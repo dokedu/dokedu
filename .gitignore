@@ -19,3 +19,8 @@
 
 # Go workspace file
 go.work
+
+.env
+.idea
+node_modules
+.DS_Store
