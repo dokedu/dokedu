@@ -7,7 +7,6 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/lib/pq v1.10.8
-	github.com/tabbed/pqtype v0.1.1
 	github.com/uptrace/bun v1.1.12
 	github.com/urfave/cli/v2 v2.24.4
 	github.com/vektah/gqlparser/v2 v2.5.1

@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type APIContext struct {
+type ApiContext struct {
 	echo.Context
 	Tx     *db.DBTX
 	Claims jwt.Claims

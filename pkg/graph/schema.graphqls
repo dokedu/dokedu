@@ -4,20 +4,6 @@
 
 scalar Time
 
-type File {
-    id: ID!
-    kind: String!
-    name: String!
-    mimeType: String!
-
-    # cdnUrl: String!
-
-    # parents: [File]
-
-    createdAt: Time!
-    deletedAt: Time
-}
-
 type Organisation {
     id: ID!
     name: String!
@@ -37,142 +23,11 @@ type User {
     email: String
     role: UserRole!
 
-    avatar: File
-    firstName: String!
-    lastName: String!
-
-    # student
-    birthday: Time
-    leftAt: Time
-    joinedAt: Time
-
-    createdAt: Time!
-    deletedAt: Time
-}
-
-enum CompetenceType {
-    subject
-    group
-    competence
-}
-
-type Competence {
-    id: ID!
     name: String!
-    grades: [Int!]!
-    type: CompetenceType!
-    color: String
-    createdAt: Time!
-    deletedAt: Time
-
-    parents: [Competence]
-}
-
-enum ReportStatus {
-    pending
-    processing
-    done
-    error
-}
-
-enum ReportType {
-    reports
-    subjects
-}
-
-enum ReportFormat {
-    pdf
-    docx
-    # xlsx
-}
-
-type Report {
-    id: ID!
-    status: ReportStatus!
-    type: ReportType!
-    format: ReportFormat!
-    user: User!
-    tags: [String!]!
-    student: User!
-    from: Time!
-    to: Time!
-    createdAt: Time!
-}
-
-type Entry {
-    id: ID!
-    date: Time!
-    body: String!
-    user: User!
+    surname: String!
 
     createdAt: Time!
     deletedAt: Time
-
-    tags: [Tag!]!
-    files: [File!]!
-    events: [Event!]!
-    users: [User!]!
-    userCompetences: [EntryUserCompetence!]!
-}
-
-type EntryTag {
-    id: ID!
-    entry: Entry!
-    tag: Tag!
-
-}
-type EntryEvent {
-    id: ID!
-    entry: Entry!
-    event: Event!
-
-}
-type EntryFile {
-    id: ID!
-    entry: Entry!
-    file: File!
-
-}
-type EntryUser {
-    id: ID!
-    entry: Entry!
-    user: User!
-
-}
-
-type EntryUserCompetence {
-    id: ID!
-    level: Int!
-    user: User!
-    entry: Entry!
-    competence: Competence!
-}
-
-type Tag {
-    id: ID!
-    name: String!
-    color: String!
-    createdAt: Time!
-    deletedAt: Time
-}
-
-type Event {
-    id: ID!
-    title: String!
-    body: String!
-    startsAt: Time!
-    endsAt: Time!
-    recurrence: String
-    createdAt: Time!
-    deletedAt: Time
-
-    competences: [Competence!]!
-}
-
-type EventCompetence {
-    id: ID!
-    event: Event!
-    competence: Competence!
 }
 
 input SignInInput {
@@ -208,156 +63,24 @@ type UserConnection {
     totalCount: Int!
 }
 
-type CompetenceConnection {
-    edges: [Competence]
-    pageInfo: PageInfo!
-    totalCount: Int!
-}
-
-type ReportConnection {
-    edges: [Report]
-    pageInfo: PageInfo!
-    totalCount: Int!
-}
-
-type EntryConnection {
-    edges: [Entry]
-    pageInfo: PageInfo!
-    totalCount: Int!
-}
-
-type EntryUserCompetenceConnection {
-    edges: [EntryUserCompetence]
-    pageInfo: PageInfo!
-    totalCount: Int!
-}
-
-
-type TagConnection {
-    edges: [Tag]
-    pageInfo: PageInfo!
-    totalCount: Int!
-}
-
-type EventConnection {
-    edges: [Event]
-    pageInfo: PageInfo!
-    totalCount: Int!
-}
 
 # user filter input
 input UserFilterInput {
     role: [UserRole]
 }
 
-input CompetenceFilterInput {
-    competenceType: [CompetenceType!]
-    grades: [Int!]
-}
-
-input EntryFilterInput {
-    userIds: [ID!]
-    tagIds: [ID!]
-    eventIds: [ID!]
-    competenceIds: [ID!]
-}
-
-input EventFilterInput {
-    startsAt: Time
-    endsAt: Time
-    showArchived: Boolean
-}
 
 type Query {
-    me: User!
     organisation: Organisation!
 
     users(limit: Int, offset: Int, filter: UserFilterInput): UserConnection!
     user(id: ID!): User!
 
-    competences(limit: Int, offset: Int, filter: CompetenceFilterInput): CompetenceConnection!
-    competence(id: ID!): Competence!
-
-    reports(limit: Int, offset: Int): ReportConnection!
-    report(id: ID!): Report!
-
-    entries(limit: Int, offset: Int, filter: EntryFilterInput): EntryConnection!
-    entry(id: ID!): Entry!
-
-    tags(limit: Int, offset: Int): TagConnection!
-    tag(id: ID!): Tag!
-
-    events(limit: Int, offset: Int, filter: EventFilterInput): EventConnection!
-    event(id: ID!): Event!
-
-    searchCompetences(query: String!): [CompetenceConnection!]!
-}
-
-input CreateEntryInput {
-    date: Time!
-    body: String!
-    userIds: [ID!]!
-    tagIds: [ID!]!
-    eventIds: [ID!]!
-    fileIds: [ID!]!
-    userCompetences: [CreateEntryUserCompetenceInput!]!
-}
-
-input CreateEntryUserCompetenceInput {
-    entryId: ID!
-    userId: ID!
-    competenceId: ID!
-    level: Int!
-}
-
-input CreateEntryTagInput {
-    entryId: ID!
-    tagId: ID!
-}
-
-input CreateEntryEventInput {
-    entryId: ID!
-    eventId: ID!
-}
-
-input CreateEntryFileInput {
-    entryId: ID!
-    fileId: ID!
-}
-
-input CreateEntryUserInput {
-    entryId: ID!
-    userId: ID!
-}
-
-input CreateReportInput {
-    type: ReportType!
-    filterTags: [String!]!
-    studentId: ID!
-    from: Time!
-    to: Time!
-}
-
-input CreateEventInput {
-    title: String!
-    body: String!
-    startsAt: Time!
-    endsAt: Time!
-}
-
-input CreateTagInput {
-    name: String!
-}
-
-input UpdateTagInput {
-    id: ID!
-    name: String
-    color: String
 }
 
 input CreateUserInput {
-    firstName: String!
-    lastName: String!
+    name: String!
+    surname: String!
     email: String!
     role: UserRole!
 
@@ -368,10 +91,9 @@ input CreateUserInput {
 
 input UpdateUserInput {
     id: ID!
-    firstName: String
-    lastName: String
+    name: String!
+    surname: String!
     email: String
-    role: UserRole
     birthday: Time
     leftAt: Time
     joinedAt: Time
@@ -382,83 +104,13 @@ input InviteUserInput {
     role: UserRole!
 }
 
-input UpdateEntryInput {
-    id: ID!
-    date: Time
-    body: String
-    userIds: [ID!]
-    tagIds: [ID!]
-    eventIds: [ID!]
-    fileIds: [ID!]
-    userCompetences: [UpdateEntryUserCompetenceInput!]
-}
-
-input UpdateEntryUserCompetenceInput {
-    id: ID!
-    userId: ID
-    competenceId: ID
-    level: Int
-}
-
-input UpdateEntryUserCompetenceLevelInput {
-    id: ID!
-    level: Int
-}
-
-input UpdateEventInput {
-    id: ID!
-    title: String
-    body: String
-    startsAt: Time
-    endsAt: Time
-}
-
-input ArchiveEventInput {
-    id: ID!
-}
-
-input CreateEventCompetenceInput {
-    eventId: ID!
-    competenceId: ID!
-}
 
 type Mutation {
     signIn(input: SignInInput!): SignInPayload!
+    signUp(input: SignUpInput!): SignInPayload!
 
     createUser(input: CreateUserInput!): User!
     updateUser(input: UpdateUserInput!): User!
     inviteUser(input: InviteUserInput!): User!
     archiveUser(id: ID!): User!
-
-    createEntry(input: CreateEntryInput): Entry!
-    updateEntry(input: UpdateEntryInput): Entry!
-    archiveEntry(id: ID!): Entry!
-
-    deleteEntryTag(id: ID!): EntryTag!
-    deleteEntryEvent(id: ID!): EntryEvent!
-    deleteEntryFile(id: ID!): EntryFile!
-    deleteEntryUser(id: ID!): EntryUser!
-    deleteEntryUserCompetence(id: ID!): EntryUserCompetence!
-
-    createEntryTag(input: CreateEntryTagInput): EntryTag!
-    createEntryEvent(input: CreateEntryEventInput): EntryEvent!
-    createEntryFile(input: CreateEntryFileInput): EntryFile!
-    createEntryUser(input: CreateEntryUserInput): EntryUser!
-    createEntryUserCompetence(input: CreateEntryUserCompetenceInput): EntryUserCompetence!
-
-    updateEntryUserCompetenceLevel(input: UpdateEntryUserCompetenceLevelInput!): EntryUserCompetence!
-
-    createReport(input: CreateReportInput!): Report!
-
-    createEvent(input: CreateEventInput!): Event!
-    updateEvent(input: UpdateEventInput!): Event!
-    archiveEvent(input: ArchiveEventInput!): Event!
-
-    createEventCompetence(input: CreateEventCompetenceInput!): EventCompetence!
-
-    deleteEventCompetence(id: ID!): EventCompetence!
-
-    createTag(input: CreateTagInput!): Tag!
-    updateTag(input: UpdateTagInput): Tag!
-    archiveTag(id: ID!): Tag!
 }

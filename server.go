@@ -48,14 +48,6 @@ func main() {
 		return c.String(http.StatusOK, "")
 	})
 
-	// add queries to context
-	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			c.Set("queries", queries)
-			return next(c)
-		}
-	})
-
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
@@ -92,5 +84,5 @@ func main() {
 	})
 
 	// Start server
-	e.Logger.Fatal(e.Start(":" + port))
+	e.Logger.Fatal(e.Start("localhost:" + port))
 }

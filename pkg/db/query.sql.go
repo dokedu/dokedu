@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/lib/pq"
 )
@@ -16,7 +17,7 @@ UPDATE users
 SET deleted_at = now()
 WHERE id = $1
   AND organisation_id = $2
-RETURNING id, role, organisation_id, first_name, last_name, email, password, avatar_file, birthday, grade, left_at, joined_at, created_at, deleted_at
+RETURNING id, role, organisation_id, name, surname, email, password, created_at, deleted_at
 `
 
 type ArchiveUserParams struct {
@@ -31,15 +32,71 @@ func (q *Queries) ArchiveUser(ctx context.Context, arg ArchiveUserParams) (User,
 		&i.ID,
 		&i.Role,
 		&i.OrganisationID,
-		&i.FirstName,
-		&i.LastName,
+		&i.Name,
+		&i.Surname,
 		&i.Email,
 		&i.Password,
-		&i.AvatarFile,
-		&i.Birthday,
-		&i.Grade,
-		&i.LeftAt,
-		&i.JoinedAt,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const createUser = `-- name: CreateUser :one
+INSERT INTO users (organisation_id, role, email, name, surname)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id, role, organisation_id, name, surname, email, password, created_at, deleted_at
+`
+
+type CreateUserParams struct {
+	OrganisationID string         `json:"organisationID"`
+	Role           UserRole       `json:"role"`
+	Email          sql.NullString `json:"email"`
+	Name           string         `json:"name"`
+	Surname        string         `json:"surname"`
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, createUser,
+		arg.OrganisationID,
+		arg.Role,
+		arg.Email,
+		arg.Name,
+		arg.Surname,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Role,
+		&i.OrganisationID,
+		&i.Name,
+		&i.Surname,
+		&i.Email,
+		&i.Password,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const getAuthUserByEmail = `-- name: GetAuthUserByEmail :one
+SELECT id, role, organisation_id, name, surname, email, password, created_at, deleted_at
+FROM users
+WHERE email = $1
+LIMIT 1
+`
+
+func (q *Queries) GetAuthUserByEmail(ctx context.Context, email sql.NullString) (User, error) {
+	row := q.db.QueryRowContext(ctx, getAuthUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Role,
+		&i.OrganisationID,
+		&i.Name,
+		&i.Surname,
+		&i.Email,
+		&i.Password,
 		&i.CreatedAt,
 		&i.DeletedAt,
 	)
@@ -47,7 +104,7 @@ func (q *Queries) ArchiveUser(ctx context.Context, arg ArchiveUserParams) (User,
 }
 
 const getOrganisation = `-- name: GetOrganisation :one
-SELECT id, name, legal_name, website, phone, owner_id, allowed_domains, created_at, deleted_at
+SELECT id, name, owner_id, allowed_domains, created_at, deleted_at
 FROM organisations
 WHERE id = $1
 `
@@ -58,9 +115,6 @@ func (q *Queries) GetOrganisation(ctx context.Context, id string) (Organisation,
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
-		&i.LegalName,
-		&i.Website,
-		&i.Phone,
 		&i.OwnerID,
 		pq.Array(&i.AllowedDomains),
 		&i.CreatedAt,
@@ -70,7 +124,7 @@ func (q *Queries) GetOrganisation(ctx context.Context, id string) (Organisation,
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, role, organisation_id, first_name, last_name, email, password, avatar_file, birthday, grade, left_at, joined_at, created_at, deleted_at
+SELECT id, role, organisation_id, name, surname, email, password, created_at, deleted_at
 FROM users
 WHERE id = $1
   AND organisation_id = $2
@@ -88,15 +142,10 @@ func (q *Queries) GetUser(ctx context.Context, arg GetUserParams) (User, error) 
 		&i.ID,
 		&i.Role,
 		&i.OrganisationID,
-		&i.FirstName,
-		&i.LastName,
+		&i.Name,
+		&i.Surname,
 		&i.Email,
 		&i.Password,
-		&i.AvatarFile,
-		&i.Birthday,
-		&i.Grade,
-		&i.LeftAt,
-		&i.JoinedAt,
 		&i.CreatedAt,
 		&i.DeletedAt,
 	)
@@ -125,7 +174,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, arg GetUserByEmailParams) 
 const inviteUserByEmail = `-- name: InviteUserByEmail :one
 INSERT INTO users (organisation_id, role, email)
 VALUES ($1, $2, $3::text)
-RETURNING id, role, organisation_id, first_name, last_name, email, password, avatar_file, birthday, grade, left_at, joined_at, created_at, deleted_at
+RETURNING id, role, organisation_id, name, surname, email, password, created_at, deleted_at
 `
 
 type InviteUserByEmailParams struct {
@@ -141,194 +190,18 @@ func (q *Queries) InviteUserByEmail(ctx context.Context, arg InviteUserByEmailPa
 		&i.ID,
 		&i.Role,
 		&i.OrganisationID,
-		&i.FirstName,
-		&i.LastName,
+		&i.Name,
+		&i.Surname,
 		&i.Email,
 		&i.Password,
-		&i.AvatarFile,
-		&i.Birthday,
-		&i.Grade,
-		&i.LeftAt,
-		&i.JoinedAt,
 		&i.CreatedAt,
 		&i.DeletedAt,
 	)
 	return i, err
 }
 
-const listEntries = `-- name: ListEntries :many
-SELECT id, date, body, user_id, created_at, deleted_at, organisation_id
-FROM entries
-WHERE organisation_id = $1
-`
-
-func (q *Queries) ListEntries(ctx context.Context, organisationID string) ([]Entry, error) {
-	rows, err := q.db.QueryContext(ctx, listEntries, organisationID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Entry
-	for rows.Next() {
-		var i Entry
-		if err := rows.Scan(
-			&i.ID,
-			&i.Date,
-			&i.Body,
-			&i.UserID,
-			&i.CreatedAt,
-			&i.DeletedAt,
-			&i.OrganisationID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listEventsFromEntry = `-- name: ListEventsFromEntry :many
-SELECT events.id, events.image_file_bucket_id, events.image_file_name, events.organisation_id, events.title, events.body, events.starts_at, events.ends_at, events.recurrence, events.created_at, events.deleted_at
-FROM events
-         LEFT JOIN entry_events ee on events.id = ee.event_id
-WHERE ee.entry_id = $1
-  AND events.organisation_id = $2
-`
-
-type ListEventsFromEntryParams struct {
-	EntryID        string `json:"entryID"`
-	OrganisationID string `json:"organisationID"`
-}
-
-func (q *Queries) ListEventsFromEntry(ctx context.Context, arg ListEventsFromEntryParams) ([]Event, error) {
-	rows, err := q.db.QueryContext(ctx, listEventsFromEntry, arg.EntryID, arg.OrganisationID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Event
-	for rows.Next() {
-		var i Event
-		if err := rows.Scan(
-			&i.ID,
-			&i.ImageFileBucketID,
-			&i.ImageFileName,
-			&i.OrganisationID,
-			&i.Title,
-			&i.Body,
-			&i.StartsAt,
-			&i.EndsAt,
-			pq.Array(&i.Recurrence),
-			&i.CreatedAt,
-			&i.DeletedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listFilesFromEntry = `-- name: ListFilesFromEntry :many
-SELECT files.id, files.file_bucket_id, files.file_name, files.organisation_id, files.created_at, files.deleted_at
-FROM files
-         LEFT JOIN entry_files ef on files.id = ef.file_id
-WHERE ef.entry_id = $1
-  AND files.organisation_id = $2
-`
-
-type ListFilesFromEntryParams struct {
-	EntryID        string `json:"entryID"`
-	OrganisationID string `json:"organisationID"`
-}
-
-func (q *Queries) ListFilesFromEntry(ctx context.Context, arg ListFilesFromEntryParams) ([]File, error) {
-	rows, err := q.db.QueryContext(ctx, listFilesFromEntry, arg.EntryID, arg.OrganisationID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []File
-	for rows.Next() {
-		var i File
-		if err := rows.Scan(
-			&i.ID,
-			&i.FileBucketID,
-			&i.FileName,
-			&i.OrganisationID,
-			&i.CreatedAt,
-			&i.DeletedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listTagsFromEntry = `-- name: ListTagsFromEntry :many
-SELECT tags.id, tags.name, tags.color, tags.organisation_id, tags.created_at, tags.deleted_at
-FROM tags
-         LEFT JOIN entry_tags et on tags.id = et.tag_id
-WHERE et.entry_id = $1
-  AND tags.organisation_id = $2
-`
-
-type ListTagsFromEntryParams struct {
-	EntryID        string `json:"entryID"`
-	OrganisationID string `json:"organisationID"`
-}
-
-func (q *Queries) ListTagsFromEntry(ctx context.Context, arg ListTagsFromEntryParams) ([]Tag, error) {
-	rows, err := q.db.QueryContext(ctx, listTagsFromEntry, arg.EntryID, arg.OrganisationID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Tag
-	for rows.Next() {
-		var i Tag
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Color,
-			&i.OrganisationID,
-			&i.CreatedAt,
-			&i.DeletedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const listUsers = `-- name: ListUsers :many
-SELECT id, role, organisation_id, first_name, last_name, email, password, avatar_file, birthday, grade, left_at, joined_at, created_at, deleted_at
+SELECT id, role, organisation_id, name, surname, email, password, created_at, deleted_at
 FROM users
 WHERE organisation_id = $1
 `
@@ -346,15 +219,10 @@ func (q *Queries) ListUsers(ctx context.Context, organisationID string) ([]User,
 			&i.ID,
 			&i.Role,
 			&i.OrganisationID,
-			&i.FirstName,
-			&i.LastName,
+			&i.Name,
+			&i.Surname,
 			&i.Email,
 			&i.Password,
-			&i.AvatarFile,
-			&i.Birthday,
-			&i.Grade,
-			&i.LeftAt,
-			&i.JoinedAt,
 			&i.CreatedAt,
 			&i.DeletedAt,
 		); err != nil {
@@ -371,53 +239,39 @@ func (q *Queries) ListUsers(ctx context.Context, organisationID string) ([]User,
 	return items, nil
 }
 
-const listUsersFromEntry = `-- name: ListUsersFromEntry :many
-SELECT users.id, users.role, users.organisation_id, users.first_name, users.last_name, users.email, users.password, users.avatar_file, users.birthday, users.grade, users.left_at, users.joined_at, users.created_at, users.deleted_at
-FROM users
-         LEFT JOIN entry_users eu on users.id = eu.user_id
-WHERE eu.entry_id = $1
-  AND users.organisation_id = $2
+const updateUser = `-- name: UpdateUser :one
+UPDATE users
+SET (name, surname, updated_at) = ($3, $4, now())
+WHERE id = $1
+  AND organisation_id = $2
+RETURNING id, role, organisation_id, name, surname, email, password, created_at, deleted_at
 `
 
-type ListUsersFromEntryParams struct {
-	EntryID        string `json:"entryID"`
+type UpdateUserParams struct {
+	ID             string `json:"id"`
 	OrganisationID string `json:"organisationID"`
+	Name           string `json:"name"`
+	Surname        string `json:"surname"`
 }
 
-func (q *Queries) ListUsersFromEntry(ctx context.Context, arg ListUsersFromEntryParams) ([]User, error) {
-	rows, err := q.db.QueryContext(ctx, listUsersFromEntry, arg.EntryID, arg.OrganisationID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []User
-	for rows.Next() {
-		var i User
-		if err := rows.Scan(
-			&i.ID,
-			&i.Role,
-			&i.OrganisationID,
-			&i.FirstName,
-			&i.LastName,
-			&i.Email,
-			&i.Password,
-			&i.AvatarFile,
-			&i.Birthday,
-			&i.Grade,
-			&i.LeftAt,
-			&i.JoinedAt,
-			&i.CreatedAt,
-			&i.DeletedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updateUser,
+		arg.ID,
+		arg.OrganisationID,
+		arg.Name,
+		arg.Surname,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Role,
+		&i.OrganisationID,
+		&i.Name,
+		&i.Surname,
+		&i.Email,
+		&i.Password,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
 }
