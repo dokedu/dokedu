@@ -1,13 +1,15 @@
 package main
 
 import (
+	"database/sql"
 	"example/cmd/bun/migrations"
 	"example/cmd/bun/seed"
 	"example/pkg/config"
-	"example/pkg/db"
 	"fmt"
 	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/migrate"
+	"github.com/uptrace/bun/schema"
 	"log"
 	"os"
 	"strings"
@@ -16,15 +18,14 @@ import (
 )
 
 func main() {
-	cfg, err := config.Load()
+	dbConn, err := sql.Open("postgres", config.DatabaseConnection)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	dbConn, err := db.New(cfg.DBConfig)
-	if err != nil {
-		log.Fatal(err)
-	}
+	bunDb := bun.NewDB(dbConn, &pgdialect.Dialect{
+		BaseDialect: schema.BaseDialect{},
+	})
 
 	app := &cli.App{
 		Name: "bun",
@@ -36,7 +37,7 @@ func main() {
 			},
 		},
 		Commands: []*cli.Command{
-			newDBCommand(migrations.Migrations, dbConn.DB),
+			newDBCommand(migrations.Migrations, bunDb),
 		},
 	}
 	if err := app.Run(os.Args); err != nil {

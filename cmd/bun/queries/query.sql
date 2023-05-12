@@ -40,12 +40,12 @@ RETURNING *;
 
 -- name: UpdateUser :one
 UPDATE users
-SET (name, surname, updated_at) = ($3, $4, now())
+SET (first_name, last_name) = ($3, $4)
 WHERE id = $1
   AND organisation_id = $2
 RETURNING *;
 
 -- name: CreateUser :one
-INSERT INTO users (organisation_id, role, email, name, surname)
+INSERT INTO users (organisation_id, role, email, first_name, last_name)
 VALUES ($1, $2, $3, $4, $5)
 RETURNING *;

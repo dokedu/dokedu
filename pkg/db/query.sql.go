@@ -7,9 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
-
-	"github.com/lib/pq"
 )
 
 const archiveUser = `-- name: ArchiveUser :one
@@ -17,7 +14,7 @@ UPDATE users
 SET deleted_at = now()
 WHERE id = $1
   AND organisation_id = $2
-RETURNING id, role, organisation_id, name, surname, email, password, created_at, deleted_at
+RETURNING id, role, organisation_id, first_name, last_name, email, password, avatar_file_bucket_id, avatar_file_name, created_at, deleted_at, joined_at, left_at, birthday, grade
 `
 
 type ArchiveUserParams struct {
@@ -32,28 +29,34 @@ func (q *Queries) ArchiveUser(ctx context.Context, arg ArchiveUserParams) (User,
 		&i.ID,
 		&i.Role,
 		&i.OrganisationID,
-		&i.Name,
-		&i.Surname,
+		&i.FirstName,
+		&i.LastName,
 		&i.Email,
 		&i.Password,
+		&i.AvatarFileBucketID,
+		&i.AvatarFileName,
 		&i.CreatedAt,
 		&i.DeletedAt,
+		&i.JoinedAt,
+		&i.LeftAt,
+		&i.Birthday,
+		&i.Grade,
 	)
 	return i, err
 }
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (organisation_id, role, email, name, surname)
+INSERT INTO users (organisation_id, role, email, first_name, last_name)
 VALUES ($1, $2, $3, $4, $5)
-RETURNING id, role, organisation_id, name, surname, email, password, created_at, deleted_at
+RETURNING id, role, organisation_id, first_name, last_name, email, password, avatar_file_bucket_id, avatar_file_name, created_at, deleted_at, joined_at, left_at, birthday, grade
 `
 
 type CreateUserParams struct {
-	OrganisationID string         `json:"organisationID"`
-	Role           UserRole       `json:"role"`
-	Email          sql.NullString `json:"email"`
-	Name           string         `json:"name"`
-	Surname        string         `json:"surname"`
+	OrganisationID string `json:"organisationID"`
+	Role           string `json:"role"`
+	Email          string `json:"email"`
+	FirstName      string `json:"firstName"`
+	LastName       string `json:"lastName"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -61,50 +64,62 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.OrganisationID,
 		arg.Role,
 		arg.Email,
-		arg.Name,
-		arg.Surname,
+		arg.FirstName,
+		arg.LastName,
 	)
 	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Role,
 		&i.OrganisationID,
-		&i.Name,
-		&i.Surname,
+		&i.FirstName,
+		&i.LastName,
 		&i.Email,
 		&i.Password,
+		&i.AvatarFileBucketID,
+		&i.AvatarFileName,
 		&i.CreatedAt,
 		&i.DeletedAt,
+		&i.JoinedAt,
+		&i.LeftAt,
+		&i.Birthday,
+		&i.Grade,
 	)
 	return i, err
 }
 
 const getAuthUserByEmail = `-- name: GetAuthUserByEmail :one
-SELECT id, role, organisation_id, name, surname, email, password, created_at, deleted_at
+SELECT id, role, organisation_id, first_name, last_name, email, password, avatar_file_bucket_id, avatar_file_name, created_at, deleted_at, joined_at, left_at, birthday, grade
 FROM users
 WHERE email = $1
 LIMIT 1
 `
 
-func (q *Queries) GetAuthUserByEmail(ctx context.Context, email sql.NullString) (User, error) {
+func (q *Queries) GetAuthUserByEmail(ctx context.Context, email string) (User, error) {
 	row := q.db.QueryRowContext(ctx, getAuthUserByEmail, email)
 	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Role,
 		&i.OrganisationID,
-		&i.Name,
-		&i.Surname,
+		&i.FirstName,
+		&i.LastName,
 		&i.Email,
 		&i.Password,
+		&i.AvatarFileBucketID,
+		&i.AvatarFileName,
 		&i.CreatedAt,
 		&i.DeletedAt,
+		&i.JoinedAt,
+		&i.LeftAt,
+		&i.Birthday,
+		&i.Grade,
 	)
 	return i, err
 }
 
 const getOrganisation = `-- name: GetOrganisation :one
-SELECT id, name, owner_id, allowed_domains, created_at, deleted_at
+SELECT id, name, legal_name, website, phone, owner_id, created_at, deleted_at
 FROM organisations
 WHERE id = $1
 `
@@ -115,8 +130,10 @@ func (q *Queries) GetOrganisation(ctx context.Context, id string) (Organisation,
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
+		&i.LegalName,
+		&i.Website,
+		&i.Phone,
 		&i.OwnerID,
-		pq.Array(&i.AllowedDomains),
 		&i.CreatedAt,
 		&i.DeletedAt,
 	)
@@ -124,7 +141,7 @@ func (q *Queries) GetOrganisation(ctx context.Context, id string) (Organisation,
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, role, organisation_id, name, surname, email, password, created_at, deleted_at
+SELECT id, role, organisation_id, first_name, last_name, email, password, avatar_file_bucket_id, avatar_file_name, created_at, deleted_at, joined_at, left_at, birthday, grade
 FROM users
 WHERE id = $1
   AND organisation_id = $2
@@ -142,12 +159,18 @@ func (q *Queries) GetUser(ctx context.Context, arg GetUserParams) (User, error) 
 		&i.ID,
 		&i.Role,
 		&i.OrganisationID,
-		&i.Name,
-		&i.Surname,
+		&i.FirstName,
+		&i.LastName,
 		&i.Email,
 		&i.Password,
+		&i.AvatarFileBucketID,
+		&i.AvatarFileName,
 		&i.CreatedAt,
 		&i.DeletedAt,
+		&i.JoinedAt,
+		&i.LeftAt,
+		&i.Birthday,
+		&i.Grade,
 	)
 	return i, err
 }
@@ -174,13 +197,13 @@ func (q *Queries) GetUserByEmail(ctx context.Context, arg GetUserByEmailParams) 
 const inviteUserByEmail = `-- name: InviteUserByEmail :one
 INSERT INTO users (organisation_id, role, email)
 VALUES ($1, $2, $3::text)
-RETURNING id, role, organisation_id, name, surname, email, password, created_at, deleted_at
+RETURNING id, role, organisation_id, first_name, last_name, email, password, avatar_file_bucket_id, avatar_file_name, created_at, deleted_at, joined_at, left_at, birthday, grade
 `
 
 type InviteUserByEmailParams struct {
-	OrganisationID string   `json:"organisationID"`
-	Role           UserRole `json:"role"`
-	Email          string   `json:"email"`
+	OrganisationID string `json:"organisationID"`
+	Role           string `json:"role"`
+	Email          string `json:"email"`
 }
 
 func (q *Queries) InviteUserByEmail(ctx context.Context, arg InviteUserByEmailParams) (User, error) {
@@ -190,18 +213,24 @@ func (q *Queries) InviteUserByEmail(ctx context.Context, arg InviteUserByEmailPa
 		&i.ID,
 		&i.Role,
 		&i.OrganisationID,
-		&i.Name,
-		&i.Surname,
+		&i.FirstName,
+		&i.LastName,
 		&i.Email,
 		&i.Password,
+		&i.AvatarFileBucketID,
+		&i.AvatarFileName,
 		&i.CreatedAt,
 		&i.DeletedAt,
+		&i.JoinedAt,
+		&i.LeftAt,
+		&i.Birthday,
+		&i.Grade,
 	)
 	return i, err
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, role, organisation_id, name, surname, email, password, created_at, deleted_at
+SELECT id, role, organisation_id, first_name, last_name, email, password, avatar_file_bucket_id, avatar_file_name, created_at, deleted_at, joined_at, left_at, birthday, grade
 FROM users
 WHERE organisation_id = $1
 `
@@ -219,12 +248,18 @@ func (q *Queries) ListUsers(ctx context.Context, organisationID string) ([]User,
 			&i.ID,
 			&i.Role,
 			&i.OrganisationID,
-			&i.Name,
-			&i.Surname,
+			&i.FirstName,
+			&i.LastName,
 			&i.Email,
 			&i.Password,
+			&i.AvatarFileBucketID,
+			&i.AvatarFileName,
 			&i.CreatedAt,
 			&i.DeletedAt,
+			&i.JoinedAt,
+			&i.LeftAt,
+			&i.Birthday,
+			&i.Grade,
 		); err != nil {
 			return nil, err
 		}
@@ -241,37 +276,43 @@ func (q *Queries) ListUsers(ctx context.Context, organisationID string) ([]User,
 
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
-SET (name, surname, updated_at) = ($3, $4, now())
+SET (first_name, last_name) = ($3, $4)
 WHERE id = $1
   AND organisation_id = $2
-RETURNING id, role, organisation_id, name, surname, email, password, created_at, deleted_at
+RETURNING id, role, organisation_id, first_name, last_name, email, password, avatar_file_bucket_id, avatar_file_name, created_at, deleted_at, joined_at, left_at, birthday, grade
 `
 
 type UpdateUserParams struct {
 	ID             string `json:"id"`
 	OrganisationID string `json:"organisationID"`
-	Name           string `json:"name"`
-	Surname        string `json:"surname"`
+	FirstName      string `json:"firstName"`
+	LastName       string `json:"lastName"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
 	row := q.db.QueryRowContext(ctx, updateUser,
 		arg.ID,
 		arg.OrganisationID,
-		arg.Name,
-		arg.Surname,
+		arg.FirstName,
+		arg.LastName,
 	)
 	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Role,
 		&i.OrganisationID,
-		&i.Name,
-		&i.Surname,
+		&i.FirstName,
+		&i.LastName,
 		&i.Email,
 		&i.Password,
+		&i.AvatarFileBucketID,
+		&i.AvatarFileName,
 		&i.CreatedAt,
 		&i.DeletedAt,
+		&i.JoinedAt,
+		&i.LeftAt,
+		&i.Birthday,
+		&i.Grade,
 	)
 	return i, err
 }

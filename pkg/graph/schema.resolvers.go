@@ -23,6 +23,7 @@ var userRole = db.UserRoleOwner
 // SignIn is the resolver for the signIn field.
 func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) (*model.SignInPayload, error) {
 	// TODO: security
+	// TODO: logout, blacklist tokens
 
 	// get the user by email
 	user, err := r.DB.GetAuthUserByEmail(ctx, sql.NullString{String: input.Email, Valid: true})

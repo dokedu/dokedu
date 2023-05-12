@@ -9,6 +9,22 @@ import (
 	"database/sql"
 )
 
+type sslMode string
+
+const (
+	SSLModeDisable sslMode = "disable"
+	SSLModePrefer  sslMode = "prefer"
+)
+
+type Config struct {
+	Username string
+	Password string
+	Host     string
+	Port     string
+	Database string
+	SSL      sslMode
+}
+
 type DBTX interface {
 	ExecContext(context.Context, string, ...interface{}) (sql.Result, error)
 	PrepareContext(context.Context, string) (*sql.Stmt, error)

@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"example/pkg/api/middleware"
+	"example/pkg/config"
 	"example/pkg/db"
 	"example/pkg/graph"
 	"example/pkg/jwt"
@@ -24,7 +25,7 @@ func main() {
 	// TODO: move jwt secret to env
 	signer := jwt.NewSigner("12345678")
 
-	dbConn, err := sql.Open("postgres", "user=postgres password=postgres dbname=postgres sslmode=disable")
+	dbConn, err := sql.Open("postgres", config.DatabaseConnection)
 	if err != nil {
 		log.Fatal(err)
 	}

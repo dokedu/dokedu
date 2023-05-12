@@ -50,6 +50,7 @@ CREATE TABLE users
     organisation_id       text                         NOT NULL REFERENCES organisations,
     first_name            text                         NOT NULL,
     last_name             text                         NOT NULL,
+    email                 text                         NOT NULL,
     password              text                         NOT NULL,
     avatar_file_bucket_id text,
     avatar_file_name      text,
