@@ -8,4 +8,4 @@ sql:
               package: "db"
               out: "pkg/db"
               emit_json_tags: true
-              json_tags_case_style: camel
+              json_tags_case_style: snake

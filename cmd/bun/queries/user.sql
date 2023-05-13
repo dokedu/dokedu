@@ -3,11 +3,6 @@ SELECT *
 FROM users
 WHERE organisation_id = $1;
 
--- name: GetOrganisation :one
-SELECT *
-FROM organisations
-WHERE id = $1;
-
 -- name: GetUserByEmail :one
 SELECT count(*)
 FROM users

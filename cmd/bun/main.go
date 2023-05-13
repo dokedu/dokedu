@@ -4,28 +4,25 @@ import (
 	"database/sql"
 	"example/cmd/bun/migrations"
 	"example/cmd/bun/seed"
-	"example/pkg/config"
 	"fmt"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
+	"github.com/uptrace/bun/driver/pgdriver"
 	"github.com/uptrace/bun/migrate"
-	"github.com/uptrace/bun/schema"
 	"log"
 	"os"
 	"strings"
 
 	"github.com/urfave/cli/v2"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
-	dbConn, err := sql.Open("postgres", config.DatabaseConnection)
-	if err != nil {
-		log.Fatal(err)
-	}
+	dsn := "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
+	sqlDb := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(dsn)))
 
-	bunDb := bun.NewDB(dbConn, &pgdialect.Dialect{
-		BaseDialect: schema.BaseDialect{},
-	})
+	db := bun.NewDB(sqlDb, pgdialect.New())
 
 	app := &cli.App{
 		Name: "bun",
@@ -37,7 +34,7 @@ func main() {
 			},
 		},
 		Commands: []*cli.Command{
-			newDBCommand(migrations.Migrations, bunDb),
+			newDBCommand(migrations.Migrations, db),
 		},
 	}
 	if err := app.Run(os.Args); err != nil {

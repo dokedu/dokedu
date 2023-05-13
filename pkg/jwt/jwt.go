@@ -9,8 +9,8 @@ type User struct {
 	ID             string      `json:"id"`
 	Role           db.UserRole `json:"role"`
 	Email          string      `json:"email"`
-	Name           string      `json:"name"`
-	Surname        string      `json:"surname"`
+	FirstName      string      `json:"first_name"`
+	LastName       string      `json:"last_name"`
 	OrganisationID string      `json:"organisationId"`
 }
 

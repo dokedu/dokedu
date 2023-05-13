@@ -6,156 +6,393 @@ package db
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/tabbed/pqtype"
 )
 
+type CompetenceType string
+
+const (
+	CompetenceTypeSubject    CompetenceType = "subject"
+	CompetenceTypeGroup      CompetenceType = "group"
+	CompetenceTypeCompetence CompetenceType = "competence"
+)
+
+func (e *CompetenceType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = CompetenceType(s)
+	case string:
+		*e = CompetenceType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for CompetenceType: %T", src)
+	}
+	return nil
+}
+
+type NullCompetenceType struct {
+	CompetenceType CompetenceType
+	Valid          bool // Valid is true if CompetenceType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullCompetenceType) Scan(value interface{}) error {
+	if value == nil {
+		ns.CompetenceType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.CompetenceType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullCompetenceType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.CompetenceType), nil
+}
+
+type ReportStatus string
+
+const (
+	ReportStatusPending    ReportStatus = "pending"
+	ReportStatusProcessing ReportStatus = "processing"
+	ReportStatusDone       ReportStatus = "done"
+	ReportStatusError      ReportStatus = "error"
+)
+
+func (e *ReportStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ReportStatus(s)
+	case string:
+		*e = ReportStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ReportStatus: %T", src)
+	}
+	return nil
+}
+
+type NullReportStatus struct {
+	ReportStatus ReportStatus
+	Valid        bool // Valid is true if ReportStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullReportStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.ReportStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ReportStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullReportStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ReportStatus), nil
+}
+
+type ReportType string
+
+const (
+	ReportTypeReport       ReportType = "report"
+	ReportTypeSubjects     ReportType = "subjects"
+	ReportTypeReportDocx   ReportType = "report_docx"
+	ReportTypeSubjectsDocx ReportType = "subjects_docx"
+)
+
+func (e *ReportType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ReportType(s)
+	case string:
+		*e = ReportType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ReportType: %T", src)
+	}
+	return nil
+}
+
+type NullReportType struct {
+	ReportType ReportType
+	Valid      bool // Valid is true if ReportType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullReportType) Scan(value interface{}) error {
+	if value == nil {
+		ns.ReportType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ReportType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullReportType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ReportType), nil
+}
+
+type UserRole string
+
+const (
+	UserRoleOwner    UserRole = "owner"
+	UserRoleAdmin    UserRole = "admin"
+	UserRoleTeacher  UserRole = "teacher"
+	UserRoleEducator UserRole = "educator"
+	UserRoleStudent  UserRole = "student"
+	UserRoleParent   UserRole = "parent"
+)
+
+func (e *UserRole) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = UserRole(s)
+	case string:
+		*e = UserRole(s)
+	default:
+		return fmt.Errorf("unsupported scan type for UserRole: %T", src)
+	}
+	return nil
+}
+
+type NullUserRole struct {
+	UserRole UserRole
+	Valid    bool // Valid is true if UserRole is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullUserRole) Scan(value interface{}) error {
+	if value == nil {
+		ns.UserRole, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.UserRole.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullUserRole) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.UserRole), nil
+}
+
+type Chat struct {
+	ID             string         `json:"id"`
+	Name           sql.NullString `json:"name"`
+	OrganisationID string         `json:"organisation_id"`
+	UpdatedAt      sql.NullTime   `json:"updated_at"`
+	CreatedAt      time.Time      `json:"created_at"`
+}
+
+type ChatMessage struct {
+	ID        string       `json:"id"`
+	ChatID    string       `json:"chat_id"`
+	UserID    string       `json:"user_id"`
+	Message   string       `json:"message"`
+	UpdatedAt sql.NullTime `json:"updated_at"`
+	CreatedAt time.Time    `json:"created_at"`
+}
+
+type ChatMessageFile struct {
+	ID        string       `json:"id"`
+	ChatID    string       `json:"chat_id"`
+	UserID    string       `json:"user_id"`
+	MessageID string       `json:"message_id"`
+	FileID    string       `json:"file_id"`
+	UpdatedAt sql.NullTime `json:"updated_at"`
+	CreatedAt time.Time    `json:"created_at"`
+}
+
+type ChatMessageReaction struct {
+	ID        string    `json:"id"`
+	ChatID    string    `json:"chat_id"`
+	UserID    string    `json:"user_id"`
+	MessageID string    `json:"message_id"`
+	Reaction  string    `json:"reaction"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type ChatUser struct {
+	ChatID string `json:"chat_id"`
+	UserID string `json:"user_id"`
+}
+
 type Competence struct {
 	ID             string         `json:"id"`
 	Name           string         `json:"name"`
-	CompetenceID   sql.NullString `json:"competenceID"`
-	CompetenceType string         `json:"competenceType"`
-	OrganisationID string         `json:"organisationID"`
+	CompetenceID   sql.NullString `json:"competence_id"`
+	CompetenceType CompetenceType `json:"competence_type"`
+	OrganisationID string         `json:"organisation_id"`
 	Grades         []int32        `json:"grades"`
 	Color          sql.NullString `json:"color"`
-	CurriculumID   sql.NullString `json:"curriculumID"`
-	CreatedAt      time.Time      `json:"createdAt"`
-	DeletedAt      sql.NullTime   `json:"deletedAt"`
+	CurriculumID   sql.NullString `json:"curriculum_id"`
+	CreatedAt      time.Time      `json:"created_at"`
+	DeletedAt      sql.NullTime   `json:"deleted_at"`
 }
 
 type Entry struct {
 	ID             string          `json:"id"`
 	Date           time.Time       `json:"date"`
 	Body           json.RawMessage `json:"body"`
-	UserID         string          `json:"userID"`
-	CreatedAt      time.Time       `json:"createdAt"`
-	DeletedAt      sql.NullTime    `json:"deletedAt"`
-	OrganisationID string          `json:"organisationID"`
+	UserID         string          `json:"user_id"`
+	CreatedAt      time.Time       `json:"created_at"`
+	DeletedAt      sql.NullTime    `json:"deleted_at"`
+	OrganisationID string          `json:"organisation_id"`
 }
 
 type EntryEvent struct {
 	ID             string       `json:"id"`
-	EntryID        string       `json:"entryID"`
-	EventID        string       `json:"eventID"`
-	OrganisationID string       `json:"organisationID"`
-	CreatedAt      time.Time    `json:"createdAt"`
-	DeletedAt      sql.NullTime `json:"deletedAt"`
+	EntryID        string       `json:"entry_id"`
+	EventID        string       `json:"event_id"`
+	OrganisationID string       `json:"organisation_id"`
+	CreatedAt      time.Time    `json:"created_at"`
+	DeletedAt      sql.NullTime `json:"deleted_at"`
 }
 
 type EntryFile struct {
 	ID             string       `json:"id"`
-	EntryID        string       `json:"entryID"`
-	FileBucketID   string       `json:"fileBucketID"`
-	FileName       string       `json:"fileName"`
-	CreatedAt      time.Time    `json:"createdAt"`
-	DeletedAt      sql.NullTime `json:"deletedAt"`
-	OrganisationID string       `json:"organisationID"`
+	EntryID        string       `json:"entry_id"`
+	FileBucketID   string       `json:"file_bucket_id"`
+	FileName       string       `json:"file_name"`
+	CreatedAt      time.Time    `json:"created_at"`
+	DeletedAt      sql.NullTime `json:"deleted_at"`
+	OrganisationID string       `json:"organisation_id"`
 }
 
 type EntryTag struct {
 	ID             string       `json:"id"`
-	EntryID        string       `json:"entryID"`
-	TagID          string       `json:"tagID"`
-	OrganisationID string       `json:"organisationID"`
-	CreatedAt      time.Time    `json:"createdAt"`
-	DeletedAt      sql.NullTime `json:"deletedAt"`
+	EntryID        string       `json:"entry_id"`
+	TagID          string       `json:"tag_id"`
+	OrganisationID string       `json:"organisation_id"`
+	CreatedAt      time.Time    `json:"created_at"`
+	DeletedAt      sql.NullTime `json:"deleted_at"`
 }
 
 type EntryUser struct {
 	ID             string       `json:"id"`
-	EntryID        string       `json:"entryID"`
-	UserID         string       `json:"userID"`
-	CreatedAt      time.Time    `json:"createdAt"`
-	DeletedAt      sql.NullTime `json:"deletedAt"`
-	OrganisationID string       `json:"organisationID"`
+	EntryID        string       `json:"entry_id"`
+	UserID         string       `json:"user_id"`
+	CreatedAt      time.Time    `json:"created_at"`
+	DeletedAt      sql.NullTime `json:"deleted_at"`
+	OrganisationID string       `json:"organisation_id"`
 }
 
 type EntryUserCompetence struct {
 	ID             string       `json:"id"`
 	Level          int32        `json:"level"`
-	UserID         string       `json:"userID"`
-	EntryID        string       `json:"entryID"`
-	CompetenceID   string       `json:"competenceID"`
-	CreatedAt      time.Time    `json:"createdAt"`
-	DeletedAt      sql.NullTime `json:"deletedAt"`
-	OrganisationID string       `json:"organisationID"`
+	UserID         string       `json:"user_id"`
+	EntryID        string       `json:"entry_id"`
+	CompetenceID   string       `json:"competence_id"`
+	CreatedAt      time.Time    `json:"created_at"`
+	DeletedAt      sql.NullTime `json:"deleted_at"`
+	OrganisationID string       `json:"organisation_id"`
 }
 
 type Event struct {
-	ID                string         `json:"id"`
-	ImageFileBucketID sql.NullString `json:"imageFileBucketID"`
-	ImageFileName     sql.NullString `json:"imageFileName"`
-	OrganisationID    string         `json:"organisationID"`
-	Title             string         `json:"title"`
-	Body              string         `json:"body"`
-	StartsAt          time.Time      `json:"startsAt"`
-	EndsAt            time.Time      `json:"endsAt"`
-	Recurrence        []string       `json:"recurrence"`
-	CreatedAt         time.Time      `json:"createdAt"`
-	DeletedAt         sql.NullTime   `json:"deletedAt"`
+	ID             string       `json:"id"`
+	ImageFileID    string       `json:"image_file_id"`
+	OrganisationID string       `json:"organisation_id"`
+	Title          string       `json:"title"`
+	Body           string       `json:"body"`
+	StartsAt       time.Time    `json:"starts_at"`
+	EndsAt         time.Time    `json:"ends_at"`
+	Recurrence     []string     `json:"recurrence"`
+	CreatedAt      time.Time    `json:"created_at"`
+	DeletedAt      sql.NullTime `json:"deleted_at"`
 }
 
 type EventCompetence struct {
 	ID             string       `json:"id"`
-	EventID        string       `json:"eventID"`
-	CompetenceID   string       `json:"competenceID"`
-	CreatedAt      time.Time    `json:"createdAt"`
-	DeletedAt      sql.NullTime `json:"deletedAt"`
-	OrganisationID string       `json:"organisationID"`
+	EventID        string       `json:"event_id"`
+	CompetenceID   string       `json:"competence_id"`
+	CreatedAt      time.Time    `json:"created_at"`
+	DeletedAt      sql.NullTime `json:"deleted_at"`
+	OrganisationID string       `json:"organisation_id"`
+}
+
+type File struct {
+	ID             string       `json:"id"`
+	Bucket         string       `json:"bucket"`
+	Name           string       `json:"name"`
+	OrganisationID string       `json:"organisation_id"`
+	CreatedAt      time.Time    `json:"created_at"`
+	DeletedAt      sql.NullTime `json:"deleted_at"`
 }
 
 type Organisation struct {
-	ID        string       `json:"id"`
-	Name      string       `json:"name"`
-	LegalName string       `json:"legalName"`
-	Website   string       `json:"website"`
-	Phone     string       `json:"phone"`
-	OwnerID   string       `json:"ownerID"`
-	CreatedAt time.Time    `json:"createdAt"`
-	DeletedAt sql.NullTime `json:"deletedAt"`
+	ID             string       `json:"id"`
+	Name           string       `json:"name"`
+	LegalName      string       `json:"legal_name"`
+	Website        string       `json:"website"`
+	Phone          string       `json:"phone"`
+	OwnerID        string       `json:"owner_id"`
+	AllowedDomains []string     `json:"allowed_domains"`
+	CreatedAt      time.Time    `json:"created_at"`
+	DeletedAt      sql.NullTime `json:"deleted_at"`
 }
 
 type Report struct {
 	ID             string                `json:"id"`
-	FileBucketID   sql.NullString        `json:"fileBucketID"`
-	FileName       sql.NullString        `json:"fileName"`
-	Status         string                `json:"status"`
-	Type           string                `json:"type"`
+	Status         ReportStatus          `json:"status"`
+	Type           ReportType            `json:"type"`
 	From           time.Time             `json:"from"`
 	To             time.Time             `json:"to"`
-	UserID         string                `json:"userID"`
-	StudentUserID  string                `json:"studentUserID"`
 	Meta           pqtype.NullRawMessage `json:"meta"`
-	CreatedAt      time.Time             `json:"createdAt"`
-	DeletedAt      sql.NullTime          `json:"deletedAt"`
-	FilterTags     []string              `json:"filterTags"`
-	OrganisationID string                `json:"organisationID"`
+	FilterTags     []string              `json:"filter_tags"`
+	FileID         sql.NullString        `json:"file_id"`
+	UserID         string                `json:"user_id"`
+	StudentUserID  string                `json:"student_user_id"`
+	OrganisationID string                `json:"organisation_id"`
+	CreatedAt      time.Time             `json:"created_at"`
+	DeletedAt      sql.NullTime          `json:"deleted_at"`
 }
 
 type Tag struct {
 	ID             string       `json:"id"`
 	Name           string       `json:"name"`
-	OrganisationID string       `json:"organisationID"`
-	CreatedAt      time.Time    `json:"createdAt"`
-	DeletedAt      sql.NullTime `json:"deletedAt"`
+	OrganisationID string       `json:"organisation_id"`
+	CreatedAt      time.Time    `json:"created_at"`
+	DeletedAt      sql.NullTime `json:"deleted_at"`
 }
 
 type User struct {
-	ID                 string         `json:"id"`
-	Role               string         `json:"role"`
-	OrganisationID     string         `json:"organisationID"`
-	FirstName          string         `json:"firstName"`
-	LastName           string         `json:"lastName"`
-	Email              string         `json:"email"`
-	Password           string         `json:"password"`
-	AvatarFileBucketID sql.NullString `json:"avatarFileBucketID"`
-	AvatarFileName     sql.NullString `json:"avatarFileName"`
-	CreatedAt          time.Time      `json:"createdAt"`
-	DeletedAt          sql.NullTime   `json:"deletedAt"`
-	JoinedAt           sql.NullTime   `json:"joinedAt"`
-	LeftAt             sql.NullTime   `json:"leftAt"`
-	Birthday           sql.NullTime   `json:"birthday"`
-	Grade              sql.NullInt32  `json:"grade"`
+	ID             string         `json:"id"`
+	Role           UserRole       `json:"role"`
+	OrganisationID string         `json:"organisation_id"`
+	FirstName      string         `json:"first_name"`
+	LastName       string         `json:"last_name"`
+	Email          string         `json:"email"`
+	Password       string         `json:"password"`
+	AvatarFileID   sql.NullString `json:"avatar_file_id"`
+	CreatedAt      time.Time      `json:"created_at"`
+	DeletedAt      sql.NullTime   `json:"deleted_at"`
+}
+
+type UserStudent struct {
+	ID             string         `json:"id"`
+	UserID         string         `json:"user_id"`
+	OrganisationID string         `json:"organisation_id"`
+	LeftAt         sql.NullTime   `json:"left_at"`
+	Grade          int32          `json:"grade"`
+	Birthday       sql.NullTime   `json:"birthday"`
+	Nationality    sql.NullString `json:"nationality"`
+	Comments       sql.NullString `json:"comments"`
+	JoinedAt       sql.NullTime   `json:"joined_at"`
+	CreatedAt      time.Time      `json:"created_at"`
+	DeletedAt      sql.NullTime   `json:"deleted_at"`
 }

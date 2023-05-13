@@ -8,13 +8,13 @@ import (
 )
 
 type CreateUserInput struct {
-	Name     string      `json:"name"`
-	Surname  string      `json:"surname"`
-	Email    string      `json:"email"`
-	Role     db.UserRole `json:"role"`
-	Birthday *time.Time  `json:"birthday,omitempty"`
-	LeftAt   *time.Time  `json:"leftAt,omitempty"`
-	JoinedAt *time.Time  `json:"joinedAt,omitempty"`
+	FirstName string      `json:"firstName"`
+	LastName  string      `json:"lastName"`
+	Email     string      `json:"email"`
+	Role      db.UserRole `json:"role"`
+	Birthday  *time.Time  `json:"birthday,omitempty"`
+	LeftAt    *time.Time  `json:"leftAt,omitempty"`
+	JoinedAt  *time.Time  `json:"joinedAt,omitempty"`
 }
 
 type InviteUserInput struct {
@@ -50,13 +50,13 @@ type SignUpInput struct {
 }
 
 type UpdateUserInput struct {
-	ID       string     `json:"id"`
-	Name     string     `json:"name"`
-	Surname  string     `json:"surname"`
-	Email    *string    `json:"email,omitempty"`
-	Birthday *time.Time `json:"birthday,omitempty"`
-	LeftAt   *time.Time `json:"leftAt,omitempty"`
-	JoinedAt *time.Time `json:"joinedAt,omitempty"`
+	ID        string     `json:"id"`
+	FirstName string     `json:"firstName"`
+	LastName  string     `json:"lastName"`
+	Email     *string    `json:"email,omitempty"`
+	Birthday  *time.Time `json:"birthday,omitempty"`
+	LeftAt    *time.Time `json:"leftAt,omitempty"`
+	JoinedAt  *time.Time `json:"joinedAt,omitempty"`
 }
 
 type UserConnection struct {

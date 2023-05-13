@@ -85,5 +85,5 @@ func main() {
 	})
 
 	// Start server
-	e.Logger.Fatal(e.Start("localhost:" + port))
+	e.Logger.Fatal(e.Start("0.0.0.0:" + port))
 }

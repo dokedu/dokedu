@@ -1,7 +1,7 @@
-# Dokedu / Backend
-
 > **Warning**
 > This is an early alpha version of the Dokedu backend. It is not ready for production use.
+
+# Dokedu / Backend
 
 The productivity suite for innovative schools
 

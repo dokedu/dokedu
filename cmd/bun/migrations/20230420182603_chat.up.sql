@@ -1,7 +1,5 @@
 SET statement_timeout = 0;
 
--- migration to add a chat to an application. We support 1-on-1 chats, 1-on-many chats, and many-on-many chats between users
-
 CREATE TABLE chats
 (
     id              text        NOT NULL PRIMARY KEY DEFAULT nanoid(),

@@ -6,19 +6,17 @@ package graph
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"example/pkg/db"
 	"example/pkg/graph/model"
 	"example/pkg/jwt"
-	jwt2 "github.com/golang-jwt/jwt"
-	"golang.org/x/crypto/bcrypt"
+	"fmt"
 	"strings"
 	"time"
-)
 
-var organisationId = "61X1Gu7cEhy_OcI_X0h4v"
-var userRole = db.UserRoleOwner
+	jwt2 "github.com/golang-jwt/jwt"
+	"golang.org/x/crypto/bcrypt"
+)
 
 // SignIn is the resolver for the signIn field.
 func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) (*model.SignInPayload, error) {
@@ -26,29 +24,29 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 	// TODO: logout, blacklist tokens
 
 	// get the user by email
-	user, err := r.DB.GetAuthUserByEmail(ctx, sql.NullString{String: input.Email, Valid: true})
+	user, err := r.DB.GetAuthUserByEmail(ctx, input.Email)
 
 	if err != nil {
 		return nil, errors.New("invalid email or password")
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password.String), []byte(input.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
 		return nil, errors.New("invalid email or password")
 	}
 
 	// custom field to remove the password from the user
-	userWithoutPassword := jwt.User{
+	jwtUser := jwt.User{
 		ID:             user.ID,
 		Role:           user.Role,
 		OrganisationID: user.OrganisationID,
-		Name:           user.Name,
-		Surname:        user.Surname,
-		Email:          user.Email.String,
+		FirstName:      user.FirstName,
+		LastName:       user.LastName,
+		Email:          user.Email,
 	}
 
 	// generate a new JWT token
 	token, err := jwt.Signer{}.Sign(jwt.Claims{
-		User: userWithoutPassword,
+		User: jwtUser,
 		StandardClaims: jwt2.StandardClaims{
 			IssuedAt:  time.Now().Unix(),
 			ExpiresAt: time.Now().Add(time.Hour * 24 * 7).Unix(),
@@ -62,6 +60,11 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 	return &model.SignInPayload{
 		Token: token,
 	}, nil
+}
+
+// SignUp is the resolver for the signUp field.
+func (r *mutationResolver) SignUp(ctx context.Context, input model.SignUpInput) (*model.SignInPayload, error) {
+	panic(fmt.Errorf("not implemented: SignUp - signUp"))
 }
 
 // CreateUser is the resolver for the createUser field.
@@ -100,9 +103,9 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 	user, err := r.DB.CreateUser(ctx, db.CreateUserParams{
 		OrganisationID: organisationId,
 		Role:           input.Role,
-		Email:          sql.NullString{String: input.Email, Valid: true},
-		Name:           input.Name,
-		Surname:        input.Surname,
+		Email:          input.Email,
+		FirstName:      input.FirstName,
+		LastName:       input.LastName,
 	})
 
 	if err != nil {
@@ -123,8 +126,8 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 	user, err := r.DB.UpdateUser(ctx, db.UpdateUserParams{
 		ID:             input.ID,
 		OrganisationID: organisationId,
-		Name:           input.Name,
-		Surname:        input.Surname,
+		FirstName:      input.FirstName,
+		LastName:       input.LastName,
 	})
 
 	if err != nil {
@@ -217,7 +220,7 @@ func (r *mutationResolver) ArchiveUser(ctx context.Context, id string) (*db.User
 func (r *organisationResolver) Owner(ctx context.Context, obj *db.Organisation) (*db.User, error) {
 	// query the owner of the organisation
 	user, err := r.DB.GetUser(ctx, db.GetUserParams{
-		ID:             obj.OwnerID.String,
+		ID:             obj.OwnerID,
 		OrganisationID: obj.ID,
 	})
 
@@ -277,15 +280,6 @@ func (r *queryResolver) User(ctx context.Context, id string) (*db.User, error) {
 	return &user, nil
 }
 
-// Email is the resolver for the email field.
-func (r *userResolver) Email(ctx context.Context, obj *db.User) (*string, error) {
-	if obj.Email.Valid {
-		return &obj.Email.String, nil
-	}
-
-	return nil, nil
-}
-
 // DeletedAt is the resolver for the deletedAt field.
 func (r *userResolver) DeletedAt(ctx context.Context, obj *db.User) (*time.Time, error) {
 	if obj.DeletedAt.Valid {
@@ -311,6 +305,9 @@ type mutationResolver struct{ *Resolver }
 type organisationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }
+
+var organisationId = "3BuIYGGWfYbjDN-xfq5fJ"
+var userRole = db.UserRoleOwner
 
 func isStringInArray(s string, a []string) bool {
 	for _, v := range a {
