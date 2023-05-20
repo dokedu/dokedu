@@ -11,22 +11,10 @@ type User struct {
 	Email          string      `json:"email"`
 	FirstName      string      `json:"first_name"`
 	LastName       string      `json:"last_name"`
-	OrganisationID string      `json:"organisationId"`
+	OrganisationID string      `json:"organisation_id"`
 }
 
 type Claims struct {
 	jwt.StandardClaims
 	User User `json:"user"`
-}
-
-func NewClaims(user User) Claims {
-	return Claims{
-		User: user,
-	}
-}
-
-func (c Claims) Valid() error {
-	// TODO: validate claims
-
-	return nil
 }

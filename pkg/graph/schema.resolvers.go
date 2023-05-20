@@ -10,7 +10,7 @@ import (
 	"example/pkg/db"
 	"example/pkg/graph/model"
 	"example/pkg/jwt"
-	"fmt"
+	"example/pkg/middleware"
 	"strings"
 	"time"
 
@@ -44,8 +44,10 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 		Email:          user.Email,
 	}
 
+	signer := jwt.NewSigner("12345678")
+
 	// generate a new JWT token
-	token, err := jwt.Signer{}.Sign(jwt.Claims{
+	token, err := signer.Sign(jwt.Claims{
 		User: jwtUser,
 		StandardClaims: jwt2.StandardClaims{
 			IssuedAt:  time.Now().Unix(),
@@ -64,18 +66,24 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 
 // SignUp is the resolver for the signUp field.
 func (r *mutationResolver) SignUp(ctx context.Context, input model.SignUpInput) (*model.SignInPayload, error) {
-	panic(fmt.Errorf("not implemented: SignUp - signUp"))
+	// TODO: add input.OrganisationId to schema
+
+	return nil, nil
 }
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*db.User, error) {
-	// check if the user is allowed to create the user (only admins or higher can create users)
-	if userRole != db.UserRoleAdmin && userRole != db.UserRoleOwner {
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	if currentUser.Role != db.UserRoleOwner {
 		return nil, errors.New("you are not allowed to create users")
 	}
 
-	organisation, err := r.DB.GetOrganisation(ctx, organisationId)
-
+	organisation, err := r.DB.GetOrganisation(ctx, currentUser.OrganisationID)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +95,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 
 	// check if the email is already in the database
 	count, err := r.DB.GetUserByEmail(ctx, db.GetUserByEmailParams{
-		OrganisationID: organisationId,
+		OrganisationID: currentUser.OrganisationID,
 		Email:          input.Email,
 	})
 
@@ -101,7 +109,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 
 	// create a new user
 	user, err := r.DB.CreateUser(ctx, db.CreateUserParams{
-		OrganisationID: organisationId,
+		OrganisationID: currentUser.OrganisationID,
 		Role:           input.Role,
 		Email:          input.Email,
 		FirstName:      input.FirstName,
@@ -117,15 +125,20 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 
 // UpdateUser is the resolver for the updateUser field.
 func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUserInput) (*db.User, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
 	// check if the user is allowed to update the user (only admins or higher can update users)
-	if userRole != db.UserRoleAdmin && userRole != db.UserRoleOwner {
+	if currentUser.Role != db.UserRoleAdmin && currentUser.Role != db.UserRoleOwner {
 		return nil, errors.New("you are not allowed to update users")
 	}
 
 	// update the user
 	user, err := r.DB.UpdateUser(ctx, db.UpdateUserParams{
 		ID:             input.ID,
-		OrganisationID: organisationId,
+		OrganisationID: currentUser.OrganisationID,
 		FirstName:      input.FirstName,
 		LastName:       input.LastName,
 	})
@@ -139,7 +152,12 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 
 // InviteUser is the resolver for the inviteUser field.
 func (r *mutationResolver) InviteUser(ctx context.Context, input model.InviteUserInput) (*db.User, error) {
-	organisation, err := r.DB.GetOrganisation(ctx, organisationId)
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	organisation, err := r.DB.GetOrganisation(ctx, currentUser.OrganisationID)
 
 	if err != nil {
 		return nil, err
@@ -184,15 +202,20 @@ func (r *mutationResolver) InviteUser(ctx context.Context, input model.InviteUse
 
 // ArchiveUser is the resolver for the archiveUser field.
 func (r *mutationResolver) ArchiveUser(ctx context.Context, id string) (*db.User, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
 	// check if the user is allowed to archive the user (only admins or higher can archive users)
-	if userRole != db.UserRoleAdmin && userRole != db.UserRoleOwner {
+	if currentUser.Role != db.UserRoleAdmin && currentUser.Role != db.UserRoleOwner {
 		return nil, errors.New("you are not allowed to archive users")
 	}
 
 	// check whether the user is already archived
 	user, err := r.DB.GetUser(ctx, db.GetUserParams{
 		ID:             id,
-		OrganisationID: organisationId,
+		OrganisationID: currentUser.OrganisationID,
 	})
 
 	if err != nil {
@@ -206,7 +229,7 @@ func (r *mutationResolver) ArchiveUser(ctx context.Context, id string) (*db.User
 	// archive the user
 	user, err = r.DB.ArchiveUser(ctx, db.ArchiveUserParams{
 		ID:             id,
-		OrganisationID: organisationId,
+		OrganisationID: currentUser.OrganisationID,
 	})
 
 	if err != nil {
@@ -233,8 +256,13 @@ func (r *organisationResolver) Owner(ctx context.Context, obj *db.Organisation) 
 
 // Organisation is the resolver for the organisation field.
 func (r *queryResolver) Organisation(ctx context.Context) (*db.Organisation, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
 	// query the organisation
-	organisation, err := r.DB.GetOrganisation(ctx, organisationId)
+	organisation, err := r.DB.GetOrganisation(ctx, currentUser.OrganisationID)
 
 	if err != nil {
 		return nil, err
@@ -245,8 +273,13 @@ func (r *queryResolver) Organisation(ctx context.Context) (*db.Organisation, err
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filter *model.UserFilterInput) (*model.UserConnection, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
 	// query the users
-	users, err := r.DB.ListUsers(ctx, organisationId)
+	users, err := r.DB.ListUsers(ctx, currentUser.OrganisationID)
 
 	if err != nil {
 		return nil, err
@@ -267,10 +300,15 @@ func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filt
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*db.User, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
 	// query the user
 	user, err := r.DB.GetUser(ctx, db.GetUserParams{
 		ID:             id,
-		OrganisationID: organisationId,
+		OrganisationID: currentUser.OrganisationID,
 	})
 
 	if err != nil {
@@ -305,9 +343,6 @@ type mutationResolver struct{ *Resolver }
 type organisationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }
-
-var organisationId = "3BuIYGGWfYbjDN-xfq5fJ"
-var userRole = db.UserRoleOwner
 
 func isStringInArray(s string, a []string) bool {
 	for _, v := range a {

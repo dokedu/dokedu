@@ -2,11 +2,11 @@ package main
 
 import (
 	"database/sql"
-	"example/pkg/api/middleware"
 	"example/pkg/config"
 	"example/pkg/db"
 	"example/pkg/graph"
 	"example/pkg/jwt"
+	"example/pkg/middleware"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/labstack/echo/v4"
 	"log"
@@ -20,10 +20,10 @@ import (
 )
 
 const defaultPort = "8080"
+const jwtSecret = "12345678"
 
 func main() {
-	// TODO: move jwt secret to env
-	signer := jwt.NewSigner("12345678")
+	signer := jwt.NewSigner(jwtSecret)
 
 	dbConn, err := sql.Open("postgres", config.DatabaseConnection)
 	if err != nil {
@@ -54,7 +54,6 @@ func main() {
 		port = defaultPort
 	}
 
-	// add cors
 	e.Use(middleware.CORS())
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
