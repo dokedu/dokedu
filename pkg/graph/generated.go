@@ -52,7 +52,7 @@ type ComplexityRoot struct {
 	Mutation struct {
 		ArchiveUser func(childComplexity int, id string) int
 		CreateUser  func(childComplexity int, input model.CreateUserInput) int
-		InviteUser  func(childComplexity int, input model.InviteUserInput) int
+		InviteUser  func(childComplexity int, input model.CreateUserInput) int
 		SignIn      func(childComplexity int, input model.SignInInput) int
 		SignUp      func(childComplexity int, input model.SignUpInput) int
 		UpdateUser  func(childComplexity int, input model.UpdateUserInput) int
@@ -108,7 +108,7 @@ type MutationResolver interface {
 	SignUp(ctx context.Context, input model.SignUpInput) (*model.SignInPayload, error)
 	CreateUser(ctx context.Context, input model.CreateUserInput) (*db.User, error)
 	UpdateUser(ctx context.Context, input model.UpdateUserInput) (*db.User, error)
-	InviteUser(ctx context.Context, input model.InviteUserInput) (*db.User, error)
+	InviteUser(ctx context.Context, input model.CreateUserInput) (*db.User, error)
 	ArchiveUser(ctx context.Context, id string) (*db.User, error)
 }
 type OrganisationResolver interface {
@@ -172,7 +172,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.InviteUser(childComplexity, args["input"].(model.InviteUserInput)), true
+		return e.complexity.Mutation.InviteUser(childComplexity, args["input"].(model.CreateUserInput)), true
 
 	case "Mutation.signIn":
 		if e.complexity.Mutation.SignIn == nil {
@@ -390,7 +390,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := executionContext{rc, e}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputCreateUserInput,
-		ec.unmarshalInputInviteUserInput,
 		ec.unmarshalInputSignInInput,
 		ec.unmarshalInputSignUpInput,
 		ec.unmarshalInputUpdateUserInput,
@@ -507,10 +506,10 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_inviteUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.InviteUserInput
+	var arg0 model.CreateUserInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNInviteUserInput2exampleᚋpkgᚋgraphᚋmodelᚐInviteUserInput(ctx, tmp)
+		arg0, err = ec.unmarshalNCreateUserInput2exampleᚋpkgᚋgraphᚋmodelᚐCreateUserInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -939,7 +938,7 @@ func (ec *executionContext) _Mutation_inviteUser(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().InviteUser(rctx, fc.Args["input"].(model.InviteUserInput))
+		return ec.resolvers.Mutation().InviteUser(rctx, fc.Args["input"].(model.CreateUserInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4155,42 +4154,6 @@ func (ec *executionContext) unmarshalInputCreateUserInput(ctx context.Context, o
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputInviteUserInput(ctx context.Context, obj interface{}) (model.InviteUserInput, error) {
-	var it model.InviteUserInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"email", "role"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "email":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
-			it.Email, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "role":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
-			it.Role, err = ec.unmarshalNUserRole2exampleᚋpkgᚋdbᚐUserRole(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputSignInInput(ctx context.Context, obj interface{}) (model.SignInInput, error) {
 	var it model.SignInInput
 	asMap := map[string]interface{}{}
@@ -5224,11 +5187,6 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) unmarshalNInviteUserInput2exampleᚋpkgᚋgraphᚋmodelᚐInviteUserInput(ctx context.Context, v interface{}) (model.InviteUserInput, error) {
-	res, err := ec.unmarshalInputInviteUserInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNOrganisation2exampleᚋpkgᚋdbᚐOrganisation(ctx context.Context, sel ast.SelectionSet, v db.Organisation) graphql.Marshaler {

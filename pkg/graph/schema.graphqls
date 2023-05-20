@@ -99,18 +99,12 @@ input UpdateUserInput {
     joinedAt: Time
 }
 
-input InviteUserInput {
-    email: String!
-    role: UserRole!
-}
-
-
 type Mutation {
     signIn(input: SignInInput!): SignInPayload!
     signUp(input: SignUpInput!): SignInPayload!
 
     createUser(input: CreateUserInput!): User!
     updateUser(input: UpdateUserInput!): User!
-    inviteUser(input: InviteUserInput!): User!
+    inviteUser(input: CreateUserInput!): User!
     archiveUser(id: ID!): User!
 }

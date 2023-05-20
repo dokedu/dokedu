@@ -74,7 +74,7 @@ CREATE TABLE users
     first_name      text                         NOT NULL,
     last_name       text                         NOT NULL,
     email           text                         NOT NULL,
-    password        text                         NOT NULL,
+    password        text                         NULL,
     avatar_file_id  text                         NULL REFERENCES files,
     created_at      timestamptz DEFAULT NOW()    NOT NULL,
     deleted_at      timestamptz,

@@ -27,6 +27,12 @@ func (s Signer) Sign(claims Claims) (string, error) {
 }
 
 func (s Signer) ParseAndValidate(tokenString string) (Claims, error) {
+	// TODO: add expiration check
+	// TODO: add audience check
+	// TODO: add issuer check
+	// TODO: add created at check
+	// TODO: add blacklisted token check
+
 	claims := Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

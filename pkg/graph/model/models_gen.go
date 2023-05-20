@@ -17,11 +17,6 @@ type CreateUserInput struct {
 	JoinedAt  *time.Time  `json:"joinedAt,omitempty"`
 }
 
-type InviteUserInput struct {
-	Email string      `json:"email"`
-	Role  db.UserRole `json:"role"`
-}
-
 type OrganisationConnection struct {
 	Edges      []*db.Organisation `json:"edges,omitempty"`
 	PageInfo   *PageInfo          `json:"pageInfo"`

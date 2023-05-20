@@ -377,7 +377,7 @@ type User struct {
 	FirstName      string         `json:"first_name"`
 	LastName       string         `json:"last_name"`
 	Email          string         `json:"email"`
-	Password       string         `json:"password"`
+	Password       sql.NullString `json:"password"`
 	AvatarFileID   sql.NullString `json:"avatar_file_id"`
 	CreatedAt      time.Time      `json:"created_at"`
 	DeletedAt      sql.NullTime   `json:"deleted_at"`

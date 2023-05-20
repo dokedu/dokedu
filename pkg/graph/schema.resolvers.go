@@ -20,9 +20,6 @@ import (
 
 // SignIn is the resolver for the signIn field.
 func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) (*model.SignInPayload, error) {
-	// TODO: security
-	// TODO: logout, blacklist tokens
-
 	// get the user by email
 	user, err := r.DB.GetAuthUserByEmail(ctx, input.Email)
 
@@ -30,7 +27,12 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 		return nil, errors.New("invalid email or password")
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
+	// user.Password is a sql.NullString, so we need to check if it is valid
+	if !user.Password.Valid {
+		return nil, errors.New("invalid email or password")
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password.String), []byte(input.Password)); err != nil {
 		return nil, errors.New("invalid email or password")
 	}
 
@@ -44,6 +46,7 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 		Email:          user.Email,
 	}
 
+	// TODO: add the secret to the environment variables
 	signer := jwt.NewSigner("12345678")
 
 	// generate a new JWT token
@@ -151,7 +154,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 }
 
 // InviteUser is the resolver for the inviteUser field.
-func (r *mutationResolver) InviteUser(ctx context.Context, input model.InviteUserInput) (*db.User, error) {
+func (r *mutationResolver) InviteUser(ctx context.Context, input model.CreateUserInput) (*db.User, error) {
 	currentUser := middleware.ForContext(ctx)
 	if currentUser == nil {
 		return nil, errors.New("no user found in the context")
@@ -174,7 +177,7 @@ func (r *mutationResolver) InviteUser(ctx context.Context, input model.InviteUse
 
 	// check if the email is already in the database
 	count, err := r.DB.GetUserByEmail(ctx, db.GetUserByEmailParams{
-		OrganisationID: "1",
+		OrganisationID: currentUser.OrganisationID,
 		Email:          input.Email,
 	})
 
@@ -187,10 +190,12 @@ func (r *mutationResolver) InviteUser(ctx context.Context, input model.InviteUse
 	}
 
 	// create a new user
-	user, err := r.DB.InviteUserByEmail(ctx, db.InviteUserByEmailParams{
-		OrganisationID: "1",
+	user, err := r.DB.CreateUser(ctx, db.CreateUserParams{
+		OrganisationID: currentUser.OrganisationID,
 		Email:          input.Email,
 		Role:           input.Role,
+		FirstName:      input.FirstName,
+		LastName:       input.LastName,
 	})
 
 	if err != nil {
@@ -288,7 +293,8 @@ func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filt
 	usersPtr := make([]*db.User, len(users))
 
 	for i, user := range users {
-		usersPtr[i] = &user
+		userCopy := user
+		usersPtr[i] = &userCopy
 	}
 
 	return &model.UserConnection{
