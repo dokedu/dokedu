@@ -1,0 +1,104 @@
+# The @specifiedBy built-in directive is used within the type system definition
+# language to provide a scalar specification
+ URL for specifying the behavior of
+# custom scalar types
+.
+directive @specifiedBy(url: String!) on SCALAR
+input CreateUserInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  role: UserRole!
+  birthday: Time
+  leftAt: Time
+  joinedAt: Time
+}
+
+type Mutation {
+  signIn(input: SignInInput!): SignInPayload!
+  signUp(input: SignUpInput!): SignInPayload!
+  createUser(input: CreateUserInput!): User!
+  updateUser(input: UpdateUserInput!): User!
+  inviteUser(input: CreateUserInput!): User!
+  archiveUser(id: ID!): User!
+}
+
+type Organisation {
+  id: ID!
+  name: String!
+  owner: User!
+}
+
+type OrganisationConnection {
+  edges: [Organisation]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  currentPage: Int!
+}
+
+type Query {
+  organisation: Organisation!
+  users(limit: Int, offset: Int, filter: UserFilterInput): UserConnection!
+  user(id: ID!): User!
+}
+
+input SignInInput {
+  email: String!
+  password: String!
+}
+
+type SignInPayload {
+  token: String!
+}
+
+input SignUpInput {
+  name: String!
+  email: String!
+  password: String!
+}
+
+scalar Time
+
+input UpdateUserInput {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String
+  birthday: Time
+  leftAt: Time
+  joinedAt: Time
+}
+
+type User {
+  id: ID!
+  email: String
+  role: UserRole!
+  firstName: String!
+  lastName: String!
+  createdAt: Time!
+  deletedAt: Time
+}
+
+type UserConnection {
+  edges: [User]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input UserFilterInput {
+  role: [UserRole]
+}
+
+enum UserRole {
+  owner
+  admin
+  teacher
+  educator
+  student
+}
+
