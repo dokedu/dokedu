@@ -1,9 +1,10 @@
 # The @specifiedBy built-in directive is used within the type system definition
 # language to provide a scalar specification
- URL for specifying the behavior of
-# custom scalar types
-.
+# URL for specifying the behavior of
+# custom scalar types.
+
 directive @specifiedBy(url: String!) on SCALAR
+
 input CreateUserInput {
   firstName: String!
   lastName: String!
