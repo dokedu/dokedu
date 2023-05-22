@@ -11,19 +11,21 @@ CREATE TABLE chats
 
 CREATE TABLE chat_users
 (
-    chat_id text NOT NULL REFERENCES chats,
-    user_id text NOT NULL REFERENCES users,
-    PRIMARY KEY (chat_id, user_id)
+    id              text NOT NULL PRIMARY KEY DEFAULT nanoid(),
+    chat_id         text NOT NULL REFERENCES chats,
+    user_id         text NOT NULL REFERENCES users,
+    organisation_id text NOT NULL REFERENCES organisations
 );
 
 CREATE TABLE chat_messages
 (
-    id         text        NOT NULL PRIMARY KEY DEFAULT nanoid(),
-    chat_id    text        NOT NULL REFERENCES chats,
-    user_id    text        NOT NULL REFERENCES users,
-    message    text        NOT NULL,
-    updated_at timestamptz NULL,
-    created_at timestamptz NOT NULL             DEFAULT now()
+    id              text        NOT NULL PRIMARY KEY DEFAULT nanoid(),
+    chat_id         text        NOT NULL REFERENCES chats,
+    user_id         text        NOT NULL REFERENCES users,
+    message         text        NOT NULL,
+    organisation_id text        NOT NULL REFERENCES organisations,
+    updated_at      timestamptz NULL,
+    created_at      timestamptz NOT NULL             DEFAULT now()
 );
 
 -- chat message files

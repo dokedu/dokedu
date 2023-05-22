@@ -30,6 +30,27 @@ type User {
     deletedAt: Time
 }
 
+type Chat {
+    id: ID!
+    name: String
+    chatUsers: [ChatUser!]!
+    chatMessages: [ChatMessage!]!
+}
+
+type ChatUser {
+    id: ID!
+    chat: Chat!
+    user: User!
+}
+
+type ChatMessage {
+    id: ID!
+    chat: Chat!
+    user: User!
+    message: String!
+    createdAt: Time!
+}
+
 input SignInInput {
     email: String!
     password: String!
@@ -63,6 +84,11 @@ type UserConnection {
     totalCount: Int!
 }
 
+type ChatConnection {
+    edges: [Chat]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
 
 # user filter input
 input UserFilterInput {
@@ -76,6 +102,7 @@ type Query {
     users(limit: Int, offset: Int, filter: UserFilterInput): UserConnection!
     user(id: ID!): User!
 
+    chats(limit: Int, offset: Int): ChatConnection!
 }
 
 input CreateUserInput {

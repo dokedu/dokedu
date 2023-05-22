@@ -200,12 +200,13 @@ type Chat struct {
 }
 
 type ChatMessage struct {
-	ID        string       `json:"id"`
-	ChatID    string       `json:"chat_id"`
-	UserID    string       `json:"user_id"`
-	Message   string       `json:"message"`
-	UpdatedAt sql.NullTime `json:"updated_at"`
-	CreatedAt time.Time    `json:"created_at"`
+	ID             string       `json:"id"`
+	ChatID         string       `json:"chat_id"`
+	UserID         string       `json:"user_id"`
+	Message        string       `json:"message"`
+	OrganisationID string       `json:"organisation_id"`
+	UpdatedAt      sql.NullTime `json:"updated_at"`
+	CreatedAt      time.Time    `json:"created_at"`
 }
 
 type ChatMessageFile struct {
@@ -228,8 +229,10 @@ type ChatMessageReaction struct {
 }
 
 type ChatUser struct {
-	ChatID string `json:"chat_id"`
-	UserID string `json:"user_id"`
+	ID             string `json:"id"`
+	ChatID         string `json:"chat_id"`
+	UserID         string `json:"user_id"`
+	OrganisationID string `json:"organisation_id"`
 }
 
 type Competence struct {

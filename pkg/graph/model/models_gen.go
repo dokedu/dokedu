@@ -7,6 +7,12 @@ import (
 	"time"
 )
 
+type ChatConnection struct {
+	Edges      []*db.Chat `json:"edges,omitempty"`
+	PageInfo   *PageInfo  `json:"pageInfo"`
+	TotalCount int        `json:"totalCount"`
+}
+
 type CreateUserInput struct {
 	FirstName string      `json:"firstName"`
 	LastName  string      `json:"lastName"`

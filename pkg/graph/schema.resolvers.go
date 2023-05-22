@@ -18,6 +18,202 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Name is the resolver for the name field.
+func (r *chatResolver) Name(ctx context.Context, obj *db.Chat) (*string, error) {
+	if obj.Name.Valid {
+		return &obj.Name.String, nil
+	}
+
+	return nil, nil
+}
+
+// ChatUsers is the resolver for the chatUsers field.
+func (r *chatResolver) ChatUsers(ctx context.Context, obj *db.Chat) ([]*db.ChatUser, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	// check if the user is allowed to see the chat
+	_, err := r.DB.GetChatUser(ctx, db.GetChatUserParams{
+		ChatID:         obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+		UserID:         currentUser.ID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	chatUsers, err := r.DB.ListChatUsers(ctx, db.ListChatUsersParams{
+		ChatID:         obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	chatUserPtr := make([]*db.ChatUser, len(chatUsers))
+	for i, chatUser := range chatUsers {
+		chatUserPr := &chatUser
+		chatUserPtr[i] = chatUserPr
+	}
+
+	return chatUserPtr, nil
+}
+
+// ChatMessages is the resolver for the chatMessages field.
+func (r *chatResolver) ChatMessages(ctx context.Context, obj *db.Chat) ([]*db.ChatMessage, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	// check if the user is allowed to see the chat
+	_, err := r.DB.GetChatUser(ctx, db.GetChatUserParams{
+		ChatID:         obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	chatMessages, err := r.DB.ListChatMessages(ctx, db.ListChatMessagesParams{
+		ChatID:         obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	chatMessagePtr := make([]*db.ChatMessage, len(chatMessages))
+	for i, chatMessage := range chatMessages {
+		chatMessagePr := &chatMessage
+		chatMessagePtr[i] = chatMessagePr
+	}
+
+	return chatMessagePtr, nil
+}
+
+// Chat is the resolver for the chat field.
+func (r *chatMessageResolver) Chat(ctx context.Context, obj *db.ChatMessage) (*db.Chat, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	// check if the user is allowed to see the chat
+	_, err := r.DB.GetChatUser(ctx, db.GetChatUserParams{
+		ChatID:         obj.ChatID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	chat, err := r.DB.GetChat(ctx, db.GetChatParams{
+		ID:             obj.ChatID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &chat, nil
+}
+
+// User is the resolver for the user field.
+func (r *chatMessageResolver) User(ctx context.Context, obj *db.ChatMessage) (*db.User, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	// check if the user is allowed to see the chat
+	_, err := r.DB.GetChatUser(ctx, db.GetChatUserParams{
+		ChatID:         obj.ChatID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := r.DB.GetUser(ctx, db.GetUserParams{
+		ID:             obj.UserID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+// Chat is the resolver for the chat field.
+func (r *chatUserResolver) Chat(ctx context.Context, obj *db.ChatUser) (*db.Chat, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	// check if the user is allowed to see the chat
+	_, err := r.DB.GetChatUser(ctx, db.GetChatUserParams{
+		ChatID:         obj.ChatID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	chat, err := r.DB.GetChat(ctx, db.GetChatParams{
+		ID:             obj.ChatID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &chat, nil
+}
+
+// User is the resolver for the user field.
+func (r *chatUserResolver) User(ctx context.Context, obj *db.ChatUser) (*db.User, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	// check if the user is allowed to see the chat
+	_, err := r.DB.GetChatUser(ctx, db.GetChatUserParams{
+		ChatID:         obj.ChatID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := r.DB.GetUser(ctx, db.GetUserParams{
+		ID:             obj.UserID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 // SignIn is the resolver for the signIn field.
 func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) (*model.SignInPayload, error) {
 	// get the user by email
@@ -324,6 +520,37 @@ func (r *queryResolver) User(ctx context.Context, id string) (*db.User, error) {
 	return &user, nil
 }
 
+// Chats is the resolver for the chats field.
+func (r *queryResolver) Chats(ctx context.Context, limit *int, offset *int) (*model.ChatConnection, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	totalCount, err := r.DB.TotalCountChats(ctx, currentUser.OrganisationID)
+	if err != nil {
+		return nil, err
+	}
+
+	// query the chats
+	chats, err := r.DB.ListChats(ctx, currentUser.OrganisationID)
+	if err != nil {
+		return nil, err
+	}
+
+	chatsPtr := make([]*db.Chat, len(chats))
+	for i, chat := range chats {
+		chatCopy := chat
+		chatsPtr[i] = &chatCopy
+	}
+
+	return &model.ChatConnection{
+		Edges:      chatsPtr,
+		PageInfo:   nil,
+		TotalCount: int(totalCount),
+	}, nil
+}
+
 // DeletedAt is the resolver for the deletedAt field.
 func (r *userResolver) DeletedAt(ctx context.Context, obj *db.User) (*time.Time, error) {
 	if obj.DeletedAt.Valid {
@@ -332,6 +559,15 @@ func (r *userResolver) DeletedAt(ctx context.Context, obj *db.User) (*time.Time,
 
 	return nil, nil
 }
+
+// Chat returns ChatResolver implementation.
+func (r *Resolver) Chat() ChatResolver { return &chatResolver{r} }
+
+// ChatMessage returns ChatMessageResolver implementation.
+func (r *Resolver) ChatMessage() ChatMessageResolver { return &chatMessageResolver{r} }
+
+// ChatUser returns ChatUserResolver implementation.
+func (r *Resolver) ChatUser() ChatUserResolver { return &chatUserResolver{r} }
 
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
@@ -345,6 +581,9 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
+type chatResolver struct{ *Resolver }
+type chatMessageResolver struct{ *Resolver }
+type chatUserResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type organisationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
