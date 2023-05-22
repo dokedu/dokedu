@@ -155,12 +155,11 @@ CREATE TABLE entry_files
 (
     id              text        DEFAULT nanoid() NOT NULL PRIMARY KEY,
     entry_id        text                         NOT NULL REFERENCES entries,
-    file_bucket_id  text                         NOT NULL,
-    file_name       text                         NOT NULL,
+    file_id         text                         NOT NULL REFERENCES files,
     created_at      timestamptz DEFAULT NOW()    NOT NULL,
     deleted_at      timestamptz,
     organisation_id text                         NOT NULL REFERENCES organisations,
-    UNIQUE (entry_id, file_bucket_id, file_name)
+    UNIQUE (entry_id, file_id)
 );
 
 CREATE TABLE events
@@ -188,13 +187,15 @@ CREATE TABLE entry_events
 );
 
 CREATE TYPE report_status AS ENUM ('pending', 'processing', 'done', 'error');
-CREATE TYPE report_type AS ENUM ('report', 'subjects', 'report_docx', 'subjects_docx');
+CREATE TYPE report_format AS ENUM ('docx', 'pdf', 'html', 'csv', 'xlsx');
+CREATE TYPE report_kind AS ENUM ('report', 'subjects');
 
 CREATE TABLE reports
 (
     id              text          DEFAULT nanoid()                 NOT NULL,
     status          report_status DEFAULT 'pending'::report_status NOT NULL,
-    type            report_type                                    NOT NULL,
+    format          report_format DEFAULT 'pdf'::report_format     NOT NULL,
+    kind            report_kind   DEFAULT 'report'::report_kind    NOT NULL,
     "from"          timestamptz                                    NOT NULL,
     "to"            timestamptz                                    NOT NULL,
     meta            jsonb,
@@ -246,6 +247,7 @@ CREATE TABLE tags
 (
     id              text        DEFAULT nanoid() NOT NULL PRIMARY KEY,
     name            text                         NOT NULL,
+    color           text,
     organisation_id text                         NOT NULL REFERENCES organisations,
     created_at      timestamptz DEFAULT NOW()    NOT NULL,
     deleted_at      timestamptz,

@@ -57,6 +57,93 @@ func (ns NullCompetenceType) Value() (driver.Value, error) {
 	return string(ns.CompetenceType), nil
 }
 
+type ReportFormat string
+
+const (
+	ReportFormatDocx ReportFormat = "docx"
+	ReportFormatPdf  ReportFormat = "pdf"
+	ReportFormatHtml ReportFormat = "html"
+	ReportFormatCsv  ReportFormat = "csv"
+	ReportFormatXlsx ReportFormat = "xlsx"
+)
+
+func (e *ReportFormat) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ReportFormat(s)
+	case string:
+		*e = ReportFormat(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ReportFormat: %T", src)
+	}
+	return nil
+}
+
+type NullReportFormat struct {
+	ReportFormat ReportFormat
+	Valid        bool // Valid is true if ReportFormat is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullReportFormat) Scan(value interface{}) error {
+	if value == nil {
+		ns.ReportFormat, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ReportFormat.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullReportFormat) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ReportFormat), nil
+}
+
+type ReportKind string
+
+const (
+	ReportKindReport   ReportKind = "report"
+	ReportKindSubjects ReportKind = "subjects"
+)
+
+func (e *ReportKind) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ReportKind(s)
+	case string:
+		*e = ReportKind(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ReportKind: %T", src)
+	}
+	return nil
+}
+
+type NullReportKind struct {
+	ReportKind ReportKind
+	Valid      bool // Valid is true if ReportKind is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullReportKind) Scan(value interface{}) error {
+	if value == nil {
+		ns.ReportKind, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ReportKind.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullReportKind) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ReportKind), nil
+}
+
 type ReportStatus string
 
 const (
@@ -99,50 +186,6 @@ func (ns NullReportStatus) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return string(ns.ReportStatus), nil
-}
-
-type ReportType string
-
-const (
-	ReportTypeReport       ReportType = "report"
-	ReportTypeSubjects     ReportType = "subjects"
-	ReportTypeReportDocx   ReportType = "report_docx"
-	ReportTypeSubjectsDocx ReportType = "subjects_docx"
-)
-
-func (e *ReportType) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = ReportType(s)
-	case string:
-		*e = ReportType(s)
-	default:
-		return fmt.Errorf("unsupported scan type for ReportType: %T", src)
-	}
-	return nil
-}
-
-type NullReportType struct {
-	ReportType ReportType
-	Valid      bool // Valid is true if ReportType is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullReportType) Scan(value interface{}) error {
-	if value == nil {
-		ns.ReportType, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.ReportType.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullReportType) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.ReportType), nil
 }
 
 type UserRole string
@@ -270,8 +313,7 @@ type EntryEvent struct {
 type EntryFile struct {
 	ID             string       `json:"id"`
 	EntryID        string       `json:"entry_id"`
-	FileBucketID   string       `json:"file_bucket_id"`
-	FileName       string       `json:"file_name"`
+	FileID         string       `json:"file_id"`
 	CreatedAt      time.Time    `json:"created_at"`
 	DeletedAt      sql.NullTime `json:"deleted_at"`
 	OrganisationID string       `json:"organisation_id"`
@@ -352,7 +394,8 @@ type Organisation struct {
 type Report struct {
 	ID             string                `json:"id"`
 	Status         ReportStatus          `json:"status"`
-	Type           ReportType            `json:"type"`
+	Format         ReportFormat          `json:"format"`
+	Kind           ReportKind            `json:"kind"`
 	From           time.Time             `json:"from"`
 	To             time.Time             `json:"to"`
 	Meta           pqtype.NullRawMessage `json:"meta"`
@@ -366,11 +409,12 @@ type Report struct {
 }
 
 type Tag struct {
-	ID             string       `json:"id"`
-	Name           string       `json:"name"`
-	OrganisationID string       `json:"organisation_id"`
-	CreatedAt      time.Time    `json:"created_at"`
-	DeletedAt      sql.NullTime `json:"deleted_at"`
+	ID             string         `json:"id"`
+	Name           string         `json:"name"`
+	Color          sql.NullString `json:"color"`
+	OrganisationID string         `json:"organisation_id"`
+	CreatedAt      time.Time      `json:"created_at"`
+	DeletedAt      sql.NullTime   `json:"deleted_at"`
 }
 
 type User struct {

@@ -6,6 +6,7 @@ package graph
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"example/pkg/db"
 	"example/pkg/graph/model"
@@ -217,97 +218,311 @@ func (r *chatUserResolver) User(ctx context.Context, obj *db.ChatUser) (*db.User
 
 // Type is the resolver for the type field.
 func (r *competenceResolver) Type(ctx context.Context, obj *db.Competence) (db.CompetenceType, error) {
-	panic(fmt.Errorf("not implemented: Type - type"))
+	return obj.CompetenceType, nil
 }
 
 // Color is the resolver for the color field.
 func (r *competenceResolver) Color(ctx context.Context, obj *db.Competence) (string, error) {
-	panic(fmt.Errorf("not implemented: Color - color"))
-}
+	if obj.Color.Valid {
+		return obj.Color.String, nil
+	}
 
-// Description is the resolver for the description field.
-func (r *competenceResolver) Description(ctx context.Context, obj *db.Competence) (*string, error) {
-	panic(fmt.Errorf("not implemented: Description - description"))
+	return "", nil
 }
 
 // Parents is the resolver for the parents field.
 func (r *competenceResolver) Parents(ctx context.Context, obj *db.Competence) ([]*db.Competence, error) {
-	panic(fmt.Errorf("not implemented: Parents - parents"))
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	parents, err := r.DB.CompetenceParents(ctx, db.CompetenceParentsParams{
+		ID:             obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: this is a bad workaround
+	competences := make([]*db.Competence, len(parents))
+	for i, competence := range parents {
+		competencePr := &competence
+		competences[i] = &db.Competence{
+			ID:             competencePr.ID,
+			Name:           competencePr.Name,
+			CompetenceID:   competencePr.CompetenceID,
+			CompetenceType: competencePr.CompetenceType,
+			OrganisationID: competencePr.OrganisationID,
+			Grades:         competencePr.Grades,
+			Color:          competencePr.Color,
+			CurriculumID:   competencePr.CurriculumID,
+			CreatedAt:      competencePr.CreatedAt,
+			DeletedAt:      competencePr.DeletedAt,
+		}
+	}
+
+	return competences, nil
 }
 
-// Description is the resolver for the description field.
-func (r *entryResolver) Description(ctx context.Context, obj *db.Entry) (*string, error) {
-	panic(fmt.Errorf("not implemented: Description - description"))
+// Body is the resolver for the body field.
+func (r *entryResolver) Body(ctx context.Context, obj *db.Entry) (*string, error) {
+	// obj.Body is a json string, so we need to unmarshal it
+	var body string
+	err := json.Unmarshal([]byte(obj.Body), &body)
+	if err != nil {
+		return nil, err
+	}
+
+	return &body, nil
 }
 
 // Entry is the resolver for the entry field.
 func (r *entryEventResolver) Entry(ctx context.Context, obj *db.EntryEvent) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: Entry - entry"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	entry, err := r.DB.GetEntry(ctx, db.GetEntryParams{
+		ID:             obj.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &entry, nil
 }
 
 // Event is the resolver for the event field.
 func (r *entryEventResolver) Event(ctx context.Context, obj *db.EntryEvent) (*db.Event, error) {
-	panic(fmt.Errorf("not implemented: Event - event"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	event, err := r.DB.GetEvent(ctx, db.GetEventParams{
+		ID:             obj.EventID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &event, nil
 }
 
 // Entry is the resolver for the entry field.
 func (r *entryFileResolver) Entry(ctx context.Context, obj *db.EntryFile) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: Entry - entry"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	entry, err := r.DB.GetEntry(ctx, db.GetEntryParams{
+		ID:             obj.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &entry, nil
 }
 
 // File is the resolver for the file field.
 func (r *entryFileResolver) File(ctx context.Context, obj *db.EntryFile) (*db.File, error) {
-	panic(fmt.Errorf("not implemented: File - file"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	file, err := r.DB.GetFile(ctx, db.GetFileParams{
+		ID:             obj.FileID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &file, nil
 }
 
 // Entry is the resolver for the entry field.
 func (r *entryTagResolver) Entry(ctx context.Context, obj *db.EntryTag) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: Entry - entry"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	entry, err := r.DB.GetEntry(ctx, db.GetEntryParams{
+		ID:             obj.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &entry, nil
 }
 
 // Tag is the resolver for the tag field.
 func (r *entryTagResolver) Tag(ctx context.Context, obj *db.EntryTag) (*db.Tag, error) {
-	panic(fmt.Errorf("not implemented: Tag - tag"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	tag, err := r.DB.GetTag(ctx, db.GetTagParams{
+		ID:             obj.TagID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &tag, nil
 }
 
 // Entry is the resolver for the entry field.
 func (r *entryUserResolver) Entry(ctx context.Context, obj *db.EntryUser) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: Entry - entry"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	entry, err := r.DB.GetEntry(ctx, db.GetEntryParams{
+		ID:             obj.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &entry, nil
 }
 
 // User is the resolver for the user field.
 func (r *entryUserResolver) User(ctx context.Context, obj *db.EntryUser) (*db.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	user, err := r.DB.GetUser(ctx, db.GetUserParams{
+		ID:             obj.UserID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 // Entry is the resolver for the entry field.
 func (r *entryUserCompetenceResolver) Entry(ctx context.Context, obj *db.EntryUserCompetence) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: Entry - entry"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	entry, err := r.DB.GetEntry(ctx, db.GetEntryParams{
+		ID:             obj.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &entry, nil
 }
 
 // User is the resolver for the user field.
 func (r *entryUserCompetenceResolver) User(ctx context.Context, obj *db.EntryUserCompetence) (*db.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	user, err := r.DB.GetUser(ctx, db.GetUserParams{
+		ID:             obj.UserID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 // Competence is the resolver for the competence field.
 func (r *entryUserCompetenceResolver) Competence(ctx context.Context, obj *db.EntryUserCompetence) (*db.Competence, error) {
-	panic(fmt.Errorf("not implemented: Competence - competence"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	competence, err := r.DB.GetCompetence(ctx, db.GetCompetenceParams{
+		ID:             obj.CompetenceID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &competence, nil
 }
 
 // Image is the resolver for the image field.
 func (r *eventResolver) Image(ctx context.Context, obj *db.Event) (*db.File, error) {
-	panic(fmt.Errorf("not implemented: Image - image"))
-}
+	currentUser := middleware.ForContext(ctx)
 
-// Recurrence is the resolver for the recurrence field.
-func (r *eventResolver) Recurrence(ctx context.Context, obj *db.Event) (*string, error) {
-	panic(fmt.Errorf("not implemented: Recurrence - recurrence"))
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	file, err := r.DB.GetFile(ctx, db.GetFileParams{
+		ID:             obj.ImageFileID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &file, nil
 }
 
 // URL is the resolver for the url field.
 func (r *fileResolver) URL(ctx context.Context, obj *db.File) (string, error) {
-	panic(fmt.Errorf("not implemented: URL - url"))
+	// TODO: implement this
+	return fmt.Sprintf("https://api.dokedu.org/files/%s", obj.ID), nil
 }
 
 // SignIn is the resolver for the signIn field.
@@ -693,52 +908,330 @@ func (r *queryResolver) User(ctx context.Context, id string) (*db.User, error) {
 
 // Competence is the resolver for the competence field.
 func (r *queryResolver) Competence(ctx context.Context, id string) (*db.Competence, error) {
-	panic(fmt.Errorf("not implemented: Competence - competence"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	// query the competence
+	competence, err := r.DB.GetCompetence(ctx, db.GetCompetenceParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &competence, nil
 }
 
 // Competences is the resolver for the competences field.
 func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int, filter *model.CompetenceFilterInput, search *string) (*model.CompetenceConnection, error) {
-	panic(fmt.Errorf("not implemented: Competences - competences"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	competenceTypes := make([]db.CompetenceType, len(filter.Type))
+	for i, competenceType := range filter.Type {
+		competenceTypes[i] = *competenceType
+	}
+
+	parentIds := make([]string, len(filter.Parents))
+	for i, parentId := range filter.Parents {
+		parentIds[i] = *parentId
+	}
+
+	pageLimit := int32(10)
+	if limit != nil {
+		pageLimit = int32(*limit)
+	}
+
+	pageOffset := int32(0)
+	if offset != nil {
+		pageOffset = int32(*offset)
+	}
+
+	// query the competences
+	competences, err := r.DB.ListCompetences(ctx, db.ListCompetencesParams{
+		OrganisationID:  currentUser.OrganisationID,
+		Limit:           pageLimit,
+		Offset:          pageOffset,
+		CompetenceTypes: competenceTypes,
+		ParentIds:       parentIds,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	competencesPtr := make([]*db.Competence, len(competences))
+
+	for i, competence := range competences {
+		competenceCopy := competence
+		competencesPtr[i] = &competenceCopy
+	}
+
+	return &model.CompetenceConnection{
+		Edges:      competencesPtr,
+		PageInfo:   nil,
+		TotalCount: len(competences),
+	}, nil
 }
 
 // Entry is the resolver for the entry field.
 func (r *queryResolver) Entry(ctx context.Context, id string) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: Entry - entry"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	// query the entry
+	entry, err := r.DB.GetEntry(ctx, db.GetEntryParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &entry, nil
 }
 
 // Entries is the resolver for the entries field.
 func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, filter *model.EntryFilterInput, search *string) (*model.EntryConnection, error) {
-	panic(fmt.Errorf("not implemented: Entries - entries"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	pageLimit := int32(10)
+	if limit != nil {
+		pageLimit = int32(*limit)
+	}
+
+	pageOffset := int32(0)
+	if offset != nil {
+		pageOffset = int32(*offset)
+	}
+
+	// query the entries
+	entries, err := r.DB.ListEntries(ctx, db.ListEntriesParams{
+		OrganisationID: currentUser.OrganisationID,
+		Limit:          pageLimit,
+		Offset:         pageOffset,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	entriesPtr := make([]*db.Entry, len(entries))
+
+	for i, entry := range entries {
+		entryCopy := entry
+		entriesPtr[i] = &entryCopy
+	}
+
+	return &model.EntryConnection{
+		Edges:      entriesPtr,
+		PageInfo:   nil,
+		TotalCount: len(entries),
+	}, nil
 }
 
 // Event is the resolver for the event field.
 func (r *queryResolver) Event(ctx context.Context, id string) (*db.Event, error) {
-	panic(fmt.Errorf("not implemented: Event - event"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	// query the event
+	event, err := r.DB.GetEvent(ctx, db.GetEventParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &event, nil
 }
 
 // Events is the resolver for the events field.
 func (r *queryResolver) Events(ctx context.Context, limit *int, offset *int, filter *model.EventFilterInput, search *string) (*model.EventConnection, error) {
-	panic(fmt.Errorf("not implemented: Events - events"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	pageLimit := int32(10)
+	if limit != nil {
+		pageLimit = int32(*limit)
+	}
+
+	pageOffset := int32(0)
+	if offset != nil {
+		pageOffset = int32(*offset)
+	}
+
+	// query the events
+	events, err := r.DB.ListEvents(ctx, db.ListEventsParams{
+		OrganisationID: currentUser.OrganisationID,
+		Limit:          pageLimit,
+		Offset:         pageOffset,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	eventsPtr := make([]*db.Event, len(events))
+
+	for i, event := range events {
+		eventCopy := event
+		eventsPtr[i] = &eventCopy
+	}
+
+	return &model.EventConnection{
+		Edges:      eventsPtr,
+		PageInfo:   nil,
+		TotalCount: len(events),
+	}, nil
 }
 
 // Report is the resolver for the report field.
 func (r *queryResolver) Report(ctx context.Context, id string) (*db.Report, error) {
-	panic(fmt.Errorf("not implemented: Report - report"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	// query the report
+	report, err := r.DB.GetReport(ctx, db.GetReportParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &report, nil
 }
 
 // Reports is the resolver for the reports field.
 func (r *queryResolver) Reports(ctx context.Context, limit *int, offset *int) (*model.ReportConnection, error) {
-	panic(fmt.Errorf("not implemented: Reports - reports"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	pageLimit := int32(10)
+	if limit != nil {
+		pageLimit = int32(*limit)
+	}
+
+	pageOffset := int32(0)
+	if offset != nil {
+		pageOffset = int32(*offset)
+	}
+
+	// query the reports
+	reports, err := r.DB.ListReports(ctx, db.ListReportsParams{
+		OrganisationID: currentUser.OrganisationID,
+		Limit:          pageLimit,
+		Offset:         pageOffset,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	reportsPtr := make([]*db.Report, len(reports))
+
+	for i, report := range reports {
+		reportCopy := report
+		reportsPtr[i] = &reportCopy
+	}
+
+	return &model.ReportConnection{
+		Edges:      reportsPtr,
+		PageInfo:   nil,
+		TotalCount: len(reports),
+	}, nil
 }
 
 // Tag is the resolver for the tag field.
 func (r *queryResolver) Tag(ctx context.Context, id string) (*db.Tag, error) {
-	panic(fmt.Errorf("not implemented: Tag - tag"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	// query the tag
+	tag, err := r.DB.GetTag(ctx, db.GetTagParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &tag, nil
 }
 
 // Tags is the resolver for the tags field.
 func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) ([]*db.Tag, error) {
-	panic(fmt.Errorf("not implemented: Tags - tags"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	pageLimit := int32(10)
+	if limit != nil {
+		pageLimit = int32(*limit)
+	}
+
+	pageOffset := int32(0)
+	if offset != nil {
+		pageOffset = int32(*offset)
+	}
+
+	// query the tags
+	tags, err := r.DB.ListTags(ctx, db.ListTagsParams{
+		OrganisationID: currentUser.OrganisationID,
+		Limit:          pageLimit,
+		Offset:         pageOffset,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	tagsPtr := make([]*db.Tag, len(tags))
+
+	for i, tag := range tags {
+		tagCopy := tag
+		tagsPtr[i] = &tagCopy
+	}
+
+	return tagsPtr, nil
 }
 
 // Chats is the resolver for the chats field.
@@ -772,44 +1265,89 @@ func (r *queryResolver) Chats(ctx context.Context, limit *int, offset *int) (*mo
 	}, nil
 }
 
-// Format is the resolver for the format field.
-func (r *reportResolver) Format(ctx context.Context, obj *db.Report) (model.ReportFormat, error) {
-	panic(fmt.Errorf("not implemented: Format - format"))
-}
-
-// Kind is the resolver for the kind field.
-func (r *reportResolver) Kind(ctx context.Context, obj *db.Report) (model.ReportKind, error) {
-	panic(fmt.Errorf("not implemented: Kind - kind"))
-}
-
 // Meta is the resolver for the meta field.
 func (r *reportResolver) Meta(ctx context.Context, obj *db.Report) (string, error) {
-	panic(fmt.Errorf("not implemented: Meta - meta"))
-}
+	/// meta is a jsonb field, so we need to unmarshal it
+	var meta map[string]interface{}
+	err := json.Unmarshal(obj.Meta.RawMessage, &meta)
+	if err != nil {
+		return "", err
+	}
 
-// FilterTags is the resolver for the filterTags field.
-func (r *reportResolver) FilterTags(ctx context.Context, obj *db.Report) ([]*db.Tag, error) {
-	panic(fmt.Errorf("not implemented: FilterTags - filterTags"))
+	// return meta as a string
+	return fmt.Sprintf("%v", meta), nil
 }
 
 // User is the resolver for the user field.
 func (r *reportResolver) User(ctx context.Context, obj *db.Report) (*db.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	// query the user
+	user, err := r.DB.GetUser(ctx, db.GetUserParams{
+		ID:             obj.UserID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 // StudentUser is the resolver for the studentUser field.
 func (r *reportResolver) StudentUser(ctx context.Context, obj *db.Report) (*db.User, error) {
-	panic(fmt.Errorf("not implemented: StudentUser - studentUser"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	// query the user
+	user, err := r.DB.GetUser(ctx, db.GetUserParams{
+		ID:             obj.StudentUserID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 // File is the resolver for the file field.
 func (r *reportResolver) File(ctx context.Context, obj *db.Report) (*db.File, error) {
-	panic(fmt.Errorf("not implemented: File - file"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	// query the file
+	file, err := r.DB.GetFile(ctx, db.GetFileParams{
+		ID:             obj.FileID.String,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &file, nil
 }
 
 // Color is the resolver for the color field.
 func (r *tagResolver) Color(ctx context.Context, obj *db.Tag) (string, error) {
-	panic(fmt.Errorf("not implemented: Color - color"))
+	if obj.Color.Valid {
+		return obj.Color.String, nil
+	}
+
+	return "", nil
 }
 
 // DeletedAt is the resolver for the deletedAt field.

@@ -63,7 +63,6 @@ type Competence {
     type: CompetenceType!
     grades: [Int!]!
     color: String!
-    description: String
     parents: [Competence!]!
     createdAt: Time!
 }
@@ -71,7 +70,7 @@ type Competence {
 type Entry {
     id: ID!
     date: Time!
-    description: String
+    body: String
     createdAt: Time!
 }
 
@@ -119,7 +118,7 @@ type Event {
     body: String
     startsAt: Time!
     endsAt: Time!
-    recurrence: String
+    recurrence: [String]
     createdAt: Time!
 }
 
@@ -139,7 +138,7 @@ enum ReportStatus {
 
 enum ReportFormat {
     pdf
-    excel
+    docx
 }
 
 enum ReportKind {
@@ -155,7 +154,7 @@ type Report {
     from: Time!
     to: Time!
     meta: String!
-    filterTags: [Tag!]!
+    filterTags: [ID!]!
     user: User!
     studentUser: User!
     file: File
@@ -314,7 +313,7 @@ input CreateEntryUserCompetenceInput {
 
 input CreateEntryInput {
     date: Time!
-    description: String
+    body: String
     user: ID!
     users: [ID!]!
     tags: [ID!]!
@@ -324,7 +323,7 @@ input CreateEntryInput {
 
 input UpdateEntryInput {
     date: Time
-    description: String
+    body: String
     user: ID
 }
 

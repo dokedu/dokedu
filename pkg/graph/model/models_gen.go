@@ -4,9 +4,6 @@ package model
 
 import (
 	"example/pkg/db"
-	"fmt"
-	"io"
-	"strconv"
 	"time"
 )
 
@@ -33,7 +30,7 @@ type CreateEntryFileInput struct {
 
 type CreateEntryInput struct {
 	Date            time.Time                         `json:"date"`
-	Description     *string                           `json:"description,omitempty"`
+	Body            *string                           `json:"body,omitempty"`
 	User            string                            `json:"user"`
 	Users           []string                          `json:"users"`
 	Tags            []string                          `json:"tags"`
@@ -48,13 +45,13 @@ type CreateEntryUserCompetenceInput struct {
 }
 
 type CreateReportInput struct {
-	Format      ReportFormat `json:"format"`
-	Kind        ReportKind   `json:"kind"`
-	From        time.Time    `json:"from"`
-	To          time.Time    `json:"to"`
-	Meta        string       `json:"meta"`
-	FilterTags  []string     `json:"filterTags"`
-	StudentUser string       `json:"studentUser"`
+	Format      db.ReportFormat `json:"format"`
+	Kind        db.ReportKind   `json:"kind"`
+	From        time.Time       `json:"from"`
+	To          time.Time       `json:"to"`
+	Meta        string          `json:"meta"`
+	FilterTags  []string        `json:"filterTags"`
+	StudentUser string          `json:"studentUser"`
 }
 
 type CreateUserInput struct {
@@ -128,9 +125,9 @@ type SignUpInput struct {
 }
 
 type UpdateEntryInput struct {
-	Date        *time.Time `json:"date,omitempty"`
-	Description *string    `json:"description,omitempty"`
-	User        *string    `json:"user,omitempty"`
+	Date *time.Time `json:"date,omitempty"`
+	Body *string    `json:"body,omitempty"`
+	User *string    `json:"user,omitempty"`
 }
 
 type UpdateUserInput struct {
@@ -151,86 +148,4 @@ type UserConnection struct {
 
 type UserFilterInput struct {
 	Role []*db.UserRole `json:"role,omitempty"`
-}
-
-type ReportFormat string
-
-const (
-	ReportFormatPDF   ReportFormat = "pdf"
-	ReportFormatExcel ReportFormat = "excel"
-)
-
-var AllReportFormat = []ReportFormat{
-	ReportFormatPDF,
-	ReportFormatExcel,
-}
-
-func (e ReportFormat) IsValid() bool {
-	switch e {
-	case ReportFormatPDF, ReportFormatExcel:
-		return true
-	}
-	return false
-}
-
-func (e ReportFormat) String() string {
-	return string(e)
-}
-
-func (e *ReportFormat) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = ReportFormat(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid ReportFormat", str)
-	}
-	return nil
-}
-
-func (e ReportFormat) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type ReportKind string
-
-const (
-	ReportKindReport  ReportKind = "report"
-	ReportKindSubject ReportKind = "subject"
-)
-
-var AllReportKind = []ReportKind{
-	ReportKindReport,
-	ReportKindSubject,
-}
-
-func (e ReportKind) IsValid() bool {
-	switch e {
-	case ReportKindReport, ReportKindSubject:
-		return true
-	}
-	return false
-}
-
-func (e ReportKind) String() string {
-	return string(e)
-}
-
-func (e *ReportKind) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = ReportKind(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid ReportKind", str)
-	}
-	return nil
-}
-
-func (e ReportKind) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
 }

@@ -91,14 +91,13 @@ type ComplexityRoot struct {
 	}
 
 	Competence struct {
-		Color       func(childComplexity int) int
-		CreatedAt   func(childComplexity int) int
-		Description func(childComplexity int) int
-		Grades      func(childComplexity int) int
-		ID          func(childComplexity int) int
-		Name        func(childComplexity int) int
-		Parents     func(childComplexity int) int
-		Type        func(childComplexity int) int
+		Color     func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		Grades    func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Name      func(childComplexity int) int
+		Parents   func(childComplexity int) int
+		Type      func(childComplexity int) int
 	}
 
 	CompetenceConnection struct {
@@ -108,10 +107,10 @@ type ComplexityRoot struct {
 	}
 
 	Entry struct {
-		CreatedAt   func(childComplexity int) int
-		Date        func(childComplexity int) int
-		Description func(childComplexity int) int
-		ID          func(childComplexity int) int
+		Body      func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		Date      func(childComplexity int) int
+		ID        func(childComplexity int) int
 	}
 
 	EntryConnection struct {
@@ -306,11 +305,10 @@ type CompetenceResolver interface {
 	Type(ctx context.Context, obj *db.Competence) (db.CompetenceType, error)
 
 	Color(ctx context.Context, obj *db.Competence) (string, error)
-	Description(ctx context.Context, obj *db.Competence) (*string, error)
 	Parents(ctx context.Context, obj *db.Competence) ([]*db.Competence, error)
 }
 type EntryResolver interface {
-	Description(ctx context.Context, obj *db.Entry) (*string, error)
+	Body(ctx context.Context, obj *db.Entry) (*string, error)
 }
 type EntryEventResolver interface {
 	Entry(ctx context.Context, obj *db.EntryEvent) (*db.Entry, error)
@@ -335,8 +333,6 @@ type EntryUserCompetenceResolver interface {
 }
 type EventResolver interface {
 	Image(ctx context.Context, obj *db.Event) (*db.File, error)
-
-	Recurrence(ctx context.Context, obj *db.Event) (*string, error)
 }
 type FileResolver interface {
 	URL(ctx context.Context, obj *db.File) (string, error)
@@ -384,11 +380,8 @@ type QueryResolver interface {
 	Chats(ctx context.Context, limit *int, offset *int) (*model.ChatConnection, error)
 }
 type ReportResolver interface {
-	Format(ctx context.Context, obj *db.Report) (model.ReportFormat, error)
-	Kind(ctx context.Context, obj *db.Report) (model.ReportKind, error)
-
 	Meta(ctx context.Context, obj *db.Report) (string, error)
-	FilterTags(ctx context.Context, obj *db.Report) ([]*db.Tag, error)
+
 	User(ctx context.Context, obj *db.Report) (*db.User, error)
 	StudentUser(ctx context.Context, obj *db.Report) (*db.User, error)
 	File(ctx context.Context, obj *db.Report) (*db.File, error)
@@ -534,13 +527,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Competence.CreatedAt(childComplexity), true
 
-	case "Competence.description":
-		if e.complexity.Competence.Description == nil {
-			break
-		}
-
-		return e.complexity.Competence.Description(childComplexity), true
-
 	case "Competence.grades":
 		if e.complexity.Competence.Grades == nil {
 			break
@@ -597,6 +583,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CompetenceConnection.TotalCount(childComplexity), true
 
+	case "Entry.body":
+		if e.complexity.Entry.Body == nil {
+			break
+		}
+
+		return e.complexity.Entry.Body(childComplexity), true
+
 	case "Entry.createdAt":
 		if e.complexity.Entry.CreatedAt == nil {
 			break
@@ -610,13 +603,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Entry.Date(childComplexity), true
-
-	case "Entry.description":
-		if e.complexity.Entry.Description == nil {
-			break
-		}
-
-		return e.complexity.Entry.Description(childComplexity), true
 
 	case "Entry.id":
 		if e.complexity.Entry.ID == nil {
@@ -3436,47 +3422,6 @@ func (ec *executionContext) fieldContext_Competence_color(ctx context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _Competence_description(ctx context.Context, field graphql.CollectedField, obj *db.Competence) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Competence_description(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Competence().Description(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Competence_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Competence",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Competence_parents(ctx context.Context, field graphql.CollectedField, obj *db.Competence) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Competence_parents(ctx, field)
 	if err != nil {
@@ -3526,8 +3471,6 @@ func (ec *executionContext) fieldContext_Competence_parents(ctx context.Context,
 				return ec.fieldContext_Competence_grades(ctx, field)
 			case "color":
 				return ec.fieldContext_Competence_color(ctx, field)
-			case "description":
-				return ec.fieldContext_Competence_description(ctx, field)
 			case "parents":
 				return ec.fieldContext_Competence_parents(ctx, field)
 			case "createdAt":
@@ -3629,8 +3572,6 @@ func (ec *executionContext) fieldContext_CompetenceConnection_edges(ctx context.
 				return ec.fieldContext_Competence_grades(ctx, field)
 			case "color":
 				return ec.fieldContext_Competence_color(ctx, field)
-			case "description":
-				return ec.fieldContext_Competence_description(ctx, field)
 			case "parents":
 				return ec.fieldContext_Competence_parents(ctx, field)
 			case "createdAt":
@@ -3826,8 +3767,8 @@ func (ec *executionContext) fieldContext_Entry_date(ctx context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _Entry_description(ctx context.Context, field graphql.CollectedField, obj *db.Entry) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Entry_description(ctx, field)
+func (ec *executionContext) _Entry_body(ctx context.Context, field graphql.CollectedField, obj *db.Entry) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Entry_body(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3840,7 +3781,7 @@ func (ec *executionContext) _Entry_description(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Entry().Description(rctx, obj)
+		return ec.resolvers.Entry().Body(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3854,7 +3795,7 @@ func (ec *executionContext) _Entry_description(ctx context.Context, field graphq
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Entry_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Entry_body(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Entry",
 		Field:      field,
@@ -3951,8 +3892,8 @@ func (ec *executionContext) fieldContext_EntryConnection_edges(ctx context.Conte
 				return ec.fieldContext_Entry_id(ctx, field)
 			case "date":
 				return ec.fieldContext_Entry_date(ctx, field)
-			case "description":
-				return ec.fieldContext_Entry_description(ctx, field)
+			case "body":
+				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
 			}
@@ -4145,8 +4086,8 @@ func (ec *executionContext) fieldContext_EntryEvent_entry(ctx context.Context, f
 				return ec.fieldContext_Entry_id(ctx, field)
 			case "date":
 				return ec.fieldContext_Entry_date(ctx, field)
-			case "description":
-				return ec.fieldContext_Entry_description(ctx, field)
+			case "body":
+				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
 			}
@@ -4349,8 +4290,8 @@ func (ec *executionContext) fieldContext_EntryFile_entry(ctx context.Context, fi
 				return ec.fieldContext_Entry_id(ctx, field)
 			case "date":
 				return ec.fieldContext_Entry_date(ctx, field)
-			case "description":
-				return ec.fieldContext_Entry_description(ctx, field)
+			case "body":
+				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
 			}
@@ -4545,8 +4486,8 @@ func (ec *executionContext) fieldContext_EntryTag_entry(ctx context.Context, fie
 				return ec.fieldContext_Entry_id(ctx, field)
 			case "date":
 				return ec.fieldContext_Entry_date(ctx, field)
-			case "description":
-				return ec.fieldContext_Entry_description(ctx, field)
+			case "body":
+				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
 			}
@@ -4741,8 +4682,8 @@ func (ec *executionContext) fieldContext_EntryUser_entry(ctx context.Context, fi
 				return ec.fieldContext_Entry_id(ctx, field)
 			case "date":
 				return ec.fieldContext_Entry_date(ctx, field)
-			case "description":
-				return ec.fieldContext_Entry_description(ctx, field)
+			case "body":
+				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
 			}
@@ -4987,8 +4928,8 @@ func (ec *executionContext) fieldContext_EntryUserCompetence_entry(ctx context.C
 				return ec.fieldContext_Entry_id(ctx, field)
 			case "date":
 				return ec.fieldContext_Entry_date(ctx, field)
-			case "description":
-				return ec.fieldContext_Entry_description(ctx, field)
+			case "body":
+				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
 			}
@@ -5107,8 +5048,6 @@ func (ec *executionContext) fieldContext_EntryUserCompetence_competence(ctx cont
 				return ec.fieldContext_Competence_grades(ctx, field)
 			case "color":
 				return ec.fieldContext_Competence_color(ctx, field)
-			case "description":
-				return ec.fieldContext_Competence_description(ctx, field)
 			case "parents":
 				return ec.fieldContext_Competence_parents(ctx, field)
 			case "createdAt":
@@ -5446,7 +5385,7 @@ func (ec *executionContext) _Event_recurrence(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Event().Recurrence(rctx, obj)
+		return obj.Recurrence, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5455,17 +5394,17 @@ func (ec *executionContext) _Event_recurrence(ctx context.Context, field graphql
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.([]string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOString2ᚕstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Event_recurrence(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Event",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -6293,8 +6232,8 @@ func (ec *executionContext) fieldContext_Mutation_createEntry(ctx context.Contex
 				return ec.fieldContext_Entry_id(ctx, field)
 			case "date":
 				return ec.fieldContext_Entry_date(ctx, field)
-			case "description":
-				return ec.fieldContext_Entry_description(ctx, field)
+			case "body":
+				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
 			}
@@ -6358,8 +6297,8 @@ func (ec *executionContext) fieldContext_Mutation_updateEntry(ctx context.Contex
 				return ec.fieldContext_Entry_id(ctx, field)
 			case "date":
 				return ec.fieldContext_Entry_date(ctx, field)
-			case "description":
-				return ec.fieldContext_Entry_description(ctx, field)
+			case "body":
+				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
 			}
@@ -7849,8 +7788,6 @@ func (ec *executionContext) fieldContext_Query_competence(ctx context.Context, f
 				return ec.fieldContext_Competence_grades(ctx, field)
 			case "color":
 				return ec.fieldContext_Competence_color(ctx, field)
-			case "description":
-				return ec.fieldContext_Competence_description(ctx, field)
 			case "parents":
 				return ec.fieldContext_Competence_parents(ctx, field)
 			case "createdAt":
@@ -7979,8 +7916,8 @@ func (ec *executionContext) fieldContext_Query_entry(ctx context.Context, field 
 				return ec.fieldContext_Entry_id(ctx, field)
 			case "date":
 				return ec.fieldContext_Entry_date(ctx, field)
-			case "description":
-				return ec.fieldContext_Entry_description(ctx, field)
+			case "body":
+				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
 			}
@@ -8768,7 +8705,7 @@ func (ec *executionContext) _Report_format(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Report().Format(rctx, obj)
+		return obj.Format, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8780,17 +8717,17 @@ func (ec *executionContext) _Report_format(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.ReportFormat)
+	res := resTmp.(db.ReportFormat)
 	fc.Result = res
-	return ec.marshalNReportFormat2exampleᚋpkgᚋgraphᚋmodelᚐReportFormat(ctx, field.Selections, res)
+	return ec.marshalNReportFormat2exampleᚋpkgᚋdbᚐReportFormat(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Report_format(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Report",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type ReportFormat does not have child fields")
 		},
@@ -8812,7 +8749,7 @@ func (ec *executionContext) _Report_kind(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Report().Kind(rctx, obj)
+		return obj.Kind, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8824,17 +8761,17 @@ func (ec *executionContext) _Report_kind(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.ReportKind)
+	res := resTmp.(db.ReportKind)
 	fc.Result = res
-	return ec.marshalNReportKind2exampleᚋpkgᚋgraphᚋmodelᚐReportKind(ctx, field.Selections, res)
+	return ec.marshalNReportKind2exampleᚋpkgᚋdbᚐReportKind(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Report_kind(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Report",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type ReportKind does not have child fields")
 		},
@@ -8988,7 +8925,7 @@ func (ec *executionContext) _Report_filterTags(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Report().FilterTags(rctx, obj)
+		return obj.FilterTags, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -9000,29 +8937,19 @@ func (ec *executionContext) _Report_filterTags(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*db.Tag)
+	res := resTmp.([]string)
 	fc.Result = res
-	return ec.marshalNTag2ᚕᚖexampleᚋpkgᚋdbᚐTagᚄ(ctx, field.Selections, res)
+	return ec.marshalNID2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Report_filterTags(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Report",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Tag_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Tag_name(ctx, field)
-			case "color":
-				return ec.fieldContext_Tag_color(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Tag_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Tag", field.Name)
+			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	return fc, nil
@@ -11925,7 +11852,7 @@ func (ec *executionContext) unmarshalInputCreateEntryInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"date", "description", "user", "users", "tags", "files", "userCompetences"}
+	fieldsInOrder := [...]string{"date", "body", "user", "users", "tags", "files", "userCompetences"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -11940,11 +11867,11 @@ func (ec *executionContext) unmarshalInputCreateEntryInput(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
-		case "description":
+		case "body":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
-			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("body"))
+			it.Body, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -12056,7 +11983,7 @@ func (ec *executionContext) unmarshalInputCreateReportInput(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("format"))
-			it.Format, err = ec.unmarshalNReportFormat2exampleᚋpkgᚋgraphᚋmodelᚐReportFormat(ctx, v)
+			it.Format, err = ec.unmarshalNReportFormat2exampleᚋpkgᚋdbᚐReportFormat(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -12064,7 +11991,7 @@ func (ec *executionContext) unmarshalInputCreateReportInput(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("kind"))
-			it.Kind, err = ec.unmarshalNReportKind2exampleᚋpkgᚋgraphᚋmodelᚐReportKind(ctx, v)
+			it.Kind, err = ec.unmarshalNReportKind2exampleᚋpkgᚋdbᚐReportKind(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -12389,7 +12316,7 @@ func (ec *executionContext) unmarshalInputUpdateEntryInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"date", "description", "user"}
+	fieldsInOrder := [...]string{"date", "body", "user"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -12404,11 +12331,11 @@ func (ec *executionContext) unmarshalInputUpdateEntryInput(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
-		case "description":
+		case "body":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
-			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("body"))
+			it.Body, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -12883,23 +12810,6 @@ func (ec *executionContext) _Competence(ctx context.Context, sel ast.SelectionSe
 				return innerFunc(ctx)
 
 			})
-		case "description":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Competence_description(ctx, field, obj)
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "parents":
 			field := field
 
@@ -13001,7 +12911,7 @@ func (ec *executionContext) _Entry(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "description":
+		case "body":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -13010,7 +12920,7 @@ func (ec *executionContext) _Entry(ctx context.Context, sel ast.SelectionSet, ob
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Entry_description(ctx, field, obj)
+				res = ec._Entry_body(ctx, field, obj)
 				return res
 			}
 
@@ -13537,22 +13447,9 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "recurrence":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Event_recurrence(ctx, field, obj)
-				return res
-			}
+			out.Values[i] = ec._Event_recurrence(ctx, field, obj)
 
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "createdAt":
 
 			out.Values[i] = ec._Event_createdAt(ctx, field, obj)
@@ -14416,45 +14313,19 @@ func (ec *executionContext) _Report(ctx context.Context, sel ast.SelectionSet, o
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "format":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Report_format(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Report_format(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "kind":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Report_kind(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Report_kind(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "from":
 
 			out.Values[i] = ec._Report_from(ctx, field, obj)
@@ -14490,25 +14361,12 @@ func (ec *executionContext) _Report(ctx context.Context, sel ast.SelectionSet, o
 
 			})
 		case "filterTags":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Report_filterTags(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Report_filterTags(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "user":
 			field := field
 
@@ -15746,24 +15604,36 @@ func (ec *executionContext) marshalNReportConnection2ᚖexampleᚋpkgᚋgraphᚋ
 	return ec._ReportConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNReportFormat2exampleᚋpkgᚋgraphᚋmodelᚐReportFormat(ctx context.Context, v interface{}) (model.ReportFormat, error) {
-	var res model.ReportFormat
-	err := res.UnmarshalGQL(v)
+func (ec *executionContext) unmarshalNReportFormat2exampleᚋpkgᚋdbᚐReportFormat(ctx context.Context, v interface{}) (db.ReportFormat, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	res := db.ReportFormat(tmp)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNReportFormat2exampleᚋpkgᚋgraphᚋmodelᚐReportFormat(ctx context.Context, sel ast.SelectionSet, v model.ReportFormat) graphql.Marshaler {
-	return v
+func (ec *executionContext) marshalNReportFormat2exampleᚋpkgᚋdbᚐReportFormat(ctx context.Context, sel ast.SelectionSet, v db.ReportFormat) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
 }
 
-func (ec *executionContext) unmarshalNReportKind2exampleᚋpkgᚋgraphᚋmodelᚐReportKind(ctx context.Context, v interface{}) (model.ReportKind, error) {
-	var res model.ReportKind
-	err := res.UnmarshalGQL(v)
+func (ec *executionContext) unmarshalNReportKind2exampleᚋpkgᚋdbᚐReportKind(ctx context.Context, v interface{}) (db.ReportKind, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	res := db.ReportKind(tmp)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNReportKind2exampleᚋpkgᚋgraphᚋmodelᚐReportKind(ctx context.Context, sel ast.SelectionSet, v model.ReportKind) graphql.Marshaler {
-	return v
+func (ec *executionContext) marshalNReportKind2exampleᚋpkgᚋdbᚐReportKind(ctx context.Context, sel ast.SelectionSet, v db.ReportKind) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) unmarshalNReportStatus2exampleᚋpkgᚋdbᚐReportStatus(ctx context.Context, v interface{}) (db.ReportStatus, error) {
@@ -16696,6 +16566,38 @@ func (ec *executionContext) unmarshalOString2string(ctx context.Context, v inter
 func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	res := graphql.MarshalString(v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOString2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕstring(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOString2string(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
