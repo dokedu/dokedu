@@ -51,6 +51,124 @@ type ChatMessage {
     createdAt: Time!
 }
 
+enum CompetenceType {
+    subject
+    group
+    competence
+}
+
+type Competence {
+    id: ID!
+    name: String!
+    type: CompetenceType!
+    grades: [Int!]!
+    color: String!
+    description: String
+    parents: [Competence!]!
+    createdAt: Time!
+}
+
+type Entry {
+    id: ID!
+    date: Time!
+    description: String
+    createdAt: Time!
+}
+
+type EntryEvent {
+    id: ID!
+    entry: Entry!
+    event: Event!
+    createdAt: Time!
+}
+
+type EntryFile {
+    id: ID!
+    entry: Entry!
+    file: File!
+    createdAt: Time!
+}
+
+type EntryTag {
+    id: ID!
+    entry: Entry!
+    tag: Tag!
+    createdAt: Time!
+}
+
+type EntryUserCompetence {
+    id: ID!
+    level: Int!
+    entry: Entry!
+    user: User!
+    competence: Competence!
+    createdAt: Time!
+}
+
+type EntryUser {
+    id: ID!
+    entry: Entry!
+    user: User!
+    createdAt: Time!
+}
+
+type Event {
+    id: ID!
+    title: String!
+    image: File
+    body: String
+    startsAt: Time!
+    endsAt: Time!
+    recurrence: String
+    createdAt: Time!
+}
+
+type File {
+    id: ID!
+    bucket: String!
+    name: String!
+    url: String!
+}
+
+enum ReportStatus {
+    pending
+    processing
+    done
+    error
+}
+
+enum ReportFormat {
+    pdf
+    excel
+}
+
+enum ReportKind {
+    report
+    subject
+}
+
+type Report {
+    id: ID!
+    status: ReportStatus!
+    format: ReportFormat!
+    kind: ReportKind!
+    from: Time!
+    to: Time!
+    meta: String!
+    filterTags: [Tag!]!
+    user: User!
+    studentUser: User!
+    file: File
+    createdAt: Time!
+}
+
+type Tag {
+    id: ID!
+    name: String!
+    color: String!
+    createdAt: Time!
+}
+
 input SignInInput {
     email: String!
     password: String!
@@ -90,17 +208,75 @@ type ChatConnection {
     totalCount: Int!
 }
 
+type CompetenceConnection {
+    edges: [Competence]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type EntryConnection {
+    edges: [Entry]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type EventConnection {
+    edges: [Event]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type ReportConnection {
+    edges: [Report]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
 # user filter input
 input UserFilterInput {
     role: [UserRole]
 }
 
+input EntryFilterInput {
+    author: [ID]
+    users: [ID]
+    tags: [ID]
+    competences: [ID]
+    from: Time
+    to: Time
+}
+
+input CompetenceFilterInput {
+    type: [CompetenceType]
+    parents: [ID]
+}
+
+input EventFilterInput {
+    from: Time
+    to: Time
+    showDeleted: Boolean
+}
 
 type Query {
     organisation: Organisation!
 
-    users(limit: Int, offset: Int, filter: UserFilterInput): UserConnection!
+    users(limit: Int, offset: Int, filter: UserFilterInput, search: String): UserConnection!
     user(id: ID!): User!
+
+    competence(id: ID!): Competence!
+    competences(limit: Int, offset: Int, filter: CompetenceFilterInput, search: String): CompetenceConnection!
+
+    entry(id: ID!): Entry!
+    entries(limit: Int, offset: Int, filter: EntryFilterInput, search: String): EntryConnection!
+
+    event(id: ID!): Event!
+    events(limit: Int, offset: Int, filter: EventFilterInput, search: String): EventConnection!
+
+    report(id: ID!): Report!
+    reports(limit: Int, offset: Int): ReportConnection!
+
+    tag(id: ID!): Tag!
+    tags(limit: Int, offset: Int): [Tag!]!
 
     chats(limit: Int, offset: Int): ChatConnection!
 }
@@ -126,6 +302,42 @@ input UpdateUserInput {
     joinedAt: Time
 }
 
+input CreateEntryFileInput {
+    file: ID!
+}
+
+input CreateEntryUserCompetenceInput {
+    level: Int!
+    user: ID!
+    competence: ID!
+}
+
+input CreateEntryInput {
+    date: Time!
+    description: String
+    user: ID!
+    users: [ID!]!
+    tags: [ID!]!
+    files: [CreateEntryFileInput!]!
+    userCompetences: [CreateEntryUserCompetenceInput!]!
+}
+
+input UpdateEntryInput {
+    date: Time
+    description: String
+    user: ID
+}
+
+input CreateReportInput {
+    format: ReportFormat!
+    kind: ReportKind!
+    from: Time!
+    to: Time!
+    meta: String!
+    filterTags: [ID!]!
+    studentUser: ID!
+}
+
 type Mutation {
     signIn(input: SignInInput!): SignInPayload!
     signUp(input: SignUpInput!): SignInPayload!
@@ -134,4 +346,27 @@ type Mutation {
     updateUser(input: UpdateUserInput!): User!
     inviteUser(input: CreateUserInput!): User!
     archiveUser(id: ID!): User!
+
+    createEntry(input: CreateEntryInput!): Entry!
+    updateEntry(id: ID!, input: UpdateEntryInput!): Entry!
+
+    createEntryEvent(entryId: ID!, eventId: ID!): EntryEvent!
+    deleteEntryEvent(id: ID!): Boolean!
+
+    createEntryFile(entryId: ID!, fileId: ID!): EntryFile!
+    deleteEntryFile(id: ID!): Boolean!
+
+    createEntryUser(entryId: ID!, userId: ID!): EntryUser!
+    deleteEntryUser(id: ID!): Boolean!
+
+    createEntryUserCompetence(entryId: ID!, userCompetenceId: ID!, level: Int!): EntryUserCompetence!
+    updateEntryUserCompetence(id: ID!, level: Int!): EntryUserCompetence!
+    deleteEntryUserCompetence(id: ID!): Boolean!
+
+    createEntryTag(entryId: ID!, tagId: ID!): EntryTag!
+    deleteEntryTag(id: ID!): Boolean!
+
+    createReport(input: CreateReportInput!): Report!
+
+    updatePassword(oldPassword: String!, newPassword: String!): Boolean!
 }

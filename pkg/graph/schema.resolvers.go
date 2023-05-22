@@ -11,6 +11,7 @@ import (
 	"example/pkg/graph/model"
 	"example/pkg/jwt"
 	"example/pkg/middleware"
+	"fmt"
 	"strings"
 	"time"
 
@@ -212,6 +213,101 @@ func (r *chatUserResolver) User(ctx context.Context, obj *db.ChatUser) (*db.User
 	}
 
 	return &user, nil
+}
+
+// Type is the resolver for the type field.
+func (r *competenceResolver) Type(ctx context.Context, obj *db.Competence) (db.CompetenceType, error) {
+	panic(fmt.Errorf("not implemented: Type - type"))
+}
+
+// Color is the resolver for the color field.
+func (r *competenceResolver) Color(ctx context.Context, obj *db.Competence) (string, error) {
+	panic(fmt.Errorf("not implemented: Color - color"))
+}
+
+// Description is the resolver for the description field.
+func (r *competenceResolver) Description(ctx context.Context, obj *db.Competence) (*string, error) {
+	panic(fmt.Errorf("not implemented: Description - description"))
+}
+
+// Parents is the resolver for the parents field.
+func (r *competenceResolver) Parents(ctx context.Context, obj *db.Competence) ([]*db.Competence, error) {
+	panic(fmt.Errorf("not implemented: Parents - parents"))
+}
+
+// Description is the resolver for the description field.
+func (r *entryResolver) Description(ctx context.Context, obj *db.Entry) (*string, error) {
+	panic(fmt.Errorf("not implemented: Description - description"))
+}
+
+// Entry is the resolver for the entry field.
+func (r *entryEventResolver) Entry(ctx context.Context, obj *db.EntryEvent) (*db.Entry, error) {
+	panic(fmt.Errorf("not implemented: Entry - entry"))
+}
+
+// Event is the resolver for the event field.
+func (r *entryEventResolver) Event(ctx context.Context, obj *db.EntryEvent) (*db.Event, error) {
+	panic(fmt.Errorf("not implemented: Event - event"))
+}
+
+// Entry is the resolver for the entry field.
+func (r *entryFileResolver) Entry(ctx context.Context, obj *db.EntryFile) (*db.Entry, error) {
+	panic(fmt.Errorf("not implemented: Entry - entry"))
+}
+
+// File is the resolver for the file field.
+func (r *entryFileResolver) File(ctx context.Context, obj *db.EntryFile) (*db.File, error) {
+	panic(fmt.Errorf("not implemented: File - file"))
+}
+
+// Entry is the resolver for the entry field.
+func (r *entryTagResolver) Entry(ctx context.Context, obj *db.EntryTag) (*db.Entry, error) {
+	panic(fmt.Errorf("not implemented: Entry - entry"))
+}
+
+// Tag is the resolver for the tag field.
+func (r *entryTagResolver) Tag(ctx context.Context, obj *db.EntryTag) (*db.Tag, error) {
+	panic(fmt.Errorf("not implemented: Tag - tag"))
+}
+
+// Entry is the resolver for the entry field.
+func (r *entryUserResolver) Entry(ctx context.Context, obj *db.EntryUser) (*db.Entry, error) {
+	panic(fmt.Errorf("not implemented: Entry - entry"))
+}
+
+// User is the resolver for the user field.
+func (r *entryUserResolver) User(ctx context.Context, obj *db.EntryUser) (*db.User, error) {
+	panic(fmt.Errorf("not implemented: User - user"))
+}
+
+// Entry is the resolver for the entry field.
+func (r *entryUserCompetenceResolver) Entry(ctx context.Context, obj *db.EntryUserCompetence) (*db.Entry, error) {
+	panic(fmt.Errorf("not implemented: Entry - entry"))
+}
+
+// User is the resolver for the user field.
+func (r *entryUserCompetenceResolver) User(ctx context.Context, obj *db.EntryUserCompetence) (*db.User, error) {
+	panic(fmt.Errorf("not implemented: User - user"))
+}
+
+// Competence is the resolver for the competence field.
+func (r *entryUserCompetenceResolver) Competence(ctx context.Context, obj *db.EntryUserCompetence) (*db.Competence, error) {
+	panic(fmt.Errorf("not implemented: Competence - competence"))
+}
+
+// Image is the resolver for the image field.
+func (r *eventResolver) Image(ctx context.Context, obj *db.Event) (*db.File, error) {
+	panic(fmt.Errorf("not implemented: Image - image"))
+}
+
+// Recurrence is the resolver for the recurrence field.
+func (r *eventResolver) Recurrence(ctx context.Context, obj *db.Event) (*string, error) {
+	panic(fmt.Errorf("not implemented: Recurrence - recurrence"))
+}
+
+// URL is the resolver for the url field.
+func (r *fileResolver) URL(ctx context.Context, obj *db.File) (string, error) {
+	panic(fmt.Errorf("not implemented: URL - url"))
 }
 
 // SignIn is the resolver for the signIn field.
@@ -440,6 +536,81 @@ func (r *mutationResolver) ArchiveUser(ctx context.Context, id string) (*db.User
 	return &user, nil
 }
 
+// CreateEntry is the resolver for the createEntry field.
+func (r *mutationResolver) CreateEntry(ctx context.Context, input model.CreateEntryInput) (*db.Entry, error) {
+	panic(fmt.Errorf("not implemented: CreateEntry - createEntry"))
+}
+
+// UpdateEntry is the resolver for the updateEntry field.
+func (r *mutationResolver) UpdateEntry(ctx context.Context, id string, input model.UpdateEntryInput) (*db.Entry, error) {
+	panic(fmt.Errorf("not implemented: UpdateEntry - updateEntry"))
+}
+
+// CreateEntryEvent is the resolver for the createEntryEvent field.
+func (r *mutationResolver) CreateEntryEvent(ctx context.Context, entryID string, eventID string) (*db.EntryEvent, error) {
+	panic(fmt.Errorf("not implemented: CreateEntryEvent - createEntryEvent"))
+}
+
+// DeleteEntryEvent is the resolver for the deleteEntryEvent field.
+func (r *mutationResolver) DeleteEntryEvent(ctx context.Context, id string) (bool, error) {
+	panic(fmt.Errorf("not implemented: DeleteEntryEvent - deleteEntryEvent"))
+}
+
+// CreateEntryFile is the resolver for the createEntryFile field.
+func (r *mutationResolver) CreateEntryFile(ctx context.Context, entryID string, fileID string) (*db.EntryFile, error) {
+	panic(fmt.Errorf("not implemented: CreateEntryFile - createEntryFile"))
+}
+
+// DeleteEntryFile is the resolver for the deleteEntryFile field.
+func (r *mutationResolver) DeleteEntryFile(ctx context.Context, id string) (bool, error) {
+	panic(fmt.Errorf("not implemented: DeleteEntryFile - deleteEntryFile"))
+}
+
+// CreateEntryUser is the resolver for the createEntryUser field.
+func (r *mutationResolver) CreateEntryUser(ctx context.Context, entryID string, userID string) (*db.EntryUser, error) {
+	panic(fmt.Errorf("not implemented: CreateEntryUser - createEntryUser"))
+}
+
+// DeleteEntryUser is the resolver for the deleteEntryUser field.
+func (r *mutationResolver) DeleteEntryUser(ctx context.Context, id string) (bool, error) {
+	panic(fmt.Errorf("not implemented: DeleteEntryUser - deleteEntryUser"))
+}
+
+// CreateEntryUserCompetence is the resolver for the createEntryUserCompetence field.
+func (r *mutationResolver) CreateEntryUserCompetence(ctx context.Context, entryID string, userCompetenceID string, level int) (*db.EntryUserCompetence, error) {
+	panic(fmt.Errorf("not implemented: CreateEntryUserCompetence - createEntryUserCompetence"))
+}
+
+// UpdateEntryUserCompetence is the resolver for the updateEntryUserCompetence field.
+func (r *mutationResolver) UpdateEntryUserCompetence(ctx context.Context, id string, level int) (*db.EntryUserCompetence, error) {
+	panic(fmt.Errorf("not implemented: UpdateEntryUserCompetence - updateEntryUserCompetence"))
+}
+
+// DeleteEntryUserCompetence is the resolver for the deleteEntryUserCompetence field.
+func (r *mutationResolver) DeleteEntryUserCompetence(ctx context.Context, id string) (bool, error) {
+	panic(fmt.Errorf("not implemented: DeleteEntryUserCompetence - deleteEntryUserCompetence"))
+}
+
+// CreateEntryTag is the resolver for the createEntryTag field.
+func (r *mutationResolver) CreateEntryTag(ctx context.Context, entryID string, tagID string) (*db.EntryTag, error) {
+	panic(fmt.Errorf("not implemented: CreateEntryTag - createEntryTag"))
+}
+
+// DeleteEntryTag is the resolver for the deleteEntryTag field.
+func (r *mutationResolver) DeleteEntryTag(ctx context.Context, id string) (bool, error) {
+	panic(fmt.Errorf("not implemented: DeleteEntryTag - deleteEntryTag"))
+}
+
+// CreateReport is the resolver for the createReport field.
+func (r *mutationResolver) CreateReport(ctx context.Context, input model.CreateReportInput) (*db.Report, error) {
+	panic(fmt.Errorf("not implemented: CreateReport - createReport"))
+}
+
+// UpdatePassword is the resolver for the updatePassword field.
+func (r *mutationResolver) UpdatePassword(ctx context.Context, oldPassword string, newPassword string) (bool, error) {
+	panic(fmt.Errorf("not implemented: UpdatePassword - updatePassword"))
+}
+
 // Owner is the resolver for the owner field.
 func (r *organisationResolver) Owner(ctx context.Context, obj *db.Organisation) (*db.User, error) {
 	// query the owner of the organisation
@@ -473,7 +644,7 @@ func (r *queryResolver) Organisation(ctx context.Context) (*db.Organisation, err
 }
 
 // Users is the resolver for the users field.
-func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filter *model.UserFilterInput) (*model.UserConnection, error) {
+func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filter *model.UserFilterInput, search *string) (*model.UserConnection, error) {
 	currentUser := middleware.ForContext(ctx)
 	if currentUser == nil {
 		return nil, errors.New("no user found in the context")
@@ -520,6 +691,56 @@ func (r *queryResolver) User(ctx context.Context, id string) (*db.User, error) {
 	return &user, nil
 }
 
+// Competence is the resolver for the competence field.
+func (r *queryResolver) Competence(ctx context.Context, id string) (*db.Competence, error) {
+	panic(fmt.Errorf("not implemented: Competence - competence"))
+}
+
+// Competences is the resolver for the competences field.
+func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int, filter *model.CompetenceFilterInput, search *string) (*model.CompetenceConnection, error) {
+	panic(fmt.Errorf("not implemented: Competences - competences"))
+}
+
+// Entry is the resolver for the entry field.
+func (r *queryResolver) Entry(ctx context.Context, id string) (*db.Entry, error) {
+	panic(fmt.Errorf("not implemented: Entry - entry"))
+}
+
+// Entries is the resolver for the entries field.
+func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, filter *model.EntryFilterInput, search *string) (*model.EntryConnection, error) {
+	panic(fmt.Errorf("not implemented: Entries - entries"))
+}
+
+// Event is the resolver for the event field.
+func (r *queryResolver) Event(ctx context.Context, id string) (*db.Event, error) {
+	panic(fmt.Errorf("not implemented: Event - event"))
+}
+
+// Events is the resolver for the events field.
+func (r *queryResolver) Events(ctx context.Context, limit *int, offset *int, filter *model.EventFilterInput, search *string) (*model.EventConnection, error) {
+	panic(fmt.Errorf("not implemented: Events - events"))
+}
+
+// Report is the resolver for the report field.
+func (r *queryResolver) Report(ctx context.Context, id string) (*db.Report, error) {
+	panic(fmt.Errorf("not implemented: Report - report"))
+}
+
+// Reports is the resolver for the reports field.
+func (r *queryResolver) Reports(ctx context.Context, limit *int, offset *int) (*model.ReportConnection, error) {
+	panic(fmt.Errorf("not implemented: Reports - reports"))
+}
+
+// Tag is the resolver for the tag field.
+func (r *queryResolver) Tag(ctx context.Context, id string) (*db.Tag, error) {
+	panic(fmt.Errorf("not implemented: Tag - tag"))
+}
+
+// Tags is the resolver for the tags field.
+func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) ([]*db.Tag, error) {
+	panic(fmt.Errorf("not implemented: Tags - tags"))
+}
+
 // Chats is the resolver for the chats field.
 func (r *queryResolver) Chats(ctx context.Context, limit *int, offset *int) (*model.ChatConnection, error) {
 	currentUser := middleware.ForContext(ctx)
@@ -551,6 +772,46 @@ func (r *queryResolver) Chats(ctx context.Context, limit *int, offset *int) (*mo
 	}, nil
 }
 
+// Format is the resolver for the format field.
+func (r *reportResolver) Format(ctx context.Context, obj *db.Report) (model.ReportFormat, error) {
+	panic(fmt.Errorf("not implemented: Format - format"))
+}
+
+// Kind is the resolver for the kind field.
+func (r *reportResolver) Kind(ctx context.Context, obj *db.Report) (model.ReportKind, error) {
+	panic(fmt.Errorf("not implemented: Kind - kind"))
+}
+
+// Meta is the resolver for the meta field.
+func (r *reportResolver) Meta(ctx context.Context, obj *db.Report) (string, error) {
+	panic(fmt.Errorf("not implemented: Meta - meta"))
+}
+
+// FilterTags is the resolver for the filterTags field.
+func (r *reportResolver) FilterTags(ctx context.Context, obj *db.Report) ([]*db.Tag, error) {
+	panic(fmt.Errorf("not implemented: FilterTags - filterTags"))
+}
+
+// User is the resolver for the user field.
+func (r *reportResolver) User(ctx context.Context, obj *db.Report) (*db.User, error) {
+	panic(fmt.Errorf("not implemented: User - user"))
+}
+
+// StudentUser is the resolver for the studentUser field.
+func (r *reportResolver) StudentUser(ctx context.Context, obj *db.Report) (*db.User, error) {
+	panic(fmt.Errorf("not implemented: StudentUser - studentUser"))
+}
+
+// File is the resolver for the file field.
+func (r *reportResolver) File(ctx context.Context, obj *db.Report) (*db.File, error) {
+	panic(fmt.Errorf("not implemented: File - file"))
+}
+
+// Color is the resolver for the color field.
+func (r *tagResolver) Color(ctx context.Context, obj *db.Tag) (string, error) {
+	panic(fmt.Errorf("not implemented: Color - color"))
+}
+
 // DeletedAt is the resolver for the deletedAt field.
 func (r *userResolver) DeletedAt(ctx context.Context, obj *db.User) (*time.Time, error) {
 	if obj.DeletedAt.Valid {
@@ -569,6 +830,35 @@ func (r *Resolver) ChatMessage() ChatMessageResolver { return &chatMessageResolv
 // ChatUser returns ChatUserResolver implementation.
 func (r *Resolver) ChatUser() ChatUserResolver { return &chatUserResolver{r} }
 
+// Competence returns CompetenceResolver implementation.
+func (r *Resolver) Competence() CompetenceResolver { return &competenceResolver{r} }
+
+// Entry returns EntryResolver implementation.
+func (r *Resolver) Entry() EntryResolver { return &entryResolver{r} }
+
+// EntryEvent returns EntryEventResolver implementation.
+func (r *Resolver) EntryEvent() EntryEventResolver { return &entryEventResolver{r} }
+
+// EntryFile returns EntryFileResolver implementation.
+func (r *Resolver) EntryFile() EntryFileResolver { return &entryFileResolver{r} }
+
+// EntryTag returns EntryTagResolver implementation.
+func (r *Resolver) EntryTag() EntryTagResolver { return &entryTagResolver{r} }
+
+// EntryUser returns EntryUserResolver implementation.
+func (r *Resolver) EntryUser() EntryUserResolver { return &entryUserResolver{r} }
+
+// EntryUserCompetence returns EntryUserCompetenceResolver implementation.
+func (r *Resolver) EntryUserCompetence() EntryUserCompetenceResolver {
+	return &entryUserCompetenceResolver{r}
+}
+
+// Event returns EventResolver implementation.
+func (r *Resolver) Event() EventResolver { return &eventResolver{r} }
+
+// File returns FileResolver implementation.
+func (r *Resolver) File() FileResolver { return &fileResolver{r} }
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
@@ -578,15 +868,32 @@ func (r *Resolver) Organisation() OrganisationResolver { return &organisationRes
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+// Report returns ReportResolver implementation.
+func (r *Resolver) Report() ReportResolver { return &reportResolver{r} }
+
+// Tag returns TagResolver implementation.
+func (r *Resolver) Tag() TagResolver { return &tagResolver{r} }
+
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
 type chatResolver struct{ *Resolver }
 type chatMessageResolver struct{ *Resolver }
 type chatUserResolver struct{ *Resolver }
+type competenceResolver struct{ *Resolver }
+type entryResolver struct{ *Resolver }
+type entryEventResolver struct{ *Resolver }
+type entryFileResolver struct{ *Resolver }
+type entryTagResolver struct{ *Resolver }
+type entryUserResolver struct{ *Resolver }
+type entryUserCompetenceResolver struct{ *Resolver }
+type eventResolver struct{ *Resolver }
+type fileResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type organisationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type reportResolver struct{ *Resolver }
+type tagResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }
 
 func isStringInArray(s string, a []string) bool {

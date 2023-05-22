@@ -4,6 +4,9 @@ package model
 
 import (
 	"example/pkg/db"
+	"fmt"
+	"io"
+	"strconv"
 	"time"
 )
 
@@ -11,6 +14,47 @@ type ChatConnection struct {
 	Edges      []*db.Chat `json:"edges,omitempty"`
 	PageInfo   *PageInfo  `json:"pageInfo"`
 	TotalCount int        `json:"totalCount"`
+}
+
+type CompetenceConnection struct {
+	Edges      []*db.Competence `json:"edges,omitempty"`
+	PageInfo   *PageInfo        `json:"pageInfo"`
+	TotalCount int              `json:"totalCount"`
+}
+
+type CompetenceFilterInput struct {
+	Type    []*db.CompetenceType `json:"type,omitempty"`
+	Parents []*string            `json:"parents,omitempty"`
+}
+
+type CreateEntryFileInput struct {
+	File string `json:"file"`
+}
+
+type CreateEntryInput struct {
+	Date            time.Time                         `json:"date"`
+	Description     *string                           `json:"description,omitempty"`
+	User            string                            `json:"user"`
+	Users           []string                          `json:"users"`
+	Tags            []string                          `json:"tags"`
+	Files           []*CreateEntryFileInput           `json:"files"`
+	UserCompetences []*CreateEntryUserCompetenceInput `json:"userCompetences"`
+}
+
+type CreateEntryUserCompetenceInput struct {
+	Level      int    `json:"level"`
+	User       string `json:"user"`
+	Competence string `json:"competence"`
+}
+
+type CreateReportInput struct {
+	Format      ReportFormat `json:"format"`
+	Kind        ReportKind   `json:"kind"`
+	From        time.Time    `json:"from"`
+	To          time.Time    `json:"to"`
+	Meta        string       `json:"meta"`
+	FilterTags  []string     `json:"filterTags"`
+	StudentUser string       `json:"studentUser"`
 }
 
 type CreateUserInput struct {
@@ -23,6 +67,33 @@ type CreateUserInput struct {
 	JoinedAt  *time.Time  `json:"joinedAt,omitempty"`
 }
 
+type EntryConnection struct {
+	Edges      []*db.Entry `json:"edges,omitempty"`
+	PageInfo   *PageInfo   `json:"pageInfo"`
+	TotalCount int         `json:"totalCount"`
+}
+
+type EntryFilterInput struct {
+	Author      []*string  `json:"author,omitempty"`
+	Users       []*string  `json:"users,omitempty"`
+	Tags        []*string  `json:"tags,omitempty"`
+	Competences []*string  `json:"competences,omitempty"`
+	From        *time.Time `json:"from,omitempty"`
+	To          *time.Time `json:"to,omitempty"`
+}
+
+type EventConnection struct {
+	Edges      []*db.Event `json:"edges,omitempty"`
+	PageInfo   *PageInfo   `json:"pageInfo"`
+	TotalCount int         `json:"totalCount"`
+}
+
+type EventFilterInput struct {
+	From        *time.Time `json:"from,omitempty"`
+	To          *time.Time `json:"to,omitempty"`
+	ShowDeleted *bool      `json:"showDeleted,omitempty"`
+}
+
 type OrganisationConnection struct {
 	Edges      []*db.Organisation `json:"edges,omitempty"`
 	PageInfo   *PageInfo          `json:"pageInfo"`
@@ -33,6 +104,12 @@ type PageInfo struct {
 	HasNextPage     bool `json:"hasNextPage"`
 	HasPreviousPage bool `json:"hasPreviousPage"`
 	CurrentPage     int  `json:"currentPage"`
+}
+
+type ReportConnection struct {
+	Edges      []*db.Report `json:"edges,omitempty"`
+	PageInfo   *PageInfo    `json:"pageInfo"`
+	TotalCount int          `json:"totalCount"`
 }
 
 type SignInInput struct {
@@ -48,6 +125,12 @@ type SignUpInput struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type UpdateEntryInput struct {
+	Date        *time.Time `json:"date,omitempty"`
+	Description *string    `json:"description,omitempty"`
+	User        *string    `json:"user,omitempty"`
 }
 
 type UpdateUserInput struct {
@@ -68,4 +151,86 @@ type UserConnection struct {
 
 type UserFilterInput struct {
 	Role []*db.UserRole `json:"role,omitempty"`
+}
+
+type ReportFormat string
+
+const (
+	ReportFormatPDF   ReportFormat = "pdf"
+	ReportFormatExcel ReportFormat = "excel"
+)
+
+var AllReportFormat = []ReportFormat{
+	ReportFormatPDF,
+	ReportFormatExcel,
+}
+
+func (e ReportFormat) IsValid() bool {
+	switch e {
+	case ReportFormatPDF, ReportFormatExcel:
+		return true
+	}
+	return false
+}
+
+func (e ReportFormat) String() string {
+	return string(e)
+}
+
+func (e *ReportFormat) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ReportFormat(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ReportFormat", str)
+	}
+	return nil
+}
+
+func (e ReportFormat) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ReportKind string
+
+const (
+	ReportKindReport  ReportKind = "report"
+	ReportKindSubject ReportKind = "subject"
+)
+
+var AllReportKind = []ReportKind{
+	ReportKindReport,
+	ReportKindSubject,
+}
+
+func (e ReportKind) IsValid() bool {
+	switch e {
+	case ReportKindReport, ReportKindSubject:
+		return true
+	}
+	return false
+}
+
+func (e ReportKind) String() string {
+	return string(e)
+}
+
+func (e *ReportKind) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ReportKind(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ReportKind", str)
+	}
+	return nil
+}
+
+func (e ReportKind) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
