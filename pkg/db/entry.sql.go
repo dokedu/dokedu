@@ -7,12 +7,55 @@ package db
 
 import (
 	"context"
+	"encoding/json"
+	"time"
 )
+
+const createEntry = `-- name: CreateEntry :one
+INSERT INTO entries
+(organisation_id,
+ date,
+ body,
+ user_id)
+VALUES ($1,
+        $4,
+        $2,
+        $3)
+RETURNING id, date, body, user_id, created_at, deleted_at, organisation_id
+`
+
+type CreateEntryParams struct {
+	OrganisationID string          `json:"organisation_id"`
+	Body           json.RawMessage `json:"body"`
+	UserID         string          `json:"user_id"`
+	Date           time.Time       `json:"date"`
+}
+
+func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry, error) {
+	row := q.db.QueryRowContext(ctx, createEntry,
+		arg.OrganisationID,
+		arg.Body,
+		arg.UserID,
+		arg.Date,
+	)
+	var i Entry
+	err := row.Scan(
+		&i.ID,
+		&i.Date,
+		&i.Body,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.OrganisationID,
+	)
+	return i, err
+}
 
 const getEntry = `-- name: GetEntry :one
 SELECT id, date, body, user_id, created_at, deleted_at, organisation_id
 FROM entries
-WHERE id = $1 AND organisation_id = $2
+WHERE id = $1
+  AND organisation_id = $2
 `
 
 type GetEntryParams struct {
@@ -39,6 +82,7 @@ const listEntries = `-- name: ListEntries :many
 SELECT id, date, body, user_id, created_at, deleted_at, organisation_id
 FROM entries
 WHERE entries.organisation_id = $1
+ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
 `
 

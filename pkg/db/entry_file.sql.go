@@ -9,10 +9,42 @@ import (
 	"context"
 )
 
+const createEntryFile = `-- name: CreateEntryFile :one
+INSERT INTO entry_files (organisation_id,
+                         entry_id,
+                         file_id,
+                         created_at)
+VALUES ($1,
+        $2,
+        $3,
+        now()) RETURNING id, entry_id, file_id, created_at, deleted_at, organisation_id
+`
+
+type CreateEntryFileParams struct {
+	OrganisationID string `json:"organisation_id"`
+	EntryID        string `json:"entry_id"`
+	FileID         string `json:"file_id"`
+}
+
+func (q *Queries) CreateEntryFile(ctx context.Context, arg CreateEntryFileParams) (EntryFile, error) {
+	row := q.db.QueryRowContext(ctx, createEntryFile, arg.OrganisationID, arg.EntryID, arg.FileID)
+	var i EntryFile
+	err := row.Scan(
+		&i.ID,
+		&i.EntryID,
+		&i.FileID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.OrganisationID,
+	)
+	return i, err
+}
+
 const getEntryFiles = `-- name: GetEntryFiles :many
 SELECT id, entry_id, file_id, created_at, deleted_at, organisation_id
 FROM entry_files
-WHERE organisation_id = $1 AND entry_id = $2
+WHERE organisation_id = $1
+  AND entry_id = $2
 `
 
 type GetEntryFilesParams struct {

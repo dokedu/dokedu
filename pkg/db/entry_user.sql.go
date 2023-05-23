@@ -9,10 +9,37 @@ import (
 	"context"
 )
 
+const createEntryUser = `-- name: CreateEntryUser :one
+INSERT INTO entry_users (organisation_id, entry_id, user_id)
+VALUES ($1, $2, $3)
+RETURNING id, entry_id, user_id, created_at, deleted_at, organisation_id
+`
+
+type CreateEntryUserParams struct {
+	OrganisationID string `json:"organisation_id"`
+	EntryID        string `json:"entry_id"`
+	UserID         string `json:"user_id"`
+}
+
+func (q *Queries) CreateEntryUser(ctx context.Context, arg CreateEntryUserParams) (EntryUser, error) {
+	row := q.db.QueryRowContext(ctx, createEntryUser, arg.OrganisationID, arg.EntryID, arg.UserID)
+	var i EntryUser
+	err := row.Scan(
+		&i.ID,
+		&i.EntryID,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.OrganisationID,
+	)
+	return i, err
+}
+
 const getEntryUsers = `-- name: GetEntryUsers :many
 SELECT id, entry_id, user_id, created_at, deleted_at, organisation_id
 FROM entry_users
-WHERE organisation_id = $1 AND entry_id = $2
+WHERE organisation_id = $1
+  AND entry_id = $2
 `
 
 type GetEntryUsersParams struct {

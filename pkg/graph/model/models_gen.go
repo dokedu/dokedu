@@ -29,19 +29,18 @@ type CreateEntryFileInput struct {
 }
 
 type CreateEntryInput struct {
-	Date            time.Time                         `json:"date"`
-	Body            *string                           `json:"body,omitempty"`
-	User            string                            `json:"user"`
-	Users           []string                          `json:"users"`
-	Tags            []string                          `json:"tags"`
-	Files           []*CreateEntryFileInput           `json:"files"`
-	UserCompetences []*CreateEntryUserCompetenceInput `json:"userCompetences"`
+	Date            string                            `json:"date"`
+	Body            string                            `json:"body"`
+	UserIds         []*string                         `json:"userIds,omitempty"`
+	TagIds          []*string                         `json:"tagIds,omitempty"`
+	FileIds         []*string                         `json:"fileIds,omitempty"`
+	UserCompetences []*CreateEntryUserCompetenceInput `json:"userCompetences,omitempty"`
 }
 
 type CreateEntryUserCompetenceInput struct {
-	Level      int    `json:"level"`
-	User       string `json:"user"`
-	Competence string `json:"competence"`
+	Level        int    `json:"level"`
+	UserID       string `json:"userId"`
+	CompetenceID string `json:"competenceId"`
 }
 
 type CreateReportInput struct {

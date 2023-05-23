@@ -9,6 +9,42 @@ import (
 	"context"
 )
 
+const createEntryUserCompetence = `-- name: CreateEntryUserCompetence :one
+INSERT INTO entry_user_competences (organisation_id, entry_id, user_id, competence_id, level, created_at)
+VALUES ($1, $2, $3, $4, $5, now())
+RETURNING id, level, user_id, entry_id, competence_id, created_at, deleted_at, organisation_id
+`
+
+type CreateEntryUserCompetenceParams struct {
+	OrganisationID string `json:"organisation_id"`
+	EntryID        string `json:"entry_id"`
+	UserID         string `json:"user_id"`
+	CompetenceID   string `json:"competence_id"`
+	Level          int32  `json:"level"`
+}
+
+func (q *Queries) CreateEntryUserCompetence(ctx context.Context, arg CreateEntryUserCompetenceParams) (EntryUserCompetence, error) {
+	row := q.db.QueryRowContext(ctx, createEntryUserCompetence,
+		arg.OrganisationID,
+		arg.EntryID,
+		arg.UserID,
+		arg.CompetenceID,
+		arg.Level,
+	)
+	var i EntryUserCompetence
+	err := row.Scan(
+		&i.ID,
+		&i.Level,
+		&i.UserID,
+		&i.EntryID,
+		&i.CompetenceID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.OrganisationID,
+	)
+	return i, err
+}
+
 const getEntryUserCompetences = `-- name: GetEntryUserCompetences :many
 SELECT id, level, user_id, entry_id, competence_id, created_at, deleted_at, organisation_id
 FROM entry_user_competences

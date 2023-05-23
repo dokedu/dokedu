@@ -9,6 +9,32 @@ import (
 	"context"
 )
 
+const createEntryTag = `-- name: CreateEntryTag :one
+INSERT INTO entry_tags (organisation_id, entry_id, tag_id)
+VALUES ($1, $2, $3)
+RETURNING id, entry_id, tag_id, organisation_id, created_at, deleted_at
+`
+
+type CreateEntryTagParams struct {
+	OrganisationID string `json:"organisation_id"`
+	EntryID        string `json:"entry_id"`
+	TagID          string `json:"tag_id"`
+}
+
+func (q *Queries) CreateEntryTag(ctx context.Context, arg CreateEntryTagParams) (EntryTag, error) {
+	row := q.db.QueryRowContext(ctx, createEntryTag, arg.OrganisationID, arg.EntryID, arg.TagID)
+	var i EntryTag
+	err := row.Scan(
+		&i.ID,
+		&i.EntryID,
+		&i.TagID,
+		&i.OrganisationID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const getEntryTags = `-- name: GetEntryTags :many
 SELECT id, entry_id, tag_id, organisation_id, created_at, deleted_at
 FROM entry_tags

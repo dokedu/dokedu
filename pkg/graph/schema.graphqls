@@ -73,6 +73,7 @@ type Entry {
     body: String
     createdAt: Time!
 
+    user: User!
     entryEvents: [EntryEvent!]!
     entryFiles: [EntryFile!]!
     entryTags: [EntryTag!]!
@@ -313,18 +314,17 @@ input CreateEntryFileInput {
 
 input CreateEntryUserCompetenceInput {
     level: Int!
-    user: ID!
-    competence: ID!
+    userId: ID!
+    competenceId: ID!
 }
 
 input CreateEntryInput {
-    date: Time!
-    body: String
-    user: ID!
-    users: [ID!]!
-    tags: [ID!]!
-    files: [CreateEntryFileInput!]!
-    userCompetences: [CreateEntryUserCompetenceInput!]!
+    date: String!
+    body: String!
+    userIds: [ID]
+    tagIds: [ID]
+    fileIds: [ID]
+    userCompetences: [CreateEntryUserCompetenceInput]
 }
 
 input UpdateEntryInput {

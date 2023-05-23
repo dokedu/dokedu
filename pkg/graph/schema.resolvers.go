@@ -279,6 +279,26 @@ func (r *entryResolver) Body(ctx context.Context, obj *db.Entry) (*string, error
 	return &body, nil
 }
 
+// User is the resolver for the user field.
+func (r *entryResolver) User(ctx context.Context, obj *db.Entry) (*db.User, error) {
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	user, err := r.DB.GetUser(ctx, db.GetUserParams{
+		ID:             obj.UserID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 // EntryEvents is the resolver for the entryEvents field.
 func (r *entryResolver) EntryEvents(ctx context.Context, obj *db.Entry) ([]*db.EntryEvent, error) {
 	currentUser := middleware.ForContext(ctx)
@@ -879,7 +899,78 @@ func (r *mutationResolver) ArchiveUser(ctx context.Context, id string) (*db.User
 
 // CreateEntry is the resolver for the createEntry field.
 func (r *mutationResolver) CreateEntry(ctx context.Context, input model.CreateEntryInput) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: CreateEntry - createEntry"))
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	jsonBody, err := json.Marshal(input.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// parse input.Date to 2006-01-02 format
+	date, err := time.Parse("2006-01-02", input.Date)
+
+	if err != nil {
+		return nil, err
+	}
+
+	entry, err := r.DB.CreateEntry(ctx, db.CreateEntryParams{
+		OrganisationID: currentUser.OrganisationID,
+		Date:           date,
+		Body:           jsonBody,
+		UserID:         currentUser.ID,
+	})
+
+	if input.UserIds != nil {
+		for _, userId := range input.UserIds {
+			_, err = r.DB.CreateEntryUser(ctx, db.CreateEntryUserParams{
+				EntryID:        entry.ID,
+				UserID:         *userId,
+				OrganisationID: currentUser.OrganisationID,
+			})
+		}
+	}
+
+	if input.TagIds != nil {
+		for _, tagId := range input.TagIds {
+			_, err = r.DB.CreateEntryTag(ctx, db.CreateEntryTagParams{
+				EntryID:        entry.ID,
+				TagID:          *tagId,
+				OrganisationID: currentUser.OrganisationID,
+			})
+		}
+	}
+
+	if input.FileIds != nil {
+		for _, fileId := range input.FileIds {
+			_, err = r.DB.CreateEntryFile(ctx, db.CreateEntryFileParams{
+				EntryID:        entry.ID,
+				FileID:         *fileId,
+				OrganisationID: currentUser.OrganisationID,
+			})
+		}
+	}
+
+	if input.UserCompetences != nil {
+		for _, userCompetence := range input.UserCompetences {
+			_, err = r.DB.CreateEntryUserCompetence(ctx, db.CreateEntryUserCompetenceParams{
+				EntryID:        entry.ID,
+				UserID:         userCompetence.UserID,
+				CompetenceID:   userCompetence.CompetenceID,
+				OrganisationID: currentUser.OrganisationID,
+			})
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &entry, nil
 }
 
 // UpdateEntry is the resolver for the updateEntry field.
