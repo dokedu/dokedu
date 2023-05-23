@@ -75,7 +75,7 @@ const apps: App[] = [
       {
         icon: "📑️",
         name: "Students",
-        route: "home"
+        route: "record-students"
       },
       {
         icon: "📑️",

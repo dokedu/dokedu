@@ -1,105 +1,379 @@
-# The @specifiedBy built-in directive is used within the type system definition
-# language to provide a scalar specification
-# URL for specifying the behavior of
-# custom scalar types.
-
 directive @specifiedBy(url: String!) on SCALAR
 
+type Chat {
+    id: ID!
+    name: String
+    chatUsers: [ChatUser!]!
+    chatMessages: [ChatMessage!]!
+}
+
+type ChatConnection {
+    edges: [Chat]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type ChatMessage {
+    id: ID!
+    chat: Chat!
+    user: User!
+    message: String!
+    createdAt: Time!
+}
+
+type ChatUser {
+    id: ID!
+    chat: Chat!
+    user: User!
+}
+
+type Competence {
+    id: ID!
+    name: String!
+    type: CompetenceType!
+    grades: [Int!]!
+    color: String!
+    parents: [Competence!]!
+    createdAt: Time!
+}
+
+type CompetenceConnection {
+    edges: [Competence]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+input CompetenceFilterInput {
+    type: [CompetenceType]
+    parents: [ID]
+}
+
+enum CompetenceType {
+    subject
+    group
+    competence
+}
+
+input CreateEntryFileInput {
+    file: ID!
+}
+
+input CreateEntryInput {
+    date: Time!
+    body: String
+    userIds: [ID!]!
+    tagIds: [ID!]!
+    fileIds: [ID!]!
+    userCompetences: [CreateEntryUserCompetenceInput!]!
+}
+
+input CreateEntryUserCompetenceInput {
+    level: Int!
+    userId: ID!
+    competenceId: ID!
+}
+
+input CreateReportInput {
+    format: ReportFormat!
+    kind: ReportKind!
+    from: Time!
+    to: Time!
+    meta: String!
+    filterTags: [ID!]!
+    studentUser: ID!
+}
+
 input CreateUserInput {
-  firstName: String!
-  lastName: String!
-  email: String!
-  role: UserRole!
-  birthday: Time
-  leftAt: Time
-  joinedAt: Time
+    firstName: String!
+    lastName: String!
+    email: String!
+    role: UserRole!
+    birthday: Time
+    leftAt: Time
+    joinedAt: Time
+}
+
+type Entry {
+    id: ID!
+    date: Time!
+    body: String
+    user: User!
+    createdAt: Time!
+    entryEvents: [EntryEvent!]!
+    entryFiles: [EntryFile!]!
+    entryTags: [EntryTag!]!
+    entryUserCompetences: [EntryUserCompetence!]!
+    entryUsers: [EntryUser!]!
+}
+
+type EntryConnection {
+    edges: [Entry]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type EntryEvent {
+    id: ID!
+    entry: Entry!
+    event: Event!
+    createdAt: Time!
+}
+
+type EntryFile {
+    id: ID!
+    entry: Entry!
+    file: File!
+    createdAt: Time!
+}
+
+input EntryFilterInput {
+    author: [ID]
+    users: [ID]
+    tags: [ID]
+    competences: [ID]
+    from: Time
+    to: Time
+}
+
+type EntryTag {
+    id: ID!
+    entry: Entry!
+    tag: Tag!
+    createdAt: Time!
+}
+
+type EntryUser {
+    id: ID!
+    entry: Entry!
+    user: User!
+    createdAt: Time!
+}
+
+type EntryUserCompetence {
+    id: ID!
+    level: Int!
+    entry: Entry!
+    user: User!
+    competence: Competence!
+    createdAt: Time!
+}
+
+type Event {
+    id: ID!
+    title: String!
+    image: File
+    body: String
+    startsAt: Time!
+    endsAt: Time!
+    recurrence: [String]
+    createdAt: Time!
+}
+
+type EventConnection {
+    edges: [Event]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+input EventFilterInput {
+    from: Time
+    to: Time
+    showDeleted: Boolean
+}
+
+type File {
+    id: ID!
+    bucket: String!
+    name: String!
+    url: String!
 }
 
 type Mutation {
-  signIn(input: SignInInput!): SignInPayload!
-  signUp(input: SignUpInput!): SignInPayload!
-  createUser(input: CreateUserInput!): User!
-  updateUser(input: UpdateUserInput!): User!
-  inviteUser(input: CreateUserInput!): User!
-  archiveUser(id: ID!): User!
+    signIn(input: SignInInput!): SignInPayload!
+    signUp(input: SignUpInput!): SignInPayload!
+    createUser(input: CreateUserInput!): User!
+    updateUser(input: UpdateUserInput!): User!
+    inviteUser(input: CreateUserInput!): User!
+    archiveUser(id: ID!): User!
+    createEntry(input: CreateEntryInput!): Entry!
+    updateEntry(id: ID!, input: UpdateEntryInput!): Entry!
+    createEntryEvent(entryId: ID!, eventId: ID!): EntryEvent!
+    deleteEntryEvent(id: ID!): Boolean!
+    createEntryFile(entryId: ID!, fileId: ID!): EntryFile!
+    deleteEntryFile(id: ID!): Boolean!
+    createEntryUser(entryId: ID!, userId: ID!): EntryUser!
+    deleteEntryUser(id: ID!): Boolean!
+    createEntryUserCompetence(
+        entryId: ID!
+        userCompetenceId: ID!
+        level: Int!
+    ): EntryUserCompetence!
+    updateEntryUserCompetence(id: ID!, level: Int!): EntryUserCompetence!
+    deleteEntryUserCompetence(id: ID!): Boolean!
+    createEntryTag(entryId: ID!, tagId: ID!): EntryTag!
+    deleteEntryTag(id: ID!): Boolean!
+    createReport(input: CreateReportInput!): Report!
+    updatePassword(oldPassword: String!, newPassword: String!): Boolean!
 }
 
 type Organisation {
-  id: ID!
-  name: String!
-  owner: User!
+    id: ID!
+    name: String!
+    owner: User!
 }
 
 type OrganisationConnection {
-  edges: [Organisation]
-  pageInfo: PageInfo!
-  totalCount: Int!
+    edges: [Organisation]
+    pageInfo: PageInfo!
+    totalCount: Int!
 }
 
 type PageInfo {
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-  currentPage: Int!
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    currentPage: Int!
 }
 
 type Query {
-  organisation: Organisation!
-  users(limit: Int, offset: Int, filter: UserFilterInput): UserConnection!
-  user(id: ID!): User!
+    organisation: Organisation!
+    users(
+        limit: Int
+        offset: Int
+        filter: UserFilterInput
+        search: String
+    ): UserConnection!
+    user(id: ID!): User!
+    competence(id: ID!): Competence!
+    competences(
+        limit: Int
+        offset: Int
+        filter: CompetenceFilterInput
+        search: String
+    ): CompetenceConnection!
+    entry(id: ID!): Entry!
+    entries(
+        limit: Int
+        offset: Int
+        filter: EntryFilterInput
+        search: String
+    ): EntryConnection!
+    event(id: ID!): Event!
+    events(
+        limit: Int
+        offset: Int
+        filter: EventFilterInput
+        search: String
+    ): EventConnection!
+    report(id: ID!): Report!
+    reports(limit: Int, offset: Int): ReportConnection!
+    tag(id: ID!): Tag!
+    tags(limit: Int, offset: Int): [Tag!]!
+    chats(limit: Int, offset: Int): ChatConnection!
+}
+
+type Report {
+    id: ID!
+    status: ReportStatus!
+    format: ReportFormat!
+    kind: ReportKind!
+    from: Time!
+    to: Time!
+    meta: String!
+    filterTags: [ID!]!
+    user: User!
+    studentUser: User!
+    file: File
+    createdAt: Time!
+}
+
+type ReportConnection {
+    edges: [Report]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+enum ReportFormat {
+    pdf
+    docx
+}
+
+enum ReportKind {
+    report
+    subject
+}
+
+enum ReportStatus {
+    pending
+    processing
+    done
+    error
 }
 
 input SignInInput {
-  email: String!
-  password: String!
+    email: String!
+    password: String!
 }
 
 type SignInPayload {
-  token: String!
+    token: String!
 }
 
 input SignUpInput {
-  name: String!
-  email: String!
-  password: String!
+    name: String!
+    email: String!
+    password: String!
+}
+
+type Tag {
+    id: ID!
+    name: String!
+    color: String!
+    createdAt: Time!
 }
 
 scalar Time
 
+input UpdateEntryInput {
+    date: Time
+    body: String
+    user: ID
+}
+
 input UpdateUserInput {
-  id: ID!
-  firstName: String!
-  lastName: String!
-  email: String
-  birthday: Time
-  leftAt: Time
-  joinedAt: Time
+    id: ID!
+    firstName: String!
+    lastName: String!
+    email: String
+    birthday: Time
+    leftAt: Time
+    joinedAt: Time
 }
 
 type User {
-  id: ID!
-  email: String
-  role: UserRole!
-  firstName: String!
-  lastName: String!
-  createdAt: Time!
-  deletedAt: Time
+    id: ID!
+    email: String
+    role: UserRole!
+    firstName: String!
+    lastName: String!
+    createdAt: Time!
+    deletedAt: Time
 }
 
 type UserConnection {
-  edges: [User]
-  pageInfo: PageInfo!
-  totalCount: Int!
+    edges: [User]
+    pageInfo: PageInfo!
+    totalCount: Int!
 }
 
 input UserFilterInput {
-  role: [UserRole]
+    role: [UserRole]
 }
 
 enum UserRole {
-  owner
-  admin
-  teacher
-  educator
-  student
+    owner
+    admin
+    teacher
+    educator
+    student
 }
 
