@@ -279,6 +279,132 @@ func (r *entryResolver) Body(ctx context.Context, obj *db.Entry) (*string, error
 	return &body, nil
 }
 
+// EntryEvents is the resolver for the entryEvents field.
+func (r *entryResolver) EntryEvents(ctx context.Context, obj *db.Entry) ([]*db.EntryEvent, error) {
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	entryEvents, err := r.DB.GetEntryEvents(ctx, db.GetEntryEventsParams{
+		OrganisationID: currentUser.OrganisationID,
+		EntryID:        obj.ID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	var entryEventsPtr []*db.EntryEvent
+	for _, entryEvent := range entryEvents {
+		// TODO: might not work as expected
+		entryEventsPtr = append(entryEventsPtr, &entryEvent)
+	}
+
+	return entryEventsPtr, nil
+}
+
+// EntryFiles is the resolver for the entryFiles field.
+func (r *entryResolver) EntryFiles(ctx context.Context, obj *db.Entry) ([]*db.EntryFile, error) {
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	entryFiles, err := r.DB.GetEntryFiles(ctx, db.GetEntryFilesParams{
+		OrganisationID: currentUser.OrganisationID,
+		EntryID:        obj.ID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	var entryFilesPtr []*db.EntryFile
+	for _, entryFile := range entryFiles {
+		entryFilesPtr = append(entryFilesPtr, &entryFile)
+	}
+
+	return entryFilesPtr, nil
+}
+
+// EntryTags is the resolver for the entryTags field.
+func (r *entryResolver) EntryTags(ctx context.Context, obj *db.Entry) ([]*db.EntryTag, error) {
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	entryTags, err := r.DB.GetEntryTags(ctx, db.GetEntryTagsParams{
+		OrganisationID: currentUser.OrganisationID,
+		EntryID:        obj.ID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	var entryTagsPtr []*db.EntryTag
+	for _, entryTag := range entryTags {
+		entryTagsPtr = append(entryTagsPtr, &entryTag)
+	}
+
+	return entryTagsPtr, nil
+}
+
+// EntryUserCompetences is the resolver for the entryUserCompetences field.
+func (r *entryResolver) EntryUserCompetences(ctx context.Context, obj *db.Entry) ([]*db.EntryUserCompetence, error) {
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	entryUserCompetences, err := r.DB.GetEntryUserCompetences(ctx, db.GetEntryUserCompetencesParams{
+		OrganisationID: currentUser.OrganisationID,
+		EntryID:        obj.ID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	var entryUserCompetencesPtr []*db.EntryUserCompetence
+	for _, entryUserCompetence := range entryUserCompetences {
+		entryUserCompetencesPtr = append(entryUserCompetencesPtr, &entryUserCompetence)
+	}
+
+	return entryUserCompetencesPtr, nil
+}
+
+// EntryUsers is the resolver for the entryUsers field.
+func (r *entryResolver) EntryUsers(ctx context.Context, obj *db.Entry) ([]*db.EntryUser, error) {
+	currentUser := middleware.ForContext(ctx)
+
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	entryUsers, err := r.DB.GetEntryUsers(ctx, db.GetEntryUsersParams{
+		OrganisationID: currentUser.OrganisationID,
+		EntryID:        obj.ID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	var entryUsersPtr []*db.EntryUser
+	for _, entryUser := range entryUsers {
+		entryUsersPtr = append(entryUsersPtr, &entryUser)
+	}
+
+	return entryUsersPtr, nil
+}
+
 // Entry is the resolver for the entry field.
 func (r *entryEventResolver) Entry(ctx context.Context, obj *db.EntryEvent) (*db.Entry, error) {
 	currentUser := middleware.ForContext(ctx)

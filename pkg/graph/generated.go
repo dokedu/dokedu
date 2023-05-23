@@ -107,10 +107,15 @@ type ComplexityRoot struct {
 	}
 
 	Entry struct {
-		Body      func(childComplexity int) int
-		CreatedAt func(childComplexity int) int
-		Date      func(childComplexity int) int
-		ID        func(childComplexity int) int
+		Body                 func(childComplexity int) int
+		CreatedAt            func(childComplexity int) int
+		Date                 func(childComplexity int) int
+		EntryEvents          func(childComplexity int) int
+		EntryFiles           func(childComplexity int) int
+		EntryTags            func(childComplexity int) int
+		EntryUserCompetences func(childComplexity int) int
+		EntryUsers           func(childComplexity int) int
+		ID                   func(childComplexity int) int
 	}
 
 	EntryConnection struct {
@@ -309,6 +314,12 @@ type CompetenceResolver interface {
 }
 type EntryResolver interface {
 	Body(ctx context.Context, obj *db.Entry) (*string, error)
+
+	EntryEvents(ctx context.Context, obj *db.Entry) ([]*db.EntryEvent, error)
+	EntryFiles(ctx context.Context, obj *db.Entry) ([]*db.EntryFile, error)
+	EntryTags(ctx context.Context, obj *db.Entry) ([]*db.EntryTag, error)
+	EntryUserCompetences(ctx context.Context, obj *db.Entry) ([]*db.EntryUserCompetence, error)
+	EntryUsers(ctx context.Context, obj *db.Entry) ([]*db.EntryUser, error)
 }
 type EntryEventResolver interface {
 	Entry(ctx context.Context, obj *db.EntryEvent) (*db.Entry, error)
@@ -603,6 +614,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Entry.Date(childComplexity), true
+
+	case "Entry.entryEvents":
+		if e.complexity.Entry.EntryEvents == nil {
+			break
+		}
+
+		return e.complexity.Entry.EntryEvents(childComplexity), true
+
+	case "Entry.entryFiles":
+		if e.complexity.Entry.EntryFiles == nil {
+			break
+		}
+
+		return e.complexity.Entry.EntryFiles(childComplexity), true
+
+	case "Entry.entryTags":
+		if e.complexity.Entry.EntryTags == nil {
+			break
+		}
+
+		return e.complexity.Entry.EntryTags(childComplexity), true
+
+	case "Entry.entryUserCompetences":
+		if e.complexity.Entry.EntryUserCompetences == nil {
+			break
+		}
+
+		return e.complexity.Entry.EntryUserCompetences(childComplexity), true
+
+	case "Entry.entryUsers":
+		if e.complexity.Entry.EntryUsers == nil {
+			break
+		}
+
+		return e.complexity.Entry.EntryUsers(childComplexity), true
 
 	case "Entry.id":
 		if e.complexity.Entry.ID == nil {
@@ -3852,6 +3898,280 @@ func (ec *executionContext) fieldContext_Entry_createdAt(ctx context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _Entry_entryEvents(ctx context.Context, field graphql.CollectedField, obj *db.Entry) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Entry_entryEvents(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entry().EntryEvents(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*db.EntryEvent)
+	fc.Result = res
+	return ec.marshalNEntryEvent2ᚕᚖexampleᚋpkgᚋdbᚐEntryEventᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Entry_entryEvents(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entry",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_EntryEvent_id(ctx, field)
+			case "entry":
+				return ec.fieldContext_EntryEvent_entry(ctx, field)
+			case "event":
+				return ec.fieldContext_EntryEvent_event(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_EntryEvent_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type EntryEvent", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Entry_entryFiles(ctx context.Context, field graphql.CollectedField, obj *db.Entry) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Entry_entryFiles(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entry().EntryFiles(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*db.EntryFile)
+	fc.Result = res
+	return ec.marshalNEntryFile2ᚕᚖexampleᚋpkgᚋdbᚐEntryFileᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Entry_entryFiles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entry",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_EntryFile_id(ctx, field)
+			case "entry":
+				return ec.fieldContext_EntryFile_entry(ctx, field)
+			case "file":
+				return ec.fieldContext_EntryFile_file(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_EntryFile_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type EntryFile", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Entry_entryTags(ctx context.Context, field graphql.CollectedField, obj *db.Entry) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Entry_entryTags(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entry().EntryTags(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*db.EntryTag)
+	fc.Result = res
+	return ec.marshalNEntryTag2ᚕᚖexampleᚋpkgᚋdbᚐEntryTagᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Entry_entryTags(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entry",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_EntryTag_id(ctx, field)
+			case "entry":
+				return ec.fieldContext_EntryTag_entry(ctx, field)
+			case "tag":
+				return ec.fieldContext_EntryTag_tag(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_EntryTag_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type EntryTag", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Entry_entryUserCompetences(ctx context.Context, field graphql.CollectedField, obj *db.Entry) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Entry_entryUserCompetences(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entry().EntryUserCompetences(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*db.EntryUserCompetence)
+	fc.Result = res
+	return ec.marshalNEntryUserCompetence2ᚕᚖexampleᚋpkgᚋdbᚐEntryUserCompetenceᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Entry_entryUserCompetences(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entry",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_EntryUserCompetence_id(ctx, field)
+			case "level":
+				return ec.fieldContext_EntryUserCompetence_level(ctx, field)
+			case "entry":
+				return ec.fieldContext_EntryUserCompetence_entry(ctx, field)
+			case "user":
+				return ec.fieldContext_EntryUserCompetence_user(ctx, field)
+			case "competence":
+				return ec.fieldContext_EntryUserCompetence_competence(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_EntryUserCompetence_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type EntryUserCompetence", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Entry_entryUsers(ctx context.Context, field graphql.CollectedField, obj *db.Entry) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Entry_entryUsers(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entry().EntryUsers(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*db.EntryUser)
+	fc.Result = res
+	return ec.marshalNEntryUser2ᚕᚖexampleᚋpkgᚋdbᚐEntryUserᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Entry_entryUsers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entry",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_EntryUser_id(ctx, field)
+			case "entry":
+				return ec.fieldContext_EntryUser_entry(ctx, field)
+			case "user":
+				return ec.fieldContext_EntryUser_user(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_EntryUser_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type EntryUser", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _EntryConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.EntryConnection) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EntryConnection_edges(ctx, field)
 	if err != nil {
@@ -3896,6 +4216,16 @@ func (ec *executionContext) fieldContext_EntryConnection_edges(ctx context.Conte
 				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "entryEvents":
+				return ec.fieldContext_Entry_entryEvents(ctx, field)
+			case "entryFiles":
+				return ec.fieldContext_Entry_entryFiles(ctx, field)
+			case "entryTags":
+				return ec.fieldContext_Entry_entryTags(ctx, field)
+			case "entryUserCompetences":
+				return ec.fieldContext_Entry_entryUserCompetences(ctx, field)
+			case "entryUsers":
+				return ec.fieldContext_Entry_entryUsers(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -4090,6 +4420,16 @@ func (ec *executionContext) fieldContext_EntryEvent_entry(ctx context.Context, f
 				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "entryEvents":
+				return ec.fieldContext_Entry_entryEvents(ctx, field)
+			case "entryFiles":
+				return ec.fieldContext_Entry_entryFiles(ctx, field)
+			case "entryTags":
+				return ec.fieldContext_Entry_entryTags(ctx, field)
+			case "entryUserCompetences":
+				return ec.fieldContext_Entry_entryUserCompetences(ctx, field)
+			case "entryUsers":
+				return ec.fieldContext_Entry_entryUsers(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -4294,6 +4634,16 @@ func (ec *executionContext) fieldContext_EntryFile_entry(ctx context.Context, fi
 				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "entryEvents":
+				return ec.fieldContext_Entry_entryEvents(ctx, field)
+			case "entryFiles":
+				return ec.fieldContext_Entry_entryFiles(ctx, field)
+			case "entryTags":
+				return ec.fieldContext_Entry_entryTags(ctx, field)
+			case "entryUserCompetences":
+				return ec.fieldContext_Entry_entryUserCompetences(ctx, field)
+			case "entryUsers":
+				return ec.fieldContext_Entry_entryUsers(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -4490,6 +4840,16 @@ func (ec *executionContext) fieldContext_EntryTag_entry(ctx context.Context, fie
 				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "entryEvents":
+				return ec.fieldContext_Entry_entryEvents(ctx, field)
+			case "entryFiles":
+				return ec.fieldContext_Entry_entryFiles(ctx, field)
+			case "entryTags":
+				return ec.fieldContext_Entry_entryTags(ctx, field)
+			case "entryUserCompetences":
+				return ec.fieldContext_Entry_entryUserCompetences(ctx, field)
+			case "entryUsers":
+				return ec.fieldContext_Entry_entryUsers(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -4686,6 +5046,16 @@ func (ec *executionContext) fieldContext_EntryUser_entry(ctx context.Context, fi
 				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "entryEvents":
+				return ec.fieldContext_Entry_entryEvents(ctx, field)
+			case "entryFiles":
+				return ec.fieldContext_Entry_entryFiles(ctx, field)
+			case "entryTags":
+				return ec.fieldContext_Entry_entryTags(ctx, field)
+			case "entryUserCompetences":
+				return ec.fieldContext_Entry_entryUserCompetences(ctx, field)
+			case "entryUsers":
+				return ec.fieldContext_Entry_entryUsers(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -4932,6 +5302,16 @@ func (ec *executionContext) fieldContext_EntryUserCompetence_entry(ctx context.C
 				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "entryEvents":
+				return ec.fieldContext_Entry_entryEvents(ctx, field)
+			case "entryFiles":
+				return ec.fieldContext_Entry_entryFiles(ctx, field)
+			case "entryTags":
+				return ec.fieldContext_Entry_entryTags(ctx, field)
+			case "entryUserCompetences":
+				return ec.fieldContext_Entry_entryUserCompetences(ctx, field)
+			case "entryUsers":
+				return ec.fieldContext_Entry_entryUsers(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -6236,6 +6616,16 @@ func (ec *executionContext) fieldContext_Mutation_createEntry(ctx context.Contex
 				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "entryEvents":
+				return ec.fieldContext_Entry_entryEvents(ctx, field)
+			case "entryFiles":
+				return ec.fieldContext_Entry_entryFiles(ctx, field)
+			case "entryTags":
+				return ec.fieldContext_Entry_entryTags(ctx, field)
+			case "entryUserCompetences":
+				return ec.fieldContext_Entry_entryUserCompetences(ctx, field)
+			case "entryUsers":
+				return ec.fieldContext_Entry_entryUsers(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -6301,6 +6691,16 @@ func (ec *executionContext) fieldContext_Mutation_updateEntry(ctx context.Contex
 				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "entryEvents":
+				return ec.fieldContext_Entry_entryEvents(ctx, field)
+			case "entryFiles":
+				return ec.fieldContext_Entry_entryFiles(ctx, field)
+			case "entryTags":
+				return ec.fieldContext_Entry_entryTags(ctx, field)
+			case "entryUserCompetences":
+				return ec.fieldContext_Entry_entryUserCompetences(ctx, field)
+			case "entryUsers":
+				return ec.fieldContext_Entry_entryUsers(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -7920,6 +8320,16 @@ func (ec *executionContext) fieldContext_Query_entry(ctx context.Context, field 
 				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "entryEvents":
+				return ec.fieldContext_Entry_entryEvents(ctx, field)
+			case "entryFiles":
+				return ec.fieldContext_Entry_entryFiles(ctx, field)
+			case "entryTags":
+				return ec.fieldContext_Entry_entryTags(ctx, field)
+			case "entryUserCompetences":
+				return ec.fieldContext_Entry_entryUserCompetences(ctx, field)
+			case "entryUsers":
+				return ec.fieldContext_Entry_entryUsers(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -12935,6 +13345,106 @@ func (ec *executionContext) _Entry(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "entryEvents":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Entry_entryEvents(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "entryFiles":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Entry_entryFiles(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "entryTags":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Entry_entryTags(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "entryUserCompetences":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Entry_entryUserCompetences(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "entryUsers":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Entry_entryUsers(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -15335,6 +15845,50 @@ func (ec *executionContext) marshalNEntryEvent2exampleᚋpkgᚋdbᚐEntryEvent(c
 	return ec._EntryEvent(ctx, sel, &v)
 }
 
+func (ec *executionContext) marshalNEntryEvent2ᚕᚖexampleᚋpkgᚋdbᚐEntryEventᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.EntryEvent) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNEntryEvent2ᚖexampleᚋpkgᚋdbᚐEntryEvent(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) marshalNEntryEvent2ᚖexampleᚋpkgᚋdbᚐEntryEvent(ctx context.Context, sel ast.SelectionSet, v *db.EntryEvent) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -15347,6 +15901,50 @@ func (ec *executionContext) marshalNEntryEvent2ᚖexampleᚋpkgᚋdbᚐEntryEven
 
 func (ec *executionContext) marshalNEntryFile2exampleᚋpkgᚋdbᚐEntryFile(ctx context.Context, sel ast.SelectionSet, v db.EntryFile) graphql.Marshaler {
 	return ec._EntryFile(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNEntryFile2ᚕᚖexampleᚋpkgᚋdbᚐEntryFileᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.EntryFile) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNEntryFile2ᚖexampleᚋpkgᚋdbᚐEntryFile(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNEntryFile2ᚖexampleᚋpkgᚋdbᚐEntryFile(ctx context.Context, sel ast.SelectionSet, v *db.EntryFile) graphql.Marshaler {
@@ -15363,6 +15961,50 @@ func (ec *executionContext) marshalNEntryTag2exampleᚋpkgᚋdbᚐEntryTag(ctx c
 	return ec._EntryTag(ctx, sel, &v)
 }
 
+func (ec *executionContext) marshalNEntryTag2ᚕᚖexampleᚋpkgᚋdbᚐEntryTagᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.EntryTag) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNEntryTag2ᚖexampleᚋpkgᚋdbᚐEntryTag(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) marshalNEntryTag2ᚖexampleᚋpkgᚋdbᚐEntryTag(ctx context.Context, sel ast.SelectionSet, v *db.EntryTag) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -15377,6 +16019,50 @@ func (ec *executionContext) marshalNEntryUser2exampleᚋpkgᚋdbᚐEntryUser(ctx
 	return ec._EntryUser(ctx, sel, &v)
 }
 
+func (ec *executionContext) marshalNEntryUser2ᚕᚖexampleᚋpkgᚋdbᚐEntryUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.EntryUser) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNEntryUser2ᚖexampleᚋpkgᚋdbᚐEntryUser(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) marshalNEntryUser2ᚖexampleᚋpkgᚋdbᚐEntryUser(ctx context.Context, sel ast.SelectionSet, v *db.EntryUser) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -15389,6 +16075,50 @@ func (ec *executionContext) marshalNEntryUser2ᚖexampleᚋpkgᚋdbᚐEntryUser(
 
 func (ec *executionContext) marshalNEntryUserCompetence2exampleᚋpkgᚋdbᚐEntryUserCompetence(ctx context.Context, sel ast.SelectionSet, v db.EntryUserCompetence) graphql.Marshaler {
 	return ec._EntryUserCompetence(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNEntryUserCompetence2ᚕᚖexampleᚋpkgᚋdbᚐEntryUserCompetenceᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.EntryUserCompetence) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNEntryUserCompetence2ᚖexampleᚋpkgᚋdbᚐEntryUserCompetence(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNEntryUserCompetence2ᚖexampleᚋpkgᚋdbᚐEntryUserCompetence(ctx context.Context, sel ast.SelectionSet, v *db.EntryUserCompetence) graphql.Marshaler {

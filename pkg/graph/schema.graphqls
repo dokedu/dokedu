@@ -72,6 +72,12 @@ type Entry {
     date: Time!
     body: String
     createdAt: Time!
+
+    entryEvents: [EntryEvent!]!
+    entryFiles: [EntryFile!]!
+    entryTags: [EntryTag!]!
+    entryUserCompetences: [EntryUserCompetence!]!
+    entryUsers: [EntryUser!]!
 }
 
 type EntryEvent {
