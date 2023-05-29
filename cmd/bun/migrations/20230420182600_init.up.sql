@@ -53,15 +53,17 @@ CREATE TABLE organisations
     deleted_at      timestamptz
 );
 
+CREATE TYPE file_type as ENUM ('blob', 'folder');
+
 CREATE TABLE files
 (
     id              text        DEFAULT nanoid() NOT NULL PRIMARY KEY,
-    bucket          text                         NOT NULL,
     name            text                         NOT NULL,
+    file_type       file_type                    NOT NULL DEFAULT 'blob'::file_type,
     organisation_id text                         NOT NULL REFERENCES organisations,
+    parent_id       text                         NULL REFERENCES files,
     created_at      timestamptz DEFAULT NOW()    NOT NULL,
-    deleted_at      timestamptz,
-    UNIQUE (bucket, name)
+    deleted_at      timestamptz
 );
 
 CREATE TYPE user_role AS ENUM ('owner', 'admin', 'teacher', 'educator', 'student', 'parent');
@@ -165,7 +167,7 @@ CREATE TABLE entry_files
 CREATE TABLE events
 (
     id              text        DEFAULT nanoid() NOT NULL PRIMARY KEY,
-    image_file_id   text                         NOT NULL REFERENCES files,
+    image_file_id   text                         NULL REFERENCES files,
     organisation_id text                         NOT NULL REFERENCES organisations,
     title           text                         NOT NULL,
     body            text                         NOT NULL,

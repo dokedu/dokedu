@@ -2,19 +2,20 @@ package main
 
 import (
 	"database/sql"
-	"example/pkg/config"
-	"example/pkg/db"
 	"example/pkg/graph"
 	"example/pkg/jwt"
 	"example/pkg/middleware"
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
 	"os"
 
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/dialect/pgdialect"
+	"github.com/uptrace/bun/driver/pgdriver"
 
 	_ "github.com/lib/pq"
 )
@@ -25,23 +26,13 @@ const jwtSecret = "12345678"
 func main() {
 	signer := jwt.NewSigner(jwtSecret)
 
-	dbConn, err := sql.Open("postgres", config.DatabaseConnection)
-	if err != nil {
-		log.Fatal(err)
-	}
+	dsn := "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
+	// dsn := "unix://user:pass@dbname/var/run/postgresql/.s.PGSQL.5432"
+	dbConn := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(dsn)))
 
-	// close db connection
-	defer func(dbConn *sql.DB) {
-		err := dbConn.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}(dbConn)
+	db := bun.NewDB(dbConn, pgdialect.New())
 
 	e := echo.New()
-
-	queries := db.New(dbConn)
-
 	e.Use(middleware.Auth(signer))
 
 	// add options handler
@@ -57,7 +48,7 @@ func main() {
 	e.Use(middleware.CORS())
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
-		DB: queries,
+		DB: db,
 	}}))
 
 	srv.AddTransport(&transport.Websocket{})

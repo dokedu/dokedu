@@ -110,6 +110,7 @@ type ComplexityRoot struct {
 		Body                 func(childComplexity int) int
 		CreatedAt            func(childComplexity int) int
 		Date                 func(childComplexity int) int
+		DeletedAt            func(childComplexity int) int
 		EntryEvents          func(childComplexity int) int
 		EntryFiles           func(childComplexity int) int
 		EntryTags            func(childComplexity int) int
@@ -187,6 +188,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		ArchiveEntry              func(childComplexity int, id string) int
 		ArchiveUser               func(childComplexity int, id string) int
 		CreateEntry               func(childComplexity int, input model.CreateEntryInput) int
 		CreateEntryEvent          func(childComplexity int, entryID string, eventID string) int
@@ -316,6 +318,7 @@ type CompetenceResolver interface {
 type EntryResolver interface {
 	Body(ctx context.Context, obj *db.Entry) (*string, error)
 
+	DeletedAt(ctx context.Context, obj *db.Entry) (*time.Time, error)
 	User(ctx context.Context, obj *db.Entry) (*db.User, error)
 	EntryEvents(ctx context.Context, obj *db.Entry) ([]*db.EntryEvent, error)
 	EntryFiles(ctx context.Context, obj *db.Entry) ([]*db.EntryFile, error)
@@ -348,6 +351,8 @@ type EventResolver interface {
 	Image(ctx context.Context, obj *db.Event) (*db.File, error)
 }
 type FileResolver interface {
+	Bucket(ctx context.Context, obj *db.File) (string, error)
+
 	URL(ctx context.Context, obj *db.File) (string, error)
 }
 type MutationResolver interface {
@@ -359,6 +364,7 @@ type MutationResolver interface {
 	ArchiveUser(ctx context.Context, id string) (*db.User, error)
 	CreateEntry(ctx context.Context, input model.CreateEntryInput) (*db.Entry, error)
 	UpdateEntry(ctx context.Context, id string, input model.UpdateEntryInput) (*db.Entry, error)
+	ArchiveEntry(ctx context.Context, id string) (*db.Entry, error)
 	CreateEntryEvent(ctx context.Context, entryID string, eventID string) (*db.EntryEvent, error)
 	DeleteEntryEvent(ctx context.Context, id string) (bool, error)
 	CreateEntryFile(ctx context.Context, entryID string, fileID string) (*db.EntryFile, error)
@@ -616,6 +622,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Entry.Date(childComplexity), true
+
+	case "Entry.deletedAt":
+		if e.complexity.Entry.DeletedAt == nil {
+			break
+		}
+
+		return e.complexity.Entry.DeletedAt(childComplexity), true
 
 	case "Entry.entryEvents":
 		if e.complexity.Entry.EntryEvents == nil {
@@ -945,6 +958,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.File.URL(childComplexity), true
+
+	case "Mutation.archiveEntry":
+		if e.complexity.Mutation.ArchiveEntry == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_archiveEntry_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ArchiveEntry(childComplexity, args["id"].(string)), true
 
 	case "Mutation.archiveUser":
 		if e.complexity.Mutation.ArchiveUser == nil {
@@ -1733,6 +1758,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_archiveEntry_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_archiveUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -3415,9 +3455,9 @@ func (ec *executionContext) _Competence_grades(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]int32)
+	res := resTmp.([]int)
 	fc.Result = res
-	return ec.marshalNInt2ᚕint32ᚄ(ctx, field.Selections, res)
+	return ec.marshalNInt2ᚕintᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Competence_grades(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3907,6 +3947,47 @@ func (ec *executionContext) fieldContext_Entry_createdAt(ctx context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _Entry_deletedAt(ctx context.Context, field graphql.CollectedField, obj *db.Entry) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Entry_deletedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entry().DeletedAt(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Entry_deletedAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entry",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Entry_user(ctx context.Context, field graphql.CollectedField, obj *db.Entry) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Entry_user(ctx, field)
 	if err != nil {
@@ -4285,6 +4366,8 @@ func (ec *executionContext) fieldContext_EntryConnection_edges(ctx context.Conte
 				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "entryEvents":
@@ -4491,6 +4574,8 @@ func (ec *executionContext) fieldContext_EntryEvent_entry(ctx context.Context, f
 				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "entryEvents":
@@ -4707,6 +4792,8 @@ func (ec *executionContext) fieldContext_EntryFile_entry(ctx context.Context, fi
 				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "entryEvents":
@@ -4915,6 +5002,8 @@ func (ec *executionContext) fieldContext_EntryTag_entry(ctx context.Context, fie
 				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "entryEvents":
@@ -5123,6 +5212,8 @@ func (ec *executionContext) fieldContext_EntryUser_entry(ctx context.Context, fi
 				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "entryEvents":
@@ -5381,6 +5472,8 @@ func (ec *executionContext) fieldContext_EntryUserCompetence_entry(ctx context.C
 				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "entryEvents":
@@ -6130,7 +6223,7 @@ func (ec *executionContext) _File_bucket(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Bucket, nil
+		return ec.resolvers.File().Bucket(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6151,8 +6244,8 @@ func (ec *executionContext) fieldContext_File_bucket(ctx context.Context, field 
 	fc = &graphql.FieldContext{
 		Object:     "File",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -6697,6 +6790,8 @@ func (ec *executionContext) fieldContext_Mutation_createEntry(ctx context.Contex
 				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "entryEvents":
@@ -6774,6 +6869,8 @@ func (ec *executionContext) fieldContext_Mutation_updateEntry(ctx context.Contex
 				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "entryEvents":
@@ -6798,6 +6895,85 @@ func (ec *executionContext) fieldContext_Mutation_updateEntry(ctx context.Contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updateEntry_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_archiveEntry(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_archiveEntry(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ArchiveEntry(rctx, fc.Args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.Entry)
+	fc.Result = res
+	return ec.marshalNEntry2ᚖexampleᚋpkgᚋdbᚐEntry(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_archiveEntry(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Entry_id(ctx, field)
+			case "date":
+				return ec.fieldContext_Entry_date(ctx, field)
+			case "body":
+				return ec.fieldContext_Entry_body(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
+			case "user":
+				return ec.fieldContext_Entry_user(ctx, field)
+			case "entryEvents":
+				return ec.fieldContext_Entry_entryEvents(ctx, field)
+			case "entryFiles":
+				return ec.fieldContext_Entry_entryFiles(ctx, field)
+			case "entryTags":
+				return ec.fieldContext_Entry_entryTags(ctx, field)
+			case "entryUserCompetences":
+				return ec.fieldContext_Entry_entryUserCompetences(ctx, field)
+			case "entryUsers":
+				return ec.fieldContext_Entry_entryUsers(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_archiveEntry_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -8405,6 +8581,8 @@ func (ec *executionContext) fieldContext_Query_entry(ctx context.Context, field 
 				return ec.fieldContext_Entry_body(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "entryEvents":
@@ -12761,18 +12939,26 @@ func (ec *executionContext) unmarshalInputSignUpInput(ctx context.Context, obj i
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "email", "password"}
+	fieldsInOrder := [...]string{"firstName", "lastName", "email", "password"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "name":
+		case "firstName":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("firstName"))
+			it.FirstName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lastName"))
+			it.LastName, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -13424,6 +13610,23 @@ func (ec *executionContext) _Entry(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "deletedAt":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Entry_deletedAt(ctx, field, obj)
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		case "user":
 			field := field
 
@@ -14134,12 +14337,25 @@ func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "bucket":
+			field := field
 
-			out.Values[i] = ec._File_bucket(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._File_bucket(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
 			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		case "name":
 
 			out.Values[i] = ec._File_name(ctx, field, obj)
@@ -14264,6 +14480,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateEntry(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "archiveEntry":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_archiveEntry(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -16305,16 +16530,16 @@ func (ec *executionContext) marshalNInt2int32(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) unmarshalNInt2ᚕint32ᚄ(ctx context.Context, v interface{}) ([]int32, error) {
+func (ec *executionContext) unmarshalNInt2ᚕintᚄ(ctx context.Context, v interface{}) ([]int, error) {
 	var vSlice []interface{}
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
 	var err error
-	res := make([]int32, len(vSlice))
+	res := make([]int, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNInt2int32(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNInt2int(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -16322,10 +16547,10 @@ func (ec *executionContext) unmarshalNInt2ᚕint32ᚄ(ctx context.Context, v int
 	return res, nil
 }
 
-func (ec *executionContext) marshalNInt2ᚕint32ᚄ(ctx context.Context, sel ast.SelectionSet, v []int32) graphql.Marshaler {
+func (ec *executionContext) marshalNInt2ᚕintᚄ(ctx context.Context, sel ast.SelectionSet, v []int) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	for i := range v {
-		ret[i] = ec.marshalNInt2int32(ctx, sel, v[i])
+		ret[i] = ec.marshalNInt2int(ctx, sel, v[i])
 	}
 
 	for _, e := range ret {

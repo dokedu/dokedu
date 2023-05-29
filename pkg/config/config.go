@@ -1,3 +1,3 @@
 package config
 
-const DatabaseConnection = "user=postgres password=postgres dbname=postgres sslmode=disable"
+const DatabaseConnection = "postgres://postgres:@localhost:5432/postgres?sslmode=disable"

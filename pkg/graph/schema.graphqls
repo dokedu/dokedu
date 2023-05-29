@@ -72,6 +72,7 @@ type Entry {
     date: Time!
     body: String
     createdAt: Time!
+    deletedAt: Time
 
     user: User!
     entryEvents: [EntryEvent!]!
@@ -185,7 +186,8 @@ type SignInPayload {
 }
 
 input SignUpInput {
-    name: String!
+    firstName: String!
+    lastName: String!
     email: String!
     password: String!
 }
@@ -354,6 +356,7 @@ type Mutation {
 
     createEntry(input: CreateEntryInput!): Entry!
     updateEntry(id: ID!, input: UpdateEntryInput!): Entry!
+    archiveEntry(id: ID!): Entry!
 
     createEntryEvent(entryId: ID!, eventId: ID!): EntryEvent!
     deleteEntryEvent(id: ID!): Boolean!

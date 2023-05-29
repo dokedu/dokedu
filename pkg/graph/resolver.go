@@ -3,7 +3,7 @@ package graph
 //go:generate go run github.com/99designs/gqlgen generate
 
 import (
-	"example/pkg/db"
+	"github.com/uptrace/bun"
 )
 
 // This file will not be regenerated automatically.
@@ -11,5 +11,5 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	DB *db.Queries
+	DB *bun.DB
 }
