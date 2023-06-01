@@ -19,6 +19,11 @@ const router = createRouter({
       component: () => import("./pages/admin/users/index.vue"),
     },
     {
+      name: "admin-students",
+      path: "/admin/students",
+      component: () => import("./pages/admin/students/index.vue"),
+    },
+    {
       name: "record-entries",
       path: "/record/entries",
       component: () => import("./pages/record/entries/index.vue"),

@@ -1,33 +1,39 @@
 <template>
   <PageWrapper>
     <PageHeader class="flex justify-between">
-      <div class="text-gray-950 font-medium">Schüler</div>
+      <div class="flex items-center gap-1 text-gray-700">
+        <router-link :to="{ name: 'record-students' }" class="rounded font-medium hover:text-gray-950">
+          Students
+        </router-link>
+        <ChevronRight :size="18" class="stroke-gray-500" />
+        <span class="font-medium text-gray-950">{{ data?.user?.firstName }} {{ data?.user?.lastName }}</span>
+      </div>
     </PageHeader>
-    <div class="p-4 flex flex-col">
-      <div class="text-2xl mb-3 font-medium text-gray-800">{{ data?.user?.firstName }} {{ data?.user?.lastName }}</div>
-      <pre>{{ data?.user?.role }}</pre>
+    <div class="flex flex-col p-4">
+      <pre>{{ data?.user }}</pre>
     </div>
   </PageWrapper>
 </template>
 <script setup lang="ts">
 import PageHeader from "../../../components/PageHeader.vue";
 import PageWrapper from "../../../components/PageWrapper.vue";
-import {gql, useQuery} from "@urql/vue";
-import {useRoute} from "vue-router";
+import { gql, useQuery } from "@urql/vue";
+import { useRoute } from "vue-router";
+import { ChevronRight } from "lucide-vue-next";
 
-const route = useRoute()
+const route = useRoute();
 
-const {data} = useQuery({
+const { data } = useQuery({
   query: gql`
-query entry($id: ID!) {
-  user(id: $id) {
-    id
-    firstName
-    lastName
-    role
-  }
-}`,
-  variables: {id: route.params.id}
-})
-
+    query entry($id: ID!) {
+      user(id: $id) {
+        id
+        firstName
+        lastName
+        role
+      }
+    }
+  `,
+  variables: { id: route.params.id },
+});
 </script>

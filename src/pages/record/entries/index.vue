@@ -14,7 +14,7 @@
         v-for="entry in data?.entries?.edges"
         class="flex border-b transition-all hover:bg-gray-50"
       >
-        <div class="w-full p-2 pl-8">{{ entry.body }}</div>
+        <div class="w-full p-2 pl-8">{{ entry.body.slice(0, 70) }} {{ entry.body.length > 70 ? "..." : "" }}</div>
         <div class="w-1/4 p-2">{{ dateOnly(entry.date) }}</div>
         <div class="w-1/4 p-2">
           {{ `${entry.user.firstName} ${entry.user.lastName}` }}

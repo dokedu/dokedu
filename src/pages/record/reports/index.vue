@@ -1,11 +1,16 @@
 <template>
   <PageWrapper>
     <PageHeader class="flex justify-between">
-      <div class="text-gray-950 font-medium">Berichte</div>
+      <div class="font-medium text-gray-950">Reports</div>
       <div class="flex gap-2">
-        <button type="button" class="bg-gray-50 text-gray-700 px-6 py-1.5 rounded-md transition-all hover:bg-gray-100 hover:text-gray-800">Jahresberichte erstellen</button>
-        <router-link :to="{ name: 'record-entries-new' }" class="bg-black text-white px-6 py-1.5 rounded-md">
-          Bericht erstellen
+        <button
+          type="button"
+          class="rounded-md bg-gray-50 px-6 py-1.5 text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-800"
+        >
+          Prepare annual reports
+        </button>
+        <router-link :to="{ name: 'record-entries-new' }" class="rounded-md bg-black px-6 py-1.5 text-white">
+          Create report
         </router-link>
       </div>
     </PageHeader>

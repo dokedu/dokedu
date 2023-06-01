@@ -1,41 +1,22 @@
 <template>
   <div class="flex h-full justify-between">
     <div class="w-full">
-      <div class="flex justify-between border-b px-8 py-4">
-        <div>
-          <button
-            type="button"
-            class="rounded-md px-4 py-1 text-gray-500 outline-0 transition-all hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-          >
-            Cancel
-          </button>
-        </div>
-        <div class="flex gap-2">
-          <button
-            type="button"
-            class="rounded-md bg-red-50 px-4 py-1 text-red-500 outline-0 transition-all hover:bg-red-100 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-            @click="archive"
-          >
-            Archive
-          </button>
-          <button
-            type="button"
-            class="rounded-md bg-gray-950 px-4 py-1 text-white outline-0 transition-all hover:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-            @click="onSubmit"
-          >
-            {{ mode === "new" ? "Create" : "Save" }}
-          </button>
-        </div>
-      </div>
+      <EntryFormHeader :mode="mode" @submit="submit" @archive="archive" />
       <textarea
-        v-model="entry.body"
+        ref="textarea"
+        v-model="body"
         placeholder="Write down your observations..."
         class="block w-full resize-none border-none border-transparent p-8 text-lg text-gray-900 placeholder:text-gray-400 focus:ring-0"
       />
+      <div class="px-8">
+        <button class="flex items-center gap-2 rounded-md border p-4 py-1.5 shadow-sm transition-all hover:shadow">
+          <Upload :size="16" /> Upload file
+        </button>
+      </div>
     </div>
     <div class="flex min-h-full w-[400px] min-w-[400px] flex-col gap-4 border-l px-8 py-4">
       <div class="flex items-center gap-4">
-        <label for="date" class="text-gray-500">Datum</label>
+        <label for="date" class="min-w-[64px] text-gray-500">Datum</label>
         <input
           v-model="formattedDate"
           type="date"
@@ -45,10 +26,53 @@
         />
       </div>
       <div class="flex gap-4">
-        <label for="date" class="mt-2 text-gray-500">Projects</label>
+        <label for="date" class="mt-2 min-w-[64px] text-gray-500">Projects</label>
+        <div class="w-full">
+          <d-context-menu
+            :show="contextMenuEvents"
+            @close="contextMenuEvents = false"
+            :alignment="ContextMenuAlignment.Overlay"
+          >
+            <div class="flex flex-col gap-1 px-1 py-2">
+              <div
+                v-for="event in events?.events?.edges"
+                :key="event.id"
+                @click="toggleEvent(event)"
+                class="flex w-full items-center justify-between rounded-md p-1 hover:bg-gray-100"
+              >
+                <div class="px-1 py-0.5 text-gray-700">{{ event.title }}</div>
+                <svg
+                  v-show="entry?.events?.length > 0 && entry?.events.map((el) => el.id).includes(event.id)"
+                  class="stroke-gray-700"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M17.3327 8L9.99935 15.3333L6.66602 12"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+            </div>
+          </d-context-menu>
+          <div
+            class="flex w-full cursor-default flex-wrap items-start gap-2 rounded-md p-2 hover:bg-gray-50"
+            @click="contextMenuEvents = true"
+          >
+            <div v-for="event in entry?.events" class="rounded-full border px-3 py-1 text-gray-700">
+              {{ event.title }}
+            </div>
+            <div v-if="entry.events?.length === 0" class="text-gray-400">Add project</div>
+          </div>
+        </div>
       </div>
       <div class="flex gap-4">
-        <label for="date" class="mt-2 text-gray-500">Labels</label>
+        <label for="date" class="mt-2 min-w-[64px] text-gray-500">Labels</label>
         <div class="w-full">
           <d-context-menu
             :show="tagsContextMenuOpen"
@@ -85,17 +109,78 @@
             </div>
           </d-context-menu>
           <div
-            class="flex min-h-[50px] w-full cursor-default flex-wrap items-start gap-2 rounded-md p-2 hover:bg-gray-50"
+            class="flex w-full cursor-default flex-wrap items-start gap-2 rounded-md p-2 hover:bg-gray-50"
             @click="tagsContextMenuOpen = true"
           >
             <d-tag v-for="tag in entry.tags" :key="tag.id" :color="tag.color">
               {{ tag.name }}
             </d-tag>
-            <div v-if="entry.tags?.length === 0" class="text-gray-500">Add label</div>
+            <div v-if="entry.tags?.length === 0" class="text-gray-400">Add label</div>
           </div>
         </div>
       </div>
+      <div>
+        <header class="mb-2 flex items-center justify-between">
+          <div class="text-gray-500">Students</div>
+          <div class="rounded-md p-1 hover:bg-gray-100" @click="dialogStudents.showModal()">
+            <Plus :size="20" class="stroke-gray-500" />
+          </div>
+        </header>
+        <div class="mb-2">
+          <div
+            v-for="student in entry?.users"
+            class="flex w-full select-none items-center justify-between gap-2 rounded-lg px-1 py-1 text-gray-700 hover:bg-gray-50"
+          >
+            <div class="flex items-center gap-2">
+              <div
+                class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 p-1 text-xs uppercase text-gray-500"
+              >
+                {{ `${student.firstName[0]}${student.lastName[0]}` }}
+              </div>
+              <span>{{ `${student.firstName} ${student.lastName}` }}</span>
+            </div>
+            <div class="rounded-md p-1 hover:bg-gray-100" @click="toggleStudent(student)">
+              <X :size="20" class="stroke-gray-500" />
+            </div>
+          </div>
+        </div>
+        <div
+          class="flex w-fit select-none items-center gap-2 rounded-md p-1 hover:bg-gray-100"
+          @click="dialogStudents.showModal()"
+        >
+          <div class="rounded-md">
+            <Plus :size="20" class="stroke-gray-500" />
+          </div>
+          <span class="pr-2 text-gray-500">Add student</span>
+        </div>
+      </div>
     </div>
+    <dialog ref="dialogStudents" class="w-full max-w-xl rounded-lg shadow-lg backdrop:bg-gray-950/20">
+      <div class="mb-4 flex items-center justify-between gap-2">
+        <input
+          type="text"
+          name="student-search"
+          id="student-search"
+          placeholder="Search students"
+          class="w-full rounded-md border border-gray-200 px-3 py-1.5 shadow-sm outline-none placeholder:text-gray-400 focus:border-gray-200 focus:ring-0"
+        />
+        <div class="rounded-md p-1 hover:bg-gray-100" @click="dialogStudents.close()">
+          <X class="stroke-gray-500" />
+        </div>
+      </div>
+      <div>
+        <div class="mb-2 text-sm uppercase text-gray-500">Students</div>
+        <div class="flex flex-col gap-1">
+          <div
+            v-for="student in students?.users?.edges"
+            class="w-full select-none rounded-lg px-2 py-1 text-gray-700 hover:bg-gray-50"
+            @click="toggleStudent(student)"
+          >
+            {{ `${student.firstName} ${student.lastName}` }}
+          </div>
+        </div>
+      </div>
+    </dialog>
   </div>
 </template>
 <script setup lang="ts">
@@ -105,7 +190,9 @@ import { gql, useMutation, useQuery } from "@urql/vue";
 import tagQuery from "../../../queries/tags";
 import { computed, ref, toRef } from "vue";
 import archiveEntryMutation from "../../../queries/archiveEntry.mutation.ts";
-import { formatDate } from "@vueuse/core";
+import { formatDate, useTextareaAutosize } from "@vueuse/core";
+import EntryFormHeader from "./EntryFormHeader.vue";
+import { Upload, Plus, X } from "lucide-vue-next";
 
 interface Tag {
   id: string;
@@ -118,7 +205,11 @@ interface Entry {
   body: string;
   createdAt: string;
   tags: Tag[];
+  events: [{ id: string; title: string }];
+  users: [{ id: string; firstName: string; lastName: string }];
 }
+
+const dialogStudents = ref<HTMLDialogElement>();
 
 const props = defineProps<{
   entry: Entry;
@@ -129,23 +220,83 @@ const { data: tags } = useQuery({
   query: tagQuery,
 });
 
+const { data: students } = useQuery({
+  query: gql`
+    query {
+      users(filter: { role: [student] }) {
+        edges {
+          id
+          firstName
+          lastName
+        }
+      }
+    }
+  `,
+});
+
+const { data: events } = useQuery({
+  query: gql`
+    query events {
+      events {
+        edges {
+          id
+          title
+        }
+      }
+    }
+  `,
+});
+
 const entry = toRef(props, "entry");
 const tagsContextMenuOpen = ref(false);
+const contextMenuEvents = ref(false);
+
+const { textarea, input: body } = useTextareaAutosize({ input: entry.value.body });
 
 const { executeMutation: archiveEntryMut } = useMutation(archiveEntryMutation);
 
 function toggleTag(tag: Tag) {
-  // if entry.entryTags is undefined, create empty array
+  // if entry.tags is undefined, create empty array
   if (!entry.value.tags) {
     entry.value.tags = [];
   }
 
-  // create new entryTag and add it to entry.entryTags if it doesn't exist
+  // create new tag and add it to entry.tags if it doesn't exist
   if (!entry.value.tags.map((el) => el.id).includes(tag.id)) {
     entry.value.tags.push(tag);
   } else {
-    // remove entryTag from entry.entryTags if it exists
+    // remove tag from entry.tags if it exists
     entry.value.tags = entry.value.tags.filter((el) => el.id !== tag.id);
+  }
+}
+
+function toggleStudent(student: { id: string }) {
+  // if entry.users is undefined, create empty array
+  if (!entry.value.users) {
+    entry.value.users = [];
+  }
+
+  // create new student and add it to entry.users if it doesn't exist
+  if (!entry.value.users.map((el) => el.id).includes(student.id)) {
+    entry.value.users.push(student);
+  } else {
+    // remove student from entry.users if it exists
+    entry.value.users = entry.value.users.filter((el) => el.id !== student.id);
+  }
+}
+
+function toggleEvent(event) {
+  // if entry.events is undefined, create empty array
+  if (!entry.value.events) {
+    entry.value.events = [];
+  }
+
+  // create new event and add it to entry.events if it doesn't exist
+  if (!entry.value.events.map((el) => el.id).includes(event.id)) {
+    entry.value.events.push(event);
+  } else {
+    // remove event from entry.events if it exists
+    entry.value.events = entry.value.events.filter((el) => el.id !== event.id);
   }
 }
 
@@ -194,11 +345,13 @@ async function archive() {
 // emits
 const emit = defineEmits(["saved", "archived"]);
 
-async function onSubmit() {
+async function submit() {
   const input: any = {
     date: entry.value.date,
-    body: entry.value.body,
+    body: body.value,
     tags: entry.value.tags.map((el) => el.id),
+    events: entry.value.events.map((el) => el.id),
+    users: entry.value.users.map((el) => el.id),
   };
 
   if (props.mode === "edit") {

@@ -39,6 +39,15 @@ const { data: entry } = useQuery({
           name
           color
         }
+        events {
+          id
+          title
+        }
+        users {
+          id
+          firstName
+          lastName
+        }
       }
     }
   `,

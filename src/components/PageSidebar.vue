@@ -68,6 +68,7 @@ import {
   FileArchive,
   Folder,
   Wrench,
+  Calendar,
 } from "lucide-vue-next";
 
 const activeApp = ref<string>("record");
@@ -97,37 +98,42 @@ const apps: App[] = [
       {
         // icon: "file-check-02",
         icon: Pen,
-        name: "Einträge",
+        name: "Entries",
         route: "record-entries",
       },
       {
         // icon: "users-01",
         icon: Users,
-        name: "Schüler",
+        name: "Students",
         route: "record-students",
       },
       {
         // icon: "flag-04",
         icon: Flag,
-        name: "Ziele",
+        name: "Goals",
         route: "home",
       },
       {
         // icon: "grid-01",
         icon: Grid,
-        name: "Projekte",
+        name: "Projects",
         route: "record-projects",
       },
       {
         // icon: "check-done-01",
         icon: CopyCheck,
-        name: "Kompetenzen",
+        name: "Competences",
         route: "home",
       },
       {
         icon: PieChart,
         name: "Berichte",
         route: "record-reports",
+      },
+      {
+        icon: Calendar,
+        name: "Timetable",
+        route: "record-projects",
       },
     ],
   },
@@ -178,6 +184,12 @@ const apps: App[] = [
         icon: PieChart,
         name: "Users",
         route: "admin-users",
+      },
+      {
+        // icon: "👥",
+        icon: PieChart,
+        name: "Students",
+        route: "admin-students",
       },
     ],
   },
