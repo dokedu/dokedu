@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"example/pkg/db"
@@ -157,18 +156,6 @@ func (r *competenceResolver) Parents(ctx context.Context, obj *db.Competence) ([
 	return parents, nil
 }
 
-// Body is the resolver for the body field.
-func (r *entryResolver) Body(ctx context.Context, obj *db.Entry) (*string, error) {
-	// obj.Body is a json string, so we need to unmarshal it
-	var body string
-	err := json.Unmarshal([]byte(obj.Body), &body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &body, nil
-}
-
 // DeletedAt is the resolver for the deletedAt field.
 func (r *entryResolver) DeletedAt(ctx context.Context, obj *db.Entry) (*time.Time, error) {
 	if obj.DeletedAt.IsZero() {
@@ -194,260 +181,51 @@ func (r *entryResolver) User(ctx context.Context, obj *db.Entry) (*db.User, erro
 	return &user, nil
 }
 
-// EntryEvents is the resolver for the entryEvents field.
-func (r *entryResolver) EntryEvents(ctx context.Context, obj *db.Entry) ([]*db.EntryEvent, error) {
+// Users is the resolver for the users field.
+func (r *entryResolver) Users(ctx context.Context, obj *db.Entry) ([]*db.User, error) {
 	currentUser := middleware.ForContext(ctx)
 	if currentUser == nil {
 		return nil, errors.New("no user found in the context")
 	}
 
-	var entryEvents []*db.EntryEvent
-	err := r.DB.NewSelect().Model(&entryEvents).Where("entry_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	var users []*db.User
+	err := r.DB.NewSelect().Model(&users).Join("JOIN entry_users AS eu ON eu.user_id = users.id").Where("entry_user.entry_id = ?", obj.ID).Where("users.organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return entryEvents, nil
+	return users, nil
 }
 
-// EntryFiles is the resolver for the entryFiles field.
-func (r *entryResolver) EntryFiles(ctx context.Context, obj *db.Entry) ([]*db.EntryFile, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var entryFiles []*db.EntryFile
-	err := r.DB.NewSelect().Model(&entryFiles).Where("entry_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return entryFiles, nil
+// Events is the resolver for the events field.
+func (r *entryResolver) Events(ctx context.Context, obj *db.Entry) ([]*db.Event, error) {
+	panic(fmt.Errorf("not implemented: Events - events"))
 }
 
-// EntryTags is the resolver for the entryTags field.
-func (r *entryResolver) EntryTags(ctx context.Context, obj *db.Entry) ([]*db.EntryTag, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var entryTags []*db.EntryTag
-	err := r.DB.NewSelect().Model(&entryTags).Where("entry_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return entryTags, nil
+// Files is the resolver for the files field.
+func (r *entryResolver) Files(ctx context.Context, obj *db.Entry) ([]*db.File, error) {
+	panic(fmt.Errorf("not implemented: Files - files"))
 }
 
-// EntryUserCompetences is the resolver for the entryUserCompetences field.
-func (r *entryResolver) EntryUserCompetences(ctx context.Context, obj *db.Entry) ([]*db.EntryUserCompetence, error) {
+// Tags is the resolver for the tags field.
+func (r *entryResolver) Tags(ctx context.Context, obj *db.Entry) ([]*db.Tag, error) {
 	currentUser := middleware.ForContext(ctx)
 	if currentUser == nil {
 		return nil, errors.New("no user found in the context")
 	}
 
-	var entryUserCompetences []*db.EntryUserCompetence
-	err := r.DB.NewSelect().Model(&entryUserCompetences).Where("entry_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	var tags []*db.Tag
+	err := r.DB.NewSelect().Model(&tags).ColumnExpr("tag.*").Join("JOIN entry_tags et on tag.id = et.tag_id").Join("JOIN entries e on et.entry_id = e.id", obj.ID).Where("e.id = ?", obj.ID).Where("tag.organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return entryUserCompetences, nil
+	return tags, nil
 }
 
-// EntryUsers is the resolver for the entryUsers field.
-func (r *entryResolver) EntryUsers(ctx context.Context, obj *db.Entry) ([]*db.EntryUser, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var entryUsers []*db.EntryUser
-	err := r.DB.NewSelect().Model(&entryUsers).Where("entry_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return entryUsers, nil
-}
-
-// Entry is the resolver for the entry field.
-func (r *entryEventResolver) Entry(ctx context.Context, obj *db.EntryEvent) (*db.Entry, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var entry db.Entry
-	err := r.DB.NewSelect().Model(&entry).Where("id = ?", obj.EntryID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &entry, nil
-}
-
-// Event is the resolver for the event field.
-func (r *entryEventResolver) Event(ctx context.Context, obj *db.EntryEvent) (*db.Event, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var event db.Event
-	err := r.DB.NewSelect().Model(&event).Where("id = ?", obj.EventID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &event, nil
-}
-
-// Entry is the resolver for the entry field.
-func (r *entryFileResolver) Entry(ctx context.Context, obj *db.EntryFile) (*db.Entry, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var entry db.Entry
-	err := r.DB.NewSelect().Model(&entry).Where("id = ?", obj.EntryID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &entry, nil
-}
-
-// File is the resolver for the file field.
-func (r *entryFileResolver) File(ctx context.Context, obj *db.EntryFile) (*db.File, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var file db.File
-	err := r.DB.NewSelect().Model(&file).Where("id = ?", obj.FileID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &file, nil
-}
-
-// Entry is the resolver for the entry field.
-func (r *entryTagResolver) Entry(ctx context.Context, obj *db.EntryTag) (*db.Entry, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var entry db.Entry
-	err := r.DB.NewSelect().Model(&entry).Where("id = ?", obj.EntryID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &entry, nil
-}
-
-// Tag is the resolver for the tag field.
-func (r *entryTagResolver) Tag(ctx context.Context, obj *db.EntryTag) (*db.Tag, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var tag db.Tag
-	err := r.DB.NewSelect().Model(&tag).Where("id = ?", obj.TagID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &tag, nil
-}
-
-// Entry is the resolver for the entry field.
-func (r *entryUserResolver) Entry(ctx context.Context, obj *db.EntryUser) (*db.Entry, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var entry db.Entry
-	err := r.DB.NewSelect().Model(&entry).Where("id = ?", obj.EntryID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &entry, nil
-}
-
-// User is the resolver for the user field.
-func (r *entryUserResolver) User(ctx context.Context, obj *db.EntryUser) (*db.User, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var user db.User
-	err := r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
-}
-
-// Entry is the resolver for the entry field.
-func (r *entryUserCompetenceResolver) Entry(ctx context.Context, obj *db.EntryUserCompetence) (*db.Entry, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var entry db.Entry
-	err := r.DB.NewSelect().Model(&entry).Where("id = ?", obj.EntryID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &entry, nil
-}
-
-// User is the resolver for the user field.
-func (r *entryUserCompetenceResolver) User(ctx context.Context, obj *db.EntryUserCompetence) (*db.User, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var user db.User
-	err := r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
-}
-
-// Competence is the resolver for the competence field.
-func (r *entryUserCompetenceResolver) Competence(ctx context.Context, obj *db.EntryUserCompetence) (*db.Competence, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var competence db.Competence
-	err := r.DB.NewSelect().Model(&competence).Where("id = ?", obj.CompetenceID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &competence, nil
+// UserCompetences is the resolver for the userCompetences field.
+func (r *entryResolver) UserCompetences(ctx context.Context, obj *db.Entry) ([]*model.UserCompetence, error) {
+	panic(fmt.Errorf("not implemented: UserCompetences - userCompetences"))
 }
 
 // Image is the resolver for the image field.
@@ -466,15 +244,30 @@ func (r *eventResolver) Image(ctx context.Context, obj *db.Event) (*db.File, err
 	return &file, nil
 }
 
-// Bucket is the resolver for the bucket field.
-func (r *fileResolver) Bucket(ctx context.Context, obj *db.File) (string, error) {
-	panic(fmt.Errorf("not implemented: Bucket - bucket"))
+// DeletedAt is the resolver for the deletedAt field.
+func (r *eventResolver) DeletedAt(ctx context.Context, obj *db.Event) (*time.Time, error) {
+	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
+}
+
+// Competences is the resolver for the competences field.
+func (r *eventResolver) Competences(ctx context.Context, obj *db.Event) ([]*db.Competence, error) {
+	panic(fmt.Errorf("not implemented: Competences - competences"))
+}
+
+// Parent is the resolver for the parent field.
+func (r *fileResolver) Parent(ctx context.Context, obj *db.File) (*db.File, error) {
+	panic(fmt.Errorf("not implemented: Parent - parent"))
 }
 
 // URL is the resolver for the url field.
 func (r *fileResolver) URL(ctx context.Context, obj *db.File) (string, error) {
 	// TODO: implement this
 	return fmt.Sprintf("https://api.dokedu.org/files/%s", obj.ID), nil
+}
+
+// DeletedAt is the resolver for the deletedAt field.
+func (r *fileResolver) DeletedAt(ctx context.Context, obj *db.File) (*time.Time, error) {
+	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
 }
 
 // SignIn is the resolver for the signIn field.
@@ -526,38 +319,9 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 	}, nil
 }
 
-// SignUp is the resolver for the signUp field.
-func (r *mutationResolver) SignUp(ctx context.Context, input model.SignUpInput) (*model.SignInPayload, error) {
-	// if user is already logged in, return an error
-	currentUser := middleware.ForContext(ctx)
-	if currentUser != nil {
-		return nil, errors.New("you are already logged in")
-	}
-
-	// is password valid (more than 8 characters)
-	if len(input.Password) < 8 {
-		return nil, errors.New("password must be at least 8 characters long")
-	}
-
-	// does user already exist
-	var user db.User
-	err := r.DB.NewSelect().Model(&user).Where("email = ?", strings.ToLower(input.Email)).Scan(ctx)
-	if err == nil {
-		return nil, errors.New("user already exists")
-	}
-
-	// hash password
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
-
-	// create the user
-	user = db.User{
-		FirstName: input.FirstName,
-		LastName:  input.LastName,
-		Email:     strings.ToLower(input.Email),
-		Password:  sql.NullString{String: string(hashedPassword), Valid: true},
-	}
-
-	return nil, nil
+// AcceptInvite is the resolver for the acceptInvite field.
+func (r *mutationResolver) AcceptInvite(ctx context.Context, token string, input model.SignUpInput) (*model.SignInPayload, error) {
+	panic(fmt.Errorf("not implemented: AcceptInvite - acceptInvite"))
 }
 
 // CreateUser is the resolver for the createUser field.
@@ -732,12 +496,6 @@ func (r *mutationResolver) CreateEntry(ctx context.Context, input model.CreateEn
 		return nil, errors.New("no user found in the context")
 	}
 
-	jsonBody, err := json.Marshal(input.Body)
-
-	if err != nil {
-		return nil, err
-	}
-
 	// parse input.Date to 2006-01-02 format
 	date, err := time.Parse("2006-01-02", input.Date)
 
@@ -748,7 +506,7 @@ func (r *mutationResolver) CreateEntry(ctx context.Context, input model.CreateEn
 	entry := db.Entry{
 		OrganisationID: currentUser.OrganisationID,
 		Date:           date,
-		Body:           jsonBody,
+		Body:           input.Body,
 		UserID:         currentUser.ID,
 	}
 	err = r.DB.NewInsert().Model(&entry).Returning("*").Scan(ctx)
@@ -756,11 +514,11 @@ func (r *mutationResolver) CreateEntry(ctx context.Context, input model.CreateEn
 		return nil, err
 	}
 
-	if len(input.UserIds) > 0 {
+	if len(input.Users) > 0 {
 		var entryUsers []*db.EntryUser
 
-		if input.UserIds != nil {
-			for _, userId := range input.UserIds {
+		if input.Users != nil {
+			for _, userId := range input.Users {
 				entryUsers = append(entryUsers, &db.EntryUser{
 					EntryID:        entry.ID,
 					UserID:         *userId,
@@ -775,11 +533,11 @@ func (r *mutationResolver) CreateEntry(ctx context.Context, input model.CreateEn
 		}
 	}
 
-	if len(input.TagIds) > 0 {
+	if len(input.Tags) > 0 {
 		var entryTags []*db.EntryTag
 
-		if input.TagIds != nil {
-			for _, tagId := range input.TagIds {
+		if input.Tags != nil {
+			for _, tagId := range input.Tags {
 				entryTags = append(entryTags, &db.EntryTag{
 					EntryID:        entry.ID,
 					TagID:          *tagId,
@@ -794,11 +552,11 @@ func (r *mutationResolver) CreateEntry(ctx context.Context, input model.CreateEn
 		}
 	}
 
-	if len(input.FileIds) > 0 {
+	if len(input.Files) > 0 {
 		var entryFiles []*db.EntryFile
 
-		if input.FileIds != nil {
-			for _, fileId := range input.FileIds {
+		if input.Files != nil {
+			for _, fileId := range input.Files {
 				entryFiles = append(entryFiles, &db.EntryFile{
 					EntryID:        entry.ID,
 					FileID:         *fileId,
@@ -837,8 +595,54 @@ func (r *mutationResolver) CreateEntry(ctx context.Context, input model.CreateEn
 }
 
 // UpdateEntry is the resolver for the updateEntry field.
-func (r *mutationResolver) UpdateEntry(ctx context.Context, id string, input model.UpdateEntryInput) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: UpdateEntry - updateEntry"))
+func (r *mutationResolver) UpdateEntry(ctx context.Context, input model.UpdateEntryInput) (*db.Entry, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var entry db.Entry
+	err := r.DB.NewSelect().Model(&entry).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// save input.Date to database
+	if input.Date != nil {
+		err = r.DB.NewUpdate().Model(&entry).Set("date = ?", input.Date).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Returning("*").Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// save input.Body to database
+	if input.Body != nil {
+		err = r.DB.NewUpdate().Model(&entry).Set("body = ?", input.Body).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Returning("*").Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if len(input.Tags) > 0 {
+		var entryTags []*db.EntryTag
+
+		if input.Tags != nil {
+			for _, tagId := range input.Tags {
+				entryTags = append(entryTags, &db.EntryTag{
+					EntryID:        entry.ID,
+					TagID:          *tagId,
+					OrganisationID: currentUser.OrganisationID,
+				})
+			}
+		}
+
+		err = r.DB.NewInsert().Model(&entryTags).On("CONFLICT (entry_id, tag_id) DO NOTHING").Returning("*").Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &entry, nil
 }
 
 // ArchiveEntry is the resolver for the archiveEntry field.
@@ -856,7 +660,7 @@ func (r *mutationResolver) ArchiveEntry(ctx context.Context, id string) (*db.Ent
 			Time: time.Now(),
 		},
 	}
-	err := r.DB.NewSelect().Model(&entry).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	_, err := r.DB.NewUpdate().Model(&entry).Column("deleted_at").Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Exec(ctx)
 
 	if err != nil {
 		return nil, err
@@ -865,59 +669,14 @@ func (r *mutationResolver) ArchiveEntry(ctx context.Context, id string) (*db.Ent
 	return &entry, nil
 }
 
-// CreateEntryEvent is the resolver for the createEntryEvent field.
-func (r *mutationResolver) CreateEntryEvent(ctx context.Context, entryID string, eventID string) (*db.EntryEvent, error) {
-	panic(fmt.Errorf("not implemented: CreateEntryEvent - createEntryEvent"))
+// CreateTag is the resolver for the createTag field.
+func (r *mutationResolver) CreateTag(ctx context.Context, input model.CreateTagInput) (*db.Tag, error) {
+	panic(fmt.Errorf("not implemented: CreateTag - createTag"))
 }
 
-// DeleteEntryEvent is the resolver for the deleteEntryEvent field.
-func (r *mutationResolver) DeleteEntryEvent(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteEntryEvent - deleteEntryEvent"))
-}
-
-// CreateEntryFile is the resolver for the createEntryFile field.
-func (r *mutationResolver) CreateEntryFile(ctx context.Context, entryID string, fileID string) (*db.EntryFile, error) {
-	panic(fmt.Errorf("not implemented: CreateEntryFile - createEntryFile"))
-}
-
-// DeleteEntryFile is the resolver for the deleteEntryFile field.
-func (r *mutationResolver) DeleteEntryFile(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteEntryFile - deleteEntryFile"))
-}
-
-// CreateEntryUser is the resolver for the createEntryUser field.
-func (r *mutationResolver) CreateEntryUser(ctx context.Context, entryID string, userID string) (*db.EntryUser, error) {
-	panic(fmt.Errorf("not implemented: CreateEntryUser - createEntryUser"))
-}
-
-// DeleteEntryUser is the resolver for the deleteEntryUser field.
-func (r *mutationResolver) DeleteEntryUser(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteEntryUser - deleteEntryUser"))
-}
-
-// CreateEntryUserCompetence is the resolver for the createEntryUserCompetence field.
-func (r *mutationResolver) CreateEntryUserCompetence(ctx context.Context, entryID string, userCompetenceID string, level int) (*db.EntryUserCompetence, error) {
-	panic(fmt.Errorf("not implemented: CreateEntryUserCompetence - createEntryUserCompetence"))
-}
-
-// UpdateEntryUserCompetence is the resolver for the updateEntryUserCompetence field.
-func (r *mutationResolver) UpdateEntryUserCompetence(ctx context.Context, id string, level int) (*db.EntryUserCompetence, error) {
-	panic(fmt.Errorf("not implemented: UpdateEntryUserCompetence - updateEntryUserCompetence"))
-}
-
-// DeleteEntryUserCompetence is the resolver for the deleteEntryUserCompetence field.
-func (r *mutationResolver) DeleteEntryUserCompetence(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteEntryUserCompetence - deleteEntryUserCompetence"))
-}
-
-// CreateEntryTag is the resolver for the createEntryTag field.
-func (r *mutationResolver) CreateEntryTag(ctx context.Context, entryID string, tagID string) (*db.EntryTag, error) {
-	panic(fmt.Errorf("not implemented: CreateEntryTag - createEntryTag"))
-}
-
-// DeleteEntryTag is the resolver for the deleteEntryTag field.
-func (r *mutationResolver) DeleteEntryTag(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteEntryTag - deleteEntryTag"))
+// ArchiveTag is the resolver for the archiveTag field.
+func (r *mutationResolver) ArchiveTag(ctx context.Context, id string) (*db.Tag, error) {
+	panic(fmt.Errorf("not implemented: ArchiveTag - archiveTag"))
 }
 
 // CreateReport is the resolver for the createReport field.
@@ -1226,6 +985,11 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) ([]*d
 	return tags, nil
 }
 
+// Chat is the resolver for the chat field.
+func (r *queryResolver) Chat(ctx context.Context, id string) (*db.Chat, error) {
+	panic(fmt.Errorf("not implemented: Chat - chat"))
+}
+
 // Chats is the resolver for the chats field.
 func (r *queryResolver) Chats(ctx context.Context, limit *int, offset *int) (*model.ChatConnection, error) {
 	currentUser := middleware.ForContext(ctx)
@@ -1254,6 +1018,16 @@ func (r *queryResolver) Chats(ctx context.Context, limit *int, offset *int) (*mo
 		PageInfo:   nil,
 		TotalCount: count,
 	}, nil
+}
+
+// File is the resolver for the file field.
+func (r *queryResolver) File(ctx context.Context, id string) (*db.File, error) {
+	panic(fmt.Errorf("not implemented: File - file"))
+}
+
+// Files is the resolver for the files field.
+func (r *queryResolver) Files(ctx context.Context, limit *int, offset *int) ([]*db.File, error) {
+	panic(fmt.Errorf("not implemented: Files - files"))
 }
 
 // Meta is the resolver for the meta field.
@@ -1317,6 +1091,11 @@ func (r *reportResolver) File(ctx context.Context, obj *db.Report) (*db.File, er
 	return &file, nil
 }
 
+// DeletedAt is the resolver for the deletedAt field.
+func (r *reportResolver) DeletedAt(ctx context.Context, obj *db.Report) (*time.Time, error) {
+	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
+}
+
 // Color is the resolver for the color field.
 func (r *tagResolver) Color(ctx context.Context, obj *db.Tag) (string, error) {
 	if obj.Color.Valid {
@@ -1324,6 +1103,11 @@ func (r *tagResolver) Color(ctx context.Context, obj *db.Tag) (string, error) {
 	}
 
 	return "", nil
+}
+
+// DeletedAt is the resolver for the deletedAt field.
+func (r *tagResolver) DeletedAt(ctx context.Context, obj *db.Tag) (*time.Time, error) {
+	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
 }
 
 // DeletedAt is the resolver for the deletedAt field.
@@ -1349,23 +1133,6 @@ func (r *Resolver) Competence() CompetenceResolver { return &competenceResolver{
 
 // Entry returns EntryResolver implementation.
 func (r *Resolver) Entry() EntryResolver { return &entryResolver{r} }
-
-// EntryEvent returns EntryEventResolver implementation.
-func (r *Resolver) EntryEvent() EntryEventResolver { return &entryEventResolver{r} }
-
-// EntryFile returns EntryFileResolver implementation.
-func (r *Resolver) EntryFile() EntryFileResolver { return &entryFileResolver{r} }
-
-// EntryTag returns EntryTagResolver implementation.
-func (r *Resolver) EntryTag() EntryTagResolver { return &entryTagResolver{r} }
-
-// EntryUser returns EntryUserResolver implementation.
-func (r *Resolver) EntryUser() EntryUserResolver { return &entryUserResolver{r} }
-
-// EntryUserCompetence returns EntryUserCompetenceResolver implementation.
-func (r *Resolver) EntryUserCompetence() EntryUserCompetenceResolver {
-	return &entryUserCompetenceResolver{r}
-}
 
 // Event returns EventResolver implementation.
 func (r *Resolver) Event() EventResolver { return &eventResolver{r} }
@@ -1396,11 +1163,6 @@ type chatMessageResolver struct{ *Resolver }
 type chatUserResolver struct{ *Resolver }
 type competenceResolver struct{ *Resolver }
 type entryResolver struct{ *Resolver }
-type entryEventResolver struct{ *Resolver }
-type entryFileResolver struct{ *Resolver }
-type entryTagResolver struct{ *Resolver }
-type entryUserResolver struct{ *Resolver }
-type entryUserCompetenceResolver struct{ *Resolver }
 type eventResolver struct{ *Resolver }
 type fileResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
@@ -1410,6 +1172,12 @@ type reportResolver struct{ *Resolver }
 type tagResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }
 
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
 func isStringInArray(s string, a []string) bool {
 	for _, v := range a {
 		if v == s {

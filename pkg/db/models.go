@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"encoding/json"
 	"github.com/uptrace/bun"
 	"time"
 
@@ -144,13 +143,13 @@ type Competence struct {
 type Entry struct {
 	bun.BaseModel
 
-	ID             string          `bun:",nullzero,pk" json:"id"`
-	Date           time.Time       `json:"date"`
-	Body           json.RawMessage `json:"body"`
-	UserID         string          `json:"user_id"`
-	OrganisationID string          `json:"organisation_id"`
-	CreatedAt      time.Time       `bun:",nullzero,notnull,default:now()" json:"created_at"`
-	DeletedAt      bun.NullTime    `bun:",soft_delete,nullzero"`
+	ID             string       `bun:",nullzero,pk" json:"id"`
+	Date           time.Time    `json:"date"`
+	Body           string       `json:"body"`
+	UserID         string       `json:"user_id"`
+	OrganisationID string       `json:"organisation_id"`
+	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
 type EntryEvent struct {

@@ -107,7 +107,7 @@ CREATE TABLE entries
 (
     id              text        DEFAULT nanoid() NOT NULL PRIMARY KEY,
     date            date                         NOT NULL,
-    body            jsonb                        NOT NULL,
+    body            text                         NOT NULL,
     user_id         text                         NOT NULL REFERENCES users,
     created_at      timestamptz DEFAULT NOW()    NOT NULL,
     deleted_at      timestamptz,
@@ -264,6 +264,6 @@ CREATE TABLE entry_tags
     organisation_id text                         NOT NULL REFERENCES organisations,
     created_at      timestamptz DEFAULT NOW()    NOT NULL,
     deleted_at      timestamptz,
-    UNIQUE (id, entry_id, tag_id)
+    UNIQUE (entry_id, tag_id)
 );
 

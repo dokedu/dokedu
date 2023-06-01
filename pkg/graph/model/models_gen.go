@@ -29,18 +29,12 @@ type CreateEntryFileInput struct {
 }
 
 type CreateEntryInput struct {
-	Date            string                            `json:"date"`
-	Body            string                            `json:"body"`
-	UserIds         []*string                         `json:"userIds,omitempty"`
-	TagIds          []*string                         `json:"tagIds,omitempty"`
-	FileIds         []*string                         `json:"fileIds,omitempty"`
-	UserCompetences []*CreateEntryUserCompetenceInput `json:"userCompetences,omitempty"`
-}
-
-type CreateEntryUserCompetenceInput struct {
-	Level        int    `json:"level"`
-	UserID       string `json:"userId"`
-	CompetenceID string `json:"competenceId"`
+	Date            string                       `json:"date"`
+	Body            string                       `json:"body"`
+	Tags            []*string                    `json:"tags,omitempty"`
+	Files           []*string                    `json:"files,omitempty"`
+	Users           []*string                    `json:"users,omitempty"`
+	UserCompetences []*CreateUserCompetenceInput `json:"userCompetences,omitempty"`
 }
 
 type CreateReportInput struct {
@@ -51,6 +45,17 @@ type CreateReportInput struct {
 	Meta        string          `json:"meta"`
 	FilterTags  []string        `json:"filterTags"`
 	StudentUser string          `json:"studentUser"`
+}
+
+type CreateTagInput struct {
+	Name  string `json:"name"`
+	Color string `json:"color"`
+}
+
+type CreateUserCompetenceInput struct {
+	Level        int    `json:"level"`
+	UserID       string `json:"userId"`
+	CompetenceID string `json:"competenceId"`
 }
 
 type CreateUserInput struct {
@@ -70,12 +75,13 @@ type EntryConnection struct {
 }
 
 type EntryFilterInput struct {
-	Author      []*string  `json:"author,omitempty"`
+	Authors     []*string  `json:"authors,omitempty"`
 	Users       []*string  `json:"users,omitempty"`
 	Tags        []*string  `json:"tags,omitempty"`
 	Competences []*string  `json:"competences,omitempty"`
 	From        *time.Time `json:"from,omitempty"`
 	To          *time.Time `json:"to,omitempty"`
+	Deleted     *bool      `json:"deleted,omitempty"`
 }
 
 type EventConnection struct {
@@ -85,9 +91,9 @@ type EventConnection struct {
 }
 
 type EventFilterInput struct {
-	From        *time.Time `json:"from,omitempty"`
-	To          *time.Time `json:"to,omitempty"`
-	ShowDeleted *bool      `json:"showDeleted,omitempty"`
+	From    *time.Time `json:"from,omitempty"`
+	To      *time.Time `json:"to,omitempty"`
+	Deleted *bool      `json:"deleted,omitempty"`
 }
 
 type OrganisationConnection struct {
@@ -125,9 +131,18 @@ type SignUpInput struct {
 }
 
 type UpdateEntryInput struct {
-	Date *time.Time `json:"date,omitempty"`
-	Body *string    `json:"body,omitempty"`
-	User *string    `json:"user,omitempty"`
+	ID              string                       `json:"id"`
+	Date            *time.Time                   `json:"date,omitempty"`
+	Body            *string                      `json:"body,omitempty"`
+	Tags            []*string                    `json:"tags,omitempty"`
+	Files           []*string                    `json:"files,omitempty"`
+	Users           []*string                    `json:"users,omitempty"`
+	UserCompetences []*CreateUserCompetenceInput `json:"userCompetences,omitempty"`
+}
+
+type UpdateEntryTagInput struct {
+	ID        string     `json:"id"`
+	DeletedAt *time.Time `json:"deletedAt,omitempty"`
 }
 
 type UpdateUserInput struct {
@@ -138,6 +153,17 @@ type UpdateUserInput struct {
 	Birthday  *time.Time `json:"birthday,omitempty"`
 	LeftAt    *time.Time `json:"leftAt,omitempty"`
 	JoinedAt  *time.Time `json:"joinedAt,omitempty"`
+}
+
+type UserCompetence struct {
+	ID         string         `json:"id"`
+	Level      int            `json:"level"`
+	User       *db.User       `json:"user"`
+	Competence *db.Competence `json:"competence"`
+	Entry      *db.Entry      `json:"entry,omitempty"`
+	CreatedBy  *db.User       `json:"createdBy,omitempty"`
+	CreatedAt  time.Time      `json:"createdAt"`
+	DeletedAt  *time.Time     `json:"deletedAt,omitempty"`
 }
 
 type UserConnection struct {

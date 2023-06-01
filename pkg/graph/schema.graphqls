@@ -16,6 +16,7 @@ enum UserRole {
     teacher
     educator
     student
+    parent
 }
 
 type User {
@@ -75,48 +76,22 @@ type Entry {
     deletedAt: Time
 
     user: User!
-    entryEvents: [EntryEvent!]!
-    entryFiles: [EntryFile!]!
-    entryTags: [EntryTag!]!
-    entryUserCompetences: [EntryUserCompetence!]!
-    entryUsers: [EntryUser!]!
+    users: [User!]!
+    events: [Event!]!
+    files: [File!]!
+    tags: [Tag!]!
+    userCompetences: [UserCompetence!]!
 }
 
-type EntryEvent {
-    id: ID!
-    entry: Entry!
-    event: Event!
-    createdAt: Time!
-}
-
-type EntryFile {
-    id: ID!
-    entry: Entry!
-    file: File!
-    createdAt: Time!
-}
-
-type EntryTag {
-    id: ID!
-    entry: Entry!
-    tag: Tag!
-    createdAt: Time!
-}
-
-type EntryUserCompetence {
+type UserCompetence {
     id: ID!
     level: Int!
-    entry: Entry!
     user: User!
     competence: Competence!
+    entry: Entry
+    createdBy: User
     createdAt: Time!
-}
-
-type EntryUser {
-    id: ID!
-    entry: Entry!
-    user: User!
-    createdAt: Time!
+    deletedAt: Time
 }
 
 type Event {
@@ -128,13 +103,24 @@ type Event {
     endsAt: Time!
     recurrence: [String]
     createdAt: Time!
+    deletedAt: Time
+
+    competences: [Competence!]!
+}
+
+enum FileType {
+    blob
+    folder
 }
 
 type File {
     id: ID!
-    bucket: String!
+    fileType: FileType!
+    parent: File
     name: String!
     url: String!
+    createdAt: Time!
+    deletedAt: Time
 }
 
 enum ReportStatus {
@@ -167,6 +153,7 @@ type Report {
     studentUser: User!
     file: File
     createdAt: Time!
+    deletedAt: Time
 }
 
 type Tag {
@@ -174,6 +161,7 @@ type Tag {
     name: String!
     color: String!
     createdAt: Time!
+    deletedAt: Time
 }
 
 input SignInInput {
@@ -246,12 +234,13 @@ input UserFilterInput {
 }
 
 input EntryFilterInput {
-    author: [ID]
+    authors: [ID]
     users: [ID]
     tags: [ID]
     competences: [ID]
     from: Time
     to: Time
+    deleted: Boolean
 }
 
 input CompetenceFilterInput {
@@ -262,7 +251,7 @@ input CompetenceFilterInput {
 input EventFilterInput {
     from: Time
     to: Time
-    showDeleted: Boolean
+    deleted: Boolean
 }
 
 type Query {
@@ -286,7 +275,11 @@ type Query {
     tag(id: ID!): Tag!
     tags(limit: Int, offset: Int): [Tag!]!
 
+    chat(id: ID!): Chat!
     chats(limit: Int, offset: Int): ChatConnection!
+
+    file(id: ID!): File!
+    files(limit: Int, offset: Int): [File!]!
 }
 
 input CreateUserInput {
@@ -314,7 +307,7 @@ input CreateEntryFileInput {
     file: ID!
 }
 
-input CreateEntryUserCompetenceInput {
+input CreateUserCompetenceInput {
     level: Int!
     userId: ID!
     competenceId: ID!
@@ -323,16 +316,26 @@ input CreateEntryUserCompetenceInput {
 input CreateEntryInput {
     date: String!
     body: String!
-    userIds: [ID]
-    tagIds: [ID]
-    fileIds: [ID]
-    userCompetences: [CreateEntryUserCompetenceInput]
+    tags: [ID]
+    files: [ID]
+    users: [ID]
+    userCompetences: [CreateUserCompetenceInput]
 }
 
+# TODO: if field is null, ignore, if field is empty, delete existing items, if set, set all to this
 input UpdateEntryInput {
+    id: ID!
     date: Time
     body: String
-    user: ID
+    tags: [ID]
+    files: [ID]
+    users: [ID]
+    userCompetences: [CreateUserCompetenceInput]
+}
+
+input UpdateEntryTagInput {
+    id: ID!
+    deletedAt: Time
 }
 
 input CreateReportInput {
@@ -345,9 +348,15 @@ input CreateReportInput {
     studentUser: ID!
 }
 
+input CreateTagInput {
+    name: String!
+    color: String!
+}
+
 type Mutation {
     signIn(input: SignInInput!): SignInPayload!
-    signUp(input: SignUpInput!): SignInPayload!
+
+    acceptInvite(token: String!, input: SignUpInput!): SignInPayload!
 
     createUser(input: CreateUserInput!): User!
     updateUser(input: UpdateUserInput!): User!
@@ -355,24 +364,11 @@ type Mutation {
     archiveUser(id: ID!): User!
 
     createEntry(input: CreateEntryInput!): Entry!
-    updateEntry(id: ID!, input: UpdateEntryInput!): Entry!
+    updateEntry(input: UpdateEntryInput!): Entry!
     archiveEntry(id: ID!): Entry!
 
-    createEntryEvent(entryId: ID!, eventId: ID!): EntryEvent!
-    deleteEntryEvent(id: ID!): Boolean!
-
-    createEntryFile(entryId: ID!, fileId: ID!): EntryFile!
-    deleteEntryFile(id: ID!): Boolean!
-
-    createEntryUser(entryId: ID!, userId: ID!): EntryUser!
-    deleteEntryUser(id: ID!): Boolean!
-
-    createEntryUserCompetence(entryId: ID!, userCompetenceId: ID!, level: Int!): EntryUserCompetence!
-    updateEntryUserCompetence(id: ID!, level: Int!): EntryUserCompetence!
-    deleteEntryUserCompetence(id: ID!): Boolean!
-
-    createEntryTag(entryId: ID!, tagId: ID!): EntryTag!
-    deleteEntryTag(id: ID!): Boolean!
+    createTag(input: CreateTagInput!): Tag!
+    archiveTag(id: ID!): Tag!
 
     createReport(input: CreateReportInput!): Report!
 
