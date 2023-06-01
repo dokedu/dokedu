@@ -137,6 +137,7 @@ type UpdateEntryInput struct {
 	Tags            []*string                    `json:"tags,omitempty"`
 	Files           []*string                    `json:"files,omitempty"`
 	Users           []*string                    `json:"users,omitempty"`
+	Events          []*string                    `json:"events,omitempty"`
 	UserCompetences []*CreateUserCompetenceInput `json:"userCompetences,omitempty"`
 }
 

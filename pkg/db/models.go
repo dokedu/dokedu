@@ -336,7 +336,7 @@ type User struct {
 	Password       sql.NullString `json:"password"`
 	AvatarFileID   sql.NullString `json:"avatar_file_id"`
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
-	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
+	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero" json:"deleted_at"`
 }
 
 type UserDriveFile struct {

@@ -12016,7 +12016,7 @@ func (ec *executionContext) unmarshalInputUpdateEntryInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "date", "body", "tags", "files", "users", "userCompetences"}
+	fieldsInOrder := [...]string{"id", "date", "body", "tags", "files", "users", "events", "userCompetences"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -12068,6 +12068,14 @@ func (ec *executionContext) unmarshalInputUpdateEntryInput(ctx context.Context, 
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("users"))
 			it.Users, err = ec.unmarshalOID2ᚕᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "events":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("events"))
+			it.Events, err = ec.unmarshalOID2ᚕᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}

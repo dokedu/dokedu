@@ -330,6 +330,7 @@ input UpdateEntryInput {
     tags: [ID]
     files: [ID]
     users: [ID]
+    events: [ID]
     userCompetences: [CreateUserCompetenceInput]
 }
 

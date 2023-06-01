@@ -97,7 +97,8 @@ CREATE TABLE user_students
     comments        text,
     joined_at       timestamptz,
     created_at      timestamptz DEFAULT NOW()    NOT NULL,
-    deleted_at      timestamptz
+    deleted_at      timestamptz,
+    UNIQUE (user_id, organisation_id)
 );
 
 ALTER TABLE organisations
@@ -121,7 +122,8 @@ CREATE TABLE entry_users
     user_id         text                         NOT NULL REFERENCES users,
     created_at      timestamptz DEFAULT NOW()    NOT NULL,
     deleted_at      timestamptz,
-    organisation_id text                         NOT NULL REFERENCES organisations
+    organisation_id text                         NOT NULL REFERENCES organisations,
+    UNIQUE (entry_id, user_id)
 );
 
 CREATE TYPE competence_type AS ENUM ('subject', 'group', 'competence');
@@ -185,7 +187,8 @@ CREATE TABLE entry_events
     event_id        text                         NOT NULL REFERENCES events,
     organisation_id text                         NOT NULL REFERENCES organisations,
     created_at      timestamptz DEFAULT NOW()    NOT NULL,
-    deleted_at      timestamptz
+    deleted_at      timestamptz,
+    UNIQUE (entry_id, event_id)
 );
 
 CREATE TYPE report_status AS ENUM ('pending', 'processing', 'done', 'error');

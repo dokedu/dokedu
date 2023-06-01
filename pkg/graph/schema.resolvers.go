@@ -189,7 +189,16 @@ func (r *entryResolver) Users(ctx context.Context, obj *db.Entry) ([]*db.User, e
 	}
 
 	var users []*db.User
-	err := r.DB.NewSelect().Model(&users).Join("JOIN entry_users AS eu ON eu.user_id = users.id").Where("entry_user.entry_id = ?", obj.ID).Where("users.organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+
+	err := r.DB.NewSelect().
+		Model(&users).
+		Join("JOIN entry_users eu on \"user\".id = eu.user_id").
+		Join("JOIN entries e on eu.entry_id = e.id").
+		Where("eu.deleted_at is NULL").
+		Where("e.id = ?", obj.ID).
+		Where("\"user\".organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+
 	if err != nil {
 		return nil, err
 	}
@@ -199,7 +208,26 @@ func (r *entryResolver) Users(ctx context.Context, obj *db.Entry) ([]*db.User, e
 
 // Events is the resolver for the events field.
 func (r *entryResolver) Events(ctx context.Context, obj *db.Entry) ([]*db.Event, error) {
-	panic(fmt.Errorf("not implemented: Events - events"))
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var events []*db.Event
+	err := r.DB.NewSelect().
+		Model(&events).
+		ColumnExpr("event.*").
+		Join("JOIN entry_events ee on event.id = ee.event_id").
+		Join("JOIN entries e on ee.entry_id = e.id").
+		Where("ee.deleted_at is NULL").
+		Where("e.id = ?", obj.ID).
+		Where("event.organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return events, nil
 }
 
 // Files is the resolver for the files field.
@@ -215,7 +243,14 @@ func (r *entryResolver) Tags(ctx context.Context, obj *db.Entry) ([]*db.Tag, err
 	}
 
 	var tags []*db.Tag
-	err := r.DB.NewSelect().Model(&tags).ColumnExpr("tag.*").Join("JOIN entry_tags et on tag.id = et.tag_id").Join("JOIN entries e on et.entry_id = e.id", obj.ID).Where("e.id = ?", obj.ID).Where("tag.organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err := r.DB.NewSelect().
+		Model(&tags).
+		ColumnExpr("tag.*").
+		Join("JOIN entry_tags et on tag.id = et.tag_id").
+		Join("JOIN entries e on et.entry_id = e.id").
+		Where("et.deleted_at is NULL").
+		Where("e.id = ?", obj.ID).
+		Where("tag.organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -642,6 +677,52 @@ func (r *mutationResolver) UpdateEntry(ctx context.Context, input model.UpdateEn
 		}
 	}
 
+	if len(input.Events) > 0 {
+		var entryEvents []*db.EntryEvent
+
+		if input.Events != nil {
+			for _, eventId := range input.Events {
+				entryEvents = append(entryEvents, &db.EntryEvent{
+					EntryID:        entry.ID,
+					EventID:        *eventId,
+					OrganisationID: currentUser.OrganisationID,
+				})
+			}
+		}
+
+		err = r.DB.NewInsert().Model(&entryEvents).On("CONFLICT (entry_id, event_id) DO NOTHING").Returning("*").Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if len(input.Users) > 0 {
+		var entryUsers []*db.EntryUser
+
+		if input.Users != nil {
+			for _, userId := range input.Users {
+				entryUsers = append(entryUsers, &db.EntryUser{
+					EntryID:        entry.ID,
+					UserID:         *userId,
+					OrganisationID: currentUser.OrganisationID,
+				})
+			}
+		}
+
+		err = r.DB.NewInsert().Model(&entryUsers).On("CONFLICT (entry_id, user_id) DO UPDATE SET deleted_at = null").Returning("*").Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if len(input.Users) == 0 {
+		// delete all entryFiles
+		_, err = r.DB.NewDelete().Model(&db.EntryUser{}).Where("entry_id = ?", entry.ID).Where("organisation_id = ?", currentUser.OrganisationID).Exec(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return &entry, nil
 }
 
@@ -730,7 +811,13 @@ func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filt
 
 	// query the users
 	var users []*db.User
-	count, err := r.DB.NewSelect().Model(&users).Where("organisation_id = ?", currentUser.OrganisationID).ScanAndCount(ctx)
+	query := r.DB.NewSelect().Model(&users).Where("organisation_id = ?", currentUser.OrganisationID)
+
+	if filter.Role != nil {
+		query.Where("role IN (?)", bun.In(filter.Role))
+	}
+
+	count, err := query.ScanAndCount(ctx)
 	if err != nil {
 		return nil, err
 	}
