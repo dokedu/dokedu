@@ -99,6 +99,7 @@ type Entry {
     body: String
     user: User!
     createdAt: Time!
+    deletedAt: Time
     entryEvents: [EntryEvent!]!
     entryFiles: [EntryFile!]!
     entryTags: [EntryTag!]!

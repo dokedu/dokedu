@@ -1,56 +1,47 @@
 <template>
   <PageWrapper>
-    <PageHeader class="flex justify-between">
-      <div class="text-gray-950 font-medium">Einträge</div>
-      <router-link :to="{ name: 'record-entry', params: { id: $route.params.id } }" class="bg-black text-white px-6 py-1.5 rounded-md">
-        Bearbeiten
-      </router-link>
-    </PageHeader>
-    <div class="p-4 flex flex-col">
-        <pre>{{data?.entry}}</pre>
-      <div class="flex flex-wrap gap-4">
-        <DTag v-for="tag in tags" :key="tag.id">{{tag.name}}</DTag>
-      </div>
-    </div>
+    <EntryForm v-if="entry" :entry="entry.entry" mode="edit" @archived="archived" @saved="saved" />
   </PageWrapper>
 </template>
 <script setup lang="ts">
-import PageHeader from "../../../components/PageHeader.vue";
 import PageWrapper from "../../../components/PageWrapper.vue";
-import {gql, useQuery} from "@urql/vue";
-import {useRoute} from "vue-router";
-import DTag from "../../../components/d-tag/d-tag.vue";
-import {computed} from "vue";
+import EntryForm from "./EntryForm.vue";
+import { useRoute, useRouter } from "vue-router";
+import { gql, useQuery } from "@urql/vue";
 
-const route = useRoute()
+const router = useRouter();
+const route = useRoute();
 
-const tags = computed(() => {
-  return data?.value?.entry?.entryTags?.map(el => el.tag)
-})
+async function archived() {
+  await router.push({ name: "record-entries" });
+}
 
-const {data} = useQuery({
+function saved() {
+  router.push({ name: "record-entries" });
+}
+
+const { data: entry } = useQuery({
   query: gql`
-query entry($id: ID!) {
-  entry(id: $id) {
-    id
-    date
-    body
-    user {
-      id
-      firstName
-      lastName
+    query entry($id: ID!) {
+      entry(id: $id) {
+        id
+        date
+        body
+        deletedAt
+        user {
+          id
+          firstName
+          lastName
+        }
+        createdAt
+        tags {
+          id
+          name
+          color
+        }
+      }
     }
-    createdAt
-    entryTags {
-    id
-    tag {
-    id
-    name
-    }
-    }
-  }
-}`,
-  variables: { id: route.params.id }
-})
-
+  `,
+  variables: { id: route.params.id },
+});
 </script>
