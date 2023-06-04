@@ -31,27 +31,6 @@ type User {
     deletedAt: Time
 }
 
-type Chat {
-    id: ID!
-    name: String
-    chatUsers: [ChatUser!]!
-    chatMessages: [ChatMessage!]!
-}
-
-type ChatUser {
-    id: ID!
-    chat: Chat!
-    user: User!
-}
-
-type ChatMessage {
-    id: ID!
-    chat: Chat!
-    user: User!
-    message: String!
-    createdAt: Time!
-}
-
 enum CompetenceType {
     subject
     group
@@ -86,12 +65,12 @@ type Entry {
 type UserCompetence {
     id: ID!
     level: Int!
-    user: User!
     competence: Competence!
     entry: Entry
-    createdBy: User
+    user: User!
+    # TODO: createdBy: User
     createdAt: Time!
-    deletedAt: Time
+    # TODO: deletedAt: Time
 }
 
 type Event {
@@ -198,11 +177,7 @@ type UserConnection {
     totalCount: Int!
 }
 
-type ChatConnection {
-    edges: [Chat]
-    pageInfo: PageInfo!
-    totalCount: Int!
-}
+
 
 type CompetenceConnection {
     edges: [Competence]
@@ -254,7 +229,12 @@ input EventFilterInput {
     deleted: Boolean
 }
 
-type Query {
+
+type Query
+
+type Mutation
+
+extend type Query {
     organisation: Organisation!
 
     users(limit: Int, offset: Int, filter: UserFilterInput, search: String): UserConnection!
@@ -275,11 +255,9 @@ type Query {
     tag(id: ID!): Tag!
     tags(limit: Int, offset: Int): [Tag!]!
 
-    chat(id: ID!): Chat!
-    chats(limit: Int, offset: Int): ChatConnection!
-
     file(id: ID!): File!
     files(limit: Int, offset: Int): [File!]!
+
 }
 
 input CreateUserInput {
@@ -309,7 +287,6 @@ input CreateEntryFileInput {
 
 input CreateUserCompetenceInput {
     level: Int!
-    userId: ID!
     competenceId: ID!
 }
 
@@ -319,6 +296,7 @@ input CreateEntryInput {
     tags: [ID]
     files: [ID]
     users: [ID]
+    events: [ID]
     userCompetences: [CreateUserCompetenceInput]
 }
 
@@ -354,7 +332,7 @@ input CreateTagInput {
     color: String!
 }
 
-type Mutation {
+extend type Mutation {
     signIn(input: SignInInput!): SignInPayload!
 
     acceptInvite(token: String!, input: SignUpInput!): SignInPayload!
@@ -368,6 +346,9 @@ type Mutation {
     updateEntry(input: UpdateEntryInput!): Entry!
     archiveEntry(id: ID!): Entry!
 
+    createUserCompetence(input: CreateUserCompetenceInput!): UserCompetence!
+    archiveUserCompetence(id: ID!): UserCompetence!
+
     createTag(input: CreateTagInput!): Tag!
     archiveTag(id: ID!): Tag!
 
@@ -375,3 +356,4 @@ type Mutation {
 
     updatePassword(oldPassword: String!, newPassword: String!): Boolean!
 }
+

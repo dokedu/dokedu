@@ -196,17 +196,18 @@ type EntryUser struct {
 	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
-type EntryUserCompetence struct {
+type UserCompetence struct {
 	bun.BaseModel
 
-	ID             string       `bun:",nullzero,pk" json:"id"`
-	Level          int32        `json:"level"`
-	UserID         string       `json:"user_id"`
-	EntryID        string       `json:"entry_id"`
-	CompetenceID   string       `json:"competence_id"`
-	OrganisationID string       `json:"organisation_id"`
-	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
-	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
+	ID             string         `bun:",nullzero,pk" json:"id"`
+	Level          int            `json:"level"`
+	UserID         string         `json:"user_id"`
+	EntryID        sql.NullString `json:"entry_id,omitempty"`
+	CompetenceID   string         `json:"competence_id"`
+	OrganisationID string         `json:"organisation_id"`
+	CreatedBy      sql.NullString `json:"created_by,omitempty"`
+	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
 }
 
 type Event struct {

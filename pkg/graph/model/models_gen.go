@@ -34,6 +34,7 @@ type CreateEntryInput struct {
 	Tags            []*string                    `json:"tags,omitempty"`
 	Files           []*string                    `json:"files,omitempty"`
 	Users           []*string                    `json:"users,omitempty"`
+	Events          []*string                    `json:"events,omitempty"`
 	UserCompetences []*CreateUserCompetenceInput `json:"userCompetences,omitempty"`
 }
 
@@ -54,7 +55,6 @@ type CreateTagInput struct {
 
 type CreateUserCompetenceInput struct {
 	Level        int    `json:"level"`
-	UserID       string `json:"userId"`
 	CompetenceID string `json:"competenceId"`
 }
 
@@ -154,17 +154,6 @@ type UpdateUserInput struct {
 	Birthday  *time.Time `json:"birthday,omitempty"`
 	LeftAt    *time.Time `json:"leftAt,omitempty"`
 	JoinedAt  *time.Time `json:"joinedAt,omitempty"`
-}
-
-type UserCompetence struct {
-	ID         string         `json:"id"`
-	Level      int            `json:"level"`
-	User       *db.User       `json:"user"`
-	Competence *db.Competence `json:"competence"`
-	Entry      *db.Entry      `json:"entry,omitempty"`
-	CreatedBy  *db.User       `json:"createdBy,omitempty"`
-	CreatedAt  time.Time      `json:"createdAt"`
-	DeletedAt  *time.Time     `json:"deletedAt,omitempty"`
 }
 
 type UserConnection struct {

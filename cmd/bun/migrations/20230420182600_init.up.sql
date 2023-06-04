@@ -142,17 +142,18 @@ CREATE TABLE competences
     deleted_at      timestamptz
 );
 
-CREATE TABLE entry_user_competences
+CREATE TABLE user_competences
 (
     id              text        DEFAULT nanoid() NOT NULL PRIMARY KEY,
     level           integer                      NOT NULL CHECK ((level <= 3) AND (level >= 0)),
     user_id         text                         NOT NULL REFERENCES users,
-    entry_id        text                         NOT NULL REFERENCES entries,
+    entry_id        text                         NULL REFERENCES entries,
     competence_id   text                         NOT NULL REFERENCES competences,
     created_at      timestamptz DEFAULT NOW()    NOT NULL,
+    created_by      text                         NULL REFERENCES users,
     deleted_at      timestamptz,
     organisation_id text                         NOT NULL REFERENCES organisations,
-    UNIQUE (user_id, entry_id, competence_id)
+    UNIQUE (user_id, competence_id, entry_id)
 );
 
 CREATE TABLE entry_files

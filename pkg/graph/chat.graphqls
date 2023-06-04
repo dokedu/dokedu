@@ -1,0 +1,31 @@
+type Chat {
+    id: ID!
+    name: String
+    chatUsers: [ChatUser!]!
+    chatMessages: [ChatMessage!]!
+}
+
+type ChatUser {
+    id: ID!
+    chat: Chat!
+    user: User!
+}
+
+type ChatMessage {
+    id: ID!
+    chat: Chat!
+    user: User!
+    message: String!
+    createdAt: Time!
+}
+
+type ChatConnection {
+    edges: [Chat]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+extend type Query {
+    chat(id: ID!): Chat!
+    chats(limit: Int, offset: Int): ChatConnection!
+}

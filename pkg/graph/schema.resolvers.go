@@ -6,6 +6,7 @@ package graph
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"example/pkg/db"
@@ -20,111 +21,6 @@ import (
 	"github.com/uptrace/bun"
 	"golang.org/x/crypto/bcrypt"
 )
-
-// Name is the resolver for the name field.
-func (r *chatResolver) Name(ctx context.Context, obj *db.Chat) (*string, error) {
-	if obj.Name.Valid {
-		return &obj.Name.String, nil
-	}
-
-	return nil, nil
-}
-
-// ChatUsers is the resolver for the chatUsers field.
-func (r *chatResolver) ChatUsers(ctx context.Context, obj *db.Chat) ([]*db.ChatUser, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var chatUser []*db.ChatUser
-	err := r.DB.NewSelect().Model(&chatUser).Where("chat_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return chatUser, nil
-}
-
-// ChatMessages is the resolver for the chatMessages field.
-func (r *chatResolver) ChatMessages(ctx context.Context, obj *db.Chat) ([]*db.ChatMessage, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var chatMessage []*db.ChatMessage
-	err := r.DB.NewSelect().Model(&chatMessage).Where("chat_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return chatMessage, nil
-}
-
-// Chat is the resolver for the chat field.
-func (r *chatMessageResolver) Chat(ctx context.Context, obj *db.ChatMessage) (*db.Chat, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var chat db.Chat
-	err := r.DB.NewSelect().Model(&chat).Where("id = ?", obj.ChatID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &chat, nil
-}
-
-// User is the resolver for the user field.
-func (r *chatMessageResolver) User(ctx context.Context, obj *db.ChatMessage) (*db.User, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var user db.User
-	err := r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
-}
-
-// Chat is the resolver for the chat field.
-func (r *chatUserResolver) Chat(ctx context.Context, obj *db.ChatUser) (*db.Chat, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var chat db.Chat
-	err := r.DB.NewSelect().Model(&chat).Where("id = ?", obj.ChatID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &chat, nil
-}
-
-// User is the resolver for the user field.
-func (r *chatUserResolver) User(ctx context.Context, obj *db.ChatUser) (*db.User, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var user db.User
-	err := r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
-}
 
 // Type is the resolver for the type field.
 func (r *competenceResolver) Type(ctx context.Context, obj *db.Competence) (db.CompetenceType, error) {
@@ -259,8 +155,24 @@ func (r *entryResolver) Tags(ctx context.Context, obj *db.Entry) ([]*db.Tag, err
 }
 
 // UserCompetences is the resolver for the userCompetences field.
-func (r *entryResolver) UserCompetences(ctx context.Context, obj *db.Entry) ([]*model.UserCompetence, error) {
-	panic(fmt.Errorf("not implemented: UserCompetences - userCompetences"))
+func (r *entryResolver) UserCompetences(ctx context.Context, obj *db.Entry) ([]*db.UserCompetence, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var userCompetences []*db.UserCompetence
+	err := r.DB.NewSelect().
+		Model(&userCompetences).
+		Where("entry_id = ?", obj.ID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return userCompetences, nil
 }
 
 // Image is the resolver for the image field.
@@ -552,20 +464,39 @@ func (r *mutationResolver) CreateEntry(ctx context.Context, input model.CreateEn
 	if len(input.Users) > 0 {
 		var entryUsers []*db.EntryUser
 
-		if input.Users != nil {
-			for _, userId := range input.Users {
-				entryUsers = append(entryUsers, &db.EntryUser{
-					EntryID:        entry.ID,
-					UserID:         *userId,
-					OrganisationID: currentUser.OrganisationID,
-				})
-			}
+		for _, userId := range input.Users {
+			entryUsers = append(entryUsers, &db.EntryUser{
+				EntryID:        entry.ID,
+				UserID:         *userId,
+				OrganisationID: currentUser.OrganisationID,
+			})
 		}
 
 		err = r.DB.NewInsert().Model(&entryUsers).Returning("*").Scan(ctx)
 		if err != nil {
 			return nil, err
 		}
+
+		// user competences
+		if len(input.UserCompetences) > 0 {
+			var userCompetences []*db.UserCompetence
+			for _, userId := range input.Users {
+				for _, userCompetence := range input.UserCompetences {
+					userCompetences = append(userCompetences, &db.UserCompetence{
+						UserID:         *userId,
+						CompetenceID:   userCompetence.CompetenceID,
+						EntryID:        sql.NullString{String: entry.ID, Valid: true},
+						OrganisationID: currentUser.OrganisationID,
+					})
+				}
+			}
+
+			err = r.DB.NewInsert().Model(&userCompetences).On("CONFLICT (user_id, competence_id, entry_id) DO UPDATE SET deleted_at = null").Returning("*").Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+		}
+
 	}
 
 	if len(input.Tags) > 0 {
@@ -601,26 +532,6 @@ func (r *mutationResolver) CreateEntry(ctx context.Context, input model.CreateEn
 		}
 
 		err = r.DB.NewInsert().Model(&entryFiles).Returning("*").Scan(ctx)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if len(input.UserCompetences) > 0 {
-		var entryUserCompetences []*db.EntryUserCompetence
-
-		if input.UserCompetences != nil {
-			for _, userCompetence := range input.UserCompetences {
-				entryUserCompetences = append(entryUserCompetences, &db.EntryUserCompetence{
-					EntryID:        entry.ID,
-					UserID:         userCompetence.UserID,
-					CompetenceID:   userCompetence.CompetenceID,
-					OrganisationID: currentUser.OrganisationID,
-				})
-			}
-		}
-
-		err = r.DB.NewInsert().Model(&entryUserCompetences).Returning("*").Scan(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -678,6 +589,9 @@ func (r *mutationResolver) UpdateEntry(ctx context.Context, input model.UpdateEn
 	}
 
 	if len(input.Events) > 0 {
+		var existing []*db.EntryEvent
+		err = r.DB.NewSelect().Model(&existing).Where("entry_id = ?", entry.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+
 		var entryEvents []*db.EntryEvent
 
 		if input.Events != nil {
@@ -690,7 +604,25 @@ func (r *mutationResolver) UpdateEntry(ctx context.Context, input model.UpdateEn
 			}
 		}
 
+		var toDelete []*db.EntryEvent
+		for _, existingEvent := range existing {
+			found := false
+			for _, newEvent := range entryEvents {
+				if existingEvent.EventID == newEvent.EventID {
+					found = true
+				}
+			}
+			if !found {
+				toDelete = append(toDelete, existingEvent)
+			}
+		}
+
 		err = r.DB.NewInsert().Model(&entryEvents).On("CONFLICT (entry_id, event_id) DO NOTHING").Returning("*").Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		err = r.DB.NewDelete().Model(&toDelete).Where("entry_id = ?", entry.ID).Where("organisation_id = ?", currentUser.OrganisationID).WherePK().Scan(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -712,6 +644,56 @@ func (r *mutationResolver) UpdateEntry(ctx context.Context, input model.UpdateEn
 		err = r.DB.NewInsert().Model(&entryUsers).On("CONFLICT (entry_id, user_id) DO UPDATE SET deleted_at = null").Returning("*").Scan(ctx)
 		if err != nil {
 			return nil, err
+		}
+
+		// user competences
+		if len(input.UserCompetences) > 0 {
+			var existing []*db.UserCompetence
+			err = r.DB.NewSelect().Model(&existing).Where("entry_id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			var insert []*db.UserCompetence
+
+			for _, userId := range input.Users {
+				for _, userCompetence := range input.UserCompetences {
+
+					insert = append(insert, &db.UserCompetence{
+						EntryID:        sql.NullString{String: input.ID, Valid: true},
+						UserID:         *userId,
+						CompetenceID:   userCompetence.CompetenceID,
+						OrganisationID: currentUser.OrganisationID,
+						Level:          userCompetence.Level,
+						DeletedAt:      bun.NullTime{},
+					})
+				}
+			}
+
+			var deleted []*db.UserCompetence
+			for _, existingCompetence := range existing {
+				var found bool
+				for _, insertCompetence := range insert {
+					if existingCompetence.UserID == insertCompetence.UserID && existingCompetence.CompetenceID == insertCompetence.CompetenceID {
+						found = true
+						break
+					}
+				}
+				if !found {
+					deleted = append(deleted, existingCompetence)
+				}
+			}
+
+			err = r.DB.NewInsert().Model(&insert).On("CONFLICT (entry_id, user_id, competence_id) DO UPDATE SET deleted_at = null").Returning("*").Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			_, err = r.DB.NewDelete().Model(&deleted).Where("entry_id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).WherePK().Exec(ctx)
+			if err != nil {
+				return nil, err
+			}
+
 		}
 	}
 
@@ -748,6 +730,16 @@ func (r *mutationResolver) ArchiveEntry(ctx context.Context, id string) (*db.Ent
 	}
 
 	return &entry, nil
+}
+
+// CreateUserCompetence is the resolver for the createUserCompetence field.
+func (r *mutationResolver) CreateUserCompetence(ctx context.Context, input model.CreateUserCompetenceInput) (*db.UserCompetence, error) {
+	panic(fmt.Errorf("not implemented: CreateUserCompetence - createUserCompetence"))
+}
+
+// ArchiveUserCompetence is the resolver for the archiveUserCompetence field.
+func (r *mutationResolver) ArchiveUserCompetence(ctx context.Context, id string) (*db.UserCompetence, error) {
+	panic(fmt.Errorf("not implemented: ArchiveUserCompetence - archiveUserCompetence"))
 }
 
 // CreateTag is the resolver for the createTag field.
@@ -868,18 +860,47 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 		return nil, errors.New("no user found in the context")
 	}
 
-	var pageLimit int = 10
+	var pageLimit = 10
 	if limit != nil {
 		pageLimit = *limit
 	}
 
-	var pageOffset int = 0
+	var pageOffset = 0
 	if offset != nil {
 		pageOffset = *offset
 	}
 
 	var competences []*db.Competence
-	count, err := r.DB.NewSelect().Model(&competences).Where("organisation_id = ?", currentUser.OrganisationID).Limit(pageLimit).Offset(pageOffset).ScanAndCount(ctx)
+	query := r.DB.NewSelect().
+		Model(&competences).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Limit(pageLimit).
+		Offset(pageOffset)
+
+	if search != nil {
+		query.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", *search))
+	}
+
+	if filter != nil {
+		if filter.Type != nil {
+			if len(filter.Type) == 1 {
+				query.Where("competence_type = ?", filter.Type[0])
+			} else {
+				query.Where("competence_type IN (?)", bun.In(filter.Type))
+			}
+		}
+
+		if filter.Parents != nil {
+			if len(filter.Parents) == 1 {
+				query.Where("competence_id = ?", filter.Parents[0])
+			} else {
+				query.Where("competence_id IN (?)", bun.In(filter.Parents))
+			}
+		}
+	}
+
+	count, err := query.ScanAndCount(ctx)
+
 	if err != nil {
 		return nil, err
 	}
@@ -1072,41 +1093,6 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) ([]*d
 	return tags, nil
 }
 
-// Chat is the resolver for the chat field.
-func (r *queryResolver) Chat(ctx context.Context, id string) (*db.Chat, error) {
-	panic(fmt.Errorf("not implemented: Chat - chat"))
-}
-
-// Chats is the resolver for the chats field.
-func (r *queryResolver) Chats(ctx context.Context, limit *int, offset *int) (*model.ChatConnection, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	pageLimit := 10
-	if limit != nil {
-		pageLimit = *limit
-	}
-
-	pageOffset := 0
-	if offset != nil {
-		pageOffset = *offset
-	}
-
-	var chats []*db.Chat
-	count, err := r.DB.NewSelect().Model(&chats).Where("organisation_id = ?", currentUser.OrganisationID).Limit(pageLimit).Offset(pageOffset).ScanAndCount(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &model.ChatConnection{
-		Edges:      chats,
-		PageInfo:   nil,
-		TotalCount: count,
-	}, nil
-}
-
 // File is the resolver for the file field.
 func (r *queryResolver) File(ctx context.Context, id string) (*db.File, error) {
 	panic(fmt.Errorf("not implemented: File - file"))
@@ -1206,14 +1192,31 @@ func (r *userResolver) DeletedAt(ctx context.Context, obj *db.User) (*time.Time,
 	return nil, nil
 }
 
-// Chat returns ChatResolver implementation.
-func (r *Resolver) Chat() ChatResolver { return &chatResolver{r} }
+// Competence is the resolver for the competence field.
+func (r *userCompetenceResolver) Competence(ctx context.Context, obj *db.UserCompetence) (*db.Competence, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
 
-// ChatMessage returns ChatMessageResolver implementation.
-func (r *Resolver) ChatMessage() ChatMessageResolver { return &chatMessageResolver{r} }
+	var competence db.Competence
+	err := r.DB.NewSelect().Model(&competence).Where("id = ?", obj.CompetenceID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-// ChatUser returns ChatUserResolver implementation.
-func (r *Resolver) ChatUser() ChatUserResolver { return &chatUserResolver{r} }
+	return &competence, nil
+}
+
+// Entry is the resolver for the entry field.
+func (r *userCompetenceResolver) Entry(ctx context.Context, obj *db.UserCompetence) (*db.Entry, error) {
+	panic(fmt.Errorf("not implemented: Entry - entry"))
+}
+
+// User is the resolver for the user field.
+func (r *userCompetenceResolver) User(ctx context.Context, obj *db.UserCompetence) (*db.User, error) {
+	panic(fmt.Errorf("not implemented: User - user"))
+}
 
 // Competence returns CompetenceResolver implementation.
 func (r *Resolver) Competence() CompetenceResolver { return &competenceResolver{r} }
@@ -1245,9 +1248,9 @@ func (r *Resolver) Tag() TagResolver { return &tagResolver{r} }
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
-type chatResolver struct{ *Resolver }
-type chatMessageResolver struct{ *Resolver }
-type chatUserResolver struct{ *Resolver }
+// UserCompetence returns UserCompetenceResolver implementation.
+func (r *Resolver) UserCompetence() UserCompetenceResolver { return &userCompetenceResolver{r} }
+
 type competenceResolver struct{ *Resolver }
 type entryResolver struct{ *Resolver }
 type eventResolver struct{ *Resolver }
@@ -1258,6 +1261,7 @@ type queryResolver struct{ *Resolver }
 type reportResolver struct{ *Resolver }
 type tagResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }
+type userCompetenceResolver struct{ *Resolver }
 
 // !!! WARNING !!!
 // The code below was going to be deleted when updating resolvers. It has been copied here so you have
