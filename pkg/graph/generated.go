@@ -1525,8 +1525,12 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputEventFilterInput,
 		ec.unmarshalInputSignInInput,
 		ec.unmarshalInputSignUpInput,
+		ec.unmarshalInputUpdateEntryEventInput,
+		ec.unmarshalInputUpdateEntryFileInput,
 		ec.unmarshalInputUpdateEntryInput,
 		ec.unmarshalInputUpdateEntryTagInput,
+		ec.unmarshalInputUpdateEntryUserInput,
+		ec.unmarshalInputUpdateUserCompetenceInput,
 		ec.unmarshalInputUpdateUserInput,
 		ec.unmarshalInputUserFilterInput,
 	)
@@ -11781,7 +11785,7 @@ func (ec *executionContext) unmarshalInputCreateUserCompetenceInput(ctx context.
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"level", "competenceId"}
+	fieldsInOrder := [...]string{"level", "userId", "competenceId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -11793,6 +11797,14 @@ func (ec *executionContext) unmarshalInputCreateUserCompetenceInput(ctx context.
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("level"))
 			it.Level, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "userId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+			it.UserID, err = ec.unmarshalNID2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -12094,6 +12106,78 @@ func (ec *executionContext) unmarshalInputSignUpInput(ctx context.Context, obj i
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateEntryEventInput(ctx context.Context, obj interface{}) (model.UpdateEntryEventInput, error) {
+	var it model.UpdateEntryEventInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "deletedAt"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "deletedAt":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deletedAt"))
+			it.DeletedAt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateEntryFileInput(ctx context.Context, obj interface{}) (model.UpdateEntryFileInput, error) {
+	var it model.UpdateEntryFileInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "deletedAt"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "deletedAt":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deletedAt"))
+			it.DeletedAt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateEntryInput(ctx context.Context, obj interface{}) (model.UpdateEntryInput, error) {
 	var it model.UpdateEntryInput
 	asMap := map[string]interface{}{}
@@ -12136,7 +12220,7 @@ func (ec *executionContext) unmarshalInputUpdateEntryInput(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tags"))
-			it.Tags, err = ec.unmarshalOID2ᚕᚖstring(ctx, v)
+			it.Tags, err = ec.unmarshalOUpdateEntryTagInput2ᚕᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateEntryTagInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -12144,7 +12228,7 @@ func (ec *executionContext) unmarshalInputUpdateEntryInput(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("files"))
-			it.Files, err = ec.unmarshalOID2ᚕᚖstring(ctx, v)
+			it.Files, err = ec.unmarshalOUpdateEntryFileInput2ᚕᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateEntryFileInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -12152,7 +12236,7 @@ func (ec *executionContext) unmarshalInputUpdateEntryInput(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("users"))
-			it.Users, err = ec.unmarshalOID2ᚕᚖstring(ctx, v)
+			it.Users, err = ec.unmarshalOUpdateEntryUserInput2ᚕᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateEntryUserInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -12160,7 +12244,7 @@ func (ec *executionContext) unmarshalInputUpdateEntryInput(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("events"))
-			it.Events, err = ec.unmarshalOID2ᚕᚖstring(ctx, v)
+			it.Events, err = ec.unmarshalOUpdateEntryEventInput2ᚕᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateEntryEventInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -12168,7 +12252,7 @@ func (ec *executionContext) unmarshalInputUpdateEntryInput(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userCompetences"))
-			it.UserCompetences, err = ec.unmarshalOCreateUserCompetenceInput2ᚕᚖexampleᚋpkgᚋgraphᚋmodelᚐCreateUserCompetenceInput(ctx, v)
+			it.UserCompetences, err = ec.unmarshalOUpdateUserCompetenceInput2ᚕᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateUserCompetenceInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -12197,6 +12281,94 @@ func (ec *executionContext) unmarshalInputUpdateEntryTagInput(ctx context.Contex
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "deletedAt":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deletedAt"))
+			it.DeletedAt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateEntryUserInput(ctx context.Context, obj interface{}) (model.UpdateEntryUserInput, error) {
+	var it model.UpdateEntryUserInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "deletedAt"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "deletedAt":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deletedAt"))
+			it.DeletedAt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateUserCompetenceInput(ctx context.Context, obj interface{}) (model.UpdateUserCompetenceInput, error) {
+	var it model.UpdateUserCompetenceInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"level", "userId", "competenceId", "deletedAt"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "level":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("level"))
+			it.Level, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "userId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+			it.UserID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "competenceId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("competenceId"))
+			it.CompetenceID, err = ec.unmarshalNID2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16554,6 +16726,146 @@ func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel
 	}
 	res := graphql.MarshalTime(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOUpdateEntryEventInput2ᚕᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateEntryEventInput(ctx context.Context, v interface{}) ([]*model.UpdateEntryEventInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.UpdateEntryEventInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOUpdateEntryEventInput2ᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateEntryEventInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOUpdateEntryEventInput2ᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateEntryEventInput(ctx context.Context, v interface{}) (*model.UpdateEntryEventInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputUpdateEntryEventInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOUpdateEntryFileInput2ᚕᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateEntryFileInput(ctx context.Context, v interface{}) ([]*model.UpdateEntryFileInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.UpdateEntryFileInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOUpdateEntryFileInput2ᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateEntryFileInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOUpdateEntryFileInput2ᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateEntryFileInput(ctx context.Context, v interface{}) (*model.UpdateEntryFileInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputUpdateEntryFileInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOUpdateEntryTagInput2ᚕᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateEntryTagInput(ctx context.Context, v interface{}) ([]*model.UpdateEntryTagInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.UpdateEntryTagInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOUpdateEntryTagInput2ᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateEntryTagInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOUpdateEntryTagInput2ᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateEntryTagInput(ctx context.Context, v interface{}) (*model.UpdateEntryTagInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputUpdateEntryTagInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOUpdateEntryUserInput2ᚕᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateEntryUserInput(ctx context.Context, v interface{}) ([]*model.UpdateEntryUserInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.UpdateEntryUserInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOUpdateEntryUserInput2ᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateEntryUserInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOUpdateEntryUserInput2ᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateEntryUserInput(ctx context.Context, v interface{}) (*model.UpdateEntryUserInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputUpdateEntryUserInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOUpdateUserCompetenceInput2ᚕᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateUserCompetenceInput(ctx context.Context, v interface{}) ([]*model.UpdateUserCompetenceInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.UpdateUserCompetenceInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOUpdateUserCompetenceInput2ᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateUserCompetenceInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOUpdateUserCompetenceInput2ᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateUserCompetenceInput(ctx context.Context, v interface{}) (*model.UpdateUserCompetenceInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputUpdateUserCompetenceInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOUser2ᚕᚖexampleᚋpkgᚋdbᚐUser(ctx context.Context, sel ast.SelectionSet, v []*db.User) graphql.Marshaler {

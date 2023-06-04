@@ -480,15 +480,14 @@ func (r *mutationResolver) CreateEntry(ctx context.Context, input model.CreateEn
 		// user competences
 		if len(input.UserCompetences) > 0 {
 			var userCompetences []*db.UserCompetence
-			for _, userId := range input.Users {
-				for _, userCompetence := range input.UserCompetences {
-					userCompetences = append(userCompetences, &db.UserCompetence{
-						UserID:         *userId,
-						CompetenceID:   userCompetence.CompetenceID,
-						EntryID:        sql.NullString{String: entry.ID, Valid: true},
-						OrganisationID: currentUser.OrganisationID,
-					})
-				}
+			for _, userCompetence := range input.UserCompetences {
+				userCompetences = append(userCompetences, &db.UserCompetence{
+					UserID:         userCompetence.UserID,
+					CompetenceID:   userCompetence.CompetenceID,
+					EntryID:        sql.NullString{String: entry.ID, Valid: true},
+					Level:          userCompetence.Level,
+					OrganisationID: currentUser.OrganisationID,
+				})
 			}
 
 			err = r.DB.NewInsert().Model(&userCompetences).On("CONFLICT (user_id, competence_id, entry_id) DO UPDATE SET deleted_at = null").Returning("*").Scan(ctx)
@@ -537,6 +536,25 @@ func (r *mutationResolver) CreateEntry(ctx context.Context, input model.CreateEn
 		}
 	}
 
+	if len(input.Events) > 0 {
+		var entryEvents []*db.EntryEvent
+
+		if input.Events != nil {
+			for _, eventId := range input.Events {
+				entryEvents = append(entryEvents, &db.EntryEvent{
+					EntryID:        entry.ID,
+					EventID:        *eventId,
+					OrganisationID: currentUser.OrganisationID,
+				})
+			}
+		}
+
+		err = r.DB.NewInsert().Model(&entryEvents).Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return &entry, nil
 }
 
@@ -548,14 +566,23 @@ func (r *mutationResolver) UpdateEntry(ctx context.Context, input model.UpdateEn
 	}
 
 	var entry db.Entry
-	err := r.DB.NewSelect().Model(&entry).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err := r.DB.NewSelect().
+		Model(&entry).
+		Where("id = ?", input.ID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	// save input.Date to database
 	if input.Date != nil {
-		err = r.DB.NewUpdate().Model(&entry).Set("date = ?", input.Date).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Returning("*").Scan(ctx)
+		err = r.DB.NewUpdate().
+			Model(&entry).
+			Set("date = ?", input.Date).
+			Where("id = ?", input.ID).
+			Where("organisation_id = ?", currentUser.OrganisationID).
+			Scan(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -563,7 +590,12 @@ func (r *mutationResolver) UpdateEntry(ctx context.Context, input model.UpdateEn
 
 	// save input.Body to database
 	if input.Body != nil {
-		err = r.DB.NewUpdate().Model(&entry).Set("body = ?", input.Body).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Returning("*").Scan(ctx)
+		err = r.DB.NewUpdate().
+			Model(&entry).
+			Set("body = ?", input.Body).
+			Where("id = ?", input.ID).
+			Where("organisation_id = ?", currentUser.OrganisationID).
+			Scan(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -573,16 +605,27 @@ func (r *mutationResolver) UpdateEntry(ctx context.Context, input model.UpdateEn
 		var entryTags []*db.EntryTag
 
 		if input.Tags != nil {
-			for _, tagId := range input.Tags {
+			for _, tag := range input.Tags {
+				deletedAt := bun.NullTime{}
+
+				if tag.DeletedAt != nil {
+					deletedAt = bun.NullTime{Time: *tag.DeletedAt}
+				}
+
 				entryTags = append(entryTags, &db.EntryTag{
 					EntryID:        entry.ID,
-					TagID:          *tagId,
+					TagID:          tag.ID,
 					OrganisationID: currentUser.OrganisationID,
+					DeletedAt:      deletedAt,
 				})
 			}
 		}
 
-		err = r.DB.NewInsert().Model(&entryTags).On("CONFLICT (entry_id, tag_id) DO NOTHING").Returning("*").Scan(ctx)
+		err = r.DB.NewInsert().
+			Model(&entryTags).
+			On("CONFLICT (entry_id, tag_id)").
+			Set("deleted_at = null").
+			Scan(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -595,10 +638,10 @@ func (r *mutationResolver) UpdateEntry(ctx context.Context, input model.UpdateEn
 		var entryEvents []*db.EntryEvent
 
 		if input.Events != nil {
-			for _, eventId := range input.Events {
+			for _, event := range input.Events {
 				entryEvents = append(entryEvents, &db.EntryEvent{
 					EntryID:        entry.ID,
-					EventID:        *eventId,
+					EventID:        event.ID,
 					OrganisationID: currentUser.OrganisationID,
 				})
 			}
@@ -632,68 +675,50 @@ func (r *mutationResolver) UpdateEntry(ctx context.Context, input model.UpdateEn
 		var entryUsers []*db.EntryUser
 
 		if input.Users != nil {
-			for _, userId := range input.Users {
+			for _, user := range input.Users {
 				entryUsers = append(entryUsers, &db.EntryUser{
 					EntryID:        entry.ID,
-					UserID:         *userId,
+					UserID:         user.ID,
 					OrganisationID: currentUser.OrganisationID,
 				})
 			}
 		}
 
-		err = r.DB.NewInsert().Model(&entryUsers).On("CONFLICT (entry_id, user_id) DO UPDATE SET deleted_at = null").Returning("*").Scan(ctx)
+		err = r.DB.NewInsert().Model(&entryUsers).On("CONFLICT (entry_id, user_id) DO UPDATE").Set("deleted_at = null").Scan(ctx)
 		if err != nil {
 			return nil, err
 		}
 
 		// user competences
 		if len(input.UserCompetences) > 0 {
-			var existing []*db.UserCompetence
-			err = r.DB.NewSelect().Model(&existing).Where("entry_id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+			var userCompetences []*db.UserCompetence
+
+			for _, userCompetence := range input.UserCompetences {
+				deletedAt := bun.NullTime{}
+
+				if userCompetence.DeletedAt != nil {
+					deletedAt = bun.NullTime{Time: *userCompetence.DeletedAt}
+				}
+
+				userCompetences = append(userCompetences, &db.UserCompetence{
+					EntryID:        sql.NullString{String: input.ID, Valid: true},
+					UserID:         userCompetence.UserID,
+					CompetenceID:   userCompetence.CompetenceID,
+					OrganisationID: currentUser.OrganisationID,
+					Level:          userCompetence.Level,
+					DeletedAt:      deletedAt,
+				})
+			}
+
+			err = r.DB.NewInsert().
+				Model(&userCompetences).
+				On("CONFLICT (entry_id, user_id, competence_id) DO UPDATE").
+				Set("deleted_at = null").
+				Set("level = EXCLUDED.level").
+				Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-
-			var insert []*db.UserCompetence
-
-			for _, userId := range input.Users {
-				for _, userCompetence := range input.UserCompetences {
-
-					insert = append(insert, &db.UserCompetence{
-						EntryID:        sql.NullString{String: input.ID, Valid: true},
-						UserID:         *userId,
-						CompetenceID:   userCompetence.CompetenceID,
-						OrganisationID: currentUser.OrganisationID,
-						Level:          userCompetence.Level,
-						DeletedAt:      bun.NullTime{},
-					})
-				}
-			}
-
-			var deleted []*db.UserCompetence
-			for _, existingCompetence := range existing {
-				var found bool
-				for _, insertCompetence := range insert {
-					if existingCompetence.UserID == insertCompetence.UserID && existingCompetence.CompetenceID == insertCompetence.CompetenceID {
-						found = true
-						break
-					}
-				}
-				if !found {
-					deleted = append(deleted, existingCompetence)
-				}
-			}
-
-			err = r.DB.NewInsert().Model(&insert).On("CONFLICT (entry_id, user_id, competence_id) DO UPDATE SET deleted_at = null").Returning("*").Scan(ctx)
-			if err != nil {
-				return nil, err
-			}
-
-			_, err = r.DB.NewDelete().Model(&deleted).Where("entry_id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).WherePK().Exec(ctx)
-			if err != nil {
-				return nil, err
-			}
-
 		}
 	}
 

@@ -55,6 +55,7 @@ type CreateTagInput struct {
 
 type CreateUserCompetenceInput struct {
 	Level        int    `json:"level"`
+	UserID       string `json:"userId"`
 	CompetenceID string `json:"competenceId"`
 }
 
@@ -130,20 +131,42 @@ type SignUpInput struct {
 	Password  string `json:"password"`
 }
 
+type UpdateEntryEventInput struct {
+	ID        string     `json:"id"`
+	DeletedAt *time.Time `json:"deletedAt,omitempty"`
+}
+
+type UpdateEntryFileInput struct {
+	ID        string     `json:"id"`
+	DeletedAt *time.Time `json:"deletedAt,omitempty"`
+}
+
 type UpdateEntryInput struct {
 	ID              string                       `json:"id"`
 	Date            *time.Time                   `json:"date,omitempty"`
 	Body            *string                      `json:"body,omitempty"`
-	Tags            []*string                    `json:"tags,omitempty"`
-	Files           []*string                    `json:"files,omitempty"`
-	Users           []*string                    `json:"users,omitempty"`
-	Events          []*string                    `json:"events,omitempty"`
-	UserCompetences []*CreateUserCompetenceInput `json:"userCompetences,omitempty"`
+	Tags            []*UpdateEntryTagInput       `json:"tags,omitempty"`
+	Files           []*UpdateEntryFileInput      `json:"files,omitempty"`
+	Users           []*UpdateEntryUserInput      `json:"users,omitempty"`
+	Events          []*UpdateEntryEventInput     `json:"events,omitempty"`
+	UserCompetences []*UpdateUserCompetenceInput `json:"userCompetences,omitempty"`
 }
 
 type UpdateEntryTagInput struct {
 	ID        string     `json:"id"`
 	DeletedAt *time.Time `json:"deletedAt,omitempty"`
+}
+
+type UpdateEntryUserInput struct {
+	ID        string     `json:"id"`
+	DeletedAt *time.Time `json:"deletedAt,omitempty"`
+}
+
+type UpdateUserCompetenceInput struct {
+	Level        int        `json:"level"`
+	UserID       string     `json:"userId"`
+	CompetenceID string     `json:"competenceId"`
+	DeletedAt    *time.Time `json:"deletedAt,omitempty"`
 }
 
 type UpdateUserInput struct {

@@ -287,7 +287,16 @@ input CreateEntryFileInput {
 
 input CreateUserCompetenceInput {
     level: Int!
+    userId: ID!
     competenceId: ID!
+}
+
+
+input UpdateUserCompetenceInput {
+    level: Int!
+    userId: ID!
+    competenceId: ID!
+    deletedAt: Time
 }
 
 input CreateEntryInput {
@@ -300,21 +309,36 @@ input CreateEntryInput {
     userCompetences: [CreateUserCompetenceInput]
 }
 
+input UpdateEntryTagInput {
+    id: ID!
+    deletedAt: Time
+}
+
+input UpdateEntryFileInput {
+    id: ID!
+    deletedAt: Time
+}
+
+input UpdateEntryUserInput {
+    id: ID!
+    deletedAt: Time
+}
+
+input UpdateEntryEventInput {
+    id: ID!
+    deletedAt: Time
+}
+
 # TODO: if field is null, ignore, if field is empty, delete existing items, if set, set all to this
 input UpdateEntryInput {
     id: ID!
     date: Time
     body: String
-    tags: [ID]
-    files: [ID]
-    users: [ID]
-    events: [ID]
-    userCompetences: [CreateUserCompetenceInput]
-}
-
-input UpdateEntryTagInput {
-    id: ID!
-    deletedAt: Time
+    tags: [UpdateEntryTagInput]
+    files: [UpdateEntryFileInput]
+    users: [UpdateEntryUserInput]
+    events: [UpdateEntryEventInput]
+    userCompetences: [UpdateUserCompetenceInput]
 }
 
 input CreateReportInput {
