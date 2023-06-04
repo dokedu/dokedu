@@ -32,7 +32,7 @@
       <div v-show="visibleAppSwitcher" class="absolute flex w-full flex-col gap-1 rounded-lg bg-white p-1 shadow">
         <div
           v-for="_app in apps"
-          class="flex cursor-default items-center gap-3 rounded-lg border border-white p-2 hover:bg-gray-100"
+          class="flex items-center gap-3 rounded-lg border border-white p-2 hover:bg-gray-100"
           :class="activeApp === _app.id ? `!border-gray-200 bg-gray-100 hover:!bg-gray-100` : ''"
           @click="switchApp(_app.id)"
         >

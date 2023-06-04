@@ -8,11 +8,12 @@
         placeholder="Write down your observations..."
         class="block w-full resize-none border-none border-transparent p-8 text-lg text-gray-900 placeholder:text-gray-400 focus:ring-0"
       />
-      <div class="px-8">
+      <div class="px-8" v-if="false">
         <button class="flex items-center gap-2 rounded-md border p-4 py-1.5 shadow-sm transition-all hover:shadow">
           <Upload :size="16" /> Upload file
         </button>
       </div>
+      <EntryFormCompetences :eacs="entry.userCompetences" @toggle="toggleCompetence" />
     </div>
     <div class="flex min-h-full w-[400px] min-w-[400px] flex-col gap-4 border-l px-8 py-4">
       <div class="flex items-center gap-4">
@@ -61,13 +62,13 @@
             </div>
           </d-context-menu>
           <div
-            class="flex w-full cursor-default flex-wrap items-start gap-2 rounded-md p-2 hover:bg-gray-50"
+            class="flex w-full flex-wrap items-start gap-2 rounded-md p-2 hover:bg-gray-50"
             @click="contextMenuEvents = true"
           >
             <div v-for="event in entry?.events" class="rounded-full border px-3 py-1 text-gray-700">
               {{ event.title }}
             </div>
-            <div v-if="entry.events?.length === 0" class="text-gray-400">Add project</div>
+            <div v-if="entry.events?.length === 0 || entry.events === undefined" class="text-gray-400">Add project</div>
           </div>
         </div>
       </div>
@@ -109,7 +110,7 @@
             </div>
           </d-context-menu>
           <div
-            class="flex w-full cursor-default flex-wrap items-start gap-2 rounded-md p-2 hover:bg-gray-50"
+            class="flex w-full flex-wrap items-start gap-2 rounded-md p-2 hover:bg-gray-50"
             @click="tagsContextMenuOpen = true"
           >
             <d-tag v-for="tag in entry.tags" :key="tag.id" :color="tag.color">
@@ -155,7 +156,7 @@
         </div>
       </div>
     </div>
-    <dialog ref="dialogStudents" class="w-full max-w-xl rounded-lg shadow-lg backdrop:bg-gray-950/20">
+    <dialog ref="dialogStudents" class="mt-32 w-full max-w-xl rounded-lg shadow-lg backdrop:bg-gray-950/20">
       <div class="mb-4 flex items-center justify-between gap-2">
         <input
           type="text"
@@ -192,7 +193,8 @@ import { computed, ref, toRef } from "vue";
 import archiveEntryMutation from "../../../queries/archiveEntry.mutation.ts";
 import { formatDate, useTextareaAutosize } from "@vueuse/core";
 import EntryFormHeader from "./EntryFormHeader.vue";
-import { Upload, Plus, X } from "lucide-vue-next";
+import { Plus, Upload, X } from "lucide-vue-next";
+import EntryFormCompetences from "./EntryFormCompetences.vue";
 
 interface Tag {
   id: string;
@@ -207,6 +209,7 @@ interface Entry {
   tags: Tag[];
   events: [{ id: string; title: string }];
   users: [{ id: string; firstName: string; lastName: string }];
+  userCompetences: [{ id: string; competence: { id: string; name: string } }];
 }
 
 const dialogStudents = ref<HTMLDialogElement>();
@@ -342,16 +345,46 @@ async function archive() {
   await emit("archived");
 }
 
+function toggleCompetence(competence) {
+  console.log(competence);
+  if (competence.type !== "competence") return;
+
+  // if entry.userCompetences is undefined, create empty array
+  if (!entry.value.userCompetences) {
+    entry.value.userCompetences = [];
+  }
+
+  // create new competence and add it to entry.userCompetences if it doesn't exist
+  if (!entry.value.userCompetences.map((el) => el.competence.id).includes(competence.id)) {
+    entry.value.userCompetences.push({ competence: competence, level: 1 });
+  } else {
+    // remove competence from entry.userCompetences if it exists
+    entry.value.userCompetences = entry.value.userCompetences.filter((el) => el.competence.id !== competence.id);
+  }
+}
+
 // emits
 const emit = defineEmits(["saved", "archived"]);
 
+function userCompetences() {
+  const competences = entry.value.userCompetences?.map((el) => ({
+    competenceId: el.competence.id,
+    level: 1,
+  }));
+
+  return competences?.filter((v, i, a) => a.findIndex((t) => t.competenceId === v.competenceId) === i);
+}
+
 async function submit() {
+  const EACs = userCompetences();
+
   const input: any = {
     date: entry.value.date,
     body: body.value,
-    tags: entry.value.tags.map((el) => el.id),
-    events: entry.value.events.map((el) => el.id),
-    users: entry.value.users.map((el) => el.id),
+    tags: entry.value.tags?.map((el) => el.id),
+    events: entry.value.events?.map((el) => el.id),
+    users: entry.value.users?.map((el) => el.id),
+    userCompetences: EACs,
   };
 
   if (props.mode === "edit") {

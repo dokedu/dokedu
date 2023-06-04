@@ -48,6 +48,16 @@ const { data: entry } = useQuery({
           firstName
           lastName
         }
+        userCompetences {
+          id
+          level
+          competence {
+            id
+            name
+            color
+            type
+          }
+        }
       }
     }
   `,

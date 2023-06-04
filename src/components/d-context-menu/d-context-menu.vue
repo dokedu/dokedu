@@ -20,15 +20,8 @@ export enum ContextMenuAlignment {
 </script>
 
 <script lang="ts" setup>
-import {
-  getCurrentInstance,
-  onMounted,
-  reactive,
-  ref,
-  toRef,
-  watch,
-} from "vue";
-import { useParentElement, onClickOutside } from "@vueuse/core";
+import { getCurrentInstance, onMounted, reactive, ref, toRef, watch } from "vue";
+import { useParentElement, onClickOutside, onKeyStroke } from "@vueuse/core";
 import { useWindowSize } from "@vueuse/core";
 
 interface Point {
@@ -40,6 +33,10 @@ const props = defineProps<{
   show: boolean;
   alignment: ContextMenuAlignment;
 }>();
+
+onKeyStroke("Escape", () => {
+  emit("close");
+});
 
 const target = ref(null);
 

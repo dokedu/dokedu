@@ -5,3 +5,7 @@
 body {
     overscroll-behavior: none;
 }
+
+* {
+    @apply !cursor-default
+}
