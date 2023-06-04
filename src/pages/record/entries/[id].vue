@@ -7,7 +7,8 @@
 import PageWrapper from "../../../components/PageWrapper.vue";
 import EntryForm from "./EntryForm.vue";
 import { useRoute, useRouter } from "vue-router";
-import { gql, useQuery } from "@urql/vue";
+import { useQuery } from "@urql/vue";
+import { graphql } from "../../../gql";
 
 const router = useRouter();
 const route = useRoute();
@@ -21,8 +22,8 @@ function saved() {
 }
 
 const { data: entry } = useQuery({
-  query: gql`
-    query entry($id: ID!) {
+  query: graphql(`
+    query entryById($id: ID!) {
       entry(id: $id) {
         id
         date
@@ -60,7 +61,7 @@ const { data: entry } = useQuery({
         }
       }
     }
-  `,
-  variables: { id: route.params.id },
+  `),
+  variables: { id: route.params.id as string },
 });
 </script>

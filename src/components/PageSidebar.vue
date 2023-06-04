@@ -4,44 +4,30 @@
       <div class="flex items-center justify-between px-3 py-1">
         <div class="flex items-center gap-3">
           <component v-if="app" :is="app.icon" class="stroke-gray-500" :size="20" />
-          <router-link
-            :to="{ name: 'home' }"
-            class="text-sm text-gray-700 transition-all duration-100 hover:text-gray-950"
-          >
+          <router-link :to="{ name: 'home' }"
+            class="text-sm text-gray-700 transition-all duration-100 hover:text-gray-950">
             Acme GmbH
           </router-link>
         </div>
-        <div
-          class="rounded-md border border-gray-300 p-2 transition-all hover:bg-gray-200"
-          @click="visibleAppSwitcher = true"
-        >
+        <div class="rounded-md border border-gray-300 p-2 transition-all hover:bg-gray-200"
+          @click="visibleAppSwitcher = true">
           <Grip :size="16" class="stroke-gray-700" />
         </div>
       </div>
       <div>
-        <router-link
-          v-for="link in app?.links"
-          :to="{ name: link.route }"
+        <router-link v-for="link in app?.links" :to="{ name: link.route }"
           class="flex items-center gap-3 rounded-md p-1 px-3 text-gray-500 transition-all duration-100 hover:bg-gray-200 hover:text-gray-950"
-          active-class="bg-gray-200 text-gray-700"
-        >
+          active-class="bg-gray-200 text-gray-700">
           <component :is="link.icon" class="stroke-gray-500" :size="20" />
           <div>{{ link.name }}</div>
         </router-link>
       </div>
       <div v-show="visibleAppSwitcher" class="absolute flex w-full flex-col gap-1 rounded-lg bg-white p-1 shadow">
-        <div
-          v-for="_app in apps"
-          class="flex items-center gap-3 rounded-lg border border-white p-2 hover:bg-gray-100"
+        <div v-for="_app in apps" class="flex items-center gap-3 rounded-lg border border-white p-2 hover:bg-gray-100"
           :class="activeApp === _app.id ? `!border-gray-200 bg-gray-100 hover:!bg-gray-100` : ''"
-          @click="switchApp(_app.id)"
-        >
-          <component
-            :is="_app.icon"
-            class="stroke-gray-500"
-            :size="20"
-            :class="activeApp === _app.id ? `!stroke-gray-900` : ''"
-          />
+          @click="switchApp(_app.id)">
+          <component :is="_app.icon" class="stroke-gray-500" :size="20"
+            :class="activeApp === _app.id ? `!stroke-gray-900` : ''" />
           <span class="text-gray-500" :class="activeApp === _app.id ? `!text-gray-900` : ''">{{ _app.name }}</span>
         </div>
       </div>
@@ -70,6 +56,7 @@ import {
   Wrench,
   Calendar,
 } from "lucide-vue-next";
+import { Tag } from "lucide-vue-next";
 
 const activeApp = ref<string>("record");
 const visibleAppSwitcher = ref<boolean>(false);
@@ -107,12 +94,12 @@ const apps: App[] = [
         name: "Students",
         route: "record-students",
       },
-      {
-        // icon: "flag-04",
-        icon: Flag,
-        name: "Goals",
-        route: "home",
-      },
+      // {
+      //   // icon: "flag-04",
+      //   icon: Flag,
+      //   name: "Goals",
+      //   route: "home",
+      // },
       {
         // icon: "grid-01",
         icon: Grid,
@@ -127,13 +114,13 @@ const apps: App[] = [
       },
       {
         icon: PieChart,
-        name: "Berichte",
+        name: "Reports",
         route: "record-reports",
       },
       {
-        icon: Calendar,
-        name: "Timetable",
-        route: "record-projects",
+        icon: Tag,
+        name: "Tags",
+        route: "record-tags",
       },
     ],
   },

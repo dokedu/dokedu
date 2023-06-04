@@ -17,15 +17,19 @@
 <script setup lang="ts">
 import PageHeader from "../../../components/PageHeader.vue";
 import PageWrapper from "../../../components/PageWrapper.vue";
-import { gql, useQuery } from "@urql/vue";
+import { useQuery } from "@urql/vue";
 import { useRoute } from "vue-router";
 import { ChevronRight } from "lucide-vue-next";
+import { graphql } from "../../../gql";
+import { computed } from "vue";
 
 const route = useRoute();
 
+const id = computed<string>(() => route.params.id as string);
+
 const { data } = useQuery({
-  query: gql`
-    query entry($id: ID!) {
+  query: graphql(`
+    query userById($id: ID!) {
       user(id: $id) {
         id
         firstName
@@ -33,7 +37,7 @@ const { data } = useQuery({
         role
       }
     }
-  `,
-  variables: { id: route.params.id },
+  `),
+  variables: { id: id.value },
 });
 </script>
