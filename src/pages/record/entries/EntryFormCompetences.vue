@@ -109,7 +109,7 @@ function updateCompetenceLevel(data: { id: string, level: number }) {
 }
 
 const competences = computed(() => {
-  const items = entry.value.userCompetences?.map((eac) => ({ ...eac.competence, level: eac.level }));
+  const items = entry.value.userCompetences?.map((eac) => ({ ...eac.competence, level: eac.level })) || [];
   // return unique items by item.id
   return items.filter((item, index, self) => self.findIndex((t) => t.id === item.id) === index)
 });

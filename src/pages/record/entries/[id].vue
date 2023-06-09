@@ -18,7 +18,8 @@ async function archived() {
 }
 
 function saved() {
-  router.push({ name: "record-entries" });
+  // TODO: show toast successfully saved
+  alert("Successfully saved");
 }
 
 const { data: entry } = useQuery({

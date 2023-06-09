@@ -8,12 +8,9 @@
         </router-link>
       </div>
     </PageHeader>
-    <div class="flex flex-col">
-      <router-link
-        :to="{ name: 'record-entry', params: { id: entry.id } }"
-        v-for="entry in data?.entries?.edges"
-        class="flex border-b transition-all hover:bg-gray-50"
-      >
+    <div class="flex flex-col overflow-scroll">
+      <router-link :to="{ name: 'record-entry', params: { id: entry.id } }" v-for="entry in data?.entries?.edges"
+        class="flex border-b transition-all hover:bg-gray-50">
         <div class="w-full p-2 pl-8">{{ entry.body.slice(0, 70) }} {{ entry.body.length > 70 ? "..." : "" }}</div>
         <div class="w-1/4 p-2">{{ dateOnly(entry.date) }}</div>
         <div class="w-1/4 p-2">

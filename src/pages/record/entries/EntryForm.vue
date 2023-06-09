@@ -1,10 +1,14 @@
 <template>
   <div class="flex h-full justify-between">
-    <div class="w-full">
+    <div class="w-full h-full flex flex-col max-h-full">
       <EntryFormHeader :mode="mode" @submit="submit" @archive="archive" />
-      <textarea ref="textarea" v-model="body" placeholder="Write down your observations..."
-        class="block w-full resize-none border-none border-transparent p-8 text-lg text-gray-900 placeholder:text-gray-400 focus:ring-0" />
-      <EntryFormCompetences :entry="entry" />
+      <div class="pb-8">
+        <div class="overflow-scroll">
+          <textarea ref="textarea" v-model="body" placeholder="Write down your observations..."
+            class="block w-full resize-none border-none border-transparent p-8 text-lg text-gray-900 placeholder:text-gray-400 focus:ring-0" />
+        </div>
+        <EntryFormCompetences :entry="entry" />
+      </div>
     </div>
     <div class="flex min-h-full w-[400px] min-w-[400px] flex-col gap-4 border-l px-8 py-4">
       <div class="flex items-center gap-4">
@@ -47,7 +51,37 @@ const { executeMutation: createEntry } = useMutation(gql`
       id
       date
       body
+      deletedAt
+      user {
+        id
+        firstName
+        lastName
+      }
       createdAt
+      tags {
+        id
+        name
+        color
+      }
+      events {
+        id
+        title
+      }
+      users {
+        id
+        firstName
+        lastName
+      }
+      userCompetences {
+        id
+        level
+        competence {
+          id
+          name
+          color
+          type
+        }
+      }
     }
   }
 `);
@@ -58,11 +92,36 @@ const { executeMutation: updateEntry } = useMutation(gql`
       id
       date
       body
+      deletedAt
+      user {
+        id
+        firstName
+        lastName
+      }
       createdAt
       tags {
         id
         name
         color
+      }
+      events {
+        id
+        title
+      }
+      users {
+        id
+        firstName
+        lastName
+      }
+      userCompetences {
+        id
+        level
+        competence {
+          id
+          name
+          color
+          type
+        }
       }
     }
   }
@@ -135,9 +194,9 @@ async function update() {
   const input: any = {
     date: entry.value.date,
     body: body.value,
-    tags: entry.value.tags?.map((el) => ({ id: el.id })),
-    events: entry.value.events?.map((el) => ({ id: el.id })),
-    users: entry.value.users?.map((el) => ({ id: el.id })),
+    tagIds: entry.value.tags?.map((el) => el.id),
+    eventIds: entry.value.events?.map((el) => el.id),
+    userIds: entry.value.users?.map((el) => el.id),
     userCompetences: eacs,
   };
 
@@ -154,9 +213,9 @@ async function create() {
   const input: any = {
     date: entry.value.date,
     body: body.value,
-    tags: entry.value.tags?.map((el) => el.id),
-    events: entry.value.events?.map((el) => el.id),
-    users: entry.value.users?.map((el) => el.id),
+    tagIds: entry.value.tags?.map((el) => el.id),
+    eventIds: entry.value.events?.map((el) => el.id),
+    userIds: entry.value.users?.map((el) => el.id),
     userCompetences: eacs,
   };
 
