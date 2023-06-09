@@ -148,7 +148,14 @@ const emit = defineEmits(["saved", "archived"]);
 function userCompetences(): { error: boolean, eacs: any[] } {
   const eacs = [];
 
-  if (entry.value.users === undefined) {
+  const userCount = entry.value.users?.length || 0;
+  const userCompetenceCount = entry.value.userCompetences?.length || 0;
+
+  if (userCompetenceCount === 0) {
+    return { error: false, eacs: [] };
+  }
+
+  if (userCount === 0 && userCompetenceCount > 0) {
     alert("You must select at least one student.");
     return { error: true, eacs: [] };
   }

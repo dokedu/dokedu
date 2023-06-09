@@ -17,10 +17,7 @@ async function archived() {
   await router.push({ name: "record-entries" });
 }
 
-function saved() {
-  // TODO: show toast successfully saved
-  alert("Successfully saved");
-}
+function saved() { }
 
 const { data: entry } = useQuery({
   query: graphql(`
