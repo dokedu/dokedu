@@ -24,17 +24,13 @@ type CompetenceFilterInput struct {
 	Parents []*string            `json:"parents,omitempty"`
 }
 
-type CreateEntryFileInput struct {
-	File string `json:"file"`
-}
-
 type CreateEntryInput struct {
 	Date            string                       `json:"date"`
 	Body            string                       `json:"body"`
-	Tags            []*string                    `json:"tags,omitempty"`
-	Files           []*string                    `json:"files,omitempty"`
-	Users           []*string                    `json:"users,omitempty"`
-	Events          []*string                    `json:"events,omitempty"`
+	TagIds          []string                     `json:"tagIds,omitempty"`
+	FileIds         []string                     `json:"fileIds,omitempty"`
+	UserIds         []string                     `json:"userIds,omitempty"`
+	EventIds        []string                     `json:"eventIds,omitempty"`
 	UserCompetences []*CreateUserCompetenceInput `json:"userCompetences,omitempty"`
 }
 
@@ -131,42 +127,21 @@ type SignUpInput struct {
 	Password  string `json:"password"`
 }
 
-type UpdateEntryEventInput struct {
-	ID        string     `json:"id"`
-	DeletedAt *time.Time `json:"deletedAt,omitempty"`
-}
-
-type UpdateEntryFileInput struct {
-	ID        string     `json:"id"`
-	DeletedAt *time.Time `json:"deletedAt,omitempty"`
-}
-
 type UpdateEntryInput struct {
 	ID              string                       `json:"id"`
-	Date            *time.Time                   `json:"date,omitempty"`
+	Date            *string                      `json:"date,omitempty"`
 	Body            *string                      `json:"body,omitempty"`
-	Tags            []*UpdateEntryTagInput       `json:"tags,omitempty"`
-	Files           []*UpdateEntryFileInput      `json:"files,omitempty"`
-	Users           []*UpdateEntryUserInput      `json:"users,omitempty"`
-	Events          []*UpdateEntryEventInput     `json:"events,omitempty"`
+	TagIds          []string                     `json:"tagIds,omitempty"`
+	FileIds         []string                     `json:"fileIds,omitempty"`
+	UserIds         []string                     `json:"userIds,omitempty"`
+	EventIds        []string                     `json:"eventIds,omitempty"`
 	UserCompetences []*UpdateUserCompetenceInput `json:"userCompetences,omitempty"`
 }
 
-type UpdateEntryTagInput struct {
-	ID        string     `json:"id"`
-	DeletedAt *time.Time `json:"deletedAt,omitempty"`
-}
-
-type UpdateEntryUserInput struct {
-	ID        string     `json:"id"`
-	DeletedAt *time.Time `json:"deletedAt,omitempty"`
-}
-
 type UpdateUserCompetenceInput struct {
-	Level        int        `json:"level"`
-	UserID       string     `json:"userId"`
-	CompetenceID string     `json:"competenceId"`
-	DeletedAt    *time.Time `json:"deletedAt,omitempty"`
+	Level        int    `json:"level"`
+	UserID       string `json:"userId"`
+	CompetenceID string `json:"competenceId"`
 }
 
 type UpdateUserInput struct {

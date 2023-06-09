@@ -144,7 +144,7 @@ type Entry struct {
 	bun.BaseModel
 
 	ID             string       `bun:",nullzero,pk" json:"id"`
-	Date           time.Time    `json:"date"`
+	Date           string       `json:"date"`
 	Body           string       `json:"body"`
 	UserID         string       `json:"user_id"`
 	OrganisationID string       `json:"organisation_id"`

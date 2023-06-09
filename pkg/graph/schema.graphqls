@@ -47,21 +47,6 @@ type Competence {
     createdAt: Time!
 }
 
-type Entry {
-    id: ID!
-    date: Time!
-    body: String
-    createdAt: Time!
-    deletedAt: Time
-
-    user: User!
-    users: [User!]!
-    events: [Event!]!
-    files: [File!]!
-    tags: [Tag!]!
-    userCompetences: [UserCompetence!]!
-}
-
 type UserCompetence {
     id: ID!
     level: Int!
@@ -177,16 +162,8 @@ type UserConnection {
     totalCount: Int!
 }
 
-
-
 type CompetenceConnection {
     edges: [Competence]
-    pageInfo: PageInfo!
-    totalCount: Int!
-}
-
-type EntryConnection {
-    edges: [Entry]
     pageInfo: PageInfo!
     totalCount: Int!
 }
@@ -208,16 +185,6 @@ input UserFilterInput {
     role: [UserRole]
 }
 
-input EntryFilterInput {
-    authors: [ID]
-    users: [ID]
-    tags: [ID]
-    competences: [ID]
-    from: Time
-    to: Time
-    deleted: Boolean
-}
-
 input CompetenceFilterInput {
     type: [CompetenceType]
     parents: [ID]
@@ -228,7 +195,6 @@ input EventFilterInput {
     to: Time
     deleted: Boolean
 }
-
 
 type Query
 
@@ -242,9 +208,6 @@ extend type Query {
 
     competence(id: ID!): Competence!
     competences(limit: Int, offset: Int, filter: CompetenceFilterInput, search: String): CompetenceConnection!
-
-    entry(id: ID!): Entry!
-    entries(limit: Int, offset: Int, filter: EntryFilterInput, search: String): EntryConnection!
 
     event(id: ID!): Event!
     events(limit: Int, offset: Int, filter: EventFilterInput, search: String): EventConnection!
@@ -281,66 +244,6 @@ input UpdateUserInput {
     joinedAt: Time
 }
 
-input CreateEntryFileInput {
-    file: ID!
-}
-
-input CreateUserCompetenceInput {
-    level: Int!
-    userId: ID!
-    competenceId: ID!
-}
-
-
-input UpdateUserCompetenceInput {
-    level: Int!
-    userId: ID!
-    competenceId: ID!
-    deletedAt: Time
-}
-
-input CreateEntryInput {
-    date: String!
-    body: String!
-    tags: [ID]
-    files: [ID]
-    users: [ID]
-    events: [ID]
-    userCompetences: [CreateUserCompetenceInput]
-}
-
-input UpdateEntryTagInput {
-    id: ID!
-    deletedAt: Time
-}
-
-input UpdateEntryFileInput {
-    id: ID!
-    deletedAt: Time
-}
-
-input UpdateEntryUserInput {
-    id: ID!
-    deletedAt: Time
-}
-
-input UpdateEntryEventInput {
-    id: ID!
-    deletedAt: Time
-}
-
-# TODO: if field is null, ignore, if field is empty, delete existing items, if set, set all to this
-input UpdateEntryInput {
-    id: ID!
-    date: Time
-    body: String
-    tags: [UpdateEntryTagInput]
-    files: [UpdateEntryFileInput]
-    users: [UpdateEntryUserInput]
-    events: [UpdateEntryEventInput]
-    userCompetences: [UpdateUserCompetenceInput]
-}
-
 input CreateReportInput {
     format: ReportFormat!
     kind: ReportKind!
@@ -365,10 +268,6 @@ extend type Mutation {
     updateUser(input: UpdateUserInput!): User!
     inviteUser(input: CreateUserInput!): User!
     archiveUser(id: ID!): User!
-
-    createEntry(input: CreateEntryInput!): Entry!
-    updateEntry(input: UpdateEntryInput!): Entry!
-    archiveEntry(id: ID!): Entry!
 
     createUserCompetence(input: CreateUserCompetenceInput!): UserCompetence!
     archiveUserCompetence(id: ID!): UserCompetence!

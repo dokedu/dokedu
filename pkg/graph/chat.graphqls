@@ -1,8 +1,8 @@
 type Chat {
     id: ID!
     name: String
-    chatUsers: [ChatUser!]!
-    chatMessages: [ChatMessage!]!
+    users: [User!]!
+    messages: [ChatMessage!]!
 }
 
 type ChatUser {

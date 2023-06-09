@@ -75,7 +75,7 @@ CREATE TABLE users
     organisation_id text                         NOT NULL REFERENCES organisations,
     first_name      text                         NOT NULL,
     last_name       text                         NOT NULL,
-    email           text                         NOT NULL,
+    email           text                         NULL,
     password        text                         NULL,
     avatar_file_id  text                         NULL REFERENCES files,
     created_at      timestamptz DEFAULT NOW()    NOT NULL,

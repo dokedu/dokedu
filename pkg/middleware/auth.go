@@ -36,6 +36,33 @@ func Auth(signer jwt.Signer) echo.MiddlewareFunc {
 	}
 }
 
+func TestAuth(signer jwt.Signer) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			header := r.Header.Get("Authorization")
+
+			// Allow unauthenticated users in
+			if header == "" {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			// Check if the header is valid
+			claims, err := signer.ParseAndValidate(header)
+			if err != nil {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			user := claims.User
+			ctx := context.WithValue(r.Context(), userCtxKey, &user)
+			r = r.WithContext(ctx)
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 // ForContext finds the user from the context. REQUIRES Middleware to have run.
 func ForContext(ctx context.Context) *jwt.User {
 	raw, _ := ctx.Value(userCtxKey).(*jwt.User)

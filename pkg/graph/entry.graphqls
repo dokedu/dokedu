@@ -1,0 +1,74 @@
+type Entry {
+    id: ID!
+    date: String!
+    body: String
+    createdAt: Time!
+    deletedAt: Time
+
+    user: User!
+    users: [User!]!
+    events: [Event!]!
+    files: [File!]!
+    tags: [Tag!]!
+    userCompetences: [UserCompetence!]!
+}
+
+type EntryConnection {
+    edges: [Entry]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+input EntryFilterInput {
+    authors: [ID]
+    users: [ID]
+    tags: [ID]
+    competences: [ID]
+    from: Time
+    to: Time
+    deleted: Boolean
+}
+
+extend type Query {
+    entry(id: ID!): Entry!
+    entries(limit: Int, offset: Int, filter: EntryFilterInput, search: String): EntryConnection!
+}
+
+input CreateUserCompetenceInput {
+    level: Int!
+    userId: ID!
+    competenceId: ID!
+}
+
+input CreateEntryInput {
+    date: String!
+    body: String!
+    tagIds: [ID!]
+    fileIds: [ID!]
+    userIds: [ID!]
+    eventIds: [ID!]
+    userCompetences: [CreateUserCompetenceInput!]
+}
+
+input UpdateEntryInput {
+    id: ID!
+    date: String
+    body: String
+    tagIds: [ID!]
+    fileIds: [ID!]
+    userIds: [ID!]
+    eventIds: [ID!]
+    userCompetences: [UpdateUserCompetenceInput!]
+}
+
+input UpdateUserCompetenceInput {
+    level: Int!
+    userId: ID!
+    competenceId: ID!
+}
+
+extend type Mutation {
+    createEntry(input: CreateEntryInput!): Entry!
+    updateEntry(input: UpdateEntryInput!): Entry!
+    archiveEntry(id: ID!): Entry!
+}
