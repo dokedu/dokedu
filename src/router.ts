@@ -34,7 +34,7 @@ const router = createRouter({
       component: () => import("./pages/record/entries/new.vue"),
     },
     {
-      name: "record-entry",
+      name: "record-entries-entry",
       path: "/record/entries/:id",
       component: () => import("./pages/record/entries/[id].vue"),
     },
@@ -44,7 +44,7 @@ const router = createRouter({
       component: () => import("./pages/record/students/index.vue"),
     },
     {
-      name: "record-student",
+      name: "record-students-student",
       path: "/record/students/:id",
       component: () => import("./pages/record/students/[id].vue"),
     },
@@ -57,6 +57,11 @@ const router = createRouter({
       name: "record-projects",
       path: "/record/projects",
       component: () => import("./pages/record/projects/index.vue"),
+    },
+    {
+      name: "record-projects-project",
+      path: "/record/projects/:id",
+      component: () => import("./pages/record/projects/[id].vue"),
     },
     {
       name: "drive-my-drive",

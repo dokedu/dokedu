@@ -23,6 +23,6 @@ function today() {
 }
 
 function saved(entry: { id: string }) {
-  router.push({ name: "record-entry", params: { id: entry.id } });
+  router.push({ name: "record-entries-entry", params: { id: entry.id } });
 }
 </script>

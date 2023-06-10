@@ -3,13 +3,13 @@
     <PageHeader class="flex justify-between">
       <div class="font-medium text-gray-950">Entries</div>
       <div class="flex gap-2">
-        <router-link :to="{ name: 'record-entries-new' }" class="rounded-md bg-black px-6 py-1.5 text-white">
-          Create entry
+        <router-link :to="{ name: 'record-entries-new' }">
+          <DButton type="primary" size="sm" :icon-left="Plus">Create entry</DButton>
         </router-link>
       </div>
     </PageHeader>
     <div class="flex flex-col overflow-scroll">
-      <router-link :to="{ name: 'record-entry', params: { id: entry.id } }" v-for="entry in data?.entries?.edges"
+      <router-link :to="{ name: 'record-entries-entry', params: { id: entry.id } }" v-for="entry in data?.entries?.edges"
         class="flex border-b transition-all hover:bg-gray-50">
         <div class="w-full p-2 pl-8">{{ entry.body.slice(0, 70) }} {{ entry.body.length > 70 ? "..." : "" }}</div>
         <div class="w-1/4 p-2">{{ dateOnly(entry.date) }}</div>
@@ -24,6 +24,8 @@
 import PageHeader from "../../../components/PageHeader.vue";
 import PageWrapper from "../../../components/PageWrapper.vue";
 import { gql, useQuery } from "@urql/vue";
+import DButton from "../../../components/d-button/d-button.vue";
+import { Plus } from "lucide-vue-next";
 
 const { data } = useQuery({
   query: gql`
