@@ -5,6 +5,8 @@ package model
 import (
 	"example/pkg/db"
 	"time"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type ChatConnection struct {
@@ -32,6 +34,12 @@ type CreateEntryInput struct {
 	UserIds         []string                     `json:"userIds,omitempty"`
 	EventIds        []string                     `json:"eventIds,omitempty"`
 	UserCompetences []*CreateUserCompetenceInput `json:"userCompetences,omitempty"`
+}
+
+type CreateFolderInput struct {
+	Name          string  `json:"name"`
+	FolderID      *string `json:"folderId,omitempty"`
+	SharedDriveID *string `json:"sharedDriveId,omitempty"`
 }
 
 type CreateReportInput struct {
@@ -93,6 +101,14 @@ type EventFilterInput struct {
 	Deleted *bool      `json:"deleted,omitempty"`
 }
 
+type FileUploadInput struct {
+	File graphql.Upload `json:"file"`
+	// The folder to upload the file to if empty the file will be uploaded to the root folder of the user.
+	FolderID *string `json:"folderId,omitempty"`
+	// The shared drive to upload the file to if empty the file will be uploaded to the root folder of the user.
+	SharedDriveID *string `json:"sharedDriveId,omitempty"`
+}
+
 type OrganisationConnection struct {
 	Edges      []*db.Organisation `json:"edges,omitempty"`
 	PageInfo   *PageInfo          `json:"pageInfo"`
@@ -109,6 +125,10 @@ type ReportConnection struct {
 	Edges      []*db.Report `json:"edges,omitempty"`
 	PageInfo   *PageInfo    `json:"pageInfo"`
 	TotalCount int          `json:"totalCount"`
+}
+
+type SharedDriveFilterInput struct {
+	Folder *string `json:"folder,omitempty"`
 }
 
 type SignInInput struct {
@@ -158,6 +178,10 @@ type UserConnection struct {
 	Edges      []*db.User `json:"edges,omitempty"`
 	PageInfo   *PageInfo  `json:"pageInfo"`
 	TotalCount int        `json:"totalCount"`
+}
+
+type UserFileFilterInput struct {
+	FolderID *string `json:"folderId,omitempty"`
 }
 
 type UserFilterInput struct {

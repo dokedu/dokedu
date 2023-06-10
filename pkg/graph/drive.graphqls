@@ -1,0 +1,71 @@
+scalar Upload
+
+enum FileType {
+    blob
+    folder
+}
+
+type File {
+    id: ID!
+    name: String!
+    fileType: FileType!
+    fileSize: Int!
+    parent: File
+    createdAt: Time!
+    deletedAt: Time
+
+    files: [File!]!
+}
+
+type SharedDrive {
+    id: ID!
+    name: String!
+    files: [File!]!
+    createdAt: Time!
+}
+
+input UserFileFilterInput {
+    folderId: String
+}
+
+input SharedDriveFilterInput {
+    folder: String
+}
+
+input FilesFilterInput {
+    folderId: String
+    sharedDriveId: String
+    limit: Int
+    offset: Int
+}
+
+extend type Query {
+    userFiles(input: UserFileFilterInput): [File!]!
+    sharedDrives(input: SharedDriveFilterInput): [SharedDrive!]!
+
+    file(id: ID!): File!
+    files(input: FilesFilterInput): [File!]!
+}
+
+input FileUploadInput {
+    file: Upload!
+    """
+    The folder to upload the file to if empty the file will be uploaded to the root folder of the user.
+    """
+    folderId: ID
+    """
+    The shared drive to upload the file to if empty the file will be uploaded to the root folder of the user.
+    """
+    sharedDriveId: ID
+}
+
+input CreateFolderInput {
+    name: String!
+    folderId: ID
+    sharedDriveId: ID
+}
+
+extend type Mutation {
+    singleUpload(input: FileUploadInput!): File!
+    createFolder(input: CreateFolderInput!): File!
+}

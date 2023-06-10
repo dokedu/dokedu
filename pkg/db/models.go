@@ -242,6 +242,8 @@ type File struct {
 	ID             string         `bun:",nullzero,pk" json:"id"`
 	Name           string         `json:"name"`
 	FileType       FileType       `json:"file_type"`
+	MimeType       string         `json:"mime_type"`
+	Size           int64          `json:"size"`
 	OrganisationID string         `json:"organisation_id"`
 	ParentID       sql.NullString `json:"parent_id"`
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
@@ -257,7 +259,8 @@ type Organisation struct {
 	Website        string       `json:"website"`
 	Phone          string       `json:"phone"`
 	OwnerID        string       `json:"owner_id"`
-	AllowedDomains []string     `json:"allowed_domains"`
+	AllowedDomains []string     `bun:",array" json:"allowed_domains"`
+	EnabledApps    []string     `bun:",array" json:"enabled_apps"`
 	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
 	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
@@ -331,6 +334,7 @@ type User struct {
 	ID             string         `bun:",nullzero,pk" json:"id"`
 	Role           UserRole       `json:"role"`
 	OrganisationID string         `json:"organisation_id"`
+	BucketID       string         `json:"bucket_id"`
 	FirstName      string         `json:"first_name"`
 	LastName       string         `json:"last_name"`
 	Email          string         `json:"email"`
@@ -340,7 +344,7 @@ type User struct {
 	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero" json:"deleted_at"`
 }
 
-type UserDriveFile struct {
+type UserFiles struct {
 	bun.BaseModel
 
 	ID             string       `bun:",nullzero,pk" json:"id"`
@@ -349,7 +353,6 @@ type UserDriveFile struct {
 	FileID         string       `json:"file_id"`
 	UpdatedAt      bun.NullTime `json:"updated_at"`
 	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
-	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
 type UserStudent struct {

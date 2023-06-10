@@ -77,26 +77,16 @@ func (r *eventResolver) Competences(ctx context.Context, obj *db.Event) ([]*db.C
 	panic(fmt.Errorf("not implemented: Competences - competences"))
 }
 
-// Parent is the resolver for the parent field.
-func (r *fileResolver) Parent(ctx context.Context, obj *db.File) (*db.File, error) {
-	panic(fmt.Errorf("not implemented: Parent - parent"))
-}
-
-// URL is the resolver for the url field.
-func (r *fileResolver) URL(ctx context.Context, obj *db.File) (string, error) {
-	// TODO: implement this
-	return fmt.Sprintf("https://api.dokedu.org/files/%s", obj.ID), nil
-}
-
-// DeletedAt is the resolver for the deletedAt field.
-func (r *fileResolver) DeletedAt(ctx context.Context, obj *db.File) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
-}
-
 // SignIn is the resolver for the signIn field.
 func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) (*model.SignInPayload, error) {
 	var user db.User
 	err := r.DB.NewSelect().Model(&user).Where("email = ?", strings.ToLower(input.Email)).Scan(ctx)
+	if err != nil {
+		return nil, errors.New("invalid email or password")
+	}
+
+	var organisation db.Organisation
+	err = r.DB.NewSelect().Model(&organisation).Where("id = ?", user.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, errors.New("invalid email or password")
 	}
@@ -125,7 +115,8 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 
 	// generate a new JWT token
 	token, err := signer.Sign(jwt.Claims{
-		User: jwtUser,
+		User:        jwtUser,
+		EnabledApps: organisation.EnabledApps,
 		StandardClaims: jwt2.StandardClaims{
 			IssuedAt: time.Now().Unix(),
 			// expires in 24 hours
@@ -629,7 +620,18 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) ([]*d
 
 // File is the resolver for the file field.
 func (r *queryResolver) File(ctx context.Context, id string) (*db.File, error) {
-	panic(fmt.Errorf("not implemented: File - file"))
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var file db.File
+	err := r.DB.NewSelect().Model(&file).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &file, nil
 }
 
 // Files is the resolver for the files field.
@@ -758,9 +760,6 @@ func (r *Resolver) Competence() CompetenceResolver { return &competenceResolver{
 // Event returns EventResolver implementation.
 func (r *Resolver) Event() EventResolver { return &eventResolver{r} }
 
-// File returns FileResolver implementation.
-func (r *Resolver) File() FileResolver { return &fileResolver{r} }
-
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
@@ -784,7 +783,6 @@ func (r *Resolver) UserCompetence() UserCompetenceResolver { return &userCompete
 
 type competenceResolver struct{ *Resolver }
 type eventResolver struct{ *Resolver }
-type fileResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type organisationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
@@ -799,6 +797,10 @@ type userCompetenceResolver struct{ *Resolver }
 //   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //     it when you're done.
 //   - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *fileResolver) URL(ctx context.Context, obj *db.File) (string, error) {
+	// TODO: implement this
+	return fmt.Sprintf("https://api.dokedu.org/files/%s", obj.ID), nil
+}
 func isStringInArray(s string, a []string) bool {
 	for _, v := range a {
 		if v == s {

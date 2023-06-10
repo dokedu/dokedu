@@ -9,6 +9,8 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/labstack/echo/v4"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"log"
 	"net/http"
 	"os"
@@ -36,6 +38,8 @@ func main() {
 	// Print all queries to stdout.
 	db.AddQueryHook(bundebug.NewQueryHook(bundebug.WithVerbose(true)))
 
+	minioClient := minioClient()
+
 	e := echo.New()
 	e.Use(middleware.Auth(signer))
 
@@ -52,7 +56,8 @@ func main() {
 	e.Use(middleware.CORS())
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
-		DB: db,
+		DB:          db,
+		MinioClient: minioClient,
 	}}))
 
 	srv.AddTransport(&transport.Websocket{})
@@ -80,4 +85,22 @@ func main() {
 
 	// Start server
 	e.Logger.Fatal(e.Start("0.0.0.0:" + port))
+}
+
+func minioClient() *minio.Client {
+	endpoint := "localhost:9000"
+	accessKeyID := "accessKeyID"
+	secretAccessKey := "secretAccessKey"
+	useSSL := false
+
+	// Initialize minio client object.
+	minioClient, err := minio.New(endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
+		Secure: useSSL,
+	})
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return minioClient
 }

@@ -5,9 +5,9 @@ WITH new_id AS (
              VALUES ((SELECT id FROM new_id), 'owner', 'John', 'Doe', (SELECT id FROM new_id), crypt('password', gen_salt('bf')), 'john@dokedu.org')
              RETURNING id),
      new_org AS (
-         INSERT INTO organisations (id, name, legal_name, website, phone, owner_id, allowed_domains)
+         INSERT INTO organisations (id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps)
              VALUES ((SELECT id FROM new_id), 'Acme Corp', 'Acme Corporation', 'https://acme.dokedu.org', '555-1234',
-                     (SELECT id FROM new_user), '{"dokedu.org"}')
+                     (SELECT id FROM new_user), '{"dokedu.org"}', '{"drive","admin","record"}')
              RETURNING id)
 UPDATE users
 SET organisation_id = new_org.id

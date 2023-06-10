@@ -16,5 +16,6 @@ type User struct {
 
 type Claims struct {
 	jwt.StandardClaims
-	User User `json:"user"`
+	User        User     `json:"user"`
+	EnabledApps []string `json:"enabled_apps"`
 }

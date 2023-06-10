@@ -49,6 +49,7 @@ CREATE TABLE organisations
     phone           text                         NOT NULL,
     owner_id        text                         NOT NULL,
     allowed_domains text[]                       NOT NULL,
+    enabled_apps    text[]                       NULL,
     created_at      timestamptz DEFAULT NOW()    NOT NULL,
     deleted_at      timestamptz
 );
@@ -60,6 +61,8 @@ CREATE TABLE files
     id              text        DEFAULT nanoid() NOT NULL PRIMARY KEY,
     name            text                         NOT NULL,
     file_type       file_type                    NOT NULL DEFAULT 'blob'::file_type,
+    mime_type       text                         NULL, -- application/vnd.dokedu-apps.folder
+    size            bigint                       NOT NULL default 0,
     organisation_id text                         NOT NULL REFERENCES organisations,
     parent_id       text                         NULL REFERENCES files,
     created_at      timestamptz DEFAULT NOW()    NOT NULL,
@@ -73,6 +76,7 @@ CREATE TABLE users
     id              text        DEFAULT nanoid() NOT NULL PRIMARY KEY,
     role            user_role                    NOT NULL,
     organisation_id text                         NOT NULL REFERENCES organisations,
+    bucket_id       text                         NOT NULL default nanoid(21, '0123456789abcdefghijklmnopqrstuvwxyz'),
     first_name      text                         NOT NULL,
     last_name       text                         NOT NULL,
     email           text                         NULL,
@@ -80,7 +84,8 @@ CREATE TABLE users
     avatar_file_id  text                         NULL REFERENCES files,
     created_at      timestamptz DEFAULT NOW()    NOT NULL,
     deleted_at      timestamptz,
-    UNIQUE (email)
+    UNIQUE (email),
+    UNIQUE (bucket_id)
 );
 
 

@@ -3,6 +3,7 @@ package graph
 //go:generate go run github.com/99designs/gqlgen generate
 
 import (
+	"github.com/minio/minio-go/v7"
 	"github.com/uptrace/bun"
 )
 
@@ -11,5 +12,6 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	DB *bun.DB
+	DB          *bun.DB
+	MinioClient *minio.Client
 }
