@@ -6,6 +6,7 @@ package graph
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"example/pkg/db"
@@ -315,12 +316,91 @@ func (r *mutationResolver) ArchiveUserCompetence(ctx context.Context, id string)
 
 // CreateTag is the resolver for the createTag field.
 func (r *mutationResolver) CreateTag(ctx context.Context, input model.CreateTagInput) (*db.Tag, error) {
-	panic(fmt.Errorf("not implemented: CreateTag - createTag"))
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	// check if color is set
+	color := input.Color
+	if color == "" {
+		color = "blue"
+	}
+
+	newTag := db.Tag{
+		OrganisationID: currentUser.OrganisationID,
+		Name:           input.Name,
+		Color:          sql.NullString{String: color, Valid: true},
+	}
+
+	err := r.DB.NewInsert().Model(&newTag).Returning("*").Scan(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &newTag, nil
 }
 
 // ArchiveTag is the resolver for the archiveTag field.
 func (r *mutationResolver) ArchiveTag(ctx context.Context, id string) (*db.Tag, error) {
-	panic(fmt.Errorf("not implemented: ArchiveTag - archiveTag"))
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	// set deleted_at field to the current tim
+	//e
+	tag := db.Tag{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+		DeletedAt: bun.NullTime{
+			Time: time.Now(),
+		},
+	}
+	_, err := r.DB.NewUpdate().Model(&tag).Column("deleted_at").Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).WhereAllWithDeleted().Returning("*").Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &tag, nil
+}
+
+// UpdateTag is the resolver for the updateTag field.
+func (r *mutationResolver) UpdateTag(ctx context.Context, id string, input model.CreateTagInput) (*db.Tag, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var tag db.Tag
+	tag.ID = id
+	err := r.DB.NewSelect().
+		Model(&tag).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		WherePK().
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// update the tag
+	tag.Name = input.Name
+
+	color := input.Color
+	if color == "" {
+		color = "blue"
+	}
+
+	tag.Color = sql.NullString{String: color, Valid: true}
+	_, err = r.DB.NewUpdate().Model(&tag).WherePK().Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &tag, nil
 }
 
 // CreateReport is the resolver for the createReport field.
@@ -695,7 +775,11 @@ func (r *tagResolver) Color(ctx context.Context, obj *db.Tag) (string, error) {
 
 // DeletedAt is the resolver for the deletedAt field.
 func (r *tagResolver) DeletedAt(ctx context.Context, obj *db.Tag) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
+	if obj.DeletedAt.IsZero() {
+		return &obj.DeletedAt.Time, nil
+	}
+
+	return nil, nil
 }
 
 // DeletedAt is the resolver for the deletedAt field.
