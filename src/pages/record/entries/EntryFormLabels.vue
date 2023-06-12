@@ -1,5 +1,5 @@
 <template>
-  <div class="flex gap-4">
+  <div class="flex gap-4 text-sm">
     <label for="date" class="mt-2 min-w-[64px] text-stone-500">Labels</label>
     <div class="w-full">
       <d-context-menu :show="contextMenu" @close="contextMenu = false" :alignment="ContextMenuAlignment.Overlay">

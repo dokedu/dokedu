@@ -5,13 +5,8 @@
         <router-link :to="{ name: 'record-projects' }">Projects</router-link>
       </div>
       <div class="flex gap-2">
-        <button type="button"
-          class="rounded-md bg-red-100 px-6 py-1.5 text-red-700 transition-all hover:bg-red-200 hover:text-red-800">
-          Delete
-        </button>
-        <button type="button" class="rounded-md bg-black px-6 py-1.5 text-white">
-          Edit
-        </button>
+        <d-button type="transparent" :icon-left="Trash2"> Delete </d-button>
+        <d-button type="primary" :icon-left="Edit"> Edit </d-button>
       </div>
     </PageHeader>
     <PageContent>
@@ -27,8 +22,11 @@ import PageWrapper from "../../../components/PageWrapper.vue";
 import PageContent from "../../../components/PageContent.vue";
 import { gql, useQuery } from "@urql/vue";
 import { useRoute } from "vue-router";
+import DButton from "../../../components/d-button/d-button.vue";
+import { Trash2 } from "lucide-vue-next";
+import { Edit } from "lucide-vue-next";
 
-const route = useRoute()
+const route = useRoute();
 
 const { data } = useQuery({
   query: gql`
@@ -48,4 +46,3 @@ const { data } = useQuery({
   },
 });
 </script>
-  

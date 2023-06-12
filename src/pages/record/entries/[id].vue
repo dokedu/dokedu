@@ -17,7 +17,7 @@ async function archived() {
   await router.push({ name: "record-entries" });
 }
 
-function saved() { }
+function saved() {}
 
 const { data: entry } = useQuery({
   query: graphql(`
@@ -55,6 +55,12 @@ const { data: entry } = useQuery({
             name
             color
             type
+            grades
+            parents {
+              id
+              name
+              grades
+            }
           }
         }
       }

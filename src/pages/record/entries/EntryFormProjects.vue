@@ -1,17 +1,31 @@
 <template>
-  <div class="flex gap-4">
+  <div class="flex gap-4 text-sm">
     <label for="date" class="mt-2 min-w-[64px] text-stone-500">Projects</label>
     <div class="w-full">
       <d-context-menu :show="contextMenu" @close="contextMenu = false" :alignment="ContextMenuAlignment.Overlay">
         <div class="flex flex-col gap-1 px-1 py-2">
-          <div v-for="event in events?.events?.edges" :key="event.id" @click="toggleEvent(event)"
-            class="flex w-full items-center justify-between rounded-md p-1 hover:bg-stone-100">
+          <div
+            v-for="event in events?.events?.edges"
+            :key="event.id"
+            @click="toggleEvent(event)"
+            class="flex w-full items-center justify-between rounded-md p-1 hover:bg-stone-100"
+          >
             <div class="px-1 py-0.5 text-stone-700">{{ event.title }}</div>
-            <svg v-show="entry?.events?.length > 0 && entry?.events.map((el) => el.id).includes(event.id)"
-              class="stroke-stone-700" width="24" height="24" viewBox="0 0 24 24" fill="none"
-              xmlns="http://www.w3.org/2000/svg">
-              <path d="M17.3327 8L9.99935 15.3333L6.66602 12" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round" />
+            <svg
+              v-show="entry?.events?.length > 0 && entry?.events.map((el) => el.id).includes(event.id)"
+              class="stroke-stone-700"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M17.3327 8L9.99935 15.3333L6.66602 12"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </div>
         </div>
@@ -42,7 +56,7 @@ const contextMenu = ref(false);
 
 const { data: events } = useQuery({
   query: graphql(`
-     query events {
+    query events {
       events {
         edges {
           id

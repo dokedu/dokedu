@@ -1,5 +1,5 @@
 <template>
-  <div class="px-8">
+  <div class="px-8 text-sm">
     <div>
       <header class="mb-2 flex items-center justify-between">
         <div class="text-stone-500">Competences</div>
@@ -7,22 +7,23 @@
           <Plus :size="20" class="stroke-stone-500" />
         </div>
       </header>
-      <div class="mb-2">
-        <div v-for="competence in competences"
-          class="flex w-full select-none items-center justify-between gap-2 rounded-lg px-1 py-1 text-stone-700 hover:bg-stone-50">
-          <div class="flex items-center gap-2">
-            <span>{{ competence.name }}</span>
+      <div class="mb-2 flex flex-col gap-2">
+        <d-competence v-for="competence in competences" :key="competence.id" :competence="competence">
+          <d-competence-level
+            :id="competence.id"
+            :level="competence.level"
+            :editable="true"
+            @update="updateCompetenceLevel"
+          />
+          <div class="rounded-md p-1 hover:bg-stone-100" @click="toggleCompetence(competence)">
+            <X :size="20" class="stroke-stone-500" />
           </div>
-          <div class="flex gap-2 items-center">
-            <d-competence-level :id="competence.id" :level="competence.level" :editable="true"
-              @update="updateCompetenceLevel" />
-            <div class="rounded-md p-1 hover:bg-stone-100" @click="toggleCompetence(competence)">
-              <X :size="20" class="stroke-stone-500" />
-            </div>
-          </div>
-        </div>
+        </d-competence>
       </div>
-      <div class="flex w-fit select-none items-center gap-2 rounded-md p-1 hover:bg-stone-100" @click="dialogOpen = true">
+      <div
+        class="flex w-fit select-none items-center gap-2 rounded-md p-1 hover:bg-stone-100"
+        @click="dialogOpen = true"
+      >
         <div class="rounded-md">
           <Plus :size="20" class="stroke-stone-500" />
         </div>
@@ -31,11 +32,20 @@
     </div>
   </div>
   <Teleport to="body">
-    <div v-if="dialogOpen" ref="dialog"
-      class="absolute right-0 top-0 h-screen w-full max-w-xl bg-white p-4 shadow-lg backdrop:bg-stone-950/20">
+    <div
+      v-if="dialogOpen"
+      ref="dialog"
+      class="absolute right-0 top-0 h-screen w-full max-w-xl bg-white p-4 shadow-lg backdrop:bg-stone-950/20"
+    >
       <div class="mb-4 flex items-center justify-between gap-2">
-        <input type="text" name="search" v-model="search" id="search" placeholder="Search competences"
-          class="w-full rounded-md border border-stone-200 px-3 py-1.5 shadow-sm outline-none placeholder:text-stone-400 focus:border-stone-200 focus:ring-0" />
+        <input
+          type="text"
+          name="search"
+          v-model="search"
+          id="search"
+          placeholder="Search competences"
+          class="w-full rounded-md border border-stone-200 px-3 py-1.5 shadow-sm outline-none placeholder:text-stone-400 focus:border-stone-200 focus:ring-0"
+        />
         <div class="rounded-md p-1 hover:bg-stone-100" @click="dialogOpen = false">
           <X class="stroke-stone-500" />
         </div>
@@ -45,23 +55,24 @@
           <div></div>
           <div class="text-sm text-stone-500 hover:text-stone-900" @click="parents = []">Subjects</div>
           <div v-if="parents.length > 0" class="text-stone-300">{{ "/" }}</div>
-          <div v-for="(parent, index) in parents" :key="parent.id" @click="clickParent(parent)"
-            class="flex gap-2 text-sm">
+          <div
+            v-for="(parent, index) in parents"
+            :key="parent.id"
+            @click="clickParent(parent)"
+            class="flex gap-2 text-sm"
+          >
             <div class="text-stone-500 hover:text-stone-900">{{ parent.name }}</div>
             <div class="text-stone-300">{{ index === parents.length - 1 ? "" : "/" }}</div>
           </div>
         </div>
         <div class="flex flex-col gap-1">
-          <div v-for="competence in data?.competences?.edges"
-            class="flex w-full select-none justify-between rounded-lg px-2 py-1 text-stone-700 hover:bg-stone-50"
-            @click="toggleCompetence(competence)">
-            <div :class="{ 'text-blue-700': isCompetenceInEntry(competence) }" v-html="highlightText(competence.name)">
-            </div>
-            <div>
-              {{ competence.type }}
-              {{ competence.grades }}
-            </div>
-          </div>
+          <d-competence
+            v-for="competence in data?.competences?.edges"
+            :key="competence.id"
+            :competence="competence"
+            @click="toggleCompetence(competence)"
+          >
+          </d-competence>
         </div>
         <div v-if="!data?.competences?.edges" class="select-none text-center text-sm uppercase text-stone-500">
           no results
@@ -76,8 +87,9 @@ import { computed, ref, toRef } from "vue";
 import { gql, useQuery } from "@urql/vue";
 import { onClickOutside } from "@vueuse/core";
 import { onKeyStroke } from "@vueuse/core";
-import DCompetenceLevel from "../../../components/d-competence-level.vue"
+import DCompetenceLevel from "../../../components/d-competence-level.vue";
 import { Entry, Competence } from "../../../gql/graphql";
+import DCompetence from "../../../components/d-competence/d-competence.vue";
 
 const dialog = ref(null);
 const dialogOpen = ref(false);
@@ -89,7 +101,9 @@ onKeyStroke("Escape", () => {
   dialogOpen.value = false;
 });
 
-onClickOutside(dialog, () => { dialogOpen.value = false; });
+onClickOutside(dialog, () => {
+  dialogOpen.value = false;
+});
 
 function isCompetenceInEntry(competence: Competence) {
   return entry.value.userCompetences?.some((eac) => eac.competence.id === competence.id);
@@ -99,7 +113,7 @@ const props = defineProps<{ entry: Partial<Entry> }>();
 
 const entry = toRef(props, "entry");
 
-function updateCompetenceLevel(data: { id: string, level: number }) {
+function updateCompetenceLevel(data: { id: string; level: number }) {
   // find all eacs with eac.competence.id = data.id
   const eacs = entry.value.userCompetences?.filter((eac) => eac.competence.id === data.id);
   // update all eacs with new level
@@ -111,7 +125,7 @@ function updateCompetenceLevel(data: { id: string, level: number }) {
 const competences = computed(() => {
   const items = entry.value.userCompetences?.map((eac) => ({ ...eac.competence, level: eac.level })) || [];
   // return unique items by item.id
-  return items.filter((item, index, self) => self.findIndex((t) => t.id === item.id) === index)
+  return items.filter((item, index, self) => self.findIndex((t) => t.id === item.id) === index);
 });
 
 const filter = computed(() => {
@@ -139,6 +153,12 @@ const { data } = useQuery({
           type
           color
           grades
+          parents {
+            id
+            name
+            type
+            grades
+          }
         }
       }
     }

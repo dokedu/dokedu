@@ -1,20 +1,29 @@
 <template>
   <div class="flex h-full justify-between">
-    <div class="w-full h-full flex flex-col max-h-full">
+    <div class="flex h-full max-h-full w-full flex-col">
       <EntryFormHeader :mode="mode" @submit="submit" @archive="archive" />
       <div class="pb-8">
         <div class="overflow-scroll">
-          <textarea ref="textarea" v-model="body" placeholder="Write down your observations..."
-            class="block w-full resize-none border-none border-transparent p-8 text-lg text-stone-900 placeholder:text-stone-400 focus:ring-0" />
+          <textarea
+            ref="textarea"
+            v-model="body"
+            placeholder="Write down your observations..."
+            class="block w-full resize-none border-none border-transparent p-8 text-lg text-stone-900 placeholder:text-stone-400 focus:ring-0"
+          />
         </div>
         <EntryFormCompetences :entry="entry" />
       </div>
     </div>
     <div class="flex min-h-full w-[400px] min-w-[400px] flex-col gap-4 border-l border-stone-100 px-8 py-4">
       <div class="flex items-center gap-4">
-        <label for="date" class="min-w-[64px] text-stone-500">Datum</label>
-        <input v-model="formattedDate" type="date" name="date" id="date"
-          class="w-full rounded-md border-none transition-all hover:bg-stone-50 focus:bg-stone-100 focus:ring-2 focus:ring-black" />
+        <label for="date" class="min-w-[64px] text-sm text-stone-500">Datum</label>
+        <input
+          v-model="formattedDate"
+          type="date"
+          name="date"
+          id="date"
+          class="w-full rounded-md border-none text-sm transition-all hover:bg-stone-50 focus:bg-stone-100 focus:ring-2 focus:ring-black"
+        />
       </div>
       <EntryFormProjects :entry="entry" />
       <EntryFormLabels :entry="entry" />
@@ -145,7 +154,7 @@ async function archive() {
 // emits
 const emit = defineEmits(["saved", "archived"]);
 
-function userCompetences(): { error: boolean, eacs: any[] } {
+function userCompetences(): { error: boolean; eacs: any[] } {
   const eacs = [];
 
   const userCount = entry.value.users?.length || 0;
@@ -182,7 +191,7 @@ function userCompetences(): { error: boolean, eacs: any[] } {
 
   return {
     error: false,
-    eacs
+    eacs,
   };
 }
 
@@ -210,7 +219,7 @@ async function update() {
   input["id"] = entry.value.id;
   await updateEntry({ input });
   emit("saved");
-  return true
+  return true;
 }
 
 async function create() {

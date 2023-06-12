@@ -57,6 +57,13 @@ const router = createRouter({
       name: "record-projects",
       path: "/record/projects",
       component: () => import("./pages/record/projects/index.vue"),
+      children: [
+        {
+          name: "record-projects-new",
+          path: "new",
+          component: () => import("./pages/record/projects/new.vue"),
+        },
+      ],
     },
     {
       name: "record-projects-project",

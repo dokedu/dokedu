@@ -1,29 +1,41 @@
 <template>
   <PageWrapper>
     <PageHeader class="flex justify-between">
-      <div class="font-medium text-stone-950">Projects</div>
+      <div class="flex items-center gap-4">
+        <div class="font-medium text-stone-950">Projects</div>
+        <input
+          type="text"
+          name="search"
+          id="search"
+          placeholder="Search"
+          class="h-8 rounded-md border border-stone-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-stone-200 focus:shadow-sm focus:ring-0"
+        />
+      </div>
       <div class="flex gap-2">
-        <button type="button"
-          class="rounded-md bg-stone-50 px-6 py-1.5 text-stone-700 transition-all hover:bg-stone-100 hover:text-stone-800">
-          Export
-        </button>
-        <router-link :to="{ name: 'record-entries-new' }" class="rounded-md bg-black px-6 py-1.5 text-white">
-          New project
+        <d-button type="transparent" :icon-left="Share">Export</d-button>
+        <router-link :to="{ name: 'record-projects-new' }">
+          <d-button type="primary" :icon-left="Plus"> New </d-button>
         </router-link>
       </div>
     </PageHeader>
     <PageContent>
       <div class="flex flex-col overflow-scroll">
-        <router-link :to="{ name: 'record-projects-project', params: { id: event.id } }"
-          v-for="event in data?.events?.edges" class="flex border-b transition-all hover:bg-stone-50">
-          <div class="w-1/4 p-2 pl-8 font-semibold">{{ event.title }}</div>
-          <div class="w-2/4 p-2 pl-8">{{ event.body }}</div>
-          <div class="w-1/4 p-2 px-4">{{ formatDate(new Date(Date.parse(event.startsAt)), "DD.MM.YYYY") }} - {{
-            formatDate(new Date(Date.parse(event.endsAt)), "DD.MM.YYYY") }}</div>
+        <router-link
+          :to="{ name: 'record-projects-project', params: { id: event.id } }"
+          v-for="event in data?.events?.edges"
+          class="flex border-b text-sm transition-all hover:bg-stone-50"
+        >
+          <div class="w-1/4 p-2 pl-8 text-strong">{{ event.title }}</div>
+          <div class="w-2/4 p-2 pl-8 text-subtle">{{ event.body }}</div>
+          <div class="w-1/4 p-2 px-4 text-subtle">
+            {{ formatDate(new Date(Date.parse(event.startsAt)), "DD.MM.YYYY") }} -
+            {{ formatDate(new Date(Date.parse(event.endsAt)), "DD.MM.YYYY") }}
+          </div>
         </router-link>
       </div>
     </PageContent>
   </PageWrapper>
+  <router-view />
 </template>
 <script setup lang="ts">
 import PageHeader from "../../../components/PageHeader.vue";
@@ -31,6 +43,9 @@ import PageWrapper from "../../../components/PageWrapper.vue";
 import PageContent from "../../../components/PageContent.vue";
 import { gql, useQuery } from "@urql/vue";
 import { formatDate } from "@vueuse/core";
+import DButton from "../../../components/d-button/d-button.vue";
+import { Plus } from "lucide-vue-next";
+import { Share } from "lucide-vue-next";
 
 const { data } = useQuery({
   query: gql`

@@ -3,45 +3,64 @@
     <div class="relative flex flex-col">
       <div class="flex items-center justify-between p-3 pb-1.5">
         <div class="flex items-center gap-3">
-          <div class=" border border-stone-100 p-1.5 rounded-lg">
-
+          <div class="rounded-lg border border-stone-100 p-1.5">
             <component v-if="app" :is="app.icon" class="stroke-stone-500" :size="12" />
           </div>
-          <router-link :to="{ name: 'home' }"
-            class="text-sm text-stone-700 transition-all duration-100 hover:text-stone-950">
+          <router-link
+            :to="{ name: 'home' }"
+            class="text-sm text-stone-700 transition-all duration-100 hover:text-stone-950"
+          >
             Acme GmbH
           </router-link>
         </div>
-        <div class="rounded-md border border-stone-200 p-1.5 transition-all hover:bg-stone-200"
-          @click="visibleAppSwitcher = true">
+        <div
+          class="rounded-md border border-stone-200 p-1.5 transition-all hover:bg-stone-200"
+          @click="visibleAppSwitcher = true"
+        >
           <Grip :size="16" class="stroke-stone-700" />
         </div>
       </div>
       <div class="flex flex-col gap-1 p-3">
-        <router-link v-for="link in app?.links" :to="{ name: link.route }"
+        <router-link
+          v-for="link in app?.links"
+          :to="{ name: link.route }"
           class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
-          active-class="" :class="{ '!bg-stone-200 text-stone-900': isLinkActive(link) }">
-          <component :is="link.icon" class="stroke-stone-500" :size="18"
-            :class="{ '!stroke-stone-900': isLinkActive(link) }" />
+          active-class=""
+          :class="{ '!bg-stone-200 text-stone-900': isLinkActive(link) }"
+        >
+          <component
+            :is="link.icon"
+            class="stroke-stone-500"
+            :size="18"
+            :class="{ '!stroke-stone-900': isLinkActive(link) }"
+          />
           <div class="text-sm">{{ link.name }}</div>
         </router-link>
       </div>
-      <div ref="appswitcher" v-show="visibleAppSwitcher" class="absolute p-1 w-full">
-        <div class="flex w-full flex-col gap-1 rounded-lg bg-white p-1 shadow-md ">
-          <div v-for="_app in enabledApps"
-            class="flex items-center gap-3 rounded-lg border border-white p-2 hover:bg-stone-100"
+      <div ref="appswitcher" v-show="visibleAppSwitcher" class="absolute w-full p-1">
+        <div class="flex w-full flex-col gap-1 rounded-lg bg-white p-1 shadow-md">
+          <div
+            v-for="_app in enabledApps"
+            class="flex items-center gap-3 rounded-lg border border-white p-2 text-sm hover:bg-stone-100"
             :class="activeApp === _app.id ? `!border-stone-200 bg-stone-100 hover:!bg-stone-100` : ''"
-            @click="switchApp(_app.id)">
-            <component :is="_app.icon" class="stroke-stone-500" :size="20"
-              :class="activeApp === _app.id ? `!stroke-stone-900` : ''" />
+            @click="switchApp(_app.id)"
+          >
+            <component
+              :is="_app.icon"
+              class="stroke-stone-500"
+              :size="20"
+              :class="activeApp === _app.id ? `!stroke-stone-900` : ''"
+            />
             <span class="text-stone-500" :class="activeApp === _app.id ? `!text-stone-900` : ''">{{ _app.name }}</span>
           </div>
         </div>
       </div>
     </div>
     <div class="px-1 py-4">
-      <router-link :to="{ name: 'login' }"
-        class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950">
+      <router-link
+        :to="{ name: 'login' }"
+        class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
+      >
         <LogOut class="stroke-stone-500" :size="18" />
         <div class="text-sm">Log out</div>
       </router-link>
@@ -61,16 +80,19 @@ import {
   Clock,
   Folder,
   Wrench,
-  Users2, Trash2, HardDrive, LogOut
+  Users2,
+  Trash2,
+  HardDrive,
+  LogOut,
 } from "lucide-vue-next";
 import { Tag } from "lucide-vue-next";
-import { onClickOutside, useStorage } from '@vueuse/core'
+import { onClickOutside, useStorage } from "@vueuse/core";
 import { useRoute } from "vue-router";
 
 const visibleAppSwitcher = ref<boolean>(false);
-const activeApp = useStorage('active_app', "drive")
+const activeApp = useStorage("active_app", "drive");
 
-const route = useRoute()
+const route = useRoute();
 
 interface AppLink {
   icon: FunctionalComponent;
@@ -85,18 +107,18 @@ interface App {
   links: AppLink[];
 }
 
-const appswitcher = ref()
+const appswitcher = ref();
 
 onClickOutside(appswitcher, () => {
-  visibleAppSwitcher.value = false
-})
+  visibleAppSwitcher.value = false;
+});
 
 function isLinkActive(link: AppLink) {
-  const name = route.name || ''
-  return name.startsWith(link.route)
+  const name = route.name || "";
+  return name.startsWith(link.route);
 }
 
-const enabledAppList = useStorage('enabled_apps', [])
+const enabledAppList = useStorage("enabled_apps", []);
 
 const app = computed(() => apps.find((el) => el.id === activeApp.value) || null);
 

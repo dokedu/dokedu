@@ -1,10 +1,8 @@
 <template>
   <PageWrapper>
     <PageHeader class="flex justify-between">
-      <div class="flex items-center gap-1 text-stone-700">
-        <router-link :to="{ name: 'record-students' }" class="rounded font-medium hover:text-stone-950">
-          Students
-        </router-link>
+      <div class="flex items-center gap-1 text-strong">
+        <router-link :to="{ name: 'record-students' }" class="rounded font-medium"> Students </router-link>
         <ChevronRight :size="18" class="stroke-stone-500" />
         <span class="font-medium text-stone-950">{{ data?.user?.firstName }} {{ data?.user?.lastName }}</span>
       </div>
