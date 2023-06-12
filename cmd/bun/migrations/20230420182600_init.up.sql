@@ -54,19 +54,30 @@ CREATE TABLE organisations
     deleted_at      timestamptz
 );
 
+CREATE TABLE buckets
+(
+    id              text        NOT NULL PRIMARY KEY DEFAULT nanoid(21, '0123456789abcdefghijklmnopqrstuvwxyz'),
+    name            text        NOT NULL,
+    shared          boolean     NOT NULL             DEFAULT false,
+    organisation_id text        NOT NULL REFERENCES organisations,
+    created_at      timestamptz NOT NULL             DEFAULT now(),
+    deleted_at      timestamptz NULL
+);
+
 CREATE TYPE file_type as ENUM ('blob', 'folder');
 
 CREATE TABLE files
 (
-    id              text        DEFAULT nanoid() NOT NULL PRIMARY KEY,
-    name            text                         NOT NULL,
-    file_type       file_type                    NOT NULL DEFAULT 'blob'::file_type,
-    mime_type       text                         NULL, -- application/vnd.dokedu-apps.folder
-    size            bigint                       NOT NULL default 0,
-    organisation_id text                         NOT NULL REFERENCES organisations,
-    parent_id       text                         NULL REFERENCES files,
-    created_at      timestamptz DEFAULT NOW()    NOT NULL,
-    deleted_at      timestamptz
+    id              text                 DEFAULT nanoid() NOT NULL PRIMARY KEY,
+    name            text        NOT NULL,
+    file_type       file_type   NOT NULL DEFAULT 'blob'::file_type,
+    mime_type       text        NULL, -- application/vnd.dokedu-apps.folder
+    size            bigint      NOT NULL default 0,
+    bucket_id       text        NOT NULL REFERENCES buckets,
+    parent_id       text        NULL REFERENCES files,
+    organisation_id text        NOT NULL REFERENCES organisations,
+    created_at      timestamptz NOT NULL DEFAULT now(),
+    deleted_at      timestamptz NULL
 );
 
 CREATE TYPE user_role AS ENUM ('owner', 'admin', 'teacher', 'educator', 'student', 'parent');
@@ -76,7 +87,6 @@ CREATE TABLE users
     id              text        DEFAULT nanoid() NOT NULL PRIMARY KEY,
     role            user_role                    NOT NULL,
     organisation_id text                         NOT NULL REFERENCES organisations,
-    bucket_id       text                         NOT NULL default nanoid(21, '0123456789abcdefghijklmnopqrstuvwxyz'),
     first_name      text                         NOT NULL,
     last_name       text                         NOT NULL,
     email           text                         NULL,
@@ -84,10 +94,28 @@ CREATE TABLE users
     avatar_file_id  text                         NULL REFERENCES files,
     created_at      timestamptz DEFAULT NOW()    NOT NULL,
     deleted_at      timestamptz,
-    UNIQUE (email),
-    UNIQUE (bucket_id)
+    UNIQUE (email)
 );
 
+-- add "user_id         text        NULL REFERENCES users" to buckets
+ALTER TABLE buckets
+    ADD COLUMN user_id text NULL REFERENCES users;
+
+
+CREATE TYPE file_permission AS ENUM ('viewer', 'manager');
+
+CREATE TABLE shares
+(
+    id              text            NOT NULL PRIMARY KEY DEFAULT nanoid(),
+    file_id         text            NULL references files,
+    bucket_id       text            NULL references buckets,
+    shared_with     text            NOT NULL references users,
+    shared_by       text            NOT NULL references users,
+    permission      file_permission NOT NULL,
+    organisation_id text            NOT NULL REFERENCES organisations,
+    created_at      timestamptz     NOT NULL             DEFAULT now(),
+    deleted_at      timestamptz     NULL
+);
 
 -- TODO: this is a new table, so we need to properly migrate the data
 CREATE TABLE user_students

@@ -5,23 +5,29 @@ enum FileType {
     folder
 }
 
-type File {
+type Bucket {
     id: ID!
     name: String!
-    fileType: FileType!
-    fileSize: Int!
-    parent: File
+    user: User!
+    shared: Boolean!
     createdAt: Time!
     deletedAt: Time
 
     files: [File!]!
 }
 
-type SharedDrive {
+type File {
     id: ID!
     name: String!
-    files: [File!]!
+    fileType: FileType!
+    MIMEType: String!
+    size: Int!
+    bucket: Bucket!
+    parent: File
     createdAt: Time!
+    deletedAt: Time
+
+    files: [File!]!
 }
 
 input UserFileFilterInput {
@@ -33,18 +39,43 @@ input SharedDriveFilterInput {
 }
 
 input FilesFilterInput {
-    folderId: String
-    sharedDriveId: String
+    parentId: String
+    bucketId: String
     limit: Int
     offset: Int
 }
 
+input MyFilesFilterInput {
+    parentId: String
+    limit: Int
+    offset: Int
+}
+
+input BucketFilterInput {
+    shared: Boolean
+}
+
+type BucketConnection {
+    edges: [Bucket!]!
+    totalCount: Int!
+    pageInfo: PageInfo!
+}
+
+type FileConnection {
+    edges: [File!]!
+    totalCount: Int!
+    pageInfo: PageInfo!
+}
+
 extend type Query {
-    userFiles(input: UserFileFilterInput): [File!]!
-    sharedDrives(input: SharedDriveFilterInput): [SharedDrive!]!
+    buckets(input: BucketFilterInput): BucketConnection!
+    bucket(id: ID!): Bucket!
 
     file(id: ID!): File!
-    files(input: FilesFilterInput): [File!]!
+    files(input: FilesFilterInput): FileConnection!
+
+    myFiles(input: MyFilesFilterInput): FileConnection!
+    myBucket(id: ID!): Bucket!
 }
 
 input FileUploadInput {
@@ -52,17 +83,17 @@ input FileUploadInput {
     """
     The folder to upload the file to if empty the file will be uploaded to the root folder of the user.
     """
-    folderId: ID
+    parentId: ID
     """
     The shared drive to upload the file to if empty the file will be uploaded to the root folder of the user.
     """
-    sharedDriveId: ID
+    bucketId: ID
 }
 
 input CreateFolderInput {
     name: String!
-    folderId: ID
-    sharedDriveId: ID
+    parentId: ID
+    bucketId: ID
 }
 
 extend type Mutation {

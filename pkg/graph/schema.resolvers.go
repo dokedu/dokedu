@@ -618,27 +618,6 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) ([]*d
 	return tags, nil
 }
 
-// File is the resolver for the file field.
-func (r *queryResolver) File(ctx context.Context, id string) (*db.File, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var file db.File
-	err := r.DB.NewSelect().Model(&file).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &file, nil
-}
-
-// Files is the resolver for the files field.
-func (r *queryResolver) Files(ctx context.Context, limit *int, offset *int) ([]*db.File, error) {
-	panic(fmt.Errorf("not implemented: Files - files"))
-}
-
 // Meta is the resolver for the meta field.
 func (r *reportResolver) Meta(ctx context.Context, obj *db.Report) (string, error) {
 	/// meta is a jsonb field, so we need to unmarshal it

@@ -15,19 +15,103 @@ import (
 	"time"
 )
 
-// FileSize is the resolver for the fileSize field.
-func (r *fileResolver) FileSize(ctx context.Context, obj *db.File) (int, error) {
-	return int(obj.Size), nil
+// User is the resolver for the user field.
+func (r *bucketResolver) User(ctx context.Context, obj *db.Bucket) (*db.User, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var user db.User
+	err := r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+// DeletedAt is the resolver for the deletedAt field.
+func (r *bucketResolver) DeletedAt(ctx context.Context, obj *db.Bucket) (*time.Time, error) {
+	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
+}
+
+// Files is the resolver for the files field.
+func (r *bucketResolver) Files(ctx context.Context, obj *db.Bucket) ([]*db.File, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var files []*db.File
+	err := r.DB.NewSelect().Model(&files).Where("bucket_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return files, nil
+}
+
+// Bucket is the resolver for the bucket field.
+func (r *fileResolver) Bucket(ctx context.Context, obj *db.File) (*db.Bucket, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var bucket db.Bucket
+	err := r.DB.NewSelect().Model(&bucket).Where("id = ?", obj.BucketID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &bucket, nil
 }
 
 // Parent is the resolver for the parent field.
 func (r *fileResolver) Parent(ctx context.Context, obj *db.File) (*db.File, error) {
-	panic(fmt.Errorf("not implemented: Parent - parent"))
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	if !obj.ParentID.Valid {
+		return nil, nil
+	}
+
+	var parent db.File
+	err := r.DB.NewSelect().Model(&parent).Where("id = ?", obj.ParentID.String).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &parent, nil
 }
 
 // DeletedAt is the resolver for the deletedAt field.
 func (r *fileResolver) DeletedAt(ctx context.Context, obj *db.File) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
+	if !obj.DeletedAt.IsZero() {
+		return nil, nil
+	}
+
+	deletedAt := obj.DeletedAt.Time
+	return &deletedAt, nil
+}
+
+// Files is the resolver for the files field.
+func (r *fileResolver) Files(ctx context.Context, obj *db.File) ([]*db.File, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var files []*db.File
+	err := r.DB.NewSelect().Model(&files).Where("parent_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return files, nil
 }
 
 // SingleUpload is the resolver for the singleUpload field.
@@ -37,60 +121,42 @@ func (r *mutationResolver) SingleUpload(ctx context.Context, input model.FileUpl
 		return nil, errors.New("no user found in the context")
 	}
 
-	var user db.User
-	err := r.DB.NewSelect().Model(&user).Column("bucket_id").Where("id = ?", currentUser.ID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	var file db.File
 	file.Name = input.File.Filename
 	file.FileType = "blob"
 	file.OrganisationID = currentUser.OrganisationID
 	file.Size = input.File.Size
 
-	if input.FolderID != nil && len(*input.FolderID) > 0 {
-		file.ParentID = sql.NullString{String: *input.FolderID, Valid: true}
+	if input.BucketID != nil && len(*input.BucketID) > 0 {
+		file.BucketID = *input.BucketID
+	} else {
+		var bucket db.Bucket
+		err := r.DB.NewSelect().Model(&bucket).Column("id").Where("user_id = ?", currentUser.ID).Scan(ctx)
+
+		if err != nil && err.Error() == "sql: no rows in result set" {
+			// create bucket for user
+			bucket.Name = "User Bucket " + currentUser.ID
+			bucket.UserID = sql.NullString{String: currentUser.ID, Valid: true}
+			bucket.OrganisationID = currentUser.OrganisationID
+			err = r.DB.NewInsert().Model(&bucket).Returning("*").Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+		} else if err != nil {
+			return nil, err
+		}
+
+		file.BucketID = bucket.ID
 	}
 
-	err = r.DB.NewInsert().Model(&file).Returning("*").Scan(ctx)
+	if input.ParentID != nil && len(*input.ParentID) > 0 {
+		file.ParentID = sql.NullString{String: *input.ParentID, Valid: true}
+	}
+
+	err := r.DB.NewInsert().Model(&file).Returning("*").Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
-
-	if input.FolderID == nil {
-		var userFile db.UserFiles
-		userFile.FileID = file.ID
-		userFile.UserID = currentUser.ID
-		userFile.OrganisationID = currentUser.OrganisationID
-		err = r.DB.NewInsert().Model(&userFile).Returning("*").Scan(ctx)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	//exists, err := r.MinioClient.BucketExists(ctx, user.BucketID)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//if !exists {
-	//	err = r.MinioClient.MakeBucket(ctx, user.BucketID, minio.MakeBucketOptions{})
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//}
-	//
-	//filename := input.File.Filename
-	//
-	//if input.FolderID != nil {
-	//	filename = fmt.Sprintf("%s%s", *input.FolderID, input.File.Filename)
-	//}
-	//
-	//info, err := r.MinioClient.PutObject(ctx, user.BucketID, filename, input.File.File, input.File.Size, minio.PutObjectOptions{ContentType: input.File.ContentType})
-	//if err != nil {
-	//	return nil, err
-	//}
 
 	return &file, nil
 }
@@ -102,80 +168,192 @@ func (r *mutationResolver) CreateFolder(ctx context.Context, input model.CreateF
 		return nil, errors.New("no user found in the context")
 	}
 
-	var user db.User
-	err := r.DB.NewSelect().Model(&user).Column("bucket_id").Where("id = ?", currentUser.ID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	var file db.File
 	file.Name = input.Name
 	file.FileType = "folder"
 	file.OrganisationID = currentUser.OrganisationID
 
-	if input.FolderID != nil && len(*input.FolderID) > 0 {
-		file.ParentID = sql.NullString{String: *input.FolderID, Valid: true}
-	}
+	if input.BucketID != nil && len(*input.BucketID) > 0 {
+		file.BucketID = *input.BucketID
+	} else {
+		var bucket db.Bucket
+		err := r.DB.NewSelect().Model(&bucket).Column("id").Where("user_id = ?", currentUser.ID).Scan(ctx)
 
-	err = r.DB.NewInsert().Model(&file).Returning("*").Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if input.FolderID != nil && len(*input.FolderID) == 0 {
-		var userFile db.UserFiles
-		userFile.FileID = file.ID
-		userFile.UserID = currentUser.ID
-		userFile.OrganisationID = currentUser.OrganisationID
-		err = r.DB.NewInsert().Model(&userFile).Returning("*").Scan(ctx)
-		if err != nil {
+		if err != nil && err.Error() == "sql: no rows in result set" {
+			// create bucket for user
+			bucket.Name = "User Bucket " + currentUser.ID
+			bucket.UserID = sql.NullString{String: currentUser.ID, Valid: true}
+			bucket.OrganisationID = currentUser.OrganisationID
+			err = r.DB.NewInsert().Model(&bucket).Returning("*").Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+		} else if err != nil {
 			return nil, err
 		}
+
+		file.BucketID = bucket.ID
+	}
+
+	if input.ParentID != nil && len(*input.ParentID) > 0 {
+		file.ParentID = sql.NullString{String: *input.ParentID, Valid: true}
+	}
+
+	err := r.DB.NewInsert().Model(&file).Returning("*").Scan(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	return &file, nil
 }
 
-// UserFiles is the resolver for the userFiles field.
-func (r *queryResolver) UserFiles(ctx context.Context, input *model.UserFileFilterInput) ([]*db.File, error) {
+// Buckets is the resolver for the buckets field.
+func (r *queryResolver) Buckets(ctx context.Context, input *model.BucketFilterInput) (*model.BucketConnection, error) {
 	currentUser := middleware.ForContext(ctx)
 	if currentUser == nil {
 		return nil, errors.New("no user found in the context")
 	}
 
-	var user db.User
-	err := r.DB.NewSelect().Model(&user).Column("bucket_id").Where("id = ?", currentUser.ID).Scan(ctx)
+	var buckets []*db.Bucket
+	query := r.DB.NewSelect().Model(&buckets).Where("user_id = ?", currentUser.ID)
+
+	if input != nil {
+		if input.Shared != nil {
+			query.Where("shared = ?", *input.Shared)
+		}
+	}
+
+	count, err := query.ScanAndCount(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	var files []*db.File
-
-	if input != nil && input.FolderID != nil {
-		err = r.DB.NewSelect().Model(&files).Where("organisation_id = ?", currentUser.OrganisationID).Where("parent_id = ?", *input.FolderID).Order("file_type").Order("name").Scan(ctx)
-
-	} else {
-		err = r.DB.NewSelect().Model(&files).Join("JOIN user_files uf on uf.file_id = file.id").Where("uf.user_id = ?", currentUser.ID).Order("file_type").Order("name").Scan(ctx)
-	}
-
-	return files, nil
+	return &model.BucketConnection{
+		Edges:      buckets,
+		TotalCount: count,
+	}, nil
 }
 
-// SharedDrives is the resolver for the sharedDrives field.
-func (r *queryResolver) SharedDrives(ctx context.Context, input *model.SharedDriveFilterInput) ([]*db.SharedDrive, error) {
-	panic(fmt.Errorf("not implemented: SharedDrives - sharedDrives"))
+// Bucket is the resolver for the bucket field.
+func (r *queryResolver) Bucket(ctx context.Context, id string) (*db.Bucket, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var bucket db.Bucket
+	err := r.DB.NewSelect().Model(&bucket).Where("id = ?", id).Where("user_id = ?", currentUser.ID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &bucket, nil
+}
+
+// File is the resolver for the file field.
+func (r *queryResolver) File(ctx context.Context, id string) (*db.File, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var file db.File
+	err := r.DB.NewSelect().Model(&file).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &file, nil
 }
 
 // Files is the resolver for the files field.
-func (r *sharedDriveResolver) Files(ctx context.Context, obj *db.SharedDrive) ([]*db.File, error) {
-	panic(fmt.Errorf("not implemented: Files - files"))
+func (r *queryResolver) Files(ctx context.Context, input *model.FilesFilterInput) (*model.FileConnection, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var files []*db.File
+	query := r.DB.NewSelect().Model(&files).Where("organisation_id = ?", currentUser.OrganisationID)
+
+	if input != nil {
+		if input.ParentID != nil && len(*input.ParentID) > 0 {
+			query.Where("parent_id = ?", *input.ParentID)
+		} else {
+			query.Where("parent_id IS NULL")
+		}
+		if input.BucketID != nil && len(*input.BucketID) > 0 {
+			query.Where("bucket_id = ?", *input.BucketID)
+		}
+		if input.Limit != nil {
+			query.Limit(*input.Limit)
+		}
+		if input.Offset != nil {
+			query.Offset(*input.Offset)
+		}
+	}
+
+	count, err := query.ScanAndCount(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.FileConnection{
+		Edges:      files,
+		TotalCount: count,
+		PageInfo:   nil,
+	}, nil
 }
+
+// MyFiles is the resolver for the myFiles field.
+func (r *queryResolver) MyFiles(ctx context.Context, input *model.MyFilesFilterInput) (*model.FileConnection, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var bucket db.Bucket
+	err := r.DB.NewSelect().Model(&bucket).Column("id").Where("user_id = ?", currentUser.ID).Scan(ctx)
+
+	var files []*db.File
+	query := r.DB.NewSelect().Model(&files).Where("organisation_id = ?", currentUser.OrganisationID).Where("bucket_id = ?", bucket.ID)
+
+	if input != nil {
+		if input.ParentID != nil && len(*input.ParentID) > 0 {
+			query.Where("parent_id = ?", *input.ParentID)
+		} else {
+			query.Where("parent_id IS NULL")
+		}
+		if input.Limit != nil {
+			query.Limit(*input.Limit)
+		}
+		if input.Offset != nil {
+			query.Offset(*input.Offset)
+		}
+	}
+
+	count, err := query.ScanAndCount(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.FileConnection{
+		Edges:      files,
+		TotalCount: count,
+		PageInfo:   nil,
+	}, nil
+}
+
+// MyBucket is the resolver for the myBucket field.
+func (r *queryResolver) MyBucket(ctx context.Context, id string) (*db.Bucket, error) {
+	panic(fmt.Errorf("not implemented: MyBucket - myBucket"))
+}
+
+// Bucket returns BucketResolver implementation.
+func (r *Resolver) Bucket() BucketResolver { return &bucketResolver{r} }
 
 // File returns FileResolver implementation.
 func (r *Resolver) File() FileResolver { return &fileResolver{r} }
 
-// SharedDrive returns SharedDriveResolver implementation.
-func (r *Resolver) SharedDrive() SharedDriveResolver { return &sharedDriveResolver{r} }
-
+type bucketResolver struct{ *Resolver }
 type fileResolver struct{ *Resolver }
-type sharedDriveResolver struct{ *Resolver }

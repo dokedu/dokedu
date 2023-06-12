@@ -202,8 +202,6 @@ extend type Query {
 
     tag(id: ID!): Tag!
     tags(limit: Int, offset: Int): [Tag!]!
-
-
 }
 
 input CreateUserInput {

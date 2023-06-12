@@ -9,6 +9,16 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
+type BucketConnection struct {
+	Edges      []*db.Bucket `json:"edges"`
+	TotalCount int          `json:"totalCount"`
+	PageInfo   *PageInfo    `json:"pageInfo"`
+}
+
+type BucketFilterInput struct {
+	Shared *bool `json:"shared,omitempty"`
+}
+
 type ChatConnection struct {
 	Edges      []*db.Chat `json:"edges,omitempty"`
 	PageInfo   *PageInfo  `json:"pageInfo"`
@@ -37,9 +47,9 @@ type CreateEntryInput struct {
 }
 
 type CreateFolderInput struct {
-	Name          string  `json:"name"`
-	FolderID      *string `json:"folderId,omitempty"`
-	SharedDriveID *string `json:"sharedDriveId,omitempty"`
+	Name     string  `json:"name"`
+	ParentID *string `json:"parentId,omitempty"`
+	BucketID *string `json:"bucketId,omitempty"`
 }
 
 type CreateReportInput struct {
@@ -101,12 +111,31 @@ type EventFilterInput struct {
 	Deleted *bool      `json:"deleted,omitempty"`
 }
 
+type FileConnection struct {
+	Edges      []*db.File `json:"edges"`
+	TotalCount int        `json:"totalCount"`
+	PageInfo   *PageInfo  `json:"pageInfo"`
+}
+
 type FileUploadInput struct {
 	File graphql.Upload `json:"file"`
 	// The folder to upload the file to if empty the file will be uploaded to the root folder of the user.
-	FolderID *string `json:"folderId,omitempty"`
+	ParentID *string `json:"parentId,omitempty"`
 	// The shared drive to upload the file to if empty the file will be uploaded to the root folder of the user.
-	SharedDriveID *string `json:"sharedDriveId,omitempty"`
+	BucketID *string `json:"bucketId,omitempty"`
+}
+
+type FilesFilterInput struct {
+	ParentID *string `json:"parentId,omitempty"`
+	BucketID *string `json:"bucketId,omitempty"`
+	Limit    *int    `json:"limit,omitempty"`
+	Offset   *int    `json:"offset,omitempty"`
+}
+
+type MyFilesFilterInput struct {
+	ParentID *string `json:"parentId,omitempty"`
+	Limit    *int    `json:"limit,omitempty"`
+	Offset   *int    `json:"offset,omitempty"`
 }
 
 type OrganisationConnection struct {

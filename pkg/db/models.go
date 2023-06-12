@@ -236,6 +236,18 @@ type EventCompetence struct {
 	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
+type Bucket struct {
+	bun.BaseModel
+
+	ID             string         `bun:",nullzero,pk" json:"id"`
+	Name           string         `json:"name"`
+	UserID         sql.NullString `json:"user_id"`
+	Shared         bool           `json:"shared"`
+	OrganisationID string         `json:"organisation_id"`
+	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
+}
+
 type File struct {
 	bun.BaseModel
 
@@ -244,8 +256,9 @@ type File struct {
 	FileType       FileType       `json:"file_type"`
 	MimeType       string         `json:"mime_type"`
 	Size           int64          `json:"size"`
-	OrganisationID string         `json:"organisation_id"`
-	ParentID       sql.NullString `json:"parent_id"`
+	BucketID       string         `bun:",notnull" json:"bucket_id"`
+	ParentID       sql.NullString `bun:",nullzero" json:"parent_id"`
+	OrganisationID string         `bun:",notnull" json:"organisation_id"`
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
 	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
 }
@@ -334,7 +347,6 @@ type User struct {
 	ID             string         `bun:",nullzero,pk" json:"id"`
 	Role           UserRole       `json:"role"`
 	OrganisationID string         `json:"organisation_id"`
-	BucketID       string         `json:"bucket_id"`
 	FirstName      string         `json:"first_name"`
 	LastName       string         `json:"last_name"`
 	Email          string         `json:"email"`
