@@ -14,6 +14,10 @@
 // bg-orange-50 text-orange-700
 // bg-purple-50 text-purple-700
 // bg-green-50  text-green-700
+// bg-yellow-50 text-yellow-700
+// bg-indigo-50 text-indigo-700
+// bg-pink-50   text-pink-700
+// bg-gray-50   text-gray-700
 
 defineProps({
   color: {
