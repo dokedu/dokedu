@@ -1,7 +1,17 @@
 <template>
-    <div :class="classNames">
-        <component v-if="iconLeft" :is="iconLeft" :size="16"
-            :class="$props.type === 'primary' ? 'stroke-gray-100' : 'stroke-gray-600'" />
+    <div :class="{
+        'inline-flex items-center gap-2 select-none justify-center border h-fit relative transition-all rounded-lg overflow-hidden group': true,
+        'text-white bg-inverted hover:bg-blue-900 border-transparent': type === 'primary',
+        'text-stone-700 hover:shadow-sm hover:bg-blue-50 border-stone-200 hover:border-blue-200 hover:text-blue-950': type === 'outline',
+        'text-stone-700 hover:bg-blue-50 border-transparent hover:text-blue-950': type === 'transparent',
+        'px-1 py-0.5 text-sm': size === 'xs',
+        'px-2 py-1 text-sm': size === 'sm',
+        'px-4 py-1.5 text-sm': size === 'md',
+    }">
+        <component v-if="iconLeft" :is="iconLeft" :size="16" :class="{
+            'stroke-stone-100 ': $props.type === 'primary',
+            'stroke-stone-600 group-hover:stroke-blue-950': $props.type !== 'primary',
+        }" />
         <slot />
         <component v-if="iconRight" :is="iconRight" :size="16" />
     </div>
@@ -9,7 +19,7 @@
 
 <script lang="ts" setup>
 import { Icon } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { toRef } from 'vue';
 
 export interface Props {
     type?: 'transparent' | 'outline' | 'primary'
@@ -23,32 +33,5 @@ const props = withDefaults(defineProps<Props>(), {
     size: 'md',
 })
 
-const classNames = computed(() => {
-    const classes = ['inline-flex items-center gap-2 select-none justify-center border h-fit relative transition-all rounded-lg overflow-hidden group']
-
-    switch (props.type) {
-        case 'transparent':
-            classes.push('text-gray-700 hover:bg-gray-50 border-transparent')
-            break
-        case 'outline':
-            classes.push('text-gray-700 hover:shadow hover:bg-gray-50 border-gray-200')
-            break
-        case 'primary':
-            classes.push('text-white bg-gray-950 hover:bg-gray-800 border-transparent')
-            break
-    }
-
-    switch (props.size) {
-        case 'xs':
-            break
-        case 'sm':
-            classes.push('px-2 py-1 text-sm')
-            break
-        case 'md':
-            break
-    }
-
-    return classes.join(' ')
-})
-
+const type = toRef(props, 'type')
 </script>

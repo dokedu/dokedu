@@ -1,10 +1,6 @@
 <template>
-  <div
-    ref="target"
-    v-show="show"
-    class="absolute max-h-[100vh] w-[225px] rounded-md bg-gray-50 shadow"
-    :style="{ left: `${position.x}px`, top: `${position.y}px` }"
-  >
+  <div ref="target" v-show="show" class="absolute max-h-[100vh] w-[225px] rounded-md bg-stone-50 shadow"
+    :style="{ left: `${position.x}px`, top: `${position.y}px` }">
     <slot />
   </div>
 </template>

@@ -1,19 +1,19 @@
 <template>
   <PageWrapper>
     <PageHeader class="flex justify-between">
-      <div class="font-medium text-gray-950">Entries</div>
+      <div class="font-medium text-strong">Entries</div>
       <div class="flex gap-2">
         <router-link :to="{ name: 'record-entries-new' }">
-          <DButton type="primary" size="sm" :icon-left="Plus">Create entry</DButton>
+          <DButton type="primary" size="md" :icon-left="Plus">New</DButton>
         </router-link>
       </div>
     </PageHeader>
     <div class="flex flex-col overflow-scroll">
       <router-link :to="{ name: 'record-entries-entry', params: { id: entry.id } }" v-for="entry in data?.entries?.edges"
-        class="flex border-b transition-all hover:bg-gray-50">
+        class="flex border-b text-strong transition-all border-stone-100 hover:bg-stone-50 text-sm">
         <div class="w-full p-2 pl-8">{{ entry.body.slice(0, 70) }} {{ entry.body.length > 70 ? "..." : "" }}</div>
-        <div class="w-1/4 p-2">{{ dateOnly(entry.date) }}</div>
-        <div class="w-1/4 p-2">
+        <div class="w-1/4 p-2 text-subtle">{{ dateOnly(entry.date) }}</div>
+        <div class="w-1/4 p-2 text-subtle">
           {{ `${entry.user.firstName} ${entry.user.lastName}` }}
         </div>
       </router-link>

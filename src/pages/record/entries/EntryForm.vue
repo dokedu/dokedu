@@ -5,16 +5,16 @@
       <div class="pb-8">
         <div class="overflow-scroll">
           <textarea ref="textarea" v-model="body" placeholder="Write down your observations..."
-            class="block w-full resize-none border-none border-transparent p-8 text-lg text-gray-900 placeholder:text-gray-400 focus:ring-0" />
+            class="block w-full resize-none border-none border-transparent p-8 text-lg text-stone-900 placeholder:text-stone-400 focus:ring-0" />
         </div>
         <EntryFormCompetences :entry="entry" />
       </div>
     </div>
-    <div class="flex min-h-full w-[400px] min-w-[400px] flex-col gap-4 border-l px-8 py-4">
+    <div class="flex min-h-full w-[400px] min-w-[400px] flex-col gap-4 border-l border-stone-100 px-8 py-4">
       <div class="flex items-center gap-4">
-        <label for="date" class="min-w-[64px] text-gray-500">Datum</label>
+        <label for="date" class="min-w-[64px] text-stone-500">Datum</label>
         <input v-model="formattedDate" type="date" name="date" id="date"
-          class="w-full rounded-md border-none transition-all hover:bg-gray-50 focus:bg-gray-100 focus:ring-2 focus:ring-black" />
+          class="w-full rounded-md border-none transition-all hover:bg-stone-50 focus:bg-stone-100 focus:ring-2 focus:ring-black" />
       </div>
       <EntryFormProjects :entry="entry" />
       <EntryFormLabels :entry="entry" />

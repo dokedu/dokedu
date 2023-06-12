@@ -3,35 +3,39 @@
     <PageHeader class="flex justify-between">
       <div>
         <span @click="folder = ''">My Drive</span>
-        <span v-if="!isPaused" class="px-1">/</span>
-        <span v-if="!isPaused">{{ file?.file.name }}</span>
       </div>
       <div class="flex gap-2">
-        <DButton type="transparent" size="sm" :icon-left="Plus" @click="addFolder">
+        <DButton type="transparent" size="md" :icon-left="FolderPlus" @click="addFolder">
           Folder
         </DButton>
-        <DButton type="primary" size="sm" :icon-left="Plus" @click="open()">
-          File
+        <DDialog :open="newFolderDialog" @close="newFolderDialog = false">
+          <input type="text" placeholder="Folder name">
+        </DDialog>
+        <DButton type="primary" size="md" :icon-left="Plus" @click="open()">
+          New
         </DButton>
       </div>
     </PageHeader>
     <PageContent>
       <div class="flex flex-col transition-all h-full" @drop.prevent="dropHandler" @dragover="dragover"
         :class="{ 'bg-blue-100': hasDragover }">
-        <div class="flex gap-3 items-center px-4 py-3 w-full">
+        <div class="text-sm flex gap-3 items-center px-4 py-3 w-full ">
           <div class="w-2 flex justify-center group">
             <input type="checkbox"
-              class="rounded border-transparent bg-transparent group-hover:border-gray-300 group-hover:bg-white">
+              class="rounded border-transparent bg-transparent group-hover:border-stone-300 group-hover:bg-white">
           </div>
-          <div class="flex-1">Name</div>
-          <div>Last modified</div>
-          <div class="w-[120px]">Size</div>
+          <div class="flex-1 text-strong flex gap-1 items-center">
+            <div>Name</div>
+            <ArrowDownWideNarrow :size="16" class="stroke-colors-strong" />
+          </div>
+          <div class="text-muted w-[230px]">Last modified</div>
+          <div class="w-[120px] text-muted">Size</div>
         </div>
-        <div v-for=" file  in  files2 " class="flex gap-3 items-center px-4 py-3 w-full hover:bg-gray-100 "
+        <div v-for=" file  in filesSorted" class="flex gap-3 text-sm items-center px-4 py-3 w-full hover:bg-stone-100 "
           @click="clickFile(file)">
           <div class="w-2 flex justify-center " @click.stop="">
             <input v-model="checkedFiles[file.id]" type="checkbox" :name="file.id" :id="file.id"
-              class="w-4 h-4 rounded border-transparent text-orange-500 focus:ring-orange-500 focus:ring-2">
+              class="w-4 h-4 rounded border-transparent text-gray-500 focus:ring-gray-500 focus:ring-2">
           </div>
 
           <svg v-if="file.fileType === 'folder'" width="20" height="20" viewBox="0 0 20 20" fill="none"
@@ -55,11 +59,12 @@
               fill="white" />
           </svg>
 
-          <div class="flex-1 select-none">{{ file.name }}</div>
-          <div class="text-sm text-gray-700">
+          <div class="flex-1 text-default select-none">{{ file.name }}</div>
+          <div class="text-sm text-subtle w-[230px]">
             Feb 10, 2023 Peter Schwan
           </div>
-          <div v-if="file.fileType !== 'folder'" class="w-[120px] text-right">{{ prettyBytes(file.fileSize) }}</div>
+          <div v-if="file.fileType !== 'folder'" class="w-[120px] text-subtle">{{ prettyBytes(file.size) }}
+          </div>
           <div v-else class="w-[120px]"></div>
         </div>
       </div>
@@ -76,48 +81,62 @@ import { useFileDialog } from "@vueuse/core";
 import { useRouteQuery } from '@vueuse/router'
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import DButton from "../../components/d-button/d-button.vue";
-import { Plus } from "lucide-vue-next";
+import { FolderPlus, Plus, ArrowDownWideNarrow } from "lucide-vue-next";
+import DDialog from "../../components/d-dialog/d-dialog.vue";
 
 const { open, reset, onChange } = useFileDialog()
 
 const checkedFiles = ref<string[]>([])
 
-onChange((e) => {
-  uploadFile({
+const newFolderDialog = ref(false)
+
+const folder = useRouteQuery('folder', "", {
+  transform: String
+})
+
+const folderId = computed(() => {
+  return folder.value.length > 0 ? folder.value : null
+})
+
+onChange(async (e) => {
+  await uploadFile({
     input: {
       file: e[0],
-      folderId: folderId.value,
+      parentId: folderId.value,
     }
   })
   reset()
+  refreshFiles()
 })
 
-function dropHandler(event: any) {
+async function dropHandler(event: any) {
   // console.log(event)
   if (event.dataTransfer) {
-    console.log(event.dataTransfer.files)
     if (event.dataTransfer.files.length > 0) {
-      uploadFile({
+      await uploadFile({
         input: {
           file: event.dataTransfer.files[0],
-          folderId: folderId.value,
+          parentId: folderId.value,
         }
       })
+      refreshFiles()
       hasDragover.value = false
     }
   }
 }
 
-function addFolder() {
+async function addFolder() {
+  // newFolderDialog.value = true
   // alert with input
   const folderName = prompt("Folder name")
   if (folderName) {
-    createFolder({
+    await createFolder({
       input: {
         name: folderName,
-        folderId: folder.value,
+        parentId: folder.value,
       }
     })
+    refreshFiles()
   }
 }
 
@@ -177,9 +196,9 @@ const { executeMutation: createFolder } = useMutation(
   `),
 );
 
-const files2 = computed(() => {
+const filesSorted = computed(() => {
   // sort by fileType
-  return data.value?.userFiles.sort((a, b) => {
+  return files.value?.myFiles.edges.sort((a, b) => {
     if (a.fileType === "folder" && b.fileType !== "folder") {
       return -1;
     }
@@ -190,9 +209,6 @@ const files2 = computed(() => {
   });
 })
 
-const folder = useRouteQuery('folder', "", {
-  transform: String
-})
 
 function clickFile(file) {
   if (file.fileType === "folder") {
@@ -200,49 +216,23 @@ function clickFile(file) {
   }
 }
 
-const folderId = computed(() => {
-  return folder.value.length > 0 ? folder.value : null
-})
-
-const { data } = useQuery({
+const { data: files, executeQuery: refreshFiles } = useQuery({
   query: graphql(`
-    query userFiles($input: UserFileFilterInput) {
-      userFiles(input: $input) {
-        id
-        name
-        fileType
-        fileSize
+    query myFiles($input: MyFilesFilterInput) {
+      myFiles(input: $input) {
+        edges {
+          id
+          name
+          fileType
+          size
+        }
       }
     }
   `),
   variables: {
     input: {
-      folderId: folderId,
+      parentId: folderId,
     }
   },
-});
-
-watch(folderId, (newVal) => {
-  if (newVal !== null && newVal.length > 0) {
-    resume()
-  } else {
-    pause()
-  }
-})
-
-const { data: file, resume, pause, isPaused } = useQuery({
-  query: graphql(`
-    query file($id: ID!) {
-   file(id: $id) {
-    id
-    name
-    fileType
-  }
-}
-  `),
-  variables: {
-    id: folderId,
-  },
-  pause: folderId.value === null
 });
 </script>

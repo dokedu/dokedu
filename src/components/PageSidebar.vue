@@ -1,46 +1,50 @@
 <template>
-  <header class="flex h-screen w-full max-w-[230px] flex-col justify-between border-r border-gray-100 bg-gray-50">
+  <header class="flex h-screen w-full max-w-[230px] flex-col justify-between border-r border-stone-100 bg-stone-50">
     <div class="relative flex flex-col">
       <div class="flex items-center justify-between p-3 pb-1.5">
         <div class="flex items-center gap-3">
-          <div class=" border border-gray-100 p-1.5 rounded-lg">
+          <div class=" border border-stone-100 p-1.5 rounded-lg">
 
-            <component v-if="app" :is="app.icon" class="stroke-gray-500" :size="12" />
+            <component v-if="app" :is="app.icon" class="stroke-stone-500" :size="12" />
           </div>
           <router-link :to="{ name: 'home' }"
-            class="text-sm text-gray-700 transition-all duration-100 hover:text-gray-950">
+            class="text-sm text-stone-700 transition-all duration-100 hover:text-stone-950">
             Acme GmbH
           </router-link>
         </div>
-        <div class="rounded-md border border-gray-200 p-1.5 transition-all hover:bg-gray-200"
+        <div class="rounded-md border border-stone-200 p-1.5 transition-all hover:bg-stone-200"
           @click="visibleAppSwitcher = true">
-          <Grip :size="16" class="stroke-gray-700" />
+          <Grip :size="16" class="stroke-stone-700" />
         </div>
       </div>
       <div class="flex flex-col gap-1 p-3">
         <router-link v-for="link in app?.links" :to="{ name: link.route }"
-          class="flex items-center gap-3 rounded-md p-1 px-3 text-gray-500 transition-all duration-100 hover:bg-gray-200 hover:text-gray-950"
-          active-class="" :class="{ 'bg-gray-200 text-gray-900': isLinkActive(link) }">
-          <component :is="link.icon" class="stroke-gray-500" :size="18"
-            :class="{ '!stroke-gray-900': isLinkActive(link) }" />
-          <div>{{ link.name }}</div>
+          class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
+          active-class="" :class="{ '!bg-stone-200 text-stone-900': isLinkActive(link) }">
+          <component :is="link.icon" class="stroke-stone-500" :size="18"
+            :class="{ '!stroke-stone-900': isLinkActive(link) }" />
+          <div class="text-sm">{{ link.name }}</div>
         </router-link>
       </div>
       <div ref="appswitcher" v-show="visibleAppSwitcher" class="absolute p-1 w-full">
         <div class="flex w-full flex-col gap-1 rounded-lg bg-white p-1 shadow-md ">
           <div v-for="_app in enabledApps"
-            class="flex items-center gap-3 rounded-lg border border-white p-2 hover:bg-gray-100"
-            :class="activeApp === _app.id ? `!border-gray-200 bg-gray-100 hover:!bg-gray-100` : ''"
+            class="flex items-center gap-3 rounded-lg border border-white p-2 hover:bg-stone-100"
+            :class="activeApp === _app.id ? `!border-stone-200 bg-stone-100 hover:!bg-stone-100` : ''"
             @click="switchApp(_app.id)">
-            <component :is="_app.icon" class="stroke-gray-500" :size="20"
-              :class="activeApp === _app.id ? `!stroke-gray-900` : ''" />
-            <span class="text-gray-500" :class="activeApp === _app.id ? `!text-gray-900` : ''">{{ _app.name }}</span>
+            <component :is="_app.icon" class="stroke-stone-500" :size="20"
+              :class="activeApp === _app.id ? `!stroke-stone-900` : ''" />
+            <span class="text-stone-500" :class="activeApp === _app.id ? `!text-stone-900` : ''">{{ _app.name }}</span>
           </div>
         </div>
       </div>
     </div>
-    <div>
-      <router-link :to="{ name: 'login' }" class="block px-4 py-4 text-gray-500">Log out</router-link>
+    <div class="px-1 py-4">
+      <router-link :to="{ name: 'login' }"
+        class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950">
+        <LogOut class="stroke-stone-500" :size="18" />
+        <div class="text-sm">Log out</div>
+      </router-link>
     </div>
   </header>
 </template>
@@ -57,7 +61,7 @@ import {
   Clock,
   Folder,
   Wrench,
-  Users2, Trash2, HardDrive
+  Users2, Trash2, HardDrive, LogOut
 } from "lucide-vue-next";
 import { Tag } from "lucide-vue-next";
 import { onClickOutside, useStorage } from '@vueuse/core'

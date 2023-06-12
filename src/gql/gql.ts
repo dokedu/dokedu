@@ -15,8 +15,7 @@ import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-
 const documents = {
     "\n    mutation singleUpload($input: FileUploadInput!) {\n      singleUpload(input: $input) {\n       id\n      }\n    }\n  ": types.SingleUploadDocument,
     "\n    mutation createFolder($input: CreateFolderInput!) {\n      createFolder(input: $input) {\n       id\n      }\n    }\n  ": types.CreateFolderDocument,
-    "\n    query userFiles($input: UserFileFilterInput) {\n      userFiles(input: $input) {\n        id\n        name\n        fileType\n        fileSize\n      }\n    }\n  ": types.UserFilesDocument,
-    "\n    query file($id: ID!) {\n   file(id: $id) {\n    id\n    name\n    fileType\n  }\n}\n  ": types.FileDocument,
+    "\n    query myFiles($input: MyFilesFilterInput) {\n      myFiles(input: $input) {\n        edges {\n          id\n          name\n          fileType\n          size\n        }\n      }\n    }\n  ": types.MyFilesDocument,
     "\n  mutation createEntry($input: CreateEntryInput!) {\n    createEntry(input: $input) {\n      id\n      date\n      body\n      deletedAt\n      user {\n        id\n        firstName\n        lastName\n      }\n      createdAt\n      tags {\n        id\n        name\n        color\n      }\n      events {\n        id\n        title\n      }\n      users {\n        id\n        firstName\n        lastName\n      }\n      userCompetences {\n        id\n        level\n        competence {\n          id\n          name\n          color\n          type\n        }\n      }\n    }\n  }\n": types.CreateEntryDocument,
     "\n  mutation updateEntry($input: UpdateEntryInput!) {\n    updateEntry(input: $input) {\n      id\n      date\n      body\n      deletedAt\n      user {\n        id\n        firstName\n        lastName\n      }\n      createdAt\n      tags {\n        id\n        name\n        color\n      }\n      events {\n        id\n        title\n      }\n      users {\n        id\n        firstName\n        lastName\n      }\n      userCompetences {\n        id\n        level\n        competence {\n          id\n          name\n          color\n          type\n        }\n      }\n    }\n  }\n": types.UpdateEntryDocument,
     "\n    query competences($search: String, $filter: CompetenceFilterInput) {\n      competences(search: $search, filter: $filter) {\n        edges {\n          id\n          name\n          type\n          color\n          grades\n        }\n      }\n    }\n  ": types.CompetencesDocument,
@@ -54,11 +53,7 @@ export function graphql(source: "\n    mutation createFolder($input: CreateFolde
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n    query userFiles($input: UserFileFilterInput) {\n      userFiles(input: $input) {\n        id\n        name\n        fileType\n        fileSize\n      }\n    }\n  "): (typeof documents)["\n    query userFiles($input: UserFileFilterInput) {\n      userFiles(input: $input) {\n        id\n        name\n        fileType\n        fileSize\n      }\n    }\n  "];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n    query file($id: ID!) {\n   file(id: $id) {\n    id\n    name\n    fileType\n  }\n}\n  "): (typeof documents)["\n    query file($id: ID!) {\n   file(id: $id) {\n    id\n    name\n    fileType\n  }\n}\n  "];
+export function graphql(source: "\n    query myFiles($input: MyFilesFilterInput) {\n      myFiles(input: $input) {\n        edges {\n          id\n          name\n          fileType\n          size\n        }\n      }\n    }\n  "): (typeof documents)["\n    query myFiles($input: MyFilesFilterInput) {\n      myFiles(input: $input) {\n        edges {\n          id\n          name\n          fileType\n          size\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

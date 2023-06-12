@@ -1,10 +1,10 @@
 <template>
   <PageWrapper>
     <PageHeader class="flex justify-between">
-      <div class="font-medium text-gray-950">Projects</div>
+      <div class="font-medium text-stone-950">Projects</div>
       <div class="flex gap-2">
         <button type="button"
-          class="rounded-md bg-gray-50 px-6 py-1.5 text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-800">
+          class="rounded-md bg-stone-50 px-6 py-1.5 text-stone-700 transition-all hover:bg-stone-100 hover:text-stone-800">
           Export
         </button>
         <router-link :to="{ name: 'record-entries-new' }" class="rounded-md bg-black px-6 py-1.5 text-white">
@@ -15,7 +15,7 @@
     <PageContent>
       <div class="flex flex-col overflow-scroll">
         <router-link :to="{ name: 'record-projects-project', params: { id: event.id } }"
-          v-for="event in data?.events?.edges" class="flex border-b transition-all hover:bg-gray-50">
+          v-for="event in data?.events?.edges" class="flex border-b transition-all hover:bg-stone-50">
           <div class="w-1/4 p-2 pl-8 font-semibold">{{ event.title }}</div>
           <div class="w-2/4 p-2 pl-8">{{ event.body }}</div>
           <div class="w-1/4 p-2 px-4">{{ formatDate(new Date(Date.parse(event.startsAt)), "DD.MM.YYYY") }} - {{

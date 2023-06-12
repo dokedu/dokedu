@@ -1,27 +1,27 @@
 <template>
-  <div class="flex items-center justify-between border-b px-8 py-4">
+  <div class="flex items-center justify-between border-b border-stone-100 px-8 py-3 h-14">
     <div class="flex items-center">
-      <router-link :to="{ name: 'record-entries' }" type="button"
-        class="rounded-md p-1 text-gray-500 outline-0 transition-all hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1">
-        <XIcon />
+      <router-link :to="{ name: 'record-entries' }">
+        <d-icon-button size="md" :icon="X">
+        </d-icon-button>
       </router-link>
+
     </div>
     <div class="flex gap-2">
-      <d-button v-if="mode !== 'new'" size="sm" :icon-left="Trash2" type="outline" @click="$emit('archive')">
+      <d-button v-if="mode !== 'new'" size="md" :icon-left="Trash2" type="outline" @click="$emit('archive')">
         Archive
       </d-button>
-      <d-button type="primary" size="sm" :icon-left="Save" @click="$emit('submit')">
+      <d-button type="primary" size="md" :icon-left="Save" @click="$emit('submit')">
         {{ mode === "new" ? "Create" : "Save" }}
       </d-button>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import { XIcon } from "lucide-vue-next";
 import DButton from "../../../components/d-button/d-button.vue";
-import { Save } from "lucide-vue-next";
-import { Trash2 } from "lucide-vue-next";
+import DIconButton from "../../../components/d-icon-button/d-icon-button.vue";
+import { Save, X, Trash2 } from "lucide-vue-next";
 
-const props = defineProps<{ mode: "new" | "edit" }>();
-const emit = defineEmits(["submit", "archive"]);
+defineProps<{ mode: "new" | "edit" }>();
+defineEmits(["submit", "archive"]);
 </script>

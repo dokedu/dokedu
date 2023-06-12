@@ -2,58 +2,58 @@
   <div class="px-8">
     <div>
       <header class="mb-2 flex items-center justify-between">
-        <div class="text-gray-500">Competences</div>
-        <div class="rounded-md p-1 hover:bg-gray-100" @click="dialogOpen = true">
-          <Plus :size="20" class="stroke-gray-500" />
+        <div class="text-stone-500">Competences</div>
+        <div class="rounded-md p-1 hover:bg-stone-100" @click="dialogOpen = true">
+          <Plus :size="20" class="stroke-stone-500" />
         </div>
       </header>
       <div class="mb-2">
         <div v-for="competence in competences"
-          class="flex w-full select-none items-center justify-between gap-2 rounded-lg px-1 py-1 text-gray-700 hover:bg-gray-50">
+          class="flex w-full select-none items-center justify-between gap-2 rounded-lg px-1 py-1 text-stone-700 hover:bg-stone-50">
           <div class="flex items-center gap-2">
             <span>{{ competence.name }}</span>
           </div>
           <div class="flex gap-2 items-center">
             <d-competence-level :id="competence.id" :level="competence.level" :editable="true"
               @update="updateCompetenceLevel" />
-            <div class="rounded-md p-1 hover:bg-gray-100" @click="toggleCompetence(competence)">
-              <X :size="20" class="stroke-gray-500" />
+            <div class="rounded-md p-1 hover:bg-stone-100" @click="toggleCompetence(competence)">
+              <X :size="20" class="stroke-stone-500" />
             </div>
           </div>
         </div>
       </div>
-      <div class="flex w-fit select-none items-center gap-2 rounded-md p-1 hover:bg-gray-100" @click="dialogOpen = true">
+      <div class="flex w-fit select-none items-center gap-2 rounded-md p-1 hover:bg-stone-100" @click="dialogOpen = true">
         <div class="rounded-md">
-          <Plus :size="20" class="stroke-gray-500" />
+          <Plus :size="20" class="stroke-stone-500" />
         </div>
-        <span class="pr-2 text-gray-500">Add competence</span>
+        <span class="pr-2 text-stone-500">Add competence</span>
       </div>
     </div>
   </div>
   <Teleport to="body">
     <div v-if="dialogOpen" ref="dialog"
-      class="absolute right-0 top-0 h-screen w-full max-w-xl bg-white p-4 shadow-lg backdrop:bg-gray-950/20">
+      class="absolute right-0 top-0 h-screen w-full max-w-xl bg-white p-4 shadow-lg backdrop:bg-stone-950/20">
       <div class="mb-4 flex items-center justify-between gap-2">
         <input type="text" name="search" v-model="search" id="search" placeholder="Search competences"
-          class="w-full rounded-md border border-gray-200 px-3 py-1.5 shadow-sm outline-none placeholder:text-gray-400 focus:border-gray-200 focus:ring-0" />
-        <div class="rounded-md p-1 hover:bg-gray-100" @click="dialogOpen = false">
-          <X class="stroke-gray-500" />
+          class="w-full rounded-md border border-stone-200 px-3 py-1.5 shadow-sm outline-none placeholder:text-stone-400 focus:border-stone-200 focus:ring-0" />
+        <div class="rounded-md p-1 hover:bg-stone-100" @click="dialogOpen = false">
+          <X class="stroke-stone-500" />
         </div>
       </div>
       <div>
         <div class="mb-2 flex h-6 select-none items-center gap-2">
           <div></div>
-          <div class="text-sm text-gray-500 hover:text-gray-900" @click="parents = []">Subjects</div>
-          <div v-if="parents.length > 0" class="text-gray-300">{{ "/" }}</div>
+          <div class="text-sm text-stone-500 hover:text-stone-900" @click="parents = []">Subjects</div>
+          <div v-if="parents.length > 0" class="text-stone-300">{{ "/" }}</div>
           <div v-for="(parent, index) in parents" :key="parent.id" @click="clickParent(parent)"
             class="flex gap-2 text-sm">
-            <div class="text-gray-500 hover:text-gray-900">{{ parent.name }}</div>
-            <div class="text-gray-300">{{ index === parents.length - 1 ? "" : "/" }}</div>
+            <div class="text-stone-500 hover:text-stone-900">{{ parent.name }}</div>
+            <div class="text-stone-300">{{ index === parents.length - 1 ? "" : "/" }}</div>
           </div>
         </div>
         <div class="flex flex-col gap-1">
           <div v-for="competence in data?.competences?.edges"
-            class="flex w-full select-none justify-between rounded-lg px-2 py-1 text-gray-700 hover:bg-gray-50"
+            class="flex w-full select-none justify-between rounded-lg px-2 py-1 text-stone-700 hover:bg-stone-50"
             @click="toggleCompetence(competence)">
             <div :class="{ 'text-blue-700': isCompetenceInEntry(competence) }" v-html="highlightText(competence.name)">
             </div>
@@ -63,7 +63,7 @@
             </div>
           </div>
         </div>
-        <div v-if="!data?.competences?.edges" class="select-none text-center text-sm uppercase text-gray-500">
+        <div v-if="!data?.competences?.edges" class="select-none text-center text-sm uppercase text-stone-500">
           no results
         </div>
       </div>

@@ -1,7 +1,7 @@
 <template>
   <PageWrapper>
     <PageHeader class="flex justify-between">
-      <div class="font-medium text-gray-950">
+      <div class="font-medium text-stone-950">
         <router-link :to="{ name: 'record-projects' }">Projects</router-link>
       </div>
       <div class="flex gap-2">
