@@ -13,10 +13,11 @@
       </div>
       <div class="w-[230px] text-muted">Last modified</div>
       <div class="w-[120px] text-muted">Size</div>
+      <div class="w-[80px]"></div>
     </div>
     <div
       v-for="file in files"
-      class="flex w-full items-center gap-3 px-4 py-3 text-sm hover:bg-stone-100"
+      class="group/item flex w-full items-center gap-3 px-4 py-3 text-sm hover:bg-stone-100"
       @click="clickFile(file)"
     >
       <div class="flex w-2 justify-center" @click.stop="">
@@ -83,6 +84,14 @@
         {{ prettyBytes(file.size) }}
       </div>
       <div v-else class="w-[120px]"></div>
+      <div class="flex w-[80px] gap-1 pr-4 opacity-0 group-hover/item:opacity-100">
+        <div class="group/icon w-fit rounded-lg p-1.5 hover:bg-blue-100" @click.stop="downloadFile(file)">
+          <Download class="stroke-colors-subtle group-hover/icon:stroke-blue-900" :size="16" />
+        </div>
+        <div class="group/icon w-fit rounded-lg p-1.5 hover:bg-blue-100">
+          <Edit class="stroke-colors-subtle group-hover/icon:stroke-blue-900" :size="16" />
+        </div>
+      </div>
     </div>
     <div v-if="files.length === 0" class="flex w-full flex-1 items-center justify-center gap-3 px-8 py-3">
       <div class="flex select-none flex-col items-center justify-center rounded-xl bg-muted p-8">
@@ -97,8 +106,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrowDownWideNarrow, FileText } from "lucide-vue-next";
+import { ArrowDownWideNarrow, FileText, Download, Edit } from "lucide-vue-next";
 import { File } from "../../gql/graphql";
+import { useMutation } from "@urql/vue";
+import { graphql } from "../../gql";
 
 export interface Props {
   files: Partial<File>[];
@@ -110,6 +121,44 @@ const emit = defineEmits(["click"]);
 
 function clickFile(file: File) {
   emit("click", file);
+}
+
+async function downloadFile(file: File) {
+  const { data } = await getFileURL({ input: { id: file.id } });
+
+  // data?.generateFileURL.url
+  // download file from url directly
+
+  const url = data?.generateFileURL.url as string;
+
+  forceDownload(url, file.name);
+}
+
+const { executeMutation: getFileURL } = useMutation(
+  graphql(`
+    mutation generateFileURL($input: GenerateFileURLInput!) {
+      generateFileURL(input: $input) {
+        url
+      }
+    }
+  `)
+);
+
+function forceDownload(url, fileName) {
+  const xhr = new XMLHttpRequest();
+  xhr.open("GET", url, true);
+  xhr.responseType = "blob";
+  xhr.onload = function () {
+    const urlCreator = window.URL || window.webkitURL;
+    const imageUrl = urlCreator.createObjectURL(this.response);
+    const tag = document.createElement("a");
+    tag.href = imageUrl;
+    tag.download = fileName;
+    document.body.appendChild(tag);
+    tag.click();
+    document.body.removeChild(tag);
+  };
+  xhr.send();
 }
 
 function prettyBytes(bytes: number) {

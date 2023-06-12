@@ -7,18 +7,20 @@
       </DFileDropZone>
     </PageContent>
   </PageWrapper>
+  <DFilePreview :file="previewFile" @close="previewFile = null" />
 </template>
 <script setup lang="ts">
 import PageWrapper from "../../../components/PageWrapper.vue";
 import PageContent from "../../../components/PageContent.vue";
 import { useMutation, useQuery } from "@urql/vue";
 import { graphql } from "../../../gql";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { File } from "../../../gql/graphql";
 import DFileList from "./../DFileList.vue";
 import DFileDropZone from "./../DFileDropZone.vue";
 import PageHeaderDrive from "./../PageHeaderDrive.vue";
+import DFilePreview from "./../DFilePreview.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -26,6 +28,8 @@ const route = useRoute();
 const folderId = computed(() => {
   return route.params.id;
 });
+
+const previewFile = ref<File | null>(null);
 
 async function upload({ file, parentId = folderId.value }) {
   console.log(parentId);
@@ -74,6 +78,8 @@ async function clickFile(file: File) {
         id: file.id,
       },
     });
+  } else {
+    previewFile.value = file;
   }
 }
 
