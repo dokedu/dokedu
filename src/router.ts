@@ -69,6 +69,11 @@ const router = createRouter({
       component: () => import("./pages/drive/my-drive.vue"),
     },
     {
+      name: "drive-my-drive-folders-folder",
+      path: "/drive/my-drive/folders/:id",
+      component: () => import("./pages/drive/folders/[id].vue"),
+    },
+    {
       name: "record-tags",
       path: "/record/tags",
       component: () => import("./pages/record/tags/index.vue"),

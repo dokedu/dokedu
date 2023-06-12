@@ -1,0 +1,100 @@
+<template>
+  <PageHeader class="flex justify-between">
+    <div class="flex gap-2 text-strong">
+      <router-link :to="{ name: 'drive-my-drive' }">My Drive</router-link>
+      <template v-if="folder?.file">
+        <template v-for="parent in folder.file.parents" class="stroke-colors">
+          <span>/</span>
+          <router-link :to="{ name: 'drive-my-drive-folders-folder', params: { id: parent.id } }">
+            {{ parent.name }}
+          </router-link>
+        </template>
+        <span>/</span>
+        <router-link :to="{ name: 'drive-my-drive-folders-folder', params: { id: folder.file.id } }">
+          {{ folder?.file.name }}
+        </router-link>
+      </template>
+    </div>
+    <div class="flex gap-2">
+      <DButton type="transparent" size="md" :icon-left="FolderPlus" @click="addFolder">Folder</DButton>
+      <DDialog :open="newFolderDialog" @close="newFolderDialog = false">
+        <input type="text" placeholder="Folder name" />
+      </DDialog>
+      <DButton type="primary" size="md" :icon-left="Plus" @click="open()"> New </DButton>
+    </div>
+  </PageHeader>
+</template>
+
+<script lang="ts" setup>
+import PageHeader from "../../components/PageHeader.vue";
+import DButton from "../../components/d-button/d-button.vue";
+import { FolderPlus, Plus } from "lucide-vue-next";
+import DDialog from "../../components/d-dialog/d-dialog.vue";
+import { useFileDialog } from "@vueuse/core";
+import { computed, ref } from "vue";
+import { useMutation, useQuery } from "@urql/vue";
+import { graphql } from "../../gql";
+import { useRoute } from "vue-router";
+
+const { open, reset, onChange } = useFileDialog();
+const newFolderDialog = ref(false);
+
+const route = useRoute();
+
+const folderId = computed(() => route.params.id);
+const emit = defineEmits(["upload"]);
+
+onChange(async (e) => {
+  emit("upload", {
+    input: {
+      file: e[0],
+      parentId: folderId.value,
+    },
+  });
+  reset();
+});
+
+async function addFolder() {
+  // newFolderDialog.value = true
+  // alert with input
+  const folderName = prompt("Folder name");
+  if (folderName) {
+    await createFolder({
+      input: {
+        name: folderName,
+        parentId: folderId.value,
+      },
+    });
+    // refreshFiles();
+  }
+}
+
+const { executeMutation: createFolder } = useMutation(
+  graphql(`
+    mutation createFolder($input: CreateFolderInput!) {
+      createFolder(input: $input) {
+        id
+      }
+    }
+  `)
+);
+
+const { data: folder } = useQuery({
+  query: graphql(`
+    query fileById($id: ID!) {
+      file(id: $id) {
+        id
+        name
+        parents {
+          id
+          name
+        }
+      }
+    }
+  `),
+  variables: {
+    id: folderId,
+  },
+  pause: !folderId.value,
+});
+</script>
