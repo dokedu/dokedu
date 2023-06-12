@@ -255,6 +255,7 @@ extend type Mutation {
 
     createTag(input: CreateTagInput!): Tag!
     archiveTag(id: ID!): Tag!
+    updateTag(id: ID!, input: CreateTagInput!): Tag!
 
     createReport(input: CreateReportInput!): Report!
 
