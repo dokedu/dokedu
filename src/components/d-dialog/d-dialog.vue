@@ -1,46 +1,46 @@
 <template>
-    <dialog ref="dialog" class="backdrop:bg-stone-900/90 rounded-lg" @close="close">
-        <header class="mb-4 text-sm font-medium">Rename</header>
-        <slot></slot>
-        <footer class="flex justify-between mt-3">
-            <d-button @click="close" type="outline" size="md">Cancel</d-button>
-            <d-button @click="close" type="primary" size="md">Create</d-button>
-        </footer>
-    </dialog>
+  <dialog ref="dialog" class="overflow-visible rounded-lg backdrop:bg-stone-900/90" @close="close">
+    <header class="mb-4 text-sm font-medium">
+      <slot name="header"></slot>
+    </header>
+    <slot name="main"></slot>
+    <footer class="mt-3">
+      <slot name="footer"></slot>
+    </footer>
+  </dialog>
 </template>
 
 <script lang="ts" setup>
-import { ref, toRef, watch } from 'vue';
-import dButton from '../d-button/d-button.vue';
+import { ref, toRef, watch } from "vue";
 
 const dialog = ref<HTMLDialogElement | null>(null);
 
 export interface Props {
-    open: boolean;
+  open: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    open: false,
+  open: false,
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(["close"]);
 
-const open = toRef(props, 'open');
+const open = toRef(props, "open");
 
 watch(open, (value) => {
-    if (value) {
-        dialog.value?.showModal();
-    } else {
-        emit('close');
-        dialog.value?.close();
-    }
+  if (value) {
+    dialog.value?.showModal();
+  } else {
+    emit("close");
+    dialog.value?.close();
+  }
 });
 
-function close(e) {
-    if (e) {
-        e.preventDefault();
-    }
-    emit('close');
-    dialog.value?.close();
+function close(e: Event | undefined) {
+  if (e) {
+    e.preventDefault();
+  }
+  emit("close");
+  dialog.value?.close();
 }
 </script>
