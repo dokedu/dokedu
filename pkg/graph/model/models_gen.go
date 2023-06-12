@@ -132,6 +132,14 @@ type FilesFilterInput struct {
 	Offset   *int    `json:"offset,omitempty"`
 }
 
+type GenerateFileURLInput struct {
+	ID string `json:"id"`
+}
+
+type GenerateFileURLPayload struct {
+	URL string `json:"url"`
+}
+
 type MyFilesFilterInput struct {
 	ParentID *string `json:"parentId,omitempty"`
 	Limit    *int    `json:"limit,omitempty"`

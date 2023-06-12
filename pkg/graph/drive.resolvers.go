@@ -12,7 +12,10 @@ import (
 	"example/pkg/graph/model"
 	"example/pkg/middleware"
 	"fmt"
+	"strings"
 	"time"
+
+	minio "github.com/minio/minio-go/v7"
 )
 
 // User is the resolver for the user field.
@@ -44,7 +47,7 @@ func (r *bucketResolver) Files(ctx context.Context, obj *db.Bucket) ([]*db.File,
 	}
 
 	var files []*db.File
-	err := r.DB.NewSelect().Model(&files).Where("bucket_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err := r.DB.NewSelect().Model(&files).Where("bucket_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Order("name").Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -98,6 +101,44 @@ func (r *fileResolver) DeletedAt(ctx context.Context, obj *db.File) (*time.Time,
 	return &deletedAt, nil
 }
 
+// Parents is the resolver for the parents field.
+func (r *fileResolver) Parents(ctx context.Context, obj *db.File) ([]*db.File, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	query := `
+WITH RECURSIVE file_parents AS (
+    SELECT *, 1 AS level
+    FROM files
+    WHERE id = ? AND organisation_id = ?
+    
+    UNION ALL
+    
+    SELECT f.*, fp.level + 1
+    FROM files f
+    JOIN file_parents fp ON f.id = fp.parent_id
+	WHERE f.organisation_id = ?
+)
+SELECT file_parents.id, file_parents.name, file_parents.file_type, file_parents.mime_type, file_parents.size, file_parents.bucket_id, file_parents.parent_id, file_parents.organisation_id, file_parents.created_at, file_parents.deleted_at
+FROM file_parents
+WHERE id <> ?
+ORDER BY level DESC;
+`
+
+	// query without new lines
+	q := strings.ReplaceAll(query, "\n", " ")
+
+	var files []*db.File
+	err := r.DB.NewRaw(q, obj.ID, currentUser.OrganisationID, currentUser.OrganisationID, obj.ID).Scan(ctx, &files)
+	if err != nil {
+		return nil, err
+	}
+
+	return files, nil
+}
+
 // Files is the resolver for the files field.
 func (r *fileResolver) Files(ctx context.Context, obj *db.File) ([]*db.File, error) {
 	currentUser := middleware.ForContext(ctx)
@@ -106,7 +147,7 @@ func (r *fileResolver) Files(ctx context.Context, obj *db.File) ([]*db.File, err
 	}
 
 	var files []*db.File
-	err := r.DB.NewSelect().Model(&files).Where("parent_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err := r.DB.NewSelect().Model(&files).Where("parent_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Order("name").Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -127,10 +168,11 @@ func (r *mutationResolver) SingleUpload(ctx context.Context, input model.FileUpl
 	file.OrganisationID = currentUser.OrganisationID
 	file.Size = input.File.Size
 
+	var bucket db.Bucket
+
 	if input.BucketID != nil && len(*input.BucketID) > 0 {
 		file.BucketID = *input.BucketID
 	} else {
-		var bucket db.Bucket
 		err := r.DB.NewSelect().Model(&bucket).Column("id").Where("user_id = ?", currentUser.ID).Scan(ctx)
 
 		if err != nil && err.Error() == "sql: no rows in result set" {
@@ -139,6 +181,11 @@ func (r *mutationResolver) SingleUpload(ctx context.Context, input model.FileUpl
 			bucket.UserID = sql.NullString{String: currentUser.ID, Valid: true}
 			bucket.OrganisationID = currentUser.OrganisationID
 			err = r.DB.NewInsert().Model(&bucket).Returning("*").Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			err := r.MinioClient.MakeBucket(ctx, bucket.ID, minio.MakeBucketOptions{})
 			if err != nil {
 				return nil, err
 			}
@@ -154,6 +201,14 @@ func (r *mutationResolver) SingleUpload(ctx context.Context, input model.FileUpl
 	}
 
 	err := r.DB.NewInsert().Model(&file).Returning("*").Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Upload the file to specific bucket with the file id
+	_, err = r.MinioClient.PutObject(ctx, bucket.ID, file.ID, input.File.File, input.File.Size, minio.PutObjectOptions{
+		ContentType: input.File.ContentType,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -188,6 +243,10 @@ func (r *mutationResolver) CreateFolder(ctx context.Context, input model.CreateF
 			if err != nil {
 				return nil, err
 			}
+			err := r.MinioClient.MakeBucket(ctx, bucket.ID, minio.MakeBucketOptions{})
+			if err != nil {
+				return nil, err
+			}
 		} else if err != nil {
 			return nil, err
 		}
@@ -205,6 +264,28 @@ func (r *mutationResolver) CreateFolder(ctx context.Context, input model.CreateF
 	}
 
 	return &file, nil
+}
+
+// GenerateFileURL is the resolver for the generateFileURL field.
+func (r *mutationResolver) GenerateFileURL(ctx context.Context, input model.GenerateFileURLInput) (*model.GenerateFileURLPayload, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var file db.File
+	err := r.DB.NewSelect().Model(&file).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	presignedURL, err := r.MinioClient.PresignedGetObject(ctx, file.BucketID, file.ID, time.Second*60, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.GenerateFileURLPayload{URL: presignedURL.String()}, nil
 }
 
 // Buckets is the resolver for the buckets field.
@@ -274,7 +355,7 @@ func (r *queryResolver) Files(ctx context.Context, input *model.FilesFilterInput
 	}
 
 	var files []*db.File
-	query := r.DB.NewSelect().Model(&files).Where("organisation_id = ?", currentUser.OrganisationID)
+	query := r.DB.NewSelect().Model(&files).Where("organisation_id = ?", currentUser.OrganisationID).Order("name")
 
 	if input != nil {
 		if input.ParentID != nil && len(*input.ParentID) > 0 {
@@ -316,7 +397,7 @@ func (r *queryResolver) MyFiles(ctx context.Context, input *model.MyFilesFilterI
 	err := r.DB.NewSelect().Model(&bucket).Column("id").Where("user_id = ?", currentUser.ID).Scan(ctx)
 
 	var files []*db.File
-	query := r.DB.NewSelect().Model(&files).Where("organisation_id = ?", currentUser.OrganisationID).Where("bucket_id = ?", bucket.ID)
+	query := r.DB.NewSelect().Model(&files).Where("organisation_id = ?", currentUser.OrganisationID).Where("bucket_id = ?", bucket.ID).Order("name")
 
 	if input != nil {
 		if input.ParentID != nil && len(*input.ParentID) > 0 {

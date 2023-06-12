@@ -27,6 +27,8 @@ type File {
     createdAt: Time!
     deletedAt: Time
 
+    parents: [File!]!
+
     files: [File!]!
 }
 
@@ -96,7 +98,16 @@ input CreateFolderInput {
     bucketId: ID
 }
 
+input GenerateFileURLInput {
+    id: ID!
+}
+
+type GenerateFileURLPayload {
+    url: String!
+}
+
 extend type Mutation {
     singleUpload(input: FileUploadInput!): File!
     createFolder(input: CreateFolderInput!): File!
+    generateFileURL(input: GenerateFileURLInput!): GenerateFileURLPayload!
 }

@@ -168,6 +168,7 @@ type ComplexityRoot struct {
 		MimeType  func(childComplexity int) int
 		Name      func(childComplexity int) int
 		Parent    func(childComplexity int) int
+		Parents   func(childComplexity int) int
 		Size      func(childComplexity int) int
 	}
 
@@ -175,6 +176,10 @@ type ComplexityRoot struct {
 		Edges      func(childComplexity int) int
 		PageInfo   func(childComplexity int) int
 		TotalCount func(childComplexity int) int
+	}
+
+	GenerateFileURLPayload struct {
+		URL func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -189,6 +194,7 @@ type ComplexityRoot struct {
 		CreateTag             func(childComplexity int, input model.CreateTagInput) int
 		CreateUser            func(childComplexity int, input model.CreateUserInput) int
 		CreateUserCompetence  func(childComplexity int, input model.CreateUserCompetenceInput) int
+		GenerateFileURL       func(childComplexity int, input model.GenerateFileURLInput) int
 		InviteUser            func(childComplexity int, input model.CreateUserInput) int
 		SignIn                func(childComplexity int, input model.SignInInput) int
 		SingleUpload          func(childComplexity int, input model.FileUploadInput) int
@@ -323,6 +329,7 @@ type CompetenceResolver interface {
 	Type(ctx context.Context, obj *db.Competence) (db.CompetenceType, error)
 
 	Color(ctx context.Context, obj *db.Competence) (string, error)
+
 	Parents(ctx context.Context, obj *db.Competence) ([]*db.Competence, error)
 }
 type EntryResolver interface {
@@ -345,11 +352,13 @@ type FileResolver interface {
 	Parent(ctx context.Context, obj *db.File) (*db.File, error)
 
 	DeletedAt(ctx context.Context, obj *db.File) (*time.Time, error)
+	Parents(ctx context.Context, obj *db.File) ([]*db.File, error)
 	Files(ctx context.Context, obj *db.File) ([]*db.File, error)
 }
 type MutationResolver interface {
 	SingleUpload(ctx context.Context, input model.FileUploadInput) (*db.File, error)
 	CreateFolder(ctx context.Context, input model.CreateFolderInput) (*db.File, error)
+	GenerateFileURL(ctx context.Context, input model.GenerateFileURLInput) (*model.GenerateFileURLPayload, error)
 	CreateEntry(ctx context.Context, input model.CreateEntryInput) (*db.Entry, error)
 	UpdateEntry(ctx context.Context, input model.UpdateEntryInput) (*db.Entry, error)
 	ArchiveEntry(ctx context.Context, id string) (*db.Entry, error)
@@ -928,6 +937,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.File.Parent(childComplexity), true
 
+	case "File.parents":
+		if e.complexity.File.Parents == nil {
+			break
+		}
+
+		return e.complexity.File.Parents(childComplexity), true
+
 	case "File.size":
 		if e.complexity.File.Size == nil {
 			break
@@ -955,6 +971,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.FileConnection.TotalCount(childComplexity), true
+
+	case "GenerateFileURLPayload.url":
+		if e.complexity.GenerateFileURLPayload.URL == nil {
+			break
+		}
+
+		return e.complexity.GenerateFileURLPayload.URL(childComplexity), true
 
 	case "Mutation.acceptInvite":
 		if e.complexity.Mutation.AcceptInvite == nil {
@@ -1087,6 +1110,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateUserCompetence(childComplexity, args["input"].(model.CreateUserCompetenceInput)), true
+
+	case "Mutation.generateFileURL":
+		if e.complexity.Mutation.GenerateFileURL == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_generateFileURL_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.GenerateFileURL(childComplexity, args["input"].(model.GenerateFileURLInput)), true
 
 	case "Mutation.inviteUser":
 		if e.complexity.Mutation.InviteUser == nil {
@@ -1768,6 +1803,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputEventFilterInput,
 		ec.unmarshalInputFileUploadInput,
 		ec.unmarshalInputFilesFilterInput,
+		ec.unmarshalInputGenerateFileURLInput,
 		ec.unmarshalInputMyFilesFilterInput,
 		ec.unmarshalInputSharedDriveFilterInput,
 		ec.unmarshalInputSignInInput,
@@ -2025,6 +2061,21 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNCreateUserInput2exampleᚋpkgᚋgraphᚋmodelᚐCreateUserInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_generateFileURL_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.GenerateFileURLInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNGenerateFileURLInput2exampleᚋpkgᚋgraphᚋmodelᚐGenerateFileURLInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2978,6 +3029,8 @@ func (ec *executionContext) fieldContext_Bucket_files(ctx context.Context, field
 				return ec.fieldContext_File_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
 			case "files":
 				return ec.fieldContext_File_files(ctx, field)
 			}
@@ -4115,6 +4168,50 @@ func (ec *executionContext) fieldContext_Competence_color(ctx context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _Competence_createdAt(ctx context.Context, field graphql.CollectedField, obj *db.Competence) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Competence_createdAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Competence_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Competence",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Competence_parents(ctx context.Context, field graphql.CollectedField, obj *db.Competence) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Competence_parents(ctx, field)
 	if err != nil {
@@ -4164,56 +4261,12 @@ func (ec *executionContext) fieldContext_Competence_parents(ctx context.Context,
 				return ec.fieldContext_Competence_grades(ctx, field)
 			case "color":
 				return ec.fieldContext_Competence_color(ctx, field)
-			case "parents":
-				return ec.fieldContext_Competence_parents(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Competence_createdAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_Competence_parents(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Competence_createdAt(ctx context.Context, field graphql.CollectedField, obj *db.Competence) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Competence_createdAt(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedAt, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(time.Time)
-	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Competence_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Competence",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
 		},
 	}
 	return fc, nil
@@ -4265,10 +4318,10 @@ func (ec *executionContext) fieldContext_CompetenceConnection_edges(ctx context.
 				return ec.fieldContext_Competence_grades(ctx, field)
 			case "color":
 				return ec.fieldContext_Competence_color(ctx, field)
-			case "parents":
-				return ec.fieldContext_Competence_parents(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Competence_createdAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_Competence_parents(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
 		},
@@ -4829,6 +4882,8 @@ func (ec *executionContext) fieldContext_Entry_files(ctx context.Context, field 
 				return ec.fieldContext_File_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
 			case "files":
 				return ec.fieldContext_File_files(ctx, field)
 			}
@@ -5255,6 +5310,8 @@ func (ec *executionContext) fieldContext_Event_image(ctx context.Context, field 
 				return ec.fieldContext_File_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
 			case "files":
 				return ec.fieldContext_File_files(ctx, field)
 			}
@@ -5568,10 +5625,10 @@ func (ec *executionContext) fieldContext_Event_competences(ctx context.Context, 
 				return ec.fieldContext_Competence_grades(ctx, field)
 			case "color":
 				return ec.fieldContext_Competence_color(ctx, field)
-			case "parents":
-				return ec.fieldContext_Competence_parents(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Competence_createdAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_Competence_parents(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
 		},
@@ -6072,6 +6129,8 @@ func (ec *executionContext) fieldContext_File_parent(ctx context.Context, field 
 				return ec.fieldContext_File_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
 			case "files":
 				return ec.fieldContext_File_files(ctx, field)
 			}
@@ -6166,6 +6225,74 @@ func (ec *executionContext) fieldContext_File_deletedAt(ctx context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _File_parents(ctx context.Context, field graphql.CollectedField, obj *db.File) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_File_parents(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.File().Parents(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*db.File)
+	fc.Result = res
+	return ec.marshalNFile2ᚕᚖexampleᚋpkgᚋdbᚐFileᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_File_parents(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "File",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_File_id(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "fileType":
+				return ec.fieldContext_File_fileType(ctx, field)
+			case "MIMEType":
+				return ec.fieldContext_File_MIMEType(ctx, field)
+			case "size":
+				return ec.fieldContext_File_size(ctx, field)
+			case "bucket":
+				return ec.fieldContext_File_bucket(ctx, field)
+			case "parent":
+				return ec.fieldContext_File_parent(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_File_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _File_files(ctx context.Context, field graphql.CollectedField, obj *db.File) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_File_files(ctx, field)
 	if err != nil {
@@ -6223,6 +6350,8 @@ func (ec *executionContext) fieldContext_File_files(ctx context.Context, field g
 				return ec.fieldContext_File_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
 			case "files":
 				return ec.fieldContext_File_files(ctx, field)
 			}
@@ -6289,6 +6418,8 @@ func (ec *executionContext) fieldContext_FileConnection_edges(ctx context.Contex
 				return ec.fieldContext_File_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
 			case "files":
 				return ec.fieldContext_File_files(ctx, field)
 			}
@@ -6394,6 +6525,50 @@ func (ec *executionContext) fieldContext_FileConnection_pageInfo(ctx context.Con
 	return fc, nil
 }
 
+func (ec *executionContext) _GenerateFileURLPayload_url(ctx context.Context, field graphql.CollectedField, obj *model.GenerateFileURLPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GenerateFileURLPayload_url(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_GenerateFileURLPayload_url(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GenerateFileURLPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_singleUpload(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_singleUpload(ctx, field)
 	if err != nil {
@@ -6451,6 +6626,8 @@ func (ec *executionContext) fieldContext_Mutation_singleUpload(ctx context.Conte
 				return ec.fieldContext_File_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
 			case "files":
 				return ec.fieldContext_File_files(ctx, field)
 			}
@@ -6528,6 +6705,8 @@ func (ec *executionContext) fieldContext_Mutation_createFolder(ctx context.Conte
 				return ec.fieldContext_File_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
 			case "files":
 				return ec.fieldContext_File_files(ctx, field)
 			}
@@ -6542,6 +6721,65 @@ func (ec *executionContext) fieldContext_Mutation_createFolder(ctx context.Conte
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_createFolder_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_generateFileURL(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_generateFileURL(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().GenerateFileURL(rctx, fc.Args["input"].(model.GenerateFileURLInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.GenerateFileURLPayload)
+	fc.Result = res
+	return ec.marshalNGenerateFileURLPayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐGenerateFileURLPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_generateFileURL(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "url":
+				return ec.fieldContext_GenerateFileURLPayload_url(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GenerateFileURLPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_generateFileURL_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -8408,6 +8646,8 @@ func (ec *executionContext) fieldContext_Query_file(ctx context.Context, field g
 				return ec.fieldContext_File_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
 			case "files":
 				return ec.fieldContext_File_files(ctx, field)
 			}
@@ -9002,10 +9242,10 @@ func (ec *executionContext) fieldContext_Query_competence(ctx context.Context, f
 				return ec.fieldContext_Competence_grades(ctx, field)
 			case "color":
 				return ec.fieldContext_Competence_color(ctx, field)
-			case "parents":
-				return ec.fieldContext_Competence_parents(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Competence_createdAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_Competence_parents(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
 		},
@@ -10162,6 +10402,8 @@ func (ec *executionContext) fieldContext_Report_file(ctx context.Context, field 
 				return ec.fieldContext_File_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
 			case "files":
 				return ec.fieldContext_File_files(ctx, field)
 			}
@@ -11121,10 +11363,10 @@ func (ec *executionContext) fieldContext_UserCompetence_competence(ctx context.C
 				return ec.fieldContext_Competence_grades(ctx, field)
 			case "color":
 				return ec.fieldContext_Competence_color(ctx, field)
-			case "parents":
-				return ec.fieldContext_Competence_parents(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Competence_createdAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_Competence_parents(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
 		},
@@ -13859,6 +14101,34 @@ func (ec *executionContext) unmarshalInputFilesFilterInput(ctx context.Context, 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputGenerateFileURLInput(ctx context.Context, obj interface{}) (model.GenerateFileURLInput, error) {
+	var it model.GenerateFileURLInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputMyFilesFilterInput(ctx context.Context, obj interface{}) (model.MyFilesFilterInput, error) {
 	var it model.MyFilesFilterInput
 	asMap := map[string]interface{}{}
@@ -14780,6 +15050,13 @@ func (ec *executionContext) _Competence(ctx context.Context, sel ast.SelectionSe
 				return innerFunc(ctx)
 
 			})
+		case "createdAt":
+
+			out.Values[i] = ec._Competence_createdAt(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "parents":
 			field := field
 
@@ -14800,13 +15077,6 @@ func (ec *executionContext) _Competence(ctx context.Context, sel ast.SelectionSe
 				return innerFunc(ctx)
 
 			})
-		case "createdAt":
-
-			out.Values[i] = ec._Competence_createdAt(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -15342,6 +15612,26 @@ func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj
 				return innerFunc(ctx)
 
 			})
+		case "parents":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._File_parents(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		case "files":
 			field := field
 
@@ -15415,6 +15705,34 @@ func (ec *executionContext) _FileConnection(ctx context.Context, sel ast.Selecti
 	return out
 }
 
+var generateFileURLPayloadImplementors = []string{"GenerateFileURLPayload"}
+
+func (ec *executionContext) _GenerateFileURLPayload(ctx context.Context, sel ast.SelectionSet, obj *model.GenerateFileURLPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, generateFileURLPayloadImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GenerateFileURLPayload")
+		case "url":
+
+			out.Values[i] = ec._GenerateFileURLPayload_url(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -15447,6 +15765,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createFolder(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "generateFileURL":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_generateFileURL(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -17601,6 +17928,25 @@ func (ec *executionContext) marshalNFileType2exampleᚋpkgᚋdbᚐFileType(ctx c
 func (ec *executionContext) unmarshalNFileUploadInput2exampleᚋpkgᚋgraphᚋmodelᚐFileUploadInput(ctx context.Context, v interface{}) (model.FileUploadInput, error) {
 	res, err := ec.unmarshalInputFileUploadInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNGenerateFileURLInput2exampleᚋpkgᚋgraphᚋmodelᚐGenerateFileURLInput(ctx context.Context, v interface{}) (model.GenerateFileURLInput, error) {
+	res, err := ec.unmarshalInputGenerateFileURLInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNGenerateFileURLPayload2exampleᚋpkgᚋgraphᚋmodelᚐGenerateFileURLPayload(ctx context.Context, sel ast.SelectionSet, v model.GenerateFileURLPayload) graphql.Marshaler {
+	return ec._GenerateFileURLPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNGenerateFileURLPayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐGenerateFileURLPayload(ctx context.Context, sel ast.SelectionSet, v *model.GenerateFileURLPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._GenerateFileURLPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {

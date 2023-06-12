@@ -43,8 +43,8 @@ type Competence {
     type: CompetenceType!
     grades: [Int!]!
     color: String!
-    parents: [Competence!]!
     createdAt: Time!
+    parents: [Competence!]!
 }
 
 type UserCompetence {

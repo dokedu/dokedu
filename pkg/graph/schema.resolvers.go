@@ -43,10 +43,37 @@ func (r *competenceResolver) Parents(ctx context.Context, obj *db.Competence) ([
 		return nil, errors.New("no user found in the context")
 	}
 
+	query := `
+WITH RECURSIVE competence_hierarchy AS (
+    SELECT *
+    FROM competences
+    WHERE id = ? AND organisation_id = ?
+
+    UNION ALL
+
+    SELECT c.*
+    FROM competences c
+    INNER JOIN competence_hierarchy ch ON c.id = ch.competence_id
+	WHERE c.organisation_id = ?
+)
+SELECT *
+FROM competence_hierarchy
+WHERE id <> ?;
+`
+
+	// query without new lines
+	q := strings.ReplaceAll(query, "\n", " ")
+
 	var parents []*db.Competence
-	err := r.DB.NewSelect().Model(&parents).Where("id = ?", obj.CompetenceID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err := r.DB.NewRaw(q, obj.ID, currentUser.OrganisationID, currentUser.OrganisationID, obj.ID).Scan(ctx, &parents)
 	if err != nil {
 		return nil, err
+	}
+
+	// reverse the order of the parents
+	for i := len(parents)/2 - 1; i >= 0; i-- {
+		opp := len(parents) - 1 - i
+		parents[i], parents[opp] = parents[opp], parents[i]
 	}
 
 	return parents, nil
@@ -860,10 +887,6 @@ type userCompetenceResolver struct{ *Resolver }
 //   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //     it when you're done.
 //   - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *fileResolver) URL(ctx context.Context, obj *db.File) (string, error) {
-	// TODO: implement this
-	return fmt.Sprintf("https://api.dokedu.org/files/%s", obj.ID), nil
-}
 func isStringInArray(s string, a []string) bool {
 	for _, v := range a {
 		if v == s {

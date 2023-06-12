@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
@@ -27,6 +28,11 @@ const defaultPort = "8080"
 const jwtSecret = "12345678"
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	signer := jwt.NewSigner(jwtSecret)
 
 	dsn := "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
@@ -89,8 +95,8 @@ func main() {
 
 func minioClient() *minio.Client {
 	endpoint := "localhost:9000"
-	accessKeyID := "accessKeyID"
-	secretAccessKey := "secretAccessKey"
+	accessKeyID := os.Getenv("MINIO_ACCESS_KEY_ID")
+	secretAccessKey := os.Getenv("MINIO_SECRET_ACCESS_KEY")
 	useSSL := false
 
 	// Initialize minio client object.
