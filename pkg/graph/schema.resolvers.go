@@ -504,8 +504,10 @@ func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filt
 	var users []*db.User
 	query := r.DB.NewSelect().Model(&users).Where("organisation_id = ?", currentUser.OrganisationID)
 
-	if filter.Role != nil {
-		query.Where("role IN (?)", bun.In(filter.Role))
+	if filter != nil {
+		if filter.Role != nil && len(filter.Role) > 0 {
+			query.Where("role IN (?)", bun.In(filter.Role))
+		}
 	}
 
 	count, err := query.ScanAndCount(ctx)
