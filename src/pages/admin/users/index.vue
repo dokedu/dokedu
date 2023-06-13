@@ -1,26 +1,24 @@
 <template>
   <PageWrapper>
-    <PageHeader>
-      <div class="text-stone-950 font-medium">Users</div>
+    <PageHeader class="justify-between">
+      <div class="font-medium text-stone-950">Users</div>
+      <d-button type="primary" :icon-left="UserPlus">New</d-button>
     </PageHeader>
-    <table class="select-none">
+    <table class="select-none text-sm">
       <thead>
         <tr>
-          <th class="p-2 bg-stone-100">Email</th>
-          <th class="p-2 bg-stone-100">First name</th>
-          <th class="p-2 bg-stone-100">Last name</th>
-          <th class="p-2 bg-stone-100"></th>
+          <th class="bg-stone-100 p-2 pl-8 text-left font-normal text-strong">First name</th>
+          <th class="bg-stone-100 p-2 text-left font-normal text-strong">Last name</th>
+          <th class="bg-stone-100 p-2 text-left font-normal text-strong">Role</th>
+          <th class="bg-stone-100 p-2 text-left font-normal text-strong">Email</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="user in data?.users?.edges" class="hover:bg-stone-100">
-          <td class="p-2">{{ user.email }}</td>
-          <td class="p-2">{{ user.firstName }}</td>
+        <tr v-for="user in data?.users?.edges" class="text-default hover:bg-stone-100">
+          <td class="p-2 pl-8">{{ user.firstName }}</td>
           <td class="p-2">{{ user.lastName }}</td>
-          <td class="p-2 hover:underline" @click="clicked(user)">Edit</td>
-        </tr>
-        <tr class="hover:bg-stone-100">
-          <td class="p-2" colspan="4">New</td>
+          <td class="p-2">{{ user.role }}</td>
+          <td class="p-2">{{ user.email }}</td>
         </tr>
       </tbody>
     </table>
@@ -30,22 +28,22 @@
 import { gql, useQuery } from "@urql/vue";
 import PageHeader from "../../../components/PageHeader.vue";
 import PageWrapper from "../../../components/PageWrapper.vue";
+import DButton from "../../../components/d-button/d-button.vue";
+import { UserPlus } from "lucide-vue-next";
 
 const { data } = useQuery({
-  query: gql`query {
-  users {
-    edges {
-      id
-      email
-      role
-      firstName
-      lastName
+  query: gql`
+    query {
+      users {
+        edges {
+          id
+          email
+          role
+          firstName
+          lastName
+        }
+      }
     }
-  }
-}`
+  `,
 });
-
-function clicked(user) {
-  alert(user.id)
-}
 </script>

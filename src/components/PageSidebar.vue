@@ -88,6 +88,8 @@ import {
 import { Tag } from "lucide-vue-next";
 import { onClickOutside, useStorage } from "@vueuse/core";
 import { useRoute } from "vue-router";
+import { User } from "lucide-vue-next";
+import { UserSquare } from "lucide-vue-next";
 
 const visibleAppSwitcher = ref<boolean>(false);
 const activeApp = useStorage("active_app", "drive");
@@ -218,13 +220,13 @@ const apps: App[] = [
     links: [
       {
         // icon: "👥",
-        icon: PieChart,
+        icon: Users,
         name: "Users",
         route: "admin-users",
       },
       {
         // icon: "👥",
-        icon: PieChart,
+        icon: UserSquare,
         name: "Students",
         route: "admin-students",
       },

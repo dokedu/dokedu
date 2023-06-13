@@ -26,7 +26,7 @@
           class="flex border-b text-sm transition-all hover:bg-stone-50"
         >
           <div class="w-1/4 p-2 pl-8 text-strong">{{ event.title }}</div>
-          <div class="w-2/4 p-2 pl-8 text-subtle">{{ event.body }}</div>
+          <div class="w-2/4 p-2 pl-8 text-subtle">{{ event.body?.slice(0, 50) }}...</div>
           <div class="w-1/4 p-2 px-4 text-subtle">
             {{ formatDate(new Date(Date.parse(event.startsAt)), "DD.MM.YYYY") }} -
             {{ formatDate(new Date(Date.parse(event.endsAt)), "DD.MM.YYYY") }}
