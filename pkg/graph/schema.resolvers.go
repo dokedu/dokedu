@@ -348,6 +348,16 @@ func (r *mutationResolver) CreateTag(ctx context.Context, input model.CreateTagI
 		return nil, errors.New("no user found in the context")
 	}
 
+	// Check if tag with the same name already exists
+	count, err := r.DB.NewSelect().Model(&db.Tag{}).Where("organisation_id = ?", currentUser.OrganisationID).Where("name = ?", input.Name).WhereAllWithDeleted().Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if count > 0 {
+		return nil, errors.New("Tag with the same name already exists")
+	}
+
 	// check if color is set
 	color := input.Color
 	if color == "" {
@@ -360,7 +370,7 @@ func (r *mutationResolver) CreateTag(ctx context.Context, input model.CreateTagI
 		Color:          sql.NullString{String: color, Valid: true},
 	}
 
-	err := r.DB.NewInsert().Model(&newTag).Returning("*").Scan(ctx)
+	err = r.DB.NewInsert().Model(&newTag).Returning("*").Scan(ctx)
 
 	if err != nil {
 		return nil, err
@@ -376,8 +386,7 @@ func (r *mutationResolver) ArchiveTag(ctx context.Context, id string) (*db.Tag, 
 		return nil, errors.New("no user found in the context")
 	}
 
-	// set deleted_at field to the current tim
-	//e
+	// set deleted_at field to the current time
 	tag := db.Tag{
 		ID:             id,
 		OrganisationID: currentUser.OrganisationID,
@@ -408,8 +417,20 @@ func (r *mutationResolver) UpdateTag(ctx context.Context, id string, input model
 		Where("organisation_id = ?", currentUser.OrganisationID).
 		WherePK().
 		Scan(ctx)
+
 	if err != nil {
 		return nil, err
+	}
+
+	// Check if tag with the same name already exists
+	var count int
+	count, err = r.DB.NewSelect().Model(&db.Tag{}).Where("organisation_id = ?", currentUser.OrganisationID).Where("name = ?", input.Name).WhereAllWithDeleted().Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if count > 0 {
+		return nil, errors.New("Tag with the same name already exists")
 	}
 
 	// update the tag
