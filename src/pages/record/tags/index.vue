@@ -18,7 +18,7 @@
       </div>
     </div>
 
-    <TagCreateDialog :open="createOpen" @close="toggleCreateDialog()" @created="onTagCreate()" />
+    <TagCreateDialog :open="createOpen" @close="createOpen = false" @created="onTagCreate()" />
     <TagEditDialog :open="editOpen" :tag="currentTag" @close="editOpen = false" @updated="onTagUpdate()" />
   </PageWrapper>
 </template>
@@ -44,7 +44,6 @@ const toggleCreateDialog = () => {
 };
 
 const toggleEditDialog = (tag: Tag) => {
-  console.log(tag);
   currentTag.value = tag;
   editOpen.value = true;
 };

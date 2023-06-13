@@ -1,5 +1,5 @@
 <template>
-  <DDialog :open="modalOpen">
+  <DDialog :open="modalOpen" @close="onClose">
     <template #header>
       <div class="flex items-center justify-between">
         <div class="font-medium text-strong">Create tag</div>
@@ -41,6 +41,7 @@
           </div>
         </div>
       </div>
+      <div v-if="error" class="text-xs font-semibold text-red-600">{{ error }}</div>
     </template>
     <template #footer>
       <div class="flex justify-between">
@@ -81,6 +82,7 @@ const emit = defineEmits(["close", "updated"]);
 const modalOpen = toRef(props, "open");
 const contextMenuOpen = ref(false);
 const tag = toRef(props, "tag");
+const error = ref("");
 
 const { executeMutation: updateTag } = useMutation(
   graphql(`
@@ -122,13 +124,16 @@ const onClose = () => {
 };
 
 const onUpdate = async () => {
-  await updateTag({
+  const mutation = await updateTag({
     id: tag.value.id,
     input: {
       name: tag.value.name,
       color: tag.value.color,
     },
   });
+  if (mutation.error) {
+    error.value = mutation.error.graphQLErrors[0].message;
+  }
   emit("updated");
 };
 

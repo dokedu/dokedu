@@ -1,5 +1,5 @@
 <template>
-  <DDialog :open="modalOpen">
+  <DDialog :open="modalOpen" @close="onClose">
     <template #header>
       <div class="flex items-center justify-between">
         <div class="font-medium text-strong">Create tag</div>
@@ -41,6 +41,7 @@
           </div>
         </div>
       </div>
+      <div v-if="error" class="text-xs font-semibold text-red-600">{{ error }}</div>
     </template>
     <template #footer>
       <div class="flex justify-between">
@@ -74,6 +75,7 @@ const modalOpen = toRef(props, "open");
 const name = ref("");
 const tagColor = ref("");
 const contextMenuOpen = ref(false);
+const error = ref("");
 
 const { executeMutation: createTag } = useMutation(
   graphql(`
@@ -99,12 +101,21 @@ const onClose = () => {
 };
 
 const onCreate = async () => {
-  await createTag({
+  const mutation = await createTag({
     input: {
       name: name.value,
       color: tagColor.value,
     },
   });
+
+  if (mutation.error) {
+    error.value = mutation.error.graphQLErrors[0].message;
+    return;
+  }
+
+  name.value = "";
+  tagColor.value = "";
+
   emit("created");
 };
 </script>
