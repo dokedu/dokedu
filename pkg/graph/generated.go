@@ -106,7 +106,7 @@ type ComplexityRoot struct {
 
 	Competence struct {
 		Color           func(childComplexity int) int
-		Competences     func(childComplexity int) int
+		Competences     func(childComplexity int, search *string) int
 		CreatedAt       func(childComplexity int) int
 		Grades          func(childComplexity int) int
 		ID              func(childComplexity int) int
@@ -378,7 +378,7 @@ type CompetenceResolver interface {
 	Color(ctx context.Context, obj *db.Competence) (string, error)
 
 	Parents(ctx context.Context, obj *db.Competence) ([]*db.Competence, error)
-	Competences(ctx context.Context, obj *db.Competence) ([]*db.Competence, error)
+	Competences(ctx context.Context, obj *db.Competence, search *string) ([]*db.Competence, error)
 	UserCompetences(ctx context.Context, obj *db.Competence, userID *string) ([]*db.UserCompetence, error)
 }
 type EntryResolver interface {
@@ -698,7 +698,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Competence.Competences(childComplexity), true
+		args, err := ec.field_Competence_competences_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Competence.Competences(childComplexity, args["search"].(*string)), true
 
 	case "Competence.createdAt":
 		if e.complexity.Competence.CreatedAt == nil {
@@ -2243,6 +2248,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Competence_competences_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["search"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("search"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["search"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Competence_userCompetences_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -4761,7 +4781,7 @@ func (ec *executionContext) _Competence_competences(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Competence().Competences(rctx, obj)
+		return ec.resolvers.Competence().Competences(rctx, obj, fc.Args["search"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4807,6 +4827,17 @@ func (ec *executionContext) fieldContext_Competence_competences(ctx context.Cont
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Competence_competences_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
 	}
 	return fc, nil
 }

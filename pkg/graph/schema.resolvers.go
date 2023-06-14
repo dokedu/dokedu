@@ -80,14 +80,20 @@ WHERE id <> ?;
 }
 
 // Competences is the resolver for the competences field.
-func (r *competenceResolver) Competences(ctx context.Context, obj *db.Competence) ([]*db.Competence, error) {
+func (r *competenceResolver) Competences(ctx context.Context, obj *db.Competence, search *string) ([]*db.Competence, error) {
 	currentUser := middleware.ForContext(ctx)
 	if currentUser == nil {
 		return nil, errors.New("no user found in the context")
 	}
 
 	var competences []*db.Competence
-	err := r.DB.NewSelect().Model(&competences).Where("competence_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	query := r.DB.NewSelect().Model(&competences).Where("competence_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID)
+
+	if search != nil && *search != "" {
+		query.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", *search))
+	}
+
+	err := query.Scan(ctx)
 	if err != nil {
 		return nil, err
 	}

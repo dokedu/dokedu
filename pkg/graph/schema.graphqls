@@ -46,7 +46,7 @@ type Competence {
     color: String!
     createdAt: Time!
     parents: [Competence!]!
-    competences: [Competence]!
+    competences(search: String): [Competence]!
     userCompetences(userId: ID): [UserCompetence]!
 }
 
