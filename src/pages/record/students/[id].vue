@@ -1,7 +1,9 @@
 <template>
   <PageWrapper>
     <div class="h-full p-3">
-      <div class="grid min-h-full w-full grid-cols-4 divide-x divide-stone-100 rounded-xl bg-white shadow-md">
+      <div
+        class="grid min-h-full w-full grid-cols-4 divide-x divide-stone-100 rounded-xl border border-stone-50 bg-white shadow"
+      >
         <div class="col-span-3 px-6 py-4">
           <div class="border-b border-stone-100 pb-4">
             <div class="flex items-center gap-1 text-strong">

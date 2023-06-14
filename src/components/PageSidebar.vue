@@ -1,6 +1,6 @@
 <template>
   <header
-    class="flex h-screen w-full max-w-[230px] flex-col justify-between border-r border-stone-100 bg-stone-50 print:hidden"
+    class="flex h-screen w-full max-w-[230px] select-none flex-col justify-between border-r border-stone-100 bg-stone-50 print:hidden"
   >
     <div class="relative flex flex-col">
       <div class="flex items-center justify-between p-3 pb-1.5">
@@ -90,7 +90,6 @@ import {
 import { Tag } from "lucide-vue-next";
 import { onClickOutside, useStorage } from "@vueuse/core";
 import { useRoute } from "vue-router";
-import { User } from "lucide-vue-next";
 import { UserSquare } from "lucide-vue-next";
 
 const visibleAppSwitcher = ref<boolean>(false);
@@ -164,7 +163,7 @@ const apps: App[] = [
         // icon: "check-done-01",
         icon: CopyCheck,
         name: "Competences",
-        route: "home",
+        route: "record-competences",
       },
       {
         icon: PieChart,

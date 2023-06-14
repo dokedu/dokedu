@@ -108,6 +108,16 @@ const router = createRouter({
       path: "/record/tags",
       component: () => import("./pages/record/tags/index.vue"),
     },
+    {
+      name: "record-competences",
+      path: "/record/competences",
+      component: () => import("./pages/record/competences/index.vue"),
+    },
+    {
+      name: "record-competences-competence",
+      path: "/record/competences/:id",
+      component: () => import("./pages/record/competences/[id].vue"),
+    }
   ],
 });
 

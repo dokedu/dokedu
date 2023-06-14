@@ -108,9 +108,6 @@
 
           <div v-if="events.length >= 1000" class="my-4 rounded-md bg-blue-50 p-4">
             <div class="flex">
-              <div class="flex-shrink-0">
-                <InformationCircleIcon class="h-5 w-5 text-blue-400" aria-hidden="true" />
-              </div>
               <div class="ml-3 flex-1 md:flex md:justify-between">
                 <p class="text-sm text-blue-700">
                   Derzeit zeigen wir maximal 1000 Projekte an. Wenn deine Organisation diese Grenze erreicht, wende dich
