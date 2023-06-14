@@ -14,6 +14,7 @@ function getToken(): string | null {
 app.use(router);
 app.use(urql, {
   url,
+  requestPolicy: "cache-and-network",
   exchanges: [cacheExchange, fetchExchange],
   fetchOptions: () => {
     const token = getToken();

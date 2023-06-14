@@ -2,7 +2,7 @@
   <div>
     <div class="mb-4 select-none text-sm font-medium text-strong">Project</div>
     <div class="mb-4 flex flex-col gap-2">
-      <div class="flex min-h-[8rem] w-full items-center justify-start rounded-lg bg-stone-100">
+      <div v-if="false" class="flex min-h-[8rem] w-full items-center justify-start rounded-lg bg-stone-100">
         <div class="mx-auto text-center">
           <Image class="mx-auto mb-1 stroke-stone-300" :size="48" :stroke-width="1" />
           <div class="select-none text-center text-xs text-stone-500">
