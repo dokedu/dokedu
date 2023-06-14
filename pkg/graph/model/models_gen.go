@@ -34,6 +34,7 @@ type CompetenceConnection struct {
 type CompetenceFilterInput struct {
 	Type    []*db.CompetenceType `json:"type,omitempty"`
 	Parents []*string            `json:"parents,omitempty"`
+	UserID  *string              `json:"userId,omitempty"`
 }
 
 type CreateEntryInput struct {
@@ -245,6 +246,17 @@ type UpdateUserInput struct {
 	JoinedAt  *time.Time `json:"joinedAt,omitempty"`
 }
 
+type UserCompetenceConnection struct {
+	Edges      []*db.UserCompetence `json:"edges,omitempty"`
+	PageInfo   *PageInfo            `json:"pageInfo"`
+	TotalCount int                  `json:"totalCount"`
+}
+
+type UserCompetenceFilterInput struct {
+	UserID       *string `json:"userID,omitempty"`
+	CompetenceID *string `json:"competenceID,omitempty"`
+}
+
 type UserConnection struct {
 	Edges      []*db.User `json:"edges,omitempty"`
 	PageInfo   *PageInfo  `json:"pageInfo"`
@@ -257,4 +269,10 @@ type UserFileFilterInput struct {
 
 type UserFilterInput struct {
 	Role []*db.UserRole `json:"role,omitempty"`
+}
+
+type UserStudentConnection struct {
+	Edges      []*db.UserStudent `json:"edges,omitempty"`
+	PageInfo   *PageInfo         `json:"pageInfo"`
+	TotalCount int               `json:"totalCount"`
 }

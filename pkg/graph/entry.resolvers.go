@@ -190,6 +190,7 @@ func (r *mutationResolver) CreateEntry(ctx context.Context, input model.CreateEn
 					EntryID:        sql.NullString{String: entry.ID, Valid: true},
 					Level:          userCompetence.Level,
 					OrganisationID: currentUser.OrganisationID,
+					CreatedBy:      sql.NullString{String: currentUser.ID, Valid: true},
 				})
 			}
 
@@ -402,6 +403,7 @@ func (r *mutationResolver) UpdateEntry(ctx context.Context, input model.UpdateEn
 				CompetenceID:   userCompetence.CompetenceID,
 				OrganisationID: currentUser.OrganisationID,
 				Level:          userCompetence.Level,
+				CreatedBy:      sql.NullString{String: currentUser.ID, Valid: true},
 			})
 		}
 
