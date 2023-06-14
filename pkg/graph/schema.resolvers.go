@@ -79,6 +79,43 @@ WHERE id <> ?;
 	return parents, nil
 }
 
+// Competences is the resolver for the competences field.
+func (r *competenceResolver) Competences(ctx context.Context, obj *db.Competence) ([]*db.Competence, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var competences []*db.Competence
+	err := r.DB.NewSelect().Model(&competences).Where("competence_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return competences, nil
+}
+
+// UserCompetences is the resolver for the userCompetences field.
+func (r *competenceResolver) UserCompetences(ctx context.Context, obj *db.Competence, userID *string) ([]*db.UserCompetence, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	if userID == nil {
+		return []*db.UserCompetence{}, nil
+	}
+
+	var userCompetences []*db.UserCompetence
+	err := r.DB.NewSelect().Model(&userCompetences).Where("competence_id = ?", obj.ID).Where("user_id = ?", *userID).Where("organisation_id = ?", currentUser.OrganisationID).Order("created_at DESC").Scan(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return userCompetences, nil
+}
+
 // Image is the resolver for the image field.
 func (r *eventResolver) Image(ctx context.Context, obj *db.Event) (*db.File, error) {
 	currentUser := middleware.ForContext(ctx)
@@ -333,7 +370,33 @@ func (r *mutationResolver) ArchiveUser(ctx context.Context, id string) (*db.User
 
 // CreateUserCompetence is the resolver for the createUserCompetence field.
 func (r *mutationResolver) CreateUserCompetence(ctx context.Context, input model.CreateUserCompetenceInput) (*db.UserCompetence, error) {
-	panic(fmt.Errorf("not implemented: CreateUserCompetence - createUserCompetence"))
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	if input.UserID == "" {
+		return nil, errors.New("user id is required")
+	}
+	if input.CompetenceID == "" {
+		return nil, errors.New("competence id is required")
+	}
+
+	userCompetence := db.UserCompetence{
+		UserID:         input.UserID,
+		Level:          input.Level,
+		CreatedBy:      sql.NullString{String: currentUser.ID, Valid: true},
+		CompetenceID:   input.CompetenceID,
+		OrganisationID: currentUser.OrganisationID,
+	}
+
+	err := r.DB.NewInsert().Model(&userCompetence).Returning("*").Scan(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &userCompetence, nil
 }
 
 // ArchiveUserCompetence is the resolver for the archiveUserCompetence field.
@@ -748,6 +811,52 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) ([]*d
 	return tags, nil
 }
 
+// UserStudents is the resolver for the userStudents field.
+func (r *queryResolver) UserStudents(ctx context.Context, limit *int, offset *int) (*model.UserStudentConnection, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	pageLimit := 10
+	if limit != nil {
+		pageLimit = *limit
+	}
+
+	pageOffset := 0
+	if offset != nil {
+		pageOffset = *offset
+	}
+
+	var userStudents []*db.UserStudent
+	count, err := r.DB.NewSelect().Model(&userStudents).Where("organisation_id = ?", currentUser.OrganisationID).Limit(pageLimit).Offset(pageOffset).ScanAndCount(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.UserStudentConnection{
+		Edges:      userStudents,
+		PageInfo:   nil,
+		TotalCount: count,
+	}, nil
+}
+
+// UserStudent is the resolver for the userStudent field.
+func (r *queryResolver) UserStudent(ctx context.Context, id string) (*db.UserStudent, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var userStudent db.UserStudent
+	err := r.DB.NewSelect().Model(&userStudent).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &userStudent, nil
+}
+
 // Meta is the resolver for the meta field.
 func (r *reportResolver) Meta(ctx context.Context, obj *db.Report) (string, error) {
 	/// meta is a jsonb field, so we need to unmarshal it
@@ -832,6 +941,25 @@ func (r *tagResolver) DeletedAt(ctx context.Context, obj *db.Tag) (*time.Time, e
 	return nil, nil
 }
 
+// Student is the resolver for the student field.
+func (r *userResolver) Student(ctx context.Context, obj *db.User) (*db.UserStudent, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var userStudent db.UserStudent
+	err := r.DB.NewSelect().Model(&userStudent).Where("user_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &userStudent, nil
+}
+
 // DeletedAt is the resolver for the deletedAt field.
 func (r *userResolver) DeletedAt(ctx context.Context, obj *db.User) (*time.Time, error) {
 	if obj.DeletedAt.IsZero() {
@@ -859,12 +987,143 @@ func (r *userCompetenceResolver) Competence(ctx context.Context, obj *db.UserCom
 
 // Entry is the resolver for the entry field.
 func (r *userCompetenceResolver) Entry(ctx context.Context, obj *db.UserCompetence) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: Entry - entry"))
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var entry db.Entry
+	err := r.DB.NewSelect().Model(&entry).Where("id = ?", obj.EntryID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &entry, nil
 }
 
 // User is the resolver for the user field.
 func (r *userCompetenceResolver) User(ctx context.Context, obj *db.UserCompetence) (*db.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var user db.User
+	err := r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+// CreatedBy is the resolver for the createdBy field.
+func (r *userCompetenceResolver) CreatedBy(ctx context.Context, obj *db.UserCompetence) (*db.User, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var user db.User
+	err := r.DB.NewSelect().Model(&user).Where("id = ?", obj.CreatedBy).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+// LeftAt is the resolver for the leftAt field.
+func (r *userStudentResolver) LeftAt(ctx context.Context, obj *db.UserStudent) (*time.Time, error) {
+	if !obj.LeftAt.IsZero() {
+		return &obj.LeftAt.Time, nil
+	}
+
+	return nil, nil
+}
+
+// Birthday is the resolver for the birthday field.
+func (r *userStudentResolver) Birthday(ctx context.Context, obj *db.UserStudent) (*time.Time, error) {
+	panic(fmt.Errorf("not implemented: Birthday - birthday"))
+}
+
+// Nationality is the resolver for the nationality field.
+func (r *userStudentResolver) Nationality(ctx context.Context, obj *db.UserStudent) (*string, error) {
+	panic(fmt.Errorf("not implemented: Nationality - nationality"))
+}
+
+// Comments is the resolver for the comments field.
+func (r *userStudentResolver) Comments(ctx context.Context, obj *db.UserStudent) (*string, error) {
+	panic(fmt.Errorf("not implemented: Comments - comments"))
+}
+
+// JoinedAt is the resolver for the joinedAt field.
+func (r *userStudentResolver) JoinedAt(ctx context.Context, obj *db.UserStudent) (*time.Time, error) {
+	if !obj.JoinedAt.IsZero() {
+		return &obj.JoinedAt.Time, nil
+	}
+
+	return nil, nil
+}
+
+// DeletedAt is the resolver for the deletedAt field.
+func (r *userStudentResolver) DeletedAt(ctx context.Context, obj *db.UserStudent) (*time.Time, error) {
+	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
+}
+
+// EntriesCount is the resolver for the entriesCount field.
+func (r *userStudentResolver) EntriesCount(ctx context.Context, obj *db.UserStudent) (int, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return 0, errors.New("no user found in the context")
+	}
+
+	count, err := r.DB.NewSelect().Model(&db.EntryUser{}).Where("user_id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Count(ctx)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
+// CompetencesCount is the resolver for the competencesCount field.
+func (r *userStudentResolver) CompetencesCount(ctx context.Context, obj *db.UserStudent) (int, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return 0, errors.New("no user found in the context")
+	}
+
+	count, err := r.DB.NewSelect().Model(&db.UserCompetence{}).Where("user_id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Count(ctx)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
+// EventsCount is the resolver for the eventsCount field.
+func (r *userStudentResolver) EventsCount(ctx context.Context, obj *db.UserStudent) (int, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return 0, errors.New("no user found in the context")
+	}
+
+	count, err := r.DB.NewSelect().
+		Model(&db.EntryEvent{}).
+		Join("JOIN entry_users ON entry_users.entry_id = entry_event.entry_id").
+		Where("entry_users.user_id = ?", obj.UserID).Count(ctx)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }
 
 // Competence returns CompetenceResolver implementation.
@@ -894,6 +1153,9 @@ func (r *Resolver) User() UserResolver { return &userResolver{r} }
 // UserCompetence returns UserCompetenceResolver implementation.
 func (r *Resolver) UserCompetence() UserCompetenceResolver { return &userCompetenceResolver{r} }
 
+// UserStudent returns UserStudentResolver implementation.
+func (r *Resolver) UserStudent() UserStudentResolver { return &userStudentResolver{r} }
+
 type competenceResolver struct{ *Resolver }
 type eventResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
@@ -903,6 +1165,7 @@ type reportResolver struct{ *Resolver }
 type tagResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }
 type userCompetenceResolver struct{ *Resolver }
+type userStudentResolver struct{ *Resolver }
 
 // !!! WARNING !!!
 // The code below was going to be deleted when updating resolvers. It has been copied here so you have
@@ -910,6 +1173,63 @@ type userCompetenceResolver struct{ *Resolver }
 //   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //     it when you're done.
 //   - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *queryResolver) UserCompetences(ctx context.Context, limit *int, offset *int, filter *model.UserCompetenceFilterInput) (*model.UserCompetenceConnection, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var pageLimit = 10
+	if limit != nil {
+		pageLimit = *limit
+	}
+
+	var pageOffset = 0
+	if offset != nil {
+		pageOffset = *offset
+	}
+
+	var userCompetences []*db.UserCompetence
+	query := r.DB.NewSelect().Model(&userCompetences).Where("organisation_id = ?", currentUser.OrganisationID).Limit(pageLimit).Offset(pageOffset)
+
+	if filter != nil {
+		if filter.UserID != nil {
+			query.Where("user_id = ?", filter.UserID)
+		}
+		if filter.CompetenceID != nil {
+			query.Where("competence_id = ?", filter.CompetenceID)
+		}
+	}
+
+	count, err := query.ScanAndCount(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.UserCompetenceConnection{
+		Edges:      userCompetences,
+		PageInfo:   nil,
+		TotalCount: count,
+	}, nil
+}
+func (r *queryResolver) UserCompetence(ctx context.Context, id string) (*db.UserCompetence, error) {
+	panic(fmt.Errorf("not implemented: UserCompetence - userCompetence"))
+}
+func (r *userStudentResolver) User(ctx context.Context, obj *db.UserStudent) (*db.User, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var user db.User
+	err := r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
 func isStringInArray(s string, a []string) bool {
 	for _, v := range a {
 		if v == s {

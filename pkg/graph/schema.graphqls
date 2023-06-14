@@ -26,6 +26,7 @@ type User {
 
     firstName: String!
     lastName: String!
+    student: UserStudent
 
     createdAt: Time!
     deletedAt: Time
@@ -45,6 +46,8 @@ type Competence {
     color: String!
     createdAt: Time!
     parents: [Competence!]!
+    competences: [Competence]!
+    userCompetences(userId: ID): [UserCompetence]!
 }
 
 type UserCompetence {
@@ -53,9 +56,15 @@ type UserCompetence {
     competence: Competence!
     entry: Entry
     user: User!
-    # TODO: createdBy: User
+    createdBy: User
     createdAt: Time!
     # TODO: deletedAt: Time
+}
+
+type UserCompetenceConnection {
+    edges: [UserCompetence]
+    pageInfo: PageInfo!
+    totalCount: Int!
 }
 
 type Event {
@@ -165,6 +174,27 @@ type ReportConnection {
     totalCount: Int!
 }
 
+type UserStudent {
+    id: ID!
+    leftAt: Time
+    grade: Int!
+    birthday: Time
+    nationality: String
+    comments: String
+    joinedAt: Time
+    createdAt: Time!
+    deletedAt: Time
+    entriesCount: Int!
+    competencesCount: Int!
+    eventsCount: Int!
+}
+
+type UserStudentConnection {
+    edges: [UserStudent]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
 # user filter input
 input UserFilterInput {
     role: [UserRole]
@@ -173,12 +203,18 @@ input UserFilterInput {
 input CompetenceFilterInput {
     type: [CompetenceType]
     parents: [ID]
+    userId: ID
 }
 
 input EventFilterInput {
     from: Time
     to: Time
     deleted: Boolean
+}
+
+input UserCompetenceFilterInput {
+    userID: ID
+    competenceID: ID
 }
 
 type Query
@@ -202,6 +238,9 @@ extend type Query {
 
     tag(id: ID!): Tag!
     tags(limit: Int, offset: Int): [Tag!]!
+
+    userStudents(limit: Int, offset: Int): UserStudentConnection!
+    userStudent(id: ID!): UserStudent!
 }
 
 input CreateUserInput {

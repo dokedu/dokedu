@@ -29,6 +29,11 @@ INSERT INTO users (id, role, first_name, last_name, organisation_id) VALUES ('MI
 INSERT INTO users (id, role, first_name, last_name, organisation_id) VALUES ('VU51iPRp80DGgaZxBM3W2', 'student', 'Jack', 'Holz', 'u2wHWUbnWUaUUjBeNvQ4u');
 INSERT INTO users (id, role, first_name, last_name, organisation_id) VALUES ('K-CUgRwMANG6ObFPuY2mc', 'student', 'Jill', 'Holz', 'u2wHWUbnWUaUUjBeNvQ4u');
 
+-- Student users
+INSERT INTO user_students (id, user_id, organisation_id, left_at, grade, birthday, nationality, comments, joined_at) VALUES (DEFAULT, 'MI1cAxKeI_2dgSg2knkQE', 'u2wHWUbnWUaUUjBeNvQ4u', NULL, 1, '2015-01-01', 'German', 'Likes to play with dolls', '2020-01-01');
+INSERT INTO user_students (id, user_id, organisation_id, left_at, grade, birthday, nationality, comments, joined_at) VALUES (DEFAULT, 'VU51iPRp80DGgaZxBM3W2', 'u2wHWUbnWUaUUjBeNvQ4u', NULL, 5, '2015-01-01', 'German', 'Likes to play with dolls', '2020-01-01');
+INSERT INTO user_students (id, user_id, organisation_id, left_at, grade, birthday, nationality, comments, joined_at) VALUES (DEFAULT, 'K-CUgRwMANG6ObFPuY2mc', 'u2wHWUbnWUaUUjBeNvQ4u', NULL, 8, '2015-01-01', 'German', 'Likes to play with dolls', '2020-01-01');
+
 -- Tags
 INSERT INTO tags (id, name, organisation_id, color) VALUES ('gZOvnaaMmLjPzbWev4Y44', 'Free work', 'u2wHWUbnWUaUUjBeNvQ4u', 'blue');
 INSERT INTO tags (id, name, organisation_id, color) VALUES ('CCdYedMfAss6aV6Vjfquy', 'Dispute', 'u2wHWUbnWUaUUjBeNvQ4u', 'red');
