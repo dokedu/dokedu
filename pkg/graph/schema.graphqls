@@ -58,20 +58,6 @@ type UserCompetence {
     # TODO: deletedAt: Time
 }
 
-type Event {
-    id: ID!
-    title: String!
-    image: File
-    body: String
-    startsAt: Time!
-    endsAt: Time!
-    recurrence: [String]
-    createdAt: Time!
-    deletedAt: Time
-
-    competences: [Competence!]!
-}
-
 enum ReportStatus {
     pending
     processing
@@ -153,11 +139,7 @@ type CompetenceConnection {
     totalCount: Int!
 }
 
-type EventConnection {
-    edges: [Event]
-    pageInfo: PageInfo!
-    totalCount: Int!
-}
+
 
 type ReportConnection {
     edges: [Report]
@@ -175,11 +157,7 @@ input CompetenceFilterInput {
     parents: [ID]
 }
 
-input EventFilterInput {
-    from: Time
-    to: Time
-    deleted: Boolean
-}
+
 
 type Query
 
@@ -193,9 +171,6 @@ extend type Query {
 
     competence(id: ID!): Competence!
     competences(limit: Int, offset: Int, filter: CompetenceFilterInput, search: String): CompetenceConnection!
-
-    event(id: ID!): Event!
-    events(limit: Int, offset: Int, filter: EventFilterInput, search: String): EventConnection!
 
     report(id: ID!): Report!
     reports(limit: Int, offset: Int): ReportConnection!

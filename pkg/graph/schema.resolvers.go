@@ -79,32 +79,6 @@ WHERE id <> ?;
 	return parents, nil
 }
 
-// Image is the resolver for the image field.
-func (r *eventResolver) Image(ctx context.Context, obj *db.Event) (*db.File, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var file db.File
-	err := r.DB.NewSelect().Model(&file).Where("id = ?", obj.ImageFileID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &file, nil
-}
-
-// DeletedAt is the resolver for the deletedAt field.
-func (r *eventResolver) DeletedAt(ctx context.Context, obj *db.Event) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
-}
-
-// Competences is the resolver for the competences field.
-func (r *eventResolver) Competences(ctx context.Context, obj *db.Event) ([]*db.Competence, error) {
-	panic(fmt.Errorf("not implemented: Competences - competences"))
-}
-
 // SignIn is the resolver for the signIn field.
 func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) (*model.SignInPayload, error) {
 	var user db.User
@@ -592,52 +566,6 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 	}, nil
 }
 
-// Event is the resolver for the event field.
-func (r *queryResolver) Event(ctx context.Context, id string) (*db.Event, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var event db.Event
-	err := r.DB.NewSelect().Model(&event).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &event, nil
-}
-
-// Events is the resolver for the events field.
-func (r *queryResolver) Events(ctx context.Context, limit *int, offset *int, filter *model.EventFilterInput, search *string) (*model.EventConnection, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	pageLimit := 10
-	if limit != nil {
-		pageLimit = *limit
-	}
-
-	pageOffset := 0
-	if offset != nil {
-		pageOffset = *offset
-	}
-
-	var events []*db.Event
-	count, err := r.DB.NewSelect().Model(&events).Where("organisation_id = ?", currentUser.OrganisationID).Limit(pageLimit).Offset(pageOffset).ScanAndCount(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &model.EventConnection{
-		Edges:      events,
-		PageInfo:   nil,
-		TotalCount: count,
-	}, nil
-}
-
 // Report is the resolver for the report field.
 func (r *queryResolver) Report(ctx context.Context, id string) (*db.Report, error) {
 	currentUser := middleware.ForContext(ctx)
@@ -849,9 +777,6 @@ func (r *userCompetenceResolver) User(ctx context.Context, obj *db.UserCompetenc
 // Competence returns CompetenceResolver implementation.
 func (r *Resolver) Competence() CompetenceResolver { return &competenceResolver{r} }
 
-// Event returns EventResolver implementation.
-func (r *Resolver) Event() EventResolver { return &eventResolver{r} }
-
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
@@ -874,7 +799,6 @@ func (r *Resolver) User() UserResolver { return &userResolver{r} }
 func (r *Resolver) UserCompetence() UserCompetenceResolver { return &userCompetenceResolver{r} }
 
 type competenceResolver struct{ *Resolver }
-type eventResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type organisationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

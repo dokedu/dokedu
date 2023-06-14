@@ -220,7 +220,7 @@ type Event struct {
 	Body           string         `json:"body"`
 	StartsAt       time.Time      `json:"starts_at"`
 	EndsAt         time.Time      `json:"ends_at"`
-	Recurrence     []string       `json:"recurrence"`
+	Recurrence     []string       `bun:",array" json:"recurrence"`
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
 	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
 }

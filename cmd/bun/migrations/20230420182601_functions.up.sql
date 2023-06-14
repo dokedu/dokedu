@@ -1,6 +1,6 @@
 SET statement_timeout = 0;
 
-create or replace function get_competence_tree(_competence_id text) returns table(id text, name text, competence_type text, grades int[], competence_id text, created_at timestamptz) language plpgsql set search_path = 'public' security definer as $$
+create or replace function get_competence_tree(_competence_id text) returns table(id text, name text, competence_type competence_type, grades int[], competence_id text, created_at timestamptz) language plpgsql set search_path = 'public' security definer as $$
 declare
     _base_competence_org_id text;
 begin
@@ -19,7 +19,7 @@ end
 $$;
 
 -- create a sql query that fetches recursively all the competences that are parent of the given competence
-create or replace function get_competence_parents(_competence_id text) returns table(id text, name text, competence_type text, grades int[], competence_id text, created_at timestamptz) language plpgsql set search_path = 'public' security definer as $$
+create or replace function get_competence_parents(_competence_id text) returns table(id text, name text, competence_type competence_type, grades int[], competence_id text, created_at timestamptz) language plpgsql set search_path = 'public' security definer as $$
 declare
     _base_competence_org_id text;
 begin

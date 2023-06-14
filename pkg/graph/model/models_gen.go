@@ -46,6 +46,15 @@ type CreateEntryInput struct {
 	UserCompetences []*CreateUserCompetenceInput `json:"userCompetences,omitempty"`
 }
 
+type CreateEventInput struct {
+	Title      string          `json:"title"`
+	Image      *graphql.Upload `json:"image,omitempty"`
+	Body       *string         `json:"body,omitempty"`
+	StartsAt   time.Time       `json:"startsAt"`
+	EndsAt     time.Time       `json:"endsAt"`
+	Recurrence []*string       `json:"recurrence,omitempty"`
+}
+
 type CreateFolderInput struct {
 	Name     string  `json:"name"`
 	ParentID *string `json:"parentId,omitempty"`
@@ -109,6 +118,21 @@ type EventFilterInput struct {
 	From    *time.Time `json:"from,omitempty"`
 	To      *time.Time `json:"to,omitempty"`
 	Deleted *bool      `json:"deleted,omitempty"`
+}
+
+type ExportEventsInput struct {
+	From    string `json:"from"`
+	To      string `json:"to"`
+	Deleted bool   `json:"deleted"`
+}
+
+type ExportEventsPayload struct {
+	ID       string `json:"id"`
+	Title    string `json:"title"`
+	Body     string `json:"body"`
+	StartsAt string `json:"startsAt"`
+	EndsAt   string `json:"endsAt"`
+	Subjects string `json:"subjects"`
 }
 
 type FileConnection struct {
@@ -193,6 +217,16 @@ type UpdateEntryInput struct {
 	UserIds         []string                     `json:"userIds,omitempty"`
 	EventIds        []string                     `json:"eventIds,omitempty"`
 	UserCompetences []*UpdateUserCompetenceInput `json:"userCompetences,omitempty"`
+}
+
+type UpdateEventInput struct {
+	ID         string          `json:"id"`
+	Title      *string         `json:"title,omitempty"`
+	Image      *graphql.Upload `json:"image,omitempty"`
+	Body       *string         `json:"body,omitempty"`
+	StartsAt   *time.Time      `json:"startsAt,omitempty"`
+	EndsAt     *time.Time      `json:"endsAt,omitempty"`
+	Recurrence []*string       `json:"recurrence,omitempty"`
 }
 
 type UpdateUserCompetenceInput struct {

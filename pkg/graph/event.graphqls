@@ -1,0 +1,71 @@
+type Event {
+    id: ID!
+    title: String!
+    image: File
+    body: String
+    startsAt: Time!
+    endsAt: Time!
+    recurrence: [String]
+    createdAt: Time!
+    deletedAt: Time
+
+    competences: [Competence!]!
+}
+
+type EventConnection {
+    edges: [Event]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+input EventFilterInput {
+    from: Time
+    to: Time
+    deleted: Boolean
+}
+
+input ExportEventsInput {
+    from: String!
+    to: String!
+    deleted: Boolean!
+}
+
+type ExportEventsPayload {
+    id: ID!
+    title: String!
+    body: String!
+    startsAt: String!
+    endsAt: String!
+    subjects: String!
+}
+
+extend type Query {
+    event(id: ID!): Event!
+    events(limit: Int, offset: Int, filter: EventFilterInput, search: String): EventConnection!
+    exportEvents(input: ExportEventsInput!): [ExportEventsPayload]!
+}
+
+input CreateEventInput {
+    title: String!
+    image: Upload
+    body: String
+    startsAt: Time!
+    endsAt: Time!
+    recurrence: [String]
+}
+
+input UpdateEventInput {
+    id: ID!
+    title: String
+    image: Upload
+    body: String
+    startsAt: Time
+    endsAt: Time
+    recurrence: [String]
+}
+
+extend type Mutation {
+    createEvent(input: CreateEventInput!): Event!
+    updateEvent(input: UpdateEventInput!): Event!
+    archiveEvent(id: ID!): Event!
+}
