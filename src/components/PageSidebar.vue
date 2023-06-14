@@ -1,5 +1,7 @@
 <template>
-  <header class="flex h-screen w-full max-w-[230px] flex-col justify-between border-r border-stone-100 bg-stone-50">
+  <header
+    class="flex h-screen w-full max-w-[230px] flex-col justify-between border-r border-stone-100 bg-stone-50 print:hidden"
+  >
     <div class="relative flex flex-col">
       <div class="flex items-center justify-between p-3 pb-1.5">
         <div class="flex items-center gap-3">

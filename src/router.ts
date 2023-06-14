@@ -70,7 +70,11 @@ const router = createRouter({
         },
       ],
     },
-
+    {
+      name: "record-projects-export",
+      path: "/record/projects/export",
+      component: () => import("./pages/record/projects/export.vue"),
+    },
     {
       name: "drive-my-drive",
       path: "/drive/my-drive",

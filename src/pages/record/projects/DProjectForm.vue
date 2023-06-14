@@ -55,7 +55,10 @@
       </div>
     </div>
     <div class="flex justify-between">
-      <d-button type="outline" @click="cancel">Cancel</d-button>
+      <div class="flex gap-2">
+        <d-button type="outline" @click="cancel">Cancel</d-button>
+        <d-button v-if="project.id" type="outline" :icon-left="Trash" @click="trash">Delete</d-button>
+      </div>
       <d-button v-if="!project.id" type="primary" :icon-left="Plus" @click="create">Create</d-button>
       <d-button v-if="project.id" type="primary" :icon-left="Save" @click="update">Save</d-button>
     </div>
@@ -76,6 +79,7 @@ import { useTextareaAutosize } from "@vueuse/core";
 import { Event } from "../../../gql/graphql";
 import { Save } from "lucide-vue-next";
 import DCompetence from "../../../components/d-competence/d-competence.vue";
+import { Trash } from "lucide-vue-next";
 
 export interface Props {
   project: Partial<Event>;
@@ -102,6 +106,24 @@ function cancel() {
 const { textarea, input: body } = useTextareaAutosize({
   input: project.value.body,
 });
+
+async function trash() {
+  await archiveEvent({
+    id: project.value.id as string,
+  });
+  cancel();
+}
+
+// archiveEvent(id: ID!): Event!
+const { executeMutation: archiveEvent } = useMutation(
+  graphql(`
+    mutation archiveEvent($id: ID!) {
+      archiveEvent(id: $id) {
+        id
+      }
+    }
+  `)
+);
 
 const { executeMutation: createEvent } = useMutation(
   graphql(`

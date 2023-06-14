@@ -13,7 +13,9 @@
         />
       </div>
       <div class="flex gap-2">
-        <d-button type="transparent" :icon-left="Share">Export</d-button>
+        <router-link :to="{ name: 'record-projects-export' }">
+          <d-button type="transparent" :icon-left="Share">Export</d-button>
+        </router-link>
         <router-link :to="{ name: 'record-projects-new' }">
           <d-button type="primary" :icon-left="Plus"> New </d-button>
         </router-link>
@@ -25,10 +27,13 @@
           :to="{ name: 'record-projects-project', params: { id: event.id } }"
           v-for="event in data?.events?.edges"
           class="flex border-b text-sm transition-all hover:bg-stone-50"
+          :class="{
+            '!bg-stone-100': event?.id === $route.params.id,
+          }"
         >
-          <div class="w-1/4 p-2 pl-8 text-strong">{{ event.title }}</div>
-          <div class="w-2/4 p-2 pl-8 text-subtle">{{ event.body?.slice(0, 50) }}...</div>
-          <div class="w-1/4 p-2 px-4 text-subtle">
+          <div class="w-2/6 p-2 pl-8 text-strong">{{ event.title }}</div>
+          <div class="w-3/6 p-2 pl-8 text-subtle">{{ event.body?.slice(0, 50) }}...</div>
+          <div class="w-2/6 p-2 px-4 text-subtle">
             {{ formatDate(new Date(Date.parse(event.startsAt)), "DD.MM.YYYY") }} -
             {{ formatDate(new Date(Date.parse(event.endsAt)), "DD.MM.YYYY") }}
           </div>
