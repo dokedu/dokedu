@@ -23,6 +23,7 @@
     </div>
   </PageWrapper>
 </template>
+
 <script setup lang="ts">
 import PageHeader from "../../../components/PageHeader.vue";
 import PageWrapper from "../../../components/PageWrapper.vue";
@@ -36,7 +37,9 @@ const { data } = useQuery({
           id
           firstName
           lastName
-          role
+          student {
+            id
+          }
         }
       }
     }

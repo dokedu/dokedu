@@ -47,6 +47,24 @@ const router = createRouter({
       name: "record-students-student",
       path: "/record/students/:id",
       component: () => import("./pages/record/students/[id].vue"),
+      redirect: { name: "record-students-student-competences" },
+      children: [
+        {
+          name: "record-students-student-competences",
+          path: "competences",
+          component: () => import("./pages/record/students/[id]/competences/index.vue"),
+        },
+        {
+          name: "record-students-student-entries",
+          path: "entries",
+          component: () => import("./pages/record/students/[id]/entries.vue"),
+        },
+        {
+          name: "record-students-student-competences-competence",
+          path: "competences/:subject",
+          component: () => import("./pages/record/students/[id]/competences/[id].vue"),
+        },
+      ]
     },
     {
       name: "record-reports",
