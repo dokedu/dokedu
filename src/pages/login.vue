@@ -1,17 +1,47 @@
 <template>
-  <div>
-    <form @submit.prevent="onSubmit" class="flex flex-col max-w-md mx-auto gap-4 py-24">
+  <div class="select-none text-sm">
+    <form @submit.prevent="onSubmit" class="mx-auto flex max-w-xs flex-col gap-4 py-24 text-strong">
       <div class="flex flex-col">
-        <label class="mb-1 text-sm text-stone-500" for="email">Email</label>
-        <input v-model="email" type="email" name="email" id="email" class="rounded-md border border-stone-200 shadow">
+        <img height="67" width="100" class="mx-auto mb-8 w-2/5" src="/dokedu-logo.svg" alt="dokedu logo" />
+        <label class="mb-1 text-xs text-stone-500" for="email">Email</label>
+        <input
+          v-model="email"
+          type="email"
+          name="email"
+          id="email"
+          required
+          class="block w-full rounded-md border-0 py-2 text-stone-900 shadow-sm ring-1 ring-inset ring-stone-300 placeholder:text-stone-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm sm:leading-6"
+          placeholder="Your email address"
+        />
       </div>
       <div class="flex flex-col">
-        <label class="mb-1 text-sm text-stone-500" for="password">Password</label>
-        <input v-model="password" type="password" name="password" id="password"
-          class="rounded-md border border-stone-200 shadow">
+        <label class="mb-1 text-xs text-stone-500" for="password">Password</label>
+        <input
+          v-model="password"
+          type="password"
+          name="password"
+          id="password"
+          required
+          min="8"
+          class="block w-full rounded-md border-0 py-2 text-stone-900 shadow-sm ring-1 ring-inset ring-stone-300 placeholder:text-stone-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm sm:leading-6"
+          placeholder="Your password"
+        />
+
+        <div class="mt-1 text-xs text-red-500">
+          {{ error?.graphQLErrors[0].message }}
+        </div>
       </div>
-      <button class="py-1.5 bg-black text-white shadow rounded-md" type="submit">Log in</button>
-      <pre>{{ error }}</pre>
+      <button
+        class="block rounded-md bg-black px-2.5 py-2.5 text-sm font-medium leading-none text-white shadow-sm hover:bg-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+        type="submit"
+      >
+        Log in
+      </button>
+      <router-link
+        class="mx-auto block w-fit rounded-md text-center text-xs font-medium leading-none text-muted hover:text-default focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+        to="/forgot-password"
+        >Forgot password?</router-link
+      >
     </form>
   </div>
 </template>
@@ -22,33 +52,34 @@ import signInMutation from "../queries/signIn.mutation.ts";
 import { useMutation } from "@urql/vue";
 import { useRouter } from "vue-router";
 
-const router = useRouter()
+const router = useRouter();
 
-const email = ref("john@dokedu.org")
-const password = ref("password")
+const email = ref("");
+const password = ref("");
 
-const error = ref<null | string>(null)
-
-const { executeMutation: signIn } = useMutation(signInMutation);
+const { executeMutation: signIn, error } = useMutation(signInMutation);
 
 async function onSubmit() {
-  const { data: { signIn: { token } } } = await signIn({
+  const {
+    data: {
+      signIn: { token },
+    },
+  } = await signIn({
     email: email.value,
-    password: password.value
-  })
+    password: password.value,
+  });
 
   if (token) {
     // parse jwt token
-    const claims = JSON.parse(atob(token.split(".")[1]))
-    console.log(claims)
+    const claims = JSON.parse(atob(token.split(".")[1]));
+    console.log(claims);
 
-    localStorage.setItem("enabled_apps", JSON.stringify(claims.enabled_apps))
+    localStorage.setItem("enabled_apps", JSON.stringify(claims.enabled_apps));
 
-
-    localStorage.setItem("authorization", token)
-    await router.push({ name: "home" })
+    localStorage.setItem("authorization", token);
+    await router.push({ name: "record-entries" });
   } else {
-    error.value = "Wrong password or email"
+    error.value = "Wrong password or email";
   }
 }
 </script>

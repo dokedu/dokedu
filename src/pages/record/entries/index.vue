@@ -20,6 +20,12 @@
           {{ `${entry.user.firstName} ${entry.user.lastName}` }}
         </div>
       </router-link>
+      <div
+        v-if="!data?.entries?.edges || data?.entries?.edges.length === 0"
+        class="select-none px-8 py-4 text-sm text-default"
+      >
+        You can create your first entry by clicking the "New" button above.
+      </div>
     </div>
   </PageWrapper>
 </template>

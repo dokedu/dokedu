@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import LoginPage from "./pages/login.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -11,7 +12,10 @@ const router = createRouter({
     {
       name: "login",
       path: "/login",
-      component: () => import("./pages/login.vue"),
+      meta: {
+        layout: "auth",
+      },
+      component: LoginPage, // ensures page is always loaded
     },
     {
       name: "admin-users",
