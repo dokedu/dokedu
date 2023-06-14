@@ -74,12 +74,19 @@ export type ChatUser = {
 export type Competence = {
   __typename?: 'Competence';
   color: Scalars['String']['output'];
+  competences: Array<Maybe<Competence>>;
   createdAt: Scalars['Time']['output'];
   grades: Array<Scalars['Int']['output']>;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   parents: Array<Competence>;
   type: CompetenceType;
+  userCompetences: Array<Maybe<UserCompetence>>;
+};
+
+
+export type CompetenceUserCompetencesArgs = {
+  userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type CompetenceConnection = {
@@ -92,6 +99,7 @@ export type CompetenceConnection = {
 export type CompetenceFilterInput = {
   parents?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   type?: InputMaybe<Array<InputMaybe<CompetenceType>>>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export enum CompetenceType {
@@ -471,6 +479,8 @@ export type Query = {
   tag: Tag;
   tags: Array<Tag>;
   user: User;
+  userStudent: UserStudent;
+  userStudents: UserStudentConnection;
   users: UserConnection;
 };
 
@@ -584,6 +594,17 @@ export type QueryTagsArgs = {
 
 export type QueryUserArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryUserStudentArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryUserStudentsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -711,16 +732,30 @@ export type User = {
   id: Scalars['ID']['output'];
   lastName: Scalars['String']['output'];
   role: UserRole;
+  student?: Maybe<UserStudent>;
 };
 
 export type UserCompetence = {
   __typename?: 'UserCompetence';
   competence: Competence;
   createdAt: Scalars['Time']['output'];
+  createdBy?: Maybe<User>;
   entry?: Maybe<Entry>;
   id: Scalars['ID']['output'];
   level: Scalars['Int']['output'];
   user: User;
+};
+
+export type UserCompetenceConnection = {
+  __typename?: 'UserCompetenceConnection';
+  edges?: Maybe<Array<Maybe<UserCompetence>>>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type UserCompetenceFilterInput = {
+  competenceID?: InputMaybe<Scalars['ID']['input']>;
+  userID?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type UserConnection = {
@@ -746,6 +781,29 @@ export enum UserRole {
   Student = 'student',
   Teacher = 'teacher'
 }
+
+export type UserStudent = {
+  __typename?: 'UserStudent';
+  birthday?: Maybe<Scalars['Time']['output']>;
+  comments?: Maybe<Scalars['String']['output']>;
+  competencesCount: Scalars['Int']['output'];
+  createdAt: Scalars['Time']['output'];
+  deletedAt?: Maybe<Scalars['Time']['output']>;
+  entriesCount: Scalars['Int']['output'];
+  eventsCount: Scalars['Int']['output'];
+  grade: Scalars['Int']['output'];
+  id: Scalars['ID']['output'];
+  joinedAt?: Maybe<Scalars['Time']['output']>;
+  leftAt?: Maybe<Scalars['Time']['output']>;
+  nationality?: Maybe<Scalars['String']['output']>;
+};
+
+export type UserStudentConnection = {
+  __typename?: 'UserStudentConnection';
+  edges?: Maybe<Array<Maybe<UserStudent>>>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
 
 export type GenerateFileUrlMutationVariables = Exact<{
   input: GenerateFileUrlInput;
@@ -875,7 +933,27 @@ export type UserByIdQueryVariables = Exact<{
 }>;
 
 
-export type UserByIdQuery = { __typename?: 'Query', user: { __typename?: 'User', id: string, firstName: string, lastName: string, role: UserRole } };
+export type UserByIdQuery = { __typename?: 'Query', user: { __typename?: 'User', id: string, firstName: string, lastName: string, student?: { __typename?: 'UserStudent', id: string, grade: number, joinedAt?: any | null, leftAt?: any | null, entriesCount: number, competencesCount: number, eventsCount: number } | null } };
+
+export type SubjectCompetencesQueryVariables = Exact<{
+  subject: Scalars['ID']['input'];
+  user: Scalars['ID']['input'];
+}>;
+
+
+export type SubjectCompetencesQuery = { __typename?: 'Query', competence: { __typename?: 'Competence', id: string, name: string, competences: Array<{ __typename?: 'Competence', type: CompetenceType, id: string, name: string, grades: Array<number>, parents: Array<{ __typename?: 'Competence', id: string, name: string }>, competences: Array<{ __typename?: 'Competence', id: string } | null>, userCompetences: Array<{ __typename?: 'UserCompetence', id: string, level: number, createdAt: any, entry?: { __typename?: 'Entry', id: string } | null, createdBy?: { __typename?: 'User', firstName: string, lastName: string } | null } | null> } | null> } };
+
+export type CreateUserCompetenceMutationVariables = Exact<{
+  input: CreateUserCompetenceInput;
+}>;
+
+
+export type CreateUserCompetenceMutation = { __typename?: 'Mutation', createUserCompetence: { __typename?: 'UserCompetence', id: string, level: number } };
+
+export type StudentCompetencesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type StudentCompetencesQuery = { __typename?: 'Query', competences: { __typename?: 'CompetenceConnection', edges?: Array<{ __typename?: 'Competence', id: string, name: string, grades: Array<number> } | null> | null } };
 
 export type CreateTagMutationVariables = Exact<{
   input: CreateTagInput;

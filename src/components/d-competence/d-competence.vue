@@ -24,6 +24,7 @@
         </div>
       </div>
     </div>
+    <slot name="footer" />
   </div>
 </template>
 
