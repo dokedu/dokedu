@@ -1,62 +1,37 @@
 <template>
-  <PageWrapper>
-    <PageHeader class="flex justify-between">
-      <div class="font-medium text-stone-950">
-        <router-link :to="{ name: 'record-projects' }">Projects</router-link>
-      </div>
-      <div class="flex gap-2">
-        <d-button type="transparent" :icon-left="Trash2" @click="deleteEvent"> Delete </d-button>
-        <d-button type="primary" :icon-left="Edit"> Edit </d-button>
-      </div>
-    </PageHeader>
-    <PageContent>
-      <div class="px-8 py-4 text-sm">
-        <div class="mb-2 text-base font-medium text-strong">{{ data?.event.title }}</div>
-        <div class="mb-4 text-default">{{ data?.event.body }}</div>
-        <div class="text-xs text-muted">
-          <span>Starts at {{ formatDate(new Date(data?.event.startsAt), "DD.MM.YYYY HH:mm") }}</span>
-          <span> and runs until {{ formatDate(new Date(data?.event.endsAt), "DD.MM.YYYY HH:mm") }}</span>
-          <span> and was created {{ formatTimeAgo(new Date(data?.event.createdAt)) }}</span>
-        </div>
-        <div class="mt-4">
-          <div class="mb-2 flex items-center justify-between">
-            <div class="text-strong">Competences</div>
-            <div class="rounded-lg p-1 hover:bg-stone-100" @click="openCompetenceModal">
-              <Plus :size="16" />
-            </div>
-          </div>
-          <div class="flex flex-col gap-2">
-            <d-competence
-              v-for="competence in data?.event?.competences"
-              :key="competence.id"
-              :competence="competence"
-            />
-            <div v-if="!data?.event?.competences?.length" class="text-muted">No competences added yet.</div>
-          </div>
-        </div>
-      </div>
-    </PageContent>
-  </PageWrapper>
+  <div
+    ref="sheet"
+    class="absolute right-0 top-0 h-screen w-full max-w-xl overflow-scroll bg-white shadow-md shadow-stone-300"
+  >
+    <div v-if="data?.event" class="p-4">
+      <d-project-form :project="data?.event" :cancel="data?.event" @cancel="cancel" />
+    </div>
+  </div>
 </template>
-<script setup lang="ts">
-import PageHeader from "../../../components/PageHeader.vue";
-import PageWrapper from "../../../components/PageWrapper.vue";
-import PageContent from "../../../components/PageContent.vue";
-import { useMutation, useQuery } from "@urql/vue";
+
+<script lang="ts" setup>
+import { onClickOutside, onKeyStroke } from "@vueuse/core";
+import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import DButton from "../../../components/d-button/d-button.vue";
-import { Trash2 } from "lucide-vue-next";
-import { Edit, Plus } from "lucide-vue-next";
+import DProjectForm from "./DProjectForm.vue";
+import { useMutation, useQuery } from "@urql/vue";
 import { graphql } from "../../../gql";
-import { formatTimeAgo, formatDate } from "@vueuse/core";
-import DCompetence from "../../../components/d-competence/d-competence.vue";
 
 const route = useRoute();
 const router = useRouter();
+const sheet = ref<HTMLElement | null>(null);
 
-function openCompetenceModal() {
-  alert("Please wait, this feature is not implemented yet. We are working diligently on it.");
+async function cancel() {
+  await router.push({ name: "record-projects" });
 }
+
+onClickOutside(sheet, async () => {
+  await cancel();
+});
+
+onKeyStroke("Escape", async () => {
+  await cancel();
+});
 
 const { data } = useQuery({
   query: graphql(`

@@ -63,13 +63,14 @@ const router = createRouter({
           path: "new",
           component: () => import("./pages/record/projects/new.vue"),
         },
+        {
+          name: "record-projects-project",
+          path: ":id",
+          component: () => import("./pages/record/projects/[id].vue"),
+        },
       ],
     },
-    {
-      name: "record-projects-project",
-      path: "/record/projects/:id",
-      component: () => import("./pages/record/projects/[id].vue"),
-    },
+
     {
       name: "drive-my-drive",
       path: "/drive/my-drive",

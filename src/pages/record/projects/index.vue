@@ -4,6 +4,7 @@
       <div class="flex items-center gap-4">
         <div class="font-medium text-stone-950">Projects</div>
         <input
+          v-model="search"
           type="text"
           name="search"
           id="search"
@@ -41,16 +42,20 @@
 import PageHeader from "../../../components/PageHeader.vue";
 import PageWrapper from "../../../components/PageWrapper.vue";
 import PageContent from "../../../components/PageContent.vue";
-import { gql, useQuery } from "@urql/vue";
+import { useQuery } from "@urql/vue";
 import { formatDate } from "@vueuse/core";
 import DButton from "../../../components/d-button/d-button.vue";
 import { Plus } from "lucide-vue-next";
 import { Share } from "lucide-vue-next";
+import { reactive, ref } from "vue";
+import { graphql } from "../../../gql";
+
+const search = ref("");
 
 const { data } = useQuery({
-  query: gql`
-    query {
-      events {
+  query: graphql(`
+    query eventWithSearch($search: String) {
+      events(search: $search) {
         edges {
           id
           title
@@ -61,6 +66,7 @@ const { data } = useQuery({
         }
       }
     }
-  `,
+  `),
+  variables: reactive({ search }),
 });
 </script>
