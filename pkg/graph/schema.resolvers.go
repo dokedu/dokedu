@@ -775,7 +775,7 @@ func (r *queryResolver) Reports(ctx context.Context, limit *int, offset *int) (*
 		return nil, errors.New("no user found in the context")
 	}
 
-	pageLimit := 10
+	pageLimit := 25
 	if limit != nil {
 		pageLimit = *limit
 	}
@@ -786,7 +786,7 @@ func (r *queryResolver) Reports(ctx context.Context, limit *int, offset *int) (*
 	}
 
 	var reports []*db.Report
-	count, err := r.DB.NewSelect().Model(&reports).Where("organisation_id = ?", currentUser.OrganisationID).Limit(pageLimit).Offset(pageOffset).ScanAndCount(ctx)
+	count, err := r.DB.NewSelect().Model(&reports).Where("organisation_id = ?", currentUser.OrganisationID).Order("created_at DESC").Limit(pageLimit).Offset(pageOffset).ScanAndCount(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -940,6 +940,9 @@ func (r *reportResolver) File(ctx context.Context, obj *db.Report) (*db.File, er
 
 	var file db.File
 	err := r.DB.NewSelect().Model(&file).Where("id = ?", obj.FileID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}

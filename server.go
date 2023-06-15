@@ -69,7 +69,8 @@ func main() {
 	minioClient := minioClient()
 	repGen := report_generation.
 		NewReportGenerationService(report_generation.ReportGenerationServiceConfig{
-			DB: db,
+			DB:    db,
+			MinIO: minioClient,
 		}, ctx, 3)
 
 	e := echo.New()
@@ -88,9 +89,9 @@ func main() {
 	e.Use(middleware.CORS())
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
-		DB:          db,
-		MinioClient: minioClient,
-		Mailer:      mailer,
+		DB:            db,
+		MinioClient:   minioClient,
+		Mailer:        mailer,
 		ReportService: repGen,
 	}}))
 
