@@ -81,7 +81,7 @@ enum ReportFormat {
 
 enum ReportKind {
     report
-    subject
+    subjects
 }
 
 type Report {
@@ -243,7 +243,7 @@ input CreateReportInput {
     kind: ReportKind!
     from: Time!
     to: Time!
-    meta: String!
+#    meta: String!
     filterTags: [ID!]!
     studentUser: ID!
 }

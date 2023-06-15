@@ -16083,7 +16083,7 @@ func (ec *executionContext) unmarshalInputCreateReportInput(ctx context.Context,
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"format", "kind", "from", "to", "meta", "filterTags", "studentUser"}
+	fieldsInOrder := [...]string{"format", "kind", "from", "to", "filterTags", "studentUser"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -16119,14 +16119,6 @@ func (ec *executionContext) unmarshalInputCreateReportInput(ctx context.Context,
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("to"))
 			it.To, err = ec.unmarshalNTime2timeᚐTime(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "meta":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("meta"))
-			it.Meta, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
