@@ -33,6 +33,10 @@ const documents = {
     "\n    query event($id: ID!) {\n      event(id: $id) {\n        id\n        title\n        body\n        createdAt\n        startsAt\n        endsAt\n        competences {\n          id\n          name\n          type\n          grades\n          parents {\n            id\n            name\n            type\n            grades\n          }\n        }\n      }\n    }\n  ": types.EventDocument,
     "\n    query exportEvents($input: ExportEventsInput!) {\n      exportEvents(input: $input) {\n        id\n        title\n        body\n        startsAt\n        endsAt\n        subjects\n      }\n    }\n  ": types.ExportEventsDocument,
     "\n    query eventWithSearch($search: String) {\n      events(search: $search) {\n        edges {\n          id\n          title\n          body\n          createdAt\n          startsAt\n          endsAt\n        }\n      }\n    }\n  ": types.EventWithSearchDocument,
+    "\n    query students {\n      users(filter: { role: [student] }) {\n        edges {\n          id\n          firstName\n          lastName\n          student {\n            id\n          }\n        }\n      }\n    }\n  ": types.StudentsDocument,
+    "\n    query GetTags {\n      tags {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  ": types.GetTagsDocument,
+    "\n    query reports {\n      reports {\n        edges {\n          id\n          status\n          format\n          kind\n          from\n          to\n        }\n      }\n    }\n  ": types.ReportsDocument,
+    "\n    mutation createReport($input: CreateReportInput!) {\n      createReport(input: $input) {\n        id\n      }\n    }\n  ": types.CreateReportDocument,
     "\n    query userById($id: ID!) {\n      user(id: $id) {\n        id\n        firstName\n        lastName\n        student {\n          id\n          grade\n          joinedAt\n          leftAt\n          entriesCount\n          competencesCount\n          eventsCount\n        }\n      }\n    }\n  ": types.UserByIdDocument,
     "\n    query studentCompetence($subject: ID!, $user: ID!) {\n      competence(id: $subject) {\n        id\n        name\n        competences {\n          type\n          id\n          name\n          grades\n          parents {\n            id\n            name\n          }\n          competences {\n            id\n          }\n          userCompetences(userId: $user) {\n            id\n            level\n            entry {\n              id\n            }\n            createdBy {\n              firstName\n              lastName\n            }\n            createdAt\n          }\n        }\n      }\n    }\n  ": types.StudentCompetenceDocument,
     "\n    mutation createUserCompetence($input: CreateUserCompetenceInput!) {\n      createUserCompetence(input: $input) {\n        id\n        level\n      }\n    }\n  ": types.CreateUserCompetenceDocument,
@@ -41,7 +45,6 @@ const documents = {
     "\n    mutation CreateTag($input: CreateTagInput!) {\n      createTag(input: $input) {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  ": types.CreateTagDocument,
     "\n    mutation UpdateTag($id: ID!, $input: CreateTagInput!) {\n      updateTag(id: $id, input: $input) {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  ": types.UpdateTagDocument,
     "\n    mutation ArchiveTag($id: ID!) {\n      archiveTag(id: $id) {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  ": types.ArchiveTagDocument,
-    "\n    query GetTags {\n      tags {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  ": types.GetTagsDocument,
     "\n  mutation archiveEntry($id: ID!) {\n    archiveEntry(id: $id) {\n      id\n    }\n  }\n": types.ArchiveEntryDocument,
     "\n    mutation signIn($email: String!, $password: String!) {\n        signIn(input: {email: $email, password: $password }) {\n            token\n        }\n    }\n": types.SignInDocument,
 };
@@ -143,6 +146,22 @@ export function graphql(source: "\n    query eventWithSearch($search: String) {\
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n    query students {\n      users(filter: { role: [student] }) {\n        edges {\n          id\n          firstName\n          lastName\n          student {\n            id\n          }\n        }\n      }\n    }\n  "): (typeof documents)["\n    query students {\n      users(filter: { role: [student] }) {\n        edges {\n          id\n          firstName\n          lastName\n          student {\n            id\n          }\n        }\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    query GetTags {\n      tags {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  "): (typeof documents)["\n    query GetTags {\n      tags {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    query reports {\n      reports {\n        edges {\n          id\n          status\n          format\n          kind\n          from\n          to\n        }\n      }\n    }\n  "): (typeof documents)["\n    query reports {\n      reports {\n        edges {\n          id\n          status\n          format\n          kind\n          from\n          to\n        }\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation createReport($input: CreateReportInput!) {\n      createReport(input: $input) {\n        id\n      }\n    }\n  "): (typeof documents)["\n    mutation createReport($input: CreateReportInput!) {\n      createReport(input: $input) {\n        id\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n    query userById($id: ID!) {\n      user(id: $id) {\n        id\n        firstName\n        lastName\n        student {\n          id\n          grade\n          joinedAt\n          leftAt\n          entriesCount\n          competencesCount\n          eventsCount\n        }\n      }\n    }\n  "): (typeof documents)["\n    query userById($id: ID!) {\n      user(id: $id) {\n        id\n        firstName\n        lastName\n        student {\n          id\n          grade\n          joinedAt\n          leftAt\n          entriesCount\n          competencesCount\n          eventsCount\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -172,10 +191,6 @@ export function graphql(source: "\n    mutation UpdateTag($id: ID!, $input: Crea
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    mutation ArchiveTag($id: ID!) {\n      archiveTag(id: $id) {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  "): (typeof documents)["\n    mutation ArchiveTag($id: ID!) {\n      archiveTag(id: $id) {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  "];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n    query GetTags {\n      tags {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  "): (typeof documents)["\n    query GetTags {\n      tags {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
