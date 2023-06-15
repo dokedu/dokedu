@@ -68,7 +68,7 @@ async function createReport() {
     to: new Date(to.value).toISOString(),
     kind: type.value?.kind,
     format: type.value?.format,
-    filterTags: tags.value?.map((tag) => tag.id),
+    filterTags: tags.value?.map((tag) => tag.id) || [],
   };
 
   await createReportMutation({ input });
