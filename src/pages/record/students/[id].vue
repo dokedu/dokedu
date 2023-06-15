@@ -23,10 +23,28 @@
           <div class="pt-6">
             <div class="flex gap-1">
               <RouterLink :to="{ name: 'record-students-student-competences' }">
-                <DButton type="primary" size="sm" :icon-left="CopyCheck">Competences</DButton>
+                <DButton
+                  :type="
+                    $route.matched.some(({ path }) => path.includes('/record/students/:id/competences'))
+                      ? 'primary'
+                      : 'transparent'
+                  "
+                  size="sm"
+                  :icon-left="CopyCheck"
+                  >Competences</DButton
+                >
               </RouterLink>
               <RouterLink :to="{ name: 'record-students-student-entries' }">
-                <DButton type="transparent" size="sm" :icon-left="FileCheck">Entries</DButton>
+                <DButton
+                  :type="
+                    $route.matched.some(({ path }) => path.includes('/record/students/:id/entries'))
+                      ? 'primary'
+                      : 'transparent'
+                  "
+                  size="sm"
+                  :icon-left="FileCheck"
+                  >Entries</DButton
+                >
               </RouterLink>
             </div>
             <div class="mt-4">

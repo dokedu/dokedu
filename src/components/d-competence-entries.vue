@@ -1,7 +1,7 @@
 <template>
-  <div class="mt-2 flex items-center justify-between border-t border-stone-200 py-2">
+  <div class="mt-2 flex items-center justify-between border-t border-stone-200 py-2" @click.prevent="toggleEntries">
     <div class="text-sm font-medium">Entries</div>
-    <ChevronDown class="h-5 w-5" @click="toggleEntries"></ChevronDown>
+    <ChevronDown class="h-5 w-5"></ChevronDown>
   </div>
   <div v-if="entriesOpen">
     <div v-for="competence in competences" class="text-subtle">

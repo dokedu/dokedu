@@ -1,5 +1,5 @@
 const defaultTheme = require("tailwindcss/defaultTheme");
-const colors = require('tailwindcss/colors')
+const colors = require("tailwindcss/colors");
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -42,4 +42,4 @@ export default {
     },
   },
   plugins: [require("@tailwindcss/forms")],
-}
+};

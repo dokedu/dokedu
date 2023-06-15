@@ -7,8 +7,7 @@
     >
       <DCompetence v-if="competence" :competence="competence">
         <DCompetenceLevel
-          v-if="competence.userCompetences.length > 0"
-          :id="competence.userCompetences[0].id"
+          :id="competence.userCompetences[0]?.id"
           :level="getLevel(competence)"
           :editable="competence.type == 'subject' ? false : true"
           @update="(val) => createUserCompetence({ level: val.level, id: competence.id })"
@@ -58,9 +57,9 @@ const getLevel = (competence: StudentCompetence | Partial<Competence>) => {
   return competence?.userCompetences[0].level || 0;
 };
 
-const { data } = useQuery({
+const { data, executeQuery: fetchCompetence } = useQuery({
   query: graphql(`
-    query subjectCompetences($subject: ID!, $user: ID!) {
+    query studentCompetence($subject: ID!, $user: ID!) {
       competence(id: $subject) {
         id
         name
@@ -114,5 +113,7 @@ async function createUserCompetence(input: { id: string; level: number }) {
       userId: id.value,
     },
   });
+
+  await fetchCompetence();
 }
 </script>

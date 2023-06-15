@@ -1,5 +1,9 @@
 <template>
-  <div class="relative rounded-lg border border-stone-200 p-1.5" @click="open = true" :class="{ 'shadow-md': open }">
+  <div
+    class="relative rounded-lg border border-stone-200 p-1.5"
+    @click.prevent="open = true"
+    :class="{ 'shadow-md': open }"
+  >
     <d-competence-level-icon :level="level" />
     <div
       ref="menu"
