@@ -288,7 +288,7 @@ type Report struct {
 	From           time.Time             `json:"from"`
 	To             time.Time             `json:"to"`
 	Meta           pqtype.NullRawMessage `json:"meta"`
-	FilterTags     []string              `json:"filter_tags"`
+	FilterTags     []string              `bun:",array" json:"filter_tags"`
 	FileID         sql.NullString        `json:"file_id"`
 	UserID         string                `json:"user_id"`
 	StudentUserID  string                `json:"student_user_id"`

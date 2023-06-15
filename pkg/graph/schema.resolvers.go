@@ -563,7 +563,35 @@ func (r *mutationResolver) UpdateTag(ctx context.Context, id string, input model
 
 // CreateReport is the resolver for the createReport field.
 func (r *mutationResolver) CreateReport(ctx context.Context, input model.CreateReportInput) (*db.Report, error) {
-	panic(fmt.Errorf("not implemented: CreateReport - createReport"))
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	report := db.Report{
+		OrganisationID: currentUser.OrganisationID,
+		UserID:         currentUser.ID,
+		StudentUserID:  input.StudentUser,
+		From:           input.From,
+		To:             input.To,
+		Format:         input.Format,
+		FilterTags:     input.FilterTags,
+		Kind:           input.Kind,
+		Status:         "pending",
+	}
+
+	err := r.DB.NewInsert().Model(&report).Returning("*").Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Call the report generation service
+	err = r.ReportService.AddToQueue(report.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &report, nil
 }
 
 // UpdatePassword is the resolver for the updatePassword field.
@@ -991,6 +1019,10 @@ func (r *userCompetenceResolver) Entry(ctx context.Context, obj *db.UserCompeten
 	currentUser := middleware.ForContext(ctx)
 	if currentUser == nil {
 		return nil, errors.New("no user found in the context")
+	}
+
+	if sql.NullString(obj.EntryID).String == "" {
+		return nil, nil
 	}
 
 	var entry db.Entry

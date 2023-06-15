@@ -4,6 +4,7 @@ package graph
 
 import (
 	"example/pkg/mail"
+	"example/pkg/services/report_generation"
 	"github.com/minio/minio-go/v7"
 	"github.com/uptrace/bun"
 )
@@ -16,4 +17,5 @@ type Resolver struct {
 	DB          *bun.DB
 	MinioClient *minio.Client
 	Mailer      mail.Mailer
+	ReportService *report_generation.ReportGenerationService
 }

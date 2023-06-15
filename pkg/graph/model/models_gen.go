@@ -67,7 +67,6 @@ type CreateReportInput struct {
 	Kind        db.ReportKind   `json:"kind"`
 	From        time.Time       `json:"from"`
 	To          time.Time       `json:"to"`
-	Meta        string          `json:"meta"`
 	FilterTags  []string        `json:"filterTags"`
 	StudentUser string          `json:"studentUser"`
 }

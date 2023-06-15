@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"example/pkg/graph"
 	"example/pkg/jwt"
 	"example/pkg/mail"
 	"example/pkg/middleware"
+	"example/pkg/services/report_generation"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -30,6 +32,11 @@ const defaultPort = "8080"
 const jwtSecret = "12345678"
 
 func main() {
+	// Allows us to cancel the context when we want to stop the server
+	// And hence gracefully stop the server
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -60,6 +67,10 @@ func main() {
 	db.AddQueryHook(bundebug.NewQueryHook(bundebug.WithVerbose(true)))
 
 	minioClient := minioClient()
+	repGen := report_generation.
+		NewReportGenerationService(report_generation.ReportGenerationServiceConfig{
+			DB: db,
+		}, ctx, 3)
 
 	e := echo.New()
 	e.Use(middleware.Auth(signer))
@@ -80,6 +91,7 @@ func main() {
 		DB:          db,
 		MinioClient: minioClient,
 		Mailer:      mailer,
+		ReportService: repGen,
 	}}))
 
 	srv.AddTransport(&transport.Websocket{})
