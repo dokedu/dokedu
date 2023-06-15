@@ -253,8 +253,27 @@ input CreateTagInput {
     color: String!
 }
 
+input ResetPasswordInput {
+    token: String!
+    password: String!
+}
+
+type ResetPasswordPayload {
+    success: Boolean!
+}
+
+input ForgotPasswordInput {
+    email: String!
+}
+
+type ForgotPasswordPayload {
+    success: Boolean!
+}
+
 extend type Mutation {
     signIn(input: SignInInput!): SignInPayload!
+    resetPassword(input: ResetPasswordInput!): ResetPasswordPayload!
+    forgotPassword(input: ForgotPasswordInput!): ForgotPasswordPayload!
 
     acceptInvite(token: String!, input: SignUpInput!): SignInPayload!
 

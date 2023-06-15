@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"example/pkg/graph"
 	"example/pkg/jwt"
+	"example/pkg/mail"
 	"example/pkg/middleware"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
@@ -14,6 +15,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 	"github.com/uptrace/bun"
@@ -31,6 +33,19 @@ func main() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
+	}
+
+	var mailPort int
+	mailPort, err = strconv.Atoi(os.Getenv("SMTP_PORT"))
+
+	mailer, err := mail.New(mail.Config{
+		Host:     os.Getenv("SMTP_HOST"),
+		Port:     mailPort,
+		Username: os.Getenv("SMTP_USERNAME"),
+		Password: os.Getenv("SMTP_PASSWORD"),
+	})
+	if err != nil {
+		log.Fatal(err, "Error loading .env file")
 	}
 
 	signer := jwt.NewSigner(jwtSecret)
@@ -64,6 +79,7 @@ func main() {
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
 		DB:          db,
 		MinioClient: minioClient,
+		Mailer:      mailer,
 	}}))
 
 	srv.AddTransport(&transport.Websocket{})

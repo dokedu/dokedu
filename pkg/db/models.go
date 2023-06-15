@@ -351,6 +351,8 @@ type User struct {
 	LastName       string         `json:"last_name"`
 	Email          string         `json:"email"`
 	Password       sql.NullString `json:"password"`
+	RecoveryToken  sql.NullString `bun:"-" json:"recovery_token"`
+	RecoverySentAt bun.NullTime   `bun:"-" json:"recovery_sent_at"`
 	AvatarFileID   sql.NullString `json:"avatar_file_id"`
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
 	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero" json:"deleted_at"`

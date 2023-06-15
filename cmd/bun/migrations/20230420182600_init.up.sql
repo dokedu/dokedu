@@ -84,16 +84,18 @@ CREATE TYPE user_role AS ENUM ('owner', 'admin', 'teacher', 'educator', 'student
 
 CREATE TABLE users
 (
-    id              text        DEFAULT nanoid() NOT NULL PRIMARY KEY,
-    role            user_role                    NOT NULL,
-    organisation_id text                         NOT NULL REFERENCES organisations,
-    first_name      text                         NOT NULL,
-    last_name       text                         NOT NULL,
-    email           text                         NULL,
-    password        text                         NULL,
-    avatar_file_id  text                         NULL REFERENCES files,
-    created_at      timestamptz DEFAULT NOW()    NOT NULL,
-    deleted_at      timestamptz,
+    id               text        DEFAULT nanoid() NOT NULL PRIMARY KEY,
+    role             user_role                    NOT NULL,
+    organisation_id  text                         NOT NULL REFERENCES organisations,
+    first_name       text                         NOT NULL,
+    last_name        text                         NOT NULL,
+    email            text                         NULL,
+    password         text                         NULL,
+    recovery_token   text                         NULL,
+    recovery_sent_at timestamptz                  NULL,
+    avatar_file_id   text                         NULL REFERENCES files,
+    created_at       timestamptz DEFAULT NOW()    NOT NULL,
+    deleted_at       timestamptz,
     UNIQUE (email)
 );
 

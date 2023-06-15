@@ -14,6 +14,7 @@ import (
 	"example/pkg/jwt"
 	"example/pkg/middleware"
 	"fmt"
+	nanoid "github.com/matoous/go-nanoid/v2"
 	"strings"
 	"time"
 
@@ -175,6 +176,72 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 
 	return &model.SignInPayload{
 		Token: token,
+	}, nil
+}
+
+// ResetPassword is the resolver for the resetPassword field.
+func (r *mutationResolver) ResetPassword(ctx context.Context, input model.ResetPasswordInput) (*model.ResetPasswordPayload, error) {
+	var user db.User
+	err := r.DB.NewSelect().Model(&user).Where("recovery_token = ?", input.Token).Scan(ctx)
+	if err != nil {
+		return &model.ResetPasswordPayload{
+			Success: false,
+		}, nil
+	}
+
+	if user.RecoverySentAt.Add(time.Hour * 24).After(time.Now()) {
+		return &model.ResetPasswordPayload{
+			Success: false,
+		}, nil
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return &model.ResetPasswordPayload{
+			Success: false,
+		}, nil
+	}
+
+	_, err = r.DB.NewUpdate().Model(&user).Set("password = ?", string(hashedPassword)).Set("recovery_token = NULL").Set("recovery_sent_at = NULL").Where("id = ?", user.ID).Exec(ctx)
+	if err != nil {
+		return &model.ResetPasswordPayload{
+			Success: false,
+		}, nil
+	}
+
+	return &model.ResetPasswordPayload{
+		Success: true,
+	}, nil
+}
+
+// ForgotPassword is the resolver for the forgotPassword field.
+func (r *mutationResolver) ForgotPassword(ctx context.Context, input model.ForgotPasswordInput) (*model.ForgotPasswordPayload, error) {
+	var user db.User
+	err := r.DB.NewSelect().Model(&user).Where("email = ?", strings.ToLower(input.Email)).Scan(ctx)
+	if err != nil {
+		return &model.ForgotPasswordPayload{
+			Success: false,
+		}, nil
+	}
+
+	token := nanoid.Must(32)
+
+	_, err = r.DB.NewUpdate().Model(&user).Set("recovery_token = ?", token).Set("recovery_sent_at = now()").Where("id = ?", user.ID).Exec(ctx)
+	if err != nil {
+		return &model.ForgotPasswordPayload{
+			Success: false,
+		}, nil
+	}
+
+	err = r.Mailer.SendPasswordReset(input.Email, user.FirstName, token)
+	if err != nil {
+		return &model.ForgotPasswordPayload{
+			Success: false,
+		}, nil
+	}
+
+	return &model.ForgotPasswordPayload{
+		Success: true,
 	}, nil
 }
 
@@ -1097,69 +1164,6 @@ type userResolver struct{ *Resolver }
 type userCompetenceResolver struct{ *Resolver }
 type userStudentResolver struct{ *Resolver }
 
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//     it when you're done.
-//   - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *queryResolver) UserCompetences(ctx context.Context, limit *int, offset *int, filter *model.UserCompetenceFilterInput) (*model.UserCompetenceConnection, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var pageLimit = 10
-	if limit != nil {
-		pageLimit = *limit
-	}
-
-	var pageOffset = 0
-	if offset != nil {
-		pageOffset = *offset
-	}
-
-	var userCompetences []*db.UserCompetence
-	query := r.DB.NewSelect().Model(&userCompetences).Where("organisation_id = ?", currentUser.OrganisationID).Limit(pageLimit).Offset(pageOffset)
-
-	if filter != nil {
-		if filter.UserID != nil {
-			query.Where("user_id = ?", filter.UserID)
-		}
-		if filter.CompetenceID != nil {
-			query.Where("competence_id = ?", filter.CompetenceID)
-		}
-	}
-
-	count, err := query.ScanAndCount(ctx)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &model.UserCompetenceConnection{
-		Edges:      userCompetences,
-		PageInfo:   nil,
-		TotalCount: count,
-	}, nil
-}
-func (r *queryResolver) UserCompetence(ctx context.Context, id string) (*db.UserCompetence, error) {
-	panic(fmt.Errorf("not implemented: UserCompetence - userCompetence"))
-}
-func (r *userStudentResolver) User(ctx context.Context, obj *db.UserStudent) (*db.User, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
-	}
-
-	var user db.User
-	err := r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
-}
 func isStringInArray(s string, a []string) bool {
 	for _, v := range a {
 		if v == s {

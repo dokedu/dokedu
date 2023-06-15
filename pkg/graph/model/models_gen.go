@@ -157,6 +157,14 @@ type FilesFilterInput struct {
 	Offset   *int    `json:"offset,omitempty"`
 }
 
+type ForgotPasswordInput struct {
+	Email string `json:"email"`
+}
+
+type ForgotPasswordPayload struct {
+	Success bool `json:"success"`
+}
+
 type GenerateFileURLInput struct {
 	ID string `json:"id"`
 }
@@ -187,6 +195,15 @@ type ReportConnection struct {
 	Edges      []*db.Report `json:"edges,omitempty"`
 	PageInfo   *PageInfo    `json:"pageInfo"`
 	TotalCount int          `json:"totalCount"`
+}
+
+type ResetPasswordInput struct {
+	Token    string `json:"token"`
+	Password string `json:"password"`
+}
+
+type ResetPasswordPayload struct {
+	Success bool `json:"success"`
 }
 
 type SharedDriveFilterInput struct {

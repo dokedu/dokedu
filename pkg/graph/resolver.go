@@ -3,6 +3,7 @@ package graph
 //go:generate go run github.com/99designs/gqlgen generate
 
 import (
+	"example/pkg/mail"
 	"github.com/minio/minio-go/v7"
 	"github.com/uptrace/bun"
 )
@@ -14,4 +15,5 @@ import (
 type Resolver struct {
 	DB          *bun.DB
 	MinioClient *minio.Client
+	Mailer      mail.Mailer
 }
