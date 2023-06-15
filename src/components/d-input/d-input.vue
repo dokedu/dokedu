@@ -7,7 +7,7 @@
       :name="name"
       @input="onInput"
       :id="name"
-      class="rounded-md border border-stone-200 shadow"
+      class="rounded-md border border-stone-200 text-sm shadow"
     />
   </div>
 </template>
