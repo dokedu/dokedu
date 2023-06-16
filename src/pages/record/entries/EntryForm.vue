@@ -2,8 +2,8 @@
   <div class="flex h-full justify-between">
     <div class="flex h-full max-h-full w-full flex-col">
       <EntryFormHeader :mode="mode" @submit="submit" @archive="archive" />
-      <div class="pb-8">
-        <div class="overflow-scroll">
+      <div class="h-full overflow-scroll pb-8">
+        <div>
           <textarea
             ref="textarea"
             v-model="body"
