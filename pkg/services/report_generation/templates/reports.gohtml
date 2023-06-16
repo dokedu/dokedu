@@ -1,0 +1,56 @@
+{{range .Entries}}
+    <div id="entry-fgIPqmYFPk" class="border-b-2 border-gray-100 py-4">
+        <div class="mb-4">{{ .Entry.Body}}</div>
+        <div class="text-sm">Erstellt am <span class="font-semibold">{{ .CreatedAt}}</span> von <span
+                    class="font-semibold">{{ .User.FirstName }} {{ .User.LastName }}</span> für den <span
+                    class="font-semibold">{{ .Date }}</span>.
+        </div>
+        <div class="mt-4 flex flex-col gap-2">
+            {{range .UserCompetences}}
+                <div class="rounded-lg border-2 border-gray-100 px-2 pb-2 break-inside-avoid">
+                    <div class="mb-1 flex items-baseline justify-between">
+                        <div class="text-sm">{{ .Competence.Name }}</div>
+                        <div class="flex items-center">
+                            <div class="flex items-center justify-center rounded-lg p-1">
+                                <div class="flex h-[16px] w-[16px] items-end space-x-0.5">
+                                    <div class="flex h-full w-[4px] items-end">
+                                        {{ if .AtLeastOne }}
+                                            <div class="h-[5px] w-full rounded-lg bg-blue-600"></div>
+                                        {{ else }}
+                                            <div class="h-[5px] w-full rounded-lg bg-gray-300"></div>
+                                        {{end}}
+                                    </div>
+                                    <div class="flex h-full w-[4px] items-end">
+                                        {{ if .AtLeastTwo }}
+                                            <div class="h-[10px] w-full rounded-lg bg-blue-600"></div>
+                                        {{ else }}
+                                            <div class="h-[10px] w-full rounded-lg bg-gray-300"></div>
+                                        {{end}}
+                                    </div>
+                                    <div class="flex h-full w-[4px] items-end">
+                                        {{ if .AtLeastThree }}
+                                            <div class="h-[16px] w-full rounded-lg bg-blue-600"></div>
+                                        {{ else }}
+                                            <div class="h-[16px] w-full rounded-lg bg-gray-300"></div>
+                                        {{end}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center text-sm text-gray-700">
+                        <div class="mr-1 flex items-baseline gap-1">
+                            {{range .Parents}}
+                                <span>/</span>
+                                <div class="m-0 rounded-lg bg-gray-100 px-1 py-0.5 text-xs">{{ .Name }}</div>
+                            {{end}}
+                            <div class="min-w-[max-content] rounded-lg bg-blue-100 px-1 py-0.5 text-xs text-blue-900">
+                                {{ .Grades }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {{end}}
+        </div>
+    </div>
+{{end}}

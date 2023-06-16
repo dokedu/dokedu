@@ -7,9 +7,9 @@ padding-left: 50px;
 padding-right: 40px;
 font-size: 9px;
 line-height: 9px;  font-family: Inter; width: 100%;">
-    <div>Erstellt von <span style="font-weight: 600;">Fred Heinrich</span> am <span
-            style="font-weight: 600;">04.06.2023</span> für
-        den Zeitraum <span style="font-weight: 600;">01.01.2023</span> bis <span
-            style="font-weight: 600;">04.06.2023</span></div>
+    <div>Erstellt von <span style="font-weight: 600;">{{.CreatorFullName}}</span> am <span
+            style="font-weight: 600;">{{.CreatedAt}}</span> für
+        den Zeitraum <span style="font-weight: 600;">{{.From}}</span> bis <span
+            style="font-weight: 600;">{{.To}}</span></div>
     <div>Seite <span class="pageNumber"></span> von <span class="totalPages"></span></div>
 </footer>
