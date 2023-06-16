@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col">
+  <div class="flex h-full flex-col">
     <div class="mb-4 flex h-fit gap-2 text-sm text-subtle">
       <router-link :to="{ name: 'record-students-student-competences' }">Fächer</router-link>
       <template v-for="parent in data?.competence.parents">
@@ -15,26 +15,28 @@
         {{ data?.competence.name }}
       </router-link>
     </div>
-    <div class="flex min-h-fit flex-1 flex-col gap-2 overflow-auto">
-      <component
-        v-for="competence in data?.competence?.competences"
-        :is="competence?.type !== 'competence' ? 'router-link' : 'div'"
-        :to="{ name: 'record-students-student-competences-competence', params: { subject: competence?.id } }"
-      >
-        <DCompetence v-if="competence" :competence="competence">
-          <DCompetenceLevel
-            :id="competence.userCompetences[0]?.id"
-            :level="getLevel(competence)"
-            :editable="competence.type == 'subject' ? false : true"
-            @update="(val) => createUserCompetence({ level: val.level, id: competence.id })"
-          ></DCompetenceLevel>
-          <template #footer>
-            <div v-if="competence.userCompetences.length > 0">
-              <DCompetenceEntries :competences="competence.userCompetences"></DCompetenceEntries>
-            </div>
-          </template>
-        </DCompetence>
-      </component>
+    <div class="h-full">
+      <div class="flex h-full min-h-fit flex-1 flex-col gap-2 overflow-auto">
+        <component
+          v-for="competence in data?.competence?.competences"
+          :is="competence?.type !== 'competence' ? 'router-link' : 'div'"
+          :to="{ name: 'record-students-student-competences-competence', params: { subject: competence?.id } }"
+        >
+          <DCompetence v-if="competence" :competence="competence">
+            <DCompetenceLevel
+              :id="competence.userCompetences[0]?.id"
+              :level="getLevel(competence)"
+              :editable="competence.type == 'subject' ? false : true"
+              @update="(val) => createUserCompetence({ level: val.level, id: competence.id })"
+            ></DCompetenceLevel>
+            <template #footer>
+              <div v-if="competence.userCompetences.length > 0">
+                <DCompetenceEntries :competences="competence.userCompetences"></DCompetenceEntries>
+              </div>
+            </template>
+          </DCompetence>
+        </component>
+      </div>
     </div>
   </div>
 </template>

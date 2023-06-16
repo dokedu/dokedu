@@ -13,7 +13,7 @@
         />
       </div>
     </PageHeader>
-    <div class="flex flex-col">
+    <div class="flex flex-col overflow-scroll">
       <router-link
         :to="{ name: 'record-students-student', params: { id: student.id } }"
         v-for="student in data?.users?.edges"
@@ -22,7 +22,7 @@
         <div class="px-8 py-2 text-sm text-strong">{{ `${student.firstName} ${student.lastName}` }}</div>
       </router-link>
     </div>
-    <div v-if="loading" class="flex flex-col">
+    <div v-if="loading" class="flex flex-col overflow-scroll">
       <div
         v-for="i in 25"
         :key="i"
