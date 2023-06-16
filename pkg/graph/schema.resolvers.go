@@ -648,6 +648,12 @@ func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filt
 		}
 	}
 
+	if search != nil && *search != "" {
+		withoutSpace := strings.Replace(*search, " ", "", -1)
+		// TODO: refactor this
+		query.Where("first_name ILIKE ? OR last_name ILIKE ? OR first_name || last_name ILIKE ? OR last_name || first_name ILIKE ?", "%"+withoutSpace+"%", "%"+withoutSpace+"%", "%"+withoutSpace+"%", "%"+withoutSpace+"%")
+	}
+
 	count, err := query.ScanAndCount(ctx)
 	if err != nil {
 		return nil, err
