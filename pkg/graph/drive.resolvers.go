@@ -7,7 +7,6 @@ package graph
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"example/pkg/db"
 	"example/pkg/graph/model"
 	"example/pkg/middleware"
@@ -20,13 +19,13 @@ import (
 
 // User is the resolver for the user field.
 func (r *bucketResolver) User(ctx context.Context, obj *db.Bucket) (*db.User, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var user db.User
-	err := r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -41,13 +40,13 @@ func (r *bucketResolver) DeletedAt(ctx context.Context, obj *db.Bucket) (*time.T
 
 // Files is the resolver for the files field.
 func (r *bucketResolver) Files(ctx context.Context, obj *db.Bucket) ([]*db.File, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var files []*db.File
-	err := r.DB.NewSelect().Model(&files).Where("bucket_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Order("name").Scan(ctx)
+	err = r.DB.NewSelect().Model(&files).Where("bucket_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Order("name").Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -57,13 +56,13 @@ func (r *bucketResolver) Files(ctx context.Context, obj *db.Bucket) ([]*db.File,
 
 // Bucket is the resolver for the bucket field.
 func (r *fileResolver) Bucket(ctx context.Context, obj *db.File) (*db.Bucket, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var bucket db.Bucket
-	err := r.DB.NewSelect().Model(&bucket).Where("id = ?", obj.BucketID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&bucket).Where("id = ?", obj.BucketID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -73,9 +72,9 @@ func (r *fileResolver) Bucket(ctx context.Context, obj *db.File) (*db.Bucket, er
 
 // Parent is the resolver for the parent field.
 func (r *fileResolver) Parent(ctx context.Context, obj *db.File) (*db.File, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	if !obj.ParentID.Valid {
@@ -83,7 +82,7 @@ func (r *fileResolver) Parent(ctx context.Context, obj *db.File) (*db.File, erro
 	}
 
 	var parent db.File
-	err := r.DB.NewSelect().Model(&parent).Where("id = ?", obj.ParentID.String).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&parent).Where("id = ?", obj.ParentID.String).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -103,9 +102,9 @@ func (r *fileResolver) DeletedAt(ctx context.Context, obj *db.File) (*time.Time,
 
 // Parents is the resolver for the parents field.
 func (r *fileResolver) Parents(ctx context.Context, obj *db.File) ([]*db.File, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	query := `
@@ -131,7 +130,7 @@ ORDER BY level DESC;
 	q := strings.ReplaceAll(query, "\n", " ")
 
 	var files []*db.File
-	err := r.DB.NewRaw(q, obj.ID, currentUser.OrganisationID, currentUser.OrganisationID, obj.ID).Scan(ctx, &files)
+	err = r.DB.NewRaw(q, obj.ID, currentUser.OrganisationID, currentUser.OrganisationID, obj.ID).Scan(ctx, &files)
 	if err != nil {
 		return nil, err
 	}
@@ -141,13 +140,13 @@ ORDER BY level DESC;
 
 // Files is the resolver for the files field.
 func (r *fileResolver) Files(ctx context.Context, obj *db.File) ([]*db.File, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var files []*db.File
-	err := r.DB.NewSelect().Model(&files).Where("parent_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Order("name").Scan(ctx)
+	err = r.DB.NewSelect().Model(&files).Where("parent_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Order("name").Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -157,9 +156,9 @@ func (r *fileResolver) Files(ctx context.Context, obj *db.File) ([]*db.File, err
 
 // SingleUpload is the resolver for the singleUpload field.
 func (r *mutationResolver) SingleUpload(ctx context.Context, input model.FileUploadInput) (*db.File, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var file db.File
@@ -200,7 +199,7 @@ func (r *mutationResolver) SingleUpload(ctx context.Context, input model.FileUpl
 		file.ParentID = sql.NullString{String: *input.ParentID, Valid: true}
 	}
 
-	err := r.DB.NewInsert().Model(&file).Returning("*").Scan(ctx)
+	err = r.DB.NewInsert().Model(&file).Returning("*").Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -218,9 +217,9 @@ func (r *mutationResolver) SingleUpload(ctx context.Context, input model.FileUpl
 
 // CreateFolder is the resolver for the createFolder field.
 func (r *mutationResolver) CreateFolder(ctx context.Context, input model.CreateFolderInput) (*db.File, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var file db.File
@@ -258,7 +257,7 @@ func (r *mutationResolver) CreateFolder(ctx context.Context, input model.CreateF
 		file.ParentID = sql.NullString{String: *input.ParentID, Valid: true}
 	}
 
-	err := r.DB.NewInsert().Model(&file).Returning("*").Scan(ctx)
+	err = r.DB.NewInsert().Model(&file).Returning("*").Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -268,13 +267,13 @@ func (r *mutationResolver) CreateFolder(ctx context.Context, input model.CreateF
 
 // GenerateFileURL is the resolver for the generateFileURL field.
 func (r *mutationResolver) GenerateFileURL(ctx context.Context, input model.GenerateFileURLInput) (*model.GenerateFileURLPayload, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var file db.File
-	err := r.DB.NewSelect().Model(&file).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&file).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -290,9 +289,9 @@ func (r *mutationResolver) GenerateFileURL(ctx context.Context, input model.Gene
 
 // Buckets is the resolver for the buckets field.
 func (r *queryResolver) Buckets(ctx context.Context, input *model.BucketFilterInput) (*model.BucketConnection, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var buckets []*db.Bucket
@@ -317,13 +316,13 @@ func (r *queryResolver) Buckets(ctx context.Context, input *model.BucketFilterIn
 
 // Bucket is the resolver for the bucket field.
 func (r *queryResolver) Bucket(ctx context.Context, id string) (*db.Bucket, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var bucket db.Bucket
-	err := r.DB.NewSelect().Model(&bucket).Where("id = ?", id).Where("user_id = ?", currentUser.ID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&bucket).Where("id = ?", id).Where("user_id = ?", currentUser.ID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -333,13 +332,13 @@ func (r *queryResolver) Bucket(ctx context.Context, id string) (*db.Bucket, erro
 
 // File is the resolver for the file field.
 func (r *queryResolver) File(ctx context.Context, id string) (*db.File, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var file db.File
-	err := r.DB.NewSelect().Model(&file).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&file).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -349,9 +348,9 @@ func (r *queryResolver) File(ctx context.Context, id string) (*db.File, error) {
 
 // Files is the resolver for the files field.
 func (r *queryResolver) Files(ctx context.Context, input *model.FilesFilterInput) (*model.FileConnection, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var files []*db.File
@@ -388,13 +387,13 @@ func (r *queryResolver) Files(ctx context.Context, input *model.FilesFilterInput
 
 // MyFiles is the resolver for the myFiles field.
 func (r *queryResolver) MyFiles(ctx context.Context, input *model.MyFilesFilterInput) (*model.FileConnection, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var bucket db.Bucket
-	err := r.DB.NewSelect().Model(&bucket).Column("id").Where("user_id = ?", currentUser.ID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&bucket).Column("id").Where("user_id = ?", currentUser.ID).Scan(ctx)
 
 	var files []*db.File
 	query := r.DB.NewSelect().Model(&files).Where("organisation_id = ?", currentUser.OrganisationID).Where("bucket_id = ?", bucket.ID).Order("name")

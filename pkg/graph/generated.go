@@ -217,6 +217,7 @@ type ComplexityRoot struct {
 		InviteUser            func(childComplexity int, input model.CreateUserInput) int
 		ResetPassword         func(childComplexity int, input model.ResetPasswordInput) int
 		SignIn                func(childComplexity int, input model.SignInInput) int
+		SignOut               func(childComplexity int) int
 		SingleUpload          func(childComplexity int, input model.FileUploadInput) int
 		UpdateEntry           func(childComplexity int, input model.UpdateEntryInput) int
 		UpdateEvent           func(childComplexity int, input model.UpdateEventInput) int
@@ -297,7 +298,8 @@ type ComplexityRoot struct {
 	}
 
 	SignInPayload struct {
-		Token func(childComplexity int) int
+		EnabledApps func(childComplexity int) int
+		Token       func(childComplexity int) int
 	}
 
 	Tag struct {
@@ -427,6 +429,7 @@ type MutationResolver interface {
 	SignIn(ctx context.Context, input model.SignInInput) (*model.SignInPayload, error)
 	ResetPassword(ctx context.Context, input model.ResetPasswordInput) (*model.ResetPasswordPayload, error)
 	ForgotPassword(ctx context.Context, input model.ForgotPasswordInput) (*model.ForgotPasswordPayload, error)
+	SignOut(ctx context.Context) (bool, error)
 	AcceptInvite(ctx context.Context, token string, input model.SignUpInput) (*model.SignInPayload, error)
 	CreateUser(ctx context.Context, input model.CreateUserInput) (*db.User, error)
 	UpdateUser(ctx context.Context, input model.UpdateUserInput) (*db.User, error)
@@ -1351,6 +1354,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.SignIn(childComplexity, args["input"].(model.SignInInput)), true
 
+	case "Mutation.signOut":
+		if e.complexity.Mutation.SignOut == nil {
+			break
+		}
+
+		return e.complexity.Mutation.SignOut(childComplexity), true
+
 	case "Mutation.singleUpload":
 		if e.complexity.Mutation.SingleUpload == nil {
 			break
@@ -1887,6 +1897,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ResetPasswordPayload.Success(childComplexity), true
+
+	case "SignInPayload.enabled_apps":
+		if e.complexity.SignInPayload.EnabledApps == nil {
+			break
+		}
+
+		return e.complexity.SignInPayload.EnabledApps(childComplexity), true
 
 	case "SignInPayload.token":
 		if e.complexity.SignInPayload.Token == nil {
@@ -8340,6 +8357,8 @@ func (ec *executionContext) fieldContext_Mutation_signIn(ctx context.Context, fi
 			switch field.Name {
 			case "token":
 				return ec.fieldContext_SignInPayload_token(ctx, field)
+			case "enabled_apps":
+				return ec.fieldContext_SignInPayload_enabled_apps(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type SignInPayload", field.Name)
 		},
@@ -8476,6 +8495,50 @@ func (ec *executionContext) fieldContext_Mutation_forgotPassword(ctx context.Con
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_signOut(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_signOut(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SignOut(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_signOut(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_acceptInvite(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_acceptInvite(ctx, field)
 	if err != nil {
@@ -8517,6 +8580,8 @@ func (ec *executionContext) fieldContext_Mutation_acceptInvite(ctx context.Conte
 			switch field.Name {
 			case "token":
 				return ec.fieldContext_SignInPayload_token(ctx, field)
+			case "enabled_apps":
+				return ec.fieldContext_SignInPayload_enabled_apps(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type SignInPayload", field.Name)
 		},
@@ -12370,6 +12435,50 @@ func (ec *executionContext) _SignInPayload_token(ctx context.Context, field grap
 }
 
 func (ec *executionContext) fieldContext_SignInPayload_token(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SignInPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SignInPayload_enabled_apps(ctx context.Context, field graphql.CollectedField, obj *model.SignInPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SignInPayload_enabled_apps(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EnabledApps, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SignInPayload_enabled_apps(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SignInPayload",
 		Field:      field,
@@ -18914,6 +19023,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "signOut":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_signOut(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "acceptInvite":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -20014,6 +20132,13 @@ func (ec *executionContext) _SignInPayload(ctx context.Context, sel ast.Selectio
 		case "token":
 
 			out.Values[i] = ec._SignInPayload_token(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "enabled_apps":
+
+			out.Values[i] = ec._SignInPayload_enabled_apps(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -21846,6 +21971,38 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNTag2exampleᚋpkgᚋdbᚐTag(ctx context.Context, sel ast.SelectionSet, v db.Tag) graphql.Marshaler {

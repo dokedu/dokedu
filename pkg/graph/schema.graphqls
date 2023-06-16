@@ -115,6 +115,7 @@ input SignInInput {
 
 type SignInPayload {
     token: String!
+    enabled_apps: [String!]!
 }
 
 input SignUpInput {
@@ -274,6 +275,7 @@ extend type Mutation {
     signIn(input: SignInInput!): SignInPayload!
     resetPassword(input: ResetPasswordInput!): ResetPasswordPayload!
     forgotPassword(input: ForgotPasswordInput!): ForgotPasswordPayload!
+    signOut: Boolean!
 
     acceptInvite(token: String!, input: SignUpInput!): SignInPayload!
 

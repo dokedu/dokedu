@@ -11,14 +11,12 @@ import (
 	"errors"
 	"example/pkg/db"
 	"example/pkg/graph/model"
-	"example/pkg/jwt"
 	"example/pkg/middleware"
 	"fmt"
-	nanoid "github.com/matoous/go-nanoid/v2"
 	"strings"
 	"time"
 
-	jwt2 "github.com/golang-jwt/jwt"
+	nanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/uptrace/bun"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -39,9 +37,9 @@ func (r *competenceResolver) Color(ctx context.Context, obj *db.Competence) (str
 
 // Parents is the resolver for the parents field.
 func (r *competenceResolver) Parents(ctx context.Context, obj *db.Competence) ([]*db.Competence, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	query := `
@@ -66,7 +64,7 @@ WHERE id <> ?;
 	q := strings.ReplaceAll(query, "\n", " ")
 
 	var parents []*db.Competence
-	err := r.DB.NewRaw(q, obj.ID, currentUser.OrganisationID, currentUser.OrganisationID, obj.ID).Scan(ctx, &parents)
+	err = r.DB.NewRaw(q, obj.ID, currentUser.OrganisationID, currentUser.OrganisationID, obj.ID).Scan(ctx, &parents)
 	if err != nil {
 		return nil, err
 	}
@@ -82,9 +80,9 @@ WHERE id <> ?;
 
 // Competences is the resolver for the competences field.
 func (r *competenceResolver) Competences(ctx context.Context, obj *db.Competence, search *string) ([]*db.Competence, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var competences []*db.Competence
@@ -94,7 +92,7 @@ func (r *competenceResolver) Competences(ctx context.Context, obj *db.Competence
 		query.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", *search))
 	}
 
-	err := query.Scan(ctx)
+	err = query.Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -104,9 +102,9 @@ func (r *competenceResolver) Competences(ctx context.Context, obj *db.Competence
 
 // UserCompetences is the resolver for the userCompetences field.
 func (r *competenceResolver) UserCompetences(ctx context.Context, obj *db.Competence, userID *string) ([]*db.UserCompetence, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	if userID == nil {
@@ -114,7 +112,7 @@ func (r *competenceResolver) UserCompetences(ctx context.Context, obj *db.Compet
 	}
 
 	var userCompetences []*db.UserCompetence
-	err := r.DB.NewSelect().Model(&userCompetences).Where("competence_id = ?", obj.ID).Where("user_id = ?", *userID).Where("organisation_id = ?", currentUser.OrganisationID).Order("created_at DESC").Scan(ctx)
+	err = r.DB.NewSelect().Model(&userCompetences).Where("competence_id = ?", obj.ID).Where("user_id = ?", *userID).Where("organisation_id = ?", currentUser.OrganisationID).Order("created_at DESC").Scan(ctx)
 
 	if err != nil {
 		return nil, err
@@ -146,36 +144,26 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 		return nil, errors.New("invalid email or password")
 	}
 
-	// custom field to remove the password from the user
-	jwtUser := jwt.User{
-		ID:             user.ID,
-		Role:           user.Role,
-		OrganisationID: user.OrganisationID,
-		FirstName:      user.FirstName,
-		LastName:       user.LastName,
-		Email:          user.Email,
+	// Generate a new token
+	token, err := nanoid.New(32)
+	if err != nil {
+		return nil, errors.New("unable to generate a token")
 	}
 
-	// TODO: add the secret to the environment variables
-	signer := jwt.NewSigner("12345678")
+	// Save the token in the database
+	session := db.Session{
+		UserID: user.ID,
+		Token:  token,
+	}
 
-	// generate a new JWT token
-	token, err := signer.Sign(jwt.Claims{
-		User:        jwtUser,
-		EnabledApps: organisation.EnabledApps,
-		StandardClaims: jwt2.StandardClaims{
-			IssuedAt: time.Now().Unix(),
-			// expires in 24 hours
-			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
-		},
-	})
-
+	_, err = r.DB.NewInsert().Model(&session).Exec(ctx)
 	if err != nil {
-		return nil, errors.New("unable to sign the token")
+		return nil, errors.New("unable to generate a token")
 	}
 
 	return &model.SignInPayload{
-		Token: token,
+		Token:       token,
+		EnabledApps: organisation.EnabledApps,
 	}, nil
 }
 
@@ -245,6 +233,28 @@ func (r *mutationResolver) ForgotPassword(ctx context.Context, input model.Forgo
 	}, nil
 }
 
+// SignOut is the resolver for the signOut field.
+func (r *mutationResolver) SignOut(ctx context.Context) (bool, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return false, errors.New("no user found in the context")
+	}
+
+	var session db.Session
+	_, err := r.DB.NewUpdate().
+		Model(&session).
+		Set("deleted_at = now()").
+		Where("user_id = ?", currentUser.ID).
+		Where("token = ?", currentUser.Token).
+		Exec(ctx)
+
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 // AcceptInvite is the resolver for the acceptInvite field.
 func (r *mutationResolver) AcceptInvite(ctx context.Context, token string, input model.SignUpInput) (*model.SignInPayload, error) {
 	panic(fmt.Errorf("not implemented: AcceptInvite - acceptInvite"))
@@ -252,13 +262,13 @@ func (r *mutationResolver) AcceptInvite(ctx context.Context, token string, input
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*db.User, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var organisation db.Organisation
-	err := r.DB.NewSelect().Model(&organisation).Where("id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&organisation).Where("id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -269,7 +279,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 	}
 
 	// check if the email is already in the database
-	//count, err := r.DB.GetUserByEmail(ctx, db.GetUserByEmailParams{
+	//count, err := r.DB.middleware.GetUserByEmail(ctx, db.middleware.GetUserByEmailParams{
 	//	OrganisationID: currentUser.OrganisationID,
 	//	Email:          input.Email,
 	//})
@@ -302,9 +312,9 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 
 // UpdateUser is the resolver for the updateUser field.
 func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUserInput) (*db.User, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	// update the user
@@ -315,7 +325,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 		LastName:       input.LastName,
 	}
 
-	err := r.DB.NewUpdate().Model(&user).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewUpdate().Model(&user).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -325,13 +335,13 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 
 // InviteUser is the resolver for the inviteUser field.
 func (r *mutationResolver) InviteUser(ctx context.Context, input model.CreateUserInput) (*db.User, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var organisation db.Organisation
-	err := r.DB.NewSelect().Model(&organisation).Where("id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&organisation).Where("id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -345,7 +355,7 @@ func (r *mutationResolver) InviteUser(ctx context.Context, input model.CreateUse
 	}
 
 	// check if the email is already in the database
-	//count, err := r.DB.GetUserByEmail(ctx, db.GetUserByEmailParams{
+	//count, err := r.DB.middleware.GetUserByEmail(ctx, db.middleware.GetUserByEmailParams{
 	//	OrganisationID: currentUser.OrganisationID,
 	//	Email:          input.Email,
 	//})
@@ -377,9 +387,9 @@ func (r *mutationResolver) InviteUser(ctx context.Context, input model.CreateUse
 
 // ArchiveUser is the resolver for the archiveUser field.
 func (r *mutationResolver) ArchiveUser(ctx context.Context, id string) (*db.User, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	// check whether the user is already archived
@@ -417,9 +427,9 @@ func (r *mutationResolver) ArchiveUser(ctx context.Context, id string) (*db.User
 
 // CreateUserCompetence is the resolver for the createUserCompetence field.
 func (r *mutationResolver) CreateUserCompetence(ctx context.Context, input model.CreateUserCompetenceInput) (*db.UserCompetence, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	if input.UserID == "" {
@@ -437,7 +447,7 @@ func (r *mutationResolver) CreateUserCompetence(ctx context.Context, input model
 		OrganisationID: currentUser.OrganisationID,
 	}
 
-	err := r.DB.NewInsert().Model(&userCompetence).Returning("*").Scan(ctx)
+	err = r.DB.NewInsert().Model(&userCompetence).Returning("*").Scan(ctx)
 
 	if err != nil {
 		return nil, err
@@ -453,9 +463,9 @@ func (r *mutationResolver) ArchiveUserCompetence(ctx context.Context, id string)
 
 // CreateTag is the resolver for the createTag field.
 func (r *mutationResolver) CreateTag(ctx context.Context, input model.CreateTagInput) (*db.Tag, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	// Check if tag with the same name already exists
@@ -491,9 +501,9 @@ func (r *mutationResolver) CreateTag(ctx context.Context, input model.CreateTagI
 
 // ArchiveTag is the resolver for the archiveTag field.
 func (r *mutationResolver) ArchiveTag(ctx context.Context, id string) (*db.Tag, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	// set deleted_at field to the current time
@@ -504,7 +514,7 @@ func (r *mutationResolver) ArchiveTag(ctx context.Context, id string) (*db.Tag, 
 			Time: time.Now(),
 		},
 	}
-	_, err := r.DB.NewUpdate().Model(&tag).Column("deleted_at").Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).WhereAllWithDeleted().Returning("*").Exec(ctx)
+	_, err = r.DB.NewUpdate().Model(&tag).Column("deleted_at").Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).WhereAllWithDeleted().Returning("*").Exec(ctx)
 
 	if err != nil {
 		return nil, err
@@ -515,14 +525,14 @@ func (r *mutationResolver) ArchiveTag(ctx context.Context, id string) (*db.Tag, 
 
 // UpdateTag is the resolver for the updateTag field.
 func (r *mutationResolver) UpdateTag(ctx context.Context, id string, input model.CreateTagInput) (*db.Tag, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var tag db.Tag
 	tag.ID = id
-	err := r.DB.NewSelect().
+	err = r.DB.NewSelect().
 		Model(&tag).
 		Where("organisation_id = ?", currentUser.OrganisationID).
 		WherePK().
@@ -563,9 +573,9 @@ func (r *mutationResolver) UpdateTag(ctx context.Context, id string, input model
 
 // CreateReport is the resolver for the createReport field.
 func (r *mutationResolver) CreateReport(ctx context.Context, input model.CreateReportInput) (*db.Report, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	report := db.Report{
@@ -580,7 +590,7 @@ func (r *mutationResolver) CreateReport(ctx context.Context, input model.CreateR
 		Status:         "pending",
 	}
 
-	err := r.DB.NewInsert().Model(&report).Returning("*").Scan(ctx)
+	err = r.DB.NewInsert().Model(&report).Returning("*").Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -601,13 +611,13 @@ func (r *mutationResolver) UpdatePassword(ctx context.Context, oldPassword strin
 
 // Owner is the resolver for the owner field.
 func (r *organisationResolver) Owner(ctx context.Context, obj *db.Organisation) (*db.User, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	_, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var user db.User
-	err := r.DB.NewSelect().Model(&user).Where("id = ?", obj.OwnerID).Where("organisation_id = ?", obj.ID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.OwnerID).Where("organisation_id = ?", obj.ID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -617,13 +627,13 @@ func (r *organisationResolver) Owner(ctx context.Context, obj *db.Organisation) 
 
 // Organisation is the resolver for the organisation field.
 func (r *queryResolver) Organisation(ctx context.Context) (*db.Organisation, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var organisation db.Organisation
-	err := r.DB.NewSelect().Model(&organisation).Where("id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&organisation).Where("id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -633,9 +643,9 @@ func (r *queryResolver) Organisation(ctx context.Context) (*db.Organisation, err
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filter *model.UserFilterInput, search *string) (*model.UserConnection, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	// query the users
@@ -662,13 +672,13 @@ func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filt
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*db.User, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var user db.User
-	err := r.DB.NewSelect().Model(&user).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&user).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -678,13 +688,13 @@ func (r *queryResolver) User(ctx context.Context, id string) (*db.User, error) {
 
 // Competence is the resolver for the competence field.
 func (r *queryResolver) Competence(ctx context.Context, id string) (*db.Competence, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var competence db.Competence
-	err := r.DB.NewSelect().Model(&competence).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&competence).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -694,9 +704,9 @@ func (r *queryResolver) Competence(ctx context.Context, id string) (*db.Competen
 
 // Competences is the resolver for the competences field.
 func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int, filter *model.CompetenceFilterInput, search *string) (*model.CompetenceConnection, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var pageLimit = 10
@@ -753,14 +763,14 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 
 // Report is the resolver for the report field.
 func (r *queryResolver) Report(ctx context.Context, id string) (*db.Report, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	// query the report
 	var report db.Report
-	err := r.DB.NewSelect().Model(&report).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&report).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -770,9 +780,9 @@ func (r *queryResolver) Report(ctx context.Context, id string) (*db.Report, erro
 
 // Reports is the resolver for the reports field.
 func (r *queryResolver) Reports(ctx context.Context, limit *int, offset *int) (*model.ReportConnection, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	pageLimit := 25
@@ -800,13 +810,13 @@ func (r *queryResolver) Reports(ctx context.Context, limit *int, offset *int) (*
 
 // Tag is the resolver for the tag field.
 func (r *queryResolver) Tag(ctx context.Context, id string) (*db.Tag, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var tag db.Tag
-	err := r.DB.NewSelect().Model(&tag).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&tag).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -816,9 +826,9 @@ func (r *queryResolver) Tag(ctx context.Context, id string) (*db.Tag, error) {
 
 // Tags is the resolver for the tags field.
 func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) ([]*db.Tag, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	pageLimit := 10
@@ -832,7 +842,7 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) ([]*d
 	}
 
 	var tags []*db.Tag
-	err := r.DB.NewSelect().Model(&tags).Where("organisation_id = ?", currentUser.OrganisationID).Limit(pageLimit).Offset(pageOffset).Scan(ctx)
+	err = r.DB.NewSelect().Model(&tags).Where("organisation_id = ?", currentUser.OrganisationID).Limit(pageLimit).Offset(pageOffset).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -842,9 +852,9 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) ([]*d
 
 // UserStudents is the resolver for the userStudents field.
 func (r *queryResolver) UserStudents(ctx context.Context, limit *int, offset *int) (*model.UserStudentConnection, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	pageLimit := 10
@@ -872,13 +882,13 @@ func (r *queryResolver) UserStudents(ctx context.Context, limit *int, offset *in
 
 // UserStudent is the resolver for the userStudent field.
 func (r *queryResolver) UserStudent(ctx context.Context, id string) (*db.UserStudent, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var userStudent db.UserStudent
-	err := r.DB.NewSelect().Model(&userStudent).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&userStudent).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -901,13 +911,13 @@ func (r *reportResolver) Meta(ctx context.Context, obj *db.Report) (string, erro
 
 // User is the resolver for the user field.
 func (r *reportResolver) User(ctx context.Context, obj *db.Report) (*db.User, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var user db.User
-	err := r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -917,13 +927,13 @@ func (r *reportResolver) User(ctx context.Context, obj *db.Report) (*db.User, er
 
 // StudentUser is the resolver for the studentUser field.
 func (r *reportResolver) StudentUser(ctx context.Context, obj *db.Report) (*db.User, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var user db.User
-	err := r.DB.NewSelect().Model(&user).Where("id = ?", obj.StudentUserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.StudentUserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -933,13 +943,13 @@ func (r *reportResolver) StudentUser(ctx context.Context, obj *db.Report) (*db.U
 
 // File is the resolver for the file field.
 func (r *reportResolver) File(ctx context.Context, obj *db.Report) (*db.File, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var file db.File
-	err := r.DB.NewSelect().Model(&file).Where("id = ?", obj.FileID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&file).Where("id = ?", obj.FileID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -975,13 +985,13 @@ func (r *tagResolver) DeletedAt(ctx context.Context, obj *db.Tag) (*time.Time, e
 
 // Student is the resolver for the student field.
 func (r *userResolver) Student(ctx context.Context, obj *db.User) (*db.UserStudent, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var userStudent db.UserStudent
-	err := r.DB.NewSelect().Model(&userStudent).Where("user_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&userStudent).Where("user_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -1003,13 +1013,13 @@ func (r *userResolver) DeletedAt(ctx context.Context, obj *db.User) (*time.Time,
 
 // Competence is the resolver for the competence field.
 func (r *userCompetenceResolver) Competence(ctx context.Context, obj *db.UserCompetence) (*db.Competence, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var competence db.Competence
-	err := r.DB.NewSelect().Model(&competence).Where("id = ?", obj.CompetenceID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&competence).Where("id = ?", obj.CompetenceID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -1019,9 +1029,9 @@ func (r *userCompetenceResolver) Competence(ctx context.Context, obj *db.UserCom
 
 // Entry is the resolver for the entry field.
 func (r *userCompetenceResolver) Entry(ctx context.Context, obj *db.UserCompetence) (*db.Entry, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	if sql.NullString(obj.EntryID).String == "" {
@@ -1029,7 +1039,7 @@ func (r *userCompetenceResolver) Entry(ctx context.Context, obj *db.UserCompeten
 	}
 
 	var entry db.Entry
-	err := r.DB.NewSelect().Model(&entry).Where("id = ?", obj.EntryID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&entry).Where("id = ?", obj.EntryID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -1043,13 +1053,13 @@ func (r *userCompetenceResolver) Entry(ctx context.Context, obj *db.UserCompeten
 
 // User is the resolver for the user field.
 func (r *userCompetenceResolver) User(ctx context.Context, obj *db.UserCompetence) (*db.User, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var user db.User
-	err := r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -1059,13 +1069,13 @@ func (r *userCompetenceResolver) User(ctx context.Context, obj *db.UserCompetenc
 
 // CreatedBy is the resolver for the createdBy field.
 func (r *userCompetenceResolver) CreatedBy(ctx context.Context, obj *db.UserCompetence) (*db.User, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var user db.User
-	err := r.DB.NewSelect().Model(&user).Where("id = ?", obj.CreatedBy).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.CreatedBy).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -1199,6 +1209,12 @@ type userResolver struct{ *Resolver }
 type userCompetenceResolver struct{ *Resolver }
 type userStudentResolver struct{ *Resolver }
 
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
 func isStringInArray(s string, a []string) bool {
 	for _, v := range a {
 		if v == s {
