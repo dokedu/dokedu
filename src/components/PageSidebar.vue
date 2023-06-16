@@ -59,13 +59,13 @@
       </div>
     </div>
     <div class="px-1 py-4">
-      <router-link
-        :to="{ name: 'login' }"
+      <div
         class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
+        @click="signOut"
       >
         <LogOut class="stroke-stone-500" :size="18" />
         <div class="text-sm">Log out</div>
-      </router-link>
+      </div>
     </div>
   </header>
 </template>
@@ -89,13 +89,16 @@ import {
 } from "lucide-vue-next";
 import { Tag } from "lucide-vue-next";
 import { onClickOutside, useStorage } from "@vueuse/core";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { UserSquare } from "lucide-vue-next";
+import { useMutation } from "@urql/vue";
+import { graphql } from "@/gql";
 
 const visibleAppSwitcher = ref<boolean>(false);
 const activeApp = useStorage("active_app", "drive");
 
 const route = useRoute();
+const router = useRouter();
 
 interface AppLink {
   icon: FunctionalComponent;
@@ -244,5 +247,23 @@ function switchApp(appId: string | null = null) {
   // start at first app of index is out of bounds
   const nextIndex = (enabledApps.value.findIndex((el) => el.id === activeApp.value) + 1) % enabledApps.value.length;
   activeApp.value = enabledApps.value[nextIndex].id;
+}
+
+const { executeMutation: signOutMutation } = useMutation(
+  graphql(`
+    mutation signOut {
+      signOut
+    }
+  `)
+);
+
+async function signOut() {
+  await signOutMutation({});
+
+  // Clear the token and enabled_apps from local storage
+  localStorage.removeItem("token");
+  localStorage.removeItem("enabled_apps");
+
+  router.push("/login");
 }
 </script>

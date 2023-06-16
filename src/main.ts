@@ -2,28 +2,12 @@ import { createApp } from "vue";
 import "./style.css";
 import App from "./App.vue";
 import router from "./router.ts";
-import urql, { cacheExchange, fetchExchange } from "@urql/vue";
+import client from "./client.ts";
+import urql from "@urql/vue";
 
 const app = createApp(App);
 
-const url = "http://localhost:8080/query";
-function getToken(): string | null {
-  return localStorage.getItem("authorization");
-}
-
 app.use(router);
-app.use(urql, {
-  url,
-  requestPolicy: "cache-and-network",
-  exchanges: [cacheExchange, fetchExchange],
-  fetchOptions: () => {
-    const token = getToken();
-    if (token) {
-      return {
-        headers: { authorization: token },
-      };
-    }
-  },
-});
+app.use(urql, client)
 
 app.mount("#app");

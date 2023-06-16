@@ -152,4 +152,15 @@ const router = createRouter({
   ],
 });
 
+router.beforeEach(async (to, from) => {
+  if (
+    // make sure the user is authenticated
+    !localStorage.getItem('authorization') &&
+    to.name !== 'login'
+  ) {
+    // redirect the user to the login page
+    return { name: 'login' }
+  }
+})
+
 export default router;
