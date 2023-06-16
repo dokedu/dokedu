@@ -34,28 +34,32 @@
       <span class="pr-2 text-stone-500">Add student</span>
     </div>
   </div>
-  <dialog ref="dialogStudents" class="mt-32 w-full max-w-xl rounded-lg shadow-lg backdrop:bg-stone-950/20">
-    <div class="mb-4 flex items-center justify-between gap-2">
-      <input
-        type="text"
-        name="student-search"
-        id="student-search"
-        placeholder="Search students"
-        class="w-full rounded-md border border-stone-200 px-3 py-1.5 shadow-sm outline-none placeholder:text-stone-400 focus:border-stone-200 focus:ring-0"
-      />
-      <div class="rounded-md p-1 hover:bg-stone-100" @click="dialogStudents.close()">
-        <X class="stroke-stone-500" />
+  <dialog ref="dialogStudents" class="mt-32 h-1/2 w-full max-w-xl rounded-lg p-0 shadow-lg backdrop:bg-stone-950/20">
+    <div class="flex h-full flex-col">
+      <div class="flex items-center justify-between gap-2 p-4">
+        <input
+          type="text"
+          v-model="search"
+          name="student-search"
+          id="student-search"
+          placeholder="Search students"
+          class="w-full rounded-md border border-stone-200 px-3 py-1.5 shadow-sm outline-none placeholder:text-stone-400 focus:border-stone-200 focus:ring-0"
+        />
+        <div class="rounded-md p-1 hover:bg-stone-100" @click="dialogStudents.close()">
+          <X class="stroke-stone-500" />
+        </div>
       </div>
-    </div>
-    <div>
-      <div class="mb-2 text-sm uppercase text-stone-500">Students</div>
-      <div class="flex flex-col gap-1">
-        <div
-          v-for="student in students?.users?.edges"
-          class="w-full select-none rounded-lg px-2 py-1 text-stone-700 hover:bg-stone-50"
-          @click="toggleStudent(student)"
-        >
-          {{ `${student.firstName} ${student.lastName}` }}
+      <div class="flex flex-1 flex-col overflow-auto">
+        <div class="mb-2 px-4 text-sm uppercase text-stone-500">Students</div>
+        <div class="flex h-full flex-1 flex-col gap-1 overflow-auto px-4 pb-4">
+          <div
+            v-for="student in students?.users?.edges"
+            class="flex w-full select-none items-center justify-between rounded-lg px-2 py-1 text-stone-700 hover:bg-stone-50"
+            @click="toggleStudent(student)"
+          >
+            {{ `${student.firstName} ${student.lastName}` }}
+            <Check v-if="entry.users?.some((el) => el.id === student?.id)" :size="16" />
+          </div>
         </div>
       </div>
     </div>
@@ -64,12 +68,13 @@
 
 <script lang="ts" setup>
 import { useQuery } from "@urql/vue";
-import { Plus, X } from "lucide-vue-next";
-import { ref, toRef } from "vue";
+import { Plus, X, Check } from "lucide-vue-next";
+import { reactive, ref, toRef } from "vue";
 import { graphql } from "../../../gql";
 import { Entry, User } from "../../../gql/graphql";
 
 const dialogStudents = ref();
+const search = ref();
 
 const props = defineProps<{
   entry: Partial<Entry>;
@@ -77,8 +82,8 @@ const props = defineProps<{
 
 const { data: students } = useQuery({
   query: graphql(`
-    query users {
-      users(filter: { role: [student] }) {
+    query users($search: String) {
+      users(filter: { role: [student] }, search: $search) {
         edges {
           id
           firstName
@@ -87,6 +92,9 @@ const { data: students } = useQuery({
       }
     }
   `),
+  variables: reactive({
+    search: search,
+  }),
 });
 
 const entry = toRef(props, "entry");

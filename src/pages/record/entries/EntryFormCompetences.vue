@@ -35,47 +35,48 @@
     <div
       v-if="dialogOpen"
       ref="dialog"
-      class="absolute right-0 top-0 h-screen w-full max-w-xl bg-white p-4 shadow-lg backdrop:bg-stone-950/20"
+      class="absolute right-0 top-0 h-screen w-full max-w-xl bg-white shadow-lg backdrop:bg-stone-950/20"
     >
-      <div class="mb-4 flex items-center justify-between gap-2">
-        <input
-          type="text"
-          name="search"
-          v-model="search"
-          id="search"
-          placeholder="Search competences"
-          class="w-full rounded-md border border-stone-200 px-3 py-1.5 shadow-sm outline-none placeholder:text-stone-400 focus:border-stone-200 focus:ring-0"
-        />
-        <div class="rounded-md p-1 hover:bg-stone-100" @click="dialogOpen = false">
-          <X class="stroke-stone-500" />
-        </div>
-      </div>
-      <div>
-        <div class="mb-2 flex h-6 select-none items-center gap-2">
-          <div></div>
-          <div class="text-sm text-stone-500 hover:text-stone-900" @click="parents = []">Subjects</div>
-          <div v-if="parents.length > 0" class="text-stone-300">{{ "/" }}</div>
-          <div
-            v-for="(parent, index) in parents"
-            :key="parent.id"
-            @click="clickParent(parent)"
-            class="flex gap-2 text-sm"
-          >
-            <div class="text-stone-500 hover:text-stone-900">{{ parent.name }}</div>
-            <div class="text-stone-300">{{ index === parents.length - 1 ? "" : "/" }}</div>
+      <div class="flex h-full flex-col">
+        <div class="flex h-fit items-center justify-between gap-2 p-4 pb-2">
+          <input
+            type="text"
+            name="search"
+            v-model="search"
+            id="search"
+            placeholder="Search competences"
+            class="w-full rounded-md border border-stone-200 px-3 py-1.5 shadow-sm outline-none placeholder:text-stone-400 focus:border-stone-200 focus:ring-0"
+          />
+          <div class="rounded-md p-1 hover:bg-stone-100" @click="dialogOpen = false">
+            <X class="stroke-stone-500" />
           </div>
         </div>
-        <div class="flex flex-col gap-1">
-          <d-competence
-            v-for="competence in data?.competences?.edges"
-            :key="competence.id"
-            :competence="competence"
-            @click="toggleCompetence(competence)"
-          >
-          </d-competence>
-        </div>
-        <div v-if="!data?.competences?.edges" class="select-none text-center text-sm uppercase text-stone-500">
-          no results
+        <div class="flex min-h-fit flex-1 flex-col overflow-auto">
+          <div class="mb-2 flex h-6 select-none items-center gap-2 px-4">
+            <div class="text-sm text-stone-500 hover:text-stone-900" @click="parents = []">Subjects</div>
+            <div v-if="parents.length > 0" class="text-stone-300">{{ "/" }}</div>
+            <div
+              v-for="(parent, index) in parents"
+              :key="parent.id"
+              @click="clickParent(parent)"
+              class="flex gap-2 text-sm"
+            >
+              <div class="text-stone-500 hover:text-stone-900">{{ parent.name }}</div>
+              <div class="text-stone-300">{{ index === parents.length - 1 ? "" : "/" }}</div>
+            </div>
+          </div>
+          <div class="g- flex min-h-fit flex-1 flex-col gap-1 overflow-auto px-4">
+            <d-competence
+              v-for="competence in data?.competences?.edges"
+              :key="competence.id"
+              :competence="competence"
+              @click="toggleCompetence(competence)"
+            >
+            </d-competence>
+          </div>
+          <div v-if="!data?.competences?.edges" class="select-none text-center text-sm uppercase text-stone-500">
+            no results
+          </div>
         </div>
       </div>
     </div>

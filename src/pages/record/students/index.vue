@@ -4,6 +4,7 @@
       <div class="flex items-center gap-4">
         <div class="font-medium text-stone-950">Students</div>
         <input
+          v-model="search"
           type="text"
           name="search"
           id="search"
@@ -21,18 +22,35 @@
         <div class="px-8 py-2 text-sm text-strong">{{ `${student.firstName} ${student.lastName}` }}</div>
       </router-link>
     </div>
+    <div v-if="loading" class="flex flex-col">
+      <div
+        v-for="i in 25"
+        :key="i"
+        class="flex h-9 min-h-[36px] animate-pulse items-center gap-4 border-b border-stone-100 px-8"
+      >
+        <div class="h-2.5 w-20 rounded-full bg-stone-200"></div>
+        <div class="h-2.5 w-20 rounded-full bg-stone-200"></div>
+      </div>
+    </div>
   </PageWrapper>
 </template>
 
 <script setup lang="ts">
+import { computed, reactive, ref } from "vue";
 import PageHeader from "../../../components/PageHeader.vue";
 import PageWrapper from "../../../components/PageWrapper.vue";
 import { gql, useQuery } from "@urql/vue";
 
-const { data } = useQuery({
+const search = ref("");
+
+const loading = computed(() => {
+  return fetching && !data.value;
+});
+
+const { data, fetching } = useQuery({
   query: gql`
-    query {
-      users(filter: { role: [student] }) {
+    query usersSearch($search: String) {
+      users(filter: { role: [student] }, search: $search) {
         edges {
           id
           firstName
@@ -44,5 +62,8 @@ const { data } = useQuery({
       }
     }
   `,
+  variables: reactive({
+    search: search,
+  }),
 });
 </script>

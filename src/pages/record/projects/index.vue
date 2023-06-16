@@ -26,7 +26,7 @@
         <router-link
           :to="{ name: 'record-projects-project', params: { id: event.id } }"
           v-for="event in data?.events?.edges"
-          class="flex border-b text-sm transition-all hover:bg-stone-50"
+          class="flex border-b border-stone-100 text-sm transition-all hover:bg-stone-50"
           :class="{
             '!bg-stone-100': event?.id === $route.params.id,
           }"

@@ -18,7 +18,7 @@
         <router-link
           :to="{ name: 'record-competences-competence', params: { id: competence.id } }"
           v-for="competence in data?.competences?.edges"
-          class="flex justify-between border-b text-sm transition-all hover:bg-stone-50"
+          class="flex justify-between border-b border-stone-100 text-sm transition-all hover:bg-stone-50"
           :class="{
             '!bg-stone-100': competence?.id === $route.params.id,
           }"
@@ -35,7 +35,6 @@
 import PageHeader from "@/components/PageHeader.vue";
 import PageWrapper from "@/components/PageWrapper.vue";
 import PageContent from "@/components/PageContent.vue";
-import dCompetence from "@/components/d-competence/d-competence.vue";
 import { useQuery } from "@urql/vue";
 import { graphql } from "@/gql";
 import { reactive, ref } from "vue";

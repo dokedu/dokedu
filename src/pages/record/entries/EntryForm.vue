@@ -14,7 +14,9 @@
         <EntryFormCompetences :entry="entry" />
       </div>
     </div>
-    <div class="flex min-h-full w-[400px] min-w-[400px] flex-col gap-4 border-l border-stone-100 px-8 py-4">
+    <div
+      class="flex min-h-full w-[400px] min-w-[400px] flex-col gap-4 overflow-auto border-l border-stone-100 px-8 py-4"
+    >
       <div class="flex items-center gap-4">
         <label for="date" class="min-w-[64px] text-sm text-stone-500">Datum</label>
         <input

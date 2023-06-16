@@ -1,11 +1,16 @@
 <template>
-  <div class="flex flex-col gap-2">
-    <RouterLink
-      v-for="competence in data?.competences?.edges"
-      :to="{ name: 'record-students-student-competences-competence', params: { subject: competence?.id } }"
-    >
-      <DCompetence v-if="competence" :competence="competence"> </DCompetence>
-    </RouterLink>
+  <div>
+    <div class="mb-4 flex gap-2 text-sm text-subtle">
+      <div>Fächer</div>
+    </div>
+    <div class="flex flex-col gap-2">
+      <RouterLink
+        v-for="competence in data?.competences?.edges"
+        :to="{ name: 'record-students-student-competences-competence', params: { subject: competence?.id } }"
+      >
+        <DCompetence v-if="competence" :competence="competence"> </DCompetence>
+      </RouterLink>
+    </div>
   </div>
 </template>
 

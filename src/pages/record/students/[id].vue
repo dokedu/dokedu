@@ -2,9 +2,9 @@
   <PageWrapper>
     <div class="h-full p-3">
       <div
-        class="grid min-h-full w-full grid-cols-4 divide-x divide-stone-100 rounded-xl border border-stone-50 bg-white shadow"
+        class="flex h-full min-h-full w-full divide-x divide-stone-100 rounded-xl border border-stone-50 bg-white shadow"
       >
-        <div class="col-span-3 px-6 py-4">
+        <div class="col-span-3 flex h-full w-full flex-col px-6 py-4">
           <div class="border-b border-stone-100 pb-4">
             <div class="flex items-center gap-1 text-strong">
               <router-link
@@ -20,7 +20,7 @@
               <span class="text-sm text-stone-950">{{ data?.user?.firstName }} {{ data?.user?.lastName }}</span>
             </div>
           </div>
-          <div class="pt-6">
+          <div class="flex h-full flex-col pt-6">
             <div class="flex gap-1">
               <RouterLink :to="{ name: 'record-students-student-competences' }">
                 <DButton
@@ -47,8 +47,8 @@
                 >
               </RouterLink>
             </div>
-            <div class="mt-4">
-              <RouterView> </RouterView>
+            <div class="mt-4 h-full">
+              <RouterView />
             </div>
           </div>
         </div>
