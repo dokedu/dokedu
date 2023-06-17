@@ -31,9 +31,8 @@
                   "
                   size="sm"
                   :icon-left="CopyCheck"
+                  >Competences</DButton
                 >
-                  Competences
-                </DButton>
               </RouterLink>
               <RouterLink :to="{ name: 'record-students-student-entries' }">
                 <DButton

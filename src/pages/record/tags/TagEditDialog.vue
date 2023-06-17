@@ -70,13 +70,12 @@ import { Tag } from "../../../gql/graphql";
 
 const colors = ["red", "orange", "yellow", "green", "blue", "indigo", "purple", "pink", "gray"];
 
-const props = defineProps({
-  open: Boolean,
-  tag: {
-    type: Object as () => Tag,
-    required: true,
-  },
-});
+export interface Props {
+  open: boolean;
+  tag: Tag | undefined;
+}
+
+const props = defineProps<Props>();
 const emit = defineEmits(["close", "updated"]);
 
 const modalOpen = toRef(props, "open");
@@ -124,6 +123,9 @@ const onClose = () => {
 };
 
 const onUpdate = async () => {
+  if (!tag.value) {
+    return;
+  }
   const mutation = await updateTag({
     id: tag.value.id,
     input: {
@@ -138,6 +140,9 @@ const onUpdate = async () => {
 };
 
 const onArchive = async () => {
+  if (!tag.value) {
+    return;
+  }
   await archiveTag({
     id: tag.value.id,
   });
