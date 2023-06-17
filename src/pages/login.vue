@@ -62,7 +62,7 @@ const { executeMutation: signIn, error } = useMutation(signInMutation);
 async function onSubmit() {
   const {
     data: {
-      signIn: { token },
+      signIn: { token, enabled_apps },
     },
   } = await signIn({
     email: email.value,
@@ -70,12 +70,7 @@ async function onSubmit() {
   });
 
   if (token) {
-    // parse jwt token
-    const claims = JSON.parse(atob(token.split(".")[1]));
-    console.log(claims);
-
-    localStorage.setItem("enabled_apps", JSON.stringify(claims.enabled_apps));
-
+    localStorage.setItem("enabled_apps", JSON.stringify(enabled_apps));
     localStorage.setItem("authorization", token);
     await router.push({ name: "record-entries" });
   } else {
