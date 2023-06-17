@@ -240,6 +240,8 @@ func (r *mutationResolver) SignOut(ctx context.Context) (bool, error) {
 		return false, errors.New("no user found in the context")
 	}
 
+	// TODO: suggestion: use a hard delete instead of a soft delete
+	// TODO: suggestion: perhaps delete all sessions for the user?
 	var session db.Session
 	_, err := r.DB.NewUpdate().
 		Model(&session).
