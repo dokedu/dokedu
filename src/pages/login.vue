@@ -70,9 +70,6 @@ async function onSubmit() {
   });
 
   if (token) {
-    // parse jwt token
-    console.log(enabled_apps);
-
     localStorage.setItem("enabled_apps", JSON.stringify(enabled_apps));
     localStorage.setItem("authorization", token);
     await router.push({ name: "record-entries" });

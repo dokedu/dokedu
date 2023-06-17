@@ -52,7 +52,7 @@
             </div>
           </div>
         </div>
-        <div class="pb-4 pt-5">
+        <div class="w-full max-w-xs pb-4 pt-5">
           <div class="border-b border-stone-100 px-6 pb-6 text-sm font-medium">Profile</div>
           <div class="flex flex-col items-center border-b border-stone-100 py-6">
             <div class="h-24 w-24 rounded-full" :class="`bg-${color}-500`">
