@@ -215,7 +215,8 @@ type SignInInput struct {
 }
 
 type SignInPayload struct {
-	Token string `json:"token"`
+	Token       string   `json:"token"`
+	EnabledApps []string `json:"enabled_apps"`
 }
 
 type SignUpInput struct {

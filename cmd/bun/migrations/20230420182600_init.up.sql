@@ -103,6 +103,14 @@ CREATE TABLE users
 ALTER TABLE buckets
     ADD COLUMN user_id text NULL REFERENCES users;
 
+CREATE TABLE sessions
+(
+    id              text        DEFAULT nanoid() NOT NULL PRIMARY KEY,
+    user_id         text        NOT NULL REFERENCES users,
+    token           text        NOT NULL,
+    created_at      timestamptz NOT NULL DEFAULT now(),
+    deleted_at      timestamptz NULL
+);
 
 CREATE TYPE file_permission AS ENUM ('viewer', 'manager');
 

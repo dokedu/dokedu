@@ -384,3 +384,13 @@ type UserStudent struct {
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
 	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
 }
+
+type Session struct {
+	bun.BaseModel
+
+	ID        string       `bun:",nullzero,pk" json:"id"`
+	UserID    string       `json:"user_id"`
+	Token     string       `json:"token"`
+	CreatedAt time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	DeletedAt bun.NullTime `bun:",soft_delete,nullzero"`
+}

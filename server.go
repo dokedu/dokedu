@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"example/pkg/graph"
-	"example/pkg/jwt"
 	"example/pkg/mail"
 	"example/pkg/middleware"
 	"example/pkg/services/report_generation"
@@ -55,8 +54,6 @@ func main() {
 		log.Fatal(err, "Error loading .env file")
 	}
 
-	signer := jwt.NewSigner(jwtSecret)
-
 	dsn := "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
 	// dsn := "unix://user:pass@dbname/var/run/postgresql/.s.PGSQL.5432"
 	dbConn := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(dsn)))
@@ -74,7 +71,9 @@ func main() {
 		}, ctx, 3)
 
 	e := echo.New()
-	e.Use(middleware.Auth(signer))
+
+	// Auth
+	e.Use(middleware.Auth(db))
 
 	// add options handler
 	e.OPTIONS("/*", func(c echo.Context) error {
