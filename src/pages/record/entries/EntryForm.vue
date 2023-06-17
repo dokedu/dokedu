@@ -44,6 +44,8 @@ import { Entry } from "../../../gql/graphql";
 import EntryFormProjects from "./EntryFormProjects.vue";
 import EntryFormLabels from "./EntryFormLabels.vue";
 import EntryFormStudents from "./EntryFormStudents.vue";
+import { createNotification } from "@/composables/useToast";
+import { Save } from "lucide-vue-next";
 
 const props = defineProps<{
   entry: Partial<Entry>;
@@ -203,6 +205,12 @@ async function submit() {
   } else {
     await create();
   }
+
+  await createNotification({
+    title: "Entry" + (props.mode === "edit" ? " updated" : " created"),
+    description: "Saved successfully.",
+    icon: Save,
+  });
 }
 
 async function update() {

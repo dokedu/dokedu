@@ -3,11 +3,17 @@
     class="w-fit select-none rounded-full px-2.5 py-1 text-sm font-medium"
     :class="`bg-${color}-50 text-${color}-700`"
   >
-    <slot />
+    <div class="flex items-center justify-between gap-2">
+      <p class="line-clamp-1">
+        <slot />
+      </p>
+      <X class="h-4 w-4 shrink-0" v-if="removable" @click="remove"></X>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { X } from "lucide-vue-next";
 // colors
 // bg-blue-50   text-blue-700
 // bg-red-50    text-red-700
@@ -19,10 +25,24 @@
 // bg-pink-50   text-pink-700
 // bg-gray-50   text-gray-700
 
-defineProps({
+const props = defineProps({
   color: {
     type: String,
     default: "blue",
   },
+  id: {
+    type: String,
+    default: "",
+  },
+  removable: {
+    type: Boolean,
+    default: false,
+  },
 });
+
+const emit = defineEmits(["remove"]);
+
+const remove = () => {
+  emit("remove", props.id);
+};
 </script>
