@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import LoginPage from "./pages/login.vue";
 import ForgotPasswordPage from "./pages/forgot-password.vue";
+import ResetPasswordPage from "./pages/reset-password.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -32,7 +33,7 @@ const router = createRouter({
       meta: {
         layout: "auth",
       },
-      component: () => import("./pages/reset-password.vue"),
+      component: ResetPasswordPage,
     },
     {
       name: "admin-users",
