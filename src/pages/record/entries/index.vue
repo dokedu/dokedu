@@ -33,7 +33,7 @@
     <div class="flex flex-col overflow-scroll">
       <router-link
         :to="{ name: 'record-entries-entry', params: { id: entry.id } }"
-        v-for="entry in data?.entries?.edges"
+        v-for="entry in (data?.entries?.edges as Entry[])"
         class="flex border-b border-stone-100 text-sm text-strong transition-all hover:bg-stone-50"
       >
         <div class="line-clamp-1 h-[2rem] w-full p-2 pl-8">{{ entry.body }}</div>
@@ -62,6 +62,7 @@ import { ref, computed, reactive } from "vue";
 import DFilter from "@/components/d-filter/d-filter.vue";
 import { graphql } from "@/gql";
 import DTag from "@/components/d-tag/d-tag.vue";
+import { Entry } from "@/gql/graphql";
 
 const student = ref();
 const teacher = ref();

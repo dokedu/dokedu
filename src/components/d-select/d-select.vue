@@ -30,11 +30,13 @@
 </template>
 
 <script lang="ts" setup>
-import DContextMenu from "@/components/d-context-menu/d-context-menu.vue";
-import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue";
 import { ref } from "vue";
 import { Check } from "lucide-vue-next";
 import { PropType } from "vue";
+// @ts-ignore
+import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue";
+// @ts-ignore
+import DContextMenu from "@/components/d-context-menu/d-context-menu.vue";
 
 type OptionType = {
   value: string;
@@ -55,7 +57,6 @@ const props = defineProps({
     default: false,
   },
 });
-const emit = defineEmits(["update"]);
 
 const contextMenuOpen = ref(false);
 const selectedOptions = ref<OptionType[]>([]);

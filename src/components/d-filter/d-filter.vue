@@ -2,7 +2,7 @@
   <div class="relative flex min-w-0 flex-col">
     <label
       class="mb-1 block text-xs font-medium text-subtle transition ease-in-out"
-      :class="(modelValue && modelValue.length) || search ? 'opacity-100' : 'opacity-0'"
+      :class="(modelValue && (modelValue as string).length) || search ? 'opacity-100' : 'opacity-0'"
       >{{ label }}</label
     >
     <label
@@ -10,7 +10,7 @@
       class="relative cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-1.5 text-left align-middle sm:text-sm"
       :class="{
         'border-stone-500 outline-none ring-1 ring-stone-500 ': state.isOpen,
-        'border-stone-600 pr-7 text-strong': modelValue && modelValue.length,
+        'border-stone-600 pr-7 text-strong': modelValue && (modelValue as string).length,
       }"
     >
       <input
@@ -31,24 +31,28 @@
               {{ dropdownLabel }}
             </div>
             <span
-              v-if="multiple && modelValue.length"
+              v-if="multiple && (modelValue as string).length"
               class="rounded bg-blue-100 px-1 py-[1px] text-xs text-blue-600"
-              >{{ modelValue.length }}</span
+              >{{ (modelValue as string).length }}</span
             >
           </div>
         </template>
         <template v-else>&nbsp;</template>
       </div>
       <span class="absolute inset-y-0 right-0 z-20 flex items-center pr-2">
-        <X v-if="modelValue && modelValue.length" class="h-4 w-4 stroke-black" @click.prevent="onClearValue" />
+        <X
+          v-if="modelValue && (modelValue as string).length"
+          class="h-4 w-4 stroke-black"
+          @click.prevent="onClearValue"
+        />
       </span>
     </label>
 
     <div ref="dropdownMenu" class="relative">
       <transition
-        leave-active-class="transition ease-in duration-100"
-        leave-from-class="opacity-100"
-        leave-to-class="opacity-0"
+        leaveActiveClass="transition ease-in duration-100"
+        leaveFromClass="opacity-100"
+        leaveToClass="opacity-0"
       >
         <ul
           v-if="state.isOpen"
@@ -230,6 +234,7 @@ export default defineComponent({
       if (props.multiple) {
         return props.label;
       }
+      // @ts-ignore
       return selectedOptions.value?.[0]?.label || props.label;
     });
 
@@ -271,8 +276,10 @@ export default defineComponent({
       () => state.isOpen,
       (isOpen) => {
         if (isOpen) {
+          // @ts-expect-error
           document.body.addEventListener("mousedown", onFocusOut);
         } else {
+          // @ts-expect-error
           document.body.removeEventListener("mousedown", onFocusOut);
         }
       }
