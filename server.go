@@ -97,6 +97,9 @@ func main() {
 	})
 
 	e.POST("/query", func(c echo.Context) error {
+		c.Response().Header().Set("Access-Control-Allow-Origin", "*")
+		c.Response().Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization")
 		srv.ServeHTTP(c.Response(), c.Request())
 		return nil
 	})
