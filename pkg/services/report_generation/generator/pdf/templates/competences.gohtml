@@ -1,0 +1,64 @@
+{{ define "level" }}
+    <div class="flex items-center justify-center rounded-lg p-1">
+        <div class="flex h-[16px] w-[16px] items-end space-x-0.5">
+            <div class="flex h-full w-[4px] items-end">
+                {{ if gt .Level 0 }}
+                    <div class="h-[5px] w-full rounded-lg bg-blue-600"></div>
+                {{ else }}
+                    <div class="h-[5px] w-full rounded-lg bg-stone-300"></div>
+                {{ end }}
+            </div>
+            <div class="flex h-full w-[4px] items-end">
+                {{ if gt .Level 1 }}
+                    <div class="h-[10px] w-full rounded-lg bg-blue-600"></div>
+                {{ else }}
+                    <div class="h-[10px] w-full rounded-lg bg-stone-300"></div>
+                {{ end }}
+            </div>
+            <div class="flex h-full w-[4px] items-end">
+                {{ if gt .Level 2 }}
+                    <div class="h-[16px] w-full rounded-lg bg-blue-600"></div>
+                {{ else }}
+                    <div class="h-[16px] w-full rounded-lg bg-stone-300"></div>
+                {{ end }}
+            </div>
+        </div>
+    </div>
+{{ end}}
+
+{{ define "group" }}
+    {{ range .Competences }}
+        <tr>
+            {{ if .IsCompetence }}
+                <td class="border border-stone-200 px-2 py-1 text-sm">{{ .Name }}</td>
+                <td class="border border-stone-200 px-2 py-1 text-sm">
+                    {{ template "level" . }}
+                </td>
+            {{ else }}
+                <td class="border bg-stone-50 border-stone-200 px-2 py-1 text-sm font-medium">{{ .Name }}</td>
+                <td class="border bg-stone-50 border-stone-200 px-2 py-1 text-sm">
+                    {{ template "level" . }}
+                </td>
+            {{ end }}
+        </tr>
+        {{ if gt (len .Competences) 0 }}
+            {{ template "group" . }}
+        {{ end }}
+    {{ end }}
+{{ end }}
+
+{{ range .Competences }}
+    <table class="w-full border-collapse  text-sm mb-4">
+        <tbody>
+        <tr>
+            <td class="border border-stone-200 bg-stone-100 px-2 py-1 text-sm text-left font-medium">{{ .Name }}</td>
+            <td class="border border-stone-200 bg-stone-100 px-2 py-1 text-sm text-left font-medium w-[50px]">
+                Niveau
+            </td>
+        </tr>
+        {{ template "group" . }}
+        </tbody>
+    </table>
+
+    <div class="pagebreak" style="page-break-after: always;"></div>
+{{ end }}

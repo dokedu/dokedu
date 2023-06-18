@@ -80,8 +80,9 @@ enum ReportFormat {
 }
 
 enum ReportKind {
-    report
+    entries
     subjects
+    competences
 }
 
 type Report {

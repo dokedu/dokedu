@@ -544,17 +544,6 @@ func (r *mutationResolver) UpdateTag(ctx context.Context, id string, input model
 		return nil, err
 	}
 
-	// Check if tag with the same name already exists
-	var count int
-	count, err = r.DB.NewSelect().Model(&db.Tag{}).Where("organisation_id = ?", currentUser.OrganisationID).Where("name = ?", input.Name).WhereAllWithDeleted().Count(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if count > 0 {
-		return nil, errors.New("Tag with the same name already exists")
-	}
-
 	// update the tag
 	tag.Name = input.Name
 
@@ -732,7 +721,8 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 		Model(&competences).
 		Where("organisation_id = ?", currentUser.OrganisationID).
 		Limit(pageLimit).
-		Offset(pageOffset)
+		Offset(pageOffset).
+		Order("name ASC")
 
 	if search != nil {
 		query.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", *search))
@@ -793,7 +783,7 @@ func (r *queryResolver) Reports(ctx context.Context, limit *int, offset *int) (*
 		return nil, nil
 	}
 
-	pageLimit := 25
+	pageLimit := 10
 	if limit != nil {
 		pageLimit = *limit
 	}
@@ -925,7 +915,7 @@ func (r *reportResolver) User(ctx context.Context, obj *db.Report) (*db.User, er
 	}
 
 	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).WhereAllWithDeleted().Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -941,7 +931,12 @@ func (r *reportResolver) StudentUser(ctx context.Context, obj *db.Report) (*db.U
 	}
 
 	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.StudentUserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().
+		Model(&user).
+		Where("id = ?", obj.StudentUserID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		WhereAllWithDeleted().
+		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -1027,7 +1022,7 @@ func (r *userCompetenceResolver) Competence(ctx context.Context, obj *db.UserCom
 	}
 
 	var competence db.Competence
-	err = r.DB.NewSelect().Model(&competence).Where("id = ?", obj.CompetenceID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&competence).Where("id = ?", obj.CompetenceID).Where("organisation_id = ?", currentUser.OrganisationID).WhereAllWithDeleted().Scan(ctx)
 	if err != nil {
 		return nil, err
 	}

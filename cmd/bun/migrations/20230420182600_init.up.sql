@@ -237,14 +237,14 @@ CREATE TABLE entry_events
 
 CREATE TYPE report_status AS ENUM ('pending', 'processing', 'done', 'error');
 CREATE TYPE report_format AS ENUM ('docx', 'pdf', 'html', 'csv', 'xlsx');
-CREATE TYPE report_kind AS ENUM ('report', 'subjects');
+CREATE TYPE report_kind AS ENUM ('entries', 'subjects', 'competences');
 
 CREATE TABLE reports
 (
     id              text          DEFAULT nanoid()                 NOT NULL,
     status          report_status DEFAULT 'pending'::report_status NOT NULL,
     format          report_format DEFAULT 'pdf'::report_format     NOT NULL,
-    kind            report_kind   DEFAULT 'report'::report_kind    NOT NULL,
+    kind            report_kind   DEFAULT 'entries'::report_kind   NOT NULL,
     "from"          timestamptz                                    NOT NULL,
     "to"            timestamptz                                    NOT NULL,
     meta            jsonb,

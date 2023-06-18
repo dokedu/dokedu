@@ -33,7 +33,7 @@ func (r *entryResolver) User(ctx context.Context, obj *db.Entry) (*db.User, erro
 	}
 
 	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).WhereAllWithDeleted().Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -468,7 +468,7 @@ func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, fi
 		return nil, nil
 	}
 
-	pageLimit := 25
+	pageLimit := 100
 	if limit != nil {
 		pageLimit = *limit
 	}
@@ -479,7 +479,16 @@ func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, fi
 	}
 
 	var entries []*db.Entry
-	count, err := r.DB.NewSelect().Model(&entries).Where("organisation_id = ?", currentUser.OrganisationID).Limit(pageLimit).Offset(pageOffset).Order("created_at DESC").ScanAndCount(ctx)
+
+	query := r.DB.NewSelect().Model(&entries).Where("entry.organisation_id = ?", currentUser.OrganisationID).Limit(pageLimit).Offset(pageOffset).Order("created_at DESC")
+
+	if filter != nil {
+		if len(filter.Users) > 0 {
+			query = query.Join("JOIN entry_users eu ON eu.entry_id = entry.id").Where("eu.user_id IN (?)", bun.In(filter.Users))
+		}
+	}
+
+	count, err := query.ScanAndCount(ctx)
 	if err != nil {
 		return nil, err
 	}

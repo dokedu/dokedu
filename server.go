@@ -7,6 +7,8 @@ import (
 	"example/pkg/mail"
 	"example/pkg/middleware"
 	"example/pkg/services/report_generation"
+	"example/pkg/services/report_generation/config"
+	"fmt"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -54,7 +56,9 @@ func main() {
 		log.Fatal(err, "Error loading .env file")
 	}
 
-	dsn := "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
+	//dsn := "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", os.Getenv("DB_USER"),
+		os.Getenv("DB_PASS"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
 	// dsn := "unix://user:pass@dbname/var/run/postgresql/.s.PGSQL.5432"
 	dbConn := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(dsn)))
 
@@ -65,7 +69,7 @@ func main() {
 
 	minioClient := minioClient()
 	repGen := report_generation.
-		NewReportGenerationService(report_generation.ReportGenerationServiceConfig{
+		NewReportGenerationService(config.ReportGenerationConfig{
 			DB:    db,
 			MinIO: minioClient,
 		}, ctx, 3)
