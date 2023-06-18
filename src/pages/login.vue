@@ -40,8 +40,9 @@
       <router-link
         class="mx-auto block w-fit rounded-md text-center text-xs font-medium leading-none text-muted hover:text-default focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
         to="/forgot-password"
-        >Forgot password?</router-link
       >
+        Forgot password?
+      </router-link>
     </form>
   </div>
 </template>
