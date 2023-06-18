@@ -12,6 +12,7 @@ RUN go build -o app
 RUN go build -o bun cmd/bun/main.go
 
 FROM alpine as prod
+RUN apk add --no-cache chromium
 RUN apk add --no-cache ca-certificates postgresql-client curl tini bash gnupg
 ENTRYPOINT ["/sbin/tini", "--"]
 
