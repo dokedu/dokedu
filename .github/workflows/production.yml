@@ -34,8 +34,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: backend
-          file: backend/Dockerfile
+          context: .
+          file: Dockerfile
           build-args: |
           push: true # ${{ github.ref_type == 'tag' }}
           tags: ${{ steps.meta.outputs.tags }}
