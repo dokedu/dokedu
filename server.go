@@ -80,14 +80,6 @@ func main() {
 	// Auth
 	e.Use(middleware.Auth(db))
 
-	// add options handler
-	e.OPTIONS("/*", func(c echo.Context) error {
-		c.Response().Header().Set("Access-Control-Allow-Origin", "*")
-		c.Response().Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization")
-		return c.String(http.StatusOK, "")
-	})
-
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
 		DB:            db,
 		MinioClient:   minioClient,
