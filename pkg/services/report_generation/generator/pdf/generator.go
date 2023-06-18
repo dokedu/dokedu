@@ -9,6 +9,7 @@ import (
 	"example/pkg/services/report_generation/config"
 	"fmt"
 	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/launcher"
 	"github.com/go-rod/rod/lib/proto"
 	"github.com/go-rod/rod/lib/utils"
 	"html/template"
@@ -81,7 +82,10 @@ func (g *Generator) process(report db.Report, data any) error {
 }
 
 func (g *Generator) generatePDF(report db.Report, data *CompetencesData) error {
-	browser := rod.New().MustConnect()
+	// https://stackoverflow.com/questions/70254649/rod-running-in-docker-alpine-get-error-chrome-linux-chrome-no-such-file-or-dir
+	path, _ := launcher.LookPath()
+	u := launcher.New().Bin(path).MustLaunch()
+	browser := rod.New().ControlURL(u).MustConnect()
 	defer browser.MustClose()
 
 	t, err := template.ParseFS(templateEmbeds, "templates/_head.gohtml", "templates/_foot.gohtml")
