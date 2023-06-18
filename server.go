@@ -75,6 +75,8 @@ func main() {
 
 	e := echo.New()
 
+	e.Use(middleware.CORS())
+
 	// Auth
 	e.Use(middleware.Auth(db))
 
@@ -82,8 +84,6 @@ func main() {
 	e.OPTIONS("/*", func(c echo.Context) error {
 		return c.String(http.StatusOK, "")
 	})
-
-	e.Use(middleware.CORS())
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
 		DB:            db,
