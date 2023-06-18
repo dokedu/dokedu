@@ -53,10 +53,11 @@ const contextMenuOpen = ref(false);
 const selectedType = ref<ReportType>();
 
 const types = [
-  { label: "Entries", kind: "report", format: "pdf" },
-  { label: "Subjects", kind: "subjects", format: "pdf" },
-  { label: "Entries in .docx", kind: "report", format: "docx" },
-  { label: "Subjects in .docx", kind: "subjects", format: "docx" },
+  { label: "Entries", kind: "entries", format: "pdf" },
+  { label: "Competences", kind: "competences", format: "pdf" },
+  // { label: "Subjects", kind: "subjects", format: "pdf" },
+  // { label: "Entries in .docx", kind: "entries", format: "docx" },
+  // { label: "Subjects in .docx", kind: "subjects", format: "docx" },
 ];
 
 function selectType(type: ReportType) {

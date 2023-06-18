@@ -4,18 +4,19 @@
     class="absolute right-0 top-0 h-screen w-full max-w-xl overflow-scroll bg-white shadow-md shadow-stone-300"
   >
     <div v-if="data?.event" class="p-4">
-      <d-project-form :project="data?.event" :cancel="data?.event" @cancel="cancel" />
+      <d-project-form :project="(data?.event as Event)" :cancel="data?.event" @cancel="cancel" />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { onClickOutside, onKeyStroke } from "@vueuse/core";
-import { ref } from "vue";
+import { reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import DProjectForm from "./DProjectForm.vue";
-import { useMutation, useQuery } from "@urql/vue";
+import { useQuery } from "@urql/vue";
 import { graphql } from "../../../gql";
+import { Event } from "@/gql/graphql";
 
 const route = useRoute();
 const router = useRouter();
@@ -58,24 +59,8 @@ const { data } = useQuery({
       }
     }
   `),
-  variables: {
-    id: route.params.id,
-  },
+  variables: reactive({
+    id: route.params.id as string,
+  }),
 });
-
-async function deleteEvent() {
-  if (confirm("Are you sure you want to delete this project?")) {
-    await archiveEvent({ id: route.params.id });
-    await router.push({ name: "record-projects" });
-  }
-}
-const { executeMutation: archiveEvent } = useMutation(
-  graphql(`
-    mutation archiveEvent($id: ID!) {
-      archiveEvent(id: $id) {
-        id
-      }
-    }
-  `)
-);
 </script>

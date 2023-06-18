@@ -18,15 +18,15 @@
     <PageContent>
       <div class="flexflex-col select-none overflow-scroll">
         <component
-          :is="competence.type !== 'competence' ? 'router-link' : 'div'"
-          :to="{ name: 'record-competences-competence', params: { id: competence.id } }"
           v-for="competence in data?.competence?.competences"
+          :to="{ name: 'record-competences-competence', params: { id: competence?.id } }"
+          :is="competence && competence.type !== 'competence' ? 'router-link' : 'div'"
           class="flex justify-between border-b border-stone-100 text-sm transition-all hover:bg-stone-50"
           :class="{
             '!bg-stone-100': competence?.id === $route.params.id,
           }"
         >
-          <div class="p-2 pl-8 text-strong">{{ competence.name }}</div>
+          <div class="p-2 pl-8 text-strong">{{ competence?.name }}</div>
           <div class="p-2 pr-8 text-strong">{{ grades(competence) }}</div>
         </component>
       </div>
@@ -38,7 +38,6 @@
 import PageHeader from "@/components/PageHeader.vue";
 import PageWrapper from "@/components/PageWrapper.vue";
 import PageContent from "@/components/PageContent.vue";
-import dCompetence from "@/components/d-competence/d-competence.vue";
 import { useQuery } from "@urql/vue";
 import { graphql } from "@/gql";
 import { computed, reactive, ref } from "vue";
@@ -49,6 +48,7 @@ const route = useRoute();
 
 const id = computed(() => route.params.id as string);
 
+// @ts-expect-error
 function grades(competence: Competence) {
   // return first and last grade and if only one grade only that one as string
   if (competence.grades.length === 1) {

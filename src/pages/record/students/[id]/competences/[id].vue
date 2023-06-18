@@ -15,23 +15,25 @@
         {{ data?.competence.name }}
       </router-link>
     </div>
-    <div class="h-full">
+    <div class="h-full max-h-full overflow-auto">
       <div class="flex h-full min-h-fit flex-1 flex-col gap-2 overflow-auto">
         <component
-          v-for="competence in data?.competence?.competences"
+          v-for="competence in (data?.competence?.competences as Competence[])"
           :is="competence?.type !== 'competence' ? 'router-link' : 'div'"
           :to="{ name: 'record-students-student-competences-competence', params: { subject: competence?.id } }"
         >
           <DCompetence v-if="competence" :competence="competence">
             <DCompetenceLevel
-              :id="competence.userCompetences[0]?.id"
+              :id="competence.userCompetences[0]?.id as string"
               :level="getLevel(competence)"
               :editable="competence.type == 'subject' ? false : true"
               @update="(val) => createUserCompetence({ level: val.level, id: competence.id })"
             ></DCompetenceLevel>
             <template #footer>
               <div v-if="competence.userCompetences.length > 0">
-                <DCompetenceEntries :competences="competence.userCompetences"></DCompetenceEntries>
+                <DCompetenceEntries
+                  :competences="(competence.userCompetences as UserCompetence[])"
+                ></DCompetenceEntries>
               </div>
             </template>
           </DCompetence>
@@ -45,33 +47,22 @@
 import { useQuery, useMutation } from "@urql/vue";
 import { graphql } from "../../../../../gql";
 import { useRoute } from "vue-router";
-import { computed, reactive, ref } from "vue";
+import { computed, reactive } from "vue";
 import DCompetence from "@/components/d-competence/d-competence.vue";
 import DCompetenceLevel from "@/components/d-competence-level.vue";
 import DCompetenceEntries from "@/components/d-competence-entries.vue";
-import { Competence } from "@/gql/graphql";
+import { Competence, UserCompetence } from "@/gql/graphql";
 
 const route = computed(() => useRoute());
 const competenceId = computed(() => route.value.params.subject as string);
 const id = computed(() => route.value.params.id as string);
 
-type StudentCompetence = {
-  __typename?: "Competence" | undefined;
-  id: string;
-  name: string;
-  grades: number[];
-  userCompetences: ({
-    __typename?: "UserCompetence" | undefined;
-    id: string;
-    level: number;
-  } | null)[];
-};
-
-const getLevel = (competence: StudentCompetence | Partial<Competence>) => {
+const getLevel = (competence: Competence) => {
   if (competence.userCompetences != null && competence.userCompetences?.length === 0) {
     return 0;
   }
 
+  // @ts-expect-error
   return competence?.userCompetences[0].level || 0;
 };
 

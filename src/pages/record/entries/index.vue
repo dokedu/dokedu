@@ -14,9 +14,9 @@
         v-for="entry in data?.entries?.edges"
         class="flex border-b border-stone-100 text-sm text-strong transition-all hover:bg-stone-50"
       >
-        <div class="w-full p-2 pl-8">{{ entry.body.slice(0, 70) }} {{ entry.body.length > 70 ? "..." : "" }}</div>
-        <div class="w-1/4 p-2 text-subtle">{{ dateOnly(entry.date) }}</div>
-        <div class="w-1/4 p-2 text-subtle">
+        <div class="line-clamp-1 h-[2rem] w-full p-2 pl-8">{{ entry.body }}</div>
+        <div class="w-[200px] p-2 text-right text-subtle">{{ dateOnly(entry.date) }}</div>
+        <div class="w-[400px] p-2 pr-8 text-right text-subtle">
           {{ `${entry.user.firstName} ${entry.user.lastName}` }}
         </div>
       </router-link>

@@ -73,8 +73,6 @@ async function onSubmit() {
     localStorage.setItem("enabled_apps", JSON.stringify(enabled_apps));
     localStorage.setItem("authorization", token);
     await router.push({ name: "record-entries" });
-  } else {
-    error.value = "Wrong password or email";
   }
 }
 </script>

@@ -35,7 +35,7 @@ async function dropHandler(event: any) {
   }
 }
 
-function preventDefaults(e) {
+function preventDefaults(e: any) {
   e.preventDefault();
 }
 

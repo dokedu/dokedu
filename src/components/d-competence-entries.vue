@@ -43,7 +43,7 @@ import { ref } from "vue";
 import { formatDate } from "@vueuse/core";
 
 export interface Props {
-  competences: Partial<UserCompetence>[];
+  competences: UserCompetence[];
 }
 
 defineProps<Props>();

@@ -1,6 +1,6 @@
 <template>
   <PageWrapper>
-    <EntryForm v-if="entry" :entry="entry.entry" mode="edit" @archived="archived" @saved="saved" />
+    <EntryForm v-if="entry" :entry="(entry.entry as Partial<Entry>)" mode="edit" @archived="archived" @saved="saved" />
   </PageWrapper>
 </template>
 <script setup lang="ts">
@@ -9,6 +9,7 @@ import EntryForm from "./EntryForm.vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuery } from "@urql/vue";
 import { graphql } from "../../../gql";
+import { Entry } from "@/gql/graphql";
 
 const router = useRouter();
 const route = useRoute();

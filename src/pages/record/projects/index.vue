@@ -25,7 +25,7 @@
       <div class="flex flex-col overflow-scroll">
         <router-link
           :to="{ name: 'record-projects-project', params: { id: event.id } }"
-          v-for="event in data?.events?.edges"
+          v-for="event in (data?.events?.edges as Event[])"
           class="flex border-b border-stone-100 text-sm transition-all hover:bg-stone-50"
           :class="{
             '!bg-stone-100': event?.id === $route.params.id,
@@ -54,6 +54,7 @@ import { Plus } from "lucide-vue-next";
 import { Share } from "lucide-vue-next";
 import { reactive, ref } from "vue";
 import { graphql } from "../../../gql";
+import { Event } from "@/gql/graphql";
 
 const search = ref("");
 

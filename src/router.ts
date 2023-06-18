@@ -153,11 +153,18 @@ const router = createRouter({
   ],
 });
 
-router.beforeEach(async (to, from) => {
+const allowedRoutes = [
+  'login',
+  'forgot-password',
+  'reset-password',
+]
+
+router.beforeEach(async (to) => {
   if (
     // make sure the user is authenticated
     !localStorage.getItem('authorization') &&
-    to.name !== 'login'
+    // to.name !== 'login'
+    !allowedRoutes.includes(to.name as string)
   ) {
     // redirect the user to the login page
     return { name: 'login' }

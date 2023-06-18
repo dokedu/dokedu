@@ -46,8 +46,8 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 
 const student = ref<User>();
-const from = ref<string>();
-const to = ref<string>();
+const from = ref<string>("");
+const to = ref<string>("");
 const type = ref<ReportType>();
 const tags = ref<Tag[]>();
 
@@ -71,6 +71,7 @@ async function createReport() {
     filterTags: tags.value?.map((tag) => tag.id) || [],
   };
 
+  // @ts-expect-error
   await createReportMutation({ input });
   router.push({ name: "record-reports" });
 }

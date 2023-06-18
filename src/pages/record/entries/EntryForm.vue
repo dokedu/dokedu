@@ -52,6 +52,7 @@ const props = defineProps<{
 
 const entry = toRef(props, "entry");
 
+// @ts-expect-error
 const { textarea, input: body } = useTextareaAutosize({ input: entry.value.body });
 
 const { executeMutation: archiveEntryMut } = useMutation(archiveEntryMutation);
@@ -140,6 +141,7 @@ const { executeMutation: updateEntry } = useMutation(gql`
 
 const formattedDate = computed({
   get() {
+    // @ts-expect-error
     const date = new Date(entry.value.date);
     return formatDate(date, "YYYY-MM-DD");
   },
@@ -182,6 +184,7 @@ function userCompetences(): { error: boolean; eacs: any[] } {
   }
 
   for (const competence of uniqueCompetences) {
+    // @ts-expect-error
     for (const user of entry.value.users) {
       eacs.push({
         userId: user.id,

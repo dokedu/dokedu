@@ -89,7 +89,7 @@ import {
 } from "lucide-vue-next";
 import { Tag } from "lucide-vue-next";
 import { onClickOutside, useStorage } from "@vueuse/core";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { UserSquare } from "lucide-vue-next";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
@@ -98,7 +98,6 @@ const visibleAppSwitcher = ref<boolean>(false);
 const activeApp = useStorage("active_app", "drive");
 
 const route = useRoute();
-const router = useRouter();
 
 interface AppLink {
   icon: FunctionalComponent;
@@ -121,6 +120,7 @@ onClickOutside(appswitcher, () => {
 
 function isLinkActive(link: AppLink) {
   const name = route.name || "";
+  // @ts-expect-error
   return name.startsWith(link.route);
 }
 
@@ -129,7 +129,8 @@ const enabledAppList = useStorage("enabled_apps", []);
 const app = computed(() => apps.find((el) => el.id === activeApp.value) || null);
 
 const enabledApps = computed(() => {
-  return apps.filter((el) => enabledAppList.value.includes(el.id));
+  // @ts-expect-error
+  return apps.filter((el: { id: string }) => enabledAppList.value.includes(el.id));
 });
 
 const apps: App[] = [
@@ -264,6 +265,7 @@ async function signOut() {
   localStorage.removeItem("token");
   localStorage.removeItem("enabled_apps");
 
-  router.push("/login");
+  // TODO: hack to ensure urql cache is cleared
+  location.reload();
 }
 </script>

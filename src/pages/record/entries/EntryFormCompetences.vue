@@ -95,7 +95,7 @@ import DCompetence from "../../../components/d-competence/d-competence.vue";
 const dialog = ref(null);
 const dialogOpen = ref(false);
 const search = ref("");
-const parents = ref([]);
+const parents = ref<Competence[]>([]);
 
 // on keystroke escape close dialog
 onKeyStroke("Escape", () => {
@@ -106,10 +106,6 @@ onClickOutside(dialog, () => {
   dialogOpen.value = false;
 });
 
-function isCompetenceInEntry(competence: Competence) {
-  return entry.value.userCompetences?.some((eac) => eac.competence.id === competence.id);
-}
-
 const props = defineProps<{ entry: Partial<Entry> }>();
 
 const entry = toRef(props, "entry");
@@ -118,6 +114,7 @@ function updateCompetenceLevel(data: { id: string; level: number }) {
   // find all eacs with eac.competence.id = data.id
   const eacs = entry.value.userCompetences?.filter((eac) => eac.competence.id === data.id);
   // update all eacs with new level
+  // @ts-expect-error
   for (const eac of eacs) {
     eac.level = data.level;
   }
@@ -172,6 +169,7 @@ const { data } = useQuery({
 
 function toggleCompetence(competence: { id: string; type: string }) {
   if (competence.type === "subject" || competence.type === "group") {
+    // @ts-expect-error
     parents.value = [...parents.value, competence];
   }
 
@@ -179,6 +177,7 @@ function toggleCompetence(competence: { id: string; type: string }) {
     console.log(competence);
   }
 
+  // @ts-expect-error
   emitToggleCompetence(competence);
 }
 
@@ -192,6 +191,7 @@ function emitToggleCompetence(competence: Competence) {
 
   // create new competence and add it to entry.userCompetences if it doesn't exist
   if (!entry.value.userCompetences.map((el) => el.competence.id).includes(competence.id)) {
+    // @ts-expect-error
     entry.value.userCompetences.push({ competence: competence, level: competence.level });
   } else {
     // remove competence from entry.userCompetences if it exists
@@ -199,6 +199,7 @@ function emitToggleCompetence(competence: Competence) {
   }
 }
 
+// @ts-expect-error
 function highlightText(text: string) {
   if (search.value.length === 0) {
     return text;

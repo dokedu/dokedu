@@ -3,16 +3,16 @@
     <label for="date" class="mt-2 min-w-[64px] text-stone-500">Projects</label>
     <div class="w-full">
       <d-context-menu :show="contextMenu" @close="contextMenu = false" :alignment="ContextMenuAlignment.Overlay">
-        <div class="flex flex-col gap-1 px-1 py-2">
+        <div v-if="events" class="flex flex-col gap-1 px-1 py-2">
           <div
-            v-for="event in events?.events?.edges"
+            v-for="event in (events.events.edges as Event[])"
             :key="event.id"
             @click="toggleEvent(event)"
             class="flex w-full items-center justify-between rounded-md p-1 hover:bg-stone-100"
           >
             <div class="px-1 py-0.5 text-stone-700">{{ event.title }}</div>
             <svg
-              v-show="entry?.events?.length > 0 && entry?.events.map((el) => el.id).includes(event.id)"
+              v-show="hasProject(event as Event)"
               class="stroke-stone-700"
               width="24"
               height="24"
@@ -43,7 +43,7 @@
 <script lang="ts" setup>
 import { ref, toRef } from "vue";
 import DContextMenu, { ContextMenuAlignment } from "../../../components/d-context-menu/d-context-menu.vue";
-import { Entry } from "../../../gql/graphql";
+import { Entry, Event } from "../../../gql/graphql";
 import { useQuery } from "@urql/vue";
 import { graphql } from "../../../gql";
 
@@ -53,6 +53,10 @@ const props = defineProps<{
 
 const entry = toRef(props, "entry");
 const contextMenu = ref(false);
+
+function hasProject(event: Event) {
+  return entry.value.events?.map((el) => el.id).includes(event.id);
+}
 
 const { data: events } = useQuery({
   query: graphql(`

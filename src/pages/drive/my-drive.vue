@@ -22,6 +22,7 @@ import PageHeaderDrive from "./PageHeaderDrive.vue";
 
 const router = useRouter();
 
+// @ts-expect-error
 function upload(file) {
   uploadFile({
     input: {

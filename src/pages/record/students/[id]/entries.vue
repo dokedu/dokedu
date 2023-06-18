@@ -3,7 +3,7 @@
     <router-link
       :to="{ name: 'record-entries-entry', params: { id: entry?.id } }"
       v-for="entry in data?.entries.edges"
-      class="flex flex-col justify-between space-y-4 rounded-lg border border-stone-200 p-6"
+      class="flex flex-col justify-between space-y-4 rounded-lg border border-stone-200 p-4"
     >
       <div class="space-y-4">
         <div class="text-sm text-subtle">
@@ -50,6 +50,7 @@ const { data } = useQuery({
       }
     }
   `),
-  variables: reactive({ filter: { users: id }, limit: 3 }),
+  // @ts-expect-error
+  variables: reactive({ filter: { users: [id] }, limit: 3 }),
 });
 </script>

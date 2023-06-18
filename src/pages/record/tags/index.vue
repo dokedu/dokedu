@@ -50,8 +50,8 @@ const toggleEditDialog = (tag: Tag) => {
 
 const { data, executeQuery: refreshTags } = useQuery({
   query: graphql(`
-    query GetTags {
-      tags {
+    query getTagWithLimit {
+      tags(limit: 100) {
         id
         name
         color

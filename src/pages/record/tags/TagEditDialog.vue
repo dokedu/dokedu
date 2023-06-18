@@ -2,7 +2,7 @@
   <DDialog :open="modalOpen" @close="onClose">
     <template #header>
       <div class="flex items-center justify-between">
-        <div class="font-medium text-strong">Create tag</div>
+        <div class="font-medium text-strong">Edit tag</div>
         <button @click="onClose"><X class="h-4 w-4"></X></button>
       </div>
     </template>

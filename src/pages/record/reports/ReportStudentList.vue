@@ -10,7 +10,7 @@
       >
         <div class="flex w-full flex-col items-start rounded-md">
           <div
-            @click="selectStudent(student)"
+            @click="selectStudent(student as User)"
             v-for="student in data?.users?.edges"
             class="flex w-full cursor-pointer items-center justify-between p-1 hover:bg-stone-100"
           >

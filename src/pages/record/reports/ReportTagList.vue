@@ -49,7 +49,7 @@ import DTag from "@/components/d-tag/d-tag.vue";
 const emit = defineEmits(["update"]);
 
 const contextMenuOpen = ref(false);
-const selectedTags = ref<Tag[]>();
+const selectedTags = ref<Tag[]>([]);
 
 const { data } = useQuery({
   query: graphql(`

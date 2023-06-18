@@ -1,11 +1,11 @@
 <template>
-  <div class="rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm">
+  <div class="rounded-lg border border-gray-200 px-2 py-1 text-sm">
     <div class="flex items-baseline justify-between">
-      <div class="p-1 text-base text-strong">
+      <div class="p-1 text-strong">
         {{ competence.name }}
       </div>
       <div class="flex items-center gap-2">
-        <div class="px-1 text-default">
+        <div class="w-[50px] px-1 text-right text-default">
           {{ grades(competence) }}
         </div>
         <slot />
@@ -17,7 +17,7 @@
         <div
           :class="{
             'block rounded-full border border-stone-200 px-2 py-0.5 text-strong': index === 0,
-            'pl-0.5 pr-0 text-subtle': index !== 0,
+            'line-clamp-1 pl-0.5 pr-0 text-subtle': index !== 0,
           }"
         >
           {{ parent.name }}
@@ -33,13 +33,13 @@ import { toRef } from "vue";
 import { Competence } from "../../gql/graphql";
 
 export interface Props {
-  competence: Partial<Competence>;
+  competence: Pick<Competence, "grades" | "name" | "parents">;
 }
 
 const props = defineProps<Props>();
 const competence = toRef(props, "competence");
 
-function grades(competence: Competence) {
+function grades(competence: Pick<Competence, "grades">) {
   // return first and last grade and if only one grade only that one as string
   if (competence.grades.length === 1) {
     return competence.grades[0].toString();

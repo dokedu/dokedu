@@ -16,14 +16,14 @@
     <PageContent>
       <div class="flex flex-col overflow-scroll">
         <router-link
-          :to="{ name: 'record-competences-competence', params: { id: competence.id } }"
+          :to="{ name: 'record-competences-competence', params: { id: competence?.id } }"
           v-for="competence in data?.competences?.edges"
           class="flex justify-between border-b border-stone-100 text-sm transition-all hover:bg-stone-50"
           :class="{
             '!bg-stone-100': competence?.id === $route.params.id,
           }"
         >
-          <div class="p-2 pl-8 text-strong">{{ competence.name }}</div>
+          <div class="p-2 pl-8 text-strong">{{ competence?.name }}</div>
           <div class="p-2 pr-8 text-strong">{{ grades(competence) }}</div>
         </router-link>
       </div>
@@ -41,6 +41,7 @@ import { reactive, ref } from "vue";
 
 const search = ref("");
 
+// @ts-expect-error
 function grades(competence: Competence) {
   // return first and last grade and if only one grade only that one as string
   if (competence.grades.length === 1) {
@@ -52,7 +53,7 @@ function grades(competence: Competence) {
 const { data } = useQuery({
   query: graphql(`
     query competenceSubjects($filter: CompetenceFilterInput, $search: String) {
-      competences(filter: $filter, search: $search) {
+      competences(filter: $filter, search: $search, limit: 100) {
         edges {
           id
           name
@@ -68,6 +69,7 @@ const { data } = useQuery({
       }
     }
   `),
+  // @ts-expect-error
   variables: reactive({
     filter: {
       type: "subject",

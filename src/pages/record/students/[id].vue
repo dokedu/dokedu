@@ -4,7 +4,7 @@
       <div
         class="flex h-full min-h-full w-full divide-x divide-stone-100 rounded-xl border border-stone-50 bg-white shadow"
       >
-        <div class="col-span-3 flex h-full w-full flex-col px-6 py-4">
+        <div class="flex w-full flex-col px-6 py-4">
           <div class="border-b border-stone-100 pb-4">
             <div class="flex items-center gap-1 text-strong">
               <router-link
@@ -20,8 +20,8 @@
               <span class="text-sm text-stone-950">{{ data?.user?.firstName }} {{ data?.user?.lastName }}</span>
             </div>
           </div>
-          <div class="flex h-full flex-col pt-6">
-            <div class="flex gap-1">
+          <div class="flex flex-col overflow-scroll pt-4">
+            <div class="flex h-fit gap-1">
               <RouterLink :to="{ name: 'record-students-student-competences' }">
                 <DButton
                   :type="
@@ -47,8 +47,9 @@
                 >
               </RouterLink>
             </div>
-            <div class="mt-4 h-full">
+            <div class="mt-4 h-full overflow-scroll">
               <RouterView />
+              <!-- <div v-for="i in 50" class="mb-4 h-8 bg-purple-100"></div> -->
             </div>
           </div>
         </div>

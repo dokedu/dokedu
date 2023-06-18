@@ -1,10 +1,14 @@
 <template>
   <div>
-    <div class="mb-4 select-none text-sm font-medium text-strong">Project</div>
+    <div class="mb-4 flex justify-between">
+      <div class="select-none text-sm font-medium text-strong">Project</div>
+      <d-button v-if="project.id" type="transparent" size="xs" :icon-left="Trash" @click="trash">Delete</d-button>
+    </div>
+
     <div class="mb-4 flex flex-col gap-2">
       <div v-if="false" class="flex min-h-[8rem] w-full items-center justify-start rounded-lg bg-stone-100">
         <div class="mx-auto text-center">
-          <Image class="mx-auto mb-1 stroke-stone-300" :size="48" :stroke-width="1" />
+          <Image class="mx-auto mb-1 stroke-stone-300" :size="48" v-bind="{ 'stroke-width': 1 }" />
           <div class="select-none text-center text-xs text-stone-500">
             Add a cover image <br />
             by clicking or dropping a file
@@ -57,12 +61,11 @@
     <div class="flex justify-between">
       <div class="flex gap-2">
         <d-button type="outline" @click="cancel">Cancel</d-button>
-        <d-button v-if="project.id" type="outline" :icon-left="Trash" @click="trash">Delete</d-button>
       </div>
       <d-button v-if="!project.id" type="primary" :icon-left="Plus" @click="create">Create</d-button>
       <d-button v-if="project.id" type="primary" :icon-left="Save" @click="update">Save</d-button>
     </div>
-    <div class="mt-4 select-none" v-if="project.competences && project.competences.length > 0">
+    <div class="mt-4 flex select-none flex-col gap-1" v-if="project.competences && project.competences.length > 0">
       <div class="mb-1 text-sm text-strong">Competences</div>
       <d-competence v-for="competence in project.competences" :key="competence.id" :competence="competence" />
     </div>
@@ -73,16 +76,16 @@
 import dButton from "../../../components/d-button/d-button.vue";
 import { Plus, Image } from "lucide-vue-next";
 import { graphql } from "../../../gql";
-import { computed, ref, toRef } from "vue";
+import { computed, toRef } from "vue";
 import { useMutation } from "@urql/vue";
 import { useTextareaAutosize } from "@vueuse/core";
-import { Event } from "../../../gql/graphql";
+import { Event } from "@/gql/graphql";
 import { Save } from "lucide-vue-next";
 import DCompetence from "../../../components/d-competence/d-competence.vue";
 import { Trash } from "lucide-vue-next";
 
 export interface Props {
-  project: Partial<Event>;
+  project: Event;
 }
 
 const props = defineProps<Props>();
@@ -104,7 +107,7 @@ function cancel() {
 }
 
 const { textarea, input: body } = useTextareaAutosize({
-  input: project.value.body,
+  input: project.value.body as string,
 });
 
 async function trash() {
@@ -236,7 +239,7 @@ async function create() {
 
   try {
     await createEvent({ input: event });
-    await cancel();
+    cancel();
   } catch (e) {
     alert(e);
   }

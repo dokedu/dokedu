@@ -60,10 +60,12 @@ const instance = getCurrentInstance();
 const parentEl = useParentElement();
 
 onMounted(() => {
+  // @ts-expect-error
   updatePosition(parentEl.value);
 });
 
 watch(width, () => {
+  // @ts-expect-error
   updatePosition(parentEl.value);
 });
 

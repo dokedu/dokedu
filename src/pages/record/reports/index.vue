@@ -24,7 +24,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="report in data?.reports?.edges" :key="report.id" class="border-b border-stone-100">
+            <tr v-for="report in (data?.reports?.edges as Report[])" :key="report.id" class="border-b border-stone-100">
               <td class="p-2 pl-8 text-left text-sm font-normal text-default">
                 {{ `${report?.studentUser?.firstName} ${report.studentUser?.lastName}` }}
               </td>
@@ -118,7 +118,7 @@ const downloadingFilesCount = ref(0);
 // TODO: refactor into utilitiy function
 async function downloadFile(report: Report) {
   downloadingFilesCount.value += 1;
-  const { data } = await getFileURL({ input: { id: report.file?.id } });
+  const { data } = await getFileURL({ input: { id: report.file?.id as string } });
 
   // data?.generateFileURL.url
   // download file from url directly
@@ -145,7 +145,7 @@ const { executeMutation: getFileURL } = useMutation(
   `)
 );
 
-function forceDownload(url, fileName) {
+function forceDownload(url: string, fileName: string) {
   return new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("GET", url, true);

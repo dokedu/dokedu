@@ -34,7 +34,10 @@
       <span class="pr-2 text-stone-500">Add student</span>
     </div>
   </div>
-  <dialog ref="dialogStudents" class="mt-32 h-1/2 w-full max-w-xl rounded-lg p-0 shadow-lg backdrop:bg-stone-950/20">
+  <dialog
+    ref="dialogStudents"
+    class="mt-32 h-1/2 w-full max-w-xl rounded-lg p-0 text-sm shadow-lg backdrop:bg-stone-950/20"
+  >
     <div class="flex h-full flex-col">
       <div class="flex items-center justify-between gap-2 p-4">
         <input
@@ -43,21 +46,21 @@
           name="student-search"
           id="student-search"
           placeholder="Search students"
-          class="w-full rounded-md border border-stone-200 px-3 py-1.5 shadow-sm outline-none placeholder:text-stone-400 focus:border-stone-200 focus:ring-0"
+          class="w-full rounded-md border border-stone-200 px-3 py-1.5 text-sm shadow-sm outline-none placeholder:text-stone-400 focus:border-stone-200 focus:ring-0"
         />
         <div class="rounded-md p-1 hover:bg-stone-100" @click="dialogStudents.close()">
           <X class="stroke-stone-500" />
         </div>
       </div>
       <div class="flex flex-1 flex-col overflow-auto">
-        <div class="mb-2 px-4 text-sm uppercase text-stone-500">Students</div>
+        <div class="mb-2 px-4 text-xs uppercase text-stone-500">Students</div>
         <div class="flex h-full flex-1 flex-col gap-1 overflow-auto px-4 pb-4">
           <div
             v-for="student in students?.users?.edges"
             class="flex w-full select-none items-center justify-between rounded-lg px-2 py-1 text-stone-700 hover:bg-stone-50"
-            @click="toggleStudent(student)"
+            @click="toggleStudent(student as User)"
           >
-            {{ `${student.firstName} ${student.lastName}` }}
+            {{ `${student?.firstName} ${student?.lastName}` }}
             <Check v-if="entry.users?.some((el) => el.id === student?.id)" :size="16" />
           </div>
         </div>

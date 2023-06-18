@@ -47,7 +47,7 @@
         />
       </svg>
       <svg
-        v-if="file.fileType === 'blob' && !file.name.includes('pdf')"
+        v-if="file && file.name && file.fileType === 'blob' && !file.name.includes('pdf')"
         width="20"
         height="20"
         viewBox="0 0 20 20"
@@ -64,7 +64,7 @@
         />
       </svg>
       <svg
-        v-if="file.fileType === 'blob' && file.name.includes('pdf')"
+        v-if="file && file.name && file.fileType === 'blob' && !file.name.includes('pdf')"
         width="20"
         height="20"
         viewBox="0 0 20 20"
@@ -81,7 +81,7 @@
       <div class="flex-1 select-none text-default">{{ file.name }}</div>
       <div class="w-[230px] select-none text-sm text-subtle">Feb 10, 2023 Peter Schwan</div>
       <div v-if="file.fileType !== 'folder'" class="w-[120px] select-none text-subtle">
-        {{ prettyBytes(file.size) }}
+        {{ prettyBytes(file.size || 0) }}
       </div>
       <div v-else class="w-[120px]"></div>
       <div class="flex w-[80px] gap-1 pr-4 opacity-0 group-hover/item:opacity-100">
@@ -119,11 +119,11 @@ defineProps<Props>();
 
 const emit = defineEmits(["click"]);
 
-function clickFile(file: File) {
+function clickFile(file: any) {
   emit("click", file);
 }
 
-async function downloadFile(file: File) {
+async function downloadFile(file: any) {
   const { data } = await getFileURL({ input: { id: file.id } });
 
   // data?.generateFileURL.url
@@ -144,7 +144,7 @@ const { executeMutation: getFileURL } = useMutation(
   `)
 );
 
-function forceDownload(url, fileName) {
+function forceDownload(url: string, fileName: string) {
   const xhr = new XMLHttpRequest();
   xhr.open("GET", url, true);
   xhr.responseType = "blob";

@@ -8,7 +8,7 @@
         v-for="competence in data?.competences?.edges"
         :to="{ name: 'record-students-student-competences-competence', params: { subject: competence?.id } }"
       >
-        <DCompetence v-if="competence" :competence="competence"> </DCompetence>
+        <DCompetence v-if="competence" :competence="(competence as Competence)"> </DCompetence>
       </RouterLink>
     </div>
   </div>
@@ -18,11 +18,12 @@
 import { useQuery } from "@urql/vue";
 import { graphql } from "@/gql";
 import DCompetence from "@/components/d-competence/d-competence.vue";
+import { Competence } from "@/gql/graphql";
 
 const { data } = useQuery({
   query: graphql(`
     query studentCompetences {
-      competences(filter: { type: subject }) {
+      competences(filter: { type: subject }, limit: 100) {
         edges {
           id
           name

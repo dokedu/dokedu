@@ -31,7 +31,7 @@ import DButton from "../../components/d-button/d-button.vue";
 import { FolderPlus, Plus } from "lucide-vue-next";
 import DDialog from "../../components/d-dialog/d-dialog.vue";
 import { useFileDialog } from "@vueuse/core";
-import { computed, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 import { useMutation, useQuery } from "@urql/vue";
 import { graphql } from "../../gql";
 import { useRoute } from "vue-router";
@@ -45,6 +45,7 @@ const folderId = computed(() => route.params.id);
 const emit = defineEmits(["upload"]);
 
 onChange(async (e) => {
+  if (!e) return;
   emit("upload", {
     input: {
       file: e[0],
@@ -62,7 +63,7 @@ async function addFolder() {
     await createFolder({
       input: {
         name: folderName,
-        parentId: folderId.value,
+        parentId: folderId.value as string,
       },
     });
     // refreshFiles();
@@ -92,9 +93,9 @@ const { data: folder } = useQuery({
       }
     }
   `),
-  variables: {
-    id: folderId,
-  },
+  variables: reactive({
+    id: folderId.value as string,
+  }),
   pause: !folderId.value,
 });
 </script>

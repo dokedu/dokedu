@@ -14,7 +14,7 @@
               {{ tag.name }}
             </d-tag>
             <svg
-              v-show="entry?.tags?.length > 0 && entry?.tags.map((el) => el.id).includes(tag.id)"
+              v-show="entry && entry.tags && entry.tags.length > 0 && entry.tags.map((el) => el.id).includes(tag.id)"
               class="stroke-stone-700"
               width="24"
               height="24"

@@ -14,7 +14,7 @@ import PageWrapper from "../../../components/PageWrapper.vue";
 import PageContent from "../../../components/PageContent.vue";
 import { useMutation, useQuery } from "@urql/vue";
 import { graphql } from "../../../gql";
-import { computed, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { File } from "../../../gql/graphql";
 import DFileList from "./../DFileList.vue";
@@ -31,12 +31,13 @@ const folderId = computed(() => {
 
 const previewFile = ref<File | null>(null);
 
+// @ts-expect-error
 async function upload({ file, parentId = folderId.value }) {
   console.log(parentId);
   await uploadFile({
     input: {
       file: file,
-      parentId: parentId,
+      parentId: parentId as string,
     },
   });
   refreshFiles({
@@ -96,10 +97,10 @@ const { data: files, executeQuery: refreshFiles } = useQuery({
       }
     }
   `),
-  variables: {
+  variables: reactive({
     input: {
-      parentId: folderId,
+      parentId: folderId.value as string,
     },
-  },
+  }),
 });
 </script>

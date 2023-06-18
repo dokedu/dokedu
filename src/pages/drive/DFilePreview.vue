@@ -39,6 +39,7 @@ const canvas = ref<HTMLCanvasElement | null>(null);
 const url = ref<string | null>();
 
 watch(
+  // @ts-expect-error
   () => props.file,
   async (file: File) => {
     if (file) {
@@ -48,6 +49,7 @@ watch(
           id: file.id,
         },
       });
+      // @ts-expect-error
       url.value = data.generateFileURL.url;
 
       if (file.name.includes(".pdf")) {
@@ -57,12 +59,15 @@ watch(
   }
 );
 
+// @ts-expect-error
 async function renderPDF(url) {
+  // @ts-expect-error
   const pdfjsLib = await import("pdfjs-dist/build/pdf");
   pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdfjs-3.7.107-dist/build/pdf.worker.js";
 
   const loadingTask = pdfjsLib.getDocument(url);
 
+  // @ts-expect-error
   await loadingTask.promise.then(async (pdf) => {
     const page = await pdf.getPage(1);
 

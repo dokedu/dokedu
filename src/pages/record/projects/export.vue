@@ -82,7 +82,7 @@
                           </thead>
                           <tbody class="divide-y divide-neutral-200 bg-white">
                             <tr
-                              v-for="competence in subject.competences.sort((a, b) => a.name.localeCompare(b.name))"
+                              v-for="competence in subject.competences.sort((a: any, b: any) => a.name.localeCompare(b.name))"
                               :key="competence.id"
                               class="divide-x divide-neutral-200"
                             >
@@ -125,7 +125,7 @@
 import PageHeader from "../../../components/PageHeader.vue";
 import PageWrapper from "../../../components/PageWrapper.vue";
 import PageContent from "../../../components/PageContent.vue";
-import { gql, useQuery } from "@urql/vue";
+import { useQuery } from "@urql/vue";
 import { graphql } from "../../../gql";
 import { computed, reactive, ref } from "vue";
 import dButton from "../../../components/d-button/d-button.vue";
@@ -161,6 +161,7 @@ type Event = {
   subjects: [any];
 };
 
+// @ts-expect-error
 const events = computed<Event[] | []>(() => {
   if (!data.value?.exportEvents) {
     return [];
