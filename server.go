@@ -126,7 +126,10 @@ func main() {
 }
 
 func minioClient() *minio.Client {
-	endpoint := "localhost:9000"
+	host := os.Getenv("MINIO_HOST")
+	port := os.Getenv("MINIO_PORT")
+	//endpoint := "localhost:9000"
+	endpoint := host + ":" + port
 	accessKeyID := os.Getenv("MINIO_ACCESS_KEY_ID")
 	secretAccessKey := os.Getenv("MINIO_SECRET_ACCESS_KEY")
 	useSSL := false
