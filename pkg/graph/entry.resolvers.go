@@ -479,12 +479,27 @@ func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, fi
 	}
 
 	var entries []*db.Entry
-
-	query := r.DB.NewSelect().Model(&entries).Where("entry.organisation_id = ?", currentUser.OrganisationID).Limit(pageLimit).Offset(pageOffset).Order("created_at DESC")
+	query := r.DB.NewSelect().
+		Model(&entries).
+		Distinct().
+		Join("JOIN entry_users eu ON entry.id = eu.entry_id").
+		Where("eu.deleted_at IS NULL").
+		Join("JOIN entry_tags et ON entry.id = et.entry_id").
+		Where("et.deleted_at IS NULL").
+		Where("entry.organisation_id = ?", currentUser.OrganisationID).
+		Limit(pageLimit).Offset(pageOffset).
+		Order("entry.created_at DESC")
 
 	if filter != nil {
-		if len(filter.Users) > 0 {
-			query = query.Join("JOIN entry_users eu ON eu.entry_id = entry.id").Where("eu.user_id IN (?)", bun.In(filter.Users))
+		if filter.Users != nil && len(filter.Users) > 0 {
+			query.Where("eu.user_id IN (?)", bun.In(filter.Users))
+		}
+		if filter.Authors != nil && len(filter.Authors) > 0 {
+			query.Where("entry.user_id IN (?)", bun.In(filter.Authors))
+		}
+		if filter.Tags != nil && len(filter.Tags) > 0 {
+			query.Where("et.tag_id IN (?)", bun.In(filter.Tags))
+			query.Where("(SELECT COUNT(DISTINCT et2.tag_id) FROM entry_tags et2 WHERE et2.entry_id = entry.id) >= ?", len(filter.Tags))
 		}
 	}
 
