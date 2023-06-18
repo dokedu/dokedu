@@ -29,8 +29,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const defaultPort = "8080"
-const jwtSecret = "12345678"
+const defaultPort = "1323"
 
 func main() {
 	// Allows us to cancel the context when we want to stop the server
@@ -84,11 +83,6 @@ func main() {
 		return c.String(http.StatusOK, "")
 	})
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = defaultPort
-	}
-
 	e.Use(middleware.CORS())
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
@@ -122,7 +116,7 @@ func main() {
 	})
 
 	// Start server
-	e.Logger.Fatal(e.Start("0.0.0.0:" + port))
+	e.Logger.Fatal(e.Start("0.0.0.0:" + defaultPort))
 }
 
 func minioClient() *minio.Client {
