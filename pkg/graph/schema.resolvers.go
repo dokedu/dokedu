@@ -112,7 +112,13 @@ func (r *competenceResolver) UserCompetences(ctx context.Context, obj *db.Compet
 	}
 
 	var userCompetences []*db.UserCompetence
-	err = r.DB.NewSelect().Model(&userCompetences).Where("competence_id = ?", obj.ID).Where("user_id = ?", *userID).Where("organisation_id = ?", currentUser.OrganisationID).Order("created_at DESC").Scan(ctx)
+	err = r.DB.NewSelect().
+		Model(&userCompetences).
+		Where("competence_id = ?", obj.ID).
+		Where("user_id = ?", *userID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Order("created_at DESC").
+		Scan(ctx)
 
 	if err != nil {
 		return nil, err
@@ -840,7 +846,13 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) ([]*d
 	}
 
 	var tags []*db.Tag
-	err = r.DB.NewSelect().Model(&tags).Where("organisation_id = ?", currentUser.OrganisationID).Limit(pageLimit).Offset(pageOffset).Scan(ctx)
+	err = r.DB.NewSelect().
+		Model(&tags).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Limit(pageLimit).
+		Offset(pageOffset).
+		Order("name").
+		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -1166,7 +1178,9 @@ func (r *userStudentResolver) EventsCount(ctx context.Context, obj *db.UserStude
 	count, err := r.DB.NewSelect().
 		Model(&db.EntryEvent{}).
 		Join("JOIN entry_users ON entry_users.entry_id = entry_event.entry_id").
-		Where("entry_users.user_id = ?", obj.UserID).Count(ctx)
+		Where("entry_users.user_id = ?", obj.UserID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Count(ctx)
 
 	if err != nil {
 		return 0, err

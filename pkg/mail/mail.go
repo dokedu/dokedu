@@ -2,7 +2,9 @@ package mail
 
 import (
 	"fmt"
+	"github.com/labstack/gommon/log"
 	"net/smtp"
+	"os"
 )
 
 type Mailer struct {
@@ -34,6 +36,7 @@ func (m Mailer) Send(to []string, subject string, message string) error {
 	addr := fmt.Sprintf("%s:%d", m.cfg.Host, m.cfg.Port)
 	err := smtp.SendMail(addr, m.auth, "app@dokedu.org", to, msg)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -41,10 +44,13 @@ func (m Mailer) Send(to []string, subject string, message string) error {
 }
 
 func (m Mailer) SendPasswordReset(to string, name string, token string) error {
-	link := fmt.Sprintf("http://localhost:5173/reset-password#token=%s", token)
+	frontendUrl := os.Getenv("FRONTEND_URL")
+
+	link := fmt.Sprintf("https://%s/reset-password#token=%s", frontendUrl, token)
 
 	template, err := PasswordResetMailTemplate(name, link)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 

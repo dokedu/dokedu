@@ -46,7 +46,12 @@ func (r *eventResolver) Competences(ctx context.Context, obj *db.Event) ([]*db.C
 	}
 
 	var competences []*db.Competence
-	err := r.DB.NewSelect().Model(&competences).Join("JOIN event_competences ON event_competences.competence_id = competence.id").Where("event_competences.event_id = ?", obj.ID).Where("competence.organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err := r.DB.NewSelect().
+		Model(&competences).
+		Join("JOIN event_competences ON event_competences.competence_id = competence.id").
+		Where("event_competences.event_id = ?", obj.ID).
+		Where("competence.organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +169,14 @@ func (r *mutationResolver) ArchiveEvent(ctx context.Context, id string) (*db.Eve
 
 	var event db.Event
 	// mark event.deleted_at as now
-	err := r.DB.NewUpdate().Model(&event).Set("deleted_at = ?", time.Now()).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Returning("*").WhereAllWithDeleted().Scan(ctx)
+	err := r.DB.NewUpdate().
+		Model(&event).
+		Set("deleted_at = ?", time.Now()).
+		Where("id = ?", id).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Returning("*").
+		WhereAllWithDeleted().
+		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -217,7 +229,7 @@ func (r *queryResolver) Events(ctx context.Context, limit *int, offset *int, fil
 		query.TableExpr("NULLIF(ts_rank(to_tsvector('german', event.body), query), 0) rank_description")
 		query.TableExpr("SIMILARITY(?, event.title || event.body) similarity", *search)
 		query.Where("query @@ document OR similarity > 0")
-		query.OrderExpr("rank_title, rank_description, similarity DESC NULLS LAST")
+		query.OrderExpr("rank_title, rank_description, similarity ASC NULLS LAST")
 	} else {
 		query.Order("created_at")
 	}

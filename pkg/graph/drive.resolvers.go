@@ -172,7 +172,7 @@ func (r *mutationResolver) SingleUpload(ctx context.Context, input model.FileUpl
 	if input.BucketID != nil && len(*input.BucketID) > 0 {
 		file.BucketID = *input.BucketID
 	} else {
-		err := r.DB.NewSelect().Model(&bucket).Column("id").Where("user_id = ?", currentUser.ID).Scan(ctx)
+		err := r.DB.NewSelect().Model(&bucket).Column("id").Where("user_id = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 
 		if err != nil && err.Error() == "sql: no rows in result set" {
 			// create bucket for user
@@ -231,7 +231,7 @@ func (r *mutationResolver) CreateFolder(ctx context.Context, input model.CreateF
 		file.BucketID = *input.BucketID
 	} else {
 		var bucket db.Bucket
-		err := r.DB.NewSelect().Model(&bucket).Column("id").Where("user_id = ?", currentUser.ID).Scan(ctx)
+		err := r.DB.NewSelect().Model(&bucket).Column("id").Where("user_id = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 
 		if err != nil && err.Error() == "sql: no rows in result set" {
 			// create bucket for user
@@ -295,7 +295,7 @@ func (r *queryResolver) Buckets(ctx context.Context, input *model.BucketFilterIn
 	}
 
 	var buckets []*db.Bucket
-	query := r.DB.NewSelect().Model(&buckets).Where("user_id = ?", currentUser.ID)
+	query := r.DB.NewSelect().Model(&buckets).Where("user_id = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID)
 
 	if input != nil {
 		if input.Shared != nil {
@@ -322,7 +322,7 @@ func (r *queryResolver) Bucket(ctx context.Context, id string) (*db.Bucket, erro
 	}
 
 	var bucket db.Bucket
-	err = r.DB.NewSelect().Model(&bucket).Where("id = ?", id).Where("user_id = ?", currentUser.ID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&bucket).Where("id = ?", id).Where("user_id = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -393,7 +393,7 @@ func (r *queryResolver) MyFiles(ctx context.Context, input *model.MyFilesFilterI
 	}
 
 	var bucket db.Bucket
-	err = r.DB.NewSelect().Model(&bucket).Column("id").Where("user_id = ?", currentUser.ID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&bucket).Column("id").Where("user_id = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 
 	var files []*db.File
 	query := r.DB.NewSelect().Model(&files).Where("organisation_id = ?", currentUser.OrganisationID).Where("bucket_id = ?", bucket.ID).Order("name")
