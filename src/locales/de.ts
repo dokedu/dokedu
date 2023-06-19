@@ -3,12 +3,12 @@ export const de = {
   new: "Neu",
   filter: "Filter",
   entry: "Eintrag | Einträge",
-  student: "Student | Studenten",
+  student: "Schüler | Schüler",
   teacher: "Lehrer | Lehrer",
   tag: "Tag | Tags",
   competence: "Kompetenz | Kompetenzen",
   add: "Hinzufügen",
-  archive: "Archiv",
+  archive: "Achivieren",
   save: "Speichern",
   project: "Projekt | Projekte",
   label: "Label | Labels",
@@ -20,9 +20,9 @@ export const de = {
   subject: "Fach | Fächer",
   no_results: "Keine Ergebnisse",
   add_project: "Projekt hinzufügen",
-  add_label: "Label hinzufügen",
-  add_student: "Student hinzufügen",
-  search_students: "Studenten suchen",
+  add_label: "Tag hinzufügen",
+  add_student: "Schüler hinzufügen",
+  search_students: "Schüler suchen",
   create: "Erstellen",
 
   // Students
@@ -46,7 +46,7 @@ export const de = {
   no_projects_found: "Keine Projekte gefunden.",
   max_projects_reached:
     "Derzeit zeigen wir maximal 1000 Projekte an. Wenn deine Organisation diese Grenze erreicht, wende dich",
-  starts_at: "Beginnt bei",
+  starts_at: "Beginnt am",
   ends_at: "Endet am",
   name_of_project: "Name des Projekts",
   project_description_placeholder: "Beschreiben Sie das Projekt...",
@@ -55,7 +55,7 @@ export const de = {
   // Competences
   color: "Farbe",
   update: "Update",
-  edit_competence: "Editierkompetenz",
+  edit_competence: "Kompetenz bearbeiten",
   set_color: "Farbe einstellen",
 
   // Reports
@@ -72,12 +72,12 @@ export const de = {
   create_report: "Bericht erstellen",
   done: "Erledigt",
   error: "Fehler",
-  pending: "Anhängig",
-  processing: "Verarbeitung",
-  select_students: "Studenten auswählen",
+  pending: "Ausstehend",
+  processing: "In Bearbeitung",
+  select_students: "Schüler auswählen",
   select_tags: "Tags auswählen",
-  select_type: "Typ auswählen",
-  type: "Typ | Typen" ,
+  select_type: "Art auswählen",
+  type: "Art | Arten",
   file: "Datei | Dateien",
 
   // Tags
@@ -96,13 +96,13 @@ export const de = {
   pink: "rosa",
   gray: "grau",
 
-  level: "Level | Levels",
+  level: "Niveau | Niveaus",
   was_documented_by: "wurde dokumentiert durch",
   in: "in",
   at: "unter",
   manually: "manuell",
 
-  no_levels: "Kein Level",
+  no_levels: "Kein Niveau",
   low: "Niedrig",
   medium: "Mittel",
   high: "Hoch",
