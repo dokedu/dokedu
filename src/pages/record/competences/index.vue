@@ -23,13 +23,23 @@
             '!bg-stone-100': competence?.id === $route.params.id,
           }"
         >
-          <div class="p-2 pl-8 text-strong">{{ competence?.name }}</div>
-          <div class="p-2 pr-8 text-strong">{{ grades(competence) }}</div>
+          <div class="p-2 pl-8 text-strong">
+            <DTag :color="competence.color">{{ competence?.name }}</DTag>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="rounded-lg p-1 hover:bg-stone-200" @click.prevent="editCompetence(competence)">
+              <Edit2 :size="16" class="stroke-stone-700" />
+            </div>
+            <div class="p-2 pr-8 text-strong">{{ grades(competence) }}</div>
+          </div>
         </router-link>
       </div>
     </PageContent>
   </PageWrapper>
   <router-view />
+  <div v-if="competence">
+    <DCompetenceEditDialog :competence="competence" @close="competence = null" />
+  </div>
 </template>
 <script setup lang="ts">
 import PageHeader from "@/components/PageHeader.vue";
@@ -38,10 +48,18 @@ import PageContent from "@/components/PageContent.vue";
 import { useQuery } from "@urql/vue";
 import { graphql } from "@/gql";
 import { reactive, ref } from "vue";
+import { Edit2 } from "lucide-vue-next";
+import DCompetenceEditDialog from "./DCompetenceEditDialog.vue";
+import { Competence } from "@/gql/graphql";
+import DTag from "@/components/d-tag/d-tag.vue";
 
 const search = ref("");
+const competence = ref<Competence | null>(null);
 
-// @ts-expect-error
+function editCompetence(value: Competence) {
+  competence.value = value;
+}
+
 function grades(competence: Competence) {
   // return first and last grade and if only one grade only that one as string
   if (competence.grades.length === 1) {
@@ -59,6 +77,7 @@ const { data } = useQuery({
           name
           type
           grades
+          color
           parents {
             id
             name
