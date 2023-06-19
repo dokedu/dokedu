@@ -63,6 +63,9 @@ import DFilter from "@/components/d-filter/d-filter.vue";
 import { graphql } from "@/gql";
 import DTag from "@/components/d-tag/d-tag.vue";
 import { Entry } from "@/gql/graphql";
+import { useI18n } from "vue-i18n";
+
+const i18nLocale = useI18n();
 
 const student = ref();
 const teacher = ref();
@@ -177,7 +180,7 @@ function dateOnly(date: string) {
     month: "long",
     day: "2-digit",
   };
-  return new Date(date).toLocaleDateString("de-DE", options);
+  return new Date(date).toLocaleDateString(i18nLocale.locale.value, options);
 }
 
 const filtersOpen = ref(false);

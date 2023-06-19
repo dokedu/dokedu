@@ -102,10 +102,15 @@ export const en = {
   at: "at",
   manually: "manually",
 
-  no_levels: "No level",
+  no_level: "No level",
   low: "Low",
   medium: "Medium",
   high: "High",
 
   log_out: "Log out",
+
+  saved_successfully: "Saved successfully",
+  created: "created",
+  updated: "updated",
+  delete: "Delete",
 };

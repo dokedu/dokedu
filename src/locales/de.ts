@@ -108,4 +108,9 @@ export const de = {
   high: "Hoch",
 
   log_out: "Abmelden",
+
+  saved_successfully: "Erfolgreich gespeichert",
+  created: "erstellt",
+  updated: "aktualisiert",
+  delete: "Löschen",
 };

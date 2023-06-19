@@ -46,6 +46,9 @@ import EntryFormLabels from "./EntryFormLabels.vue";
 import EntryFormStudents from "./EntryFormStudents.vue";
 import { createNotification } from "@/composables/useToast";
 import { Save } from "lucide-vue-next";
+import { useI18n } from "vue-i18n";
+
+const t = useI18n().t;
 
 const props = defineProps<{
   entry: Partial<Entry>;
@@ -203,22 +206,24 @@ function userCompetences(): { error: boolean; eacs: any[] } {
 }
 
 async function submit() {
+  let error: boolean;
   if (props.mode === "edit") {
-    await update();
+    error = await update();
   } else {
-    await create();
+    error = await create();
   }
 
+  if (error) return;
   await createNotification({
-    title: "Entry" + (props.mode === "edit" ? " updated" : " created"),
-    description: "Saved successfully.",
+    title: t("entry") + (props.mode === "edit" ? ` ${t("updated")}` : ` ${t("created")}`),
+    description: t("saved_successfully"),
     icon: Save,
   });
 }
 
 async function update() {
   const { error, eacs } = userCompetences();
-  if (error) return;
+  if (error) return true;
 
   const input: any = {
     date: entry.value.date,
@@ -232,12 +237,12 @@ async function update() {
   input["id"] = entry.value.id;
   await updateEntry({ input });
   emit("saved");
-  return true;
+  return false;
 }
 
 async function create() {
   const { error, eacs } = userCompetences();
-  if (error) return;
+  if (error) return true;
 
   const input: any = {
     date: entry.value.date,
@@ -250,5 +255,6 @@ async function create() {
 
   const { data } = await createEntry({ input });
   emit("saved", data?.createEntry);
+  return false;
 }
 </script>
