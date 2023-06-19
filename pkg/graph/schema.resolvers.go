@@ -1209,7 +1209,7 @@ func (r *userStudentResolver) EventsCount(ctx context.Context, obj *db.UserStude
 		Model(&db.EntryEvent{}).
 		Join("JOIN entry_users ON entry_users.entry_id = entry_event.entry_id").
 		Where("entry_users.user_id = ?", obj.UserID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
+		Where("entry_event.organisation_id = ?", currentUser.OrganisationID).
 		Count(ctx)
 
 	if err != nil {
