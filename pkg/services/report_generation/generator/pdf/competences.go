@@ -48,7 +48,14 @@ func (g *Generator) CompetencesReportData(report db.Report) (*CompetencesTemplat
 	}
 
 	var userCompetences []db.UserCompetence
-	err = g.cfg.DB.NewSelect().Model(&userCompetences).Where("user_id = ?", report.StudentUserID).Where("organisation_id = ?", report.OrganisationID).Order("created_at DESC").Scan(ctx)
+	err = g.cfg.DB.NewSelect().
+		Model(&userCompetences).
+		Where("user_id = ?", report.StudentUserID).
+		Where("organisation_id = ?", report.OrganisationID).
+		Where("created_at >= ?", report.From).
+		Where("created_at <= (DATE ? + 1)", report.To).
+		Order("created_at DESC").
+		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}

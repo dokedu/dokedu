@@ -33,7 +33,14 @@ func (g *Generator) EntriesReportData(report db.Report) (*ReportData, error) {
 	var reportData ReportData
 
 	var entries []db.Entry
-	err := g.cfg.DB.NewSelect().Model(&entries).Join("JOIN entry_users eu ON eu.entry_id = entry.id").Where("eu.user_id = ?", report.StudentUserID).Scan(ctx)
+	err := g.cfg.DB.
+		NewSelect().
+		Model(&entries).
+		Join("JOIN entry_users eu ON eu.entry_id = entry.id").
+		Where("eu.user_id = ?", report.StudentUserID).
+		Where("date >= ?", report.From).
+		Where("date <= ?", report.To).
+		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
