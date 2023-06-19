@@ -26,7 +26,7 @@ const router = useRouter();
 function upload(file) {
   uploadFile({
     input: {
-      file: file,
+      file: file.file,
     },
   });
   refreshFiles();
