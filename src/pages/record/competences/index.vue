@@ -17,7 +17,7 @@
       <div class="flex flex-col overflow-scroll">
         <router-link
           :to="{ name: 'record-competences-competence', params: { id: competence?.id } }"
-          v-for="competence in data?.competences?.edges"
+          v-for="competence in data?.competences?.edges as Competence[]"
           class="flex justify-between border-b border-stone-100 text-sm transition-all hover:bg-stone-50"
           :class="{
             '!bg-stone-100': competence?.id === $route.params.id,
