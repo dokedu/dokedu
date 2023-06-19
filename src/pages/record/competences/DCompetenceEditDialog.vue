@@ -141,6 +141,6 @@ const onUpdate = async () => {
   if (mutation.error) {
     error.value = mutation.error.graphQLErrors[0].message;
   }
-  emit("updated");
+  emit("close");
 };
 </script>
