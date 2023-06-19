@@ -44,11 +44,17 @@
                 {{ formatDate(new Date(report.createdAt), "DD.MM.YYYY HH:ss") }} Uhr
               </td>
               <td
-                v-if="report?.status === 'done'"
+                v-if="report?.status === 'done' && report.file"
                 class="p-2 pr-8 text-left text-sm font-normal text-default hover:underline"
                 @click="downloadFile(report)"
               >
                 Download
+              </td>
+              <td
+                v-else-if="!report.file && report.status === 'done'"
+                class="p-2 pr-8 text-left text-sm font-normal text-default"
+              >
+                No file
               </td>
               <td v-else class="p-2 pr-8 text-left text-sm font-normal text-default"></td>
             </tr>
