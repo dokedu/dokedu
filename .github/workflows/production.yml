@@ -37,7 +37,7 @@ jobs:
           context: .
           file: Dockerfile
           build-args: |
-            VITE_API_URL=https://api.dokedu.dev/query
+            VITE_API_URL=https://api.dokedu.org/query
           push: true # ${{ github.ref_type == 'tag' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
