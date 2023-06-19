@@ -606,6 +606,36 @@ func (r *mutationResolver) UpdatePassword(ctx context.Context, oldPassword strin
 	panic(fmt.Errorf("not implemented: UpdatePassword - updatePassword"))
 }
 
+// UpdateCompetence is the resolver for the updateCompetence field.
+func (r *mutationResolver) UpdateCompetence(ctx context.Context, input model.UpdateCompetenceInput) (*db.Competence, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	var competence db.Competence
+	competence.ID = input.ID
+	err = r.DB.NewSelect().
+		Model(&competence).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		WherePK().
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if input.Color != nil {
+		competence.Color = sql.NullString{String: *input.Color, Valid: true}
+	}
+
+	err = r.DB.NewUpdate().Model(&competence).WherePK().Returning("*").Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &competence, nil
+}
+
 // Owner is the resolver for the owner field.
 func (r *organisationResolver) Owner(ctx context.Context, obj *db.Organisation) (*db.User, error) {
 	_, err := middleware.GetUser(ctx)

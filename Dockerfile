@@ -16,6 +16,13 @@ RUN apk add --no-cache chromium
 RUN apk add --no-cache ca-certificates postgresql-client curl tini bash gnupg
 ENTRYPOINT ["/sbin/tini", "--"]
 
+RUN wget 'https://fonts.google.com/download?family=Inter|Mali' -O googlefonts.zip
+RUN unzip googlefonts.zip -d /usr/share/fonts/googlefonts/
+RUN rm -f googlefonts.zip
+
+# refresh the font cache
+RUN fc-cache -fv
+
 ENV GO_ENV=production
 EXPOSE 1323
 

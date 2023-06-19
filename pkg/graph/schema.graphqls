@@ -272,6 +272,11 @@ type ForgotPasswordPayload {
     success: Boolean!
 }
 
+input UpdateCompetenceInput {
+    id: ID!
+    color: String
+}
+
 extend type Mutation {
     signIn(input: SignInInput!): SignInPayload!
     resetPassword(input: ResetPasswordInput!): ResetPasswordPayload!
@@ -295,5 +300,7 @@ extend type Mutation {
     createReport(input: CreateReportInput!): Report!
 
     updatePassword(oldPassword: String!, newPassword: String!): Boolean!
+
+    updateCompetence(input: UpdateCompetenceInput!): Competence!
 }
 

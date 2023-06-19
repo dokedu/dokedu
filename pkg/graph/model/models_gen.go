@@ -226,6 +226,11 @@ type SignUpInput struct {
 	Password  string `json:"password"`
 }
 
+type UpdateCompetenceInput struct {
+	ID    string  `json:"id"`
+	Color *string `json:"color,omitempty"`
+}
+
 type UpdateEntryInput struct {
 	ID              string                       `json:"id"`
 	Date            *string                      `json:"date,omitempty"`

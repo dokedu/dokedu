@@ -219,6 +219,7 @@ type ComplexityRoot struct {
 		SignIn                func(childComplexity int, input model.SignInInput) int
 		SignOut               func(childComplexity int) int
 		SingleUpload          func(childComplexity int, input model.FileUploadInput) int
+		UpdateCompetence      func(childComplexity int, input model.UpdateCompetenceInput) int
 		UpdateEntry           func(childComplexity int, input model.UpdateEntryInput) int
 		UpdateEvent           func(childComplexity int, input model.UpdateEventInput) int
 		UpdatePassword        func(childComplexity int, oldPassword string, newPassword string) int
@@ -442,6 +443,7 @@ type MutationResolver interface {
 	UpdateTag(ctx context.Context, id string, input model.CreateTagInput) (*db.Tag, error)
 	CreateReport(ctx context.Context, input model.CreateReportInput) (*db.Report, error)
 	UpdatePassword(ctx context.Context, oldPassword string, newPassword string) (bool, error)
+	UpdateCompetence(ctx context.Context, input model.UpdateCompetenceInput) (*db.Competence, error)
 }
 type OrganisationResolver interface {
 	Owner(ctx context.Context, obj *db.Organisation) (*db.User, error)
@@ -1373,6 +1375,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.SingleUpload(childComplexity, args["input"].(model.FileUploadInput)), true
 
+	case "Mutation.updateCompetence":
+		if e.complexity.Mutation.UpdateCompetence == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateCompetence_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateCompetence(childComplexity, args["input"].(model.UpdateCompetenceInput)), true
+
 	case "Mutation.updateEntry":
 		if e.complexity.Mutation.UpdateEntry == nil {
 			break
@@ -2228,6 +2242,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputSharedDriveFilterInput,
 		ec.unmarshalInputSignInInput,
 		ec.unmarshalInputSignUpInput,
+		ec.unmarshalInputUpdateCompetenceInput,
 		ec.unmarshalInputUpdateEntryInput,
 		ec.unmarshalInputUpdateEventInput,
 		ec.unmarshalInputUpdateUserCompetenceInput,
@@ -2634,6 +2649,21 @@ func (ec *executionContext) field_Mutation_singleUpload_args(ctx context.Context
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNFileUploadInput2exampleᚋpkgᚋgraphᚋmodelᚐFileUploadInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateCompetence_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.UpdateCompetenceInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNUpdateCompetenceInput2exampleᚋpkgᚋgraphᚋmodelᚐUpdateCompetenceInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -9367,6 +9397,81 @@ func (ec *executionContext) fieldContext_Mutation_updatePassword(ctx context.Con
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updatePassword_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateCompetence(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateCompetence(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateCompetence(rctx, fc.Args["input"].(model.UpdateCompetenceInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.Competence)
+	fc.Result = res
+	return ec.marshalNCompetence2ᚖexampleᚋpkgᚋdbᚐCompetence(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateCompetence(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Competence_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Competence_name(ctx, field)
+			case "type":
+				return ec.fieldContext_Competence_type(ctx, field)
+			case "grades":
+				return ec.fieldContext_Competence_grades(ctx, field)
+			case "color":
+				return ec.fieldContext_Competence_color(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Competence_createdAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_Competence_parents(ctx, field)
+			case "competences":
+				return ec.fieldContext_Competence_competences(ctx, field)
+			case "userCompetences":
+				return ec.fieldContext_Competence_userCompetences(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateCompetence_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -17209,6 +17314,42 @@ func (ec *executionContext) unmarshalInputSignUpInput(ctx context.Context, obj i
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateCompetenceInput(ctx context.Context, obj interface{}) (model.UpdateCompetenceInput, error) {
+	var it model.UpdateCompetenceInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "color"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "color":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("color"))
+			it.Color, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateEntryInput(ctx context.Context, obj interface{}) (model.UpdateEntryInput, error) {
 	var it model.UpdateEntryInput
 	asMap := map[string]interface{}{}
@@ -19135,6 +19276,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updatePassword(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateCompetence":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateCompetence(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -22076,6 +22226,11 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNUpdateCompetenceInput2exampleᚋpkgᚋgraphᚋmodelᚐUpdateCompetenceInput(ctx context.Context, v interface{}) (model.UpdateCompetenceInput, error) {
+	res, err := ec.unmarshalInputUpdateCompetenceInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNUpdateEntryInput2exampleᚋpkgᚋgraphᚋmodelᚐUpdateEntryInput(ctx context.Context, v interface{}) (model.UpdateEntryInput, error) {

@@ -8,6 +8,7 @@ import (
 type Competence struct {
 	Name         string
 	Level        int
+	Color        string
 	IsCompetence bool
 	Competences  []Competence
 }
@@ -53,7 +54,13 @@ func (g *Generator) CompetencesReportData(report db.Report) (*CompetencesTemplat
 		}
 		data.Competences[i].Name = subjects[i].Name
 
-		competences, err := g.populateCompetences(report, subjects[i], competencesMap, userCompetencesMap)
+		data.Competences[i].Color = subjects[i].Color.String
+
+		if len(data.Competences[i].Color) == 0 {
+			data.Competences[i].Color = "stone"
+		}
+
+		competences, err := g.populateCompetences(report, subjects[i], competencesMap, userCompetencesMap, data.Competences[i].Color)
 		if err != nil {
 			return nil, err
 		}
@@ -98,7 +105,7 @@ func GetUserCompetencesByCompetenceId(userCompetences map[string][]db.UserCompet
 	return result
 }
 
-func (g *Generator) populateCompetences(report db.Report, parent db.Competence, competencesData map[string][]db.Competence, userCompetences map[string][]db.UserCompetence) ([]Competence, error) {
+func (g *Generator) populateCompetences(report db.Report, parent db.Competence, competencesData map[string][]db.Competence, userCompetences map[string][]db.UserCompetence, color string) ([]Competence, error) {
 	var data []Competence
 
 	competences := GetCompetenceByParent(competencesData, parent)
@@ -111,6 +118,8 @@ func (g *Generator) populateCompetences(report db.Report, parent db.Competence, 
 		if data[i].Competences == nil {
 			data[i].Competences = make([]Competence, len(competences))
 		}
+
+		data[i].Color = color
 
 		data[i].Name = competences[i].Name
 		if competences[i].CompetenceType == db.CompetenceTypeCompetence {
@@ -125,7 +134,7 @@ func (g *Generator) populateCompetences(report db.Report, parent db.Competence, 
 		}
 
 		for i := range competences {
-			competences, err := g.populateCompetences(report, competences[i], competencesData, userCompetences)
+			competences, err := g.populateCompetences(report, competences[i], competencesData, userCompetences, color)
 			if err != nil {
 				return nil, err
 			}
