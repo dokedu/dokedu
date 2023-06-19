@@ -1,7 +1,7 @@
 <template>
   <div class="text-sm">
     <header class="mb-2 flex items-center justify-between">
-      <div class="text-stone-500">Students</div>
+      <div class="text-stone-500">{{ $t("student", 2) }}</div>
       <div class="rounded-md p-1 hover:bg-stone-100" @click="dialogStudents.showModal()">
         <Plus :size="20" class="stroke-stone-500" />
       </div>
@@ -31,7 +31,7 @@
       <div class="rounded-md">
         <Plus :size="20" class="stroke-stone-500" />
       </div>
-      <span class="pr-2 text-stone-500">Add student</span>
+      <span class="pr-2 text-stone-500">{{ $t("add_student") }}</span>
     </div>
   </div>
   <dialog
@@ -45,7 +45,7 @@
           v-model="search"
           name="student-search"
           id="student-search"
-          placeholder="Search students"
+          :placeholder="$t('search_students')"
           class="w-full rounded-md border border-stone-200 px-3 py-1.5 text-sm shadow-sm outline-none placeholder:text-stone-400 focus:border-stone-200 focus:ring-0"
         />
         <div class="rounded-md p-1 hover:bg-stone-100" @click="dialogStudents.close()">
@@ -53,7 +53,7 @@
         </div>
       </div>
       <div class="flex flex-1 flex-col overflow-auto">
-        <div class="mb-2 px-4 text-xs uppercase text-stone-500">Students</div>
+        <div class="mb-2 px-4 text-xs uppercase text-stone-500">{{ $t("student", 2) }}</div>
         <div class="flex h-full flex-1 flex-col gap-1 overflow-auto px-4 pb-4">
           <div
             v-for="student in students?.users?.edges"

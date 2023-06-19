@@ -1,18 +1,16 @@
 <template>
-  <div class="flex items-center justify-between border-b border-stone-100 px-8 py-3 h-14">
+  <div class="flex h-14 items-center justify-between border-b border-stone-100 px-8 py-3">
     <div class="flex items-center">
       <router-link :to="{ name: 'record-entries' }">
-        <d-icon-button size="md" :icon="X">
-        </d-icon-button>
+        <d-icon-button size="md" :icon="X"> </d-icon-button>
       </router-link>
-
     </div>
     <div class="flex gap-2">
       <d-button v-if="mode !== 'new'" size="md" :icon-left="Trash2" type="outline" @click="$emit('archive')">
-        Archive
+        {{ $t("archive") }}
       </d-button>
       <d-button type="primary" size="md" :icon-left="Save" @click="$emit('submit')">
-        {{ mode === "new" ? "Create" : "Save" }}
+        {{ mode === "new" ? $t("create") : $t("save") }}
       </d-button>
     </div>
   </div>

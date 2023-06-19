@@ -2,18 +2,18 @@
   <DDialog :open="modalOpen" @close="onClose">
     <template #header>
       <div class="flex items-center justify-between">
-        <div class="font-medium text-strong">Create tag</div>
+        <div class="font-medium text-strong">{{ $t("create_tag") }}</div>
         <button @click="onClose"><X class="h-4 w-4"></X></button>
       </div>
     </template>
     <template #main>
       <div class="pb-4">
         <div class="flex items-center gap-4">
-          <div class="min-w-16 text-stone-400">Name</div>
+          <div class="min-w-16 text-sm text-stone-400">{{ $t("name") }}</div>
           <DInput name="name" v-model="name" />
         </div>
         <div class="relative mt-4 flex items-center gap-4">
-          <div class="min-w-16 text-stone-400">Color</div>
+          <div class="min-w-16 text-sm text-stone-400">{{ $t("color") }}</div>
           <div class="relative w-full">
             <DContextMenu
               :show="contextMenuOpen"
@@ -27,7 +27,7 @@
                   v-for="color in colors"
                   @click="onSelectColor(color)"
                 >
-                  <DTag :color="color">{{ color }}</DTag>
+                  <DTag :color="color">{{ $t(color) }}</DTag>
                 </div>
               </div>
             </DContextMenu>
@@ -36,7 +36,7 @@
               @click="contextMenuOpen = true"
             >
               <DTag v-if="tagColor" :color="tagColor" class="w-1/4 p-2">{{ tagColor }}</DTag>
-              <div v-else class="text-stone-400">Set color</div>
+              <div v-else class="text-stone-400">{{ $t("set_tag") }}</div>
             </div>
           </div>
         </div>
@@ -45,8 +45,8 @@
     </template>
     <template #footer>
       <div class="flex justify-between">
-        <DButton type="outline" size="md" @click="onClose">Cancel</DButton>
-        <DButton type="primary" size="md" @click="onCreate">Create</DButton>
+        <DButton type="outline" size="md" @click="onClose">{{ $t("cancel") }}</DButton>
+        <DButton type="primary" size="md" @click="onCreate">{{ $t("create") }}</DButton>
       </div>
     </template>
   </DDialog>

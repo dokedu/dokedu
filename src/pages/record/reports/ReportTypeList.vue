@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center gap-2">
-    <div class="w-20 text-sm font-medium text-strong">Type</div>
+    <div class="w-20 text-sm font-medium text-strong">{{ $t("type") }}</div>
     <div class="w-full">
       <DContextMenu
         :show="contextMenuOpen"
@@ -29,7 +29,7 @@
         <div v-if="selectedType" class="text-sm text-strong">
           {{ selectedType.label }}
         </div>
-        <div v-else class="text-sm text-subtle">Select type</div>
+        <div v-else class="text-sm text-subtle">{{ $t("select_type") }}</div>
       </div>
     </div>
   </div>
@@ -38,8 +38,9 @@
 <script lang="ts" setup>
 import DContextMenu from "@/components/d-context-menu/d-context-menu.vue";
 import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { Check } from "lucide-vue-next";
+import { useI18n } from "vue-i18n";
 
 const emit = defineEmits(["update"]);
 
@@ -51,14 +52,15 @@ export type ReportType = {
 
 const contextMenuOpen = ref(false);
 const selectedType = ref<ReportType>();
+const { t } = useI18n();
 
-const types = [
-  { label: "Entries", kind: "entries", format: "pdf" },
-  { label: "Competences", kind: "competences", format: "pdf" },
+const types = computed(() => [
+  { label: t("entry", 2), kind: "entries", format: "pdf" },
+  { label: t("competence", 2), kind: "competences", format: "pdf" },
   // { label: "Subjects", kind: "subjects", format: "pdf" },
   // { label: "Entries in .docx", kind: "entries", format: "docx" },
   // { label: "Subjects in .docx", kind: "subjects", format: "docx" },
-];
+]);
 
 function selectType(type: ReportType) {
   selectedType.value = type;

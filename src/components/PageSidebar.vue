@@ -12,7 +12,7 @@
             :to="{ name: 'home' }"
             class="text-sm text-stone-700 transition-all duration-100 hover:text-stone-950"
           >
-            Acme GmbH
+            Dokumentation
           </router-link>
         </div>
         <div
@@ -61,10 +61,25 @@
     <div class="px-1 py-4">
       <div
         class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
+      >
+        <Globe class="stroke-stone-500" :size="18" />
+        <select
+          name="language"
+          id="lang"
+          class="block w-full rounded-lg border border-stone-200 bg-stone-50 px-2 py-1 text-sm"
+          v-model="language"
+        >
+          <option value="en">English</option>
+          <option value="de">Deutsch</option>
+        </select>
+      </div>
+
+      <div
+        class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
         @click="signOut"
       >
         <LogOut class="stroke-stone-500" :size="18" />
-        <div class="text-sm">Log out</div>
+        <div class="text-sm">{{ $t("log_out") }}</div>
       </div>
     </div>
   </header>
@@ -86,6 +101,7 @@ import {
   Trash2,
   HardDrive,
   LogOut,
+  Globe,
 } from "lucide-vue-next";
 import { Tag } from "lucide-vue-next";
 import { onClickOutside, useStorage } from "@vueuse/core";
@@ -93,6 +109,11 @@ import { useRoute } from "vue-router";
 import { UserSquare } from "lucide-vue-next";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
+import { watch } from "vue";
+import i18n from "@/i18n";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const visibleAppSwitcher = ref<boolean>(false);
 const activeApp = useStorage("active_app", "drive");
@@ -126,14 +147,14 @@ function isLinkActive(link: AppLink) {
 
 const enabledAppList = useStorage("enabled_apps", []);
 
-const app = computed(() => apps.find((el) => el.id === activeApp.value) || null);
+const app = computed(() => apps.value.find((el) => el.id === activeApp.value) || null);
 
 const enabledApps = computed(() => {
   // @ts-expect-error
-  return apps.filter((el: { id: string }) => enabledAppList.value.includes(el.id));
+  return apps.value.filter((el: { id: string }) => enabledAppList.value.includes(el.id));
 });
 
-const apps: App[] = [
+const apps = computed<App[]>(() => [
   {
     id: "record",
     icon: Pen,
@@ -142,13 +163,13 @@ const apps: App[] = [
       {
         // icon: "file-check-02",
         icon: Pen,
-        name: "Entries",
+        name: t("entry", 2),
         route: "record-entries",
       },
       {
         // icon: "users-01",
         icon: Users,
-        name: "Students",
+        name: t("student", 2),
         route: "record-students",
       },
       // {
@@ -160,23 +181,23 @@ const apps: App[] = [
       {
         // icon: "grid-01",
         icon: Grid,
-        name: "Projects",
+        name: t("project", 2),
         route: "record-projects",
       },
       {
         // icon: "check-done-01",
         icon: CopyCheck,
-        name: "Competences",
+        name: t("competence", 2),
         route: "record-competences",
       },
       {
         icon: PieChart,
-        name: "Reports",
+        name: t("report", 2),
         route: "record-reports",
       },
       {
         icon: Tag,
-        name: "Tags",
+        name: t("tag", 2),
         route: "record-tags",
       },
     ],
@@ -237,7 +258,7 @@ const apps: App[] = [
       },
     ],
   },
-];
+]);
 
 function switchApp(appId: string | null = null) {
   if (appId) {
@@ -268,4 +289,10 @@ async function signOut() {
   // TODO: hack to ensure urql cache is cleared
   location.reload();
 }
+
+const language = useStorage("language", "en");
+
+watch(language, () => {
+  i18n.global.locale.value = language.value as "en" | "de";
+});
 </script>

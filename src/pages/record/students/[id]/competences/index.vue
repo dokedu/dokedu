@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="mb-4 flex gap-2 text-sm text-subtle">
-      <div>Fächer</div>
+      <div>{{ $t("subject", 2) }}</div>
     </div>
     <div class="flex flex-col gap-2">
       <RouterLink

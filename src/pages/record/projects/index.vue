@@ -2,22 +2,22 @@
   <PageWrapper>
     <PageHeader class="flex justify-between">
       <div class="flex items-center gap-4">
-        <div class="font-medium text-stone-950">Projects</div>
+        <div class="font-medium text-stone-950">{{ $t("project", 2) }}</div>
         <input
           v-model="search"
           type="text"
           name="search"
           id="search"
-          placeholder="Search"
+          :placeholder="$t('search')"
           class="h-8 rounded-md border border-stone-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-stone-200 focus:shadow-sm focus:ring-0"
         />
       </div>
       <div class="flex gap-2">
         <router-link :to="{ name: 'record-projects-export' }">
-          <d-button type="transparent" :icon-left="Share">Export</d-button>
+          <d-button type="transparent" :icon-left="Share">{{ $t("export") }}</d-button>
         </router-link>
         <router-link :to="{ name: 'record-projects-new' }">
-          <d-button type="primary" :icon-left="Plus"> New </d-button>
+          <d-button type="primary" :icon-left="Plus"> {{ $t("new") }} </d-button>
         </router-link>
       </div>
     </PageHeader>

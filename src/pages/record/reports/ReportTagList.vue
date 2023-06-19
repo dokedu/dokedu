@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center gap-2">
-    <div class="w-20 text-sm font-medium text-strong">Tags</div>
+    <div class="w-20 text-sm font-medium text-strong">{{ $t("tag", 2) }}</div>
     <div class="w-full">
       <DContextMenu
         :show="contextMenuOpen"
@@ -30,7 +30,7 @@
         <div v-if="selectedTags?.length > 0" class="flex flex-wrap gap-2 text-sm text-strong">
           <DTag v-for="tag in selectedTags" :key="tag.id" :color="tag.color">{{ tag.name }}</DTag>
         </div>
-        <div v-else class="text-sm text-subtle">Select tags</div>
+        <div v-else class="text-sm text-subtle">{{ $t("select_tags") }}</div>
       </div>
     </div>
   </div>

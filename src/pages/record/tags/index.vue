@@ -1,9 +1,9 @@
 <template>
   <PageWrapper>
     <PageHeader class="flex justify-between">
-      <div class="font-medium text-strong">Tags</div>
+      <div class="font-medium text-strong">{{ $t("tag", 2) }}</div>
       <div class="flex gap-2">
-        <DButton @click="toggleCreateDialog()" type="primary" size="md" :icon-left="Plus">New</DButton>
+        <DButton @click="toggleCreateDialog()" type="primary" size="md" :icon-left="Plus">{{ $t("new") }}</DButton>
       </div>
     </PageHeader>
     <div class="flex flex-col overflow-scroll">

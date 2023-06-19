@@ -3,26 +3,26 @@
     <PageHeader>
       <div class="w-full">
         <div class="flex items-center justify-between">
-          <div class="font-medium text-strong">Entries</div>
+          <div class="font-medium text-strong">{{ $t("entry", 2) }}</div>
           <div class="flex gap-2">
             <DButton
               :type="filtersOpen ? 'outline' : 'transparent'"
               size="md"
               :icon-left="ListFilter"
               @click="toggleFilters"
-              >Filter</DButton
+              >{{ $t("filter") }}</DButton
             >
             <router-link :to="{ name: 'record-entries-new' }">
-              <DButton type="primary" size="md" :icon-left="Plus">New</DButton>
+              <DButton type="primary" size="md" :icon-left="Plus">{{ $t("new") }}</DButton>
             </router-link>
           </div>
         </div>
       </div>
     </PageHeader>
     <div v-if="filtersOpen" class="flex items-start gap-2 border-b border-stone-100 px-8 py-2">
-      <DFilter :options="studentOptions" label="Student" v-model="student"></DFilter>
-      <DFilter :options="teacherOptions" label="Teacher" v-model="teacher"></DFilter>
-      <DFilter :options="tagOptions" label="Tags" multiple v-model="tags">
+      <DFilter :options="studentOptions" :label="$t('student')" v-model="student"></DFilter>
+      <DFilter :options="teacherOptions" :label="$t('teacher')" v-model="teacher"></DFilter>
+      <DFilter :options="tagOptions" :label="$t('tag', 2)" multiple v-model="tags">
         <div class="flex flex-wrap gap-2">
           <DTag v-for="tag in tags" :key="tag" :color="getTagColor(tag)" removable :id="tag" @remove="removeTag">
             {{ getTagName(tag) }}
@@ -46,7 +46,7 @@
         v-if="!data?.entries?.edges || data?.entries?.edges.length === 0"
         class="select-none px-8 py-4 text-sm text-default"
       >
-        You can create your first entry by clicking the "New" button above.
+        {{ $t("entry_placeholder") }}
       </div>
     </div>
   </PageWrapper>

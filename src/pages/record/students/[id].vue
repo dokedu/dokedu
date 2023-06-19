@@ -14,7 +14,7 @@
                 <X :size="16" class="stroke-stone-500"></X>
               </router-link>
               <router-link :to="{ name: 'record-students' }" class="cursor-pointer rounded text-sm font-medium">
-                Students
+                {{ $t("student", 2) }}
               </router-link>
               <ChevronRight :size="18" class="stroke-stone-500" />
               <span class="text-sm text-stone-950">{{ data?.user?.firstName }} {{ data?.user?.lastName }}</span>
@@ -31,7 +31,7 @@
                   "
                   size="sm"
                   :icon-left="CopyCheck"
-                  >Competences</DButton
+                  >{{ $t("competence", 2) }}</DButton
                 >
               </RouterLink>
               <RouterLink :to="{ name: 'record-students-student-entries' }">
@@ -43,18 +43,18 @@
                   "
                   size="sm"
                   :icon-left="FileCheck"
-                  >Entries</DButton
+                  >{{ $t("entry", 2) }}</DButton
                 >
               </RouterLink>
             </div>
-            <div class="mt-4 h-full overflow-scroll">
+            <div class="mt-4 h-full flex-grow overflow-scroll">
               <RouterView />
               <!-- <div v-for="i in 50" class="mb-4 h-8 bg-purple-100"></div> -->
             </div>
           </div>
         </div>
         <div class="w-full max-w-xs pb-4 pt-5">
-          <div class="border-b border-stone-100 px-6 pb-6 text-sm font-medium">Profile</div>
+          <div class="border-b border-stone-100 px-6 pb-6 text-sm font-medium">{{ $t("profile") }}</div>
           <div class="flex flex-col items-center border-b border-stone-100 py-6">
             <div class="h-24 w-24 rounded-full" :class="`bg-${color}-500`">
               <div class="flex h-full w-full items-center justify-center">
@@ -69,17 +69,17 @@
           </div>
           <div class="space-y-3 border-b border-stone-100 px-6 py-6">
             <div class="grid grid-cols-3">
-              <div class="col-span-2 text-sm text-stone-600">Grade</div>
+              <div class="col-span-2 text-sm text-stone-600">{{ $t("grade") }}</div>
               <div class="text-sm font-medium text-strong">{{ data?.user?.student?.grade }}</div>
             </div>
             <div class="grid grid-cols-3">
-              <div class="col-span-2 text-sm text-stone-600">Joined At</div>
+              <div class="col-span-2 text-sm text-stone-600">{{ $t("joined_at") }}</div>
               <div class="text-sm font-medium text-strong">
                 {{ data?.user?.student?.joinedAt ? toNormalisedDate(data?.user?.student?.joinedAt) : "-" }}
               </div>
             </div>
             <div class="grid grid-cols-3">
-              <div class="col-span-2 text-sm text-stone-600">Left At</div>
+              <div class="col-span-2 text-sm text-stone-600">{{ $t("left_at") }}</div>
               <div class="text-sm font-medium text-strong">
                 {{ data?.user?.student?.leftAt ? toNormalisedDate(data?.user?.student?.joinedAt) : "-" }}
               </div>
@@ -87,17 +87,17 @@
           </div>
           <div class="space-y-3 border-b border-stone-100 px-6 py-6">
             <div class="grid grid-cols-3">
-              <div class="col-span-2 text-sm text-stone-600">Entries</div>
+              <div class="col-span-2 text-sm text-stone-600">{{ $t("entry", 2) }}</div>
               <div class="text-sm font-medium text-strong">{{ data?.user?.student?.entriesCount }}</div>
             </div>
             <div class="grid grid-cols-3">
-              <div class="col-span-2 text-sm text-stone-600">Competences</div>
+              <div class="col-span-2 text-sm text-stone-600">{{ $t("competence", 2) }}</div>
               <div class="text-sm font-medium text-strong">
                 {{ data?.user?.student?.competencesCount }}
               </div>
             </div>
             <div class="grid grid-cols-3">
-              <div class="col-span-2 text-sm text-stone-600">Projects</div>
+              <div class="col-span-2 text-sm text-stone-600">{{ $t("project", 2) }}</div>
               <div class="text-sm font-medium text-strong">
                 {{ data?.user?.student?.eventsCount }}
               </div>

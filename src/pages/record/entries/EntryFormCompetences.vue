@@ -2,7 +2,7 @@
   <div class="px-8 text-sm">
     <div>
       <header class="mb-2 flex items-center justify-between">
-        <div class="text-stone-500">Competences</div>
+        <div class="text-stone-500">{{ $t("competence", 2) }}</div>
         <div class="rounded-md p-1 hover:bg-stone-100" @click="dialogOpen = true">
           <Plus :size="20" class="stroke-stone-500" />
         </div>
@@ -27,7 +27,7 @@
         <div class="rounded-md">
           <Plus :size="20" class="stroke-stone-500" />
         </div>
-        <span class="pr-2 text-stone-500">Add competence</span>
+        <span class="pr-2 text-stone-500">{{ $t("add_competence") }}</span>
       </div>
     </div>
   </div>
@@ -44,7 +44,7 @@
             name="search"
             v-model="search"
             id="search"
-            placeholder="Search competences"
+            :placeholder="$t('search_competences')"
             class="w-full rounded-md border border-stone-200 px-3 py-1.5 shadow-sm outline-none placeholder:text-stone-400 focus:border-stone-200 focus:ring-0"
           />
           <div class="rounded-md p-1 hover:bg-stone-100" @click="dialogOpen = false">
@@ -53,7 +53,7 @@
         </div>
         <div class="flex min-h-fit flex-1 flex-col overflow-auto">
           <div class="mb-2 flex h-6 select-none items-center gap-2 px-4">
-            <div class="text-sm text-stone-500 hover:text-stone-900" @click="parents = []">Subjects</div>
+            <div class="text-sm text-stone-500 hover:text-stone-900" @click="parents = []">{{ $t("subject", 2) }}</div>
             <div v-if="parents.length > 0" class="text-stone-300">{{ "/" }}</div>
             <div
               v-for="(parent, index) in parents"
@@ -75,7 +75,7 @@
             </d-competence>
           </div>
           <div v-if="!data?.competences?.edges" class="select-none text-center text-sm uppercase text-stone-500">
-            no results
+            {{ $t("no_results") }}
           </div>
         </div>
       </div>

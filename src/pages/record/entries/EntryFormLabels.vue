@@ -1,6 +1,6 @@
 <template>
   <div class="flex gap-4 text-sm">
-    <label for="date" class="mt-2 min-w-[64px] text-stone-500">Labels</label>
+    <label for="date" class="mt-2 min-w-[64px] text-stone-500">{{ $t("label", 2) }}</label>
     <div class="w-full">
       <d-context-menu :show="contextMenu" @close="contextMenu = false" :alignment="ContextMenuAlignment.Overlay">
         <div class="flex flex-col gap-1 px-1 py-2">
@@ -36,7 +36,7 @@
         <d-tag v-for="tag in entry.tags" :key="tag.id" :color="tag.color">
           {{ tag.name }}
         </d-tag>
-        <div v-if="entry.tags?.length === 0" class="text-stone-400">Add label</div>
+        <div v-if="entry.tags?.length === 0" class="text-stone-400">{{ $t("add_label") }}</div>
       </div>
     </div>
   </div>

@@ -6,16 +6,16 @@
     @close.prevent="$emit('close')"
   >
     <div class="mb-4 flex items-center justify-between">
-      <div class="font-medium text-strong">Edit competence</div>
+      <div class="font-medium text-strong">{{ $t("edit_competence") }}</div>
       <button @click="onClose"><X class="h-4 w-4"></X></button>
     </div>
     <div class="pb-4">
       <div class="flex items-center gap-4">
-        <div class="min-w-16 text-stone-400">Name</div>
+        <div class="min-w-16 text-stone-400">{{ $t("name") }}</div>
         <div class="px-1">{{ competence.name }}</div>
       </div>
       <div class="relative mt-4 flex items-center gap-4">
-        <div class="min-w-16 text-stone-400">Color</div>
+        <div class="min-w-16 text-stone-400">{{ $t("color") }}</div>
         <div class="relative w-full">
           <DContextMenu
             :show="contextMenuOpen"
@@ -38,16 +38,16 @@
             @click="contextMenuOpen = true"
           >
             <DTag v-if="competence.color" :color="competence.color">{{ capitalizeFirstLetter(competence.color) }}</DTag>
-            <div v-else class="text-stone-400">Set color</div>
+            <div v-else class="text-stone-400">{{ $t("set_color") }}</div>
           </div>
         </div>
       </div>
     </div>
     <div v-if="error" class="text-xs font-semibold text-red-600">{{ error }}</div>
     <div class="flex justify-between">
-      <DButton type="outline" size="md" @click="onClose">Cancel</DButton>
+      <DButton type="outline" size="md" @click="onClose">{{ $t("cancel") }}</DButton>
       <div class="flex gap-2">
-        <DButton type="primary" size="md" @click="onUpdate">Update</DButton>
+        <DButton type="primary" size="md" @click="onUpdate">{{ $t("update") }}</DButton>
       </div>
     </div>
   </dialog>

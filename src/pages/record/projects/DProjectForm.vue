@@ -1,8 +1,10 @@
 <template>
   <div>
     <div class="mb-4 flex justify-between">
-      <div class="select-none text-sm font-medium text-strong">Project</div>
-      <d-button v-if="project.id" type="transparent" size="xs" :icon-left="Trash" @click="trash">Delete</d-button>
+      <div class="select-none text-sm font-medium text-strong">{{ $t("project", 1) }}</div>
+      <d-button v-if="project.id" type="transparent" size="xs" :icon-left="Trash" @click="trash">{{
+        $t("delete")
+      }}</d-button>
     </div>
 
     <div class="mb-4 flex flex-col gap-2">
@@ -21,7 +23,7 @@
         type="text"
         name="name"
         id="name"
-        placeholder="Name of the project"
+        :placeholder="$t('name_of_project')"
         required
       />
       <textarea
@@ -32,11 +34,13 @@
         id="description"
         cols="30"
         rows="3"
-        placeholder="Think of some magical description"
+        :placeholder="$t('project_description_placeholder')"
         required
       />
       <div>
-        <label for="starts" class="mb-1 block text-xs font-medium leading-6 text-stone-900">Starts at</label>
+        <label for="starts" class="mb-1 block text-xs font-medium leading-6 text-stone-900">{{
+          $t("starts_at")
+        }}</label>
         <input
           v-model="startsAt"
           class="block w-full select-none rounded-md border-0 py-2 text-sm text-stone-900 shadow-sm ring-1 ring-inset ring-stone-200 placeholder:text-stone-400 focus:ring-2 focus:ring-inset focus:ring-black"
@@ -47,7 +51,7 @@
         />
       </div>
       <div>
-        <label for="ends" class="mb-1 block text-xs font-medium leading-6 text-stone-900">Ends at</label>
+        <label for="ends" class="mb-1 block text-xs font-medium leading-6 text-stone-900">{{ $t("ends_at") }}</label>
         <input
           v-model="endsAt"
           class="block w-full select-none rounded-md border-0 py-2 text-sm text-stone-900 shadow-sm ring-1 ring-inset ring-stone-200 placeholder:text-stone-400 focus:ring-2 focus:ring-inset focus:ring-black"
@@ -60,13 +64,13 @@
     </div>
     <div class="flex justify-between">
       <div class="flex gap-2">
-        <d-button type="outline" @click="cancel">Cancel</d-button>
+        <d-button type="outline" @click="cancel">{{ $t("cancel") }}</d-button>
       </div>
-      <d-button v-if="!project.id" type="primary" :icon-left="Plus" @click="create">Create</d-button>
-      <d-button v-if="project.id" type="primary" :icon-left="Save" @click="update">Save</d-button>
+      <d-button v-if="!project.id" type="primary" :icon-left="Plus" @click="create">{{ $t("create") }}</d-button>
+      <d-button v-if="project.id" type="primary" :icon-left="Save" @click="update">{{ $t("save") }}</d-button>
     </div>
     <div class="mt-4 flex select-none flex-col gap-1" v-if="project.competences && project.competences.length > 0">
-      <div class="mb-1 text-sm text-strong">Competences</div>
+      <div class="mb-1 text-sm text-strong">{{ $t("competence", 2) }}</div>
       <d-competence v-for="competence in project.competences" :key="competence.id" :competence="competence" />
     </div>
   </div>

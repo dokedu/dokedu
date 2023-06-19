@@ -2,9 +2,9 @@
   <PageWrapper>
     <PageHeader>
       <div class="flex w-full items-center justify-between">
-        <div class="font-medium text-stone-950">Create report</div>
+        <div class="font-medium text-stone-950">{{ $t("create_report") }}</div>
         <div class="flex gap-2">
-          <d-button type="primary" :icon-left="Save" @click="createReport">Save</d-button>
+          <d-button type="primary" :icon-left="Save" @click="createReport">{{ $t("save") }}</d-button>
         </div>
       </div>
     </PageHeader>
@@ -12,11 +12,11 @@
       <div class="mt-4 max-w-sm space-y-4 px-8">
         <StudentList @update="(selectedStudent) => (student = selectedStudent)" />
         <div class="flex items-center gap-2">
-          <div class="w-20 text-sm font-medium text-strong">From</div>
+          <div class="w-20 text-sm font-medium text-strong">{{ $t("from") }}</div>
           <d-input class="w-full" type="date" name="from" v-model="from" />
         </div>
         <div class="flex items-center gap-2">
-          <div class="w-20 text-sm font-medium text-strong">To</div>
+          <div class="w-20 text-sm font-medium text-strong">{{ $t("to") }}</div>
           <d-input class="w-full" type="date" name="to" v-model="to" />
         </div>
         <ReportTypeList @update="(selectedType) => (type = selectedType)"></ReportTypeList>

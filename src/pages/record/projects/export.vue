@@ -3,11 +3,11 @@
     <PageHeader class="flex justify-between">
       <div class="flex w-full items-center justify-between gap-4">
         <div class="font-medium text-stone-950">
-          <router-link :to="{ name: 'record-projects' }">Projects</router-link>
-          / Export
+          <router-link :to="{ name: 'record-projects' }">{{ $t("project", 2) }}</router-link>
+          / {{ $t("export") }}
         </div>
 
-        <d-button type="primary" size="sm" :icon-right="Printer" @click="print">Drucken</d-button>
+        <d-button type="primary" size="sm" :icon-right="Printer" @click="print">{{ $t("print") }} </d-button>
       </div>
     </PageHeader>
     <PageContent>
@@ -31,13 +31,13 @@
                 v-model="filter.deleted"
                 class="w-[140px] rounded-md border border-stone-200 px-2 py-1 text-sm shadow-sm"
               >
-                <option :value="false" :selected="!filter.deleted">Aktive</option>
-                <option :value="true" :selected="filter.deleted">Mit gelöschten</option>
+                <option :value="false" :selected="!filter.deleted">{{ $t("active") }}</option>
+                <option :value="true" :selected="filter.deleted">{{ $t("with_deleted") }}</option>
               </select>
             </div>
           </div>
 
-          <div v-if="fetching" class="px-8 py-4 text-sm text-strong">Lädt...</div>
+          <div v-if="fetching" class="px-8 py-4 text-sm text-strong">{{ $t("loading") }}</div>
 
           <div
             v-if="events.length > 0"
@@ -46,9 +46,15 @@
             <table class="min-w-full divide-y divide-neutral-300">
               <thead class="bg-neutral-50">
                 <tr class="divide-x divide-neutral-200">
-                  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-900">Name</th>
-                  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-900">Beschreibung</th>
-                  <th scope="col" class="px-2 py-3.5 text-left text-sm font-semibold text-neutral-900">Kompetenzen</th>
+                  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-900">
+                    {{ $t("name") }}
+                  </th>
+                  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-900">
+                    {{ $t("description") }}
+                  </th>
+                  <th scope="col" class="px-2 py-3.5 text-left text-sm font-semibold text-neutral-900">
+                    {{ $t("competence", 2) }}
+                  </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-neutral-200 bg-white">
@@ -57,7 +63,7 @@
                     <div class="mb-2">{{ event.title }}</div>
                     <div class="text-xs text-neutral-500">
                       <span class="font-medium">{{ event.startsAt }}</span>
-                      bis
+                      {{ $t("to") }}
                       <span class="font-medium">{{ event.endsAt }}</span>
                     </div>
                   </td>
@@ -76,7 +82,7 @@
                                 <strong>{{ subject.subject_name }}</strong>
                               </th>
                               <th scope="col" class="px-2 py-1.5 text-left text-sm font-medium text-neutral-700">
-                                Klassen
+                                {{ $t("class", 2) }}
                               </th>
                             </tr>
                           </thead>
@@ -95,7 +101,9 @@
                         </table>
                       </div>
                     </div>
-                    <div v-else class="p-2 pt-3 text-sm text-neutral-500">Keine Kompetenzen hinterlegt.</div>
+                    <div v-else class="p-2 pt-3 text-sm text-neutral-500">
+                      {{ $t("no_competences") }}
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -103,15 +111,17 @@
           </div>
 
           <div v-if="events.length === 0">
-            <div v-if="!fetching" class="px-8 py-4 text-sm text-strong">Keine Projekte gefunden.</div>
+            <div v-if="!fetching" class="px-8 py-4 text-sm text-strong">
+              {{ $t("no_projects_found") }}
+            </div>
           </div>
 
           <div v-if="events.length >= 1000" class="my-4 rounded-md bg-blue-50 p-4">
             <div class="flex">
               <div class="ml-3 flex-1 md:flex md:justify-between">
                 <p class="text-sm text-blue-700">
-                  Derzeit zeigen wir maximal 1000 Projekte an. Wenn deine Organisation diese Grenze erreicht, wende dich
-                  bitte an den <a href="mailto:support@dokedu.org" class="hover:underline">Dokedu Support</a>.
+                  {{ $t("max_projects_reached") }}
+                  <a href="mailto:support@dokedu.org" class="hover:underline"> Dokedu Support</a>.
                 </p>
               </div>
             </div>

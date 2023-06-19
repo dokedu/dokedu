@@ -6,31 +6,33 @@
   <div v-if="entriesOpen">
     <div v-for="competence in competences" class="text-subtle">
       <div v-if="competence.entry">
-        <span class="font-medium text-strong">Level {{ competence.level }}</span> was documented by
+        <span class="font-medium text-strong">{{ $t("level") }} {{ competence.level }}</span>
+        {{ $t("was_documented_by") }}
         <span class="font-medium text-strong"
           >{{ competence.createdBy?.firstName }} {{ competence.createdBy?.lastName }}</span
         >
-        at
+        {{ $t("at") }}
         <span class="font-medium text-strong">
           {{ formatDate(new Date(Date.parse(competence.createdAt)), "DD.MM.YYYY HH:MM") }}
         </span>
-        in
+        {{ $t("in") }}
         <RouterLink
           :to="{ name: 'record-entries-entry', params: { id: competence.entry.id } }"
           class="font-medium text-strong"
-          >Entry</RouterLink
+          >{{ $t("entry") }}</RouterLink
         >
       </div>
       <div v-else="competence.entry">
-        <span class="font-medium text-strong">Level {{ competence.level }}</span> was documented by
+        <span class="font-medium text-strong">{{ $t("level") }} {{ competence.level }}</span>
+        {{ $t("was_documented_by") }}
         <span class="font-medium text-strong"
           >{{ competence.createdBy?.firstName }} {{ competence.createdBy?.lastName }}</span
         >
-        at
+        {{ $t("at") }}
         <span class="font-medium text-strong">
           {{ formatDate(new Date(Date.parse(competence.createdAt)), "DD.MM.YYYY HH:MM") }}
         </span>
-        manually
+        {{ $t("manually") }}
       </div>
     </div>
   </div>

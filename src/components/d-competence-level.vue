@@ -17,7 +17,7 @@
         >
           <div class="flex items-center gap-3">
             <d-competence-level-icon :level="0" />
-            <div>No level</div>
+            <div>{{ $t("no_level") }}</div>
           </div>
           <Check v-if="level === 0" :size="16" class="stroke-stone-700" />
         </div>
@@ -29,7 +29,7 @@
         >
           <div class="flex items-center gap-3">
             <d-competence-level-icon :level="1" />
-            <div>Low</div>
+            <div>{{ $t("low") }}</div>
           </div>
           <Check v-if="level === 1" :size="16" class="stroke-stone-700" />
         </div>
@@ -39,7 +39,7 @@
         >
           <div class="flex items-center gap-3">
             <d-competence-level-icon :level="2" />
-            <div>Medium</div>
+            <div>{{ $t("medium") }}</div>
           </div>
           <Check v-if="level === 2" :size="16" class="stroke-stone-700" />
         </div>
@@ -49,7 +49,7 @@
         >
           <div class="flex items-center gap-3">
             <d-competence-level-icon :level="3" />
-            <div>High</div>
+            <div>{{ $t("high") }}</div>
           </div>
           <Check v-if="level === 3" :size="16" class="stroke-stone-700" />
         </div>

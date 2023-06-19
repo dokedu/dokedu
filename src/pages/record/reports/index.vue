@@ -1,11 +1,11 @@
 <template>
   <PageWrapper>
     <PageHeader class="flex select-none justify-between">
-      <div class="font-medium text-stone-950">Reports</div>
+      <div class="font-medium text-stone-950">{{ $t("report", 2) }}</div>
       <div class="flex gap-2">
-        <d-button type="transparent" :icon-left="Newspaper">Prepare annual reports</d-button>
+        <d-button type="transparent" :icon-left="Newspaper">{{ $t("prepare_annual_reports") }}</d-button>
         <router-link :to="{ name: 'record-reports-new' }">
-          <d-button type="primary" :icon-left="Plus">Create</d-button>
+          <d-button type="primary" :icon-left="Plus">{{ $t("create") }}</d-button>
         </router-link>
       </div>
     </PageHeader>
@@ -14,13 +14,13 @@
         <table>
           <thead>
             <tr class="border-b border-stone-100 bg-stone-50">
-              <th class="p-2 pl-8 text-left text-sm font-normal text-strong">Schüler</th>
-              <th class="p-2 text-left text-sm font-normal text-strong">Von</th>
-              <th class="p-2 text-left text-sm font-normal text-strong">Bis</th>
-              <th class="p-2 text-left text-sm font-normal text-strong">Status</th>
-              <th class="p-2 text-left text-sm font-normal text-strong">Ersteller</th>
-              <th class="p-2 text-left text-sm font-normal text-strong">Erstellt am</th>
-              <th class="p-2 pr-8 text-left text-sm font-normal text-strong">Datei</th>
+              <th class="p-2 pl-8 text-left text-sm font-normal text-strong">{{ $t("student") }}</th>
+              <th class="p-2 text-left text-sm font-normal text-strong">{{ $t("from") }}</th>
+              <th class="p-2 text-left text-sm font-normal text-strong">{{ $t("to") }}</th>
+              <th class="p-2 text-left text-sm font-normal text-strong">{{ $t("status") }}</th>
+              <th class="p-2 text-left text-sm font-normal text-strong">{{ $t("created_by") }}</th>
+              <th class="p-2 text-left text-sm font-normal text-strong">{{ $t("created_at") }}</th>
+              <th class="p-2 pr-8 text-left text-sm font-normal text-strong">{{ $t("file") }}</th>
             </tr>
           </thead>
           <tbody>
@@ -41,20 +41,20 @@
                 {{ `${report.user?.firstName} ${report.user?.lastName}` }}
               </td>
               <td class="p-2 text-left text-sm font-normal text-default">
-                {{ formatDate(new Date(report.createdAt), "DD.MM.YYYY HH:ss") }} Uhr
+                {{ formatDate(new Date(report.createdAt), "DD.MM.YYYY HH:ss") }} {{ $t("hour") }}
               </td>
               <td
                 v-if="report?.status === 'done' && report.file"
                 class="p-2 pr-8 text-left text-sm font-normal text-default hover:underline"
                 @click="downloadFile(report)"
               >
-                Download
+                {{ $t("download") }}
               </td>
               <td
                 v-else-if="!report.file && report.status === 'done'"
                 class="p-2 pr-8 text-left text-sm font-normal text-default"
               >
-                No file
+                {{ $t("no-file") }}
               </td>
               <td v-else class="p-2 pr-8 text-left text-sm font-normal text-default"></td>
             </tr>
@@ -71,7 +71,7 @@
     <div class="animate-spin">
       <Loader2 :size="20" />
     </div>
-    <div>downloading file</div>
+    <div>{{ $t("downloading_file") }}</div>
   </div>
 </template>
 <script setup lang="ts">
@@ -87,7 +87,6 @@ import { formatDate } from "@vueuse/core";
 import { Report } from "@/gql/graphql";
 import DReportStatus from "./DReportStatus.vue";
 import { ref } from "vue";
-
 const { data } = useQuery({
   query: graphql(`
     query reports {

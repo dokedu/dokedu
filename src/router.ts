@@ -94,11 +94,6 @@ const router = createRouter({
       component: () => import("./pages/record/reports/index.vue"),
     },
     {
-      name: "record-reports-report",
-      path: "/record/reports/:id",
-      component: () => import("./pages/record/reports/[id].vue"),
-    },
-    {
       name: "record-reports-new",
       path: "/record/reports/new",
       component: () => import("./pages/record/reports/new.vue"),

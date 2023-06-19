@@ -2,13 +2,13 @@
   <PageWrapper>
     <PageHeader class="flex justify-between">
       <div class="flex items-center gap-4">
-        <div class="font-medium text-stone-950">Students</div>
+        <div class="font-medium text-stone-950">{{ $t("student", 2) }}</div>
         <input
           v-model="search"
           type="text"
           name="search"
           id="search"
-          placeholder="Search"
+          :placeholder="$t('search')"
           class="h-8 rounded-md border border-stone-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-stone-200 focus:shadow-sm focus:ring-0"
         />
       </div>

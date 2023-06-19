@@ -1,6 +1,6 @@
 <template>
   <div class="flex gap-4 text-sm">
-    <label for="date" class="mt-2 min-w-[64px] text-stone-500">Projects</label>
+    <label for="date" class="mt-2 min-w-[64px] text-stone-500">{{ $t("project", 2) }}</label>
     <div class="w-full">
       <d-context-menu :show="contextMenu" @close="contextMenu = false" :alignment="ContextMenuAlignment.Overlay">
         <div v-if="events" class="flex flex-col gap-1 px-1 py-2">
@@ -34,7 +34,9 @@
         <div v-for="event in entry?.events" class="rounded-full border px-3 py-1 text-stone-700">
           {{ event.title }}
         </div>
-        <div v-if="entry.events?.length === 0 || entry.events === undefined" class="text-stone-400">Add project</div>
+        <div v-if="entry.events?.length === 0 || entry.events === undefined" class="text-stone-400">
+          {{ $t("add_project") }}
+        </div>
       </div>
     </div>
   </div>

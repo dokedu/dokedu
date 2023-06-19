@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center gap-2">
-    <div class="w-20 text-sm font-medium text-strong">Students</div>
+    <div class="w-20 text-sm font-medium text-strong">{{ $t("student", 2) }}</div>
     <div class="w-full">
       <DContextMenu
         :show="contextMenuOpen"
@@ -26,7 +26,7 @@
         <div v-if="selectedStudent" class="text-sm text-strong">
           {{ selectedStudent.firstName }} {{ selectedStudent.lastName }}
         </div>
-        <div v-else class="text-sm text-subtle">Select students</div>
+        <div v-else class="text-sm text-subtle">{{ $t("select_students") }}</div>
       </div>
     </div>
   </div>

@@ -1,7 +1,7 @@
 <template>
-  <div class="flex h-full flex-col">
+  <div class="flex min-h-full flex-col">
     <div class="mb-4 flex h-fit gap-2 text-sm text-subtle">
-      <router-link :to="{ name: 'record-students-student-competences' }">Fächer</router-link>
+      <router-link :to="{ name: 'record-students-student-competences' }">{{ $t("subject", 2) }}</router-link>
       <template v-for="parent in data?.competence.parents">
         <span>{{ ">" }}</span>
         <router-link :to="{ name: 'record-students-student-competences-competence', params: { subject: parent?.id } }">
@@ -28,6 +28,7 @@
               :level="getLevel(competence)"
               :editable="competence.type == 'subject' ? false : true"
               @update="(val) => createUserCompetence({ level: val.level, id: competence.id })"
+              class="z-10"
             ></DCompetenceLevel>
             <template #footer>
               <div v-if="competence.userCompetences.length > 0">
