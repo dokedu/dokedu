@@ -482,9 +482,9 @@ func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, fi
 	query := r.DB.NewSelect().
 		Model(&entries).
 		Distinct().
-		Join("JOIN entry_users eu ON entry.id = eu.entry_id").
+		Join("LEFT JOIN entry_users eu ON entry.id = eu.entry_id").
 		Where("eu.deleted_at IS NULL").
-		Join("JOIN entry_tags et ON entry.id = et.entry_id").
+		Join("LEFT JOIN entry_tags et ON entry.id = et.entry_id").
 		Where("et.deleted_at IS NULL").
 		Where("entry.organisation_id = ?", currentUser.OrganisationID).
 		Limit(pageLimit).Offset(pageOffset).
