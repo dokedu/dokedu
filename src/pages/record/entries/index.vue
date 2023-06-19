@@ -30,10 +30,10 @@
         </div>
       </DFilter>
     </div>
-    <div class="flex flex-col overflow-scroll">
+    <div class="flex flex-col overflow-scroll" ref="el">
       <router-link
         :to="{ name: 'record-entries-entry', params: { id: entry.id } }"
-        v-for="entry in (data?.entries?.edges as Entry[])"
+        v-for="entry in entryData"
         class="flex border-b border-stone-100 text-sm text-strong transition-all hover:bg-stone-50"
       >
         <div class="line-clamp-1 h-[2rem] w-full p-2 pl-8">{{ entry.body }}</div>
@@ -64,6 +64,8 @@ import { graphql } from "@/gql";
 import DTag from "@/components/d-tag/d-tag.vue";
 import { Entry } from "@/gql/graphql";
 import { useI18n } from "vue-i18n";
+import { useInfiniteScroll } from "@vueuse/core";
+import { watch } from "vue";
 
 const i18nLocale = useI18n();
 
@@ -71,10 +73,25 @@ const student = ref();
 const teacher = ref();
 const tags = ref([]);
 
-const { data } = useQuery({
+const offset = ref(0);
+const el = ref<HTMLElement>();
+
+useInfiniteScroll(
+  el,
+  () => {
+    if (fetching.value) return;
+    if (Number(data.value?.entries?.totalCount) < 100) return;
+    if (entryData.value.length >= Number(data.value?.entries?.totalCount)) return;
+    offset.value += 100;
+  },
+  { distance: 500 }
+);
+
+const { data, fetching } = useQuery({
   query: graphql(`
     query getEntries($filter: EntryFilterInput, $limit: Int, $offset: Int) {
       entries(filter: $filter, limit: $limit, offset: $offset) {
+        totalCount
         edges {
           id
           date
@@ -95,7 +112,17 @@ const { data } = useQuery({
       authors: teacher,
       tags: tags,
     },
+    offset,
   }),
+});
+
+const entryData = ref<Entry[]>([]);
+
+watch(data, () => {
+  if (fetching.value) return;
+  // @ts-expect-error
+  entryData.value.push(...data.value?.entries?.edges);
+  console.log(entryData.value);
 });
 
 const { data: studentData } = useQuery({
