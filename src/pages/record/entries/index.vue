@@ -80,9 +80,9 @@ useInfiniteScroll(
   el,
   () => {
     if (fetching.value) return;
-    if (Number(data.value?.entries?.totalCount) < 100) return;
+    if (Number(data.value?.entries?.totalCount) < 50) return;
     if (entryData.value.length >= Number(data.value?.entries?.totalCount)) return;
-    offset.value += 100;
+    offset.value += 50;
   },
   { distance: 500 }
 );
@@ -122,7 +122,6 @@ watch(data, () => {
   if (fetching.value) return;
   // @ts-expect-error
   entryData.value.push(...data.value?.entries?.edges);
-  console.log(entryData.value);
 });
 
 const { data: studentData } = useQuery({

@@ -50,7 +50,6 @@ const { data } = useQuery({
       }
     }
   `),
-  // @ts-expect-error
-  variables: reactive({ filter: { users: [id] }, limit: 3 }),
+  variables: reactive({ filter: { users: [id.value] }, limit: 3 }),
 });
 </script>
