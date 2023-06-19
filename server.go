@@ -122,19 +122,11 @@ func minioClient() *minio.Client {
 	endpoint := host + ":" + port
 	accessKeyID := os.Getenv("MINIO_ACCESS_KEY_ID")
 	secretAccessKey := os.Getenv("MINIO_SECRET_ACCESS_KEY")
-	useSSL := os.Getenv("MINIO_USE_SSL") == "true"
 
 	// Initialize minio client object.
 	minioClient, err := minio.New(endpoint, &minio.Options{
-		Creds:              credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
-		Secure:             useSSL,
-		Transport:          nil,
-		Region:             "",
-		BucketLookup:       0,
-		CustomRegionViaURL: nil,
-		TrailingHeaders:    false,
-		CustomMD5:          nil,
-		CustomSHA256:       nil,
+		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
+		Secure: true,
 	})
 	if err != nil {
 		log.Fatalln(err)
