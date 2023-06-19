@@ -25,6 +25,7 @@ type Generator struct {
 }
 
 type HeadData struct {
+	ReportKind      string
 	StudentFullName string
 }
 
@@ -93,7 +94,16 @@ func (g *Generator) generatePDF(report db.Report, data *CompetencesData) error {
 		return err
 	}
 
+	var reportType string
+	switch report.Kind {
+	case db.ReportKindEntries:
+		reportType = "Einträge"
+	case db.ReportKindCompetences:
+		reportType = "Kompetenzen"
+	}
+
 	headData := HeadData{
+		ReportKind:      reportType,
 		StudentFullName: fmt.Sprintf("%s %s", data.Student.FirstName, data.Student.LastName),
 	}
 	head := new(bytes.Buffer)
