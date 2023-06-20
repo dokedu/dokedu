@@ -685,7 +685,7 @@ func (r *mutationResolver) UpdateCompetenceSorting(ctx context.Context, input mo
 
 	for _, competence := range competences {
 		sortOrder := competenceMap[competence.ID].SortOrder
-		_, err = r.DB.NewUpdate().Model(competence).WherePK().Set("sort_order = ?", sortOrder).Where("organisation_id = ?", currentUser.ID).Exec(ctx)
+		_, err = r.DB.NewUpdate().Model(competence).WherePK().Set("sort_order = ?", sortOrder).Where("organisation_id = ?", currentUser.OrganisationID).Exec(ctx)
 		if err != nil {
 			return nil, err
 		}
