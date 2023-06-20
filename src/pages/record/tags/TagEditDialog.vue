@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex items-center justify-between">
         <div class="font-medium text-strong">{{ $t("edit_tag") }}</div>
-        <button @click="onClose"><X class="h-4 w-4"></X></button>
+        <DIconButton :icon="X" size="md" @click="onClose"></DIconButton>
       </div>
     </template>
     <template #main>
@@ -58,6 +58,7 @@
 <script setup lang="ts">
 import DDialog from "../../../components/d-dialog/d-dialog.vue";
 import DButton from "../../../components/d-button/d-button.vue";
+import DIconButton from "../../../components/d-icon-button/d-icon-button.vue";
 import { X } from "lucide-vue-next";
 import { toRef, ref } from "vue";
 import DInput from "../../../components/d-input/d-input.vue";
