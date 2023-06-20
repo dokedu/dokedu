@@ -7,11 +7,8 @@
         <div class="flex w-full flex-col px-6 py-4">
           <div class="border-b border-stone-100 pb-4">
             <div class="flex items-center gap-1 text-strong">
-              <router-link
-                :to="{ name: 'record-students' }"
-                class="mr-3 cursor-pointer rounded-lg border border-stone-200 p-2"
-              >
-                <X :size="16" class="stroke-stone-500"></X>
+              <router-link :to="{ name: 'record-students' }" class="mr-2">
+                <DIconButton :icon="X" size="md"></DIconButton>
               </router-link>
               <router-link :to="{ name: 'record-students' }" class="cursor-pointer rounded text-sm font-medium">
                 {{ $t("student", 2) }}
@@ -59,7 +56,7 @@
             <div class="h-24 w-24 rounded-full" :class="`bg-${color}-500`">
               <div class="flex h-full w-full items-center justify-center">
                 <div class="text-3xl font-bold text-white">
-                  {{ data?.user?.firstName[0] }} {{ data?.user?.lastName[0] }}
+                  {{ data?.user?.firstName[0] }}{{ data?.user?.lastName[0] }}
                 </div>
               </div>
             </div>
@@ -117,6 +114,7 @@ import { ChevronRight, X } from "lucide-vue-next";
 import { graphql } from "../../../gql";
 import { computed, reactive, ref } from "vue";
 import DButton from "../../../components/d-button/d-button.vue";
+import DIconButton from "@/components/d-icon-button/d-icon-button.vue";
 import { CopyCheck, FileCheck } from "lucide-vue-next";
 
 const route = useRoute();

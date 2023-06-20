@@ -30,16 +30,36 @@
         </div>
       </DFilter>
     </div>
+    <div class="flex w-full items-start gap-3 border-b border-stone-100 py-3 text-sm">
+      <div class="flex flex-1 items-center pl-8 text-muted">
+        <div>Description</div>
+      </div>
+      <div class="w-[200px] text-right text-muted">Date</div>
+      <div class="w-[220px] pr-8 text-right text-muted">Created at</div>
+    </div>
     <div class="flex flex-col overflow-scroll" ref="el">
       <router-link
         :to="{ name: 'record-entries-entry', params: { id: entry.id } }"
         v-for="entry in entryData"
-        class="flex border-b border-stone-100 text-sm text-strong transition-all hover:bg-stone-50"
+        class="flex items-center border-b border-stone-100 text-sm text-strong transition-all hover:bg-stone-50"
       >
-        <div class="line-clamp-1 h-[2rem] w-full p-2 pl-8">{{ entry.body }}</div>
+        <div class="line-clamp-1 h-[2rem] flex-1 p-2 pl-8">{{ entry.body }}</div>
         <div class="w-[200px] p-2 text-right text-subtle">{{ dateOnly(entry.date) }}</div>
-        <div class="w-[400px] p-2 pr-8 text-right text-subtle">
-          {{ `${entry.user.firstName} ${entry.user.lastName}` }}
+        <div class="flex w-[220px] items-center justify-end gap-2 p-2 pr-8 text-right text-subtle">
+          <div>
+            {{ dateOnly(entry.createdAt) }}
+          </div>
+          <div
+            :title="`${entry.user?.firstName} ${entry.user?.lastName}`"
+            class="h-8 w-8 rounded-full"
+            :class="`bg-subtle`"
+          >
+            <div class="flex h-full w-full items-center justify-center">
+              <div class="text-xs font-bold text-subtle">
+                {{ entry.user?.firstName[0] }}{{ entry.user?.lastName[0] }}
+              </div>
+            </div>
+          </div>
         </div>
       </router-link>
       <div
