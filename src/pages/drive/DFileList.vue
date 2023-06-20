@@ -64,7 +64,7 @@
         />
       </svg>
       <svg
-        v-if="file && file.name && file.fileType === 'blob' && !file.name.includes('pdf')"
+        v-if="file && file.name && file.fileType === 'blob' && file.name.includes('pdf')"
         width="20"
         height="20"
         viewBox="0 0 20 20"
@@ -79,7 +79,9 @@
       </svg>
 
       <div class="flex-1 select-none text-default">{{ file.name }}</div>
-      <div class="w-[230px] select-none text-sm text-subtle">Feb 10, 2023 Peter Schwan</div>
+      <div class="w-[230px] select-none text-sm text-subtle">
+        {{ formatDate(new Date(file.createdAt), "DD.MM.YYYY") }} by me
+      </div>
       <div v-if="file.fileType !== 'folder'" class="w-[120px] select-none text-subtle">
         {{ prettyBytes(file.size || 0) }}
       </div>
@@ -110,6 +112,7 @@ import { ArrowDownWideNarrow, FileText, Download, Edit } from "lucide-vue-next";
 import { File } from "../../gql/graphql";
 import { useMutation } from "@urql/vue";
 import { graphql } from "../../gql";
+import { formatDate } from "@vueuse/core";
 
 export interface Props {
   files: Partial<File>[];

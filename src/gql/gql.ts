@@ -19,7 +19,7 @@ const documents = {
     "\n    query fileById($id: ID!) {\n      file(id: $id) {\n        id\n        name\n        parents {\n          id\n          name\n        }\n      }\n    }\n  ": types.FileByIdDocument,
     "\n    mutation singleUpload($input: FileUploadInput!) {\n      singleUpload(input: $input) {\n        id\n      }\n    }\n  ": types.SingleUploadDocument,
     "\n    query files($input: FilesFilterInput) {\n      files(input: $input) {\n        edges {\n          id\n          name\n          fileType\n          size\n        }\n      }\n    }\n  ": types.FilesDocument,
-    "\n    query myFiles($input: MyFilesFilterInput) {\n      myFiles(input: $input) {\n        edges {\n          id\n          name\n          fileType\n          size\n        }\n      }\n    }\n  ": types.MyFilesDocument,
+    "\n    query myFiles($input: MyFilesFilterInput) {\n      myFiles(input: $input) {\n        edges {\n          id\n          name\n          fileType\n          size\n          createdAt\n        }\n      }\n    }\n  ": types.MyFilesDocument,
     "\n    mutation forgotPassword($input: ForgotPasswordInput!) {\n      forgotPassword(input: $input) {\n        success\n      }\n    }\n  ": types.ForgotPasswordDocument,
     "\n    mutation updateCompetence($input: UpdateCompetenceInput!) {\n      updateCompetence(input: $input) {\n        id\n        name\n        color\n      }\n    }\n  ": types.UpdateCompetenceDocument,
     "\n    mutation updateCompetenceSorting($input: UpdateCompetenceSortingInput!) {\n      updateCompetenceSorting(input: $input) {\n        id\n        name\n        type\n        grades\n        color\n        sortOrder\n      }\n    }\n  ": types.UpdateCompetenceSortingDocument,
@@ -101,7 +101,7 @@ export function graphql(source: "\n    query files($input: FilesFilterInput) {\n
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n    query myFiles($input: MyFilesFilterInput) {\n      myFiles(input: $input) {\n        edges {\n          id\n          name\n          fileType\n          size\n        }\n      }\n    }\n  "): (typeof documents)["\n    query myFiles($input: MyFilesFilterInput) {\n      myFiles(input: $input) {\n        edges {\n          id\n          name\n          fileType\n          size\n        }\n      }\n    }\n  "];
+export function graphql(source: "\n    query myFiles($input: MyFilesFilterInput) {\n      myFiles(input: $input) {\n        edges {\n          id\n          name\n          fileType\n          size\n          createdAt\n        }\n      }\n    }\n  "): (typeof documents)["\n    query myFiles($input: MyFilesFilterInput) {\n      myFiles(input: $input) {\n        edges {\n          id\n          name\n          fileType\n          size\n          createdAt\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
