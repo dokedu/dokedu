@@ -44,7 +44,7 @@
       <div v-if="error" class="text-xs font-semibold text-red-600">{{ error }}</div>
     </template>
     <template #footer>
-      <div class="flex justify-between">
+      <div class="flex justify-between gap-2">
         <DButton type="outline" size="md" @click="onClose">{{ $t("cancel") }}</DButton>
         <div class="flex gap-2">
           <DButton type="outline" size="md" @click="onArchive">{{ $t("archive") }}</DButton>
