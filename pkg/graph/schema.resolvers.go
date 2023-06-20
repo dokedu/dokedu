@@ -669,7 +669,7 @@ func (r *mutationResolver) UpdateCompetenceSorting(ctx context.Context, input mo
 
 	// if length of competences is not equal to length of input, then some competences were not found
 	if len(competences) != len(input.Competences) {
-		return nil, fmt.Errorf("some competences were not found")
+		return nil, fmt.Errorf("some competences were not found %v, %v", len(competences), len(input.Competences))
 	}
 
 	// create a map of competences for easy lookup
