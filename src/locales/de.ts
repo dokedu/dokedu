@@ -9,7 +9,7 @@ export const de = {
   competence: "Kompetenz | Kompetenzen",
   learned_competences: "Gelernte Kompetenzen",
   add: "Hinzufügen",
-  archive: "Achivieren",
+  archive: "Archivieren",
   save: "Speichern",
   project: "Projekt | Projekte",
   label: "Label | Labels",

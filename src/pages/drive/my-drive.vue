@@ -78,6 +78,7 @@ const { data: files, executeQuery: refreshFiles } = useQuery({
           name
           fileType
           size
+          createdAt
         }
       }
     }

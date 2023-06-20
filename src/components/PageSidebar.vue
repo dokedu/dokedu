@@ -3,23 +3,17 @@
     class="flex h-screen w-full max-w-[230px] select-none flex-col justify-between border-r border-stone-100 bg-stone-50 print:hidden"
   >
     <div class="relative flex flex-col">
-      <div class="flex items-center justify-between p-3 pb-1.5">
-        <div class="flex items-center gap-3">
-          <div class="rounded-lg border border-stone-100 p-1.5">
-            <component v-if="app" :is="app.icon" class="stroke-stone-500" :size="12" />
+      <div class="flex items-center justify-between px-3 py-3 pb-1.5">
+        <div class="flex flex-1 justify-between rounded-md p-1 hover:bg-strong" @click="visibleAppSwitcher = true">
+          <div class="flex items-center gap-3">
+            <div class="rounded-lg border border-stone-100 p-1.5">
+              <component v-if="app" :is="app.icon" class="stroke-stone-500" :size="12" />
+            </div>
+            <div class="text-sm text-stone-700 transition-all duration-100 hover:text-stone-950">{{ app?.name }}</div>
           </div>
-          <router-link
-            :to="{ name: 'home' }"
-            class="text-sm text-stone-700 transition-all duration-100 hover:text-stone-950"
-          >
-            Dokumentation
-          </router-link>
-        </div>
-        <div
-          class="rounded-md border border-stone-200 p-1.5 transition-all hover:bg-stone-200"
-          @click="visibleAppSwitcher = true"
-        >
-          <Grip :size="16" class="stroke-stone-700" />
+          <div class="rounded-md border border-stone-200 p-1.5 transition-all hover:bg-stone-200">
+            <Grip :size="16" class="stroke-stone-700" />
+          </div>
         </div>
       </div>
       <div class="flex flex-col gap-1 p-3">
