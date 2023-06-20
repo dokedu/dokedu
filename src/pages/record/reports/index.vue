@@ -3,7 +3,7 @@
     <PageHeader class="flex select-none justify-between">
       <div class="font-medium text-stone-950">{{ $t("report", 2) }}</div>
       <div class="flex gap-2">
-        <d-button type="transparent" :icon-left="Newspaper">{{ $t("prepare_annual_reports") }}</d-button>
+        <d-button v-if="false" type="transparent" :icon-left="Newspaper">{{ $t("prepare_annual_reports") }}</d-button>
         <router-link :to="{ name: 'record-reports-new' }">
           <d-button type="primary" :icon-left="Plus">{{ $t("create") }}</d-button>
         </router-link>
