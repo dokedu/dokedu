@@ -662,7 +662,7 @@ func (r *mutationResolver) UpdateCompetenceSorting(ctx context.Context, input mo
 	}
 
 	var competences []*db.Competence
-	err = r.DB.NewSelect().Model(&competences).Where("id IN (?)", bun.In(ids)).Where("organisation_id = ?", currentUser.ID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&competences).Where("id IN (?)", bun.In(ids)).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
