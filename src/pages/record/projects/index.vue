@@ -61,7 +61,7 @@ const search = ref("");
 const { data } = useQuery({
   query: graphql(`
     query eventWithSearch($search: String) {
-      events(search: $search) {
+      events(search: $search, limit: 300) {
         edges {
           id
           title
