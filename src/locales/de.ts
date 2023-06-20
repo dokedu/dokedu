@@ -8,7 +8,7 @@ export const de = {
   tag: "Tag | Tags",
   competence: "Kompetenz | Kompetenzen",
   add: "Hinzufügen",
-  archive: "Achivieren",
+  archive: "Archivieren",
   save: "Speichern",
   project: "Projekt | Projekte",
   label: "Label | Labels",
