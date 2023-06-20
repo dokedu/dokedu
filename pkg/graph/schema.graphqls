@@ -180,9 +180,17 @@ type UserStudentConnection {
     totalCount: Int!
 }
 
+enum UserOrderBy {
+    first_name
+    last_name
+    email
+    role
+}
+
 # user filter input
 input UserFilterInput {
     role: [UserRole]
+    orderBy: [UserOrderBy]
 }
 
 input CompetenceFilterInput {

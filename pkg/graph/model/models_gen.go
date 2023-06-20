@@ -307,7 +307,8 @@ type UserFileFilterInput struct {
 }
 
 type UserFilterInput struct {
-	Role []*db.UserRole `json:"role,omitempty"`
+	Role    []*db.UserRole `json:"role,omitempty"`
+	OrderBy []*UserOrderBy `json:"orderBy,omitempty"`
 }
 
 type UserStudentConnection struct {
@@ -397,5 +398,50 @@ func (e *SortDirection) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SortDirection) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type UserOrderBy string
+
+const (
+	UserOrderByFirstName UserOrderBy = "first_name"
+	UserOrderByLastName  UserOrderBy = "last_name"
+	UserOrderByEmail     UserOrderBy = "email"
+	UserOrderByRole      UserOrderBy = "role"
+)
+
+var AllUserOrderBy = []UserOrderBy{
+	UserOrderByFirstName,
+	UserOrderByLastName,
+	UserOrderByEmail,
+	UserOrderByRole,
+}
+
+func (e UserOrderBy) IsValid() bool {
+	switch e {
+	case UserOrderByFirstName, UserOrderByLastName, UserOrderByEmail, UserOrderByRole:
+		return true
+	}
+	return false
+}
+
+func (e UserOrderBy) String() string {
+	return string(e)
+}
+
+func (e *UserOrderBy) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = UserOrderBy(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid UserOrderBy", str)
+	}
+	return nil
+}
+
+func (e UserOrderBy) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

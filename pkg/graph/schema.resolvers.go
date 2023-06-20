@@ -741,6 +741,13 @@ func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filt
 		if filter.Role != nil && len(filter.Role) > 0 {
 			query.Where("role IN (?)", bun.In(filter.Role))
 		}
+		if filter.OrderBy != nil && len(filter.OrderBy) > 0 {
+			orderString := make([]string, len(filter.OrderBy))
+			for i, orderBy := range filter.OrderBy {
+				orderString[i] = orderBy.String()
+			}
+			query.OrderExpr(strings.Join(orderString, ", "))
+		}
 	}
 
 	if search != nil && *search != "" {
@@ -800,7 +807,7 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 		return nil, nil
 	}
 
-	var pageLimit = 10
+	var pageLimit = 100 // TODO: Should we use an infinite scroll instead?
 	if limit != nil {
 		pageLimit = *limit
 	}
