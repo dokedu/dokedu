@@ -46,7 +46,8 @@ type Competence {
     color: String!
     createdAt: Time!
     parents: [Competence!]!
-    competences(search: String): [Competence]!
+    sortOrder: Int!
+    competences(search: String, sort: CompetenceSort): [Competence]!
     userCompetences(userId: ID): [UserCompetence]!
 }
 
@@ -196,6 +197,22 @@ input UserCompetenceFilterInput {
     competenceID: ID
 }
 
+enum CompetenceSortField {
+    created_at
+    name
+    sort_order
+}
+
+enum SortDirection {
+    asc
+    desc
+}
+
+input CompetenceSort {
+    field: CompetenceSortField!
+    order: SortDirection!
+}
+
 type Query
 
 type Mutation
@@ -207,7 +224,7 @@ extend type Query {
     user(id: ID!): User!
 
     competence(id: ID!): Competence!
-    competences(limit: Int, offset: Int, filter: CompetenceFilterInput, search: String): CompetenceConnection!
+    competences(limit: Int, offset: Int, filter: CompetenceFilterInput, search: String, sort: CompetenceSort): CompetenceConnection!
 
     report(id: ID!): Report!
     reports(limit: Int, offset: Int): ReportConnection!
@@ -277,6 +294,15 @@ input UpdateCompetenceInput {
     color: String
 }
 
+input SortCompetenceInput {
+    id: ID!
+    sortOrder: Int!
+}
+
+input UpdateCompetenceSortingInput {
+    competences: [SortCompetenceInput!]!
+}
+
 extend type Mutation {
     signIn(input: SignInInput!): SignInPayload!
     resetPassword(input: ResetPasswordInput!): ResetPasswordPayload!
@@ -302,5 +328,7 @@ extend type Mutation {
     updatePassword(oldPassword: String!, newPassword: String!): Boolean!
 
     updateCompetence(input: UpdateCompetenceInput!): Competence!
+
+    updateCompetenceSorting(input: UpdateCompetenceSortingInput!): [Competence]!
 }
 

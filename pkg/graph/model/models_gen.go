@@ -4,6 +4,9 @@ package model
 
 import (
 	"example/pkg/db"
+	"fmt"
+	"io"
+	"strconv"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -35,6 +38,11 @@ type CompetenceFilterInput struct {
 	Type    []*db.CompetenceType `json:"type,omitempty"`
 	Parents []*string            `json:"parents,omitempty"`
 	UserID  *string              `json:"userId,omitempty"`
+}
+
+type CompetenceSort struct {
+	Field CompetenceSortField `json:"field"`
+	Order SortDirection       `json:"order"`
 }
 
 type CreateEntryInput struct {
@@ -226,9 +234,18 @@ type SignUpInput struct {
 	Password  string `json:"password"`
 }
 
+type SortCompetenceInput struct {
+	ID        string `json:"id"`
+	SortOrder int    `json:"sortOrder"`
+}
+
 type UpdateCompetenceInput struct {
 	ID    string  `json:"id"`
 	Color *string `json:"color,omitempty"`
+}
+
+type UpdateCompetenceSortingInput struct {
+	Competences []*SortCompetenceInput `json:"competences"`
 }
 
 type UpdateEntryInput struct {
@@ -297,4 +314,88 @@ type UserStudentConnection struct {
 	Edges      []*db.UserStudent `json:"edges,omitempty"`
 	PageInfo   *PageInfo         `json:"pageInfo"`
 	TotalCount int               `json:"totalCount"`
+}
+
+type CompetenceSortField string
+
+const (
+	CompetenceSortFieldCreatedAt CompetenceSortField = "created_at"
+	CompetenceSortFieldName      CompetenceSortField = "name"
+	CompetenceSortFieldSortOrder CompetenceSortField = "sort_order"
+)
+
+var AllCompetenceSortField = []CompetenceSortField{
+	CompetenceSortFieldCreatedAt,
+	CompetenceSortFieldName,
+	CompetenceSortFieldSortOrder,
+}
+
+func (e CompetenceSortField) IsValid() bool {
+	switch e {
+	case CompetenceSortFieldCreatedAt, CompetenceSortFieldName, CompetenceSortFieldSortOrder:
+		return true
+	}
+	return false
+}
+
+func (e CompetenceSortField) String() string {
+	return string(e)
+}
+
+func (e *CompetenceSortField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = CompetenceSortField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid CompetenceSortField", str)
+	}
+	return nil
+}
+
+func (e CompetenceSortField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type SortDirection string
+
+const (
+	SortDirectionAsc  SortDirection = "asc"
+	SortDirectionDesc SortDirection = "desc"
+)
+
+var AllSortDirection = []SortDirection{
+	SortDirectionAsc,
+	SortDirectionDesc,
+}
+
+func (e SortDirection) IsValid() bool {
+	switch e {
+	case SortDirectionAsc, SortDirectionDesc:
+		return true
+	}
+	return false
+}
+
+func (e SortDirection) String() string {
+	return string(e)
+}
+
+func (e *SortDirection) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SortDirection(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SortDirection", str)
+	}
+	return nil
+}
+
+func (e SortDirection) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

@@ -42,7 +42,10 @@ func (g *Generator) CompetencesReportData(report db.Report) (*CompetencesTemplat
 	data.OrganisationName = organisation.Name
 
 	var competences []db.Competence
-	err = g.cfg.DB.NewSelect().Model(&competences).Where("organisation_id = ?", report.OrganisationID).Scan(ctx)
+	err = g.cfg.DB.NewSelect().
+		Model(&competences).
+		Where("organisation_id = ?", report.OrganisationID).
+		Order("sort_order").Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -109,6 +112,15 @@ func Subjects(competences []db.Competence) []db.Competence {
 		}
 	}
 
+	// sort subjects by sort_order
+	for i := range subjects {
+		for j := range subjects {
+			if subjects[i].SortOrder < subjects[j].SortOrder {
+				subjects[i], subjects[j] = subjects[j], subjects[i]
+			}
+		}
+	}
+
 	return subjects
 }
 
@@ -117,6 +129,15 @@ func GetCompetenceByParent(competences map[string][]db.Competence, parent db.Com
 	var result []db.Competence
 	for _, c := range competences[parent.ID] {
 		result = append(result, c)
+	}
+
+	// sort competences by sort_order
+	for i := range result {
+		for j := range result {
+			if result[i].SortOrder < result[j].SortOrder {
+				result[i], result[j] = result[j], result[i]
+			}
+		}
 	}
 
 	return result

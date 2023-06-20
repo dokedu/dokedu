@@ -136,6 +136,7 @@ type Competence struct {
 	OrganisationID string         `json:"organisation_id"`
 	Grades         []int          `bun:",array" json:"grades"`
 	Color          sql.NullString `json:"color"`
+	SortOrder      int            `json:"sort_order"`
 	CurriculumID   sql.NullString `json:"curriculum_id"`
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
 	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`

@@ -106,12 +106,13 @@ type ComplexityRoot struct {
 
 	Competence struct {
 		Color           func(childComplexity int) int
-		Competences     func(childComplexity int, search *string) int
+		Competences     func(childComplexity int, search *string, sort *model.CompetenceSort) int
 		CreatedAt       func(childComplexity int) int
 		Grades          func(childComplexity int) int
 		ID              func(childComplexity int) int
 		Name            func(childComplexity int) int
 		Parents         func(childComplexity int) int
+		SortOrder       func(childComplexity int) int
 		Type            func(childComplexity int) int
 		UserCompetences func(childComplexity int, userID *string) int
 	}
@@ -199,32 +200,33 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AcceptInvite          func(childComplexity int, token string, input model.SignUpInput) int
-		ArchiveEntry          func(childComplexity int, id string) int
-		ArchiveEvent          func(childComplexity int, id string) int
-		ArchiveTag            func(childComplexity int, id string) int
-		ArchiveUser           func(childComplexity int, id string) int
-		ArchiveUserCompetence func(childComplexity int, id string) int
-		CreateEntry           func(childComplexity int, input model.CreateEntryInput) int
-		CreateEvent           func(childComplexity int, input model.CreateEventInput) int
-		CreateFolder          func(childComplexity int, input model.CreateFolderInput) int
-		CreateReport          func(childComplexity int, input model.CreateReportInput) int
-		CreateTag             func(childComplexity int, input model.CreateTagInput) int
-		CreateUser            func(childComplexity int, input model.CreateUserInput) int
-		CreateUserCompetence  func(childComplexity int, input model.CreateUserCompetenceInput) int
-		ForgotPassword        func(childComplexity int, input model.ForgotPasswordInput) int
-		GenerateFileURL       func(childComplexity int, input model.GenerateFileURLInput) int
-		InviteUser            func(childComplexity int, input model.CreateUserInput) int
-		ResetPassword         func(childComplexity int, input model.ResetPasswordInput) int
-		SignIn                func(childComplexity int, input model.SignInInput) int
-		SignOut               func(childComplexity int) int
-		SingleUpload          func(childComplexity int, input model.FileUploadInput) int
-		UpdateCompetence      func(childComplexity int, input model.UpdateCompetenceInput) int
-		UpdateEntry           func(childComplexity int, input model.UpdateEntryInput) int
-		UpdateEvent           func(childComplexity int, input model.UpdateEventInput) int
-		UpdatePassword        func(childComplexity int, oldPassword string, newPassword string) int
-		UpdateTag             func(childComplexity int, id string, input model.CreateTagInput) int
-		UpdateUser            func(childComplexity int, input model.UpdateUserInput) int
+		AcceptInvite            func(childComplexity int, token string, input model.SignUpInput) int
+		ArchiveEntry            func(childComplexity int, id string) int
+		ArchiveEvent            func(childComplexity int, id string) int
+		ArchiveTag              func(childComplexity int, id string) int
+		ArchiveUser             func(childComplexity int, id string) int
+		ArchiveUserCompetence   func(childComplexity int, id string) int
+		CreateEntry             func(childComplexity int, input model.CreateEntryInput) int
+		CreateEvent             func(childComplexity int, input model.CreateEventInput) int
+		CreateFolder            func(childComplexity int, input model.CreateFolderInput) int
+		CreateReport            func(childComplexity int, input model.CreateReportInput) int
+		CreateTag               func(childComplexity int, input model.CreateTagInput) int
+		CreateUser              func(childComplexity int, input model.CreateUserInput) int
+		CreateUserCompetence    func(childComplexity int, input model.CreateUserCompetenceInput) int
+		ForgotPassword          func(childComplexity int, input model.ForgotPasswordInput) int
+		GenerateFileURL         func(childComplexity int, input model.GenerateFileURLInput) int
+		InviteUser              func(childComplexity int, input model.CreateUserInput) int
+		ResetPassword           func(childComplexity int, input model.ResetPasswordInput) int
+		SignIn                  func(childComplexity int, input model.SignInInput) int
+		SignOut                 func(childComplexity int) int
+		SingleUpload            func(childComplexity int, input model.FileUploadInput) int
+		UpdateCompetence        func(childComplexity int, input model.UpdateCompetenceInput) int
+		UpdateCompetenceSorting func(childComplexity int, input model.UpdateCompetenceSortingInput) int
+		UpdateEntry             func(childComplexity int, input model.UpdateEntryInput) int
+		UpdateEvent             func(childComplexity int, input model.UpdateEventInput) int
+		UpdatePassword          func(childComplexity int, oldPassword string, newPassword string) int
+		UpdateTag               func(childComplexity int, id string, input model.CreateTagInput) int
+		UpdateUser              func(childComplexity int, input model.UpdateUserInput) int
 	}
 
 	Organisation struct {
@@ -251,7 +253,7 @@ type ComplexityRoot struct {
 		Chat         func(childComplexity int, id string) int
 		Chats        func(childComplexity int, limit *int, offset *int) int
 		Competence   func(childComplexity int, id string) int
-		Competences  func(childComplexity int, limit *int, offset *int, filter *model.CompetenceFilterInput, search *string) int
+		Competences  func(childComplexity int, limit *int, offset *int, filter *model.CompetenceFilterInput, search *string, sort *model.CompetenceSort) int
 		Entries      func(childComplexity int, limit *int, offset *int, filter *model.EntryFilterInput, search *string) int
 		Entry        func(childComplexity int, id string) int
 		Event        func(childComplexity int, id string) int
@@ -391,7 +393,8 @@ type CompetenceResolver interface {
 	Color(ctx context.Context, obj *db.Competence) (string, error)
 
 	Parents(ctx context.Context, obj *db.Competence) ([]*db.Competence, error)
-	Competences(ctx context.Context, obj *db.Competence, search *string) ([]*db.Competence, error)
+
+	Competences(ctx context.Context, obj *db.Competence, search *string, sort *model.CompetenceSort) ([]*db.Competence, error)
 	UserCompetences(ctx context.Context, obj *db.Competence, userID *string) ([]*db.UserCompetence, error)
 }
 type EntryResolver interface {
@@ -444,6 +447,7 @@ type MutationResolver interface {
 	CreateReport(ctx context.Context, input model.CreateReportInput) (*db.Report, error)
 	UpdatePassword(ctx context.Context, oldPassword string, newPassword string) (bool, error)
 	UpdateCompetence(ctx context.Context, input model.UpdateCompetenceInput) (*db.Competence, error)
+	UpdateCompetenceSorting(ctx context.Context, input model.UpdateCompetenceSortingInput) ([]*db.Competence, error)
 }
 type OrganisationResolver interface {
 	Owner(ctx context.Context, obj *db.Organisation) (*db.User, error)
@@ -466,7 +470,7 @@ type QueryResolver interface {
 	Users(ctx context.Context, limit *int, offset *int, filter *model.UserFilterInput, search *string) (*model.UserConnection, error)
 	User(ctx context.Context, id string) (*db.User, error)
 	Competence(ctx context.Context, id string) (*db.Competence, error)
-	Competences(ctx context.Context, limit *int, offset *int, filter *model.CompetenceFilterInput, search *string) (*model.CompetenceConnection, error)
+	Competences(ctx context.Context, limit *int, offset *int, filter *model.CompetenceFilterInput, search *string, sort *model.CompetenceSort) (*model.CompetenceConnection, error)
 	Report(ctx context.Context, id string) (*db.Report, error)
 	Reports(ctx context.Context, limit *int, offset *int) (*model.ReportConnection, error)
 	Tag(ctx context.Context, id string) (*db.Tag, error)
@@ -720,7 +724,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Competence.Competences(childComplexity, args["search"].(*string)), true
+		return e.complexity.Competence.Competences(childComplexity, args["search"].(*string), args["sort"].(*model.CompetenceSort)), true
 
 	case "Competence.createdAt":
 		if e.complexity.Competence.CreatedAt == nil {
@@ -756,6 +760,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Competence.Parents(childComplexity), true
+
+	case "Competence.sortOrder":
+		if e.complexity.Competence.SortOrder == nil {
+			break
+		}
+
+		return e.complexity.Competence.SortOrder(childComplexity), true
 
 	case "Competence.type":
 		if e.complexity.Competence.Type == nil {
@@ -1387,6 +1398,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateCompetence(childComplexity, args["input"].(model.UpdateCompetenceInput)), true
 
+	case "Mutation.updateCompetenceSorting":
+		if e.complexity.Mutation.UpdateCompetenceSorting == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateCompetenceSorting_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateCompetenceSorting(childComplexity, args["input"].(model.UpdateCompetenceSortingInput)), true
+
 	case "Mutation.updateEntry":
 		if e.complexity.Mutation.UpdateEntry == nil {
 			break
@@ -1580,7 +1603,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Competences(childComplexity, args["limit"].(*int), args["offset"].(*int), args["filter"].(*model.CompetenceFilterInput), args["search"].(*string)), true
+		return e.complexity.Query.Competences(childComplexity, args["limit"].(*int), args["offset"].(*int), args["filter"].(*model.CompetenceFilterInput), args["search"].(*string), args["sort"].(*model.CompetenceSort)), true
 
 	case "Query.entries":
 		if e.complexity.Query.Entries == nil {
@@ -2223,6 +2246,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputBucketFilterInput,
 		ec.unmarshalInputCompetenceFilterInput,
+		ec.unmarshalInputCompetenceSort,
 		ec.unmarshalInputCreateEntryInput,
 		ec.unmarshalInputCreateEventInput,
 		ec.unmarshalInputCreateFolderInput,
@@ -2242,7 +2266,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputSharedDriveFilterInput,
 		ec.unmarshalInputSignInInput,
 		ec.unmarshalInputSignUpInput,
+		ec.unmarshalInputSortCompetenceInput,
 		ec.unmarshalInputUpdateCompetenceInput,
+		ec.unmarshalInputUpdateCompetenceSortingInput,
 		ec.unmarshalInputUpdateEntryInput,
 		ec.unmarshalInputUpdateEventInput,
 		ec.unmarshalInputUpdateUserCompetenceInput,
@@ -2345,6 +2371,15 @@ func (ec *executionContext) field_Competence_competences_args(ctx context.Contex
 		}
 	}
 	args["search"] = arg0
+	var arg1 *model.CompetenceSort
+	if tmp, ok := rawArgs["sort"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sort"))
+		arg1, err = ec.unmarshalOCompetenceSort2ᚖexampleᚋpkgᚋgraphᚋmodelᚐCompetenceSort(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sort"] = arg1
 	return args, nil
 }
 
@@ -2657,6 +2692,21 @@ func (ec *executionContext) field_Mutation_singleUpload_args(ctx context.Context
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_updateCompetenceSorting_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.UpdateCompetenceSortingInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNUpdateCompetenceSortingInput2exampleᚋpkgᚋgraphᚋmodelᚐUpdateCompetenceSortingInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_updateCompetence_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2903,6 +2953,15 @@ func (ec *executionContext) field_Query_competences_args(ctx context.Context, ra
 		}
 	}
 	args["search"] = arg3
+	var arg4 *model.CompetenceSort
+	if tmp, ok := rawArgs["sort"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sort"))
+		arg4, err = ec.unmarshalOCompetenceSort2ᚖexampleᚋpkgᚋgraphᚋmodelᚐCompetenceSort(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sort"] = arg4
 	return args, nil
 }
 
@@ -4885,12 +4944,58 @@ func (ec *executionContext) fieldContext_Competence_parents(ctx context.Context,
 				return ec.fieldContext_Competence_createdAt(ctx, field)
 			case "parents":
 				return ec.fieldContext_Competence_parents(ctx, field)
+			case "sortOrder":
+				return ec.fieldContext_Competence_sortOrder(ctx, field)
 			case "competences":
 				return ec.fieldContext_Competence_competences(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Competence_userCompetences(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Competence_sortOrder(ctx context.Context, field graphql.CollectedField, obj *db.Competence) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Competence_sortOrder(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SortOrder, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Competence_sortOrder(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Competence",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -4910,7 +5015,7 @@ func (ec *executionContext) _Competence_competences(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Competence().Competences(rctx, obj, fc.Args["search"].(*string))
+		return ec.resolvers.Competence().Competences(rctx, obj, fc.Args["search"].(*string), fc.Args["sort"].(*model.CompetenceSort))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4949,6 +5054,8 @@ func (ec *executionContext) fieldContext_Competence_competences(ctx context.Cont
 				return ec.fieldContext_Competence_createdAt(ctx, field)
 			case "parents":
 				return ec.fieldContext_Competence_parents(ctx, field)
+			case "sortOrder":
+				return ec.fieldContext_Competence_sortOrder(ctx, field)
 			case "competences":
 				return ec.fieldContext_Competence_competences(ctx, field)
 			case "userCompetences":
@@ -5092,6 +5199,8 @@ func (ec *executionContext) fieldContext_CompetenceConnection_edges(ctx context.
 				return ec.fieldContext_Competence_createdAt(ctx, field)
 			case "parents":
 				return ec.fieldContext_Competence_parents(ctx, field)
+			case "sortOrder":
+				return ec.fieldContext_Competence_sortOrder(ctx, field)
 			case "competences":
 				return ec.fieldContext_Competence_competences(ctx, field)
 			case "userCompetences":
@@ -6409,6 +6518,8 @@ func (ec *executionContext) fieldContext_Event_competences(ctx context.Context, 
 				return ec.fieldContext_Competence_createdAt(ctx, field)
 			case "parents":
 				return ec.fieldContext_Competence_parents(ctx, field)
+			case "sortOrder":
+				return ec.fieldContext_Competence_sortOrder(ctx, field)
 			case "competences":
 				return ec.fieldContext_Competence_competences(ctx, field)
 			case "userCompetences":
@@ -9456,6 +9567,8 @@ func (ec *executionContext) fieldContext_Mutation_updateCompetence(ctx context.C
 				return ec.fieldContext_Competence_createdAt(ctx, field)
 			case "parents":
 				return ec.fieldContext_Competence_parents(ctx, field)
+			case "sortOrder":
+				return ec.fieldContext_Competence_sortOrder(ctx, field)
 			case "competences":
 				return ec.fieldContext_Competence_competences(ctx, field)
 			case "userCompetences":
@@ -9472,6 +9585,83 @@ func (ec *executionContext) fieldContext_Mutation_updateCompetence(ctx context.C
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updateCompetence_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateCompetenceSorting(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateCompetenceSorting(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateCompetenceSorting(rctx, fc.Args["input"].(model.UpdateCompetenceSortingInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*db.Competence)
+	fc.Result = res
+	return ec.marshalNCompetence2ᚕᚖexampleᚋpkgᚋdbᚐCompetence(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateCompetenceSorting(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Competence_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Competence_name(ctx, field)
+			case "type":
+				return ec.fieldContext_Competence_type(ctx, field)
+			case "grades":
+				return ec.fieldContext_Competence_grades(ctx, field)
+			case "color":
+				return ec.fieldContext_Competence_color(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Competence_createdAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_Competence_parents(ctx, field)
+			case "sortOrder":
+				return ec.fieldContext_Competence_sortOrder(ctx, field)
+			case "competences":
+				return ec.fieldContext_Competence_competences(ctx, field)
+			case "userCompetences":
+				return ec.fieldContext_Competence_userCompetences(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateCompetenceSorting_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -11035,6 +11225,8 @@ func (ec *executionContext) fieldContext_Query_competence(ctx context.Context, f
 				return ec.fieldContext_Competence_createdAt(ctx, field)
 			case "parents":
 				return ec.fieldContext_Competence_parents(ctx, field)
+			case "sortOrder":
+				return ec.fieldContext_Competence_sortOrder(ctx, field)
 			case "competences":
 				return ec.fieldContext_Competence_competences(ctx, field)
 			case "userCompetences":
@@ -11071,7 +11263,7 @@ func (ec *executionContext) _Query_competences(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Competences(rctx, fc.Args["limit"].(*int), fc.Args["offset"].(*int), fc.Args["filter"].(*model.CompetenceFilterInput), fc.Args["search"].(*string))
+		return ec.resolvers.Query().Competences(rctx, fc.Args["limit"].(*int), fc.Args["offset"].(*int), fc.Args["filter"].(*model.CompetenceFilterInput), fc.Args["search"].(*string), fc.Args["sort"].(*model.CompetenceSort))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -13323,6 +13515,8 @@ func (ec *executionContext) fieldContext_UserCompetence_competence(ctx context.C
 				return ec.fieldContext_Competence_createdAt(ctx, field)
 			case "parents":
 				return ec.fieldContext_Competence_parents(ctx, field)
+			case "sortOrder":
+				return ec.fieldContext_Competence_sortOrder(ctx, field)
 			case "competences":
 				return ec.fieldContext_Competence_competences(ctx, field)
 			case "userCompetences":
@@ -16390,6 +16584,42 @@ func (ec *executionContext) unmarshalInputCompetenceFilterInput(ctx context.Cont
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputCompetenceSort(ctx context.Context, obj interface{}) (model.CompetenceSort, error) {
+	var it model.CompetenceSort
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"field", "order"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "field":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
+			it.Field, err = ec.unmarshalNCompetenceSortField2exampleᚋpkgᚋgraphᚋmodelᚐCompetenceSortField(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "order":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+			it.Order, err = ec.unmarshalNSortDirection2exampleᚋpkgᚋgraphᚋmodelᚐSortDirection(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreateEntryInput(ctx context.Context, obj interface{}) (model.CreateEntryInput, error) {
 	var it model.CreateEntryInput
 	asMap := map[string]interface{}{}
@@ -17314,6 +17544,42 @@ func (ec *executionContext) unmarshalInputSignUpInput(ctx context.Context, obj i
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputSortCompetenceInput(ctx context.Context, obj interface{}) (model.SortCompetenceInput, error) {
+	var it model.SortCompetenceInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "sortOrder"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "sortOrder":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sortOrder"))
+			it.SortOrder, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateCompetenceInput(ctx context.Context, obj interface{}) (model.UpdateCompetenceInput, error) {
 	var it model.UpdateCompetenceInput
 	asMap := map[string]interface{}{}
@@ -17341,6 +17607,34 @@ func (ec *executionContext) unmarshalInputUpdateCompetenceInput(ctx context.Cont
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("color"))
 			it.Color, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateCompetenceSortingInput(ctx context.Context, obj interface{}) (model.UpdateCompetenceSortingInput, error) {
+	var it model.UpdateCompetenceSortingInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"competences"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "competences":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("competences"))
+			it.Competences, err = ec.unmarshalNSortCompetenceInput2ᚕᚖexampleᚋpkgᚋgraphᚋmodelᚐSortCompetenceInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -18250,6 +18544,13 @@ func (ec *executionContext) _Competence(ctx context.Context, sel ast.SelectionSe
 				return innerFunc(ctx)
 
 			})
+		case "sortOrder":
+
+			out.Values[i] = ec._Competence_sortOrder(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "competences":
 			field := field
 
@@ -19285,6 +19586,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateCompetence(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateCompetenceSorting":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateCompetenceSorting(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -21511,6 +21821,16 @@ func (ec *executionContext) marshalNCompetenceConnection2ᚖexampleᚋpkgᚋgrap
 	return ec._CompetenceConnection(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNCompetenceSortField2exampleᚋpkgᚋgraphᚋmodelᚐCompetenceSortField(ctx context.Context, v interface{}) (model.CompetenceSortField, error) {
+	var res model.CompetenceSortField
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNCompetenceSortField2exampleᚋpkgᚋgraphᚋmodelᚐCompetenceSortField(ctx context.Context, sel ast.SelectionSet, v model.CompetenceSortField) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNCompetenceType2exampleᚋpkgᚋdbᚐCompetenceType(ctx context.Context, v interface{}) (db.CompetenceType, error) {
 	tmp, err := graphql.UnmarshalString(v)
 	res := db.CompetenceType(tmp)
@@ -22108,6 +22428,38 @@ func (ec *executionContext) unmarshalNSignUpInput2exampleᚋpkgᚋgraphᚋmodel�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNSortCompetenceInput2ᚕᚖexampleᚋpkgᚋgraphᚋmodelᚐSortCompetenceInputᚄ(ctx context.Context, v interface{}) ([]*model.SortCompetenceInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.SortCompetenceInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNSortCompetenceInput2ᚖexampleᚋpkgᚋgraphᚋmodelᚐSortCompetenceInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNSortCompetenceInput2ᚖexampleᚋpkgᚋgraphᚋmodelᚐSortCompetenceInput(ctx context.Context, v interface{}) (*model.SortCompetenceInput, error) {
+	res, err := ec.unmarshalInputSortCompetenceInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNSortDirection2exampleᚋpkgᚋgraphᚋmodelᚐSortDirection(ctx context.Context, v interface{}) (model.SortDirection, error) {
+	var res model.SortDirection
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNSortDirection2exampleᚋpkgᚋgraphᚋmodelᚐSortDirection(ctx context.Context, sel ast.SelectionSet, v model.SortDirection) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -22230,6 +22582,11 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 
 func (ec *executionContext) unmarshalNUpdateCompetenceInput2exampleᚋpkgᚋgraphᚋmodelᚐUpdateCompetenceInput(ctx context.Context, v interface{}) (model.UpdateCompetenceInput, error) {
 	res, err := ec.unmarshalInputUpdateCompetenceInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateCompetenceSortingInput2exampleᚋpkgᚋgraphᚋmodelᚐUpdateCompetenceSortingInput(ctx context.Context, v interface{}) (model.UpdateCompetenceSortingInput, error) {
+	res, err := ec.unmarshalInputUpdateCompetenceSortingInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -22868,6 +23225,14 @@ func (ec *executionContext) unmarshalOCompetenceFilterInput2ᚖexampleᚋpkgᚋg
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputCompetenceFilterInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOCompetenceSort2ᚖexampleᚋpkgᚋgraphᚋmodelᚐCompetenceSort(ctx context.Context, v interface{}) (*model.CompetenceSort, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputCompetenceSort(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

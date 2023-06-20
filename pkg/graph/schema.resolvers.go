@@ -79,7 +79,7 @@ WHERE id <> ?;
 }
 
 // Competences is the resolver for the competences field.
-func (r *competenceResolver) Competences(ctx context.Context, obj *db.Competence, search *string) ([]*db.Competence, error) {
+func (r *competenceResolver) Competences(ctx context.Context, obj *db.Competence, search *string, sort *model.CompetenceSort) ([]*db.Competence, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, nil
@@ -87,6 +87,19 @@ func (r *competenceResolver) Competences(ctx context.Context, obj *db.Competence
 
 	var competences []*db.Competence
 	query := r.DB.NewSelect().Model(&competences).Where("competence_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID)
+
+	if sort != nil {
+		switch sort.Field {
+		case model.CompetenceSortFieldSortOrder:
+			query.Order("sort_order ASC")
+		case model.CompetenceSortFieldName:
+			query.Order("name ASC")
+		case model.CompetenceSortFieldCreatedAt:
+			query.Order("created_at ASC")
+		}
+	} else {
+		query.Order("name ASC")
+	}
 
 	if search != nil && *search != "" {
 		query.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", *search))
@@ -636,15 +649,60 @@ func (r *mutationResolver) UpdateCompetence(ctx context.Context, input model.Upd
 	return &competence, nil
 }
 
+// UpdateCompetenceSorting is the resolver for the updateCompetenceSorting field.
+func (r *mutationResolver) UpdateCompetenceSorting(ctx context.Context, input model.UpdateCompetenceSortingInput) ([]*db.Competence, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	ids := make([]string, len(input.Competences))
+	for i, id := range input.Competences {
+		ids[i] = id.ID
+	}
+
+	var competences []*db.Competence
+	err = r.DB.NewSelect().Model(&competences).Where("id IN (?)", bun.In(ids)).Where("organisation_id = ?", currentUser.ID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// if length of competences is not equal to length of input, then some competences were not found
+	if len(competences) != len(input.Competences) {
+		return nil, fmt.Errorf("some competences were not found")
+	}
+
+	// create a map of competences for easy lookup
+	competenceMap := make(map[string]*db.Competence)
+	for _, competence := range competences {
+		competenceMap[competence.ID] = competence
+	}
+
+	// update the sorting
+	for i, id := range ids {
+		competenceMap[id].SortOrder = i
+	}
+
+	for _, competence := range competences {
+		sortOrder := competenceMap[competence.ID].SortOrder
+		_, err = r.DB.NewUpdate().Model(competence).WherePK().Set("sort_order = ?", sortOrder).Where("organisation_id = ?", currentUser.ID).Exec(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return competences, nil
+}
+
 // Owner is the resolver for the owner field.
 func (r *organisationResolver) Owner(ctx context.Context, obj *db.Organisation) (*db.User, error) {
-	_, err := middleware.GetUser(ctx)
+	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, nil
 	}
 
 	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.OwnerID).Where("organisation_id = ?", obj.ID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.OwnerID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -736,7 +794,7 @@ func (r *queryResolver) Competence(ctx context.Context, id string) (*db.Competen
 }
 
 // Competences is the resolver for the competences field.
-func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int, filter *model.CompetenceFilterInput, search *string) (*model.CompetenceConnection, error) {
+func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int, filter *model.CompetenceFilterInput, search *string, sort *model.CompetenceSort) (*model.CompetenceConnection, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, nil
@@ -757,8 +815,20 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 		Model(&competences).
 		Where("organisation_id = ?", currentUser.OrganisationID).
 		Limit(pageLimit).
-		Offset(pageOffset).
-		Order("name ASC")
+		Offset(pageOffset)
+
+	if sort != nil {
+		switch sort.Field {
+		case model.CompetenceSortFieldSortOrder:
+			query.Order("sort_order ASC")
+		case model.CompetenceSortFieldName:
+			query.Order("name ASC")
+		case model.CompetenceSortFieldCreatedAt:
+			query.Order("created_at ASC")
+		}
+	} else {
+		query.Order("name ASC")
+	}
 
 	if search != nil {
 		query.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", *search))
