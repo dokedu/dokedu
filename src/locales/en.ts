@@ -7,6 +7,7 @@ export const en = {
   teacher: "Teacher | Teachers",
   tag: "Tag | Tags",
   competence: "Competence | Competences",
+  learned_competences: "Learned competences",
   add: "Add",
   archive: "Archive",
   save: "Save",

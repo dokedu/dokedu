@@ -7,6 +7,7 @@ export const de = {
   teacher: "Lehrer | Lehrer",
   tag: "Tag | Tags",
   competence: "Kompetenz | Kompetenzen",
+  learned_competences: "Gelernte Kompetenzen",
   add: "Hinzufügen",
   archive: "Achivieren",
   save: "Speichern",

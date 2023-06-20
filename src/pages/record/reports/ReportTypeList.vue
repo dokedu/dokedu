@@ -57,6 +57,7 @@ const { t } = useI18n();
 const types = computed(() => [
   { label: t("entry", 2), kind: "entries", format: "pdf" },
   { label: t("competence", 2), kind: "competences", format: "pdf" },
+  { label: t("learned_competences", 2), kind: "learned_competences", format: "pdf" },
   // { label: "Subjects", kind: "subjects", format: "pdf" },
   // { label: "Entries in .docx", kind: "entries", format: "docx" },
   // { label: "Subjects in .docx", kind: "subjects", format: "docx" },
