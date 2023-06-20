@@ -84,6 +84,7 @@ enum ReportKind {
     entries
     subjects
     competences
+    learned_competences
 }
 
 type Report {

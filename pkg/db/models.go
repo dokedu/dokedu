@@ -43,9 +43,10 @@ type NullReportFormat struct {
 type ReportKind string
 
 const (
-	ReportKindEntries     ReportKind = "entries"
-	ReportKindSubjects    ReportKind = "subjects"
-	ReportKindCompetences ReportKind = "competences"
+	ReportKindEntries            ReportKind = "entries"
+	ReportKindSubjects           ReportKind = "subjects"
+	ReportKindCompetences        ReportKind = "competences"
+	ReportKindLearnedCompetences ReportKind = "learned_competences"
 )
 
 type ReportStatus string

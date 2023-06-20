@@ -48,6 +48,9 @@ func (g *Generator) GeneratePDF(report db.Report) error {
 	case db.ReportKindCompetences:
 		data, _ := g.CompetencesReportData(report)
 		return g.process(report, data)
+	case db.ReportKindLearnedCompetences:
+		data, _ := g.LearnedCompetencesReportData(report)
+		return g.process(report, data)
 	default:
 		return errors.New("unknown report kind")
 	}
@@ -100,6 +103,8 @@ func (g *Generator) generatePDF(report db.Report, data *CompetencesData) error {
 		reportType = "Einträge"
 	case db.ReportKindCompetences:
 		reportType = "Kompetenzen"
+	case db.ReportKindLearnedCompetences:
+		reportType = "Gelernte Kompetenzen"
 	}
 
 	headData := HeadData{
@@ -215,6 +220,8 @@ func (g *Generator) generateHTML(report db.Report, data any) error {
 		if err != nil {
 			return err
 		}
+	case db.ReportKindLearnedCompetences:
+		err = t.ExecuteTemplate(reports, "competences.gohtml", data)
 	}
 
 	footer := new(bytes.Buffer)
