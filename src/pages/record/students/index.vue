@@ -50,7 +50,7 @@ const loading = computed(() => {
 const { data, fetching } = useQuery({
   query: gql`
     query usersSearch($search: String) {
-      users(filter: { role: [student] }, search: $search) {
+      users(filter: { role: [student], orderBy: [first_name, last_name] }, search: $search) {
         edges {
           id
           firstName
