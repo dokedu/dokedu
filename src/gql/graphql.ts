@@ -699,6 +699,7 @@ export enum ReportFormat {
 export enum ReportKind {
   Competences = 'competences',
   Entries = 'entries',
+  LearnedCompetences = 'learned_competences',
   Subjects = 'subjects'
 }
 
