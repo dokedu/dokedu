@@ -77,7 +77,7 @@ Outer:
 			// check if parent already exists
 			var exists bool
 			for _, c := range competences {
-				if c.CompetenceID == p.CompetenceID {
+				if c.ID == p.ID {
 					exists = true
 					break
 				}
