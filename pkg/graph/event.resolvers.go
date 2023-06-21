@@ -234,6 +234,16 @@ func (r *queryResolver) Events(ctx context.Context, limit *int, offset *int, fil
 		query.Order("created_at")
 	}
 
+	// Filters
+	if filter != nil {
+		if filter.From != nil {
+			query.Where("starts_at >= ?", filter.From)
+		}
+		if filter.To != nil {
+			query.Where("ends_at <= ?", filter.To)
+		}
+	}
+
 	count, err := query.ScanAndCount(ctx)
 	if err != nil {
 		return nil, err
