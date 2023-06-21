@@ -2,7 +2,7 @@
   <div class="relative flex min-w-0 flex-col">
     <label
       class="mb-1 block text-xs font-medium text-subtle transition ease-in-out"
-      :class="(modelValue && (modelValue as string).length) || search ? 'opacity-100' : 'opacity-0'"
+      v-if="(modelValue && (modelValue as string).length) || search"
       >{{ label }}</label
     >
     <label
@@ -56,7 +56,7 @@
       >
         <ul
           v-if="state.isOpen"
-          class="absolute top-0 z-10 mt-1 max-h-60 w-full min-w-[170px] overflow-auto rounded-md bg-white px-1 py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+          class="absolute top-0 z-10 mt-1 max-h-60 w-full min-w-[250px] overflow-auto rounded-md bg-white px-1 py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
           :class="{ '-top-12 -translate-y-full': openOnTop }"
         >
           <li class="mb-1 flex flex-wrap gap-2 px-2">
