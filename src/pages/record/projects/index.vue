@@ -108,7 +108,6 @@ useInfiniteScroll(
     if (!data.value?.events?.edges) return;
     if (Number(data.value?.events?.totalCount) < 50) return;
     if (eventData.value?.length >= Number(data.value?.events?.totalCount)) return;
-    console.log("Here");
     offset.value += 50;
   },
   { distance: 500 }
