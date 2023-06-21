@@ -19,7 +19,7 @@
         </div>
       </div>
     </PageHeader>
-    <div v-if="filtersOpen" class="flex items-start gap-2 border-b border-stone-100 px-8 py-2">
+    <div v-if="filtersOpen" class="flex items-end gap-2 border-b border-stone-100 px-8 py-2">
       <DFilter :options="studentOptions" :label="$t('student')" v-model="student"></DFilter>
       <DFilter :options="teacherOptions" :label="$t('teacher')" v-model="teacher"></DFilter>
       <DFilter :options="tagOptions" :label="$t('tag', 2)" multiple v-model="tags">
@@ -82,10 +82,10 @@ import { ref, computed, reactive } from "vue";
 import DFilter from "@/components/d-filter/d-filter.vue";
 import { graphql } from "@/gql";
 import DTag from "@/components/d-tag/d-tag.vue";
-import { Entry } from "@/gql/graphql";
 import { useI18n } from "vue-i18n";
 import { useInfiniteScroll } from "@vueuse/core";
 import { watch } from "vue";
+import { Entry } from "@/gql/graphql";
 
 const i18nLocale = useI18n();
 
@@ -94,12 +94,13 @@ const teacher = ref();
 const tags = ref([]);
 
 const offset = ref(0);
-const el = ref<HTMLElement>();
+const el = ref<HTMLElement | null>(null);
 
 useInfiniteScroll(
   el,
   () => {
     if (fetching.value) return;
+    if (!data.value?.entries?.edges) return;
     if (Number(data.value?.entries?.totalCount) < 50) return;
     if (entryData.value.length >= Number(data.value?.entries?.totalCount)) return;
     offset.value += 50;
@@ -133,6 +134,7 @@ const { data, fetching } = useQuery({
       tags: tags,
     },
     offset,
+    limit: 50,
   }),
 });
 
@@ -140,6 +142,7 @@ const entryData = ref<Entry[]>([]);
 
 watch(data, () => {
   if (fetching.value) return;
+  if (!data.value?.entries?.edges) return;
   // @ts-expect-error
   entryData.value.push(...data.value?.entries?.edges);
 });
