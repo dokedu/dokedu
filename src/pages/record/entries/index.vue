@@ -35,19 +35,19 @@
         <div>Description</div>
       </div>
       <div class="flex w-[200px] items-center justify-end gap-1 text-muted">
-        <div @click="toggleDateSort">Date</div>
+        <div @click="sortBy('date')">Date</div>
         <ArrowDown
-          v-if="sortDate"
+          v-if="currentSort == EntrySortBy.DateAsc || currentSort == EntrySortBy.DateDesc"
           class="h-4 w-4 transition-all ease-in-out"
-          :class="sortDate == 'asc' ? 'rotate-180' : 'rotate-0'"
+          :class="currentSort == EntrySortBy.DateAsc ? 'rotate-180' : 'rotate-0'"
         />
       </div>
       <div class="flex w-[220px] items-center justify-end gap-1 pr-8 text-muted">
-        <div @click="toggleCreatedAtSort">Created at</div>
+        <div @click="sortBy('createdAt')">Created at</div>
         <ArrowDown
-          v-if="sortCreatedAt"
+          v-if="currentSort == EntrySortBy.CreatedAtAsc || currentSort == EntrySortBy.CreatedAtDesc"
           class="h-4 w-4 transition-all ease-in-out"
-          :class="sortCreatedAt == 'asc' ? 'rotate-180' : 'rotate-0'"
+          :class="currentSort == EntrySortBy.CreatedAtAsc ? 'rotate-180' : 'rotate-0'"
         />
       </div>
     </div>
@@ -101,55 +101,33 @@ import { useInfiniteScroll } from "@vueuse/core";
 import { watch } from "vue";
 import { Entry } from "@/gql/graphql";
 import { ArrowDown } from "lucide-vue-next";
+import { EntrySortBy } from "@/gql/graphql";
 
 const i18nLocale = useI18n();
 
 const student = ref();
 const teacher = ref();
 const tags = ref([]);
-const sortDate = ref("");
-const sortCreatedAt = ref("");
+const currentSort = ref(EntrySortBy.CreatedAtDesc);
 
-function toggleDateSort() {
-  if (sortCreatedAt.value) {
-    sortCreatedAt.value = "";
-  }
-  if (sortDate.value === "asc") {
-    sortDate.value = "desc";
-  } else if (sortDate.value === "desc") {
-    sortDate.value = "";
-  } else {
-    sortDate.value = "asc";
-  }
-}
-
-function toggleCreatedAtSort() {
-  if (sortDate.value) {
-    sortDate.value = "";
-  }
-  if (sortCreatedAt.value === "asc") {
-    sortCreatedAt.value = "desc";
-  } else if (sortCreatedAt.value === "desc") {
-    sortCreatedAt.value = "";
-  } else {
-    sortCreatedAt.value = "asc";
-  }
-}
-
-const sort = computed(() => {
-  let field = "";
-  if (sortDate.value) {
-    field = "date";
-  } else if (sortCreatedAt.value) {
-    field = "created_at";
-  }
-  if (!field) return;
-  const order = sortDate.value || sortCreatedAt.value;
-  return {
-    field,
-    order,
-  };
+const sortColumns = reactive<{ [key: string]: { [key: string]: EntrySortBy } }>({
+  date: {
+    asc: EntrySortBy.DateAsc,
+    desc: EntrySortBy.DateDesc,
+  },
+  createdAt: {
+    asc: EntrySortBy.CreatedAtAsc,
+    desc: EntrySortBy.CreatedAtDesc,
+  },
 });
+
+function sortBy(column: string) {
+  if (currentSort.value === sortColumns[column].asc) {
+    currentSort.value = sortColumns[column].desc;
+  } else {
+    currentSort.value = sortColumns[column].asc;
+  }
+}
 
 const offset = ref(0);
 const el = ref<HTMLElement | null>(null);
@@ -168,8 +146,8 @@ useInfiniteScroll(
 
 const { data, fetching } = useQuery({
   query: graphql(`
-    query getEntries($filter: EntryFilterInput, $limit: Int, $sort: EntrySortInput, $offset: Int) {
-      entries(filter: $filter, limit: $limit, sort: $sort, offset: $offset) {
+    query getEntries($filter: EntryFilterInput, $limit: Int, $sortBy: EntrySortBy, $offset: Int) {
+      entries(filter: $filter, limit: $limit, sortBy: $sortBy, offset: $offset) {
         totalCount
         edges {
           id
@@ -191,9 +169,9 @@ const { data, fetching } = useQuery({
       authors: teacher,
       tags: tags,
     },
-    offset,
     limit: 50,
-    sort,
+    sortBy: currentSort,
+    offset,
   }),
 });
 
@@ -206,7 +184,7 @@ watch(data, () => {
   entryData.value.push(...data.value?.entries?.edges);
 });
 
-watch([student, teacher, tags, sort], () => {
+watch([student, teacher, tags, currentSort], () => {
   offset.value = 0;
   entryData.value = [];
 });
