@@ -90,7 +90,7 @@ import { ref } from "vue";
 const { data } = useQuery({
   query: graphql(`
     query reports {
-      reports {
+      reports(limit: 100) {
         edges {
           id
           status
