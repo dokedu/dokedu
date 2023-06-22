@@ -34,8 +34,22 @@
       <div class="flex flex-1 items-center pl-8 text-muted">
         <div>Description</div>
       </div>
-      <div class="w-[200px] text-right text-muted">Date</div>
-      <div class="w-[220px] pr-8 text-right text-muted">Created at</div>
+      <div class="flex w-[200px] items-center justify-end gap-1 text-muted">
+        <div @click="sortBy('date')">Date</div>
+        <ArrowDown
+          v-if="currentSort == EntrySortBy.DateAsc || currentSort == EntrySortBy.DateDesc"
+          class="h-4 w-4 transition-all ease-in-out"
+          :class="currentSort == EntrySortBy.DateAsc ? 'rotate-180' : 'rotate-0'"
+        />
+      </div>
+      <div class="flex w-[220px] items-center justify-end gap-1 pr-8 text-muted">
+        <div @click="sortBy('createdAt')">Created at</div>
+        <ArrowDown
+          v-if="currentSort == EntrySortBy.CreatedAtAsc || currentSort == EntrySortBy.CreatedAtDesc"
+          class="h-4 w-4 transition-all ease-in-out"
+          :class="currentSort == EntrySortBy.CreatedAtAsc ? 'rotate-180' : 'rotate-0'"
+        />
+      </div>
     </div>
     <div class="flex flex-col overflow-scroll" ref="el">
       <router-link
@@ -78,7 +92,7 @@ import { useQuery } from "@urql/vue";
 import DButton from "../../../components/d-button/d-button.vue";
 import { Plus } from "lucide-vue-next";
 import { ListFilter } from "lucide-vue-next";
-import { ref, computed, reactive } from "vue";
+import { ref, computed, reactive, Ref } from "vue";
 import DFilter from "@/components/d-filter/d-filter.vue";
 import { graphql } from "@/gql";
 import DTag from "@/components/d-tag/d-tag.vue";
@@ -86,12 +100,34 @@ import { useI18n } from "vue-i18n";
 import { useInfiniteScroll } from "@vueuse/core";
 import { watch } from "vue";
 import { Entry } from "@/gql/graphql";
+import { ArrowDown } from "lucide-vue-next";
+import { EntrySortBy } from "@/gql/graphql";
 
 const i18nLocale = useI18n();
 
 const student = ref();
 const teacher = ref();
 const tags = ref([]);
+const currentSort = ref(EntrySortBy.CreatedAtDesc);
+
+const sortColumns = reactive<{ [key: string]: { [key: string]: EntrySortBy } }>({
+  date: {
+    asc: EntrySortBy.DateAsc,
+    desc: EntrySortBy.DateDesc,
+  },
+  createdAt: {
+    asc: EntrySortBy.CreatedAtAsc,
+    desc: EntrySortBy.CreatedAtDesc,
+  },
+});
+
+function sortBy(column: string) {
+  if (currentSort.value === sortColumns[column].asc) {
+    currentSort.value = sortColumns[column].desc;
+  } else {
+    currentSort.value = sortColumns[column].asc;
+  }
+}
 
 const offset = ref(0);
 const el = ref<HTMLElement | null>(null);
@@ -110,8 +146,8 @@ useInfiniteScroll(
 
 const { data, fetching } = useQuery({
   query: graphql(`
-    query getEntries($filter: EntryFilterInput, $limit: Int, $offset: Int) {
-      entries(filter: $filter, limit: $limit, offset: $offset) {
+    query getEntries($filter: EntryFilterInput, $limit: Int, $sortBy: EntrySortBy, $offset: Int) {
+      entries(filter: $filter, limit: $limit, sortBy: $sortBy, offset: $offset) {
         totalCount
         edges {
           id
@@ -133,8 +169,9 @@ const { data, fetching } = useQuery({
       authors: teacher,
       tags: tags,
     },
-    offset,
     limit: 50,
+    sortBy: currentSort,
+    offset,
   }),
 });
 
@@ -145,6 +182,11 @@ watch(data, () => {
   if (!data.value?.entries?.edges) return;
   // @ts-expect-error
   entryData.value.push(...data.value?.entries?.edges);
+});
+
+watch([student, teacher, tags, currentSort], () => {
+  offset.value = 0;
+  entryData.value = [];
 });
 
 const { data: studentData } = useQuery({
