@@ -462,7 +462,7 @@ func (r *queryResolver) Entry(ctx context.Context, id string) (*db.Entry, error)
 }
 
 // Entries is the resolver for the entries field.
-func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, filter *model.EntryFilterInput, sort *model.EntrySortInput, search *string) (*model.EntryConnection, error) {
+func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, filter *model.EntryFilterInput, sortBy *model.EntrySortBy, search *string) (*model.EntryConnection, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, nil
@@ -502,23 +502,19 @@ func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, fi
 		}
 	}
 
-	if sort != nil {
-		if sort.Field == model.EntrySortFieldCreatedAt {
-			if sort.Order == model.SortOrderAsc {
-				query.Order("entry.created_at ASC")
-			} else {
-				query.Order("entry.created_at DESC")
-			}
+	if sortBy != nil {
+		switch *sortBy {
+		case model.EntrySortByCreatedAtAsc:
+			query.Order("entry.created_at ASC")
+		case model.EntrySortByCreatedAtDesc:
+			query.Order("entry.created_at DESC")
+		case model.EntrySortByDateAsc:
+			query.Order("entry.date ASC")
+		case model.EntrySortByDateDesc:
+			query.Order("entry.date DESC")
+		default:
+			query.Order("entry.created_at DESC")
 		}
-		if sort.Field == model.EntrySortFieldDate {
-			if sort.Order == model.SortOrderAsc {
-				query.Order("entry.date ASC")
-			} else {
-				query.Order("entry.date DESC")
-			}
-		}
-	} else {
-		query.Order("entry.created_at DESC")
 	}
 
 	count, err := query.ScanAndCount(ctx)

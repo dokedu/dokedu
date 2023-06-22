@@ -116,11 +116,6 @@ type EntryFilterInput struct {
 	Deleted     *bool      `json:"deleted,omitempty"`
 }
 
-type EntrySortInput struct {
-	Field EntrySortField `json:"field"`
-	Order SortOrder      `json:"order"`
-}
-
 type EventConnection struct {
 	Edges      []*db.Event `json:"edges,omitempty"`
 	PageInfo   *PageInfo   `json:"pageInfo"`
@@ -365,44 +360,48 @@ func (e CompetenceSortField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type EntrySortField string
+type EntrySortBy string
 
 const (
-	EntrySortFieldDate      EntrySortField = "date"
-	EntrySortFieldCreatedAt EntrySortField = "created_at"
+	EntrySortByDateAsc       EntrySortBy = "date_ASC"
+	EntrySortByDateDesc      EntrySortBy = "date_DESC"
+	EntrySortByCreatedAtAsc  EntrySortBy = "createdAt_ASC"
+	EntrySortByCreatedAtDesc EntrySortBy = "createdAt_DESC"
 )
 
-var AllEntrySortField = []EntrySortField{
-	EntrySortFieldDate,
-	EntrySortFieldCreatedAt,
+var AllEntrySortBy = []EntrySortBy{
+	EntrySortByDateAsc,
+	EntrySortByDateDesc,
+	EntrySortByCreatedAtAsc,
+	EntrySortByCreatedAtDesc,
 }
 
-func (e EntrySortField) IsValid() bool {
+func (e EntrySortBy) IsValid() bool {
 	switch e {
-	case EntrySortFieldDate, EntrySortFieldCreatedAt:
+	case EntrySortByDateAsc, EntrySortByDateDesc, EntrySortByCreatedAtAsc, EntrySortByCreatedAtDesc:
 		return true
 	}
 	return false
 }
 
-func (e EntrySortField) String() string {
+func (e EntrySortBy) String() string {
 	return string(e)
 }
 
-func (e *EntrySortField) UnmarshalGQL(v interface{}) error {
+func (e *EntrySortBy) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = EntrySortField(str)
+	*e = EntrySortBy(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid EntrySortField", str)
+		return fmt.Errorf("%s is not a valid EntrySortBy", str)
 	}
 	return nil
 }
 
-func (e EntrySortField) MarshalGQL(w io.Writer) {
+func (e EntrySortBy) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -444,47 +443,6 @@ func (e *SortDirection) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SortDirection) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type SortOrder string
-
-const (
-	SortOrderAsc  SortOrder = "asc"
-	SortOrderDesc SortOrder = "desc"
-)
-
-var AllSortOrder = []SortOrder{
-	SortOrderAsc,
-	SortOrderDesc,
-}
-
-func (e SortOrder) IsValid() bool {
-	switch e {
-	case SortOrderAsc, SortOrderDesc:
-		return true
-	}
-	return false
-}
-
-func (e SortOrder) String() string {
-	return string(e)
-}
-
-func (e *SortOrder) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = SortOrder(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid SortOrder", str)
-	}
-	return nil
-}
-
-func (e SortOrder) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
