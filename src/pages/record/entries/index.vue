@@ -92,7 +92,7 @@ import { useQuery } from "@urql/vue";
 import DButton from "../../../components/d-button/d-button.vue";
 import { Plus } from "lucide-vue-next";
 import { ListFilter } from "lucide-vue-next";
-import { ref, computed, reactive, Ref } from "vue";
+import { ref, computed, reactive } from "vue";
 import DFilter from "@/components/d-filter/d-filter.vue";
 import { graphql } from "@/gql";
 import DTag from "@/components/d-tag/d-tag.vue";
