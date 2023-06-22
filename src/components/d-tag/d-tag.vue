@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-fit select-none rounded-full px-2.5 py-1 text-sm font-medium"
+    class="flex w-fit select-none items-center rounded-full px-2.5 py-1 text-sm font-medium"
     :class="`bg-${color}-50 text-${color}-700`"
   >
     <div class="flex items-center justify-between gap-2">

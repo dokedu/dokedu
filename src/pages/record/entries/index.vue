@@ -35,7 +35,7 @@
         <div>Description</div>
       </div>
       <div class="w-[200px] text-right text-muted">Date</div>
-      <div class="w-[220px] pr-8 text-right text-muted">Created at</div>
+      <div class="w-[180px] pr-8 text-right text-muted">Created at</div>
     </div>
     <div class="flex flex-col overflow-scroll" ref="el">
       <router-link
@@ -44,8 +44,27 @@
         class="flex items-center border-b border-stone-100 text-sm text-strong transition-all hover:bg-stone-50"
       >
         <div class="line-clamp-1 h-[2rem] flex-1 p-2 pl-8">{{ entry.body }}</div>
-        <div class="w-[200px] p-2 text-right text-subtle">{{ dateOnly(entry.date) }}</div>
-        <div class="flex w-[220px] items-center justify-end gap-2 p-2 pr-8 text-right text-subtle">
+        <div class="line-clamp-1 flex gap-1 p-2 pl-8">
+          <div v-for="event in entry.events" class="flex gap-1">
+            <router-link
+              :to="{ name: 'record-projects-project', params: { id: event.id } }"
+              class="line-clamp-1 inline-flex h-7 max-w-[120px] items-center gap-1.5 text-ellipsis whitespace-nowrap rounded-full border bg-default px-3 py-1 transition-all duration-150 ease-linear hover:max-w-[250px] hover:bg-subtle"
+            >
+              <LayoutGrid class="stroke-subtle w-4 min-w-[16px]" />
+              <div class="flex-1 overflow-hidden text-ellipsis">
+                {{ event.title }}
+              </div>
+            </router-link>
+          </div>
+          <div v-if="entry.tags.length > 5">
+            <DTag color="neutral" class="w-1/4 p-2">{{ entry.tags.length }} Labels</DTag>
+          </div>
+          <div v-else v-for="tag in entry.tags" class="flex gap-1">
+            <DTag :color="tag.color" class="w-1/4 p-2">{{ tag.name }}</DTag>
+          </div>
+        </div>
+        <div class="w-[120px] p-2 text-right text-subtle">{{ dateOnly(entry.date) }}</div>
+        <div class="flex w-[180px] items-center justify-end gap-2 p-2 pr-8 text-right text-subtle">
           <div>
             {{ dateOnly(entry.createdAt) }}
           </div>
@@ -86,6 +105,7 @@ import { useI18n } from "vue-i18n";
 import { useInfiniteScroll } from "@vueuse/core";
 import { watch } from "vue";
 import { Entry } from "@/gql/graphql";
+import { LayoutGrid } from "lucide-vue-next";
 
 const i18nLocale = useI18n();
 
@@ -123,6 +143,15 @@ const { data, fetching } = useQuery({
             lastName
           }
           createdAt
+          events {
+            id
+            title
+          }
+          tags {
+            id
+            name
+            color
+          }
         }
       }
     }
@@ -226,7 +255,7 @@ function removeTag(id: string) {
 function dateOnly(date: string) {
   const options: Intl.DateTimeFormatOptions = {
     year: "numeric",
-    month: "long",
+    month: "short",
     day: "2-digit",
   };
   return new Date(date).toLocaleDateString(i18nLocale.locale.value, options);
