@@ -99,7 +99,7 @@ func (r *competenceResolver) Competences(ctx context.Context, obj *db.Competence
 			query.Order("created_at ASC")
 		}
 	} else {
-		query.Order("name ASC")
+		//query.Order("name ASC")
 	}
 
 	if search != nil && *search != "" {
