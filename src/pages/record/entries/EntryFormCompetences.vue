@@ -144,7 +144,7 @@ defineEmits(["toggle"]);
 const { data } = useQuery({
   query: gql`
     query competences($search: String, $filter: CompetenceFilterInput) {
-      competences(search: $search, filter: $filter) {
+      competences(search: $search, filter: $filter, sort: { field: sort_order, order: asc }) {
         edges {
           id
           name

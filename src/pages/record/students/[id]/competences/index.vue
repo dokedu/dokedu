@@ -23,7 +23,7 @@ import { Competence } from "@/gql/graphql";
 const { data } = useQuery({
   query: graphql(`
     query studentCompetences {
-      competences(filter: { type: subject }, limit: 100) {
+      competences(filter: { type: subject }, limit: 100, sort: { field: sort_order, order: asc }) {
         edges {
           id
           name
