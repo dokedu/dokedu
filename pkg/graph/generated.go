@@ -254,7 +254,7 @@ type ComplexityRoot struct {
 		Chats        func(childComplexity int, limit *int, offset *int) int
 		Competence   func(childComplexity int, id string) int
 		Competences  func(childComplexity int, limit *int, offset *int, filter *model.CompetenceFilterInput, search *string, sort *model.CompetenceSort) int
-		Entries      func(childComplexity int, limit *int, offset *int, filter *model.EntryFilterInput, search *string) int
+		Entries      func(childComplexity int, limit *int, offset *int, filter *model.EntryFilterInput, sortBy *model.EntrySortBy, search *string) int
 		Entry        func(childComplexity int, id string) int
 		Event        func(childComplexity int, id string) int
 		Events       func(childComplexity int, limit *int, offset *int, filter *model.EventFilterInput, search *string) int
@@ -462,7 +462,7 @@ type QueryResolver interface {
 	MyFiles(ctx context.Context, input *model.MyFilesFilterInput) (*model.FileConnection, error)
 	MyBucket(ctx context.Context, id string) (*db.Bucket, error)
 	Entry(ctx context.Context, id string) (*db.Entry, error)
-	Entries(ctx context.Context, limit *int, offset *int, filter *model.EntryFilterInput, search *string) (*model.EntryConnection, error)
+	Entries(ctx context.Context, limit *int, offset *int, filter *model.EntryFilterInput, sortBy *model.EntrySortBy, search *string) (*model.EntryConnection, error)
 	Event(ctx context.Context, id string) (*db.Event, error)
 	Events(ctx context.Context, limit *int, offset *int, filter *model.EventFilterInput, search *string) (*model.EventConnection, error)
 	ExportEvents(ctx context.Context, input model.ExportEventsInput) ([]*model.ExportEventsPayload, error)
@@ -1615,7 +1615,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Entries(childComplexity, args["limit"].(*int), args["offset"].(*int), args["filter"].(*model.EntryFilterInput), args["search"].(*string)), true
+		return e.complexity.Query.Entries(childComplexity, args["limit"].(*int), args["offset"].(*int), args["filter"].(*model.EntryFilterInput), args["sortBy"].(*model.EntrySortBy), args["search"].(*string)), true
 
 	case "Query.entry":
 		if e.complexity.Query.Entry == nil {
@@ -2995,15 +2995,24 @@ func (ec *executionContext) field_Query_entries_args(ctx context.Context, rawArg
 		}
 	}
 	args["filter"] = arg2
-	var arg3 *string
-	if tmp, ok := rawArgs["search"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("search"))
-		arg3, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+	var arg3 *model.EntrySortBy
+	if tmp, ok := rawArgs["sortBy"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sortBy"))
+		arg3, err = ec.unmarshalOEntrySortBy2ᚖexampleᚋpkgᚋgraphᚋmodelᚐEntrySortBy(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["search"] = arg3
+	args["sortBy"] = arg3
+	var arg4 *string
+	if tmp, ok := rawArgs["search"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("search"))
+		arg4, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["search"] = arg4
 	return args, nil
 }
 
@@ -10726,7 +10735,7 @@ func (ec *executionContext) _Query_entries(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Entries(rctx, fc.Args["limit"].(*int), fc.Args["offset"].(*int), fc.Args["filter"].(*model.EntryFilterInput), fc.Args["search"].(*string))
+		return ec.resolvers.Query().Entries(rctx, fc.Args["limit"].(*int), fc.Args["offset"].(*int), fc.Args["filter"].(*model.EntryFilterInput), fc.Args["sortBy"].(*model.EntrySortBy), fc.Args["search"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -23396,6 +23405,22 @@ func (ec *executionContext) unmarshalOEntryFilterInput2ᚖexampleᚋpkgᚋgraph�
 	}
 	res, err := ec.unmarshalInputEntryFilterInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOEntrySortBy2ᚖexampleᚋpkgᚋgraphᚋmodelᚐEntrySortBy(ctx context.Context, v interface{}) (*model.EntrySortBy, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.EntrySortBy)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOEntrySortBy2ᚖexampleᚋpkgᚋgraphᚋmodelᚐEntrySortBy(ctx context.Context, sel ast.SelectionSet, v *model.EntrySortBy) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) marshalOEvent2ᚕᚖexampleᚋpkgᚋdbᚐEvent(ctx context.Context, sel ast.SelectionSet, v []*db.Event) graphql.Marshaler {

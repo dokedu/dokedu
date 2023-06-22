@@ -29,9 +29,16 @@ input EntryFilterInput {
     deleted: Boolean
 }
 
+enum EntrySortBy {
+    date_ASC
+    date_DESC
+    createdAt_ASC
+    createdAt_DESC
+}
+
 extend type Query {
     entry(id: ID!): Entry!
-    entries(limit: Int, offset: Int, filter: EntryFilterInput, search: String): EntryConnection!
+    entries(limit: Int, offset: Int, filter: EntryFilterInput, sortBy: EntrySortBy, search: String): EntryConnection!
 }
 
 input CreateUserCompetenceInput {

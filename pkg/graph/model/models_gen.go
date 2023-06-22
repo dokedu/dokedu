@@ -360,6 +360,51 @@ func (e CompetenceSortField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type EntrySortBy string
+
+const (
+	EntrySortByDateAsc       EntrySortBy = "date_ASC"
+	EntrySortByDateDesc      EntrySortBy = "date_DESC"
+	EntrySortByCreatedAtAsc  EntrySortBy = "createdAt_ASC"
+	EntrySortByCreatedAtDesc EntrySortBy = "createdAt_DESC"
+)
+
+var AllEntrySortBy = []EntrySortBy{
+	EntrySortByDateAsc,
+	EntrySortByDateDesc,
+	EntrySortByCreatedAtAsc,
+	EntrySortByCreatedAtDesc,
+}
+
+func (e EntrySortBy) IsValid() bool {
+	switch e {
+	case EntrySortByDateAsc, EntrySortByDateDesc, EntrySortByCreatedAtAsc, EntrySortByCreatedAtDesc:
+		return true
+	}
+	return false
+}
+
+func (e EntrySortBy) String() string {
+	return string(e)
+}
+
+func (e *EntrySortBy) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EntrySortBy(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EntrySortBy", str)
+	}
+	return nil
+}
+
+func (e EntrySortBy) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type SortDirection string
 
 const (

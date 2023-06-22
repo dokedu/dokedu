@@ -462,7 +462,7 @@ func (r *queryResolver) Entry(ctx context.Context, id string) (*db.Entry, error)
 }
 
 // Entries is the resolver for the entries field.
-func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, filter *model.EntryFilterInput, search *string) (*model.EntryConnection, error) {
+func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, filter *model.EntryFilterInput, sortBy *model.EntrySortBy, search *string) (*model.EntryConnection, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, nil
@@ -487,8 +487,7 @@ func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, fi
 		Join("LEFT JOIN entry_tags et ON entry.id = et.entry_id").
 		Where("et.deleted_at IS NULL").
 		Where("entry.organisation_id = ?", currentUser.OrganisationID).
-		Limit(pageLimit).Offset(pageOffset).
-		Order("entry.created_at DESC")
+		Limit(pageLimit).Offset(pageOffset)
 
 	if filter != nil {
 		if filter.Users != nil && len(filter.Users) > 0 {
@@ -500,6 +499,21 @@ func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, fi
 		if filter.Tags != nil && len(filter.Tags) > 0 {
 			query.Where("et.tag_id IN (?)", bun.In(filter.Tags))
 			query.Where("(SELECT COUNT(DISTINCT et2.tag_id) FROM entry_tags et2 WHERE et2.entry_id = entry.id) >= ?", len(filter.Tags))
+		}
+	}
+
+	if sortBy != nil {
+		switch *sortBy {
+		case model.EntrySortByCreatedAtAsc:
+			query.Order("entry.created_at ASC")
+		case model.EntrySortByCreatedAtDesc:
+			query.Order("entry.created_at DESC")
+		case model.EntrySortByDateAsc:
+			query.Order("entry.date ASC")
+		case model.EntrySortByDateDesc:
+			query.Order("entry.date DESC")
+		default:
+			query.Order("entry.created_at DESC")
 		}
 	}
 
