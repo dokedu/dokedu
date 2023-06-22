@@ -91,7 +91,8 @@ func (r *competenceResolver) Competences(ctx context.Context, obj *db.Competence
 	if sort != nil {
 		switch sort.Field {
 		case model.CompetenceSortFieldSortOrder:
-			query.Order("sort_order, name ASC")
+			query.Order("sort_order ASC")
+			query.Order("name ASC")
 		case model.CompetenceSortFieldName:
 			query.Order("name ASC")
 		case model.CompetenceSortFieldCreatedAt:
