@@ -5,6 +5,7 @@ export default gql`
         signIn(input: {email: $email, password: $password }) {
             token
             enabled_apps
+            language
         }
     }
 `

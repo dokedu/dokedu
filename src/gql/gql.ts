@@ -14,6 +14,7 @@ import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-
  */
 const documents = {
     "\n    mutation signOut {\n      signOut\n    }\n  ": types.SignOutDocument,
+    "\n    mutation updateUserLanguage($language: UserLanguage!) {\n      updateUserLanguage(language: $language) {\n        id\n        language\n      }\n    }\n  ": types.UpdateUserLanguageDocument,
     "\n    mutation generateFileURL($input: GenerateFileURLInput!) {\n      generateFileURL(input: $input) {\n        url\n      }\n    }\n  ": types.GenerateFileUrlDocument,
     "\n    mutation createFolder($input: CreateFolderInput!) {\n      createFolder(input: $input) {\n        id\n      }\n    }\n  ": types.CreateFolderDocument,
     "\n    query fileById($id: ID!) {\n      file(id: $id) {\n        id\n        name\n        parents {\n          id\n          name\n        }\n      }\n    }\n  ": types.FileByIdDocument,
@@ -57,7 +58,7 @@ const documents = {
     "\n    query getTagWithLimit {\n      tags(limit: 100) {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  ": types.GetTagWithLimitDocument,
     "\n    mutation resetPassword($input: ResetPasswordInput!) {\n      resetPassword(input: $input) {\n        success\n      }\n    }\n  ": types.ResetPasswordDocument,
     "\n  mutation archiveEntry($id: ID!) {\n    archiveEntry(id: $id) {\n      id\n    }\n  }\n": types.ArchiveEntryDocument,
-    "\n    mutation signIn($email: String!, $password: String!) {\n        signIn(input: {email: $email, password: $password }) {\n            token\n            enabled_apps\n        }\n    }\n": types.SignInDocument,
+    "\n    mutation signIn($email: String!, $password: String!) {\n        signIn(input: {email: $email, password: $password }) {\n            token\n            enabled_apps\n            language\n        }\n    }\n": types.SignInDocument,
 };
 
 /**
@@ -78,6 +79,10 @@ export function graphql(source: string): unknown;
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    mutation signOut {\n      signOut\n    }\n  "): (typeof documents)["\n    mutation signOut {\n      signOut\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation updateUserLanguage($language: UserLanguage!) {\n      updateUserLanguage(language: $language) {\n        id\n        language\n      }\n    }\n  "): (typeof documents)["\n    mutation updateUserLanguage($language: UserLanguage!) {\n      updateUserLanguage(language: $language) {\n        id\n        language\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -253,7 +258,7 @@ export function graphql(source: "\n  mutation archiveEntry($id: ID!) {\n    arch
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n    mutation signIn($email: String!, $password: String!) {\n        signIn(input: {email: $email, password: $password }) {\n            token\n            enabled_apps\n        }\n    }\n"): (typeof documents)["\n    mutation signIn($email: String!, $password: String!) {\n        signIn(input: {email: $email, password: $password }) {\n            token\n            enabled_apps\n        }\n    }\n"];
+export function graphql(source: "\n    mutation signIn($email: String!, $password: String!) {\n        signIn(input: {email: $email, password: $password }) {\n            token\n            enabled_apps\n            language\n        }\n    }\n"): (typeof documents)["\n    mutation signIn($email: String!, $password: String!) {\n        signIn(input: {email: $email, password: $password }) {\n            token\n            enabled_apps\n            language\n        }\n    }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};
