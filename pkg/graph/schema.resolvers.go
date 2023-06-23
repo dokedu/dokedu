@@ -184,6 +184,7 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 	return &model.SignInPayload{
 		Token:       token,
 		EnabledApps: organisation.EnabledApps,
+		Language:    string(user.Language),
 	}, nil
 }
 
@@ -445,6 +446,34 @@ func (r *mutationResolver) ArchiveUser(ctx context.Context, id string) (*db.User
 	}
 
 	return user, nil
+}
+
+// UpdateUserLanguage is the resolver for the updateUserLanguage field.
+func (r *mutationResolver) UpdateUserLanguage(ctx context.Context, language db.UserLanguage) (*db.User, error) {
+	// We get the currentUser from context
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	updatedUser := db.User{
+		ID:             currentUser.ID,
+		OrganisationID: currentUser.OrganisationID,
+		Language:       language,
+	}
+
+	// update the user
+	_, err = r.DB.NewUpdate().
+		Model(&updatedUser).
+		Column("language").
+		Where("id = ?", currentUser.ID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &updatedUser, nil
 }
 
 // CreateUserCompetence is the resolver for the createUserCompetence field.

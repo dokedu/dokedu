@@ -227,6 +227,7 @@ type ComplexityRoot struct {
 		UpdatePassword          func(childComplexity int, oldPassword string, newPassword string) int
 		UpdateTag               func(childComplexity int, id string, input model.CreateTagInput) int
 		UpdateUser              func(childComplexity int, input model.UpdateUserInput) int
+		UpdateUserLanguage      func(childComplexity int, language db.UserLanguage) int
 	}
 
 	Organisation struct {
@@ -302,6 +303,7 @@ type ComplexityRoot struct {
 
 	SignInPayload struct {
 		EnabledApps func(childComplexity int) int
+		Language    func(childComplexity int) int
 		Token       func(childComplexity int) int
 	}
 
@@ -319,6 +321,7 @@ type ComplexityRoot struct {
 		Email     func(childComplexity int) int
 		FirstName func(childComplexity int) int
 		ID        func(childComplexity int) int
+		Language  func(childComplexity int) int
 		LastName  func(childComplexity int) int
 		Role      func(childComplexity int) int
 		Student   func(childComplexity int) int
@@ -439,6 +442,7 @@ type MutationResolver interface {
 	UpdateUser(ctx context.Context, input model.UpdateUserInput) (*db.User, error)
 	InviteUser(ctx context.Context, input model.CreateUserInput) (*db.User, error)
 	ArchiveUser(ctx context.Context, id string) (*db.User, error)
+	UpdateUserLanguage(ctx context.Context, language db.UserLanguage) (*db.User, error)
 	CreateUserCompetence(ctx context.Context, input model.CreateUserCompetenceInput) (*db.UserCompetence, error)
 	ArchiveUserCompetence(ctx context.Context, id string) (*db.UserCompetence, error)
 	CreateTag(ctx context.Context, input model.CreateTagInput) (*db.Tag, error)
@@ -1470,6 +1474,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateUser(childComplexity, args["input"].(model.UpdateUserInput)), true
 
+	case "Mutation.updateUserLanguage":
+		if e.complexity.Mutation.UpdateUserLanguage == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateUserLanguage_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateUserLanguage(childComplexity, args["language"].(db.UserLanguage)), true
+
 	case "Organisation.id":
 		if e.complexity.Organisation.ID == nil {
 			break
@@ -1942,6 +1958,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SignInPayload.EnabledApps(childComplexity), true
 
+	case "SignInPayload.language":
+		if e.complexity.SignInPayload.Language == nil {
+			break
+		}
+
+		return e.complexity.SignInPayload.Language(childComplexity), true
+
 	case "SignInPayload.token":
 		if e.complexity.SignInPayload.Token == nil {
 			break
@@ -2018,6 +2041,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.ID(childComplexity), true
+
+	case "User.language":
+		if e.complexity.User.Language == nil {
+			break
+		}
+
+		return e.complexity.User.Language(childComplexity), true
 
 	case "User.lastName":
 		if e.complexity.User.LastName == nil {
@@ -2800,6 +2830,21 @@ func (ec *executionContext) field_Mutation_updateTag_args(ctx context.Context, r
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_updateUserLanguage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 db.UserLanguage
+	if tmp, ok := rawArgs["language"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("language"))
+		arg0, err = ec.unmarshalNUserLanguage2exampleᚋpkgᚋdbᚐUserLanguage(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["language"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -3514,6 +3559,8 @@ func (ec *executionContext) fieldContext_Bucket_user(ctx context.Context, field 
 				return ec.fieldContext_User_lastName(ctx, field)
 			case "student":
 				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
@@ -4014,6 +4061,8 @@ func (ec *executionContext) fieldContext_Chat_users(ctx context.Context, field g
 				return ec.fieldContext_User_lastName(ctx, field)
 			case "student":
 				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
@@ -4377,6 +4426,8 @@ func (ec *executionContext) fieldContext_ChatMessage_user(ctx context.Context, f
 				return ec.fieldContext_User_lastName(ctx, field)
 			case "student":
 				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
@@ -4625,6 +4676,8 @@ func (ec *executionContext) fieldContext_ChatUser_user(ctx context.Context, fiel
 				return ec.fieldContext_User_lastName(ctx, field)
 			case "student":
 				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
@@ -5582,6 +5635,8 @@ func (ec *executionContext) fieldContext_Entry_user(ctx context.Context, field g
 				return ec.fieldContext_User_lastName(ctx, field)
 			case "student":
 				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
@@ -5644,6 +5699,8 @@ func (ec *executionContext) fieldContext_Entry_users(ctx context.Context, field 
 				return ec.fieldContext_User_lastName(ctx, field)
 			case "student":
 				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
@@ -8509,6 +8566,8 @@ func (ec *executionContext) fieldContext_Mutation_signIn(ctx context.Context, fi
 				return ec.fieldContext_SignInPayload_token(ctx, field)
 			case "enabled_apps":
 				return ec.fieldContext_SignInPayload_enabled_apps(ctx, field)
+			case "language":
+				return ec.fieldContext_SignInPayload_language(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type SignInPayload", field.Name)
 		},
@@ -8732,6 +8791,8 @@ func (ec *executionContext) fieldContext_Mutation_acceptInvite(ctx context.Conte
 				return ec.fieldContext_SignInPayload_token(ctx, field)
 			case "enabled_apps":
 				return ec.fieldContext_SignInPayload_enabled_apps(ctx, field)
+			case "language":
+				return ec.fieldContext_SignInPayload_language(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type SignInPayload", field.Name)
 		},
@@ -8801,6 +8862,8 @@ func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context
 				return ec.fieldContext_User_lastName(ctx, field)
 			case "student":
 				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
@@ -8874,6 +8937,8 @@ func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context
 				return ec.fieldContext_User_lastName(ctx, field)
 			case "student":
 				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
@@ -8947,6 +9012,8 @@ func (ec *executionContext) fieldContext_Mutation_inviteUser(ctx context.Context
 				return ec.fieldContext_User_lastName(ctx, field)
 			case "student":
 				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
@@ -9020,6 +9087,8 @@ func (ec *executionContext) fieldContext_Mutation_archiveUser(ctx context.Contex
 				return ec.fieldContext_User_lastName(ctx, field)
 			case "student":
 				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
@@ -9036,6 +9105,81 @@ func (ec *executionContext) fieldContext_Mutation_archiveUser(ctx context.Contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_archiveUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateUserLanguage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateUserLanguage(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateUserLanguage(rctx, fc.Args["language"].(db.UserLanguage))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖexampleᚋpkgᚋdbᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateUserLanguage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "student":
+				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_User_deletedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateUserLanguage_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -9816,6 +9960,8 @@ func (ec *executionContext) fieldContext_Organisation_owner(ctx context.Context,
 				return ec.fieldContext_User_lastName(ctx, field)
 			case "student":
 				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
@@ -11159,6 +11305,8 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_lastName(ctx, field)
 			case "student":
 				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
@@ -12277,6 +12425,8 @@ func (ec *executionContext) fieldContext_Report_user(ctx context.Context, field 
 				return ec.fieldContext_User_lastName(ctx, field)
 			case "student":
 				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
@@ -12339,6 +12489,8 @@ func (ec *executionContext) fieldContext_Report_studentUser(ctx context.Context,
 				return ec.fieldContext_User_lastName(ctx, field)
 			case "student":
 				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
@@ -12785,6 +12937,50 @@ func (ec *executionContext) _SignInPayload_enabled_apps(ctx context.Context, fie
 }
 
 func (ec *executionContext) fieldContext_SignInPayload_enabled_apps(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SignInPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SignInPayload_language(ctx context.Context, field graphql.CollectedField, obj *model.SignInPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SignInPayload_language(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Language, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SignInPayload_language(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SignInPayload",
 		Field:      field,
@@ -13298,6 +13494,50 @@ func (ec *executionContext) fieldContext_User_student(ctx context.Context, field
 	return fc, nil
 }
 
+func (ec *executionContext) _User_language(ctx context.Context, field graphql.CollectedField, obj *db.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_language(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Language, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(db.UserLanguage)
+	fc.Result = res
+	return ec.marshalNUserLanguage2exampleᚋpkgᚋdbᚐUserLanguage(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_language(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type UserLanguage does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _User_createdAt(ctx context.Context, field graphql.CollectedField, obj *db.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_createdAt(ctx, field)
 	if err != nil {
@@ -13653,6 +13893,8 @@ func (ec *executionContext) fieldContext_UserCompetence_user(ctx context.Context
 				return ec.fieldContext_User_lastName(ctx, field)
 			case "student":
 				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
@@ -13712,6 +13954,8 @@ func (ec *executionContext) fieldContext_UserCompetence_createdBy(ctx context.Co
 				return ec.fieldContext_User_lastName(ctx, field)
 			case "student":
 				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
@@ -13968,6 +14212,8 @@ func (ec *executionContext) fieldContext_UserConnection_edges(ctx context.Contex
 				return ec.fieldContext_User_lastName(ctx, field)
 			case "student":
 				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
@@ -19536,6 +19782,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "updateUserLanguage":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateUserLanguage(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "createUserCompetence":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -20620,6 +20875,13 @@ func (ec *executionContext) _SignInPayload(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "language":
+
+			out.Values[i] = ec._SignInPayload_language(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -20769,6 +21031,13 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				return innerFunc(ctx)
 
 			})
+		case "language":
+
+			out.Values[i] = ec._User_language(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "createdAt":
 
 			out.Values[i] = ec._User_createdAt(ctx, field, obj)
@@ -22808,6 +23077,22 @@ func (ec *executionContext) marshalNUserConnection2ᚖexampleᚋpkgᚋgraphᚋmo
 		return graphql.Null
 	}
 	return ec._UserConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNUserLanguage2exampleᚋpkgᚋdbᚐUserLanguage(ctx context.Context, v interface{}) (db.UserLanguage, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	res := db.UserLanguage(tmp)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUserLanguage2exampleᚋpkgᚋdbᚐUserLanguage(ctx context.Context, sel ast.SelectionSet, v db.UserLanguage) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) unmarshalNUserRole2exampleᚋpkgᚋdbᚐUserRole(ctx context.Context, v interface{}) (db.UserRole, error) {

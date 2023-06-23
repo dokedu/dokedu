@@ -19,6 +19,11 @@ enum UserRole {
     parent
 }
 
+enum UserLanguage {
+    en
+    de
+}
+
 type User {
     id: ID!
     email: String
@@ -27,6 +32,7 @@ type User {
     firstName: String!
     lastName: String!
     student: UserStudent
+    language: UserLanguage!
 
     createdAt: Time!
     deletedAt: Time
@@ -119,6 +125,7 @@ input SignInInput {
 type SignInPayload {
     token: String!
     enabled_apps: [String!]!
+    language: String!
 }
 
 input SignUpInput {
@@ -324,6 +331,7 @@ extend type Mutation {
     updateUser(input: UpdateUserInput!): User!
     inviteUser(input: CreateUserInput!): User!
     archiveUser(id: ID!): User!
+    updateUserLanguage(language: UserLanguage!): User!
 
     createUserCompetence(input: CreateUserCompetenceInput!): UserCompetence!
     archiveUserCompetence(id: ID!): UserCompetence!
