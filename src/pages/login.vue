@@ -52,6 +52,7 @@ import { ref } from "vue";
 import signInMutation from "../queries/signIn.mutation.ts";
 import { useMutation } from "@urql/vue";
 import { useRouter } from "vue-router";
+import i18n from "@/i18n";
 
 const router = useRouter();
 
@@ -63,7 +64,7 @@ const { executeMutation: signIn, error } = useMutation(signInMutation);
 async function onSubmit() {
   const {
     data: {
-      signIn: { token, enabled_apps },
+      signIn: { token, enabled_apps, language },
     },
   } = await signIn({
     email: email.value,
@@ -73,6 +74,10 @@ async function onSubmit() {
   if (token) {
     localStorage.setItem("enabled_apps", JSON.stringify(enabled_apps));
     localStorage.setItem("authorization", token);
+    localStorage.setItem("language", language);
+
+    // Set the i18n locale to the user's language
+    i18n.global.locale.value = language;
     await router.push({ name: "record-entries" });
   }
 }

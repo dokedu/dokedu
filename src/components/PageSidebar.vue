@@ -99,13 +99,14 @@ import {
 } from "lucide-vue-next";
 import { Tag } from "lucide-vue-next";
 import { onClickOutside, useStorage } from "@vueuse/core";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { UserSquare } from "lucide-vue-next";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { watch } from "vue";
 import i18n from "@/i18n";
 import { useI18n } from "vue-i18n";
+import { UserLanguage } from "@/gql/graphql";
 
 const { t } = useI18n();
 
@@ -113,6 +114,7 @@ const visibleAppSwitcher = ref<boolean>(false);
 const activeApp = useStorage("active_app", "drive");
 
 const route = useRoute();
+const router = useRouter();
 
 interface AppLink {
   icon: FunctionalComponent;
@@ -258,6 +260,12 @@ function switchApp(appId: string | null = null) {
   if (appId) {
     activeApp.value = appId;
     visibleAppSwitcher.value = false;
+
+    // Reroute to first link of app
+    const app = apps.value.find((el) => el.id === appId);
+    if (app) {
+      router.push({ name: app.links[0].route });
+    }
     return;
   }
   // start at first app of index is out of bounds
@@ -284,9 +292,30 @@ async function signOut() {
   location.reload();
 }
 
+const { executeMutation: updateLanguage } = useMutation(
+  graphql(`
+    mutation updateUserLanguage($language: UserLanguage!) {
+      updateUserLanguage(language: $language) {
+        id
+        language
+      }
+    }
+  `)
+);
+
+// Using the language from the local storage
+// If undefined we set it to english
 const language = useStorage("language", "en");
 
-watch(language, () => {
+const languageOptions: { [key: string]: UserLanguage } = {
+  de: UserLanguage.De,
+  en: UserLanguage.En,
+};
+
+watch(language, async () => {
   i18n.global.locale.value = language.value as "en" | "de";
+
+  // Update the language in the backend
+  await updateLanguage({ language: languageOptions[language.value] });
 });
 </script>

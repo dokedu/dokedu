@@ -123,7 +123,7 @@ const { data } = useQuery({
           type
           grades
         }
-        competences(search: $search, sort: { field: sort_order, order: asc }) {
+        competences(search: $search) {
           id
           name
           type

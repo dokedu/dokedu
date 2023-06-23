@@ -77,7 +77,7 @@ const { data, executeQuery: fetchCompetence } = useQuery({
           id
           name
         }
-        competences {
+        competences(sort: { field: sort_order, order: asc }) {
           type
           id
           name
