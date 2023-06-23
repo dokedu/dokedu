@@ -1058,7 +1058,7 @@ export type GetEntriesQueryVariables = Exact<{
 }>;
 
 
-export type GetEntriesQuery = { __typename?: 'Query', entries: { __typename?: 'EntryConnection', totalCount: number, edges?: Array<{ __typename?: 'Entry', id: string, date: string, body?: string | null, createdAt: any, user: { __typename?: 'User', id: string, firstName: string, lastName: string } } | null> | null } };
+export type GetEntriesQuery = { __typename?: 'Query', entries: { __typename?: 'EntryConnection', totalCount: number, edges?: Array<{ __typename?: 'Entry', id: string, date: string, body?: string | null, createdAt: any, user: { __typename?: 'User', id: string, firstName: string, lastName: string }, events: Array<{ __typename?: 'Event', id: string, title: string }>, tags: Array<{ __typename?: 'Tag', id: string, name: string, color: string }> } | null> | null } };
 
 export type GetEntryFilterStudentsQueryVariables = Exact<{ [key: string]: never; }>;
 
