@@ -42,7 +42,7 @@
           :class="currentSort == EntrySortBy.DateAsc ? 'rotate-180' : 'rotate-0'"
         />
       </div>
-      <div class="flex w-[180px] pr-8 text-muted items-center justify-end gap-1">
+      <div class="flex w-[180px] items-center justify-end gap-1 pr-8 text-muted">
         <div @click="sortBy('createdAt')">Created at</div>
         <ArrowDown
           v-if="currentSort == EntrySortBy.CreatedAtAsc || currentSort == EntrySortBy.CreatedAtDesc"
@@ -123,7 +123,6 @@ import { LayoutGrid } from "lucide-vue-next";
 import { ArrowDown } from "lucide-vue-next";
 import { EntrySortBy } from "@/gql/graphql";
 
-
 const i18nLocale = useI18n();
 
 const student = ref();
@@ -158,6 +157,7 @@ useInfiniteScroll(
   () => {
     if (fetching.value) return;
     if (!data.value?.entries?.edges) return;
+    if (!entryData.value.length) return;
     if (Number(data.value?.entries?.totalCount) < 50) return;
     if (entryData.value.length >= Number(data.value?.entries?.totalCount)) return;
     offset.value += 50;

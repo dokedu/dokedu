@@ -106,6 +106,7 @@ useInfiniteScroll(
   () => {
     if (fetching.value) return;
     if (!data.value?.events?.edges) return;
+    if (!eventData.value.length) return;
     if (Number(data.value?.events?.totalCount) < 50) return;
     if (eventData.value?.length >= Number(data.value?.events?.totalCount)) return;
     offset.value += 50;
