@@ -7,9 +7,8 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
-      name: "home",
       path: "/",
-      component: () => import("./pages/index.vue"),
+      redirect: { name: "record-entries" },
     },
     {
       name: "login",
