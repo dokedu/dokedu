@@ -106,6 +106,7 @@ import { graphql } from "@/gql";
 import { watch } from "vue";
 import i18n from "@/i18n";
 import { useI18n } from "vue-i18n";
+import { UserLanguage } from "@/gql/graphql";
 
 const { t } = useI18n();
 
@@ -284,9 +285,30 @@ async function signOut() {
   location.reload();
 }
 
+const { executeMutation: updateLanguage } = useMutation(
+  graphql(`
+    mutation updateUserLanguage($language: UserLanguage!) {
+      updateUserLanguage(language: $language) {
+        id
+        language
+      }
+    }
+  `)
+);
+
+// Using the language from the local storage
+// If undefined we set it to english
 const language = useStorage("language", "en");
 
-watch(language, () => {
+const languageOptions: { [key: string]: UserLanguage } = {
+  de: UserLanguage.De,
+  en: UserLanguage.En,
+};
+
+watch(language, async () => {
   i18n.global.locale.value = language.value as "en" | "de";
+
+  // Update the language in the backend
+  await updateLanguage({ language: languageOptions[language.value] });
 });
 </script>
