@@ -69,6 +69,13 @@ const (
 	UserRoleParent   UserRole = "parent"
 )
 
+type UserLanguage string
+
+const (
+	UserLangEn UserLanguage = "en"
+	UserLangDe UserLanguage = "de"
+)
+
 type Chat struct {
 	bun.BaseModel
 
@@ -359,6 +366,7 @@ type User struct {
 	AvatarFileID   sql.NullString `json:"avatar_file_id"`
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
 	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero" json:"deleted_at"`
+	Language       UserLanguage   `json:"language"`
 }
 
 type UserFiles struct {
