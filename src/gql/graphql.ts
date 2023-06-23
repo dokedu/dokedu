@@ -213,6 +213,13 @@ export type EntryFilterInput = {
   users?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
 };
 
+export enum EntrySortBy {
+  CreatedAtAsc = 'createdAt_ASC',
+  CreatedAtDesc = 'createdAt_DESC',
+  DateAsc = 'date_ASC',
+  DateDesc = 'date_DESC'
+}
+
 export type Event = {
   __typename?: 'Event';
   body?: Maybe<Scalars['String']['output']>;
@@ -345,6 +352,7 @@ export type Mutation = {
   updatePassword: Scalars['Boolean']['output'];
   updateTag: Tag;
   updateUser: User;
+  updateUserLanguage: User;
 };
 
 
@@ -480,6 +488,11 @@ export type MutationUpdateUserArgs = {
   input: UpdateUserInput;
 };
 
+
+export type MutationUpdateUserLanguageArgs = {
+  language: UserLanguage;
+};
+
 export type MyFilesFilterInput = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
@@ -576,6 +589,7 @@ export type QueryEntriesArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<EntrySortBy>;
 };
 
 
@@ -732,6 +746,7 @@ export type SignInInput = {
 export type SignInPayload = {
   __typename?: 'SignInPayload';
   enabled_apps: Array<Scalars['String']['output']>;
+  language: Scalars['String']['output'];
   token: Scalars['String']['output'];
 };
 
@@ -814,6 +829,7 @@ export type User = {
   email?: Maybe<Scalars['String']['output']>;
   firstName: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  language: UserLanguage;
   lastName: Scalars['String']['output'];
   role: UserRole;
   student?: Maybe<UserStudent>;
@@ -857,6 +873,11 @@ export type UserFilterInput = {
   orderBy?: InputMaybe<Array<InputMaybe<UserOrderBy>>>;
   role?: InputMaybe<Array<InputMaybe<UserRole>>>;
 };
+
+export enum UserLanguage {
+  De = 'de',
+  En = 'en'
+}
 
 export enum UserOrderBy {
   Email = 'email',
