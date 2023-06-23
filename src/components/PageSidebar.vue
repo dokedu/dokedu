@@ -99,7 +99,7 @@ import {
 } from "lucide-vue-next";
 import { Tag } from "lucide-vue-next";
 import { onClickOutside, useStorage } from "@vueuse/core";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { UserSquare } from "lucide-vue-next";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
@@ -113,6 +113,7 @@ const visibleAppSwitcher = ref<boolean>(false);
 const activeApp = useStorage("active_app", "drive");
 
 const route = useRoute();
+const router = useRouter();
 
 interface AppLink {
   icon: FunctionalComponent;
@@ -258,6 +259,12 @@ function switchApp(appId: string | null = null) {
   if (appId) {
     activeApp.value = appId;
     visibleAppSwitcher.value = false;
+
+    // Reroute to first link of app
+    const app = apps.value.find((el) => el.id === appId);
+    if (app) {
+      router.push({ name: app.links[0].route });
+    }
     return;
   }
   // start at first app of index is out of bounds
