@@ -59,7 +59,10 @@
       >
         <div class="line-clamp-1 h-[2rem] flex-1 p-2 pl-8">{{ entry.body }}</div>
         <div class="line-clamp-1 flex gap-1 p-2 pl-8">
-          <div v-for="event in entry.events" class="flex gap-1">
+          <div v-if="entry.events?.length > 3">
+            <DTag color="neutral" class="w-1/4 p-2">{{ entry.events?.length }} {{ $t("project", 2) }} </DTag>
+          </div>
+          <div v-else v-for="event in entry.events" class="flex gap-1">
             <router-link
               :to="{ name: 'record-projects-project', params: { id: event.id } }"
               class="line-clamp-1 inline-flex h-7 max-w-[120px] items-center gap-1.5 text-ellipsis whitespace-nowrap rounded-full border bg-default px-3 py-1 transition-all duration-150 ease-linear hover:max-w-[250px] hover:bg-subtle"
@@ -71,7 +74,7 @@
             </router-link>
           </div>
           <div v-if="entry.tags.length > 5">
-            <DTag color="neutral" class="w-1/4 p-2">{{ entry.tags.length }} Labels</DTag>
+            <DTag color="neutral" class="w-1/4 p-2">{{ entry.tags.length }} {{ $t("label", 2) }}</DTag>
           </div>
           <div v-else v-for="tag in entry.tags" class="flex gap-1">
             <DTag :color="tag.color" class="w-1/4 p-2">{{ tag.name }}</DTag>
