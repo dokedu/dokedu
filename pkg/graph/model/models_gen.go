@@ -79,6 +79,15 @@ type CreateReportInput struct {
 	StudentUser string          `json:"studentUser"`
 }
 
+type CreateStudentInput struct {
+	FirstName string     `json:"firstName"`
+	LastName  string     `json:"lastName"`
+	Grade     int        `json:"grade"`
+	Birthday  *time.Time `json:"birthday,omitempty"`
+	LeftAt    *time.Time `json:"leftAt,omitempty"`
+	JoinedAt  *time.Time `json:"joinedAt,omitempty"`
+}
+
 type CreateTagInput struct {
 	Name  string `json:"name"`
 	Color string `json:"color"`
@@ -281,6 +290,7 @@ type UpdateUserInput struct {
 	FirstName string     `json:"firstName"`
 	LastName  string     `json:"lastName"`
 	Email     *string    `json:"email,omitempty"`
+	Grade     *int       `json:"grade,omitempty"`
 	Birthday  *time.Time `json:"birthday,omitempty"`
 	LeftAt    *time.Time `json:"leftAt,omitempty"`
 	JoinedAt  *time.Time `json:"joinedAt,omitempty"`
@@ -309,7 +319,7 @@ type UserFileFilterInput struct {
 
 type UserFilterInput struct {
 	Role    []*db.UserRole `json:"role,omitempty"`
-	OrderBy []*UserOrderBy `json:"orderBy,omitempty"`
+	OrderBy *UserOrderBy   `json:"orderBy,omitempty"`
 }
 
 type UserStudentConnection struct {
@@ -450,22 +460,22 @@ func (e SortDirection) MarshalGQL(w io.Writer) {
 type UserOrderBy string
 
 const (
-	UserOrderByFirstName UserOrderBy = "first_name"
-	UserOrderByLastName  UserOrderBy = "last_name"
-	UserOrderByEmail     UserOrderBy = "email"
-	UserOrderByRole      UserOrderBy = "role"
+	UserOrderByFirstNameAsc  UserOrderBy = "firstNameAsc"
+	UserOrderByFirstNameDesc UserOrderBy = "firstNameDesc"
+	UserOrderByLastNameAsc   UserOrderBy = "lastNameAsc"
+	UserOrderByLastNameDesc  UserOrderBy = "lastNameDesc"
 )
 
 var AllUserOrderBy = []UserOrderBy{
-	UserOrderByFirstName,
-	UserOrderByLastName,
-	UserOrderByEmail,
-	UserOrderByRole,
+	UserOrderByFirstNameAsc,
+	UserOrderByFirstNameDesc,
+	UserOrderByLastNameAsc,
+	UserOrderByLastNameDesc,
 }
 
 func (e UserOrderBy) IsValid() bool {
 	switch e {
-	case UserOrderByFirstName, UserOrderByLastName, UserOrderByEmail, UserOrderByRole:
+	case UserOrderByFirstNameAsc, UserOrderByFirstNameDesc, UserOrderByLastNameAsc, UserOrderByLastNameDesc:
 		return true
 	}
 	return false

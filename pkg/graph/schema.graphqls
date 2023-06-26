@@ -32,7 +32,7 @@ type User {
     firstName: String!
     lastName: String!
     student: UserStudent
-    language: UserLanguage!
+    language: UserLanguage
 
     createdAt: Time!
     deletedAt: Time
@@ -189,16 +189,16 @@ type UserStudentConnection {
 }
 
 enum UserOrderBy {
-    first_name
-    last_name
-    email
-    role
+    firstNameAsc
+    firstNameDesc
+    lastNameAsc
+    lastNameDesc
 }
 
 # user filter input
 input UserFilterInput {
     role: [UserRole]
-    orderBy: [UserOrderBy]
+    orderBy: UserOrderBy
 }
 
 input CompetenceFilterInput {
@@ -268,6 +268,16 @@ input UpdateUserInput {
     firstName: String!
     lastName: String!
     email: String
+    grade: Int
+    birthday: Time
+    leftAt: Time
+    joinedAt: Time
+}
+
+input CreateStudentInput {
+    firstName: String!
+    lastName: String!
+    grade: Int!
     birthday: Time
     leftAt: Time
     joinedAt: Time
@@ -332,6 +342,8 @@ extend type Mutation {
     inviteUser(input: CreateUserInput!): User!
     archiveUser(id: ID!): User!
     updateUserLanguage(language: UserLanguage!): User!
+
+    createStudent(input: CreateStudentInput!): User!
 
     createUserCompetence(input: CreateUserCompetenceInput!): UserCompetence!
     archiveUserCompetence(id: ID!): UserCompetence!
