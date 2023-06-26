@@ -43,6 +43,18 @@ const router = createRouter({
       name: "admin-students",
       path: "/admin/students",
       component: () => import("./pages/admin/students/index.vue"),
+      children: [
+        {
+          name: "admin-students-new",
+          path: "new",
+          component: () => import("./pages/admin/students/new.vue"),
+        },
+        {
+          name: "admin-students-student",
+          path: ":id",
+          component: () => import("./pages/admin/students/[id].vue"),
+        },
+      ],
     },
     {
       name: "record-entries",

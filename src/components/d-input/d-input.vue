@@ -7,6 +7,8 @@
       :name="name"
       @input="onInput"
       :id="name"
+      :max="max"
+      :min="min"
       class="rounded-md border border-stone-200 text-sm shadow"
     />
   </div>
@@ -15,7 +17,7 @@
 <script lang="ts" setup>
 defineProps({
   modelValue: {
-    type: String,
+    type: [String, Number, Date],
     required: true,
   },
   label: {
@@ -29,6 +31,14 @@ defineProps({
   name: {
     type: String,
     required: true,
+  },
+  max: {
+    type: Number,
+    default: null,
+  },
+  min: {
+    type: Number,
+    default: null,
   },
 });
 

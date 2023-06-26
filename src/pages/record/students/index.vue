@@ -13,10 +13,10 @@
         />
       </div>
     </PageHeader>
-    <div class="flex flex-col overflow-scroll">
+    <div class="flex flex-col overflow-scroll" ref="studentContainer">
       <router-link
         :to="{ name: 'record-students-student', params: { id: student.id } }"
-        v-for="student in data?.users?.edges"
+        v-for="student in studentData"
         class="flex border-b border-stone-100 transition-all hover:bg-stone-50"
       >
         <div class="px-8 py-2 text-sm text-strong">{{ `${student.firstName} ${student.lastName}` }}</div>
@@ -36,12 +36,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import PageHeader from "../../../components/PageHeader.vue";
 import PageWrapper from "../../../components/PageWrapper.vue";
 import { gql, useQuery } from "@urql/vue";
+import { User } from "@/gql/graphql";
+import { useInfiniteScroll } from "@vueuse/core";
 
 const search = ref("");
+const studentData = ref<User[]>([]);
+const studentContainer = ref<HTMLElement | null>(null);
+const offset = ref(0);
 
 const loading = computed(() => {
   return fetching && !data.value;
@@ -49,8 +54,9 @@ const loading = computed(() => {
 
 const { data, fetching } = useQuery({
   query: gql`
-    query usersSearch($search: String) {
-      users(filter: { role: [student], orderBy: [first_name, last_name] }, search: $search) {
+    query usersSearch($search: String, $offset: Int) {
+      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, offset: $offset) {
+        totalCount
         edges {
           id
           firstName
@@ -64,6 +70,30 @@ const { data, fetching } = useQuery({
   `,
   variables: reactive({
     search: search,
+    offset,
   }),
+});
+useInfiniteScroll(
+  studentContainer,
+  () => {
+    if (fetching.value) return;
+    if (!data.value?.users?.edges) return;
+    if (!studentData.value.length) return;
+    if (Number(data.value?.users?.totalCount) < 50) return;
+    if (studentData.value.length >= Number(data.value?.users?.totalCount)) return;
+    offset.value += 50;
+  },
+  { distance: 500 }
+);
+
+watch(data, () => {
+  if (fetching.value) return;
+  if (!data.value?.users?.edges) return;
+  studentData.value.push(...data.value?.users?.edges);
+});
+
+watch(search, () => {
+  offset.value = 0;
+  studentData.value = [];
 });
 </script>

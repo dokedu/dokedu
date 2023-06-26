@@ -15,6 +15,11 @@ import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-
 const documents = {
     "\n    mutation signOut {\n      signOut\n    }\n  ": types.SignOutDocument,
     "\n    mutation updateUserLanguage($language: UserLanguage!) {\n      updateUserLanguage(language: $language) {\n        id\n        language\n      }\n    }\n  ": types.UpdateUserLanguageDocument,
+    "\n    query adminStudentById($id: ID!) {\n      user(id: $id) {\n        id\n        firstName\n        lastName\n        role\n        student {\n          id\n          grade\n          birthday\n          joinedAt\n          leftAt\n        }\n      }\n    }\n  ": types.AdminStudentByIdDocument,
+    "\n    mutation updateUser($student: UpdateUserInput!) {\n      updateUser(input: $student) {\n        id\n        firstName\n        lastName\n        role\n        student {\n          birthday\n          grade\n          leftAt\n          joinedAt\n        }\n      }\n    }\n  ": types.UpdateUserDocument,
+    "\n    mutation archiveStudent($id: ID!) {\n      archiveUser(id: $id) {\n        id\n        firstName\n        lastName\n        role\n        student {\n          birthday\n          grade\n          leftAt\n          joinedAt\n        }\n      }\n    }\n  ": types.ArchiveStudentDocument,
+    "\n    query adminStudents($search: String, $order: UserOrderBy, $offset: Int) {\n      users(filter: { role: [student], orderBy: $order }, search: $search, offset: $offset) {\n        totalCount\n        edges {\n          id\n          firstName\n          lastName\n          student {\n            id\n            birthday\n            grade\n          }\n        }\n      }\n    }\n  ": types.AdminStudentsDocument,
+    "\n    mutation createStudent($student: CreateStudentInput!) {\n      createStudent(input: $student) {\n        id\n        firstName\n        lastName\n        student {\n          birthday\n          grade\n          leftAt\n          joinedAt\n        }\n      }\n    }\n  ": types.CreateStudentDocument,
     "\n    mutation generateFileURL($input: GenerateFileURLInput!) {\n      generateFileURL(input: $input) {\n        url\n      }\n    }\n  ": types.GenerateFileUrlDocument,
     "\n    mutation createFolder($input: CreateFolderInput!) {\n      createFolder(input: $input) {\n        id\n      }\n    }\n  ": types.CreateFolderDocument,
     "\n    query fileById($id: ID!) {\n      file(id: $id) {\n        id\n        name\n        parents {\n          id\n          name\n        }\n      }\n    }\n  ": types.FileByIdDocument,
@@ -51,7 +56,7 @@ const documents = {
     "\n    mutation createUserCompetence($input: CreateUserCompetenceInput!) {\n      createUserCompetence(input: $input) {\n        id\n        level\n      }\n    }\n  ": types.CreateUserCompetenceDocument,
     "\n    query studentCompetences {\n      competences(filter: { type: subject }, limit: 100, sort: { field: sort_order, order: asc }) {\n        edges {\n          id\n          name\n          grades\n        }\n      }\n    }\n  ": types.StudentCompetencesDocument,
     "\n    query studentEntries($filter: EntryFilterInput, $limit: Int) {\n      entries(filter: $filter, limit: $limit) {\n        edges {\n          id\n          date\n          body\n          user {\n            id\n            firstName\n            lastName\n          }\n        }\n      }\n    }\n  ": types.StudentEntriesDocument,
-    "\n    query usersSearch($search: String) {\n      users(filter: { role: [student], orderBy: [first_name, last_name] }, search: $search) {\n        edges {\n          id\n          firstName\n          lastName\n          student {\n            id\n          }\n        }\n      }\n    }\n  ": types.UsersSearchDocument,
+    "\n    query usersSearch($search: String, $offset: Int) {\n      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, offset: $offset) {\n        totalCount\n        edges {\n          id\n          firstName\n          lastName\n          student {\n            id\n          }\n        }\n      }\n    }\n  ": types.UsersSearchDocument,
     "\n    mutation CreateTag($input: CreateTagInput!) {\n      createTag(input: $input) {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  ": types.CreateTagDocument,
     "\n    mutation UpdateTag($id: ID!, $input: CreateTagInput!) {\n      updateTag(id: $id, input: $input) {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  ": types.UpdateTagDocument,
     "\n    mutation ArchiveTag($id: ID!) {\n      archiveTag(id: $id) {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  ": types.ArchiveTagDocument,
@@ -83,6 +88,26 @@ export function graphql(source: "\n    mutation signOut {\n      signOut\n    }\
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    mutation updateUserLanguage($language: UserLanguage!) {\n      updateUserLanguage(language: $language) {\n        id\n        language\n      }\n    }\n  "): (typeof documents)["\n    mutation updateUserLanguage($language: UserLanguage!) {\n      updateUserLanguage(language: $language) {\n        id\n        language\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    query adminStudentById($id: ID!) {\n      user(id: $id) {\n        id\n        firstName\n        lastName\n        role\n        student {\n          id\n          grade\n          birthday\n          joinedAt\n          leftAt\n        }\n      }\n    }\n  "): (typeof documents)["\n    query adminStudentById($id: ID!) {\n      user(id: $id) {\n        id\n        firstName\n        lastName\n        role\n        student {\n          id\n          grade\n          birthday\n          joinedAt\n          leftAt\n        }\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation updateUser($student: UpdateUserInput!) {\n      updateUser(input: $student) {\n        id\n        firstName\n        lastName\n        role\n        student {\n          birthday\n          grade\n          leftAt\n          joinedAt\n        }\n      }\n    }\n  "): (typeof documents)["\n    mutation updateUser($student: UpdateUserInput!) {\n      updateUser(input: $student) {\n        id\n        firstName\n        lastName\n        role\n        student {\n          birthday\n          grade\n          leftAt\n          joinedAt\n        }\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation archiveStudent($id: ID!) {\n      archiveUser(id: $id) {\n        id\n        firstName\n        lastName\n        role\n        student {\n          birthday\n          grade\n          leftAt\n          joinedAt\n        }\n      }\n    }\n  "): (typeof documents)["\n    mutation archiveStudent($id: ID!) {\n      archiveUser(id: $id) {\n        id\n        firstName\n        lastName\n        role\n        student {\n          birthday\n          grade\n          leftAt\n          joinedAt\n        }\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    query adminStudents($search: String, $order: UserOrderBy, $offset: Int) {\n      users(filter: { role: [student], orderBy: $order }, search: $search, offset: $offset) {\n        totalCount\n        edges {\n          id\n          firstName\n          lastName\n          student {\n            id\n            birthday\n            grade\n          }\n        }\n      }\n    }\n  "): (typeof documents)["\n    query adminStudents($search: String, $order: UserOrderBy, $offset: Int) {\n      users(filter: { role: [student], orderBy: $order }, search: $search, offset: $offset) {\n        totalCount\n        edges {\n          id\n          firstName\n          lastName\n          student {\n            id\n            birthday\n            grade\n          }\n        }\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation createStudent($student: CreateStudentInput!) {\n      createStudent(input: $student) {\n        id\n        firstName\n        lastName\n        student {\n          birthday\n          grade\n          leftAt\n          joinedAt\n        }\n      }\n    }\n  "): (typeof documents)["\n    mutation createStudent($student: CreateStudentInput!) {\n      createStudent(input: $student) {\n        id\n        firstName\n        lastName\n        student {\n          birthday\n          grade\n          leftAt\n          joinedAt\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -230,7 +255,7 @@ export function graphql(source: "\n    query studentEntries($filter: EntryFilter
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n    query usersSearch($search: String) {\n      users(filter: { role: [student], orderBy: [first_name, last_name] }, search: $search) {\n        edges {\n          id\n          firstName\n          lastName\n          student {\n            id\n          }\n        }\n      }\n    }\n  "): (typeof documents)["\n    query usersSearch($search: String) {\n      users(filter: { role: [student], orderBy: [first_name, last_name] }, search: $search) {\n        edges {\n          id\n          firstName\n          lastName\n          student {\n            id\n          }\n        }\n      }\n    }\n  "];
+export function graphql(source: "\n    query usersSearch($search: String, $offset: Int) {\n      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, offset: $offset) {\n        totalCount\n        edges {\n          id\n          firstName\n          lastName\n          student {\n            id\n          }\n        }\n      }\n    }\n  "): (typeof documents)["\n    query usersSearch($search: String, $offset: Int) {\n      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, offset: $offset) {\n        totalCount\n        edges {\n          id\n          firstName\n          lastName\n          student {\n            id\n          }\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
