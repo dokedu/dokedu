@@ -352,6 +352,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 		Model(&user).
 		OmitZero().
 		WherePK().
+		Where("organisation_id = ?", currentUser.OrganisationID).
 		Returning("*").
 		Exec(ctx)
 	if err != nil {
