@@ -868,6 +868,9 @@ func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filt
 
 	pageLimit := 50
 	if limit != nil {
+		if *limit > 1000 {
+			return nil, fmt.Errorf("limit cannot be greater than 1000")
+		}
 		pageLimit = *limit
 	}
 
@@ -979,6 +982,9 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 
 	var pageLimit = 100 // TODO: Should we use an infinite scroll instead?
 	if limit != nil {
+		if *limit > 1000 {
+			return nil, fmt.Errorf("limit cannot be greater than 1000")
+		}
 		pageLimit = *limit
 	}
 
@@ -1068,6 +1074,9 @@ func (r *queryResolver) Reports(ctx context.Context, limit *int, offset *int) (*
 
 	pageLimit := 10
 	if limit != nil {
+		if *limit > 1000 {
+			return nil, fmt.Errorf("limit cannot be greater than 1000")
+		}
 		pageLimit = *limit
 	}
 
@@ -1114,6 +1123,9 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) ([]*d
 
 	pageLimit := 10
 	if limit != nil {
+		if *limit > 1000 {
+			return nil, fmt.Errorf("limit cannot be greater than 1000")
+		}
 		pageLimit = *limit
 	}
 
@@ -1146,6 +1158,9 @@ func (r *queryResolver) UserStudents(ctx context.Context, limit *int, offset *in
 
 	pageLimit := 10
 	if limit != nil {
+		if *limit > 1000 {
+			return nil, fmt.Errorf("limit cannot be greater than 1000")
+		}
 		pageLimit = *limit
 	}
 
