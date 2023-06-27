@@ -13,6 +13,7 @@
     <div v-if="data" v-for="row in data[objectName]?.edges">
       <slot :row="row"></slot>
     </div>
+    <slot v-if="data && !data[objectName].edges && !data[objectName].pageInfo.hasPrevPage" name="placeholder"></slot>
   </div>
 </template>
 

@@ -52,58 +52,67 @@
       </div>
     </div>
     <div class="flex flex-col overflow-scroll" ref="el">
-      <router-link
-        :to="{ name: 'record-entries-entry', params: { id: entry.id } }"
-        v-for="entry in entryData"
-        class="flex items-center border-b border-stone-100 text-sm text-strong transition-all hover:bg-stone-50"
+      <PageSearchResult
+        v-for="(variables, i) in pageVariables"
+        :key="i"
+        :variables="variables"
+        :query="entriesQuery"
+        objectName="entries"
+        @fetched="fetchedAll = true"
       >
-        <div class="line-clamp-1 h-[2rem] flex-1 p-2 pl-8">{{ entry.body }}</div>
-        <div class="line-clamp-1 flex gap-1 p-2 pl-8">
-          <div v-if="entry.events?.length > 3">
-            <DTag color="neutral" class="w-1/4 p-2">{{ entry.events?.length }} {{ $t("project", 2) }} </DTag>
-          </div>
-          <div v-else v-for="event in entry.events" class="flex gap-1">
-            <router-link
-              :to="{ name: 'record-projects-project', params: { id: event.id } }"
-              class="line-clamp-1 inline-flex h-7 max-w-[120px] items-center gap-1.5 text-ellipsis whitespace-nowrap rounded-full border bg-default px-3 py-1 transition-all duration-150 ease-linear hover:max-w-[250px] hover:bg-subtle"
-            >
-              <LayoutGrid class="stroke-subtle w-4 min-w-[16px]" />
-              <div class="flex-1 overflow-hidden text-ellipsis">
-                {{ event.title }}
-              </div>
-            </router-link>
-          </div>
-          <div v-if="entry.tags.length > 5">
-            <DTag color="neutral" class="w-1/4 p-2">{{ entry.tags.length }} {{ $t("label", 2) }}</DTag>
-          </div>
-          <div v-else v-for="tag in entry.tags" class="flex gap-1">
-            <DTag :color="tag.color" class="w-1/4 p-2">{{ tag.name }}</DTag>
-          </div>
-        </div>
-        <div class="w-[120px] p-2 text-right text-subtle">{{ dateOnly(entry.date) }}</div>
-        <div class="flex w-[180px] items-center justify-end gap-2 p-2 pr-8 text-right text-subtle">
-          <div>
-            {{ dateOnly(entry.createdAt) }}
-          </div>
-          <div
-            :title="`${entry.user?.firstName} ${entry.user?.lastName}`"
-            class="h-8 w-8 rounded-full"
-            :class="`bg-subtle`"
+        <template v-slot="{ row }">
+          <router-link
+            :to="{ name: 'record-entries-entry', params: { id: row.id } }"
+            class="flex items-center border-b border-stone-100 text-sm text-strong transition-all hover:bg-stone-50"
           >
-            <div class="flex h-full w-full items-center justify-center">
-              <div class="text-xs font-bold text-subtle">
-                {{ entry.user?.firstName[0] }}{{ entry.user?.lastName[0] }}
+            <div class="line-clamp-1 h-[2rem] flex-1 p-2 pl-8">{{ row.body }}</div>
+            <div class="line-clamp-1 flex gap-1 p-2 pl-8">
+              <div v-if="row.events?.length > 3">
+                <DTag color="neutral" class="w-1/4 p-2">{{ row.events?.length }} {{ $t("project", 2) }} </DTag>
+              </div>
+              <div v-else v-for="event in row.events" class="flex gap-1">
+                <router-link
+                  :to="{ name: 'record-projects-project', params: { id: event.id } }"
+                  class="line-clamp-1 inline-flex h-7 max-w-[120px] items-center gap-1.5 text-ellipsis whitespace-nowrap rounded-full border bg-default px-3 py-1 transition-all duration-150 ease-linear hover:max-w-[250px] hover:bg-subtle"
+                >
+                  <LayoutGrid class="stroke-subtle w-4 min-w-[16px]" />
+                  <div class="flex-1 overflow-hidden text-ellipsis">
+                    {{ event.title }}
+                  </div>
+                </router-link>
+              </div>
+              <div v-if="row.tags.length > 5">
+                <DTag color="neutral" class="w-1/4 p-2">{{ row.tags.length }} {{ $t("label", 2) }}</DTag>
+              </div>
+              <div v-else v-for="tag in row.tags" class="flex gap-1">
+                <DTag :color="tag.color" class="w-1/4 p-2">{{ tag.name }}</DTag>
               </div>
             </div>
+            <div class="w-[120px] p-2 text-right text-subtle">{{ dateOnly(row.date) }}</div>
+            <div class="flex w-[180px] items-center justify-end gap-2 p-2 pr-8 text-right text-subtle">
+              <div>
+                {{ dateOnly(row.createdAt) }}
+              </div>
+              <div
+                :title="`${row.user?.firstName} ${row.user?.lastName}`"
+                class="h-8 w-8 rounded-full"
+                :class="`bg-subtle`"
+              >
+                <div class="flex h-full w-full items-center justify-center">
+                  <div class="text-xs font-bold text-subtle">
+                    {{ row.user?.firstName[0] }}{{ row.user?.lastName[0] }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </router-link>
+        </template>
+        <template #placeholder>
+          <div class="select-none px-8 py-4 text-sm text-default">
+            {{ $t("entry_placeholder") }}
           </div>
-        </div>
-      </router-link>
-      <div
-        v-if="!data?.entries?.edges || data?.entries?.edges.length === 0"
-        class="select-none px-8 py-4 text-sm text-default"
-      >
-        {{ $t("entry_placeholder") }}
-      </div>
+        </template>
+      </PageSearchResult>
     </div>
   </PageWrapper>
 </template>
@@ -121,10 +130,10 @@ import DTag from "@/components/d-tag/d-tag.vue";
 import { useI18n } from "vue-i18n";
 import { useInfiniteScroll } from "@vueuse/core";
 import { watch } from "vue";
-import { Entry } from "@/gql/graphql";
 import { LayoutGrid } from "lucide-vue-next";
 import { ArrowDown } from "lucide-vue-next";
 import { EntrySortBy } from "@/gql/graphql";
+import PageSearchResult from "@/components/PageSearchResult.vue";
 
 const i18nLocale = useI18n();
 
@@ -132,6 +141,7 @@ const student = ref();
 const teacher = ref();
 const tags = ref([]);
 const currentSort = ref(EntrySortBy.CreatedAtDesc);
+const fetchedAll = ref(false);
 
 const sortColumns = reactive<{ [key: string]: { [key: string]: EntrySortBy } }>({
   date: {
@@ -152,51 +162,8 @@ function sortBy(column: string) {
   }
 }
 
-const offset = ref(0);
-const el = ref<HTMLElement | null>(null);
-
-useInfiniteScroll(
-  el,
-  () => {
-    if (fetching.value) return;
-    if (!data.value?.entries?.edges) return;
-    if (!entryData.value.length) return;
-    if (Number(data.value?.entries?.totalCount) < 50) return;
-    if (entryData.value.length >= Number(data.value?.entries?.totalCount)) return;
-    offset.value += 50;
-  },
-  { distance: 500 }
-);
-
-const { data, fetching } = useQuery({
-  query: graphql(`
-    query getEntries($filter: EntryFilterInput, $limit: Int, $sortBy: EntrySortBy, $offset: Int) {
-      entries(filter: $filter, limit: $limit, sortBy: $sortBy, offset: $offset) {
-        totalCount
-        edges {
-          id
-          date
-          body
-          user {
-            id
-            firstName
-            lastName
-          }
-          createdAt
-          events {
-            id
-            title
-          }
-          tags {
-            id
-            name
-            color
-          }
-        }
-      }
-    }
-  `),
-  variables: reactive({
+const pageVariables = ref([
+  {
     filter: {
       users: student,
       authors: teacher,
@@ -204,23 +171,74 @@ const { data, fetching } = useQuery({
     },
     limit: 50,
     sortBy: currentSort,
-    offset,
-  }),
-});
+    offset: 0,
+  },
+]);
 
-const entryData = ref<Entry[]>([]);
-
-watch(data, () => {
-  if (fetching.value) return;
-  if (!data.value?.entries?.edges) return;
-  // @ts-expect-error
-  entryData.value.push(...data.value?.entries?.edges);
-});
+const loadMore = () => {
+  if (fetchedAll.value) return;
+  const lastPage = pageVariables.value[pageVariables.value.length - 1];
+  pageVariables.value.push({
+    filter: {
+      users: student,
+      authors: teacher,
+      tags: tags.value,
+    },
+    limit: 50,
+    sortBy: currentSort.value,
+    offset: lastPage.offset + lastPage.limit,
+  });
+};
 
 watch([student, teacher, tags, currentSort], () => {
-  offset.value = 0;
-  entryData.value = [];
+  pageVariables.value = [
+    {
+      filter: {
+        users: student,
+        authors: teacher,
+        tags: tags.value,
+      },
+      limit: 50,
+      sortBy: currentSort.value,
+      offset: 0,
+    },
+  ];
+  fetchedAll.value = false;
 });
+
+const el = ref<HTMLElement | null>(null);
+useInfiniteScroll(el, loadMore);
+
+const entriesQuery = graphql(`
+  query getEntries($filter: EntryFilterInput, $limit: Int, $sortBy: EntrySortBy, $offset: Int) {
+    entries(filter: $filter, limit: $limit, sortBy: $sortBy, offset: $offset) {
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+      }
+      edges {
+        id
+        date
+        body
+        user {
+          id
+          firstName
+          lastName
+        }
+        createdAt
+        events {
+          id
+          title
+        }
+        tags {
+          id
+          name
+          color
+        }
+      }
+    }
+  }
+`);
 
 // TODO: Add infinite scroll here possibly too? no reason to have high limit
 const { data: studentData } = useQuery({
