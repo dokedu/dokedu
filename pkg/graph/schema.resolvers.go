@@ -319,7 +319,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 	user := db.User{
 		OrganisationID: currentUser.OrganisationID,
 		Role:           input.Role,
-		Email:          input.Email,
+		Email:          sql.NullString{String: input.Email, Valid: true},
 		FirstName:      input.FirstName,
 		LastName:       input.LastName,
 	}
@@ -348,9 +348,48 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 		LastName:       input.LastName,
 	}
 
-	err = r.DB.NewUpdate().Model(&user).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	_, err = r.DB.NewUpdate().
+		Model(&user).
+		OmitZero().
+		WherePK().
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Returning("*").
+		Exec(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	// Update the user_student if the role is student
+	if user.Role == "student" {
+		student := db.UserStudent{
+			UserID:         user.ID,
+			OrganisationID: currentUser.OrganisationID,
+		}
+
+		// Check the optional fields
+		if input.Grade != nil {
+			student.Grade = int32(*input.Grade)
+		}
+		if input.Birthday != nil {
+			student.Birthday = bun.NullTime{Time: *input.Birthday}
+		}
+		if input.JoinedAt != nil {
+			student.JoinedAt = bun.NullTime{Time: *input.JoinedAt}
+		}
+		if input.LeftAt != nil {
+			student.LeftAt = bun.NullTime{Time: *input.LeftAt}
+		}
+
+		_, err = r.DB.NewUpdate().
+			Model(&student).
+			OmitZero().
+			Where("user_id = ?", user.ID).
+			Where("organisation_id = ?", currentUser.OrganisationID).
+			Returning("*").
+			Exec(ctx)
+		if err != nil {
+			return nil, nil
+		}
 	}
 
 	return &user, nil
@@ -393,7 +432,7 @@ func (r *mutationResolver) InviteUser(ctx context.Context, input model.CreateUse
 	// create a new user
 	user := db.User{
 		OrganisationID: currentUser.OrganisationID,
-		Email:          input.Email,
+		Email:          sql.NullString{String: input.Email, Valid: true},
 		Role:           input.Role,
 		FirstName:      input.FirstName,
 		LastName:       input.LastName,
@@ -445,6 +484,22 @@ func (r *mutationResolver) ArchiveUser(ctx context.Context, id string) (*db.User
 		return nil, errors.New("user not found")
 	}
 
+	// If the user is a student, we also need to archive the user_student
+	if user.Role == "student" {
+		student := db.UserStudent{
+			UserID:         user.ID,
+			OrganisationID: currentUser.OrganisationID,
+			DeletedAt: bun.NullTime{
+				Time: time.Now(),
+			},
+		}
+
+		_, err = r.DB.NewUpdate().Model(&student).Column("deleted_at").Where("user_id = ?", user.ID).Where("organisation_id = ?", currentUser.OrganisationID).Exec(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return user, nil
 }
 
@@ -474,6 +529,54 @@ func (r *mutationResolver) UpdateUserLanguage(ctx context.Context, language db.U
 	}
 
 	return &updatedUser, nil
+}
+
+// CreateStudent is the resolver for the createStudent field.
+func (r *mutationResolver) CreateStudent(ctx context.Context, input model.CreateStudentInput) (*db.User, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	// Create user first
+	user := db.User{
+		OrganisationID: currentUser.OrganisationID,
+		FirstName:      input.FirstName,
+		LastName:       input.LastName,
+		Role:           "student",
+		Email:          sql.NullString{},
+	}
+
+	// Insert and get the new id
+	err = r.DB.NewInsert().Model(&user).Scan(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	// Create user_student struct
+	student := db.UserStudent{
+		UserID:         user.ID,
+		OrganisationID: currentUser.OrganisationID,
+		Grade:          int32(input.Grade),
+	}
+
+	if input.Birthday != nil {
+		student.Birthday = bun.NullTime{Time: *input.Birthday}
+	}
+	if input.JoinedAt != nil {
+		student.JoinedAt = bun.NullTime{Time: *input.JoinedAt}
+	}
+	if input.LeftAt != nil {
+		student.LeftAt = bun.NullTime{Time: *input.LeftAt}
+	}
+
+	// Insert the user_student
+	err = r.DB.NewInsert().Model(&student).Scan(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	return &user, nil
 }
 
 // CreateUserCompetence is the resolver for the createUserCompetence field.
@@ -763,20 +866,41 @@ func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filt
 		return nil, nil
 	}
 
+	pageLimit := 50
+	if limit != nil {
+		pageLimit = *limit
+	}
+
+	pageOffset := 0
+	if offset != nil {
+		pageOffset = *offset
+	}
+
 	// query the users
 	var users []*db.User
-	query := r.DB.NewSelect().Model(&users).Where("organisation_id = ?", currentUser.OrganisationID)
+	query := r.DB.NewSelect().
+		Model(&users).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Limit(pageLimit).
+		Offset(pageOffset)
 
 	if filter != nil {
 		if filter.Role != nil && len(filter.Role) > 0 {
 			query.Where("role IN (?)", bun.In(filter.Role))
 		}
-		if filter.OrderBy != nil && len(filter.OrderBy) > 0 {
-			orderString := make([]string, len(filter.OrderBy))
-			for i, orderBy := range filter.OrderBy {
-				orderString[i] = orderBy.String()
+		if filter.OrderBy != nil {
+			switch *filter.OrderBy {
+			case model.UserOrderByFirstNameAsc:
+				query.OrderExpr("first_name ASC")
+			case model.UserOrderByFirstNameDesc:
+				query.OrderExpr("first_name DESC")
+			case model.UserOrderByLastNameAsc:
+				query.OrderExpr("last_name ASC")
+			case model.UserOrderByLastNameDesc:
+				query.OrderExpr("last_name DESC")
+			default:
+				query.OrderExpr("last_name ASC")
 			}
-			query.OrderExpr(strings.Join(orderString, ", "))
 		}
 	}
 
@@ -791,9 +915,25 @@ func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filt
 		return nil, err
 	}
 
+	// Get the pageInfo
+	page := model.PageInfo{}
+	if count < pageOffset+pageLimit {
+		page.HasNextPage = false
+	} else {
+		page.HasNextPage = true
+	}
+
+	if pageOffset > 0 {
+		page.HasPreviousPage = true
+	} else {
+		page.HasPreviousPage = false
+	}
+
+	page.CurrentPage = pageOffset / pageLimit
+
 	return &model.UserConnection{
 		Edges:      users,
-		PageInfo:   nil,
+		PageInfo:   &page,
 		TotalCount: count,
 	}, nil
 }
@@ -1135,6 +1275,11 @@ func (r *tagResolver) DeletedAt(ctx context.Context, obj *db.Tag) (*time.Time, e
 	return nil, nil
 }
 
+// Email is the resolver for the email field.
+func (r *userResolver) Email(ctx context.Context, obj *db.User) (*string, error) {
+	panic(fmt.Errorf("not implemented: Email - email"))
+}
+
 // Student is the resolver for the student field.
 func (r *userResolver) Student(ctx context.Context, obj *db.User) (*db.UserStudent, error) {
 	currentUser, err := middleware.GetUser(ctx)
@@ -1246,7 +1391,10 @@ func (r *userStudentResolver) LeftAt(ctx context.Context, obj *db.UserStudent) (
 
 // Birthday is the resolver for the birthday field.
 func (r *userStudentResolver) Birthday(ctx context.Context, obj *db.UserStudent) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: Birthday - birthday"))
+	if !obj.Birthday.IsZero() {
+		return &obj.Birthday.Time, nil
+	}
+	return nil, nil
 }
 
 // Nationality is the resolver for the nationality field.

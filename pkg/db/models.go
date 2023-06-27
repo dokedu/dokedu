@@ -359,14 +359,14 @@ type User struct {
 	OrganisationID string         `json:"organisation_id"`
 	FirstName      string         `json:"first_name"`
 	LastName       string         `json:"last_name"`
-	Email          string         `json:"email"`
+	Email          sql.NullString `bun:",nullzero" json:"email"`
 	Password       sql.NullString `json:"password"`
-	RecoveryToken  sql.NullString `bun:"-" json:"recovery_token"`
-	RecoverySentAt bun.NullTime   `bun:"-" json:"recovery_sent_at"`
+	RecoveryToken  sql.NullString `json:"recovery_token"`
+	RecoverySentAt bun.NullTime   `json:"recovery_sent_at"`
 	AvatarFileID   sql.NullString `json:"avatar_file_id"`
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
 	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero" json:"deleted_at"`
-	Language       UserLanguage   `json:"language"`
+	Language       UserLanguage   `bun:",nullzero" json:"language"`
 }
 
 type UserFiles struct {
@@ -386,12 +386,12 @@ type UserStudent struct {
 	ID             string         `bun:",nullzero,pk" json:"id"`
 	UserID         string         `json:"user_id"`
 	OrganisationID string         `json:"organisation_id"`
-	LeftAt         bun.NullTime   `json:"left_at"`
+	LeftAt         bun.NullTime   `bun:",nullzero" json:"left_at"`
 	Grade          int32          `json:"grade"`
-	Birthday       bun.NullTime   `json:"birthday"`
+	Birthday       bun.NullTime   `bun:",nullzero" json:"birthday"`
 	Nationality    sql.NullString `json:"nationality"`
 	Comments       sql.NullString `json:"comments"`
-	JoinedAt       bun.NullTime   `json:"joined_at"`
+	JoinedAt       bun.NullTime   `bun:",nullzero" json:"joined_at"`
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
 	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
 }
