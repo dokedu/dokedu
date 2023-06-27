@@ -222,10 +222,11 @@ watch([student, teacher, tags, currentSort], () => {
   entryData.value = [];
 });
 
+// TODO: Add infinite scroll here possibly too? no reason to have high limit
 const { data: studentData } = useQuery({
   query: graphql(`
     query getEntryFilterStudents {
-      users(filter: { role: [student] }) {
+      users(filter: { role: [student] }, limit: 1000) {
         edges {
           id
           firstName
@@ -239,7 +240,7 @@ const { data: studentData } = useQuery({
 const { data: teacherData } = useQuery({
   query: graphql(`
     query getEntryFilterTeachers {
-      users(filter: { role: [owner, admin, teacher, educator] }) {
+      users(filter: { role: [owner, admin, teacher, educator] }, limit: 500) {
         edges {
           id
           firstName

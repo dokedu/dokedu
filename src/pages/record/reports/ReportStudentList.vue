@@ -49,7 +49,7 @@ const selectedStudent = ref<User>();
 const { data } = useQuery({
   query: graphql(`
     query students {
-      users(filter: { role: [student] }) {
+      users(filter: { role: [student] }, limit: 1000) {
         edges {
           id
           firstName

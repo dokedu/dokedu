@@ -114,4 +114,9 @@ export const de = {
   created: "erstellt",
   updated: "aktualisiert",
   delete: "Löschen",
+
+  first_name: "Vorname",
+  last_name: "Nachname",
+  birthday: "Geburtstag",
+  edit_student: "Schüler bearbeiten"
 };
