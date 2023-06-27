@@ -33,6 +33,7 @@ const { executeMutation: createStudent } = useMutation(
         firstName
         lastName
         student {
+          id
           birthday
           grade
           leftAt

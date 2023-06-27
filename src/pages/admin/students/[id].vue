@@ -52,6 +52,7 @@ const { executeMutation: updateStudent } = useMutation(
         lastName
         role
         student {
+          id
           birthday
           grade
           leftAt
