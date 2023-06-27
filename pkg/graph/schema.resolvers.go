@@ -914,9 +914,25 @@ func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filt
 		return nil, err
 	}
 
+	// Get the pageInfo
+	page := model.PageInfo{}
+	if count < pageOffset+pageLimit {
+		page.HasNextPage = false
+	} else {
+		page.HasNextPage = true
+	}
+
+	if pageOffset > 0 {
+		page.HasPreviousPage = true
+	} else {
+		page.HasPreviousPage = false
+	}
+
+	page.CurrentPage = pageOffset / pageLimit
+
 	return &model.UserConnection{
 		Edges:      users,
-		PageInfo:   nil,
+		PageInfo:   &page,
 		TotalCount: count,
 	}, nil
 }
