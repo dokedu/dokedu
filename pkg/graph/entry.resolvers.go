@@ -522,9 +522,25 @@ func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, fi
 		return nil, err
 	}
 
+	// Page info
+	page := &model.PageInfo{}
+
+	if count < pageOffset+pageLimit {
+		page.HasNextPage = false
+	} else {
+		page.HasNextPage = true
+	}
+
+	if pageOffset > 0 {
+		page.HasPreviousPage = true
+	} else {
+		page.HasPreviousPage = false
+	}
+
+	page.CurrentPage = pageOffset / pageLimit
 	return &model.EntryConnection{
 		Edges:      entries,
-		PageInfo:   nil,
+		PageInfo:   page,
 		TotalCount: count,
 	}, nil
 }

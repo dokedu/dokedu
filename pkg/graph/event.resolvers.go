@@ -249,9 +249,32 @@ func (r *queryResolver) Events(ctx context.Context, limit *int, offset *int, fil
 		return nil, err
 	}
 
+	// Page info
+	page := &model.PageInfo{}
+
+	if count < pageOffset+pageLimit {
+		page.HasNextPage = false
+	} else {
+		page.HasNextPage = true
+	}
+
+	if pageOffset > 0 {
+		page.HasPreviousPage = true
+	} else {
+		page.HasPreviousPage = false
+	}
+
+	page.CurrentPage = pageOffset / pageLimit
+
+	if pageOffset > 0 {
+		page.HasPreviousPage = true
+	} else {
+		page.HasPreviousPage = false
+	}
+
 	return &model.EventConnection{
 		Edges:      events,
-		PageInfo:   nil,
+		PageInfo:   page,
 		TotalCount: count,
 	}, nil
 }
