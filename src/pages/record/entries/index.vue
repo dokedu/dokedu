@@ -226,7 +226,7 @@ watch([student, teacher, tags, currentSort], () => {
 const { data: studentData } = useQuery({
   query: graphql(`
     query getEntryFilterStudents {
-      users(filter: { role: [student] }, limit: 5000) {
+      users(filter: { role: [student] }, limit: 1000) {
         edges {
           id
           firstName
