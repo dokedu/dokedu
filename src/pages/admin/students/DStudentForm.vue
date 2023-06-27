@@ -2,19 +2,19 @@
   <DSidebar :title="title" :delete="deletable" @cancel="onCancel" @delete="onDelete">
     <template #main>
       <div class="flex flex-col gap-2">
-        <DInput name="firstName" label="First name" v-model="student.firstName"></DInput>
-        <DInput name="lastName" label="Last name" v-model="student.lastName"></DInput>
+        <DInput name="firstName" :label="$t('first_name')" v-model="student.firstName"></DInput>
+        <DInput name="lastName" :label="$t('last_name')" v-model="student.lastName"></DInput>
         <DInput
           type="number"
           v-if="student.student"
-          label="Grade"
+          :label="$t('grade')"
           :min="0"
           name="grade"
           v-model="student.student.grade"
         ></DInput>
-        <DInput type="date" label="Birthday" name="birthday" v-model="birthday"></DInput>
-        <DInput type="date" label="Joined At" name="birthday" v-model="joinedAt"></DInput>
-        <DInput type="date" label="Left At" name="birthday" v-model="leftAt"></DInput>
+        <DInput type="date" :label="$t('birthday')" name="birthday" v-model="birthday"></DInput>
+        <DInput type="date" :label="$t('joined_at')" name="birthday" v-model="joinedAt"></DInput>
+        <DInput type="date" :label="$t('left_at')" name="birthday" v-model="leftAt"></DInput>
       </div>
     </template>
     <template #footer>

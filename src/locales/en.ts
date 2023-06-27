@@ -114,4 +114,9 @@ export const en = {
   created: "created",
   updated: "updated",
   delete: "Delete",
+
+  first_name: "First name",
+  last_name: "Last name",
+  birthday: "Birthday",
+  edit_student: "Edit student"
 };

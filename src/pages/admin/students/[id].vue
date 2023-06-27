@@ -2,7 +2,7 @@
   <div v-if="data?.user">
     <DStudentForm
       :student="(data.user as User)"
-      title="Edit student"
+      :title="$t('edit_student')"
       deletable
       @save="onEditStudent"
       @delete="onDeleteStudent"

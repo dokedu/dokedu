@@ -1,5 +1,5 @@
 <template>
-  <DStudentForm :student="student" title="Add student" @save="onCreateStudent"></DStudentForm>
+  <DStudentForm :student="student" :title="$t('add_student')" @save="onCreateStudent"></DStudentForm>
 </template>
 
 <script lang="ts" setup>

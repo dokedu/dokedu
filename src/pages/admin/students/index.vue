@@ -13,12 +13,12 @@
         />
       </div>
       <RouterLink :to="{ name: 'admin-students-new' }">
-        <DButton type="primary" size="md" :icon-left="Plus">Add student</DButton>
+        <DButton type="primary" size="md" :icon-left="Plus">{{ $t("add_student") }}</DButton>
       </RouterLink>
     </PageHeader>
     <div class="flex w-full items-start gap-3 border-b border-stone-100 px-8 py-3 text-sm">
       <div class="flex w-[200px] items-center gap-1 text-muted">
-        <div @click="sortBy('firstName')">First Name</div>
+        <div @click="sortBy('firstName')">{{ $t("first_name") }}</div>
         <ArrowDown
           v-if="currentSort == UserOrderBy.FirstNameAsc || currentSort == UserOrderBy.FirstNameDesc"
           class="h-4 w-4 transition-all ease-in-out"
@@ -26,15 +26,15 @@
         />
       </div>
       <div class="flex flex-1 items-center gap-1 text-muted">
-        <div @click="sortBy('lastName')">Last Name</div>
+        <div @click="sortBy('lastName')">{{ $t("last_name") }}</div>
         <ArrowDown
           v-if="currentSort == UserOrderBy.LastNameAsc || currentSort == UserOrderBy.LastNameDesc"
           class="h-4 w-4 transition-all ease-in-out"
           :class="currentSort == UserOrderBy.LastNameAsc ? 'rotate-180' : 'rotate-0'"
         />
       </div>
-      <div class="flex w-[200px] items-center gap-1 text-muted">Grade</div>
-      <div class="flex w-[100px] items-center gap-1 text-muted">Birthday</div>
+      <div class="flex w-[200px] items-center gap-1 text-muted">{{ $t("grade") }}</div>
+      <div class="flex w-[100px] items-center gap-1 text-muted">{{ $t("birthday") }}</div>
     </div>
     <div class="flex flex-col overflow-scroll" ref="adminStudentContainer">
       <PageSearchResult
