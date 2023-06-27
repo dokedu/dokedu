@@ -470,8 +470,8 @@ func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, fi
 
 	pageLimit := 100
 	if limit != nil {
-		if *limit < 1000 {
-			return nil, fmt.Errorf("limit must be less than 1000")
+		if *limit > 1000 {
+			return nil, fmt.Errorf("limit cannot be greater than 1000")
 		}
 		pageLimit = *limit
 	}
