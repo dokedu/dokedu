@@ -37,31 +37,31 @@
       <div class="flex w-[100px] items-center gap-1 text-muted">Birthday</div>
     </div>
     <div class="flex flex-col overflow-scroll" ref="adminStudentContainer">
-      <router-link
-        :to="{ name: 'admin-students-student', params: { id: student.id } }"
-        v-for="student in studentData"
-        class="flex gap-3 border-b border-stone-100 px-8 py-2 transition-all hover:bg-stone-50"
-      >
-        <div class="line-clamp-1 w-[200px] text-sm text-strong">{{ student.firstName }}</div>
-        <div class="line-clamp-1 flex-1 text-sm text-strong">{{ student.lastName }}</div>
-        <div class="line-clamp-1 w-[200px] text-sm font-medium text-strong">
-          {{ student.student?.grade }}
-        </div>
-        <div v-if="student.student?.birthday" class="line-clamp-1 w-[100px] text-sm font-medium text-strong">
-          {{ formatDate(new Date(Date.parse(student?.student.birthday as string)), "DD.MM.YYYY") }}
-        </div>
-        <div v-else class="w-[100px] text-sm font-medium text-strong">-</div>
-      </router-link>
-    </div>
-    <div v-if="loading" class="flex flex-col overflow-scroll">
-      <div
-        v-for="i in 25"
+      <PageSearchResult
+        v-for="(variables, i) in pageVariables"
         :key="i"
-        class="flex h-9 min-h-[36px] animate-pulse items-center gap-4 border-b border-stone-100 px-8"
+        :variables="variables"
+        :query="studentsQuery"
+        objectName="users"
+        @fetched="fetchedAll = true"
       >
-        <div class="h-2.5 w-20 rounded-full bg-stone-200"></div>
-        <div class="h-2.5 w-20 rounded-full bg-stone-200"></div>
-      </div>
+        <template v-slot="{ row }">
+          <router-link
+            :to="{ name: 'admin-students-student', params: { id: row.id } }"
+            class="flex gap-3 border-b border-stone-100 px-8 py-2 transition-all hover:bg-stone-50"
+          >
+            <div class="line-clamp-1 w-[200px] text-sm text-strong">{{ row.firstName }}</div>
+            <div class="line-clamp-1 flex-1 text-sm text-strong">{{ row.lastName }}</div>
+            <div class="line-clamp-1 w-[200px] text-sm font-medium text-strong">
+              {{ row.student?.grade }}
+            </div>
+            <div v-if="row.student?.birthday" class="line-clamp-1 w-[100px] text-sm font-medium text-strong">
+              {{ formatDate(new Date(Date.parse(row?.student.birthday as string)), "DD.MM.YYYY") }}
+            </div>
+            <div v-else class="w-[100px] text-sm font-medium text-strong">-</div>
+          </router-link>
+        </template>
+      </PageSearchResult>
     </div>
   </PageWrapper>
   <router-view />
@@ -71,18 +71,68 @@ import DButton from "@/components/d-button/d-button.vue";
 import PageHeader from "../../../components/PageHeader.vue";
 import PageWrapper from "../../../components/PageWrapper.vue";
 import { Plus } from "lucide-vue-next";
-import { computed, ref, reactive, watch } from "vue";
-import { gql, useQuery } from "@urql/vue";
+import { ref, reactive, watch } from "vue";
 import { formatDate } from "@vueuse/core";
 import { ArrowDown } from "lucide-vue-next";
-import { UserOrderBy, User } from "@/gql/graphql";
+import { UserOrderBy } from "@/gql/graphql";
 import { useInfiniteScroll } from "@vueuse/core";
+import PageSearchResult from "@/components/PageSearchResult.vue";
+import { graphql } from "@/gql";
 
 const search = ref("");
-const offset = ref(0);
 const adminStudentContainer = ref<HTMLElement | null>(null);
 const currentSort = ref<UserOrderBy>(UserOrderBy.LastNameAsc);
-const studentData = ref<User[]>([]);
+const fetchedAll = ref(false);
+
+const pageVariables = ref([
+  {
+    search: "",
+    order: UserOrderBy.LastNameAsc,
+    offset: 0,
+  },
+]);
+
+const loadMore = () => {
+  if (fetchedAll.value) return;
+  const lastPage = pageVariables.value[pageVariables.value.length - 1];
+  pageVariables.value.push({
+    search: search.value,
+    order: currentSort.value,
+    offset: lastPage.offset + 50,
+  });
+};
+
+watch([search, currentSort], () => {
+  pageVariables.value = [
+    {
+      search: search.value,
+      order: currentSort.value,
+      offset: 0,
+    },
+  ];
+  fetchedAll.value = false;
+});
+
+useInfiniteScroll(adminStudentContainer, loadMore);
+const studentsQuery = graphql(`
+  query adminStudents($search: String, $order: UserOrderBy, $offset: Int) {
+    users(filter: { role: [student], orderBy: $order }, search: $search, offset: $offset) {
+      pageInfo {
+        hasNextPage
+      }
+      edges {
+        id
+        firstName
+        lastName
+        student {
+          id
+          birthday
+          grade
+        }
+      }
+    }
+  }
+`);
 
 const sortColumns = reactive<{ [key: string]: { [key: string]: UserOrderBy } }>({
   firstName: {
@@ -102,57 +152,5 @@ function sortBy(column: string) {
     currentSort.value = sortColumns[column].asc;
   }
 }
-const loading = computed(() => {
-  return fetching && !data.value;
-});
-
-const { data, fetching } = useQuery({
-  query: gql`
-    query adminStudents($search: String, $order: UserOrderBy, $offset: Int) {
-      users(filter: { role: [student], orderBy: $order }, search: $search, offset: $offset) {
-        totalCount
-        edges {
-          id
-          firstName
-          lastName
-          student {
-            id
-            birthday
-            grade
-          }
-        }
-      }
-    }
-  `,
-  variables: reactive({
-    search: search,
-    order: currentSort,
-    offset,
-  }),
-});
-
-useInfiniteScroll(
-  adminStudentContainer,
-  () => {
-    if (fetching.value) return;
-    if (!data.value?.users?.edges) return;
-    if (!studentData.value.length) return;
-    if (Number(data.value?.users?.totalCount) < 50) return;
-    if (studentData.value.length >= Number(data.value?.users?.totalCount)) return;
-    offset.value += 50;
-  },
-  { distance: 500 }
-);
-
-watch(data, () => {
-  if (fetching.value) return;
-  if (!data.value?.users?.edges) return;
-  studentData.value.push(...data.value?.users?.edges);
-});
-
-watch([search, currentSort], () => {
-  offset.value = 0;
-  studentData.value = [];
-});
 </script>
 ```

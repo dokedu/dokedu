@@ -14,86 +14,84 @@
       </div>
     </PageHeader>
     <div class="flex flex-col overflow-scroll" ref="studentContainer">
-      <router-link
-        :to="{ name: 'record-students-student', params: { id: student.id } }"
-        v-for="student in studentData"
-        class="flex border-b border-stone-100 transition-all hover:bg-stone-50"
-      >
-        <div class="px-8 py-2 text-sm text-strong">{{ `${student.firstName} ${student.lastName}` }}</div>
-      </router-link>
-    </div>
-    <div v-if="loading" class="flex flex-col overflow-scroll">
-      <div
-        v-for="i in 25"
+      <PageSearchResult
+        v-for="(variables, i) in pageVariables"
         :key="i"
-        class="flex h-9 min-h-[36px] animate-pulse items-center gap-4 border-b border-stone-100 px-8"
+        :variables="variables"
+        :query="studentsQuery"
+        objectName="users"
+        @fetched="fetchedAll = true"
       >
-        <div class="h-2.5 w-20 rounded-full bg-stone-200"></div>
-        <div class="h-2.5 w-20 rounded-full bg-stone-200"></div>
-      </div>
+        <template v-slot="{ row }">
+          <router-link
+            :to="{ name: 'record-students-student', params: { id: row.id } }"
+            class="flex border-b border-stone-100 transition-all hover:bg-stone-50"
+          >
+            <div class="px-8 py-2 text-sm text-strong">{{ `${row.firstName} ${row.lastName}` }}</div>
+          </router-link>
+        </template>
+      </PageSearchResult>
     </div>
   </PageWrapper>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import PageHeader from "../../../components/PageHeader.vue";
 import PageWrapper from "../../../components/PageWrapper.vue";
-import { gql, useQuery } from "@urql/vue";
-import { User } from "@/gql/graphql";
 import { useInfiniteScroll } from "@vueuse/core";
+import { graphql } from "@/gql";
+import PageSearchResult from "@/components/PageSearchResult.vue";
 
 const search = ref("");
-const studentData = ref<User[]>([]);
 const studentContainer = ref<HTMLElement | null>(null);
-const offset = ref(0);
+const fetchedAll = ref(false);
 
-const loading = computed(() => {
-  return fetching && !data.value;
+const pageVariables = ref([
+  {
+    search: "",
+    offset: 0,
+  },
+]);
+
+const loadMore = () => {
+  if (fetchedAll.value) return;
+  const lastPage = pageVariables.value[pageVariables.value.length - 1];
+  pageVariables.value.push({
+    search: search.value,
+    offset: lastPage.offset + 50,
+  });
+};
+
+watch([search], () => {
+  pageVariables.value = [
+    {
+      search: search.value,
+      offset: 0,
+    },
+  ];
+  fetchedAll.value = false;
 });
 
-const { data, fetching } = useQuery({
-  query: gql`
-    query usersSearch($search: String, $offset: Int) {
-      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, offset: $offset) {
-        totalCount
-        edges {
+useInfiniteScroll(studentContainer, loadMore);
+
+const studentsQuery = graphql(`
+  query recordStudents($search: String, $offset: Int) {
+    users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, offset: $offset) {
+      pageInfo {
+        hasNextPage
+      }
+      edges {
+        id
+        firstName
+        lastName
+        student {
           id
-          firstName
-          lastName
-          student {
-            id
-          }
+          birthday
+          grade
         }
       }
     }
-  `,
-  variables: reactive({
-    search: search,
-    offset,
-  }),
-});
-useInfiniteScroll(
-  studentContainer,
-  () => {
-    if (fetching.value) return;
-    if (!data.value?.users?.edges) return;
-    if (!studentData.value.length) return;
-    if (Number(data.value?.users?.totalCount) < 50) return;
-    if (studentData.value.length >= Number(data.value?.users?.totalCount)) return;
-    offset.value += 50;
-  },
-  { distance: 500 }
-);
-
-watch(data, () => {
-  if (fetching.value) return;
-  if (!data.value?.users?.edges) return;
-  studentData.value.push(...data.value?.users?.edges);
-});
-
-watch(search, () => {
-  offset.value = 0;
-  studentData.value = [];
-});
+  }
+`);
 </script>
