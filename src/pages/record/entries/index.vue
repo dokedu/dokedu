@@ -58,7 +58,6 @@
         :variables="variables"
         :query="entriesQuery"
         objectName="entries"
-        @fetched="fetchedAll = true"
       >
         <template v-slot="{ row }">
           <router-link
@@ -141,7 +140,6 @@ const student = ref();
 const teacher = ref();
 const tags = ref([]);
 const currentSort = ref(EntrySortBy.CreatedAtDesc);
-const fetchedAll = ref(false);
 
 const sortColumns = reactive<{ [key: string]: { [key: string]: EntrySortBy } }>({
   date: {
@@ -169,24 +167,26 @@ const pageVariables = ref([
       authors: teacher,
       tags: tags,
     },
-    limit: 50,
+    limit: 20,
     sortBy: currentSort,
     offset: 0,
+    nextPage: null,
   },
 ]);
 
 const loadMore = () => {
-  if (fetchedAll.value) return;
   const lastPage = pageVariables.value[pageVariables.value.length - 1];
+  if (!lastPage.nextPage) return;
   pageVariables.value.push({
     filter: {
       users: student,
       authors: teacher,
       tags: tags.value,
     },
-    limit: 50,
+    limit: 20,
     sortBy: currentSort.value,
     offset: lastPage.offset + lastPage.limit,
+    nextPage: null,
   });
 };
 
@@ -198,12 +198,12 @@ watch([student, teacher, tags, currentSort], () => {
         authors: teacher,
         tags: tags.value,
       },
-      limit: 50,
+      limit: 20,
       sortBy: currentSort.value,
       offset: 0,
+      nextPage: null,
     },
   ];
-  fetchedAll.value = false;
 });
 
 const el = ref<HTMLElement | null>(null);

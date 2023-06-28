@@ -59,7 +59,6 @@
         :variables="variables"
         :query="eventsQuery"
         objectName="events"
-        @fetched="fetchedAll = true"
       >
         <template v-slot="{ row }">
           <router-link
@@ -99,7 +98,6 @@ const search = ref("");
 const filtersOpen = ref(false);
 const startsAt = ref();
 const endsAt = ref();
-const fetchedAll = ref(false);
 
 const startTimestamp = computed(() => startsAt.value && new Date(startsAt.value).toISOString());
 const endsTimestamp = computed(() => endsAt.value && new Date(endsAt.value).toISOString());
@@ -117,12 +115,13 @@ const pageVariables = ref([
     search: "",
     limit: 50,
     offset: 0,
+    nextPage: null,
   },
 ]);
 
 const loadMore = () => {
-  if (fetchedAll.value) return;
   const lastPage = pageVariables.value[pageVariables.value.length - 1];
+  if (!lastPage.nextPage) return;
   pageVariables.value.push({
     filter: {
       from: startTimestamp.value,
@@ -131,6 +130,7 @@ const loadMore = () => {
     search: search.value,
     limit: 50,
     offset: lastPage.offset + 50,
+    nextPage: null,
   });
 };
 
@@ -144,9 +144,9 @@ watch([search, startTimestamp, endsTimestamp], () => {
       search: search.value,
       limit: 50,
       offset: 0,
+      nextPage: null,
     },
   ];
-  fetchedAll.value = false;
 });
 
 const events = ref<HTMLElement | null>(null);
