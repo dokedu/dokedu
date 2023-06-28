@@ -80,6 +80,7 @@ const studentsQuery = graphql(`
     users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, offset: $offset) {
       pageInfo {
         hasNextPage
+        hasPreviousPage
       }
       edges {
         id
