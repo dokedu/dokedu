@@ -53,21 +53,30 @@
       </div>
     </div>
     <div class="flex flex-col overflow-scroll" ref="events">
-      <router-link
-        :to="{ name: 'record-projects-project', params: { id: event.id } }"
-        v-for="event in (eventData as Event[])"
-        class="flex border-b border-stone-100 text-sm transition-all hover:bg-stone-50"
-        :class="{
-          '!bg-stone-100': event?.id === $route.params.id,
-        }"
+      <PageSearchResult
+        v-for="(variables, i) in pageVariables"
+        :key="i"
+        :variables="variables"
+        :query="eventsQuery"
+        objectName="events"
       >
-        <div class="w-2/6 p-2 pl-8 text-strong">{{ event.title }}</div>
-        <div class="w-3/6 p-2 pl-8 text-subtle">{{ event.body?.slice(0, 50) }}...</div>
-        <div class="w-2/6 p-2 px-4 text-subtle">
-          {{ formatDate(new Date(Date.parse(event.startsAt)), "DD.MM.YYYY") }} -
-          {{ formatDate(new Date(Date.parse(event.endsAt)), "DD.MM.YYYY") }}
-        </div>
-      </router-link>
+        <template v-slot="{ row }">
+          <router-link
+            :to="{ name: 'record-projects-project', params: { id: row.id } }"
+            class="flex border-b border-stone-100 text-sm transition-all hover:bg-stone-50"
+            :class="{
+              '!bg-stone-100': row?.id === $route.params.id,
+            }"
+          >
+            <div class="w-2/6 p-2 pl-8 text-strong">{{ row.title }}</div>
+            <div class="w-3/6 p-2 pl-8 text-subtle">{{ row.body?.slice(0, 50) }}...</div>
+            <div class="w-2/6 p-2 px-4 text-subtle">
+              {{ formatDate(new Date(Date.parse(row.startsAt)), "DD.MM.YYYY") }} -
+              {{ formatDate(new Date(Date.parse(row.endsAt)), "DD.MM.YYYY") }}
+            </div>
+          </router-link>
+        </template>
+      </PageSearchResult>
     </div>
   </PageWrapper>
   <router-view />
@@ -75,24 +84,20 @@
 <script setup lang="ts">
 import PageHeader from "../../../components/PageHeader.vue";
 import PageWrapper from "../../../components/PageWrapper.vue";
-import { useQuery } from "@urql/vue";
 import { formatDate } from "@vueuse/core";
 import DButton from "../../../components/d-button/d-button.vue";
 import { Plus } from "lucide-vue-next";
 import { Share } from "lucide-vue-next";
-import { reactive, ref, computed, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import { graphql } from "../../../gql";
-import { Event } from "@/gql/graphql";
 import { ListFilter } from "lucide-vue-next";
 import { useInfiniteScroll } from "@vueuse/core";
+import PageSearchResult from "@/components/PageSearchResult.vue";
 
 const search = ref("");
 const filtersOpen = ref(false);
 const startsAt = ref();
 const endsAt = ref();
-const offset = ref(0);
-const events = ref<HTMLElement>();
-const eventData = ref<Event[]>([]);
 
 const startTimestamp = computed(() => startsAt.value && new Date(startsAt.value).toISOString());
 const endsTimestamp = computed(() => endsAt.value && new Date(endsAt.value).toISOString());
@@ -101,51 +106,68 @@ function toggleFilters() {
   filtersOpen.value = !filtersOpen.value;
 }
 
-useInfiniteScroll(
-  events,
-  () => {
-    if (fetching.value) return;
-    if (!data.value?.events?.edges) return;
-    if (!eventData.value.length) return;
-    if (Number(data.value?.events?.totalCount) < 50) return;
-    if (eventData.value?.length >= Number(data.value?.events?.totalCount)) return;
-    offset.value += 50;
+const pageVariables = ref([
+  {
+    filter: {
+      from: null,
+      to: null,
+    },
+    search: "",
+    limit: 50,
+    offset: 0,
+    nextPage: null,
   },
-  { distance: 500 }
-);
+]);
 
-const { data, fetching } = useQuery({
-  query: graphql(`
-    query eventWithSearch($search: String, $offset: Int, $filter: EventFilterInput) {
-      events(search: $search, limit: 50, offset: $offset, filter: $filter) {
-        totalCount
-        edges {
-          id
-          title
-          body
-          createdAt
-          startsAt
-          endsAt
-        }
-      }
-    }
-  `),
-  variables: reactive({
-    search,
-    offset,
-    filter: { from: startTimestamp, to: endsTimestamp },
-  }),
-});
-
-watch(data, () => {
-  if (fetching.value) return;
-  if (!data.value?.events?.edges) return;
-
-  // @ts-expect-error
-  eventData.value.push(...data.value?.events?.edges);
-});
+const loadMore = () => {
+  const lastPage = pageVariables.value[pageVariables.value.length - 1];
+  if (!lastPage.nextPage) return;
+  pageVariables.value.push({
+    filter: {
+      from: startTimestamp.value,
+      to: endsTimestamp.value,
+    },
+    search: search.value,
+    limit: 50,
+    offset: lastPage.offset + 50,
+    nextPage: null,
+  });
+};
 
 watch([search, startTimestamp, endsTimestamp], () => {
-  offset.value = 0;
+  pageVariables.value = [
+    {
+      filter: {
+        from: startTimestamp.value,
+        to: endsTimestamp.value,
+      },
+      search: search.value,
+      limit: 50,
+      offset: 0,
+      nextPage: null,
+    },
+  ];
 });
+
+const events = ref<HTMLElement | null>(null);
+useInfiniteScroll(events, loadMore);
+
+const eventsQuery = graphql(`
+  query eventWithSearch($search: String, $offset: Int, $filter: EventFilterInput) {
+    events(search: $search, limit: 50, offset: $offset, filter: $filter) {
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+      }
+      edges {
+        id
+        title
+        body
+        createdAt
+        startsAt
+        endsAt
+      }
+    }
+  }
+`);
 </script>

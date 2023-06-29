@@ -43,7 +43,6 @@
         :variables="variables"
         :query="studentsQuery"
         objectName="users"
-        @fetched="fetchedAll = true"
       >
         <template v-slot="{ row }">
           <router-link
@@ -82,23 +81,24 @@ import { graphql } from "@/gql";
 const search = ref("");
 const adminStudentContainer = ref<HTMLElement | null>(null);
 const currentSort = ref<UserOrderBy>(UserOrderBy.LastNameAsc);
-const fetchedAll = ref(false);
 
 const pageVariables = ref([
   {
     search: "",
     order: UserOrderBy.LastNameAsc,
     offset: 0,
+    nextPage: null,
   },
 ]);
 
 const loadMore = () => {
-  if (fetchedAll.value) return;
   const lastPage = pageVariables.value[pageVariables.value.length - 1];
+  if (!lastPage.nextPage) return;
   pageVariables.value.push({
     search: search.value,
     order: currentSort.value,
     offset: lastPage.offset + 50,
+    nextPage: null,
   });
 };
 
@@ -108,9 +108,9 @@ watch([search, currentSort], () => {
       search: search.value,
       order: currentSort.value,
       offset: 0,
+      nextPage: null,
     },
   ];
-  fetchedAll.value = false;
 });
 
 useInfiniteScroll(adminStudentContainer, loadMore);
@@ -119,6 +119,7 @@ const studentsQuery = graphql(`
     users(filter: { role: [student], orderBy: $order }, search: $search, offset: $offset) {
       pageInfo {
         hasNextPage
+        hasPreviousPage
       }
       edges {
         id

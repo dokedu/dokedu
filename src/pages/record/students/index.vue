@@ -20,7 +20,6 @@
         :variables="variables"
         :query="studentsQuery"
         objectName="users"
-        @fetched="fetchedAll = true"
       >
         <template v-slot="{ row }">
           <router-link
@@ -45,21 +44,22 @@ import PageSearchResult from "@/components/PageSearchResult.vue";
 
 const search = ref("");
 const studentContainer = ref<HTMLElement | null>(null);
-const fetchedAll = ref(false);
 
 const pageVariables = ref([
   {
     search: "",
     offset: 0,
+    nextPage: null,
   },
 ]);
 
 const loadMore = () => {
-  if (fetchedAll.value) return;
   const lastPage = pageVariables.value[pageVariables.value.length - 1];
+  if (!lastPage.nextPage) return;
   pageVariables.value.push({
     search: search.value,
     offset: lastPage.offset + 50,
+    nextPage: null,
   });
 };
 
@@ -68,9 +68,9 @@ watch([search], () => {
     {
       search: search.value,
       offset: 0,
+      nextPage: null,
     },
   ];
-  fetchedAll.value = false;
 });
 
 useInfiniteScroll(studentContainer, loadMore);
@@ -80,6 +80,7 @@ const studentsQuery = graphql(`
     users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, offset: $offset) {
       pageInfo {
         hasNextPage
+        hasPreviousPage
       }
       edges {
         id
