@@ -305,6 +305,7 @@ input ResetPasswordInput {
 
 type ResetPasswordPayload {
     success: Boolean!
+    message: String!
 }
 
 input ForgotPasswordInput {

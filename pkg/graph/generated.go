@@ -299,6 +299,7 @@ type ComplexityRoot struct {
 	}
 
 	ResetPasswordPayload struct {
+		Message func(childComplexity int) int
 		Success func(childComplexity int) int
 	}
 
@@ -1959,6 +1960,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ReportConnection.TotalCount(childComplexity), true
+
+	case "ResetPasswordPayload.message":
+		if e.complexity.ResetPasswordPayload.Message == nil {
+			break
+		}
+
+		return e.complexity.ResetPasswordPayload.Message(childComplexity), true
 
 	case "ResetPasswordPayload.success":
 		if e.complexity.ResetPasswordPayload.Success == nil {
@@ -8659,6 +8667,8 @@ func (ec *executionContext) fieldContext_Mutation_resetPassword(ctx context.Cont
 			switch field.Name {
 			case "success":
 				return ec.fieldContext_ResetPasswordPayload_success(ctx, field)
+			case "message":
+				return ec.fieldContext_ResetPasswordPayload_message(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ResetPasswordPayload", field.Name)
 		},
@@ -12963,6 +12973,50 @@ func (ec *executionContext) fieldContext_ResetPasswordPayload_success(ctx contex
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ResetPasswordPayload_message(ctx context.Context, field graphql.CollectedField, obj *model.ResetPasswordPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ResetPasswordPayload_message(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ResetPasswordPayload_message(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ResetPasswordPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -21025,6 +21079,13 @@ func (ec *executionContext) _ResetPasswordPayload(ctx context.Context, sel ast.S
 		case "success":
 
 			out.Values[i] = ec._ResetPasswordPayload_success(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "message":
+
+			out.Values[i] = ec._ResetPasswordPayload_message(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

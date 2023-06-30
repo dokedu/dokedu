@@ -195,12 +195,14 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, input model.ResetP
 	if err != nil {
 		return &model.ResetPasswordPayload{
 			Success: false,
+			Message: "invalid token",
 		}, nil
 	}
 
 	if user.RecoverySentAt.Add(time.Hour * 24).After(time.Now()) {
 		return &model.ResetPasswordPayload{
 			Success: false,
+			Message: "token expired",
 		}, nil
 	}
 
@@ -208,6 +210,7 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, input model.ResetP
 	if err != nil {
 		return &model.ResetPasswordPayload{
 			Success: false,
+			Message: "unable to generate a new password",
 		}, nil
 	}
 
@@ -215,11 +218,13 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, input model.ResetP
 	if err != nil {
 		return &model.ResetPasswordPayload{
 			Success: false,
+			Message: "unable to reset password",
 		}, nil
 	}
 
 	return &model.ResetPasswordPayload{
 		Success: true,
+		Message: "successfully reset password",
 	}, nil
 }
 
