@@ -199,7 +199,7 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, input model.ResetP
 		}, nil
 	}
 
-	if user.RecoverySentAt.Add(time.Hour * 24).After(time.Now()) {
+	if time.Now().After(user.RecoverySentAt.Add(24 * time.Hour)) {
 		return &model.ResetPasswordPayload{
 			Success: false,
 			Message: "token expired",
