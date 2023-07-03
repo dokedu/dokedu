@@ -14,11 +14,7 @@
               size="sm"
               v-if="column.sortable"
               :icon-right="
-                currentSort.key === column.key
-                  ? currentSort.order === column.sortable.asc
-                    ? ArrowUp
-                    : ArrowDown
-                  : ArrowUpDown
+                currentKey === column.key ? (currentSort === column.sortable.asc ? ArrowUp : ArrowDown) : ArrowUpDown
               "
               @click="sortBy(column)"
             >
@@ -59,7 +55,7 @@
 <script lang="ts" setup>
 import TableSearchResult from "../TableSearchResult.vue";
 import DButton from "../d-button/d-button.vue";
-import { ref, PropType, toRef, watch, computed, Ref } from "vue";
+import { ref, PropType, watch, computed } from "vue";
 import { useInfiniteScroll } from "@vueuse/core";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-vue-next";
 
@@ -100,7 +96,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["update:modelValue", "load-more", "update:variables"]);
+const emit = defineEmits(["update:modelValue", "update:variables"]);
 const pageVariables = computed({
   get() {
     return props.variables;
@@ -109,43 +105,48 @@ const pageVariables = computed({
     emit("update:variables", value);
   },
 });
+
 const table = ref<HTMLElement | null>(null);
-const currentSort = ref({
-  key: props.defaultSort || "",
-  order: pageVariables.value[0].order,
-});
+const currentSort = ref(pageVariables.value[0].order);
+const currentKey = ref(props.defaultSort || "");
 
 useInfiniteScroll(table, () => {
   const lastPage = pageVariables.value[pageVariables.value.length - 1];
   if (!lastPage.nextPage) return;
+
   pageVariables.value.push({
-    ...lastPage,
+    limit: lastPage.limit,
+    order: lastPage.order,
+    search: lastPage.search,
     offset: (lastPage.offset as number) + 50,
   });
 });
 
-watch([currentSort], () => {
+watch(currentSort, () => {
   // Take the last pageVariables and update the offset
   const lastPage = pageVariables.value[pageVariables.value.length - 1];
   pageVariables.value = [
     {
-      ...lastPage,
       offset: 0,
+      limit: lastPage.limit,
+      order: currentSort.value,
+      search: lastPage.search,
     },
   ];
+  console.log(pageVariables.value);
 });
 
 function sortBy(column: Column) {
   if (!column.sortable) return;
-  currentSort.value.key = column.key;
+  currentKey.value = column.key;
 
   // Take the last pageVariables and update the order
   const lastPage = pageVariables.value[pageVariables.value.length - 1];
-  if (currentSort.value.order === column.sortable?.asc) {
-    currentSort.value.order = column.sortable.desc;
+  if (currentSort.value === column.sortable?.asc) {
+    currentSort.value = column.sortable.desc;
     lastPage.order = column.sortable.desc;
   } else {
-    currentSort.value.order = column.sortable.asc;
+    currentSort.value = column.sortable.asc;
     lastPage.order = column.sortable.asc;
   }
 

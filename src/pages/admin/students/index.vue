@@ -93,10 +93,12 @@ const pageVariables = ref([
 watchDebounced(
   search,
   () => {
+    // Get last page and set it as only with the search
+    const lastPage = pageVariables.value[pageVariables.value.length - 1];
     pageVariables.value = [
       {
         search: search.value,
-        order: UserOrderBy.LastNameAsc,
+        order: lastPage.order,
         offset: 0,
         nextPage: null,
       },
