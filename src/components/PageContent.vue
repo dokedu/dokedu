@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full overflow-scroll">
+  <div class="h-full">
     <slot />
   </div>
 </template>
