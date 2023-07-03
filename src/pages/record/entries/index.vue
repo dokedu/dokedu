@@ -20,7 +20,7 @@
       </div>
     </PageHeader>
     <div v-if="filtersOpen" class="flex items-end gap-2 border-b border-stone-100 px-8 py-2">
-      <DFilter :options="studentOptions" :label="$t('student')" v-model="student"></DFilter>
+      <EntryFilterStudents></EntryFilterStudents>
       <DFilter :options="teacherOptions" :label="$t('teacher')" v-model="teacher"></DFilter>
       <DFilter :options="tagOptions" :label="$t('tag', 2)" multiple v-model="tags">
         <div class="flex flex-wrap gap-2">
@@ -29,6 +29,7 @@
           </DTag>
         </div>
       </DFilter>
+      <DSelect></DSelect>
     </div>
     <div class="flex w-full items-start gap-3 border-b border-stone-100 py-3 text-sm">
       <div class="flex flex-1 items-center pl-8 text-muted">
@@ -133,6 +134,8 @@ import { LayoutGrid } from "lucide-vue-next";
 import { ArrowDown } from "lucide-vue-next";
 import { EntrySortBy } from "@/gql/graphql";
 import PageSearchResult from "@/components/PageSearchResult.vue";
+import DSelect from "@/components/d-select/d-select.vue";
+import EntryFilterStudents from "./EntryFilterStudents.vue";
 
 const i18nLocale = useI18n();
 
@@ -240,21 +243,6 @@ const entriesQuery = graphql(`
   }
 `);
 
-// TODO: Add infinite scroll here possibly too? no reason to have high limit
-const { data: studentData } = useQuery({
-  query: graphql(`
-    query getEntryFilterStudents {
-      users(filter: { role: [student] }, limit: 1000) {
-        edges {
-          id
-          firstName
-          lastName
-        }
-      }
-    }
-  `),
-});
-
 const { data: teacherData } = useQuery({
   query: graphql(`
     query getEntryFilterTeachers {
@@ -280,14 +268,6 @@ const { data: tagData } = useQuery({
     }
   `),
 });
-
-const studentOptions = computed(
-  () =>
-    studentData?.value?.users?.edges?.map((edge: any) => ({
-      label: `${edge.firstName} ${edge.lastName}`,
-      value: edge.id,
-    })) || []
-);
 
 const teacherOptions = computed(
   () =>

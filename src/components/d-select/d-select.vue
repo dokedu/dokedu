@@ -1,78 +1,120 @@
 <template>
-  <div class="min-w-[200px]">
-    <DContextMenu
-      :show="contextMenuOpen"
-      @close="contextMenuOpen = false"
-      :alignment="ContextMenuAlignment.Overlay"
-      class="max-h-[150px] w-[200px] overflow-y-auto p-1"
-    >
-      <div class="flex w-full flex-col items-start rounded-md">
-        <div
-          @click="selectOption(option)"
-          v-for="option in options"
-          class="flex w-full cursor-pointer items-center justify-between p-1 hover:bg-stone-100"
-        >
-          <div class="text-sm">{{ option.label }}</div>
-          <Check v-show="optionSelected(option)" class="h-4 w-4"></Check>
-        </div>
-      </div>
-    </DContextMenu>
+  <div class="relative" ref="select">
     <div
-      class="flex w-full flex-wrap items-start gap-2 rounded-md border border-stone-200 p-2 hover:bg-stone-50"
-      @click="contextMenuOpen = true"
+      class="flex min-w-[120px] items-center justify-between gap-2 rounded-md border border-stone-200 py-1.5 pl-2 pr-1"
+      @click="toggleSelect"
     >
-      <div v-if="selectedOptions.length" class="text-sm font-medium text-strong">
-        {{ selectedOptions.length + " " + label + (selectedOptions.length > 1 ? "s" : "") + " selected" }}
+      <div class="text-sm">{{ label }}</div>
+      <ChevronRight class="h-4 w-4 transition-all ease-in-out" :class="open ? 'rotate-90' : 'rotate-0'" />
+    </div>
+    <div
+      v-if="open"
+      ref="container"
+      class="absolute top-10 max-h-[200px] w-full overflow-y-auto rounded-md bg-white px-1 pb-2 pt-1 shadow"
+    >
+      <div class="mb-1 flex w-full items-center gap-1 rounded border border-stone-100 py-0.5 pl-1 text-sm">
+        <Search class="h-4 w-4 shrink-0 text-subtle"></Search>
+        <input class="w-full focus:!outline-none" v-if="searchable" v-model="search" @input="onSearch" />
       </div>
-      <div v-else class="text-sm text-subtle">{{ label }}</div>
+      <PageSearchResult
+        v-for="(variables, i) in vars"
+        v-if="query"
+        :variables="variables"
+        :key="i"
+        :query="query"
+        :objectName="objectName"
+      >
+        <template v-slot="{ row }">
+          <div class="rounded-md px-1.5 py-1 text-sm text-strong hover:bg-stone-100" @click="onSelect">
+            <slot :row="row" />
+          </div>
+        </template>
+      </PageSearchResult>
+      <div v-else v-for="option in options">
+        <pre>{{ option }}</pre>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
-import { Check } from "lucide-vue-next";
-import { PropType } from "vue";
-// @ts-ignore
-import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue";
-// @ts-ignore
-import DContextMenu from "@/components/d-context-menu/d-context-menu.vue";
+import { ChevronRight } from "lucide-vue-next";
+import { ref, toRef } from "vue";
+import { onClickOutside, useInfiniteScroll } from "@vueuse/core";
+import PageSearchResult from "../PageSearchResult.vue";
+import { Search } from "lucide-vue-next";
 
-type OptionType = {
-  value: string;
-  label: string;
-};
+const emit = defineEmits(["loadMore", "search", "update:modelValue"]);
+const search = ref("");
 
 const props = defineProps({
-  options: {
-    type: Array as PropType<OptionType[]>,
-    required: true,
-  },
   label: {
     type: String,
-    default: "Select",
+    default: "Label",
   },
   multiple: {
     type: Boolean,
     default: false,
   },
+  modelValue: {
+    type: [String, Array],
+    default: "",
+  },
+  options: {
+    type: Array,
+    default: () => [],
+  },
+  query: {
+    type: Function,
+    default: () => {},
+  },
+  objectName: {
+    type: String,
+    default: "",
+  },
+  pageVariables: {
+    type: Object,
+    default: () => {},
+  },
+  searchable: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const contextMenuOpen = ref(false);
-const selectedOptions = ref<OptionType[]>([]);
+const open = ref(false);
+const select = ref(null);
+const container = ref(null);
+const vars = toRef(props, "pageVariables");
+const model = toRef(props, "modelValue");
 
-function optionSelected(option: OptionType) {
-  return selectedOptions.value.some((o) => o.value === option.value);
-}
-function selectOption(option: OptionType) {
+onClickOutside(select, () => (open.value = false));
+useInfiniteScroll(container, () => {
+  emit("loadMore");
+});
+
+const toggleSelect = () => {
+  open.value = !open.value;
+};
+
+const onSearch = () => {
+  emit("search", search.value);
+};
+
+const onSelect = (row) => {
   if (props.multiple) {
-    if (optionSelected(option)) {
-      selectedOptions.value = selectedOptions.value.filter((o) => o.value !== option.value);
+    if (model.value.includes(row.id)) {
+      model.value = model.value.filter((id) => id !== row.id);
     } else {
-      selectedOptions.value = [...selectedOptions.value, option];
+      model.value = [...model.value, row.id];
     }
-  } else {
-    selectedOptions.value = [option];
+    return;
   }
-}
+
+  emit("update:modelValue", row.id);
+};
+
+// TODO: Support multiple
+// TODO: Support search
+// TODO: Add infinite scroll? option to query?
 </script>
