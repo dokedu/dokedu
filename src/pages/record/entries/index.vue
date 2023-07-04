@@ -184,8 +184,8 @@ watch([student, teacher, tags, currentSort], () => {
 });
 
 const entriesQuery = graphql(`
-  query getEntries($filter: EntryFilterInput, $limit: Int, $sortBy: EntrySortBy, $offset: Int) {
-    entries(filter: $filter, limit: $limit, sortBy: $sortBy, offset: $offset) {
+  query getEntries($filter: EntryFilterInput, $limit: Int, $order: EntrySortBy, $offset: Int) {
+    entries(filter: $filter, limit: $limit, sortBy: $order, offset: $offset) {
       pageInfo {
         hasNextPage
         hasPreviousPage

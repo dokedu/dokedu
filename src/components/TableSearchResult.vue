@@ -1,12 +1,12 @@
 <template>
-  <tr v-if="fetching" v-for="i in variables.limit" :key="i" class="animate-pulse">
-    <td v-for="column in columns" :key="column.key" class="border-b border-stone-100 px-8 py-3">
+  <div v-bind="$attrs" v-if="fetching" v-for="i in variables.limit" :key="i" class="animate-pulse">
+    <div v-for="column in columns" :key="column.key" class="border-b border-stone-100 px-8 py-3">
       <div class="h-3 rounded-full bg-stone-100"></div>
-    </td>
-  </tr>
-  <tr v-else v-for="row in data[objectName]?.edges">
+    </div>
+  </div>
+  <div v-bind="$attrs" v-else v-for="row in data[objectName]?.edges" class="grid transition-colors hover:bg-stone-50">
     <slot :row="row" :fetching="fetching"></slot>
-  </tr>
+  </div>
 </template>
 
 <script lang="ts" setup>
