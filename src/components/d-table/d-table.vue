@@ -55,7 +55,7 @@
 <script lang="ts" setup>
 import TableSearchResult from "../TableSearchResult.vue";
 import DButton from "../d-button/d-button.vue";
-import { ref, PropType, watch, computed } from "vue";
+import { ref, toRef, PropType, watch, computed } from "vue";
 import { useInfiniteScroll } from "@vueuse/core";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-vue-next";
 
@@ -79,7 +79,7 @@ const props = defineProps({
     required: true,
   },
   variables: {
-    type: Array as PropType<{ [key: string]: string | number }[]>,
+    type: Array as PropType<{ [key: string]: string | number | null }[]>,
     required: true,
   },
   objectName: {
@@ -94,9 +94,14 @@ const props = defineProps({
     type: String,
     default: null,
   },
+  search: {
+    type: String,
+    default: null,
+  },
 });
 
 const emit = defineEmits(["update:modelValue", "update:variables"]);
+
 const pageVariables = computed({
   get() {
     return props.variables;
@@ -109,6 +114,7 @@ const pageVariables = computed({
 const table = ref<HTMLElement | null>(null);
 const currentSort = ref(pageVariables.value[0].order);
 const currentKey = ref(props.defaultSort || "");
+const search = toRef(props, "search");
 
 useInfiniteScroll(table, () => {
   const lastPage = pageVariables.value[pageVariables.value.length - 1];
@@ -133,7 +139,6 @@ watch(currentSort, () => {
       search: lastPage.search,
     },
   ];
-  console.log(pageVariables.value);
 });
 
 function sortBy(column: Column) {
@@ -152,4 +157,15 @@ function sortBy(column: Column) {
 
   pageVariables.value = [lastPage];
 }
+
+// Scroll to top if sort or search changes
+watch(
+  [currentSort, currentKey, search],
+  () => {
+    console.log("change");
+    // whenever stuff changes, do magic
+    table.value?.scrollTo({ top: 0, behavior: "smooth" });
+  },
+  { flush: "post" }
+);
 </script>

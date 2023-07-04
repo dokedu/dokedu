@@ -17,8 +17,8 @@
       </RouterLink>
     </PageHeader>
     <DTable
-      :watch="search"
       v-model:variables="pageVariables"
+      :search="search"
       :columns="columns"
       object-name="users"
       :query="studentsQuery"
