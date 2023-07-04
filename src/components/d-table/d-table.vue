@@ -1,12 +1,13 @@
 <template>
   <div class="h-full w-full overflow-scroll" ref="table">
-    <table class="w-full border-separate">
+    <table class="w-full table-fixed border-separate">
       <thead class="sticky top-0 bg-white">
         <th
           v-for="(column, index) in columns"
           class="border-b border-stone-100 px-8 py-2 text-left text-sm"
           :key="index"
           scope="col"
+          :class="column.headerClass"
         >
           <slot :name="`${column.key}-header`" :column="column">
             <DButton
@@ -20,7 +21,7 @@
             >
               {{ column.label }}
             </DButton>
-            <div v-else>
+            <div v-else class="text-stone-700">
               {{ column.label }}
             </div>
           </slot>
@@ -33,16 +34,20 @@
           :query="query"
           :object-name="objectName"
           :variables="vars"
+          :columns="columns"
         >
           <template v-slot="{ row }">
             <td
               class="border-b border-stone-100 px-8 py-2 text-sm"
               v-for="(column, subIndex) in columns"
               :key="subIndex"
+              :class="column.dataClass"
               @click="to(row)"
             >
               <slot v-if="row" :name="`${column.key}-data`" :item="row" :column="row[column.key]">
-                {{ row[column.key] }}
+                <div class="truncate">
+                  {{ row[column.key] }}
+                </div>
               </slot>
             </td>
           </template>
@@ -63,6 +68,8 @@ type Column = {
   key: string;
   label: string;
   sortable?: { [key: string]: string };
+  headerClass?: string;
+  dataClass?: string;
 };
 
 const props = defineProps({
@@ -79,7 +86,9 @@ const props = defineProps({
     required: true,
   },
   variables: {
-    type: Array as PropType<{ [key: string]: string | number | null }[]>,
+    type: Array as PropType<
+      { [key: string]: string | number | null | { [key: string]: string | number | never[] | null } }[]
+    >,
     required: true,
   },
   objectName: {
@@ -116,17 +125,21 @@ const currentSort = ref(pageVariables.value[0].order);
 const currentKey = ref(props.defaultSort || "");
 const search = toRef(props, "search");
 
-useInfiniteScroll(table, () => {
-  const lastPage = pageVariables.value[pageVariables.value.length - 1];
-  if (!lastPage.nextPage) return;
+useInfiniteScroll(
+  table,
+  () => {
+    const lastPage = pageVariables.value[pageVariables.value.length - 1];
+    if (!lastPage.nextPage) return;
 
-  pageVariables.value.push({
-    limit: lastPage.limit,
-    order: lastPage.order,
-    search: lastPage.search,
-    offset: (lastPage.offset as number) + 50,
-  });
-});
+    pageVariables.value.push({
+      limit: lastPage.limit,
+      order: lastPage.order,
+      search: lastPage.search,
+      offset: (lastPage.offset as number) + ((lastPage.limit as number) || 50),
+    });
+  },
+  { distance: 500 }
+);
 
 watch(currentSort, () => {
   // Take the last pageVariables and update the offset
@@ -162,8 +175,6 @@ function sortBy(column: Column) {
 watch(
   [currentSort, currentKey, search],
   () => {
-    console.log("change");
-    // whenever stuff changes, do magic
     table.value?.scrollTo({ top: 0, behavior: "smooth" });
   },
   { flush: "post" }

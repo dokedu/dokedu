@@ -85,6 +85,7 @@ const pageVariables = ref([
   {
     search: "",
     order: UserOrderBy.LastNameAsc,
+    limit: 50,
     offset: 0,
     nextPage: null,
   },
@@ -99,6 +100,7 @@ watchDebounced(
       {
         search: search.value,
         order: lastPage.order,
+        limit: 50,
         offset: 0,
         nextPage: null,
       },

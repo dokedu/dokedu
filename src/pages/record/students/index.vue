@@ -13,71 +13,104 @@
         />
       </div>
     </PageHeader>
-    <div class="flex flex-col overflow-scroll" ref="studentContainer">
-      <PageSearchResult
-        v-for="(variables, i) in pageVariables"
-        :key="i"
-        :variables="variables"
-        :query="studentsQuery"
-        objectName="users"
-      >
-        <template v-slot="{ row }">
-          <router-link
-            :to="{ name: 'record-students-student', params: { id: row.id } }"
-            class="flex border-b border-stone-100 transition-all hover:bg-stone-50"
-          >
-            <div class="px-8 py-2 text-sm text-strong">{{ `${row.firstName} ${row.lastName}` }}</div>
-          </router-link>
-        </template>
-      </PageSearchResult>
-    </div>
+    <DTable
+      v-model:variables="pageVariables"
+      :search="search"
+      :columns="columns"
+      object-name="users"
+      :query="studentsQuery"
+      :to="goToStudent"
+      default-sort="lastName"
+    >
+      <template #birthday-data="{ item }">
+        {{
+          item.student?.birthday
+            ? formatDate(new Date(Date.parse(item?.student.birthday as string)), "DD.MM.YYYY")
+            : "-"
+        }}
+      </template>
+      <template #grade-data="{ item }">
+        {{ item.student?.grade || "-" }}
+      </template>
+    </DTable>
   </PageWrapper>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref } from "vue";
 import PageHeader from "../../../components/PageHeader.vue";
 import PageWrapper from "../../../components/PageWrapper.vue";
-import { useInfiniteScroll } from "@vueuse/core";
+import { formatDate, watchDebounced } from "@vueuse/core";
 import { graphql } from "@/gql";
-import PageSearchResult from "@/components/PageSearchResult.vue";
+import { useRouter } from "vue-router";
+import { UserOrderBy } from "@/gql/graphql";
+import DTable from "@/components/d-table/d-table.vue";
 
 const search = ref("");
-const studentContainer = ref<HTMLElement | null>(null);
+const router = useRouter();
+
+const goToStudent = (row: any) => {
+  router.push({ name: "record-students-student", params: { id: row.id } });
+};
+
+const columns = [
+  {
+    label: "First name",
+    key: "firstName",
+    sortable: {
+      asc: UserOrderBy.FirstNameAsc,
+      desc: UserOrderBy.FirstNameDesc,
+    },
+  },
+  {
+    label: "Last name",
+    key: "lastName",
+    sortable: {
+      asc: UserOrderBy.LastNameAsc,
+      desc: UserOrderBy.LastNameDesc,
+    },
+  },
+  {
+    label: "Birthday",
+    key: "birthday",
+  },
+  {
+    label: "Grade",
+    key: "grade",
+  },
+];
 
 const pageVariables = ref([
   {
     search: "",
+    order: UserOrderBy.LastNameAsc,
+    limit: 50,
     offset: 0,
     nextPage: null,
   },
 ]);
 
-const loadMore = () => {
-  const lastPage = pageVariables.value[pageVariables.value.length - 1];
-  if (!lastPage.nextPage) return;
-  pageVariables.value.push({
-    search: search.value,
-    offset: lastPage.offset + 50,
-    nextPage: null,
-  });
-};
-
-watch([search], () => {
-  pageVariables.value = [
-    {
-      search: search.value,
-      offset: 0,
-      nextPage: null,
-    },
-  ];
-});
-
-useInfiniteScroll(studentContainer, loadMore);
+watchDebounced(
+  search,
+  () => {
+    // Get last page and set it as only with the search
+    const lastPage = pageVariables.value[pageVariables.value.length - 1];
+    pageVariables.value = [
+      {
+        search: search.value,
+        order: lastPage.order,
+        limit: 50,
+        offset: 0,
+        nextPage: null,
+      },
+    ];
+  },
+  { debounce: 250, maxWait: 500 }
+);
 
 const studentsQuery = graphql(`
-  query recordStudents($search: String, $offset: Int) {
-    users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, offset: $offset) {
+  query recordStudents($search: String, $order: UserOrderBy, $offset: Int) {
+    users(filter: { role: [student], orderBy: $order }, search: $search, offset: $offset) {
       pageInfo {
         hasNextPage
         hasPreviousPage
