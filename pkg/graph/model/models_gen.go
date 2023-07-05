@@ -249,6 +249,12 @@ type SortCompetenceInput struct {
 	SortOrder int    `json:"sortOrder"`
 }
 
+type TagConnection struct {
+	Edges      []*db.Tag `json:"edges,omitempty"`
+	PageInfo   *PageInfo `json:"pageInfo"`
+	TotalCount int       `json:"totalCount"`
+}
+
 type UpdateCompetenceInput struct {
 	ID    string  `json:"id"`
 	Color *string `json:"color,omitempty"`

@@ -1035,9 +1035,24 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 		return nil, err
 	}
 
+	// Get the pageInfo
+	page := model.PageInfo{}
+	if count < pageOffset+pageLimit {
+		page.HasNextPage = false
+	} else {
+		page.HasNextPage = true
+	}
+
+	if pageOffset > 0 {
+		page.HasPreviousPage = true
+	} else {
+		page.HasPreviousPage = false
+	}
+
+	page.CurrentPage = pageOffset / pageLimit
 	return &model.CompetenceConnection{
 		Edges:      competences,
-		PageInfo:   nil,
+		PageInfo:   &page,
 		TotalCount: count,
 	}, nil
 }
@@ -1077,14 +1092,35 @@ func (r *queryResolver) Reports(ctx context.Context, limit *int, offset *int) (*
 	}
 
 	var reports []*db.Report
-	count, err := r.DB.NewSelect().Model(&reports).Where("organisation_id = ?", currentUser.OrganisationID).Order("created_at DESC").Limit(pageLimit).Offset(pageOffset).ScanAndCount(ctx)
+	count, err := r.DB.NewSelect().
+		Model(&reports).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Order("created_at DESC").
+		Limit(pageLimit).
+		Offset(pageOffset).
+		ScanAndCount(ctx)
 	if err != nil {
 		return nil, err
 	}
 
+	// Get the pageInfo
+	page := model.PageInfo{}
+	if count < pageOffset+pageLimit {
+		page.HasNextPage = false
+	} else {
+		page.HasNextPage = true
+	}
+
+	if pageOffset > 0 {
+		page.HasPreviousPage = true
+	} else {
+		page.HasPreviousPage = false
+	}
+
+	page.CurrentPage = pageOffset / pageLimit
 	return &model.ReportConnection{
 		Edges:      reports,
-		PageInfo:   nil,
+		PageInfo:   &page,
 		TotalCount: count,
 	}, nil
 }
@@ -1106,7 +1142,7 @@ func (r *queryResolver) Tag(ctx context.Context, id string) (*db.Tag, error) {
 }
 
 // Tags is the resolver for the tags field.
-func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) ([]*db.Tag, error) {
+func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) (*model.TagConnection, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, nil
@@ -1123,18 +1159,38 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) ([]*d
 	}
 
 	var tags []*db.Tag
-	err = r.DB.NewSelect().
+	count, err := r.DB.NewSelect().
 		Model(&tags).
 		Where("organisation_id = ?", currentUser.OrganisationID).
 		Limit(pageLimit).
 		Offset(pageOffset).
 		Order("name").
-		Scan(ctx)
+		ScanAndCount(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return tags, nil
+	// Get the pageInfo
+	page := model.PageInfo{}
+	if count < pageOffset+pageLimit {
+		page.HasNextPage = false
+	} else {
+		page.HasNextPage = true
+	}
+
+	if pageOffset > 0 {
+		page.HasPreviousPage = true
+	} else {
+		page.HasPreviousPage = false
+	}
+
+	page.CurrentPage = pageOffset / pageLimit
+
+	return &model.TagConnection{
+		Edges:      tags,
+		PageInfo:   &page,
+		TotalCount: count,
+	}, nil
 }
 
 // UserStudents is the resolver for the userStudents field.
