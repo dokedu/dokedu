@@ -22,6 +22,7 @@
       object-name="competences"
       v-model:variables="pageVariables"
       :to="goToCompetence"
+      :search="search"
     >
       <template #grade-data="{ item }">
         <div class="flex justify-end">{{ grades(item) }}</div>
@@ -37,6 +38,7 @@ import { graphql } from "@/gql";
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import DTable from "@/components/d-table/d-table.vue";
+import { watchDebounced } from "@vueuse/core";
 
 const search = ref("");
 const route = useRoute();
@@ -50,8 +52,25 @@ const pageVariables = ref([
     limit: 50,
     offset: 0,
     parent: [id.value],
+    nextPage: null,
   },
 ]);
+
+watchDebounced(
+  search,
+  () => {
+    pageVariables.value = [
+      {
+        search: search.value,
+        limit: 50,
+        offset: 0,
+        nextPage: null,
+        parent: [id.value],
+      },
+    ];
+  },
+  { debounce: 250, maxWait: 500 }
+);
 
 // To ensure the router view updates
 watch(id, () => {
@@ -61,6 +80,7 @@ watch(id, () => {
       limit: 50,
       offset: 0,
       parent: [id.value],
+      nextPage: null,
     },
   ];
 });
@@ -85,7 +105,8 @@ function grades(competence: Competence) {
   return `${competence.grades[0]} - ${competence.grades[competence.grades.length - 1]}`;
 }
 
-function goToCompetence<Type extends { id: string; type: string }>(row: Type) {
+function goToCompetence<Type extends { id: string }>(row: Type) {
+  // @ts-expect-error
   if (row.type === "competence") return;
   router.push({ name: "record-competences-competence", params: { id: row.id } });
 }

@@ -20,6 +20,8 @@
       object-name="competences"
       :to="goToCompetence"
       hide-header
+      :watchers="[search]"
+      :search="search"
     >
       <template #name-data="{ item }">
         <DTag :color="item.color">{{ item.name }}</DTag>
@@ -52,6 +54,7 @@ import { Competence } from "@/gql/graphql";
 import DTag from "@/components/d-tag/d-tag.vue";
 import DTable from "@/components/d-table/d-table.vue";
 import { useRouter } from "vue-router";
+import { watchDebounced } from "@vueuse/core";
 
 const search = ref("");
 const competence = ref<Competence | null>(null);
@@ -62,8 +65,24 @@ const pageVariables = ref([
     limit: 100,
     offset: 0,
     search: "",
+    nextPage: null,
   },
 ]);
+
+watchDebounced(
+  search,
+  () => {
+    pageVariables.value = [
+      {
+        search: search.value,
+        limit: 100,
+        offset: 0,
+        nextPage: null,
+      },
+    ];
+  },
+  { debounce: 250, maxWait: 500 }
+);
 
 const columns = [
   {
