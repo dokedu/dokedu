@@ -35,6 +35,7 @@
         :variables="vars"
         :columns="columns"
         :style="gridColumns"
+        :activeRowFunc="activeRowFunc"
       >
         <template v-slot="{ row }">
           <div
@@ -104,6 +105,10 @@ const props = defineProps({
   },
   search: {
     type: String,
+    default: null,
+  },
+  activeRowFunc: {
+    type: Function as PropType<<Type extends { id: string }>(row: Type) => boolean>,
     default: null,
   },
 });

@@ -59,6 +59,7 @@
       :query="eventsQuery"
       default-sort="createdAt"
       :to="goToProject"
+      :activeRowFunc="(row) => $route.params.id === row.id"
     >
       <template #body-data="{ column }">
         <div class="truncate text-subtle">{{ column }}</div>

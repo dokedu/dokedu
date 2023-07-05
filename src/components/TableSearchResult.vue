@@ -4,7 +4,13 @@
       <div class="h-3 rounded-full bg-stone-100"></div>
     </div>
   </div>
-  <div v-bind="$attrs" v-else v-for="row in data[objectName]?.edges" class="grid transition-colors hover:bg-stone-50">
+  <div
+    v-bind="$attrs"
+    v-else
+    v-for="row in data[objectName]?.edges"
+    class="grid transition-colors hover:bg-stone-50"
+    :class="activeRowFunc ? (activeRowFunc(row) ? 'bg-stone-50' : '') : ''"
+  >
     <slot :row="row" :fetching="fetching"></slot>
   </div>
 </template>
@@ -14,8 +20,10 @@ import { useQuery } from "@urql/vue";
 import { watch } from "vue";
 import { toRef } from "vue";
 
-const props = defineProps(["query", "variables", "objectName", "columns"]);
+const props = defineProps(["query", "variables", "objectName", "columns", "activeRowFunc"]);
 const pageVariables = toRef(props, "variables");
+
+const activeRowFunc = toRef(props, "activeRowFunc", false);
 
 const { data, fetching } = useQuery({
   query: props.query,
