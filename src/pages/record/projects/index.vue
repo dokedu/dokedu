@@ -102,22 +102,20 @@ function toggleFilters() {
 
 const columns = [
   {
-    label: "Title",
+    label: "title",
     key: "title",
   },
   {
-    label: "Description",
+    label: "description",
     key: "body",
   },
   {
-    label: "Starts at",
+    label: "starts_at",
     key: "startsAt",
-    headerClass: "w-[150px]",
   },
   {
-    label: "Ends at",
+    label: "ends_at",
     key: "endsAt",
-    headerClass: "w-[150px]",
   },
 ];
 

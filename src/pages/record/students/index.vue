@@ -55,7 +55,7 @@ const goToStudent = (row: any) => {
 
 const columns = [
   {
-    label: "First name",
+    label: "first_name",
     key: "firstName",
     sortable: {
       asc: UserOrderBy.FirstNameAsc,
@@ -63,7 +63,7 @@ const columns = [
     },
   },
   {
-    label: "Last name",
+    label: "last_name",
     key: "lastName",
     sortable: {
       asc: UserOrderBy.LastNameAsc,
@@ -71,11 +71,11 @@ const columns = [
     },
   },
   {
-    label: "Birthday",
+    label: "birthday",
     key: "birthday",
   },
   {
-    label: "Grade",
+    label: "grade",
     key: "grade",
   },
 ];

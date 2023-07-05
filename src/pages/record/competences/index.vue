@@ -13,29 +13,28 @@
         />
       </div>
     </PageHeader>
-    <PageContent>
-      <div class="flex flex-col overflow-scroll" ref="sortable">
-        <router-link
-          :to="{ name: 'record-competences-competence', params: { id: competence?.id } }"
-          :key="competence?.id"
-          v-for="competence in competences as Competence[]"
-          class="flex justify-between border-b border-stone-100 text-sm transition-all hover:bg-stone-50"
-          :class="{
-            '!bg-stone-100': competence?.id === $route.params.id,
-          }"
-        >
-          <div class="p-2 pl-8 text-strong">
-            <DTag :color="competence.color">{{ competence.name }} </DTag>
+    <DTable
+      :columns="columns"
+      :query="competencesQuery"
+      v-model:variables="pageVariables"
+      object-name="competences"
+      :to="goToCompetence"
+      hide-header
+    >
+      <template #name-data="{ item }">
+        <DTag :color="item.color">{{ item.name }}</DTag>
+      </template>
+      <template #grade-data="{ item }">
+        <div class="flex items-center justify-end gap-2">
+          <div class="rounded-lg p-1 hover:bg-stone-200" @click.stop="editCompetence(item)">
+            <Edit2 :size="16" class="stroke-stone-700" />
           </div>
-          <div class="flex items-center gap-2">
-            <div class="rounded-lg p-1 hover:bg-stone-200" @click.prevent="editCompetence(competence)">
-              <Edit2 :size="16" class="stroke-stone-700" />
-            </div>
-            <div class="p-2 pr-8 text-strong">{{ grades(competence) }}</div>
+          <div>
+            {{ grades(item) }}
           </div>
-        </router-link>
-      </div>
-    </PageContent>
+        </div>
+      </template>
+    </DTable>
   </PageWrapper>
   <router-view />
   <div v-if="competence">
@@ -45,53 +44,37 @@
 <script setup lang="ts">
 import PageHeader from "@/components/PageHeader.vue";
 import PageWrapper from "@/components/PageWrapper.vue";
-import PageContent from "@/components/PageContent.vue";
-import { useMutation, useQuery } from "@urql/vue";
 import { graphql } from "@/gql";
-import { computed, reactive, ref } from "vue";
+import { ref } from "vue";
 import { Edit2 } from "lucide-vue-next";
 import DCompetenceEditDialog from "./DCompetenceEditDialog.vue";
 import { Competence } from "@/gql/graphql";
 import DTag from "@/components/d-tag/d-tag.vue";
-import { useSortable } from "@vueuse/integrations/useSortable";
-
-const sortable = ref<HTMLElement | null>(null);
+import DTable from "@/components/d-table/d-table.vue";
+import { useRouter } from "vue-router";
 
 const search = ref("");
 const competence = ref<Competence | null>(null);
-const competences = computed({
-  get: () => data.value?.competences?.edges || [],
-  set: (value) => {
-    // @ts-expect-error
-    data.value = value;
+const router = useRouter();
+
+const pageVariables = ref([
+  {
+    limit: 100,
+    offset: 0,
+    search: "",
   },
-});
+]);
 
-useSortable(sortable, competences, {
-  onUpdate: (e: { oldIndex: number; newIndex: number }) => {
-    competences.value.splice(e.newIndex, 0, competences.value.splice(e.oldIndex, 1)[0]);
-    for (let i = 0; i < competences.value.length; i++) {
-      // @ts-expect-error
-      competences.value[i].sortOrder = i;
-    }
-    updateCompetenceOrder();
+const columns = [
+  {
+    label: "name",
+    key: "name",
   },
-});
-
-async function updateCompetenceOrder() {
-  // get all ids and their sort order by using their current index
-  const ids = competences.value.map((competence: any, index: number) => ({
-    id: competence.id,
-    sortOrder: index,
-  }));
-
-  // update the sort order of all competences
-  await updateCompetenceSorting({
-    input: {
-      competences: ids,
-    },
-  });
-}
+  {
+    label: "grade",
+    key: "grade",
+  },
+];
 
 function editCompetence(value: Competence) {
   competence.value = value;
@@ -105,48 +88,43 @@ function grades(competence: Competence) {
   return `${competence.grades[0]} - ${competence.grades[competence.grades.length - 1]}`;
 }
 
-const { data } = useQuery({
-  query: graphql(`
-    query competenceSubjects($filter: CompetenceFilterInput, $search: String) {
-      competences(filter: $filter, search: $search, limit: 100, sort: { field: sort_order, order: asc }) {
-        edges {
-          id
-          name
-          type
-          grades
-          color
-          sortOrder
-          parents {
-            id
-            name
-            type
-            grades
-          }
-        }
+const competencesQuery = graphql(`
+  query competenceSubjects($search: String, $limit: Int, $offset: Int) {
+    competences(
+      filter: { type: subject }
+      search: $search
+      limit: $limit
+      offset: $offset
+      sort: { field: sort_order, order: asc }
+    ) {
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
       }
-    }
-  `),
-  // @ts-expect-error
-  variables: reactive({
-    filter: {
-      type: "subject",
-    },
-    search: search,
-  }),
-});
-
-const { executeMutation: updateCompetenceSorting } = useMutation(
-  graphql(`
-    mutation updateCompetenceSorting($input: UpdateCompetenceSortingInput!) {
-      updateCompetenceSorting(input: $input) {
+      edges {
         id
         name
         type
         grades
         color
         sortOrder
+        parents {
+          id
+          name
+          type
+          grades
+        }
       }
     }
-  `)
-);
+  }
+`);
+
+const goToCompetence = <Type extends { id: string }>(row: Type) => {
+  router.push({
+    name: "record-competences-competence",
+    params: {
+      id: row.id,
+    },
+  });
+};
 </script>

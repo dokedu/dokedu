@@ -11,7 +11,7 @@
         <div class="flex w-full flex-col items-start rounded-md">
           <div
             @click="toggleTag(tag)"
-            v-for="tag in data?.tags"
+            v-for="tag in (data?.tags.edges as Tag[])"
             :key="tag.id"
             class="flex w-full cursor-pointer items-center justify-between p-1 hover:bg-stone-100"
           >
@@ -54,12 +54,14 @@ const selectedTags = ref<Tag[]>([]);
 const { data } = useQuery({
   query: graphql(`
     query GetTags {
-      tags {
-        id
-        name
-        color
-        deletedAt
-        createdAt
+      tags(limit: 1000) {
+        edges {
+          id
+          name
+          color
+          deletedAt
+          createdAt
+        }
       }
     }
   `),

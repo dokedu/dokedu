@@ -38,31 +38,32 @@
       :query="entriesQuery"
       default-sort="createdAt"
       :to="goToEntry"
+      :watchers="[student, teacher, tags]"
     >
-      <template #body-data="{ column }">
-        <div class="w-full truncate">{{ column }}</div>
-      </template>
-      <template #tags-data="{ item }">
-        <div class="overflow-hiden flex items-center justify-end gap-1">
-          <div v-if="item.events?.length > 2">
-            <DTag color="neutral" class="w-1/4 p-2">{{ item.events?.length }} {{ $t("project", 2) }} </DTag>
-          </div>
-          <div v-else v-for="event in item.events" class="flex gap-1">
-            <div
-              @click.stop="goToProject(event.id)"
-              class="line-clamp-1 inline-flex h-7 max-w-[120px] items-center gap-1.5 text-ellipsis whitespace-nowrap rounded-full border bg-default px-3 py-1 transition-all duration-150 ease-linear hover:max-w-[250px] hover:bg-subtle"
-            >
-              <LayoutGrid class="stroke-subtle w-4 min-w-[16px]" />
-              <div class="flex-1 overflow-hidden text-ellipsis">
-                {{ event.title }}
+      <template #body-data="{ column, item }">
+        <div class="flex w-full items-center justify-between gap-2">
+          <div class="truncate">{{ column }}</div>
+          <div class="overflow-hiden flex items-center justify-end gap-1">
+            <div v-if="item.events?.length > 3">
+              <DTag color="neutral" class="w-1/4 p-2">{{ item.events?.length }} {{ $t("project", 2) }} </DTag>
+            </div>
+            <div v-else v-for="event in item.events" class="flex gap-1">
+              <div
+                @click.stop="goToProject(event.id)"
+                class="line-clamp-1 inline-flex h-7 max-w-[120px] items-center gap-1.5 text-ellipsis whitespace-nowrap rounded-full border bg-default px-3 py-1 transition-all duration-150 ease-linear hover:max-w-[250px] hover:bg-subtle"
+              >
+                <LayoutGrid class="stroke-subtle w-4 min-w-[16px]" />
+                <div class="flex-1 overflow-hidden text-ellipsis">
+                  {{ event.title }}
+                </div>
               </div>
             </div>
-          </div>
-          <div v-if="item.tags.length > 3">
-            <DTag color="neutral" class="w-1/4 p-2">{{ item.tags.length }} {{ $t("label", 2) }}</DTag>
-          </div>
-          <div v-else v-for="tag in item.tags" class="flex gap-1">
-            <DTag :color="tag.color" class="w-1/4 p-2">{{ tag.name }}</DTag>
+            <div v-if="item.tags.length > 5">
+              <DTag color="neutral" class="w-1/4 p-2">{{ item.tags.length }} {{ $t("label", 2) }}</DTag>
+            </div>
+            <div v-else v-for="tag in item.tags" class="flex gap-1">
+              <DTag :color="tag.color" class="w-1/4 p-2">{{ tag.name }}</DTag>
+            </div>
           </div>
         </div>
       </template>
@@ -70,7 +71,7 @@
         {{ dateOnly(column) }}
       </template>
       <template #createdAt-data="{ column, item }">
-        <div class="flex items-center justify-end gap-2">
+        <div class="flex items-center gap-2">
           <div>
             {{ dateOnly(column) }}
           </div>
@@ -118,30 +119,24 @@ const currentSort = ref(EntrySortBy.CreatedAtDesc);
 const columns = [
   {
     key: "body",
-    label: "Description",
-    dataClass: "w-full",
-  },
-  {
-    key: "tags",
-    label: "",
+    label: "description",
+    width: 0.7,
   },
   {
     key: "date",
-    label: "Date",
+    label: "date",
     sortable: {
       asc: EntrySortBy.DateAsc,
       desc: EntrySortBy.DateDesc,
     },
-    headerClass: "w-[180px]",
   },
   {
     key: "createdAt",
-    label: "Created At",
+    label: "created_at",
     sortable: {
       asc: EntrySortBy.CreatedAtAsc,
       desc: EntrySortBy.CreatedAtDesc,
     },
-    headerClass: "text-right w-[220px]",
   },
 ];
 
@@ -246,10 +241,12 @@ const { data: teacherData } = useQuery({
 const { data: tagData } = useQuery({
   query: graphql(`
     query getEntryFilterTags {
-      tags {
-        id
-        name
-        color
+      tags(limit: 1000) {
+        edges {
+          id
+          name
+          color
+        }
       }
     }
   `),
@@ -273,18 +270,18 @@ const teacherOptions = computed(
 
 const tagOptions = computed(
   () =>
-    tagData?.value?.tags?.map((edge: any) => ({
+    tagData?.value?.tags?.edges?.map((edge: any) => ({
       label: edge.name,
       value: edge.id,
     })) || []
 );
 
 function getTagColor(id: string) {
-  return tagData?.value?.tags?.find((e: any) => e.id === id)?.color || "gray";
+  return tagData?.value?.tags?.edges?.find((e: any) => e.id === id)?.color || "gray";
 }
 
 function getTagName(id: string) {
-  return tagData?.value?.tags?.find((e: any) => e.id === id)?.name || "gray";
+  return tagData?.value?.tags?.edges?.find((e: any) => e.id === id)?.name || "gray";
 }
 
 function removeTag(id: string) {

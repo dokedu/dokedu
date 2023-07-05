@@ -1,6 +1,6 @@
 <template>
   <div class="fe flex min-h-0 w-full flex-col text-sm">
-    <div class="grid h-10" :style="gridColumns">
+    <div v-if="!hideHeader" class="grid h-10" :style="gridColumns">
       <div
         v-for="(column, index) in columns"
         class="flex h-10 items-center border-b border-stone-100 px-6 text-left text-sm"
@@ -12,16 +12,17 @@
           <DButton
             type="transparent"
             size="sm"
+            class="text-subtle"
             v-if="column.sortable"
             :icon-right="
               currentKey === column.key ? (currentSort === column.sortable.asc ? ArrowUp : ArrowDown) : ArrowUpDown
             "
             @click="sortBy(column)"
           >
-            {{ column.label }}
+            {{ $t(column.label) }}
           </DButton>
-          <div v-else class="px-2 text-stone-700">
-            {{ column.label }}
+          <div v-else class="px-2 text-subtle">
+            {{ $t(column.label) }}
           </div>
         </slot>
       </div>
@@ -43,7 +44,7 @@
             v-for="(column, subIndex) in columns"
             :key="subIndex"
             :class="column.dataClass"
-            @click="to(row)"
+            @click="to ? to(row) : null"
           >
             <slot v-if="row" :name="`${column.key}-data`" :item="row" :column="row[column.key]">
               <div class="truncate">
@@ -60,7 +61,7 @@
 <script lang="ts" setup>
 import TableSearchResult from "../TableSearchResult.vue";
 import DButton from "../d-button/d-button.vue";
-import { ref, toRef, PropType, watch, computed } from "vue";
+import { ref, toRef, PropType, watch, computed, toRefs } from "vue";
 import { useInfiniteScroll, useElementSize } from "@vueuse/core";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-vue-next";
 
@@ -70,6 +71,7 @@ type Column = {
   sortable?: { [key: string]: string };
   headerClass?: string;
   dataClass?: string;
+  width?: number;
 };
 
 const props = defineProps({
@@ -87,7 +89,7 @@ const props = defineProps({
   },
   variables: {
     type: Array as PropType<
-      { [key: string]: string | number | null | { [key: string]: string | number | never[] | null } }[]
+      { [key: string]: string | number | null | string[] | { [key: string]: string | number | never[] | null } }[]
     >,
     required: true,
   },
@@ -98,6 +100,14 @@ const props = defineProps({
   to: {
     type: Function as PropType<<Type extends { id: string }>(row: Type) => void>,
     default: null,
+  },
+  watchers: {
+    type: Array,
+    default: () => [],
+  },
+  hideHeader: {
+    type: Boolean,
+    default: false,
   },
   defaultSort: {
     type: String,
@@ -118,8 +128,33 @@ const columns = toRef(props, "columns");
 
 const { width } = useElementSize(table);
 
+// If column has set explicit relative width, use that, otherwise calculate the width
 const gridColumns = computed(() => {
-  return `grid-template-columns: ${columns.value.map(() => `${width.value / columns.value.length}px`).join(" ")}`;
+  const totalWidth = width.value;
+  const columnsData = columns.value;
+  const columnCount = columnsData.length;
+
+  // Find the columns with explicitly set widths
+  const explicitWidthColumns = columnsData.filter((column) => column.width);
+  const explicitColumnCount = explicitWidthColumns.length;
+
+  // Calculate the remaining width for columns without explicit widths
+  const remainingWidth = explicitWidthColumns.reduce((total, column) => {
+    if (!column.width) return total;
+    return total - totalWidth * column.width;
+  }, totalWidth);
+
+  // Calculate the width for columns without explicit widths
+  const calculatedWidth = remainingWidth / (columnCount - explicitColumnCount);
+
+  // Build the grid-template-columns property
+  let gridTemplateColumns = "";
+  columnsData.forEach((column) => {
+    const columnWidth = column.width ? `${column.width * totalWidth}px` : `${calculatedWidth}px`;
+    gridTemplateColumns += `${columnWidth} `;
+  });
+
+  return `grid-template-columns: ${gridTemplateColumns}`;
 });
 
 const emit = defineEmits(["update:modelValue", "update:variables"]);
@@ -169,10 +204,13 @@ function sortBy(column: Column) {
   ];
 }
 
+const { watchers } = toRefs(props);
+
 // Scroll to top if sort or search changes
 watch(
-  [currentSort, currentKey, search],
-  () => {
+  [currentSort, currentKey, search, watchers],
+  (newValue, oldValue) => {
+    if (JSON.stringify(newValue) === JSON.stringify(oldValue)) return;
     table.value?.scrollTo({ top: 0, behavior: "smooth" });
   },
   { flush: "post" }

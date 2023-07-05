@@ -9,59 +9,42 @@
         </router-link>
       </div>
     </PageHeader>
-    <PageContent>
-      <div class="flex select-none flex-col overflow-scroll">
-        <table>
-          <thead>
-            <tr class="border-b border-stone-100 bg-stone-50">
-              <th class="p-2 pl-8 text-left text-sm font-normal text-strong">{{ $t("student") }}</th>
-              <th class="p-2 text-left text-sm font-normal text-strong">{{ $t("from") }}</th>
-              <th class="p-2 text-left text-sm font-normal text-strong">{{ $t("to") }}</th>
-              <th class="p-2 text-left text-sm font-normal text-strong">{{ $t("status") }}</th>
-              <th class="p-2 text-left text-sm font-normal text-strong">{{ $t("created_by") }}</th>
-              <th class="p-2 text-left text-sm font-normal text-strong">{{ $t("created_at") }}</th>
-              <th class="p-2 pr-8 text-left text-sm font-normal text-strong">{{ $t("file") }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="report in (data?.reports?.edges as Report[])" :key="report.id" class="border-b border-stone-100">
-              <td class="p-2 pl-8 text-left text-sm font-normal text-default">
-                {{ `${report?.studentUser?.firstName} ${report.studentUser?.lastName}` }}
-              </td>
-              <td class="p-2 text-left text-sm font-normal text-default">
-                {{ formatDate(new Date(report.from), "DD.MM.YYYY") }}
-              </td>
-              <td class="p-2 text-left text-sm font-normal text-default">
-                {{ formatDate(new Date(report.to), "DD.MM.YYYY") }}
-              </td>
-              <td class="p-2 text-left text-sm font-normal text-default">
-                <DReportStatus :status="report.status"></DReportStatus>
-              </td>
-              <td class="p-2 text-left text-sm font-normal text-default">
-                {{ `${report.user?.firstName} ${report.user?.lastName}` }}
-              </td>
-              <td class="p-2 text-left text-sm font-normal text-default">
-                {{ formatDate(new Date(report.createdAt), "DD.MM.YYYY HH:ss") }} {{ $t("hour") }}
-              </td>
-              <td
-                v-if="report?.status === 'done' && report.file"
-                class="p-2 pr-8 text-left text-sm font-normal text-default hover:underline"
-                @click="downloadFile(report)"
-              >
-                {{ $t("download") }}
-              </td>
-              <td
-                v-else-if="!report.file && report.status === 'done'"
-                class="p-2 pr-8 text-left text-sm font-normal text-default"
-              >
-                {{ $t("no-file") }}
-              </td>
-              <td v-else class="p-2 pr-8 text-left text-sm font-normal text-default"></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </PageContent>
+    <DTable :columns="columns" object-name="reports" :query="reportsQuery" v-model:variables="pageVariables">
+      <template #student-data="{ item }">
+        <div>{{ item.studentUser.firstName }} {{ item.studentUser.lastName }}</div>
+      </template>
+      <template #from-data="{ column }">
+        {{ formatDate(new Date(column), "DD.MM.YYYY") }}
+      </template>
+      <template #to-data="{ column }">
+        {{ formatDate(new Date(column), "DD.MM.YYYY") }}
+      </template>
+      <template #status-data="{ column }">
+        <DReportStatus :status="column"></DReportStatus>
+      </template>
+      <template #createdBy-data="{ item }">
+        {{ `${item.user?.firstName} ${item.user?.lastName}` }}
+      </template>
+      <template #createdAt-data="{ column }">
+        {{ formatDate(new Date(column), "DD.MM.YYYY HH:ss") }} {{ $t("hour") }}
+      </template>
+      <template #file-data="{ item }">
+        <div
+          v-if="item?.status === 'done' && item.file"
+          class="p-2 pr-8 text-left text-sm font-normal text-default hover:underline"
+          @click="downloadFile(item)"
+        >
+          {{ $t("download") }}
+        </div>
+        <div
+          v-else-if="!item.file && item.status === 'done'"
+          class="p-2 pr-8 text-left text-sm font-normal text-default"
+        >
+          {{ $t("no-file") }}
+        </div>
+        <div v-else class="p-2 pr-8 text-left text-sm font-normal text-default"></div>
+      </template>
+    </DTable>
   </PageWrapper>
   <!-- requesting download file toast -->
   <div
@@ -79,44 +62,90 @@ import { Newspaper } from "lucide-vue-next";
 import PageHeader from "@/components/PageHeader.vue";
 import PageWrapper from "@/components/PageWrapper.vue";
 import DButton from "@/components/d-button/d-button.vue";
-import PageContent from "@/components/PageContent.vue";
 import { Plus, Loader2 } from "lucide-vue-next";
-import { useQuery, useMutation } from "@urql/vue";
+import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { formatDate } from "@vueuse/core";
 import { Report } from "@/gql/graphql";
 import DReportStatus from "./DReportStatus.vue";
 import { ref } from "vue";
-const { data } = useQuery({
-  query: graphql(`
-    query reports {
-      reports(limit: 100) {
-        edges {
+import DTable from "@/components/d-table/d-table.vue";
+
+const columns = [
+  {
+    key: "student",
+    label: "student",
+  },
+  {
+    key: "from",
+    label: "from",
+    width: 0.1,
+  },
+  {
+    key: "to",
+    label: "to",
+    width: 0.1,
+  },
+  {
+    key: "status",
+    label: "status",
+  },
+  {
+    key: "createdBy",
+    label: "created_by",
+  },
+  {
+    key: "createdAt",
+    label: "created_at",
+  },
+  {
+    key: "file",
+    label: "file",
+    width: 0.15,
+  },
+];
+
+const pageVariables = ref([
+  {
+    limit: 30,
+    offset: 0,
+    nextPage: null,
+  },
+]);
+
+const reportsQuery = graphql(`
+  query reports {
+    reports(limit: 100) {
+      totalCount
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+      }
+      edges {
+        id
+        status
+        format
+        kind
+        from
+        to
+        createdAt
+        studentUser {
           id
-          status
-          format
-          kind
-          from
-          to
-          createdAt
-          studentUser {
-            id
-            firstName
-            lastName
-          }
-          user {
-            id
-            firstName
-            lastName
-          }
-          file {
-            id
-          }
+          firstName
+          lastName
+        }
+        user {
+          id
+          firstName
+          lastName
+        }
+        file {
+          id
         }
       }
     }
-  `),
-});
+  }
+`);
 
 const downloadingFilesCount = ref(0);
 
