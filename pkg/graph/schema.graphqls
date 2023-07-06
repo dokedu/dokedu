@@ -188,6 +188,12 @@ type UserStudentConnection {
     totalCount: Int!
 }
 
+type TagConnection {
+    edges: [Tag]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
 enum UserOrderBy {
     firstNameAsc
     firstNameDesc
@@ -246,7 +252,7 @@ extend type Query {
     reports(limit: Int, offset: Int): ReportConnection!
 
     tag(id: ID!): Tag!
-    tags(limit: Int, offset: Int): [Tag!]!
+    tags(limit: Int, offset: Int): TagConnection!
 
     userStudents(limit: Int, offset: Int): UserStudentConnection!
     userStudent(id: ID!): UserStudent!

@@ -317,6 +317,12 @@ type ComplexityRoot struct {
 		Name      func(childComplexity int) int
 	}
 
+	TagConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
 	User struct {
 		CreatedAt func(childComplexity int) int
 		DeletedAt func(childComplexity int) int
@@ -481,7 +487,7 @@ type QueryResolver interface {
 	Report(ctx context.Context, id string) (*db.Report, error)
 	Reports(ctx context.Context, limit *int, offset *int) (*model.ReportConnection, error)
 	Tag(ctx context.Context, id string) (*db.Tag, error)
-	Tags(ctx context.Context, limit *int, offset *int) ([]*db.Tag, error)
+	Tags(ctx context.Context, limit *int, offset *int) (*model.TagConnection, error)
 	UserStudents(ctx context.Context, limit *int, offset *int) (*model.UserStudentConnection, error)
 	UserStudent(ctx context.Context, id string) (*db.UserStudent, error)
 }
@@ -2030,6 +2036,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Tag.Name(childComplexity), true
+
+	case "TagConnection.edges":
+		if e.complexity.TagConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.TagConnection.Edges(childComplexity), true
+
+	case "TagConnection.pageInfo":
+		if e.complexity.TagConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.TagConnection.PageInfo(childComplexity), true
+
+	case "TagConnection.totalCount":
+		if e.complexity.TagConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.TagConnection.TotalCount(childComplexity), true
 
 	case "User.createdAt":
 		if e.complexity.User.CreatedAt == nil {
@@ -11825,9 +11852,9 @@ func (ec *executionContext) _Query_tags(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*db.Tag)
+	res := resTmp.(*model.TagConnection)
 	fc.Result = res
-	return ec.marshalNTag2ᚕᚖexampleᚋpkgᚋdbᚐTagᚄ(ctx, field.Selections, res)
+	return ec.marshalNTagConnection2ᚖexampleᚋpkgᚋgraphᚋmodelᚐTagConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_tags(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -11838,18 +11865,14 @@ func (ec *executionContext) fieldContext_Query_tags(ctx context.Context, field g
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_Tag_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Tag_name(ctx, field)
-			case "color":
-				return ec.fieldContext_Tag_color(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Tag_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Tag_deletedAt(ctx, field)
+			case "edges":
+				return ec.fieldContext_TagConnection_edges(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_TagConnection_pageInfo(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_TagConnection_totalCount(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Tag", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type TagConnection", field.Name)
 		},
 	}
 	defer func() {
@@ -13366,6 +13389,155 @@ func (ec *executionContext) fieldContext_Tag_deletedAt(ctx context.Context, fiel
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TagConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.TagConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TagConnection_edges(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Edges, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*db.Tag)
+	fc.Result = res
+	return ec.marshalOTag2ᚕᚖexampleᚋpkgᚋdbᚐTag(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TagConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TagConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Tag_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Tag_name(ctx, field)
+			case "color":
+				return ec.fieldContext_Tag_color(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Tag_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Tag_deletedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Tag", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TagConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.TagConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TagConnection_pageInfo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.PageInfo)
+	fc.Result = res
+	return ec.marshalNPageInfo2ᚖexampleᚋpkgᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TagConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TagConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			case "hasPreviousPage":
+				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
+			case "currentPage":
+				return ec.fieldContext_PageInfo_currentPage(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TagConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.TagConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TagConnection_totalCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TagConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TagConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -21222,6 +21394,45 @@ func (ec *executionContext) _Tag(ctx context.Context, sel ast.SelectionSet, obj 
 	return out
 }
 
+var tagConnectionImplementors = []string{"TagConnection"}
+
+func (ec *executionContext) _TagConnection(ctx context.Context, sel ast.SelectionSet, obj *model.TagConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, tagConnectionImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TagConnection")
+		case "edges":
+
+			out.Values[i] = ec._TagConnection_edges(ctx, field, obj)
+
+		case "pageInfo":
+
+			out.Values[i] = ec._TagConnection_pageInfo(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "totalCount":
+
+			out.Values[i] = ec._TagConnection_totalCount(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var userImplementors = []string{"User"}
 
 func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *db.User) graphql.Marshaler {
@@ -23116,6 +23327,20 @@ func (ec *executionContext) marshalNTag2ᚖexampleᚋpkgᚋdbᚐTag(ctx context.
 	return ec._Tag(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNTagConnection2exampleᚋpkgᚋgraphᚋmodelᚐTagConnection(ctx context.Context, sel ast.SelectionSet, v model.TagConnection) graphql.Marshaler {
+	return ec._TagConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTagConnection2ᚖexampleᚋpkgᚋgraphᚋmodelᚐTagConnection(ctx context.Context, sel ast.SelectionSet, v *model.TagConnection) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TagConnection(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
 	res, err := graphql.UnmarshalTime(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -24345,6 +24570,54 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	}
 	res := graphql.MarshalString(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOTag2ᚕᚖexampleᚋpkgᚋdbᚐTag(ctx context.Context, sel ast.SelectionSet, v []*db.Tag) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOTag2ᚖexampleᚋpkgᚋdbᚐTag(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalOTag2ᚖexampleᚋpkgᚋdbᚐTag(ctx context.Context, sel ast.SelectionSet, v *db.Tag) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Tag(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOTime2ᚖtimeᚐTime(ctx context.Context, v interface{}) (*time.Time, error) {
