@@ -117,7 +117,6 @@ const router = useRouter();
 const student = ref();
 const teacher = ref();
 const tags = ref<string[]>([]);
-const currentSort = ref(EntrySortBy.CreatedAtDesc);
 
 interface Variables extends PageVariables {
   filter: {
@@ -131,7 +130,7 @@ const columns = [
   {
     key: "body",
     label: "description",
-    width: 0.7,
+    width: 0.6,
   },
   {
     key: "date",
@@ -167,13 +166,15 @@ const pageVariables = ref<Variables[]>([
       tags: tags.value,
     },
     limit: 30,
-    sortBy: currentSort.value,
+    order: EntrySortBy.CreatedAtDesc,
     offset: 0,
     nextPage: undefined,
   },
 ]);
 
-watch([student, teacher, tags, currentSort], () => {
+watch([student, teacher, tags], () => {
+  // Get last page
+  const lastPage = pageVariables.value[pageVariables.value.length - 1];
   pageVariables.value = [
     {
       filter: {
@@ -182,7 +183,7 @@ watch([student, teacher, tags, currentSort], () => {
         tags: tags.value,
       },
       limit: 30,
-      sortBy: currentSort.value,
+      order: lastPage.order,
       offset: 0,
       nextPage: undefined,
     },
