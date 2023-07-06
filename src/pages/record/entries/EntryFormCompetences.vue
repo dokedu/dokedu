@@ -45,7 +45,7 @@
             v-model="search"
             id="search"
             :placeholder="$t('search_competences')"
-            class="w-full rounded-md border border-stone-200 px-3 py-1.5 shadow-sm outline-none placeholder:text-stone-400 focus:border-stone-200 focus:ring-0"
+            class="w-full rounded-md border border-stone-200 px-3 py-1.5 text-sm shadow-sm outline-none placeholder:text-stone-400 focus:border-stone-200 focus:ring-0"
           />
           <div class="rounded-md p-1 hover:bg-stone-100" @click="dialogOpen = false">
             <X class="stroke-stone-500" />
@@ -65,7 +65,7 @@
               <div class="text-stone-300">{{ index === parents.length - 1 ? "" : "/" }}</div>
             </div>
           </div>
-          <div class="g- flex min-h-fit flex-1 flex-col gap-1 overflow-auto px-4">
+          <div class="flex min-h-fit flex-1 flex-col gap-1 overflow-auto px-4 pb-4">
             <d-competence
               v-for="competence in data?.competences?.edges"
               :key="competence.id"

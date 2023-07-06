@@ -8,7 +8,7 @@
             ref="textarea"
             v-model="body"
             :placeholder="$t('entry_create_placeholder')"
-            class="block w-full resize-none border-none border-transparent p-8 text-lg text-stone-900 placeholder:text-stone-400 focus:ring-0"
+            class="block w-full resize-none border-none border-transparent p-8 text-base text-stone-900 placeholder:text-stone-400 focus:ring-0"
           />
         </div>
         <EntryFormCompetences :entry="entry" />
