@@ -34,14 +34,14 @@
     <DTable
       v-model:variables="pageVariables"
       :columns="columns"
-      object-name="entries"
+      objectName="entries"
       :query="entriesQuery"
-      default-sort="createdAt"
-      :to="goToEntry"
+      defaultSort="createdAt"
+      @row-click="goToEntry"
       :watchers="[student, teacher, tags]"
     >
       <template #body-data="{ column, item }">
-        <div class="flex w-full items-center justify-between gap-2">
+        <div class="flex h-full w-full items-center justify-between gap-2">
           <div class="truncate">{{ column }}</div>
           <div class="overflow-hiden flex items-center justify-end gap-1">
             <div v-if="item.events?.length > 3">
@@ -68,7 +68,9 @@
         </div>
       </template>
       <template #date-data="{ column }">
-        {{ dateOnly(column) }}
+        <div class="flex h-full items-center">
+          {{ dateOnly(column) }}
+        </div>
       </template>
       <template #createdAt-data="{ column, item }">
         <div class="flex items-center gap-2">
@@ -107,14 +109,23 @@ import { LayoutGrid } from "lucide-vue-next";
 import { EntrySortBy } from "@/gql/graphql";
 import DTable from "@/components/d-table/d-table.vue";
 import { useRouter } from "vue-router";
+import { PageVariables } from "@/types/types";
 
 const i18nLocale = useI18n();
 const router = useRouter();
 
 const student = ref();
 const teacher = ref();
-const tags = ref([]);
+const tags = ref<string[]>([]);
 const currentSort = ref(EntrySortBy.CreatedAtDesc);
+
+interface Variables extends PageVariables {
+  filter: {
+    users?: string;
+    authors?: string;
+    tags?: string[];
+  };
+}
 
 const columns = [
   {
@@ -148,17 +159,17 @@ const goToProject = (id: string) => {
   router.push({ name: "record-projects-project", params: { id } });
 };
 
-const pageVariables = ref([
+const pageVariables = ref<Variables[]>([
   {
     filter: {
-      users: student,
-      authors: teacher,
-      tags: tags,
+      users: student.value,
+      authors: teacher.value,
+      tags: tags.value,
     },
     limit: 30,
-    sortBy: currentSort,
+    sortBy: currentSort.value,
     offset: 0,
-    nextPage: null,
+    nextPage: undefined,
   },
 ]);
 
@@ -166,14 +177,14 @@ watch([student, teacher, tags, currentSort], () => {
   pageVariables.value = [
     {
       filter: {
-        users: student,
-        authors: teacher,
+        users: student.value,
+        authors: teacher.value,
         tags: tags.value,
       },
       limit: 30,
       sortBy: currentSort.value,
       offset: 0,
-      nextPage: null,
+      nextPage: undefined,
     },
   ];
 });

@@ -17,10 +17,10 @@
       v-model:variables="pageVariables"
       :search="search"
       :columns="columns"
-      object-name="users"
+      objectName="users"
       :query="studentsQuery"
-      :to="goToStudent"
-      default-sort="lastName"
+      @row-click="goToStudent"
+      defaultSort="lastName"
     >
       <template #birthday-data="{ item }">
         {{
@@ -45,6 +45,7 @@ import { graphql } from "@/gql";
 import { useRouter } from "vue-router";
 import { UserOrderBy } from "@/gql/graphql";
 import DTable from "@/components/d-table/d-table.vue";
+import type { PageVariables } from "@/types/types";
 
 const search = ref("");
 const router = useRouter();
@@ -80,13 +81,13 @@ const columns = [
   },
 ];
 
-const pageVariables = ref([
+const pageVariables = ref<PageVariables[]>([
   {
     search: "",
     order: UserOrderBy.LastNameAsc,
     limit: 50,
     offset: 0,
-    nextPage: null,
+    nextPage: undefined,
   },
 ]);
 
@@ -101,7 +102,7 @@ watchDebounced(
         order: lastPage.order,
         limit: 50,
         offset: 0,
-        nextPage: null,
+        nextPage: undefined,
       },
     ];
   },

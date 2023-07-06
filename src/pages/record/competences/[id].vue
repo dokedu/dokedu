@@ -18,10 +18,10 @@
     <DTable
       :query="competenceQuery"
       :columns="columns"
-      hide-header
-      object-name="competences"
+      hideHeader
+      objectName="competences"
       v-model:variables="pageVariables"
-      :to="goToCompetence"
+      @row-click="goToCompetence"
       :search="search"
     >
       <template #grade-data="{ item }">
@@ -39,6 +39,8 @@ import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import DTable from "@/components/d-table/d-table.vue";
 import { watchDebounced } from "@vueuse/core";
+import { PageVariables } from "@/types/types";
+import { Competence } from "@/gql/graphql";
 
 const search = ref("");
 const route = useRoute();
@@ -46,13 +48,17 @@ const router = useRouter();
 
 const id = computed(() => route.params.id as string);
 
-const pageVariables = ref([
+interface Variables extends PageVariables {
+  parent: string[];
+}
+
+const pageVariables = ref<Variables[]>([
   {
     search: "",
     limit: 50,
     offset: 0,
     parent: [id.value],
-    nextPage: null,
+    nextPage: undefined,
   },
 ]);
 
@@ -64,7 +70,7 @@ watchDebounced(
         search: search.value,
         limit: 50,
         offset: 0,
-        nextPage: null,
+        nextPage: undefined,
         parent: [id.value],
       },
     ];
@@ -80,7 +86,7 @@ watch(id, () => {
       limit: 50,
       offset: 0,
       parent: [id.value],
-      nextPage: null,
+      nextPage: undefined,
     },
   ];
 });
@@ -96,7 +102,6 @@ const columns = [
   },
 ];
 
-// @ts-expect-error
 function grades(competence: Competence) {
   // return first and last grade and if only one grade only that one as string
   if (competence.grades.length === 1) {
@@ -105,8 +110,7 @@ function grades(competence: Competence) {
   return `${competence.grades[0]} - ${competence.grades[competence.grades.length - 1]}`;
 }
 
-function goToCompetence<Type extends { id: string }>(row: Type) {
-  // @ts-expect-error
+function goToCompetence<Type extends { id: string; type: string }>(row: Type) {
   if (row.type === "competence") return;
   router.push({ name: "record-competences-competence", params: { id: row.id } });
 }

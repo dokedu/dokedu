@@ -55,11 +55,10 @@
     <DTable
       v-model:variables="pageVariables"
       :columns="columns"
-      object-name="events"
+      objectName="events"
       :query="eventsQuery"
-      default-sort="createdAt"
-      :to="goToProject"
-      :activeRowFunc="(row) => $route.params.id === row.id"
+      defaultSort="createdAt"
+      @row-click="onRowClick"
     >
       <template #body-data="{ column }">
         <div class="truncate text-subtle">{{ column }}</div>
@@ -86,6 +85,7 @@ import { graphql } from "../../../gql";
 import { ListFilter } from "lucide-vue-next";
 import DTable from "@/components/d-table/d-table.vue";
 import { useRouter } from "vue-router";
+import { PageVariables } from "@/types/types";
 
 const search = ref("");
 const filtersOpen = ref(false);
@@ -98,6 +98,13 @@ const endsTimestamp = computed(() => endsAt.value && new Date(endsAt.value).toIS
 
 function toggleFilters() {
   filtersOpen.value = !filtersOpen.value;
+}
+
+interface Variables extends PageVariables {
+  filter: {
+    from?: string;
+    to?: string;
+  };
 }
 
 const columns = [
@@ -119,20 +126,20 @@ const columns = [
   },
 ];
 
-const pageVariables = ref([
+const pageVariables = ref<Variables[]>([
   {
     filter: {
-      from: null,
-      to: null,
+      from: undefined,
+      to: undefined,
     },
     search: "",
     limit: 50,
     offset: 0,
-    nextPage: null,
+    nextPage: undefined,
   },
 ]);
 
-const goToProject = (row: any) => {
+const onRowClick = (row: Record<string, string>) => {
   router.push({ name: "record-projects-project", params: { id: row.id } });
 };
 
@@ -146,7 +153,7 @@ watch([search, startTimestamp, endsTimestamp], () => {
       search: search.value,
       limit: 50,
       offset: 0,
-      nextPage: null,
+      nextPage: undefined,
     },
   ];
 });

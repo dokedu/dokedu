@@ -8,11 +8,11 @@
     </PageHeader>
     <DTable
       :query="TagsQuery"
-      object-name="tags"
-      :to="toggleEditDialog"
+      objectName="tags"
+      @row-click="toggleEditDialog"
       :columns="columns"
       v-model:variables="pageVariables"
-      hide-header
+      hideHeader
     >
       <template #name-data="{ item }">
         <DTag :color="item.color">{{ item.name }}</DTag>
@@ -34,6 +34,7 @@ import TagEditDialog from "./TagEditDialog.vue";
 import { ref } from "vue";
 import { graphql } from "../../../gql";
 import DTable from "@/components/d-table/d-table.vue";
+import { PageVariables } from "@/types/types";
 
 const createOpen = ref(false);
 const editOpen = ref(false);
@@ -55,7 +56,7 @@ const columns = [
   },
 ];
 
-const pageVariables = ref([
+const pageVariables = ref<PageVariables[]>([
   {
     limit: 50,
     offset: 0,

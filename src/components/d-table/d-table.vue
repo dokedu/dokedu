@@ -14,9 +14,7 @@
             size="sm"
             class="text-subtle"
             v-if="column.sortable"
-            :icon-right="
-              currentKey === column.key ? (currentSort === column.sortable.asc ? ArrowUp : ArrowDown) : ArrowUpDown
-            "
+            :icon-right="getSortIcon(column)"
             @click="sortBy(column)"
           >
             {{ $t(column.label) }}
@@ -36,15 +34,15 @@
         :variables="vars"
         :columns="columns"
         :style="gridColumns"
-        :activeRowFunc="activeRowFunc"
+        ref="tableRows"
       >
         <template v-slot="{ row }">
           <div
             class="border-b border-stone-100 px-8 py-2 text-sm"
+            :class="[{ 'bg-stone-100': selectedRow && selectedRow.id === row.id }, column.dataClass]"
             v-for="(column, subIndex) in columns"
             :key="subIndex"
-            :class="column.dataClass"
-            @click="to ? to(row) : null"
+            @click="onRowClick(row)"
           >
             <slot v-if="row" :name="`${column.key}-data`" :item="row" :column="row[column.key]">
               <div class="truncate">
@@ -58,12 +56,19 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script lang="ts" setup generic="T, K extends PageVariables, U">
 import TableSearchResult from "../TableSearchResult.vue";
 import DButton from "../d-button/d-button.vue";
-import { ref, toRef, PropType, watch, computed, toRefs } from "vue";
+import { ref, toRef, watch, computed, toRefs } from "vue";
 import { useInfiniteScroll, useElementSize } from "@vueuse/core";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-vue-next";
+import type { PageVariables } from "@/types/types";
+import { onClickOutside, onKeyStroke } from "@vueuse/core";
+
+const tableRows = ref();
+
+onClickOutside(tableRows, () => (selectedRow.value = null));
+onKeyStroke("Escape", () => (selectedRow.value = null));
 
 type Column = {
   key: string;
@@ -74,57 +79,43 @@ type Column = {
   width?: number;
 };
 
-const props = defineProps({
-  modelValue: {
-    type: Array,
-    default: null,
-  },
-  columns: {
-    type: Array as PropType<Column[]>,
-    required: true,
-  },
-  query: {
-    type: Object,
-    required: true,
-  },
-  variables: {
-    type: Array as PropType<
-      { [key: string]: string | number | null | string[] | { [key: string]: string | number | never[] | null } }[]
-    >,
-    required: true,
-  },
-  objectName: {
-    type: String,
-    required: true,
-  },
-  to: {
-    type: Function as PropType<<Type extends { id: string }>(row: Type) => void>,
-    default: null,
-  },
-  watchers: {
-    type: Array,
-    default: () => [],
-  },
-  hideHeader: {
-    type: Boolean,
-    default: false,
-  },
-  defaultSort: {
-    type: String,
-    default: null,
-  },
-  search: {
-    type: String,
-    default: null,
-  },
-  activeRowFunc: {
-    type: Function as PropType<<Type extends { id: string }>(row: Type) => boolean>,
-    default: null,
-  },
-});
+const props = withDefaults(
+  defineProps<{
+    modelValue?: T | T[];
+    columns: Column[];
+    query: object;
+    variables: K[];
+    objectName: string;
+    watchers?: U[];
+    hideHeader?: boolean;
+    defaultSort?: string;
+    search?: string;
+  }>(),
+  {
+    watchers: () => [],
+    hideHeader: false,
+  }
+);
+
+const emit = defineEmits(["update:modelValue", "update:variables", "row-click"]);
+
+const getSortIcon = (column: Column) => {
+  return currentKey.value === column.key
+    ? currentSort.value === column.sortable?.asc
+      ? ArrowUp
+      : ArrowDown
+    : ArrowUpDown;
+};
 
 const table = ref<HTMLElement>();
 const columns = toRef(props, "columns");
+const selectedRow = ref();
+
+const onRowClick = (row: typeof selectedRow) => {
+  selectedRow.value = row;
+  emit("update:modelValue", row);
+  emit("row-click", row);
+};
 
 const { width } = useElementSize(table);
 
@@ -135,11 +126,11 @@ const gridColumns = computed(() => {
   const columnCount = columnsData.length;
 
   // Find the columns with explicitly set widths
-  const explicitWidthColumns = columnsData.filter((column) => column.width);
+  const explicitWidthColumns = columnsData.filter((column: Column) => column.width);
   const explicitColumnCount = explicitWidthColumns.length;
 
   // Calculate the remaining width for columns without explicit widths
-  const remainingWidth = explicitWidthColumns.reduce((total, column) => {
+  const remainingWidth = explicitWidthColumns.reduce((total: number, column: Column) => {
     if (!column.width) return total;
     return total - totalWidth * column.width;
   }, totalWidth);
@@ -149,7 +140,7 @@ const gridColumns = computed(() => {
 
   // Build the grid-template-columns property
   let gridTemplateColumns = "";
-  columnsData.forEach((column) => {
+  columnsData.forEach((column: Column) => {
     const columnWidth = column.width ? `${column.width * totalWidth}px` : `${calculatedWidth}px`;
     gridTemplateColumns += `${columnWidth} `;
   });
@@ -157,9 +148,7 @@ const gridColumns = computed(() => {
   return `grid-template-columns: ${gridTemplateColumns}`;
 });
 
-const emit = defineEmits(["update:modelValue", "update:variables"]);
-
-const pageVariables = computed({
+const pageVariables = computed<K[]>({
   get() {
     return props.variables;
   },
@@ -178,13 +167,16 @@ useInfiniteScroll(
     const lastPage = pageVariables.value[pageVariables.value.length - 1];
     if (!lastPage.nextPage) return;
 
-    pageVariables.value.push({
+    const nextPageVariables = {
       limit: lastPage.limit,
       order: lastPage.order,
       search: lastPage.search,
       sortBy: lastPage.sortBy,
       offset: (lastPage.offset as number) + ((lastPage.limit as number) || 50),
-    });
+      nextPage: undefined,
+    } as K;
+
+    pageVariables.value.push(nextPageVariables);
   },
   { distance: 500 }
 );

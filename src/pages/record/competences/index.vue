@@ -17,11 +17,11 @@
       :columns="columns"
       :query="competencesQuery"
       v-model:variables="pageVariables"
-      object-name="competences"
-      :to="goToCompetence"
-      hide-header
+      objectName="competences"
+      hideHeader
       :watchers="[search]"
       :search="search"
+      @row-click="goToCompetence"
     >
       <template #name-data="{ item }">
         <DTag :color="item.color">{{ item.name }}</DTag>
@@ -55,17 +55,18 @@ import DTag from "@/components/d-tag/d-tag.vue";
 import DTable from "@/components/d-table/d-table.vue";
 import { useRouter } from "vue-router";
 import { watchDebounced } from "@vueuse/core";
+import type { PageVariables } from "@/types/types";
 
 const search = ref("");
 const competence = ref<Competence | null>(null);
 const router = useRouter();
 
-const pageVariables = ref([
+const pageVariables = ref<PageVariables[]>([
   {
     limit: 100,
     offset: 0,
     search: "",
-    nextPage: null,
+    nextPage: undefined,
   },
 ]);
 
@@ -77,7 +78,7 @@ watchDebounced(
         search: search.value,
         limit: 100,
         offset: 0,
-        nextPage: null,
+        nextPage: undefined,
       },
     ];
   },

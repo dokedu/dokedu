@@ -9,7 +9,7 @@
         </router-link>
       </div>
     </PageHeader>
-    <DTable :columns="columns" object-name="reports" :query="reportsQuery" v-model:variables="pageVariables">
+    <DTable :columns="columns" objectName="reports" :query="reportsQuery" v-model:variables="pageVariables">
       <template #student-data="{ item }">
         <div>{{ item.studentUser.firstName }} {{ item.studentUser.lastName }}</div>
       </template>
@@ -70,6 +70,7 @@ import { Report } from "@/gql/graphql";
 import DReportStatus from "./DReportStatus.vue";
 import { ref } from "vue";
 import DTable from "@/components/d-table/d-table.vue";
+import type { PageVariables } from "@/types/types";
 
 const columns = [
   {
@@ -105,11 +106,11 @@ const columns = [
   },
 ];
 
-const pageVariables = ref([
+const pageVariables = ref<PageVariables[]>([
   {
     limit: 30,
     offset: 0,
-    nextPage: null,
+    nextPage: undefined,
   },
 ]);
 
