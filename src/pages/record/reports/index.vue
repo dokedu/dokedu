@@ -116,7 +116,7 @@ const pageVariables = ref<PageVariables[]>([
 
 const reportsQuery = graphql(`
   query reports {
-    reports(limit: 100) {
+    reports(limit: 30) {
       totalCount
       pageInfo {
         hasNextPage
@@ -155,13 +155,9 @@ async function downloadFile(report: Report) {
   downloadingFilesCount.value += 1;
   const { data } = await getFileURL({ input: { id: report.file?.id as string } });
 
-  // data?.generateFileURL.url
-  // download file from url directly
-
   const url = data?.generateFileURL.url as string;
 
   const fullNameStudent = `${report.studentUser?.lastName}-${report.studentUser?.firstName}`.toLowerCase();
-  // time of format YYYY-MM-DD-HH-MM-SS
   const time = formatDate(new Date(report.createdAt), "YYYY-MM-DD-HHMMss");
   const name = `${time}-${fullNameStudent}.pdf`;
 
