@@ -10,6 +10,7 @@ import (
 	"example/pkg/db"
 	"example/pkg/graph/model"
 	"example/pkg/middleware"
+	"fmt"
 	"time"
 )
 
@@ -209,6 +210,9 @@ func (r *queryResolver) Events(ctx context.Context, limit *int, offset *int, fil
 
 	pageLimit := 10
 	if limit != nil {
+		if *limit > 1000 {
+			return nil, fmt.Errorf("limit cannot be greater than 1000")
+		}
 		pageLimit = *limit
 	}
 
