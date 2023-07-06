@@ -1,0 +1,210 @@
+<template>
+  <div class="fe flex min-h-0 w-full flex-col text-sm">
+    <div v-if="!hideHeader" class="grid h-10" :style="gridColumns">
+      <div
+        v-for="(column, index) in columns"
+        class="flex h-10 items-center border-b border-stone-100 px-6 text-left text-sm"
+        :key="index"
+        scope="col"
+        :class="column.headerClass"
+      >
+        <slot :name="`${column.key}-header`" :column="column">
+          <DButton
+            type="transparent"
+            size="sm"
+            class="text-subtle"
+            v-if="column.sortable"
+            :icon-right="getSortIcon(column)"
+            @click="sortBy(column)"
+          >
+            {{ $t(column.label) }}
+          </DButton>
+          <div v-else class="px-2 text-subtle">
+            {{ $t(column.label) }}
+          </div>
+        </slot>
+      </div>
+    </div>
+    <div ref="table" class="h-full w-full overflow-scroll">
+      <TableSearchResult
+        v-for="(vars, i) in pageVariables"
+        :key="i"
+        :query="query"
+        :object-name="objectName"
+        :variables="vars"
+        :columns="columns"
+        :style="gridColumns"
+        ref="tableRows"
+      >
+        <template v-slot="{ row }">
+          <div
+            class="border-b border-stone-100 px-8 py-2 text-sm"
+            :class="[{ 'bg-stone-100': selectedRow && selectedRow.id === row.id }, column.dataClass]"
+            v-for="(column, subIndex) in columns"
+            :key="subIndex"
+            @click="onRowClick(row)"
+          >
+            <slot v-if="row" :name="`${column.key}-data`" :item="row" :column="row[column.key]">
+              <div class="truncate">
+                {{ row[column.key] }}
+              </div>
+            </slot>
+          </div>
+        </template>
+      </TableSearchResult>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup generic="T, K extends PageVariables, U">
+import TableSearchResult from "../TableSearchResult.vue";
+import DButton from "../d-button/d-button.vue";
+import { ref, toRef, watch, computed, toRefs } from "vue";
+import { useInfiniteScroll, useElementSize } from "@vueuse/core";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-vue-next";
+import type { PageVariables } from "@/types/types";
+import { onClickOutside, onKeyStroke } from "@vueuse/core";
+
+const tableRows = ref();
+
+onClickOutside(tableRows, () => (selectedRow.value = null));
+onKeyStroke("Escape", () => (selectedRow.value = null));
+
+type Column = {
+  key: string;
+  label: string;
+  sortable?: { [key: string]: string };
+  headerClass?: string;
+  dataClass?: string;
+  width?: number;
+};
+
+const props = withDefaults(
+  defineProps<{
+    modelValue?: T | T[];
+    columns: Column[];
+    query: object;
+    variables: K[];
+    objectName: string;
+    watchers?: U[];
+    hideHeader?: boolean;
+    defaultSort?: string;
+    search?: string;
+  }>(),
+  {
+    watchers: () => [],
+    hideHeader: false,
+  }
+);
+
+const emit = defineEmits(["update:modelValue", "update:variables", "row-click"]);
+
+const getSortIcon = (column: Column) => {
+  return currentKey.value === column.key
+    ? currentSort.value === column.sortable?.asc
+      ? ArrowUp
+      : ArrowDown
+    : ArrowUpDown;
+};
+
+const table = ref<HTMLElement>();
+const columns = toRef(props, "columns");
+const selectedRow = ref();
+
+const onRowClick = (row: typeof selectedRow) => {
+  selectedRow.value = row;
+  emit("update:modelValue", row);
+  emit("row-click", row);
+};
+
+const { width } = useElementSize(table);
+
+// If column has set explicit relative width, use that, otherwise calculate the width
+const gridColumns = computed(() => {
+  const totalWidth = width.value;
+  const columnsData = columns.value;
+  const columnCount = columnsData.length;
+
+  // Find the columns with explicitly set widths
+  const explicitWidthColumns = columnsData.filter((column: Column) => column.width);
+  const explicitColumnCount = explicitWidthColumns.length;
+
+  // Calculate the remaining width for columns without explicit widths
+  const remainingWidth = explicitWidthColumns.reduce((total: number, column: Column) => {
+    if (!column.width) return total;
+    return total - totalWidth * column.width;
+  }, totalWidth);
+
+  // Calculate the width for columns without explicit widths
+  const calculatedWidth = remainingWidth / (columnCount - explicitColumnCount);
+
+  // Build the grid-template-columns property
+  let gridTemplateColumns = "";
+  columnsData.forEach((column: Column) => {
+    const columnWidth = column.width ? `${column.width * totalWidth}px` : `${calculatedWidth}px`;
+    gridTemplateColumns += `${columnWidth} `;
+  });
+
+  return `grid-template-columns: ${gridTemplateColumns}`;
+});
+
+const pageVariables = computed<K[]>({
+  get() {
+    return props.variables;
+  },
+  set(value) {
+    emit("update:variables", value);
+  },
+});
+
+const currentSort = ref(pageVariables.value[0].order);
+const currentKey = ref(props.defaultSort || "");
+const search = toRef(props, "search");
+
+useInfiniteScroll(
+  table,
+  () => {
+    const lastPage = pageVariables.value[pageVariables.value.length - 1];
+    if (!lastPage.nextPage) return;
+
+    const nextPageVariables = {
+      limit: lastPage.limit,
+      order: lastPage.order,
+      search: lastPage.search,
+      sortBy: lastPage.sortBy,
+      offset: (lastPage.offset as number) + ((lastPage.limit as number) || 50),
+      nextPage: undefined,
+    } as K;
+
+    pageVariables.value.push(nextPageVariables);
+  },
+  { distance: 500 }
+);
+
+function sortBy(column: Column) {
+  if (!column.sortable) return;
+  currentKey.value = column.key;
+  currentSort.value = currentSort.value === column.sortable?.asc ? column.sortable.desc : column.sortable.asc;
+
+  pageVariables.value = [
+    {
+      ...pageVariables.value[0],
+      offset: 0,
+      order: currentSort.value,
+      search: search.value,
+    },
+  ];
+}
+
+const { watchers } = toRefs(props);
+
+// Scroll to top if sort or search changes
+watch(
+  [currentSort, currentKey, search, watchers],
+  (newValue, oldValue) => {
+    if (JSON.stringify(newValue) === JSON.stringify(oldValue)) return;
+    table.value?.scrollTo({ top: 0, behavior: "smooth" });
+  },
+  { flush: "post" }
+);
+</script>

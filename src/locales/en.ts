@@ -118,5 +118,7 @@ export const en = {
   first_name: "First name",
   last_name: "Last name",
   birthday: "Birthday",
-  edit_student: "Edit student"
+  edit_student: "Edit student",
+
+  title: "Title",
 };

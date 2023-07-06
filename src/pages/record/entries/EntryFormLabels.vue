@@ -5,7 +5,7 @@
       <d-context-menu :show="contextMenu" @close="contextMenu = false" :alignment="ContextMenuAlignment.Overlay">
         <div class="flex flex-col gap-1 px-1 py-2">
           <div
-            v-for="tag in tags?.tags"
+            v-for="tag in tags?.tags?.edges"
             :key="tag.id"
             @click="toggleTag(tag)"
             class="flex w-full items-center justify-between rounded-md p-1 hover:bg-stone-100"
