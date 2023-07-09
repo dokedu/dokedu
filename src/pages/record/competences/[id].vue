@@ -25,7 +25,7 @@
       :search="search"
     >
       <template #grade-data="{ item }">
-        <div class="flex justify-end">{{ grades(item) }}</div>
+        <div class="flex w-full justify-end text-right">{{ grades(item) }}</div>
       </template>
     </DTable>
   </PageWrapper>
@@ -95,6 +95,7 @@ const columns = [
   {
     key: "name",
     label: "name",
+    width: 0.8,
   },
   {
     key: "grade",

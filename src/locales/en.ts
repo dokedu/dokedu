@@ -25,6 +25,28 @@ export const en = {
   add_student: "Add student",
   search_students: "Search students",
   create: "Create",
+  size: "Size",
+  filesize: "Filesize",
+  "-": "",
+
+  // Admin
+  email: "Email",
+  add_user: "Add user",
+  edit_user: "Edit user",
+  role: "Role | Roles",
+  owner: "Owner",
+  admin: "Admin",
+  user: "User | Users",
+  select_role: "Select role",
+  billing: "Billing",
+  payment_method: "Payment method",
+  billing_period: "Billing period",
+  billing_email: "Billing email",
+  change_plan: "Change plan",
+  per_member_monthly: "per member / month - billed monthly",
+  monthly: "Monthly",
+  bankaccount_ending_in: "Bank account ending in",
+  general: "General",
 
   // Students
   search: "Search",

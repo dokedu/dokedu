@@ -1,9 +1,9 @@
 <template>
-  <div class="fe flex min-h-0 w-full flex-col text-sm">
+  <div class="flex min-h-0 w-full select-none flex-col text-sm">
     <div v-if="!hideHeader" class="grid h-10" :style="gridColumns">
       <div
         v-for="(column, index) in columns"
-        class="flex h-10 items-center border-b border-stone-100 px-6 text-left text-sm"
+        class="flex h-10 items-center border-b border-stone-100 px-0 text-left text-sm first:pl-6 last:pr-6"
         :key="index"
         scope="col"
         :class="column.headerClass"
@@ -38,8 +38,8 @@
       >
         <template v-slot="{ row }">
           <div
-            class="border-b border-stone-100 px-8 py-2 text-sm"
-            :class="[{ 'bg-stone-100': selectedRow && selectedRow.id === row.id }, column.dataClass]"
+            class="flex items-center border-b border-stone-100 px-2 py-2 text-sm first:pl-8 last:pr-8"
+            :class="[{ 'bg-stone-100': isSelected(row) }, column.dataClass]"
             v-for="(column, subIndex) in columns"
             :key="subIndex"
             @click="onRowClick(row)"
@@ -50,6 +50,9 @@
               </div>
             </slot>
           </div>
+        </template>
+        <template #empty>
+          <slot name="empty" />
         </template>
       </TableSearchResult>
     </div>
@@ -67,8 +70,8 @@ import { onClickOutside, onKeyStroke } from "@vueuse/core";
 
 const tableRows = ref();
 
-onClickOutside(tableRows, () => (selectedRow.value = null));
-onKeyStroke("Escape", () => (selectedRow.value = null));
+onClickOutside(tableRows, () => (selectedRows.value = []));
+onKeyStroke("Escape", () => (selectedRows.value = []));
 
 type Column = {
   key: string;
@@ -85,6 +88,7 @@ const props = withDefaults(
     columns: Column[];
     query: object;
     variables: K[];
+    selected?: T[];
     objectName: string;
     watchers?: U[];
     hideHeader?: boolean;
@@ -97,7 +101,7 @@ const props = withDefaults(
   }
 );
 
-const emit = defineEmits(["update:modelValue", "update:variables", "row-click"]);
+const emit = defineEmits(["update:modelValue", "update:variables", "row-click", "update:selected"]);
 
 const getSortIcon = (column: Column) => {
   return currentKey.value === column.key
@@ -109,12 +113,26 @@ const getSortIcon = (column: Column) => {
 
 const table = ref<HTMLElement>();
 const columns = toRef(props, "columns");
-const selectedRow = ref();
+const selectedRows = ref<{ id: string }[]>([]);
 
-const onRowClick = (row: typeof selectedRow) => {
-  selectedRow.value = row;
+const isSelected = (row: { id: string }) => {
+  return selectedRows.value.some((selectedRow) => selectedRow.id === row.id);
+};
+
+function toggleSelectedRow(row: { id: string }) {
+  const index = selectedRows.value.findIndex((selectedRow) => selectedRow.id === row.id);
+  if (index > -1) {
+    selectedRows.value.splice(index, 1);
+  } else {
+    selectedRows.value.push(row);
+  }
+}
+
+const onRowClick = (row: { id: string }) => {
+  toggleSelectedRow(row);
   emit("update:modelValue", row);
   emit("row-click", row);
+  emit("update:selected", selectedRows.value);
 };
 
 const { width } = useElementSize(table);

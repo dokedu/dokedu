@@ -4,9 +4,16 @@
       <div class="h-3 rounded-full bg-stone-100"></div>
     </div>
   </div>
-  <div v-bind="$attrs" v-else v-for="row in data[objectName]?.edges" class="grid transition-colors hover:bg-stone-50">
+  <div
+    v-bind="$attrs"
+    v-else
+    v-for="row in data[objectName]?.edges"
+    :key="row.id"
+    class="grid transition-colors hover:bg-stone-50"
+  >
     <slot :row="row" :fetching="fetching"></slot>
   </div>
+  <slot name="empty" v-if="!fetching && data[objectName]?.edges.length === 0 && pageVariables.offset === 0" />
 </template>
 
 <script lang="ts" setup>

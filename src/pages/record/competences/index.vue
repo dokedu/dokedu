@@ -27,7 +27,7 @@
         <DTag :color="item.color">{{ item.name }}</DTag>
       </template>
       <template #grade-data="{ item }">
-        <div class="flex items-center justify-end gap-2">
+        <div class="flex w-full items-center justify-end gap-2 text-right">
           <div class="rounded-lg p-1 hover:bg-stone-200" @click.stop="editCompetence(item)">
             <Edit2 :size="16" class="stroke-stone-700" />
           </div>
@@ -89,6 +89,7 @@ const columns = [
   {
     label: "name",
     key: "name",
+    width: 0.8,
   },
   {
     label: "grade",

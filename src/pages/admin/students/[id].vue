@@ -45,7 +45,7 @@ const { data } = useQuery({
 });
 const { executeMutation: updateStudent } = useMutation(
   graphql(`
-    mutation updateUser($student: UpdateUserInput!) {
+    mutation updateStudent($student: UpdateUserInput!) {
       updateUser(input: $student) {
         id
         firstName

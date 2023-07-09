@@ -9,7 +9,7 @@
       :id="name"
       :max="max"
       :min="min"
-      class="rounded-md border border-stone-200 text-sm shadow"
+      class="block w-full rounded-md border-0 py-2 text-stone-900 shadow-sm ring-1 ring-inset ring-stone-300 placeholder:text-stone-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm sm:leading-6"
     />
   </div>
 </template>

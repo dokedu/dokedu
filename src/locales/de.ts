@@ -24,7 +24,31 @@ export const de = {
   add_label: "Tag hinzufügen",
   add_student: "Schüler hinzufügen",
   search_students: "Schüler suchen",
+
+  // Drive
   create: "Erstellen",
+  size: "Größe",
+  filesize: "Dateigröße",
+  "-": "",
+
+  // Admin
+  email: "E-Mail",
+  add_user: "Nutzer hinzufügen",
+  edit_user: "Nutzer bearbeiten",
+  role: "Rolle | Rollen",
+  owner: "Eigentümer",
+  admin: "Admin",
+  user: "Nutzer | Nutzer",
+  select_role: "Rolle auswählen",
+  billing: "Abrechnung",
+  payment_method: "Zahlungsmethode",
+  billing_period: "Abrechnungszeitraum",
+  billing_email: "Abrechnungs-E-Mail",
+  change_plan: "Plan ändern",
+  per_member_monthly: "pro Nutzer / Monat - monatlich abgerechnet",
+  monthly: "Monatlich",
+  bankaccount_ending_in: "Bankkonto endet in",
+  general: "Allgemein",
 
   // Students
   search: "Suche",
@@ -55,7 +79,7 @@ export const de = {
 
   // Competences
   color: "Farbe",
-  update: "Update",
+  update: "Aktualisieren",
   edit_competence: "Kompetenz bearbeiten",
   set_color: "Farbe einstellen",
 
@@ -103,7 +127,7 @@ export const de = {
   at: "unter",
   manually: "manuell",
 
-  no_levels: "Kein Niveau",
+  no_level: "Kein Niveau",
   low: "Niedrig",
   medium: "Mittel",
   high: "Hoch",

@@ -32,7 +32,7 @@
         <div
           v-if="item?.status === 'done' && item.file"
           class="p-2 pr-8 text-left text-sm font-normal text-default hover:underline"
-          @click="downloadFile(item)"
+          @click="downloadReport(item)"
         >
           {{ $t("download") }}
         </div>
@@ -63,7 +63,6 @@ import PageHeader from "@/components/PageHeader.vue";
 import PageWrapper from "@/components/PageWrapper.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { Plus, Loader2 } from "lucide-vue-next";
-import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { formatDate } from "@vueuse/core";
 import { Report } from "@/gql/graphql";
@@ -71,6 +70,7 @@ import DReportStatus from "./DReportStatus.vue";
 import { ref } from "vue";
 import DTable from "@/components/d-table/d-table.vue";
 import type { PageVariables } from "@/types/types";
+import useDownloadFile from "@/composables/useDownloadFile";
 
 const columns = [
   {
@@ -151,51 +151,20 @@ const reportsQuery = graphql(`
 const downloadingFilesCount = ref(0);
 
 // TODO: refactor into utilitiy function
-async function downloadFile(report: Report) {
-  downloadingFilesCount.value += 1;
-  const { data } = await getFileURL({ input: { id: report.file?.id as string } });
+async function downloadReport(report: Report) {
+  const file = report.file;
+  if (!file) return;
 
-  const url = data?.generateFileURL.url as string;
+  downloadingFilesCount.value += 1;
 
   const fullNameStudent = `${report.studentUser?.lastName}-${report.studentUser?.firstName}`.toLowerCase();
   const time = formatDate(new Date(report.createdAt), "YYYY-MM-DD-HHMMss");
   const name = `${time}-${fullNameStudent}.pdf`;
 
-  await forceDownload(url, name);
+  await downloadFile(file, name);
 
   downloadingFilesCount.value -= 1;
 }
 
-const { executeMutation: getFileURL } = useMutation(
-  graphql(`
-    mutation generateFileURL($input: GenerateFileURLInput!) {
-      generateFileURL(input: $input) {
-        url
-      }
-    }
-  `)
-);
-
-function forceDownload(url: string, fileName: string) {
-  return new Promise<void>((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("GET", url, true);
-    xhr.responseType = "blob";
-    xhr.onload = function () {
-      const urlCreator = window.URL || window.webkitURL;
-      const imageUrl = urlCreator.createObjectURL(this.response);
-      const tag = document.createElement("a");
-      tag.href = imageUrl;
-      tag.download = fileName;
-      document.body.appendChild(tag);
-      tag.click();
-      document.body.removeChild(tag);
-      resolve();
-    };
-    xhr.onerror = function () {
-      reject(new Error("Failed to download the file."));
-    };
-    xhr.send();
-  });
-}
+const { downloadFile } = useDownloadFile();
 </script>
