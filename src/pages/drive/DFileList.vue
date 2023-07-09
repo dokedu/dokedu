@@ -118,6 +118,7 @@ const pageVariables = ref<Variables[]>([
     offset: 0,
     filter: {
       parentId: parentId,
+      myBucket: true,
     },
   },
 ]);
