@@ -1353,7 +1353,11 @@ func (r *tagResolver) DeletedAt(ctx context.Context, obj *db.Tag) (*time.Time, e
 
 // Email is the resolver for the email field.
 func (r *userResolver) Email(ctx context.Context, obj *db.User) (*string, error) {
-	panic(fmt.Errorf("not implemented: Email - email"))
+	if obj.Email.Valid {
+		return &obj.Email.String, nil
+	}
+
+	return nil, nil
 }
 
 // Student is the resolver for the student field.

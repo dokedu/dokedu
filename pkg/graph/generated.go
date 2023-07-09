@@ -123,6 +123,28 @@ type ComplexityRoot struct {
 		TotalCount func(childComplexity int) int
 	}
 
+	CopyFilesPayload struct {
+		Files func(childComplexity int) int
+	}
+
+	DeleteFilePayload struct {
+		File    func(childComplexity int) int
+		Success func(childComplexity int) int
+	}
+
+	DeleteFilesPayload struct {
+		Files   func(childComplexity int) int
+		Success func(childComplexity int) int
+	}
+
+	DownloadFilePayload struct {
+		URL func(childComplexity int) int
+	}
+
+	DownloadFilesPayload struct {
+		URL func(childComplexity int) int
+	}
+
 	Entry struct {
 		Body            func(childComplexity int) int
 		CreatedAt       func(childComplexity int) int
@@ -195,8 +217,8 @@ type ComplexityRoot struct {
 		Success func(childComplexity int) int
 	}
 
-	GenerateFileURLPayload struct {
-		URL func(childComplexity int) int
+	MoveFilesPayload struct {
+		Files func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -206,6 +228,8 @@ type ComplexityRoot struct {
 		ArchiveTag              func(childComplexity int, id string) int
 		ArchiveUser             func(childComplexity int, id string) int
 		ArchiveUserCompetence   func(childComplexity int, id string) int
+		CopyFile                func(childComplexity int, input model.CopyFileInput) int
+		CopyFiles               func(childComplexity int, input model.CopyFilesInput) int
 		CreateEntry             func(childComplexity int, input model.CreateEntryInput) int
 		CreateEvent             func(childComplexity int, input model.CreateEventInput) int
 		CreateFolder            func(childComplexity int, input model.CreateFolderInput) int
@@ -214,13 +238,19 @@ type ComplexityRoot struct {
 		CreateTag               func(childComplexity int, input model.CreateTagInput) int
 		CreateUser              func(childComplexity int, input model.CreateUserInput) int
 		CreateUserCompetence    func(childComplexity int, input model.CreateUserCompetenceInput) int
+		DeleteFile              func(childComplexity int, input model.DeleteFileInput) int
+		DeleteFiles             func(childComplexity int, input model.DeleteFilesInput) int
+		DownloadFile            func(childComplexity int, input model.DownloadFileInput) int
+		DownloadFiles           func(childComplexity int, input model.DownloadFilesInput) int
 		ForgotPassword          func(childComplexity int, input model.ForgotPasswordInput) int
-		GenerateFileURL         func(childComplexity int, input model.GenerateFileURLInput) int
 		InviteUser              func(childComplexity int, input model.CreateUserInput) int
+		MoveFile                func(childComplexity int, input model.MoveFileInput) int
+		MoveFiles               func(childComplexity int, input model.MoveFilesInput) int
+		PreviewFile             func(childComplexity int, input model.PreviewFileInput) int
+		RenameFile              func(childComplexity int, input model.RenameFileInput) int
 		ResetPassword           func(childComplexity int, input model.ResetPasswordInput) int
 		SignIn                  func(childComplexity int, input model.SignInInput) int
 		SignOut                 func(childComplexity int) int
-		SingleUpload            func(childComplexity int, input model.FileUploadInput) int
 		UpdateCompetence        func(childComplexity int, input model.UpdateCompetenceInput) int
 		UpdateCompetenceSorting func(childComplexity int, input model.UpdateCompetenceSortingInput) int
 		UpdateEntry             func(childComplexity int, input model.UpdateEntryInput) int
@@ -229,6 +259,8 @@ type ComplexityRoot struct {
 		UpdateTag               func(childComplexity int, id string, input model.CreateTagInput) int
 		UpdateUser              func(childComplexity int, input model.UpdateUserInput) int
 		UpdateUserLanguage      func(childComplexity int, language db.UserLanguage) int
+		UploadFile              func(childComplexity int, input model.FileUploadInput) int
+		UploadFiles             func(childComplexity int, input model.FileUploadInput) int
 	}
 
 	Organisation struct {
@@ -249,6 +281,10 @@ type ComplexityRoot struct {
 		HasPreviousPage func(childComplexity int) int
 	}
 
+	PreviewFilePayload struct {
+		URL func(childComplexity int) int
+	}
+
 	Query struct {
 		Bucket       func(childComplexity int, id string) int
 		Buckets      func(childComplexity int, input *model.BucketFilterInput) int
@@ -262,9 +298,7 @@ type ComplexityRoot struct {
 		Events       func(childComplexity int, limit *int, offset *int, filter *model.EventFilterInput, search *string) int
 		ExportEvents func(childComplexity int, input model.ExportEventsInput) int
 		File         func(childComplexity int, id string) int
-		Files        func(childComplexity int, input *model.FilesFilterInput) int
-		MyBucket     func(childComplexity int, id string) int
-		MyFiles      func(childComplexity int, input *model.MyFilesFilterInput) int
+		Files        func(childComplexity int, input *model.FilesFilterInput, limit *int, offset *int) int
 		Organisation func(childComplexity int) int
 		Report       func(childComplexity int, id string) int
 		Reports      func(childComplexity int, limit *int, offset *int) int
@@ -321,6 +355,10 @@ type ComplexityRoot struct {
 		Edges      func(childComplexity int) int
 		PageInfo   func(childComplexity int) int
 		TotalCount func(childComplexity int) int
+	}
+
+	UploadFilesPayload struct {
+		Files func(childComplexity int) int
 	}
 
 	User struct {
@@ -432,9 +470,19 @@ type FileResolver interface {
 	Files(ctx context.Context, obj *db.File) ([]*db.File, error)
 }
 type MutationResolver interface {
-	SingleUpload(ctx context.Context, input model.FileUploadInput) (*db.File, error)
+	UploadFile(ctx context.Context, input model.FileUploadInput) (*db.File, error)
+	UploadFiles(ctx context.Context, input model.FileUploadInput) (*model.UploadFilesPayload, error)
 	CreateFolder(ctx context.Context, input model.CreateFolderInput) (*db.File, error)
-	GenerateFileURL(ctx context.Context, input model.GenerateFileURLInput) (*model.GenerateFileURLPayload, error)
+	RenameFile(ctx context.Context, input model.RenameFileInput) (*db.File, error)
+	MoveFile(ctx context.Context, input model.MoveFileInput) (*db.File, error)
+	MoveFiles(ctx context.Context, input model.MoveFilesInput) (*model.MoveFilesPayload, error)
+	CopyFile(ctx context.Context, input model.CopyFileInput) (*db.File, error)
+	CopyFiles(ctx context.Context, input model.CopyFilesInput) (*model.CopyFilesPayload, error)
+	DeleteFile(ctx context.Context, input model.DeleteFileInput) (*model.DeleteFilePayload, error)
+	DeleteFiles(ctx context.Context, input model.DeleteFilesInput) (*model.DeleteFilesPayload, error)
+	PreviewFile(ctx context.Context, input model.PreviewFileInput) (*model.PreviewFilePayload, error)
+	DownloadFile(ctx context.Context, input model.DownloadFileInput) (*model.DownloadFilePayload, error)
+	DownloadFiles(ctx context.Context, input model.DownloadFilesInput) (*model.DownloadFilesPayload, error)
 	CreateEntry(ctx context.Context, input model.CreateEntryInput) (*db.Entry, error)
 	UpdateEntry(ctx context.Context, input model.UpdateEntryInput) (*db.Entry, error)
 	ArchiveEntry(ctx context.Context, id string) (*db.Entry, error)
@@ -471,9 +519,7 @@ type QueryResolver interface {
 	Buckets(ctx context.Context, input *model.BucketFilterInput) (*model.BucketConnection, error)
 	Bucket(ctx context.Context, id string) (*db.Bucket, error)
 	File(ctx context.Context, id string) (*db.File, error)
-	Files(ctx context.Context, input *model.FilesFilterInput) (*model.FileConnection, error)
-	MyFiles(ctx context.Context, input *model.MyFilesFilterInput) (*model.FileConnection, error)
-	MyBucket(ctx context.Context, id string) (*db.Bucket, error)
+	Files(ctx context.Context, input *model.FilesFilterInput, limit *int, offset *int) (*model.FileConnection, error)
 	Entry(ctx context.Context, id string) (*db.Entry, error)
 	Entries(ctx context.Context, limit *int, offset *int, filter *model.EntryFilterInput, sortBy *model.EntrySortBy, search *string) (*model.EntryConnection, error)
 	Event(ctx context.Context, id string) (*db.Event, error)
@@ -823,6 +869,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CompetenceConnection.TotalCount(childComplexity), true
 
+	case "CopyFilesPayload.files":
+		if e.complexity.CopyFilesPayload.Files == nil {
+			break
+		}
+
+		return e.complexity.CopyFilesPayload.Files(childComplexity), true
+
+	case "DeleteFilePayload.file":
+		if e.complexity.DeleteFilePayload.File == nil {
+			break
+		}
+
+		return e.complexity.DeleteFilePayload.File(childComplexity), true
+
+	case "DeleteFilePayload.success":
+		if e.complexity.DeleteFilePayload.Success == nil {
+			break
+		}
+
+		return e.complexity.DeleteFilePayload.Success(childComplexity), true
+
+	case "DeleteFilesPayload.files":
+		if e.complexity.DeleteFilesPayload.Files == nil {
+			break
+		}
+
+		return e.complexity.DeleteFilesPayload.Files(childComplexity), true
+
+	case "DeleteFilesPayload.success":
+		if e.complexity.DeleteFilesPayload.Success == nil {
+			break
+		}
+
+		return e.complexity.DeleteFilesPayload.Success(childComplexity), true
+
+	case "DownloadFilePayload.url":
+		if e.complexity.DownloadFilePayload.URL == nil {
+			break
+		}
+
+		return e.complexity.DownloadFilePayload.URL(childComplexity), true
+
+	case "DownloadFilesPayload.url":
+		if e.complexity.DownloadFilesPayload.URL == nil {
+			break
+		}
+
+		return e.complexity.DownloadFilesPayload.URL(childComplexity), true
+
 	case "Entry.body":
 		if e.complexity.Entry.Body == nil {
 			break
@@ -1159,12 +1254,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ForgotPasswordPayload.Success(childComplexity), true
 
-	case "GenerateFileURLPayload.url":
-		if e.complexity.GenerateFileURLPayload.URL == nil {
+	case "MoveFilesPayload.files":
+		if e.complexity.MoveFilesPayload.Files == nil {
 			break
 		}
 
-		return e.complexity.GenerateFileURLPayload.URL(childComplexity), true
+		return e.complexity.MoveFilesPayload.Files(childComplexity), true
 
 	case "Mutation.acceptInvite":
 		if e.complexity.Mutation.AcceptInvite == nil {
@@ -1237,6 +1332,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.ArchiveUserCompetence(childComplexity, args["id"].(string)), true
+
+	case "Mutation.copyFile":
+		if e.complexity.Mutation.CopyFile == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_copyFile_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CopyFile(childComplexity, args["input"].(model.CopyFileInput)), true
+
+	case "Mutation.copyFiles":
+		if e.complexity.Mutation.CopyFiles == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_copyFiles_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CopyFiles(childComplexity, args["input"].(model.CopyFilesInput)), true
 
 	case "Mutation.createEntry":
 		if e.complexity.Mutation.CreateEntry == nil {
@@ -1334,6 +1453,54 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateUserCompetence(childComplexity, args["input"].(model.CreateUserCompetenceInput)), true
 
+	case "Mutation.deleteFile":
+		if e.complexity.Mutation.DeleteFile == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteFile_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteFile(childComplexity, args["input"].(model.DeleteFileInput)), true
+
+	case "Mutation.deleteFiles":
+		if e.complexity.Mutation.DeleteFiles == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteFiles_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteFiles(childComplexity, args["input"].(model.DeleteFilesInput)), true
+
+	case "Mutation.downloadFile":
+		if e.complexity.Mutation.DownloadFile == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_downloadFile_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DownloadFile(childComplexity, args["input"].(model.DownloadFileInput)), true
+
+	case "Mutation.downloadFiles":
+		if e.complexity.Mutation.DownloadFiles == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_downloadFiles_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DownloadFiles(childComplexity, args["input"].(model.DownloadFilesInput)), true
+
 	case "Mutation.forgotPassword":
 		if e.complexity.Mutation.ForgotPassword == nil {
 			break
@@ -1346,18 +1513,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.ForgotPassword(childComplexity, args["input"].(model.ForgotPasswordInput)), true
 
-	case "Mutation.generateFileURL":
-		if e.complexity.Mutation.GenerateFileURL == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_generateFileURL_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.GenerateFileURL(childComplexity, args["input"].(model.GenerateFileURLInput)), true
-
 	case "Mutation.inviteUser":
 		if e.complexity.Mutation.InviteUser == nil {
 			break
@@ -1369,6 +1524,54 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.InviteUser(childComplexity, args["input"].(model.CreateUserInput)), true
+
+	case "Mutation.moveFile":
+		if e.complexity.Mutation.MoveFile == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_moveFile_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.MoveFile(childComplexity, args["input"].(model.MoveFileInput)), true
+
+	case "Mutation.moveFiles":
+		if e.complexity.Mutation.MoveFiles == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_moveFiles_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.MoveFiles(childComplexity, args["input"].(model.MoveFilesInput)), true
+
+	case "Mutation.previewFile":
+		if e.complexity.Mutation.PreviewFile == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_previewFile_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.PreviewFile(childComplexity, args["input"].(model.PreviewFileInput)), true
+
+	case "Mutation.renameFile":
+		if e.complexity.Mutation.RenameFile == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_renameFile_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RenameFile(childComplexity, args["input"].(model.RenameFileInput)), true
 
 	case "Mutation.resetPassword":
 		if e.complexity.Mutation.ResetPassword == nil {
@@ -1400,18 +1603,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.SignOut(childComplexity), true
-
-	case "Mutation.singleUpload":
-		if e.complexity.Mutation.SingleUpload == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_singleUpload_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.SingleUpload(childComplexity, args["input"].(model.FileUploadInput)), true
 
 	case "Mutation.updateCompetence":
 		if e.complexity.Mutation.UpdateCompetence == nil {
@@ -1509,6 +1700,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateUserLanguage(childComplexity, args["language"].(db.UserLanguage)), true
 
+	case "Mutation.uploadFile":
+		if e.complexity.Mutation.UploadFile == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_uploadFile_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UploadFile(childComplexity, args["input"].(model.FileUploadInput)), true
+
+	case "Mutation.uploadFiles":
+		if e.complexity.Mutation.UploadFiles == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_uploadFiles_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UploadFiles(childComplexity, args["input"].(model.FileUploadInput)), true
+
 	case "Organisation.id":
 		if e.complexity.Organisation.ID == nil {
 			break
@@ -1571,6 +1786,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PageInfo.HasPreviousPage(childComplexity), true
+
+	case "PreviewFilePayload.url":
+		if e.complexity.PreviewFilePayload.URL == nil {
+			break
+		}
+
+		return e.complexity.PreviewFilePayload.URL(childComplexity), true
 
 	case "Query.bucket":
 		if e.complexity.Query.Bucket == nil {
@@ -1726,31 +1948,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Files(childComplexity, args["input"].(*model.FilesFilterInput)), true
-
-	case "Query.myBucket":
-		if e.complexity.Query.MyBucket == nil {
-			break
-		}
-
-		args, err := ec.field_Query_myBucket_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.MyBucket(childComplexity, args["id"].(string)), true
-
-	case "Query.myFiles":
-		if e.complexity.Query.MyFiles == nil {
-			break
-		}
-
-		args, err := ec.field_Query_myFiles_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.MyFiles(childComplexity, args["input"].(*model.MyFilesFilterInput)), true
+		return e.complexity.Query.Files(childComplexity, args["input"].(*model.FilesFilterInput), args["limit"].(*int), args["offset"].(*int)), true
 
 	case "Query.organisation":
 		if e.complexity.Query.Organisation == nil {
@@ -2058,6 +2256,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.TagConnection.TotalCount(childComplexity), true
 
+	case "UploadFilesPayload.files":
+		if e.complexity.UploadFilesPayload.Files == nil {
+			break
+		}
+
+		return e.complexity.UploadFilesPayload.Files(childComplexity), true
+
 	case "User.createdAt":
 		if e.complexity.User.CreatedAt == nil {
 			break
@@ -2328,6 +2533,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputBucketFilterInput,
 		ec.unmarshalInputCompetenceFilterInput,
 		ec.unmarshalInputCompetenceSort,
+		ec.unmarshalInputCopyFileInput,
+		ec.unmarshalInputCopyFilesInput,
 		ec.unmarshalInputCreateEntryInput,
 		ec.unmarshalInputCreateEventInput,
 		ec.unmarshalInputCreateFolderInput,
@@ -2336,6 +2543,10 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCreateTagInput,
 		ec.unmarshalInputCreateUserCompetenceInput,
 		ec.unmarshalInputCreateUserInput,
+		ec.unmarshalInputDeleteFileInput,
+		ec.unmarshalInputDeleteFilesInput,
+		ec.unmarshalInputDownloadFileInput,
+		ec.unmarshalInputDownloadFilesInput,
 		ec.unmarshalInputEntryFilterInput,
 		ec.unmarshalInputEventFilterInput,
 		ec.unmarshalInputExportEventsInput,
@@ -2343,7 +2554,11 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputFilesFilterInput,
 		ec.unmarshalInputForgotPasswordInput,
 		ec.unmarshalInputGenerateFileURLInput,
+		ec.unmarshalInputMoveFileInput,
+		ec.unmarshalInputMoveFilesInput,
 		ec.unmarshalInputMyFilesFilterInput,
+		ec.unmarshalInputPreviewFileInput,
+		ec.unmarshalInputRenameFileInput,
 		ec.unmarshalInputResetPasswordInput,
 		ec.unmarshalInputSharedDriveFilterInput,
 		ec.unmarshalInputSignInInput,
@@ -2579,6 +2794,36 @@ func (ec *executionContext) field_Mutation_archiveUser_args(ctx context.Context,
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_copyFile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CopyFileInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNCopyFileInput2exampleᚋpkgᚋgraphᚋmodelᚐCopyFileInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_copyFiles_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CopyFilesInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNCopyFilesInput2exampleᚋpkgᚋgraphᚋmodelᚐCopyFilesInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createEntry_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2699,6 +2944,66 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_deleteFile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.DeleteFileInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNDeleteFileInput2exampleᚋpkgᚋgraphᚋmodelᚐDeleteFileInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteFiles_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.DeleteFilesInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNDeleteFilesInput2exampleᚋpkgᚋgraphᚋmodelᚐDeleteFilesInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_downloadFile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.DownloadFileInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNDownloadFileInput2exampleᚋpkgᚋgraphᚋmodelᚐDownloadFileInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_downloadFiles_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.DownloadFilesInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNDownloadFilesInput2exampleᚋpkgᚋgraphᚋmodelᚐDownloadFilesInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_forgotPassword_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2714,13 +3019,13 @@ func (ec *executionContext) field_Mutation_forgotPassword_args(ctx context.Conte
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_generateFileURL_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_inviteUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.GenerateFileURLInput
+	var arg0 model.CreateUserInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNGenerateFileURLInput2exampleᚋpkgᚋgraphᚋmodelᚐGenerateFileURLInput(ctx, tmp)
+		arg0, err = ec.unmarshalNCreateUserInput2exampleᚋpkgᚋgraphᚋmodelᚐCreateUserInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2729,13 +3034,58 @@ func (ec *executionContext) field_Mutation_generateFileURL_args(ctx context.Cont
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_inviteUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_moveFile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.CreateUserInput
+	var arg0 model.MoveFileInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNCreateUserInput2exampleᚋpkgᚋgraphᚋmodelᚐCreateUserInput(ctx, tmp)
+		arg0, err = ec.unmarshalNMoveFileInput2exampleᚋpkgᚋgraphᚋmodelᚐMoveFileInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_moveFiles_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.MoveFilesInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNMoveFilesInput2exampleᚋpkgᚋgraphᚋmodelᚐMoveFilesInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_previewFile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.PreviewFileInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNPreviewFileInput2exampleᚋpkgᚋgraphᚋmodelᚐPreviewFileInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_renameFile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.RenameFileInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNRenameFileInput2exampleᚋpkgᚋgraphᚋmodelᚐRenameFileInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2766,21 +3116,6 @@ func (ec *executionContext) field_Mutation_signIn_args(ctx context.Context, rawA
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNSignInInput2exampleᚋpkgᚋgraphᚋmodelᚐSignInInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_singleUpload_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.FileUploadInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNFileUploadInput2exampleᚋpkgᚋgraphᚋmodelᚐFileUploadInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2919,6 +3254,36 @@ func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, 
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNUpdateUserInput2exampleᚋpkgᚋgraphᚋmodelᚐUpdateUserInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_uploadFile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.FileUploadInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNFileUploadInput2exampleᚋpkgᚋgraphᚋmodelᚐFileUploadInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_uploadFiles_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.FileUploadInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNFileUploadInput2exampleᚋpkgᚋgraphᚋmodelᚐFileUploadInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3242,36 +3607,24 @@ func (ec *executionContext) field_Query_files_args(ctx context.Context, rawArgs 
 		}
 	}
 	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_myBucket_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+	var arg1 *int
+	if tmp, ok := rawArgs["limit"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_myFiles_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *model.MyFilesFilterInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOMyFilesFilterInput2ᚖexampleᚋpkgᚋgraphᚋmodelᚐMyFilesFilterInput(ctx, tmp)
+	args["limit"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["input"] = arg0
+	args["offset"] = arg2
 	return args, nil
 }
 
@@ -5432,6 +5785,386 @@ func (ec *executionContext) fieldContext_CompetenceConnection_totalCount(ctx con
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CopyFilesPayload_files(ctx context.Context, field graphql.CollectedField, obj *model.CopyFilesPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CopyFilesPayload_files(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Files, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*db.File)
+	fc.Result = res
+	return ec.marshalNFile2ᚕᚖexampleᚋpkgᚋdbᚐFileᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CopyFilesPayload_files(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CopyFilesPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_File_id(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "fileType":
+				return ec.fieldContext_File_fileType(ctx, field)
+			case "MIMEType":
+				return ec.fieldContext_File_MIMEType(ctx, field)
+			case "size":
+				return ec.fieldContext_File_size(ctx, field)
+			case "bucket":
+				return ec.fieldContext_File_bucket(ctx, field)
+			case "parent":
+				return ec.fieldContext_File_parent(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_File_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeleteFilePayload_success(ctx context.Context, field graphql.CollectedField, obj *model.DeleteFilePayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteFilePayload_success(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Success, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeleteFilePayload_success(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeleteFilePayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeleteFilePayload_file(ctx context.Context, field graphql.CollectedField, obj *model.DeleteFilePayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteFilePayload_file(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.File, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.File)
+	fc.Result = res
+	return ec.marshalNFile2ᚖexampleᚋpkgᚋdbᚐFile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeleteFilePayload_file(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeleteFilePayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_File_id(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "fileType":
+				return ec.fieldContext_File_fileType(ctx, field)
+			case "MIMEType":
+				return ec.fieldContext_File_MIMEType(ctx, field)
+			case "size":
+				return ec.fieldContext_File_size(ctx, field)
+			case "bucket":
+				return ec.fieldContext_File_bucket(ctx, field)
+			case "parent":
+				return ec.fieldContext_File_parent(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_File_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeleteFilesPayload_success(ctx context.Context, field graphql.CollectedField, obj *model.DeleteFilesPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteFilesPayload_success(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Success, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeleteFilesPayload_success(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeleteFilesPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeleteFilesPayload_files(ctx context.Context, field graphql.CollectedField, obj *model.DeleteFilesPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteFilesPayload_files(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Files, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*db.File)
+	fc.Result = res
+	return ec.marshalNFile2ᚕᚖexampleᚋpkgᚋdbᚐFileᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeleteFilesPayload_files(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeleteFilesPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_File_id(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "fileType":
+				return ec.fieldContext_File_fileType(ctx, field)
+			case "MIMEType":
+				return ec.fieldContext_File_MIMEType(ctx, field)
+			case "size":
+				return ec.fieldContext_File_size(ctx, field)
+			case "bucket":
+				return ec.fieldContext_File_bucket(ctx, field)
+			case "parent":
+				return ec.fieldContext_File_parent(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_File_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DownloadFilePayload_url(ctx context.Context, field graphql.CollectedField, obj *model.DownloadFilePayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DownloadFilePayload_url(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DownloadFilePayload_url(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DownloadFilePayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DownloadFilesPayload_url(ctx context.Context, field graphql.CollectedField, obj *model.DownloadFilesPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DownloadFilesPayload_url(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DownloadFilesPayload_url(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DownloadFilesPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -7861,8 +8594,8 @@ func (ec *executionContext) fieldContext_ForgotPasswordPayload_success(ctx conte
 	return fc, nil
 }
 
-func (ec *executionContext) _GenerateFileURLPayload_url(ctx context.Context, field graphql.CollectedField, obj *model.GenerateFileURLPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_GenerateFileURLPayload_url(ctx, field)
+func (ec *executionContext) _MoveFilesPayload_files(ctx context.Context, field graphql.CollectedField, obj *model.MoveFilesPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MoveFilesPayload_files(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -7875,7 +8608,7 @@ func (ec *executionContext) _GenerateFileURLPayload_url(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.URL, nil
+		return obj.Files, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -7887,26 +8620,50 @@ func (ec *executionContext) _GenerateFileURLPayload_url(ctx context.Context, fie
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.([]*db.File)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚕᚖexampleᚋpkgᚋdbᚐFileᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_GenerateFileURLPayload_url(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_MoveFilesPayload_files(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "GenerateFileURLPayload",
+		Object:     "MoveFilesPayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_File_id(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "fileType":
+				return ec.fieldContext_File_fileType(ctx, field)
+			case "MIMEType":
+				return ec.fieldContext_File_MIMEType(ctx, field)
+			case "size":
+				return ec.fieldContext_File_size(ctx, field)
+			case "bucket":
+				return ec.fieldContext_File_bucket(ctx, field)
+			case "parent":
+				return ec.fieldContext_File_parent(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_File_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_singleUpload(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_singleUpload(ctx, field)
+func (ec *executionContext) _Mutation_uploadFile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_uploadFile(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -7919,7 +8676,7 @@ func (ec *executionContext) _Mutation_singleUpload(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().SingleUpload(rctx, fc.Args["input"].(model.FileUploadInput))
+		return ec.resolvers.Mutation().UploadFile(rctx, fc.Args["input"].(model.FileUploadInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -7936,7 +8693,7 @@ func (ec *executionContext) _Mutation_singleUpload(ctx context.Context, field gr
 	return ec.marshalNFile2ᚖexampleᚋpkgᚋdbᚐFile(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_singleUpload(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_uploadFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -7977,7 +8734,66 @@ func (ec *executionContext) fieldContext_Mutation_singleUpload(ctx context.Conte
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_singleUpload_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_uploadFile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_uploadFiles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_uploadFiles(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UploadFiles(rctx, fc.Args["input"].(model.FileUploadInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.UploadFilesPayload)
+	fc.Result = res
+	return ec.marshalNUploadFilesPayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐUploadFilesPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_uploadFiles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "files":
+				return ec.fieldContext_UploadFilesPayload_files(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UploadFilesPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_uploadFiles_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -8063,8 +8879,8 @@ func (ec *executionContext) fieldContext_Mutation_createFolder(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_generateFileURL(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_generateFileURL(ctx, field)
+func (ec *executionContext) _Mutation_renameFile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_renameFile(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -8077,7 +8893,7 @@ func (ec *executionContext) _Mutation_generateFileURL(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().GenerateFileURL(rctx, fc.Args["input"].(model.GenerateFileURLInput))
+		return ec.resolvers.Mutation().RenameFile(rctx, fc.Args["input"].(model.RenameFileInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8089,12 +8905,12 @@ func (ec *executionContext) _Mutation_generateFileURL(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.GenerateFileURLPayload)
+	res := resTmp.(*db.File)
 	fc.Result = res
-	return ec.marshalNGenerateFileURLPayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐGenerateFileURLPayload(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚖexampleᚋpkgᚋdbᚐFile(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_generateFileURL(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_renameFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -8102,10 +8918,30 @@ func (ec *executionContext) fieldContext_Mutation_generateFileURL(ctx context.Co
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "url":
-				return ec.fieldContext_GenerateFileURLPayload_url(ctx, field)
+			case "id":
+				return ec.fieldContext_File_id(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "fileType":
+				return ec.fieldContext_File_fileType(ctx, field)
+			case "MIMEType":
+				return ec.fieldContext_File_MIMEType(ctx, field)
+			case "size":
+				return ec.fieldContext_File_size(ctx, field)
+			case "bucket":
+				return ec.fieldContext_File_bucket(ctx, field)
+			case "parent":
+				return ec.fieldContext_File_parent(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_File_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type GenerateFileURLPayload", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
 		},
 	}
 	defer func() {
@@ -8115,7 +8951,582 @@ func (ec *executionContext) fieldContext_Mutation_generateFileURL(ctx context.Co
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_generateFileURL_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_renameFile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_moveFile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_moveFile(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().MoveFile(rctx, fc.Args["input"].(model.MoveFileInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.File)
+	fc.Result = res
+	return ec.marshalNFile2ᚖexampleᚋpkgᚋdbᚐFile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_moveFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_File_id(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "fileType":
+				return ec.fieldContext_File_fileType(ctx, field)
+			case "MIMEType":
+				return ec.fieldContext_File_MIMEType(ctx, field)
+			case "size":
+				return ec.fieldContext_File_size(ctx, field)
+			case "bucket":
+				return ec.fieldContext_File_bucket(ctx, field)
+			case "parent":
+				return ec.fieldContext_File_parent(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_File_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_moveFile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_moveFiles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_moveFiles(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().MoveFiles(rctx, fc.Args["input"].(model.MoveFilesInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.MoveFilesPayload)
+	fc.Result = res
+	return ec.marshalNMoveFilesPayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐMoveFilesPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_moveFiles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "files":
+				return ec.fieldContext_MoveFilesPayload_files(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MoveFilesPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_moveFiles_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_copyFile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_copyFile(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CopyFile(rctx, fc.Args["input"].(model.CopyFileInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.File)
+	fc.Result = res
+	return ec.marshalNFile2ᚖexampleᚋpkgᚋdbᚐFile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_copyFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_File_id(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "fileType":
+				return ec.fieldContext_File_fileType(ctx, field)
+			case "MIMEType":
+				return ec.fieldContext_File_MIMEType(ctx, field)
+			case "size":
+				return ec.fieldContext_File_size(ctx, field)
+			case "bucket":
+				return ec.fieldContext_File_bucket(ctx, field)
+			case "parent":
+				return ec.fieldContext_File_parent(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_File_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_copyFile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_copyFiles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_copyFiles(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CopyFiles(rctx, fc.Args["input"].(model.CopyFilesInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.CopyFilesPayload)
+	fc.Result = res
+	return ec.marshalNCopyFilesPayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐCopyFilesPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_copyFiles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "files":
+				return ec.fieldContext_CopyFilesPayload_files(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CopyFilesPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_copyFiles_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteFile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deleteFile(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteFile(rctx, fc.Args["input"].(model.DeleteFileInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.DeleteFilePayload)
+	fc.Result = res
+	return ec.marshalNDeleteFilePayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐDeleteFilePayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "success":
+				return ec.fieldContext_DeleteFilePayload_success(ctx, field)
+			case "file":
+				return ec.fieldContext_DeleteFilePayload_file(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DeleteFilePayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteFile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteFiles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deleteFiles(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteFiles(rctx, fc.Args["input"].(model.DeleteFilesInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.DeleteFilesPayload)
+	fc.Result = res
+	return ec.marshalNDeleteFilesPayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐDeleteFilesPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteFiles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "success":
+				return ec.fieldContext_DeleteFilesPayload_success(ctx, field)
+			case "files":
+				return ec.fieldContext_DeleteFilesPayload_files(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DeleteFilesPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteFiles_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_previewFile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_previewFile(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().PreviewFile(rctx, fc.Args["input"].(model.PreviewFileInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.PreviewFilePayload)
+	fc.Result = res
+	return ec.marshalNPreviewFilePayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐPreviewFilePayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_previewFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "url":
+				return ec.fieldContext_PreviewFilePayload_url(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PreviewFilePayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_previewFile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_downloadFile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_downloadFile(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DownloadFile(rctx, fc.Args["input"].(model.DownloadFileInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.DownloadFilePayload)
+	fc.Result = res
+	return ec.marshalNDownloadFilePayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐDownloadFilePayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_downloadFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "url":
+				return ec.fieldContext_DownloadFilePayload_url(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DownloadFilePayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_downloadFile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_downloadFiles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_downloadFiles(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DownloadFiles(rctx, fc.Args["input"].(model.DownloadFilesInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.DownloadFilesPayload)
+	fc.Result = res
+	return ec.marshalNDownloadFilesPayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐDownloadFilesPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_downloadFiles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "url":
+				return ec.fieldContext_DownloadFilesPayload_url(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DownloadFilesPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_downloadFiles_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -10394,6 +11805,50 @@ func (ec *executionContext) fieldContext_PageInfo_currentPage(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _PreviewFilePayload_url(ctx context.Context, field graphql.CollectedField, obj *model.PreviewFilePayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PreviewFilePayload_url(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PreviewFilePayload_url(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PreviewFilePayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_chat(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_chat(ctx, field)
 	if err != nil {
@@ -10749,7 +12204,7 @@ func (ec *executionContext) _Query_files(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Files(rctx, fc.Args["input"].(*model.FilesFilterInput))
+		return ec.resolvers.Query().Files(rctx, fc.Args["input"].(*model.FilesFilterInput), fc.Args["limit"].(*int), fc.Args["offset"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10792,140 +12247,6 @@ func (ec *executionContext) fieldContext_Query_files(ctx context.Context, field 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_files_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_myFiles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_myFiles(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().MyFiles(rctx, fc.Args["input"].(*model.MyFilesFilterInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.FileConnection)
-	fc.Result = res
-	return ec.marshalNFileConnection2ᚖexampleᚋpkgᚋgraphᚋmodelᚐFileConnection(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_myFiles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "edges":
-				return ec.fieldContext_FileConnection_edges(ctx, field)
-			case "totalCount":
-				return ec.fieldContext_FileConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_FileConnection_pageInfo(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type FileConnection", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_myFiles_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_myBucket(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_myBucket(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().MyBucket(rctx, fc.Args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.Bucket)
-	fc.Result = res
-	return ec.marshalNBucket2ᚖexampleᚋpkgᚋdbᚐBucket(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_myBucket(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Bucket_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Bucket_name(ctx, field)
-			case "user":
-				return ec.fieldContext_Bucket_user(ctx, field)
-			case "shared":
-				return ec.fieldContext_Bucket_shared(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Bucket_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Bucket_deletedAt(ctx, field)
-			case "files":
-				return ec.fieldContext_Bucket_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Bucket", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_myBucket_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -13538,6 +14859,74 @@ func (ec *executionContext) fieldContext_TagConnection_totalCount(ctx context.Co
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UploadFilesPayload_files(ctx context.Context, field graphql.CollectedField, obj *model.UploadFilesPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UploadFilesPayload_files(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Files, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*db.File)
+	fc.Result = res
+	return ec.marshalNFile2ᚕᚖexampleᚋpkgᚋdbᚐFileᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UploadFilesPayload_files(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UploadFilesPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_File_id(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "fileType":
+				return ec.fieldContext_File_fileType(ctx, field)
+			case "MIMEType":
+				return ec.fieldContext_File_MIMEType(ctx, field)
+			case "size":
+				return ec.fieldContext_File_size(ctx, field)
+			case "bucket":
+				return ec.fieldContext_File_bucket(ctx, field)
+			case "parent":
+				return ec.fieldContext_File_parent(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_File_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
 		},
 	}
 	return fc, nil
@@ -17205,6 +18594,78 @@ func (ec *executionContext) unmarshalInputCompetenceSort(ctx context.Context, ob
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputCopyFileInput(ctx context.Context, obj interface{}) (model.CopyFileInput, error) {
+	var it model.CopyFileInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "targetId"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "targetId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetId"))
+			it.TargetID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCopyFilesInput(ctx context.Context, obj interface{}) (model.CopyFilesInput, error) {
+	var it model.CopyFilesInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"ids", "targetId"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "ids":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ids"))
+			it.Ids, err = ec.unmarshalNID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "targetId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetId"))
+			it.TargetID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreateEntryInput(ctx context.Context, obj interface{}) (model.CreateEntryInput, error) {
 	var it model.CreateEntryInput
 	asMap := map[string]interface{}{}
@@ -17685,6 +19146,118 @@ func (ec *executionContext) unmarshalInputCreateUserInput(ctx context.Context, o
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputDeleteFileInput(ctx context.Context, obj interface{}) (model.DeleteFileInput, error) {
+	var it model.DeleteFileInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputDeleteFilesInput(ctx context.Context, obj interface{}) (model.DeleteFilesInput, error) {
+	var it model.DeleteFilesInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"ids"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "ids":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ids"))
+			it.Ids, err = ec.unmarshalNID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputDownloadFileInput(ctx context.Context, obj interface{}) (model.DownloadFileInput, error) {
+	var it model.DownloadFileInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputDownloadFilesInput(ctx context.Context, obj interface{}) (model.DownloadFilesInput, error) {
+	var it model.DownloadFilesInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"ids"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "ids":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ids"))
+			it.Ids, err = ec.unmarshalNID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputEntryFilterInput(ctx context.Context, obj interface{}) (model.EntryFilterInput, error) {
 	var it model.EntryFilterInput
 	asMap := map[string]interface{}{}
@@ -17900,7 +19473,7 @@ func (ec *executionContext) unmarshalInputFilesFilterInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"parentId", "bucketId", "limit", "offset"}
+	fieldsInOrder := [...]string{"parentId", "bucketId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -17920,22 +19493,6 @@ func (ec *executionContext) unmarshalInputFilesFilterInput(ctx context.Context, 
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bucketId"))
 			it.BucketID, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "limit":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
-			it.Limit, err = ec.unmarshalOInt2ᚖint(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "offset":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
-			it.Offset, err = ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -18001,6 +19558,78 @@ func (ec *executionContext) unmarshalInputGenerateFileURLInput(ctx context.Conte
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputMoveFileInput(ctx context.Context, obj interface{}) (model.MoveFileInput, error) {
+	var it model.MoveFileInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "targetId"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "targetId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetId"))
+			it.TargetID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputMoveFilesInput(ctx context.Context, obj interface{}) (model.MoveFilesInput, error) {
+	var it model.MoveFilesInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"ids", "targetId"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "ids":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ids"))
+			it.Ids, err = ec.unmarshalNID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "targetId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetId"))
+			it.TargetID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputMyFilesFilterInput(ctx context.Context, obj interface{}) (model.MyFilesFilterInput, error) {
 	var it model.MyFilesFilterInput
 	asMap := map[string]interface{}{}
@@ -18008,7 +19637,7 @@ func (ec *executionContext) unmarshalInputMyFilesFilterInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"parentId", "limit", "offset"}
+	fieldsInOrder := [...]string{"parentId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -18023,19 +19652,67 @@ func (ec *executionContext) unmarshalInputMyFilesFilterInput(ctx context.Context
 			if err != nil {
 				return it, err
 			}
-		case "limit":
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputPreviewFileInput(ctx context.Context, obj interface{}) (model.PreviewFileInput, error) {
+	var it model.PreviewFileInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
-			it.Limit, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "offset":
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputRenameFileInput(ctx context.Context, obj interface{}) (model.RenameFileInput, error) {
+	var it model.RenameFileInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "name"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
-			it.Offset, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -19310,6 +20987,160 @@ func (ec *executionContext) _CompetenceConnection(ctx context.Context, sel ast.S
 	return out
 }
 
+var copyFilesPayloadImplementors = []string{"CopyFilesPayload"}
+
+func (ec *executionContext) _CopyFilesPayload(ctx context.Context, sel ast.SelectionSet, obj *model.CopyFilesPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, copyFilesPayloadImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CopyFilesPayload")
+		case "files":
+
+			out.Values[i] = ec._CopyFilesPayload_files(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var deleteFilePayloadImplementors = []string{"DeleteFilePayload"}
+
+func (ec *executionContext) _DeleteFilePayload(ctx context.Context, sel ast.SelectionSet, obj *model.DeleteFilePayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, deleteFilePayloadImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DeleteFilePayload")
+		case "success":
+
+			out.Values[i] = ec._DeleteFilePayload_success(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "file":
+
+			out.Values[i] = ec._DeleteFilePayload_file(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var deleteFilesPayloadImplementors = []string{"DeleteFilesPayload"}
+
+func (ec *executionContext) _DeleteFilesPayload(ctx context.Context, sel ast.SelectionSet, obj *model.DeleteFilesPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, deleteFilesPayloadImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DeleteFilesPayload")
+		case "success":
+
+			out.Values[i] = ec._DeleteFilesPayload_success(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "files":
+
+			out.Values[i] = ec._DeleteFilesPayload_files(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var downloadFilePayloadImplementors = []string{"DownloadFilePayload"}
+
+func (ec *executionContext) _DownloadFilePayload(ctx context.Context, sel ast.SelectionSet, obj *model.DownloadFilePayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, downloadFilePayloadImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DownloadFilePayload")
+		case "url":
+
+			out.Values[i] = ec._DownloadFilePayload_url(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var downloadFilesPayloadImplementors = []string{"DownloadFilesPayload"}
+
+func (ec *executionContext) _DownloadFilesPayload(ctx context.Context, sel ast.SelectionSet, obj *model.DownloadFilesPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, downloadFilesPayloadImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DownloadFilesPayload")
+		case "url":
+
+			out.Values[i] = ec._DownloadFilesPayload_url(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var entryImplementors = []string{"Entry"}
 
 func (ec *executionContext) _Entry(ctx context.Context, sel ast.SelectionSet, obj *db.Entry) graphql.Marshaler {
@@ -19979,19 +21810,19 @@ func (ec *executionContext) _ForgotPasswordPayload(ctx context.Context, sel ast.
 	return out
 }
 
-var generateFileURLPayloadImplementors = []string{"GenerateFileURLPayload"}
+var moveFilesPayloadImplementors = []string{"MoveFilesPayload"}
 
-func (ec *executionContext) _GenerateFileURLPayload(ctx context.Context, sel ast.SelectionSet, obj *model.GenerateFileURLPayload) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, generateFileURLPayloadImplementors)
+func (ec *executionContext) _MoveFilesPayload(ctx context.Context, sel ast.SelectionSet, obj *model.MoveFilesPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, moveFilesPayloadImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("GenerateFileURLPayload")
-		case "url":
+			out.Values[i] = graphql.MarshalString("MoveFilesPayload")
+		case "files":
 
-			out.Values[i] = ec._GenerateFileURLPayload_url(ctx, field, obj)
+			out.Values[i] = ec._MoveFilesPayload_files(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -20026,10 +21857,19 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "singleUpload":
+		case "uploadFile":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_singleUpload(ctx, field)
+				return ec._Mutation_uploadFile(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "uploadFiles":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_uploadFiles(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -20044,10 +21884,91 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "generateFileURL":
+		case "renameFile":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_generateFileURL(ctx, field)
+				return ec._Mutation_renameFile(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "moveFile":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_moveFile(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "moveFiles":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_moveFiles(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "copyFile":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_copyFile(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "copyFiles":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_copyFiles(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteFile":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteFile(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteFiles":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteFiles(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "previewFile":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_previewFile(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "downloadFile":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_downloadFile(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "downloadFiles":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_downloadFiles(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -20434,6 +22355,34 @@ func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
+var previewFilePayloadImplementors = []string{"PreviewFilePayload"}
+
+func (ec *executionContext) _PreviewFilePayload(ctx context.Context, sel ast.SelectionSet, obj *model.PreviewFilePayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, previewFilePayloadImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PreviewFilePayload")
+		case "url":
+
+			out.Values[i] = ec._PreviewFilePayload_url(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var queryImplementors = []string{"Query"}
 
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -20578,52 +22527,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_files(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return rrm(innerCtx)
-			})
-		case "myFiles":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_myFiles(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return rrm(innerCtx)
-			})
-		case "myBucket":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_myBucket(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -21418,6 +23321,34 @@ func (ec *executionContext) _TagConnection(ctx context.Context, sel ast.Selectio
 		case "totalCount":
 
 			out.Values[i] = ec._TagConnection_totalCount(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var uploadFilesPayloadImplementors = []string{"UploadFilesPayload"}
+
+func (ec *executionContext) _UploadFilesPayload(ctx context.Context, sel ast.SelectionSet, obj *model.UploadFilesPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, uploadFilesPayloadImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UploadFilesPayload")
+		case "files":
+
+			out.Values[i] = ec._UploadFilesPayload_files(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -22604,6 +24535,30 @@ func (ec *executionContext) marshalNCompetenceType2exampleᚋpkgᚋdbᚐCompeten
 	return res
 }
 
+func (ec *executionContext) unmarshalNCopyFileInput2exampleᚋpkgᚋgraphᚋmodelᚐCopyFileInput(ctx context.Context, v interface{}) (model.CopyFileInput, error) {
+	res, err := ec.unmarshalInputCopyFileInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNCopyFilesInput2exampleᚋpkgᚋgraphᚋmodelᚐCopyFilesInput(ctx context.Context, v interface{}) (model.CopyFilesInput, error) {
+	res, err := ec.unmarshalInputCopyFilesInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNCopyFilesPayload2exampleᚋpkgᚋgraphᚋmodelᚐCopyFilesPayload(ctx context.Context, sel ast.SelectionSet, v model.CopyFilesPayload) graphql.Marshaler {
+	return ec._CopyFilesPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNCopyFilesPayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐCopyFilesPayload(ctx context.Context, sel ast.SelectionSet, v *model.CopyFilesPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._CopyFilesPayload(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNCreateEntryInput2exampleᚋpkgᚋgraphᚋmodelᚐCreateEntryInput(ctx context.Context, v interface{}) (model.CreateEntryInput, error) {
 	res, err := ec.unmarshalInputCreateEntryInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -22647,6 +24602,82 @@ func (ec *executionContext) unmarshalNCreateUserCompetenceInput2ᚖexampleᚋpkg
 func (ec *executionContext) unmarshalNCreateUserInput2exampleᚋpkgᚋgraphᚋmodelᚐCreateUserInput(ctx context.Context, v interface{}) (model.CreateUserInput, error) {
 	res, err := ec.unmarshalInputCreateUserInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNDeleteFileInput2exampleᚋpkgᚋgraphᚋmodelᚐDeleteFileInput(ctx context.Context, v interface{}) (model.DeleteFileInput, error) {
+	res, err := ec.unmarshalInputDeleteFileInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDeleteFilePayload2exampleᚋpkgᚋgraphᚋmodelᚐDeleteFilePayload(ctx context.Context, sel ast.SelectionSet, v model.DeleteFilePayload) graphql.Marshaler {
+	return ec._DeleteFilePayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDeleteFilePayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐDeleteFilePayload(ctx context.Context, sel ast.SelectionSet, v *model.DeleteFilePayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DeleteFilePayload(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNDeleteFilesInput2exampleᚋpkgᚋgraphᚋmodelᚐDeleteFilesInput(ctx context.Context, v interface{}) (model.DeleteFilesInput, error) {
+	res, err := ec.unmarshalInputDeleteFilesInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDeleteFilesPayload2exampleᚋpkgᚋgraphᚋmodelᚐDeleteFilesPayload(ctx context.Context, sel ast.SelectionSet, v model.DeleteFilesPayload) graphql.Marshaler {
+	return ec._DeleteFilesPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDeleteFilesPayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐDeleteFilesPayload(ctx context.Context, sel ast.SelectionSet, v *model.DeleteFilesPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DeleteFilesPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNDownloadFileInput2exampleᚋpkgᚋgraphᚋmodelᚐDownloadFileInput(ctx context.Context, v interface{}) (model.DownloadFileInput, error) {
+	res, err := ec.unmarshalInputDownloadFileInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDownloadFilePayload2exampleᚋpkgᚋgraphᚋmodelᚐDownloadFilePayload(ctx context.Context, sel ast.SelectionSet, v model.DownloadFilePayload) graphql.Marshaler {
+	return ec._DownloadFilePayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDownloadFilePayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐDownloadFilePayload(ctx context.Context, sel ast.SelectionSet, v *model.DownloadFilePayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DownloadFilePayload(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNDownloadFilesInput2exampleᚋpkgᚋgraphᚋmodelᚐDownloadFilesInput(ctx context.Context, v interface{}) (model.DownloadFilesInput, error) {
+	res, err := ec.unmarshalInputDownloadFilesInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDownloadFilesPayload2exampleᚋpkgᚋgraphᚋmodelᚐDownloadFilesPayload(ctx context.Context, sel ast.SelectionSet, v model.DownloadFilesPayload) graphql.Marshaler {
+	return ec._DownloadFilesPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDownloadFilesPayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐDownloadFilesPayload(ctx context.Context, sel ast.SelectionSet, v *model.DownloadFilesPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DownloadFilesPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNEntry2exampleᚋpkgᚋdbᚐEntry(ctx context.Context, sel ast.SelectionSet, v db.Entry) graphql.Marshaler {
@@ -22904,25 +24935,6 @@ func (ec *executionContext) marshalNForgotPasswordPayload2ᚖexampleᚋpkgᚋgra
 	return ec._ForgotPasswordPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNGenerateFileURLInput2exampleᚋpkgᚋgraphᚋmodelᚐGenerateFileURLInput(ctx context.Context, v interface{}) (model.GenerateFileURLInput, error) {
-	res, err := ec.unmarshalInputGenerateFileURLInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNGenerateFileURLPayload2exampleᚋpkgᚋgraphᚋmodelᚐGenerateFileURLPayload(ctx context.Context, sel ast.SelectionSet, v model.GenerateFileURLPayload) graphql.Marshaler {
-	return ec._GenerateFileURLPayload(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNGenerateFileURLPayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐGenerateFileURLPayload(ctx context.Context, sel ast.SelectionSet, v *model.GenerateFileURLPayload) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._GenerateFileURLPayload(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -23047,6 +25059,30 @@ func (ec *executionContext) marshalNInt2ᚕintᚄ(ctx context.Context, sel ast.S
 	return ret
 }
 
+func (ec *executionContext) unmarshalNMoveFileInput2exampleᚋpkgᚋgraphᚋmodelᚐMoveFileInput(ctx context.Context, v interface{}) (model.MoveFileInput, error) {
+	res, err := ec.unmarshalInputMoveFileInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNMoveFilesInput2exampleᚋpkgᚋgraphᚋmodelᚐMoveFilesInput(ctx context.Context, v interface{}) (model.MoveFilesInput, error) {
+	res, err := ec.unmarshalInputMoveFilesInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNMoveFilesPayload2exampleᚋpkgᚋgraphᚋmodelᚐMoveFilesPayload(ctx context.Context, sel ast.SelectionSet, v model.MoveFilesPayload) graphql.Marshaler {
+	return ec._MoveFilesPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNMoveFilesPayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐMoveFilesPayload(ctx context.Context, sel ast.SelectionSet, v *model.MoveFilesPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._MoveFilesPayload(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNOrganisation2exampleᚋpkgᚋdbᚐOrganisation(ctx context.Context, sel ast.SelectionSet, v db.Organisation) graphql.Marshaler {
 	return ec._Organisation(ctx, sel, &v)
 }
@@ -23069,6 +25105,30 @@ func (ec *executionContext) marshalNPageInfo2ᚖexampleᚋpkgᚋgraphᚋmodelᚐ
 		return graphql.Null
 	}
 	return ec._PageInfo(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNPreviewFileInput2exampleᚋpkgᚋgraphᚋmodelᚐPreviewFileInput(ctx context.Context, v interface{}) (model.PreviewFileInput, error) {
+	res, err := ec.unmarshalInputPreviewFileInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNPreviewFilePayload2exampleᚋpkgᚋgraphᚋmodelᚐPreviewFilePayload(ctx context.Context, sel ast.SelectionSet, v model.PreviewFilePayload) graphql.Marshaler {
+	return ec._PreviewFilePayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPreviewFilePayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐPreviewFilePayload(ctx context.Context, sel ast.SelectionSet, v *model.PreviewFilePayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._PreviewFilePayload(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNRenameFileInput2exampleᚋpkgᚋgraphᚋmodelᚐRenameFileInput(ctx context.Context, v interface{}) (model.RenameFileInput, error) {
+	res, err := ec.unmarshalInputRenameFileInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNReport2exampleᚋpkgᚋdbᚐReport(ctx context.Context, sel ast.SelectionSet, v db.Report) graphql.Marshaler {
@@ -23399,6 +25459,20 @@ func (ec *executionContext) marshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋg
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNUploadFilesPayload2exampleᚋpkgᚋgraphᚋmodelᚐUploadFilesPayload(ctx context.Context, sel ast.SelectionSet, v model.UploadFilesPayload) graphql.Marshaler {
+	return ec._UploadFilesPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUploadFilesPayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐUploadFilesPayload(ctx context.Context, sel ast.SelectionSet, v *model.UploadFilesPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._UploadFilesPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNUser2exampleᚋpkgᚋdbᚐUser(ctx context.Context, sel ast.SelectionSet, v db.User) graphql.Marshaler {
@@ -24376,14 +26450,6 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	}
 	res := graphql.MarshalInt(*v)
 	return res
-}
-
-func (ec *executionContext) unmarshalOMyFilesFilterInput2ᚖexampleᚋpkgᚋgraphᚋmodelᚐMyFilesFilterInput(ctx context.Context, v interface{}) (*model.MyFilesFilterInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputMyFilesFilterInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOOrganisation2ᚕᚖexampleᚋpkgᚋdbᚐOrganisation(ctx context.Context, sel ast.SelectionSet, v []*db.Organisation) graphql.Marshaler {

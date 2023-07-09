@@ -45,6 +45,20 @@ type CompetenceSort struct {
 	Order SortDirection       `json:"order"`
 }
 
+type CopyFileInput struct {
+	ID       string `json:"id"`
+	TargetID string `json:"targetId"`
+}
+
+type CopyFilesInput struct {
+	Ids      []string `json:"ids"`
+	TargetID string   `json:"targetId"`
+}
+
+type CopyFilesPayload struct {
+	Files []*db.File `json:"files"`
+}
+
 type CreateEntryInput struct {
 	Date            string                       `json:"date"`
 	Body            string                       `json:"body"`
@@ -109,6 +123,41 @@ type CreateUserInput struct {
 	JoinedAt  *time.Time  `json:"joinedAt,omitempty"`
 }
 
+type DeleteFileInput struct {
+	ID string `json:"id"`
+}
+
+type DeleteFilePayload struct {
+	Success bool     `json:"success"`
+	File    *db.File `json:"file"`
+}
+
+type DeleteFilesInput struct {
+	Ids []string `json:"ids"`
+}
+
+type DeleteFilesPayload struct {
+	Success bool       `json:"success"`
+	Files   []*db.File `json:"files"`
+}
+
+type DownloadFileInput struct {
+	ID string `json:"id"`
+}
+
+type DownloadFilePayload struct {
+	URL string `json:"url"`
+}
+
+type DownloadFilesInput struct {
+	Ids []string `json:"ids"`
+}
+
+type DownloadFilesPayload struct {
+	// The url to download a zip file containing all the files.
+	URL string `json:"url"`
+}
+
 type EntryConnection struct {
 	Edges      []*db.Entry `json:"edges,omitempty"`
 	PageInfo   *PageInfo   `json:"pageInfo"`
@@ -169,8 +218,6 @@ type FileUploadInput struct {
 type FilesFilterInput struct {
 	ParentID *string `json:"parentId,omitempty"`
 	BucketID *string `json:"bucketId,omitempty"`
-	Limit    *int    `json:"limit,omitempty"`
-	Offset   *int    `json:"offset,omitempty"`
 }
 
 type ForgotPasswordInput struct {
@@ -185,14 +232,22 @@ type GenerateFileURLInput struct {
 	ID string `json:"id"`
 }
 
-type GenerateFileURLPayload struct {
-	URL string `json:"url"`
+type MoveFileInput struct {
+	ID       string `json:"id"`
+	TargetID string `json:"targetId"`
+}
+
+type MoveFilesInput struct {
+	Ids      []string `json:"ids"`
+	TargetID string   `json:"targetId"`
+}
+
+type MoveFilesPayload struct {
+	Files []*db.File `json:"files"`
 }
 
 type MyFilesFilterInput struct {
 	ParentID *string `json:"parentId,omitempty"`
-	Limit    *int    `json:"limit,omitempty"`
-	Offset   *int    `json:"offset,omitempty"`
 }
 
 type OrganisationConnection struct {
@@ -205,6 +260,19 @@ type PageInfo struct {
 	HasNextPage     bool `json:"hasNextPage"`
 	HasPreviousPage bool `json:"hasPreviousPage"`
 	CurrentPage     int  `json:"currentPage"`
+}
+
+type PreviewFileInput struct {
+	ID string `json:"id"`
+}
+
+type PreviewFilePayload struct {
+	URL string `json:"url"`
+}
+
+type RenameFileInput struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 type ReportConnection struct {
@@ -301,6 +369,10 @@ type UpdateUserInput struct {
 	Birthday  *time.Time `json:"birthday,omitempty"`
 	LeftAt    *time.Time `json:"leftAt,omitempty"`
 	JoinedAt  *time.Time `json:"joinedAt,omitempty"`
+}
+
+type UploadFilesPayload struct {
+	Files []*db.File `json:"files"`
 }
 
 type UserCompetenceConnection struct {

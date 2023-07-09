@@ -11,6 +11,8 @@ import (
 	"example/pkg/graph/model"
 	"example/pkg/middleware"
 	"fmt"
+	"mime"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -154,8 +156,8 @@ func (r *fileResolver) Files(ctx context.Context, obj *db.File) ([]*db.File, err
 	return files, nil
 }
 
-// SingleUpload is the resolver for the singleUpload field.
-func (r *mutationResolver) SingleUpload(ctx context.Context, input model.FileUploadInput) (*db.File, error) {
+// UploadFile is the resolver for the uploadFile field.
+func (r *mutationResolver) UploadFile(ctx context.Context, input model.FileUploadInput) (*db.File, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, nil
@@ -166,6 +168,10 @@ func (r *mutationResolver) SingleUpload(ctx context.Context, input model.FileUpl
 	file.FileType = "blob"
 	file.OrganisationID = currentUser.OrganisationID
 	file.Size = input.File.Size
+
+	// parse MIME type
+	mimeFileType := mime.TypeByExtension(filepath.Ext(input.File.Filename))
+	file.MimeType = mimeFileType
 
 	var bucket db.Bucket
 
@@ -213,6 +219,11 @@ func (r *mutationResolver) SingleUpload(ctx context.Context, input model.FileUpl
 	}
 
 	return &file, nil
+}
+
+// UploadFiles is the resolver for the uploadFiles field.
+func (r *mutationResolver) UploadFiles(ctx context.Context, input model.FileUploadInput) (*model.UploadFilesPayload, error) {
+	panic(fmt.Errorf("not implemented: UploadFiles - uploadFiles"))
 }
 
 // CreateFolder is the resolver for the createFolder field.
@@ -265,8 +276,85 @@ func (r *mutationResolver) CreateFolder(ctx context.Context, input model.CreateF
 	return &file, nil
 }
 
-// GenerateFileURL is the resolver for the generateFileURL field.
-func (r *mutationResolver) GenerateFileURL(ctx context.Context, input model.GenerateFileURLInput) (*model.GenerateFileURLPayload, error) {
+// RenameFile is the resolver for the renameFile field.
+func (r *mutationResolver) RenameFile(ctx context.Context, input model.RenameFileInput) (*db.File, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	var file db.File
+	err = r.DB.NewSelect().Model(&file).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	file.Name = input.Name
+	err = r.DB.NewUpdate().Model(&file).Column("name").WherePK().Returning("*").Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &file, nil
+}
+
+// MoveFile is the resolver for the moveFile field.
+func (r *mutationResolver) MoveFile(ctx context.Context, input model.MoveFileInput) (*db.File, error) {
+	panic(fmt.Errorf("not implemented: MoveFile - moveFile"))
+}
+
+// MoveFiles is the resolver for the moveFiles field.
+func (r *mutationResolver) MoveFiles(ctx context.Context, input model.MoveFilesInput) (*model.MoveFilesPayload, error) {
+	panic(fmt.Errorf("not implemented: MoveFiles - moveFiles"))
+}
+
+// CopyFile is the resolver for the copyFile field.
+func (r *mutationResolver) CopyFile(ctx context.Context, input model.CopyFileInput) (*db.File, error) {
+	panic(fmt.Errorf("not implemented: CopyFile - copyFile"))
+}
+
+// CopyFiles is the resolver for the copyFiles field.
+func (r *mutationResolver) CopyFiles(ctx context.Context, input model.CopyFilesInput) (*model.CopyFilesPayload, error) {
+	panic(fmt.Errorf("not implemented: CopyFiles - copyFiles"))
+}
+
+// DeleteFile is the resolver for the deleteFile field.
+func (r *mutationResolver) DeleteFile(ctx context.Context, input model.DeleteFileInput) (*model.DeleteFilePayload, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	var file db.File
+	err = r.DB.NewSelect().Model(&file).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.DB.NewDelete().Model(&file).WherePK().Returning("*").Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: start background job that moves file to trash (cold storage)
+	//err = r.MinioClient.RemoveObject(ctx, file.BucketID, file.ID, minio.RemoveObjectOptions{})
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	return &model.DeleteFilePayload{
+		Success: true,
+		File:    &file,
+	}, nil
+}
+
+// DeleteFiles is the resolver for the deleteFiles field.
+func (r *mutationResolver) DeleteFiles(ctx context.Context, input model.DeleteFilesInput) (*model.DeleteFilesPayload, error) {
+	panic(fmt.Errorf("not implemented: DeleteFiles - deleteFiles"))
+}
+
+// PreviewFile is the resolver for the previewFile field.
+func (r *mutationResolver) PreviewFile(ctx context.Context, input model.PreviewFileInput) (*model.PreviewFilePayload, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, nil
@@ -284,7 +372,17 @@ func (r *mutationResolver) GenerateFileURL(ctx context.Context, input model.Gene
 		return nil, err
 	}
 
-	return &model.GenerateFileURLPayload{URL: presignedURL.String()}, nil
+	return &model.PreviewFilePayload{URL: presignedURL.String()}, nil
+}
+
+// DownloadFile is the resolver for the downloadFile field.
+func (r *mutationResolver) DownloadFile(ctx context.Context, input model.DownloadFileInput) (*model.DownloadFilePayload, error) {
+	panic(fmt.Errorf("not implemented: DownloadFile - downloadFile"))
+}
+
+// DownloadFiles is the resolver for the downloadFiles field.
+func (r *mutationResolver) DownloadFiles(ctx context.Context, input model.DownloadFilesInput) (*model.DownloadFilesPayload, error) {
+	panic(fmt.Errorf("not implemented: DownloadFiles - downloadFiles"))
 }
 
 // Buckets is the resolver for the buckets field.
@@ -347,14 +445,34 @@ func (r *queryResolver) File(ctx context.Context, id string) (*db.File, error) {
 }
 
 // Files is the resolver for the files field.
-func (r *queryResolver) Files(ctx context.Context, input *model.FilesFilterInput) (*model.FileConnection, error) {
+func (r *queryResolver) Files(ctx context.Context, input *model.FilesFilterInput, limit *int, offset *int) (*model.FileConnection, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, nil
 	}
 
+	pageLimit := 100
+	if limit != nil {
+		if *limit > 1000 {
+			return nil, fmt.Errorf("limit cannot be greater than 1000")
+		}
+		pageLimit = *limit
+	}
+
+	pageOffset := 0
+	if offset != nil {
+		pageOffset = *offset
+	}
+
 	var files []*db.File
-	query := r.DB.NewSelect().Model(&files).Where("organisation_id = ?", currentUser.OrganisationID).Order("name")
+	query := r.DB.
+		NewSelect().
+		Model(&files).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Order("file_type DESC").
+		Order("name").
+		Limit(pageLimit).
+		Offset(pageOffset)
 
 	if input != nil {
 		if input.ParentID != nil && len(*input.ParentID) > 0 {
@@ -365,50 +483,11 @@ func (r *queryResolver) Files(ctx context.Context, input *model.FilesFilterInput
 		if input.BucketID != nil && len(*input.BucketID) > 0 {
 			query.Where("bucket_id = ?", *input.BucketID)
 		}
-		if input.Limit != nil {
-			query.Limit(*input.Limit)
+		if limit != nil {
+			query.Limit(*limit)
 		}
-		if input.Offset != nil {
-			query.Offset(*input.Offset)
-		}
-	}
-
-	count, err := query.ScanAndCount(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &model.FileConnection{
-		Edges:      files,
-		TotalCount: count,
-		PageInfo:   nil,
-	}, nil
-}
-
-// MyFiles is the resolver for the myFiles field.
-func (r *queryResolver) MyFiles(ctx context.Context, input *model.MyFilesFilterInput) (*model.FileConnection, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, nil
-	}
-
-	var bucket db.Bucket
-	err = r.DB.NewSelect().Model(&bucket).Column("id").Where("user_id = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-
-	var files []*db.File
-	query := r.DB.NewSelect().Model(&files).Where("organisation_id = ?", currentUser.OrganisationID).Where("bucket_id = ?", bucket.ID).Order("name")
-
-	if input != nil {
-		if input.ParentID != nil && len(*input.ParentID) > 0 {
-			query.Where("parent_id = ?", *input.ParentID)
-		} else {
-			query.Where("parent_id IS NULL")
-		}
-		if input.Limit != nil {
-			query.Limit(*input.Limit)
-		}
-		if input.Offset != nil {
-			query.Offset(*input.Offset)
+		if offset != nil {
+			query.Offset(*offset)
 		}
 	}
 
@@ -417,16 +496,33 @@ func (r *queryResolver) MyFiles(ctx context.Context, input *model.MyFilesFilterI
 		return nil, err
 	}
 
+	pageInfo := &model.PageInfo{}
+
+	if count < pageOffset+pageLimit {
+		pageInfo.HasNextPage = false
+	} else {
+		pageInfo.HasNextPage = true
+	}
+
+	if pageOffset > 0 {
+		pageInfo.HasPreviousPage = true
+	} else {
+		pageInfo.HasPreviousPage = false
+	}
+
+	pageInfo.CurrentPage = pageOffset / pageLimit
+
+	if pageOffset > 0 {
+		pageInfo.HasPreviousPage = true
+	} else {
+		pageInfo.HasPreviousPage = false
+	}
+
 	return &model.FileConnection{
 		Edges:      files,
 		TotalCount: count,
-		PageInfo:   nil,
+		PageInfo:   pageInfo,
 	}, nil
-}
-
-// MyBucket is the resolver for the myBucket field.
-func (r *queryResolver) MyBucket(ctx context.Context, id string) (*db.Bucket, error) {
-	panic(fmt.Errorf("not implemented: MyBucket - myBucket"))
 }
 
 // Bucket returns BucketResolver implementation.

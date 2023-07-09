@@ -43,14 +43,10 @@ input SharedDriveFilterInput {
 input FilesFilterInput {
     parentId: String
     bucketId: String
-    limit: Int
-    offset: Int
 }
 
 input MyFilesFilterInput {
     parentId: String
-    limit: Int
-    offset: Int
 }
 
 input BucketFilterInput {
@@ -74,10 +70,7 @@ extend type Query {
     bucket(id: ID!): Bucket!
 
     file(id: ID!): File!
-    files(input: FilesFilterInput): FileConnection!
-
-    myFiles(input: MyFilesFilterInput): FileConnection!
-    myBucket(id: ID!): Bucket!
+    files(input: FilesFilterInput, limit: Int, offset: Int): FileConnection!
 }
 
 input FileUploadInput {
@@ -102,12 +95,106 @@ input GenerateFileURLInput {
     id: ID!
 }
 
-type GenerateFileURLPayload {
+type PreviewFilePayload {
     url: String!
 }
 
+type DeleteFilePayload {
+    success: Boolean!
+    file: File!
+}
+
+type DeleteFilesPayload {
+    success: Boolean!
+    files: [File!]!
+}
+
+input DownloadFileInput {
+    id: ID!
+}
+
+input DownloadFilesInput {
+    ids: [ID!]!
+}
+
+type DownloadFilePayload {
+    url: String!
+}
+
+type DownloadFilesPayload {
+    """
+    The url to download a zip file containing all the files.
+    """
+    url: String!
+}
+
+input RenameFileInput {
+    id: ID!
+    name: String!
+}
+
+input MoveFileInput {
+    id: ID!
+    targetId: ID!
+}
+
+input MoveFilesInput {
+    ids: [ID!]!
+    targetId: ID!
+}
+
+input CopyFileInput {
+    id: ID!
+    targetId: ID!
+}
+
+input CopyFilesInput {
+    ids: [ID!]!
+    targetId: ID!
+}
+
+input DeleteFileInput {
+    id: ID!
+}
+
+input DeleteFilesInput {
+    ids: [ID!]!
+}
+
+type MoveFilesPayload {
+    files: [File!]!
+}
+
+type CopyFilesPayload {
+    files: [File!]!
+}
+
+type UploadFilesPayload {
+    files: [File!]!
+}
+
+input PreviewFileInput {
+    id: ID!
+}
+
 extend type Mutation {
-    singleUpload(input: FileUploadInput!): File!
+    uploadFile(input: FileUploadInput!): File!
+    uploadFiles(input: FileUploadInput!): UploadFilesPayload!
+
     createFolder(input: CreateFolderInput!): File!
-    generateFileURL(input: GenerateFileURLInput!): GenerateFileURLPayload!
+
+    renameFile(input: RenameFileInput!): File!
+
+    moveFile(input: MoveFileInput!): File!
+    moveFiles(input: MoveFilesInput!): MoveFilesPayload!
+
+    copyFile(input: CopyFileInput!): File!
+    copyFiles(input: CopyFilesInput!): CopyFilesPayload!
+
+    deleteFile(input: DeleteFileInput!): DeleteFilePayload!
+    deleteFiles(input: DeleteFilesInput!): DeleteFilesPayload!
+
+    previewFile(input: PreviewFileInput!): PreviewFilePayload!
+    downloadFile(input: DownloadFileInput!): DownloadFilePayload!
+    downloadFiles(input: DownloadFilesInput!): DownloadFilesPayload!
 }
