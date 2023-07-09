@@ -218,6 +218,7 @@ type FileUploadInput struct {
 type FilesFilterInput struct {
 	ParentID *string `json:"parentId,omitempty"`
 	BucketID *string `json:"bucketId,omitempty"`
+	MyBucket *bool   `json:"myBucket,omitempty"`
 }
 
 type ForgotPasswordInput struct {

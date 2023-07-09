@@ -19473,7 +19473,7 @@ func (ec *executionContext) unmarshalInputFilesFilterInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"parentId", "bucketId"}
+	fieldsInOrder := [...]string{"parentId", "bucketId", "myBucket"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -19493,6 +19493,14 @@ func (ec *executionContext) unmarshalInputFilesFilterInput(ctx context.Context, 
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bucketId"))
 			it.BucketID, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "myBucket":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("myBucket"))
+			it.MyBucket, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}

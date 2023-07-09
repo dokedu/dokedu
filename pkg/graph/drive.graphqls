@@ -43,6 +43,7 @@ input SharedDriveFilterInput {
 input FilesFilterInput {
     parentId: String
     bucketId: String
+    myBucket: Boolean
 }
 
 input MyFilesFilterInput {

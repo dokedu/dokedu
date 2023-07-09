@@ -481,13 +481,28 @@ func (r *queryResolver) Files(ctx context.Context, input *model.FilesFilterInput
 			query.Where("parent_id IS NULL")
 		}
 		if input.BucketID != nil && len(*input.BucketID) > 0 {
-			query.Where("bucket_id = ?", *input.BucketID)
-		}
-		if limit != nil {
-			query.Limit(*limit)
-		}
-		if offset != nil {
-			query.Offset(*offset)
+			var bucket db.Bucket
+			err = r.DB.NewSelect().
+				Model(&bucket).
+				Where("id = ?", *input.BucketID).
+				Where("shared = ?", true).
+				Where("organisation_id = ?", currentUser.OrganisationID).
+				Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			query.Where("bucket_id = ?", bucket.ID)
+		} else if input.MyBucket != nil && *input.MyBucket {
+			var bucket db.Bucket
+			err = r.DB.NewSelect().Model(&bucket).Where("user_id = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			query.Where("bucket_id = ?", bucket.ID)
+		} else {
+			return nil, fmt.Errorf("bucket_id or my_bucket must be provided")
 		}
 	}
 
