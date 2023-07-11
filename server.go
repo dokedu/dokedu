@@ -79,10 +79,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = meili.GenerateCompetenceIndex(ctx, dbClient)
-	if err != nil {
-		log.Fatal(err)
-	}
+	//err = meili.GenerateCompetenceIndex(ctx, dbClient)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 
 	e := echo.New()
 
