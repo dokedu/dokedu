@@ -150,6 +150,20 @@ type Competence struct {
 	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
 }
 
+type CompetenceNoNullString struct {
+	ID             string         `bun:",nullzero,pk" json:"id"`
+	Name           string         `json:"name"`
+	CompetenceID   string         `json:"competence_id"`
+	CompetenceType CompetenceType `json:"competence_type"`
+	OrganisationID string         `json:"organisation_id"`
+	Grades         []int          `bun:",array" json:"grades"`
+	Color          string         `json:"color"`
+	SortOrder      int            `json:"sort_order"`
+	CurriculumID   string         `json:"curriculum_id"`
+	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	DeletedAt      string         `bun:",soft_delete,nullzero"`
+}
+
 type Entry struct {
 	bun.BaseModel
 

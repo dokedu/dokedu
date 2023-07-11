@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"example/pkg/dataloaders"
 	"example/pkg/graph"
 	"example/pkg/mail"
 	"example/pkg/middleware"
@@ -78,15 +79,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Generate the competence index in the background
-	//go func() {
-	//	err := meili.GenerateCompetenceIndex(ctx, dbClient)
-	//	if err != nil {
-	//		log.Fatal(err)
-	//	}
-	//}()
+	err = meili.GenerateCompetenceIndex(ctx, dbClient)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	e := echo.New()
+
+	// Add dataloader middleware
+	loader := dataloaders.NewLoaders(dbClient)
+	e.Use(dataloaders.Middleware(loader))
 
 	e.Use(middleware.CORS())
 

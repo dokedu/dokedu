@@ -9,6 +9,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"example/pkg/dataloaders"
 	"example/pkg/db"
 	"example/pkg/graph/model"
 	"example/pkg/middleware"
@@ -18,7 +19,7 @@ import (
 	"time"
 
 	nanoid "github.com/matoous/go-nanoid/v2"
-	meilisearch "github.com/meilisearch/meilisearch-go"
+	"github.com/meilisearch/meilisearch-go"
 	"github.com/uptrace/bun"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -44,40 +45,7 @@ func (r *competenceResolver) Parents(ctx context.Context, obj *db.Competence) ([
 		return nil, nil
 	}
 
-	query := `
-WITH RECURSIVE competence_hierarchy AS (
-    SELECT *
-    FROM competences
-    WHERE id = ? AND organisation_id = ?
-
-    UNION ALL
-
-    SELECT c.*
-    FROM competences c
-    INNER JOIN competence_hierarchy ch ON c.id = ch.competence_id
-	WHERE c.organisation_id = ?
-)
-SELECT *
-FROM competence_hierarchy
-WHERE id <> ?;
-`
-
-	// query without new lines
-	q := strings.ReplaceAll(query, "\n", " ")
-
-	var parents []*db.Competence
-	err = r.DB.NewRaw(q, obj.ID, currentUser.OrganisationID, currentUser.OrganisationID, obj.ID).Scan(ctx, &parents)
-	if err != nil {
-		return nil, err
-	}
-
-	// reverse the order of the parents
-	for i := len(parents)/2 - 1; i >= 0; i-- {
-		opp := len(parents) - 1 - i
-		parents[i], parents[opp] = parents[opp], parents[i]
-	}
-
-	return parents, nil
+	return dataloaders.GetCompetenceParents(ctx, obj.ID, currentUser)
 }
 
 // Competences is the resolver for the competences field.
