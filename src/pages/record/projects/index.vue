@@ -71,12 +71,19 @@
       </template>
     </DTable>
   </PageWrapper>
-  <router-view />
+
+  <div
+    ref="sheet"
+    v-if="$route.params.id || $route.name === 'record-projects-new'"
+    class="absolute right-0 top-0 h-screen w-full max-w-xl overflow-scroll bg-white shadow-md shadow-stone-300"
+  >
+    <router-view />
+  </div>
 </template>
 <script setup lang="ts">
 import PageHeader from "../../../components/PageHeader.vue";
 import PageWrapper from "../../../components/PageWrapper.vue";
-import { formatDate } from "@vueuse/core";
+import { formatDate, onClickOutside, onKeyStroke } from "@vueuse/core";
 import DButton from "../../../components/d-button/d-button.vue";
 import { Plus } from "lucide-vue-next";
 import { Share } from "lucide-vue-next";
@@ -86,6 +93,16 @@ import { ListFilter } from "lucide-vue-next";
 import DTable from "@/components/d-table/d-table.vue";
 import { useRouter } from "vue-router";
 import { PageVariables } from "@/types/types";
+
+const sheet = ref<HTMLElement | null>(null);
+
+onClickOutside(sheet, async () => {
+  await router.push({ name: "record-projects" });
+});
+
+onKeyStroke("Escape", async () => {
+  await router.push({ name: "record-projects" });
+});
 
 const search = ref("");
 const filtersOpen = ref(false);
@@ -140,7 +157,7 @@ const pageVariables = ref<Variables[]>([
 ]);
 
 const onRowClick = (row: Record<string, string>) => {
-  router.push({ name: "record-projects-project", params: { id: row.id } });
+  router.push({ name: "record-projects-project-inline", params: { id: row.id } });
 };
 
 watch([search, startTimestamp, endsTimestamp], () => {

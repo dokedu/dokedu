@@ -132,6 +132,11 @@ const router = createRouter({
       component: () => import("./pages/record/reports/new.vue"),
     },
     {
+      name: "record-projects-project",
+      path: "/record/projects/:id",
+      component: () => import("./pages/record/projects/[id].vue"),
+    },
+    {
       name: "record-projects",
       path: "/record/projects",
       component: () => import("./pages/record/projects/index.vue"),
@@ -142,7 +147,7 @@ const router = createRouter({
           component: () => import("./pages/record/projects/new.vue"),
         },
         {
-          name: "record-projects-project",
+          name: "record-projects-project-inline",
           path: ":id",
           component: () => import("./pages/record/projects/[id].vue"),
         },
