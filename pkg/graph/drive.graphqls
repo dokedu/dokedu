@@ -178,6 +178,19 @@ input PreviewFileInput {
     id: ID!
 }
 
+# file permission: Viewer, Manager
+enum FilePermission {
+    Viewer
+    Manager
+}
+
+input ShareFileInput {
+    fileId: ID!
+    users: [ID!]!
+    emails: [String!]!
+    permission: FilePermission!
+}
+
 extend type Mutation {
     uploadFile(input: FileUploadInput!): File!
     uploadFiles(input: FileUploadInput!): UploadFilesPayload!
@@ -198,4 +211,7 @@ extend type Mutation {
     previewFile(input: PreviewFileInput!): PreviewFilePayload!
     downloadFile(input: DownloadFileInput!): DownloadFilePayload!
     downloadFiles(input: DownloadFilesInput!): DownloadFilesPayload!
+
+    addFileShare(input: ShareFileInput!): File!
+    removeFileShare(input: ID!): File!
 }

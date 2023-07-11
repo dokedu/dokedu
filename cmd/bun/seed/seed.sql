@@ -33,7 +33,7 @@ VALUES ('nm5pYXzpYe_rJjHpjnCdH', 'can count to 10', 'u2wHWUbnWUaUUjBeNvQ4u', 'co
         '{1,2,3}');
 
 INSERT INTO competences (id, name, organisation_id, competence_type, competence_id, grades)
-VALUES (nanoid(), 'can count to 10', 'u2wHWUbnWUaUUjBeNvQ4u', 'competence', 'GFCWc0Wv7lqCciCPI6ngg',
+VALUES (nanoid(), 'can multiply by 2', 'u2wHWUbnWUaUUjBeNvQ4u', 'competence', 'GFCWc0Wv7lqCciCPI6ngg',
         '{1,2,3}');
 
 -- Students
@@ -44,7 +44,7 @@ $$
         first_names TEXT[] := ARRAY ['John', 'Emma', 'Michael', 'Olivia', 'William', 'Ava', 'James', 'Sophia', 'Benjamin', 'Isabella', 'Jacob', 'Mia', 'Ethan', 'Charlotte', 'Daniel', 'Amelia', 'Matthew', 'Harper', 'Henry', 'Evelyn'];
         last_names  TEXT[] := ARRAY ['Smith', 'Johnson', 'Brown', 'Taylor', 'Miller', 'Anderson', 'Thomas', 'Jackson', 'White', 'Harris', 'Martin', 'Clark', 'Lewis', 'Walker', 'Hall', 'Young', 'Allen', 'Wright', 'Scott', 'King'];
     BEGIN
-        WHILE i <= 100
+        WHILE i <= 25
             LOOP
                 INSERT INTO users (id, role, first_name, last_name, organisation_id)
                 VALUES (nanoid(), 'student', first_names[1 + floor(random() * array_length(first_names, 1))],

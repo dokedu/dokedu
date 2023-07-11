@@ -49,8 +49,8 @@ input CreateEventInput {
     title: String!
     image: Upload
     body: String
-    startsAt: Time!
-    endsAt: Time!
+    startsAt: String
+    endsAt: String
     recurrence: [String]
 }
 
@@ -59,13 +59,19 @@ input UpdateEventInput {
     title: String
     image: Upload
     body: String
-    startsAt: Time
-    endsAt: Time
+    startsAt: String
+    endsAt: String
     recurrence: [String]
+}
+
+input AddEventCompetenceInput {
+    eventId: ID!
+    competenceId: ID!
 }
 
 extend type Mutation {
     createEvent(input: CreateEventInput!): Event!
     updateEvent(input: UpdateEventInput!): Event!
+    toggleEventCompetence(input: AddEventCompetenceInput!): Event!
     archiveEvent(id: ID!): Event!
 }

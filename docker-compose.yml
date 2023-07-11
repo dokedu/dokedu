@@ -20,3 +20,11 @@ services:
     volumes:
         - ./tmp/s3:/data
     command: server --console-address ":9001" /data
+  meilisearch:
+    image: getmeili/meilisearch:v1.2
+    ports:
+      - "7700:7700"
+    environment:
+      MEILI_MASTER_KEY: "master"
+    volumes:
+      - ./tmp/meilisearch:/meili_data

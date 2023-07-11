@@ -6,6 +6,7 @@ import (
 	"example/pkg/graph"
 	"example/pkg/mail"
 	"example/pkg/middleware"
+	"example/pkg/modules"
 	"example/pkg/services/report_generation"
 	"example/pkg/services/report_generation/config"
 	"fmt"
@@ -21,12 +22,11 @@ import (
 	"strconv"
 
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
 	"github.com/uptrace/bun/extra/bundebug"
-
-	_ "github.com/lib/pq"
 )
 
 const defaultPort = "1323"
@@ -61,30 +61,44 @@ func main() {
 	// dsn := "unix://user:pass@dbname/var/run/postgresql/.s.PGSQL.5432"
 	dbConn := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(dsn)))
 
-	db := bun.NewDB(dbConn, pgdialect.New())
+	dbClient := bun.NewDB(dbConn, pgdialect.New())
 
 	// Print all queries to stdout.
-	db.AddQueryHook(bundebug.NewQueryHook(bundebug.WithVerbose(true)))
+	dbClient.AddQueryHook(bundebug.NewQueryHook(bundebug.WithVerbose(true)))
 
 	minioClient := minioClient()
 	repGen := report_generation.
 		NewReportGenerationService(config.ReportGenerationConfig{
-			DB:    db,
+			DB:    dbClient,
 			MinIO: minioClient,
 		}, ctx, 3)
+
+	meili, err := modules.NewMeiliClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Generate the competence index in the background
+	go func() {
+		err := meili.GenerateCompetenceIndex(ctx, dbClient)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	e := echo.New()
 
 	e.Use(middleware.CORS())
 
 	// Auth
-	e.Use(middleware.Auth(db))
+	e.Use(middleware.Auth(dbClient))
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
-		DB:            db,
+		DB:            dbClient,
 		MinioClient:   minioClient,
 		Mailer:        mailer,
 		ReportService: repGen,
+		Meili:         meili,
 	}}))
 
 	srv.AddTransport(&transport.Websocket{})
@@ -117,6 +131,12 @@ func main() {
 func minioClient() *minio.Client {
 	host := os.Getenv("MINIO_HOST")
 	port := os.Getenv("MINIO_PORT")
+	sslVal := os.Getenv("MINIO_SSL")
+	ssl := true
+
+	if sslVal == "false" {
+		ssl = false
+	}
 
 	//endpoint := "localhost:9000"
 	endpoint := host + ":" + port
@@ -126,7 +146,7 @@ func minioClient() *minio.Client {
 	// Initialize minio client object.
 	minioClient, err := minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
-		Secure: true,
+		Secure: ssl,
 	})
 	if err != nil {
 		log.Fatalln(err)

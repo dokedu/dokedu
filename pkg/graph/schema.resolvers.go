@@ -12,11 +12,13 @@ import (
 	"example/pkg/db"
 	"example/pkg/graph/model"
 	"example/pkg/middleware"
+	"example/pkg/modules"
 	"fmt"
 	"strings"
 	"time"
 
 	nanoid "github.com/matoous/go-nanoid/v2"
+	meilisearch "github.com/meilisearch/meilisearch-go"
 	"github.com/uptrace/bun"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -86,7 +88,11 @@ func (r *competenceResolver) Competences(ctx context.Context, obj *db.Competence
 	}
 
 	var competences []*db.Competence
-	query := r.DB.NewSelect().Model(&competences).Where("competence_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID)
+	query := r.DB.
+		NewSelect().
+		Model(&competences).
+		Where("competence_id = ?", obj.ID).
+		Where("organisation_id = ?", currentUser.OrganisationID)
 
 	if sort != nil {
 		switch sort.Field {
@@ -998,6 +1004,51 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 		pageOffset = *offset
 	}
 
+	var ids []string
+
+	if search != nil && len(*search) > 0 {
+		indexName := r.Meili.GetCompetenceIndex(currentUser.OrganisationID)
+		filterStr := ""
+
+		if filter != nil {
+			if filter.Parents != nil && len(filter.Parents) > 0 {
+				var parents []string
+				for _, parent := range filter.Parents {
+					parents = append(parents, *parent)
+
+				}
+				filterStr += "parents IN [" + strings.Join(parents, ", ") + "]"
+			}
+		}
+
+		searchRequest := meilisearch.SearchRequest{
+			Limit: int64(pageLimit),
+		}
+
+		if filterStr != "" {
+			searchRequest.Filter = filterStr
+		}
+
+		term := *search
+
+		response, err := r.Meili.Client.Index(indexName).SearchRaw(term, &searchRequest)
+		if err != nil {
+			return nil, err
+		}
+
+		var results modules.SearchResponseCompetence
+		err = json.Unmarshal(*response, &results)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, hit := range results.Hits {
+			ids = append(ids, hit.ID)
+		}
+
+		fmt.Println(ids)
+	}
+
 	var competences []*db.Competence
 	query := r.DB.NewSelect().
 		Model(&competences).
@@ -1005,37 +1056,37 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 		Limit(pageLimit).
 		Offset(pageOffset)
 
-	if sort != nil {
-		switch sort.Field {
-		case model.CompetenceSortFieldSortOrder:
-			query.Order("sort_order ASC")
-		case model.CompetenceSortFieldName:
-			query.Order("name ASC")
-		case model.CompetenceSortFieldCreatedAt:
-			query.Order("created_at ASC")
-		}
+	if len(ids) > 0 {
+		query.Where("id IN (?)", bun.In(ids))
 	} else {
-		query.Order("name ASC")
-	}
-
-	if search != nil {
-		query.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", *search))
-	}
-
-	if filter != nil {
-		if filter.Type != nil {
-			if len(filter.Type) == 1 {
-				query.Where("competence_type = ?", filter.Type[0])
-			} else {
-				query.Where("competence_type IN (?)", bun.In(filter.Type))
+		if sort != nil {
+			switch sort.Field {
+			case model.CompetenceSortFieldSortOrder:
+				query.Order("sort_order ASC")
+			case model.CompetenceSortFieldName:
+				query.Order("name ASC")
+			case model.CompetenceSortFieldCreatedAt:
+				query.Order("created_at ASC")
 			}
+		} else {
+			query.Order("name ASC")
 		}
 
-		if filter.Parents != nil {
-			if len(filter.Parents) == 1 {
-				query.Where("competence_id = ?", filter.Parents[0])
-			} else {
-				query.Where("competence_id IN (?)", bun.In(filter.Parents))
+		if filter != nil {
+			if filter.Type != nil {
+				if len(filter.Type) == 1 {
+					query.Where("competence_type = ?", filter.Type[0])
+				} else {
+					query.Where("competence_type IN (?)", bun.In(filter.Type))
+				}
+			}
+
+			if filter.Parents != nil {
+				if len(filter.Parents) == 1 {
+					query.Where("competence_id = ?", filter.Parents[0])
+				} else {
+					query.Where("competence_id IN (?)", bun.In(filter.Parents))
+				}
 			}
 		}
 	}

@@ -385,6 +385,16 @@ func (r *mutationResolver) DownloadFiles(ctx context.Context, input model.Downlo
 	panic(fmt.Errorf("not implemented: DownloadFiles - downloadFiles"))
 }
 
+// AddFileShare is the resolver for the addFileShare field.
+func (r *mutationResolver) AddFileShare(ctx context.Context, input model.ShareFileInput) (*db.File, error) {
+	panic(fmt.Errorf("not implemented: AddFileShare - addFileShare"))
+}
+
+// RemoveFileShare is the resolver for the removeFileShare field.
+func (r *mutationResolver) RemoveFileShare(ctx context.Context, input string) (*db.File, error) {
+	panic(fmt.Errorf("not implemented: RemoveFileShare - removeFileShare"))
+}
+
 // Buckets is the resolver for the buckets field.
 func (r *queryResolver) Buckets(ctx context.Context, input *model.BucketFilterInput) (*model.BucketConnection, error) {
 	currentUser, err := middleware.GetUser(ctx)

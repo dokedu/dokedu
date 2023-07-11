@@ -4,6 +4,7 @@ package graph
 
 import (
 	"example/pkg/mail"
+	"example/pkg/modules"
 	"example/pkg/services/report_generation"
 	"github.com/minio/minio-go/v7"
 	"github.com/uptrace/bun"
@@ -14,8 +15,9 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	DB          *bun.DB
-	MinioClient *minio.Client
-	Mailer      mail.Mailer
+	DB            *bun.DB
+	MinioClient   *minio.Client
+	Mailer        mail.Mailer
 	ReportService *report_generation.ReportGenerationService
+	Meili         *modules.MeiliClient
 }

@@ -12,6 +12,11 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
+type AddEventCompetenceInput struct {
+	EventID      string `json:"eventId"`
+	CompetenceID string `json:"competenceId"`
+}
+
 type BucketConnection struct {
 	Edges      []*db.Bucket `json:"edges"`
 	TotalCount int          `json:"totalCount"`
@@ -73,8 +78,8 @@ type CreateEventInput struct {
 	Title      string          `json:"title"`
 	Image      *graphql.Upload `json:"image,omitempty"`
 	Body       *string         `json:"body,omitempty"`
-	StartsAt   time.Time       `json:"startsAt"`
-	EndsAt     time.Time       `json:"endsAt"`
+	StartsAt   *string         `json:"startsAt,omitempty"`
+	EndsAt     *string         `json:"endsAt,omitempty"`
 	Recurrence []*string       `json:"recurrence,omitempty"`
 }
 
@@ -292,6 +297,13 @@ type ResetPasswordPayload struct {
 	Message string `json:"message"`
 }
 
+type ShareFileInput struct {
+	FileID     string         `json:"fileId"`
+	Users      []string       `json:"users"`
+	Emails     []string       `json:"emails"`
+	Permission FilePermission `json:"permission"`
+}
+
 type SharedDriveFilterInput struct {
 	Folder *string `json:"folder,omitempty"`
 }
@@ -350,8 +362,8 @@ type UpdateEventInput struct {
 	Title      *string         `json:"title,omitempty"`
 	Image      *graphql.Upload `json:"image,omitempty"`
 	Body       *string         `json:"body,omitempty"`
-	StartsAt   *time.Time      `json:"startsAt,omitempty"`
-	EndsAt     *time.Time      `json:"endsAt,omitempty"`
+	StartsAt   *string         `json:"startsAt,omitempty"`
+	EndsAt     *string         `json:"endsAt,omitempty"`
 	Recurrence []*string       `json:"recurrence,omitempty"`
 }
 
@@ -493,6 +505,47 @@ func (e *EntrySortBy) UnmarshalGQL(v interface{}) error {
 }
 
 func (e EntrySortBy) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type FilePermission string
+
+const (
+	FilePermissionViewer  FilePermission = "Viewer"
+	FilePermissionManager FilePermission = "Manager"
+)
+
+var AllFilePermission = []FilePermission{
+	FilePermissionViewer,
+	FilePermissionManager,
+}
+
+func (e FilePermission) IsValid() bool {
+	switch e {
+	case FilePermissionViewer, FilePermissionManager:
+		return true
+	}
+	return false
+}
+
+func (e FilePermission) String() string {
+	return string(e)
+}
+
+func (e *FilePermission) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = FilePermission(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid FilePermission", str)
+	}
+	return nil
+}
+
+func (e FilePermission) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

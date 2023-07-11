@@ -49,7 +49,7 @@ func (r *eventResolver) Competences(ctx context.Context, obj *db.Event) ([]*db.C
 	var competences []*db.Competence
 	err := r.DB.NewSelect().
 		Model(&competences).
-		Join("JOIN event_competences ON event_competences.competence_id = competence.id").
+		Join("JOIN event_competences ON event_competences.competence_id = competence.id and event_competences.deleted_at is null").
 		Where("event_competences.event_id = ?", obj.ID).
 		Where("competence.organisation_id = ?", currentUser.OrganisationID).
 		Scan(ctx)
@@ -74,15 +74,13 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input model.CreateEv
 		event.Body = *input.Body
 	}
 
-	// parse time properly to avoid error
-	layout := "2006-01-02 15:04:05.999999999 -0700 MST"
-	startsAt, err := time.Parse(layout, input.StartsAt.String())
+	startsAt, err := time.Parse(time.RFC1123, *input.StartsAt)
 	if err != nil {
 		return nil, err
 	}
 	event.StartsAt = startsAt
 
-	endsAt, err := time.Parse(layout, input.EndsAt.String())
+	endsAt, err := time.Parse(time.RFC1123, *input.EndsAt)
 	if err != nil {
 		return nil, err
 	}
@@ -127,10 +125,8 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input model.UpdateEv
 		query.Set("body = ?", event.Body)
 	}
 
-	layout := "2006-01-02 15:04:05.999999999 -0700 MST"
-
 	if input.StartsAt != nil {
-		startsAt, err := time.Parse(layout, input.StartsAt.String())
+		startsAt, err := time.Parse(time.RFC1123, *input.StartsAt)
 		if err != nil {
 			return nil, err
 		}
@@ -139,7 +135,7 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input model.UpdateEv
 	}
 
 	if input.EndsAt != nil {
-		endsAt, err := time.Parse(layout, input.EndsAt.String())
+		endsAt, err := time.Parse(time.RFC1123, *input.EndsAt)
 		if err != nil {
 			return nil, err
 		}
@@ -154,6 +150,42 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input model.UpdateEv
 
 	err := query.Scan(ctx)
 
+	if err != nil {
+		return nil, err
+	}
+
+	return &event, nil
+}
+
+// ToggleEventCompetence is the resolver for the toggleEventCompetence field.
+func (r *mutationResolver) ToggleEventCompetence(ctx context.Context, input model.AddEventCompetenceInput) (*db.Event, error) {
+	currentUser := middleware.ForContext(ctx)
+	if currentUser == nil {
+		return nil, errors.New("no user found in the context")
+	}
+
+	var eventCompetence db.EventCompetence
+	eventCompetence.EventID = input.EventID
+	eventCompetence.CompetenceID = input.CompetenceID
+	eventCompetence.OrganisationID = currentUser.OrganisationID
+
+	err := r.DB.NewInsert().
+		Model(&eventCompetence).
+		Where("\"event_competence\".organisation_id = ?", currentUser.OrganisationID).
+		On("CONFLICT (event_id, competence_id) DO UPDATE").
+		Set("deleted_at = (SELECT CASE WHEN event_competence.deleted_at IS NULL THEN NOW() ELSE NULL END)").
+		Returning("*").
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var event db.Event
+	err = r.DB.NewSelect().
+		Model(&event).
+		Where("id = ?", input.EventID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
