@@ -50,6 +50,7 @@ const { data } = useQuery({
             name
             type
             grades
+            color
           }
         }
       }
