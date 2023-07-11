@@ -56,6 +56,10 @@ func (m MeiliClient) GenerateCompetenceIndex(ctx context.Context, conn *bun.DB) 
 			return err
 		}
 
+		if len(competences) == 0 {
+			continue
+		}
+
 		for _, competence := range competences {
 			parentNames, err := getParentNames(conn, ctx, competence.ID)
 			if err != nil {

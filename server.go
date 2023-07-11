@@ -79,10 +79,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	//err = meili.GenerateCompetenceIndex(ctx, dbClient)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
+	go func() {
+		bgCtx := context.Background()
+		err := meili.GenerateCompetenceIndex(bgCtx, dbClient)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	e := echo.New()
 
