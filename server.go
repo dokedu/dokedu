@@ -79,12 +79,12 @@ func main() {
 	}
 
 	// Generate the competence index in the background
-	go func() {
-		err := meili.GenerateCompetenceIndex(ctx, dbClient)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
+	//go func() {
+	//	err := meili.GenerateCompetenceIndex(ctx, dbClient)
+	//	if err != nil {
+	//		log.Fatal(err)
+	//	}
+	//}()
 
 	e := echo.New()
 
