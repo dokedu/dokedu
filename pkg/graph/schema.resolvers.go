@@ -19,7 +19,7 @@ import (
 	"time"
 
 	nanoid "github.com/matoous/go-nanoid/v2"
-	"github.com/meilisearch/meilisearch-go"
+	meilisearch "github.com/meilisearch/meilisearch-go"
 	"github.com/uptrace/bun"
 	"golang.org/x/crypto/bcrypt"
 )

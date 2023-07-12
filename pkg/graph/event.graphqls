@@ -18,6 +18,13 @@ type EventConnection {
     totalCount: Int!
 }
 
+enum EventOrderBy {
+    startsAt_ASC
+    startsAt_DESC
+    endsAt_ASC
+    endsAt_DESC
+}
+
 input EventFilterInput {
     from: Time
     to: Time
@@ -41,7 +48,7 @@ type ExportEventsPayload {
 
 extend type Query {
     event(id: ID!): Event!
-    events(limit: Int, offset: Int, filter: EventFilterInput, search: String): EventConnection!
+    events(limit: Int, offset: Int, filter: EventFilterInput, order: EventOrderBy, search: String): EventConnection!
     exportEvents(input: ExportEventsInput!): [ExportEventsPayload]!
 }
 

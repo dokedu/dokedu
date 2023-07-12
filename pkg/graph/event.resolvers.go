@@ -234,7 +234,7 @@ func (r *queryResolver) Event(ctx context.Context, id string) (*db.Event, error)
 }
 
 // Events is the resolver for the events field.
-func (r *queryResolver) Events(ctx context.Context, limit *int, offset *int, filter *model.EventFilterInput, search *string) (*model.EventConnection, error) {
+func (r *queryResolver) Events(ctx context.Context, limit *int, offset *int, filter *model.EventFilterInput, order *model.EventOrderBy, search *string) (*model.EventConnection, error) {
 	currentUser := middleware.ForContext(ctx)
 	if currentUser == nil {
 		return nil, errors.New("no user found in the context")
@@ -267,7 +267,9 @@ func (r *queryResolver) Events(ctx context.Context, limit *int, offset *int, fil
 		query.Where("query @@ document OR similarity > 0")
 		query.OrderExpr("rank_title, rank_description, similarity ASC NULLS LAST")
 	} else {
-		query.Order("created_at")
+		if order == nil {
+			query.Order("created_at")
+		}
 	}
 
 	// Filters
@@ -277,6 +279,22 @@ func (r *queryResolver) Events(ctx context.Context, limit *int, offset *int, fil
 		}
 		if filter.To != nil {
 			query.Where("ends_at <= ?", filter.To)
+		}
+	}
+
+	// Order
+	if order != nil {
+		if *order == model.EventOrderByEndsAtAsc {
+			query.Order("ends_at")
+		}
+		if *order == model.EventOrderByEndsAtDesc {
+			query.Order("ends_at DESC")
+		}
+		if *order == model.EventOrderByStartsAtAsc {
+			query.Order("starts_at")
+		}
+		if *order == model.EventOrderByStartsAtDesc {
+			query.Order("starts_at DESC")
 		}
 	}
 

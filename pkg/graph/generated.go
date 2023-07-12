@@ -298,7 +298,7 @@ type ComplexityRoot struct {
 		Entries      func(childComplexity int, limit *int, offset *int, filter *model.EntryFilterInput, sortBy *model.EntrySortBy, search *string) int
 		Entry        func(childComplexity int, id string) int
 		Event        func(childComplexity int, id string) int
-		Events       func(childComplexity int, limit *int, offset *int, filter *model.EventFilterInput, search *string) int
+		Events       func(childComplexity int, limit *int, offset *int, filter *model.EventFilterInput, order *model.EventOrderBy, search *string) int
 		ExportEvents func(childComplexity int, input model.ExportEventsInput) int
 		File         func(childComplexity int, id string) int
 		Files        func(childComplexity int, input *model.FilesFilterInput, limit *int, offset *int) int
@@ -529,7 +529,7 @@ type QueryResolver interface {
 	Entry(ctx context.Context, id string) (*db.Entry, error)
 	Entries(ctx context.Context, limit *int, offset *int, filter *model.EntryFilterInput, sortBy *model.EntrySortBy, search *string) (*model.EntryConnection, error)
 	Event(ctx context.Context, id string) (*db.Event, error)
-	Events(ctx context.Context, limit *int, offset *int, filter *model.EventFilterInput, search *string) (*model.EventConnection, error)
+	Events(ctx context.Context, limit *int, offset *int, filter *model.EventFilterInput, order *model.EventOrderBy, search *string) (*model.EventConnection, error)
 	ExportEvents(ctx context.Context, input model.ExportEventsInput) ([]*model.ExportEventsPayload, error)
 	Organisation(ctx context.Context) (*db.Organisation, error)
 	Users(ctx context.Context, limit *int, offset *int, filter *model.UserFilterInput, search *string) (*model.UserConnection, error)
@@ -1954,7 +1954,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Events(childComplexity, args["limit"].(*int), args["offset"].(*int), args["filter"].(*model.EventFilterInput), args["search"].(*string)), true
+		return e.complexity.Query.Events(childComplexity, args["limit"].(*int), args["offset"].(*int), args["filter"].(*model.EventFilterInput), args["order"].(*model.EventOrderBy), args["search"].(*string)), true
 
 	case "Query.exportEvents":
 		if e.complexity.Query.ExportEvents == nil {
@@ -3642,15 +3642,24 @@ func (ec *executionContext) field_Query_events_args(ctx context.Context, rawArgs
 		}
 	}
 	args["filter"] = arg2
-	var arg3 *string
-	if tmp, ok := rawArgs["search"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("search"))
-		arg3, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+	var arg3 *model.EventOrderBy
+	if tmp, ok := rawArgs["order"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+		arg3, err = ec.unmarshalOEventOrderBy2ᚖexampleᚋpkgᚋgraphᚋmodelᚐEventOrderBy(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["search"] = arg3
+	args["order"] = arg3
+	var arg4 *string
+	if tmp, ok := rawArgs["search"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("search"))
+		arg4, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["search"] = arg4
 	return args, nil
 }
 
@@ -12810,7 +12819,7 @@ func (ec *executionContext) _Query_events(ctx context.Context, field graphql.Col
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Events(rctx, fc.Args["limit"].(*int), fc.Args["offset"].(*int), fc.Args["filter"].(*model.EventFilterInput), fc.Args["search"].(*string))
+		return ec.resolvers.Query().Events(rctx, fc.Args["limit"].(*int), fc.Args["offset"].(*int), fc.Args["filter"].(*model.EventFilterInput), fc.Args["order"].(*model.EventOrderBy), fc.Args["search"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -26793,6 +26802,22 @@ func (ec *executionContext) unmarshalOEventFilterInput2ᚖexampleᚋpkgᚋgraph�
 	}
 	res, err := ec.unmarshalInputEventFilterInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOEventOrderBy2ᚖexampleᚋpkgᚋgraphᚋmodelᚐEventOrderBy(ctx context.Context, v interface{}) (*model.EventOrderBy, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.EventOrderBy)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOEventOrderBy2ᚖexampleᚋpkgᚋgraphᚋmodelᚐEventOrderBy(ctx context.Context, sel ast.SelectionSet, v *model.EventOrderBy) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) marshalOExportEventsPayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐExportEventsPayload(ctx context.Context, sel ast.SelectionSet, v *model.ExportEventsPayload) graphql.Marshaler {
