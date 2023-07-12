@@ -89,6 +89,9 @@
           </div>
         </div>
       </template>
+      <template #empty>
+        <div class="px-8 py-4">{{ $t("entry_placeholder") }}</div>
+      </template>
     </DTable>
   </PageWrapper>
 </template>
