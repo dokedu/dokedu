@@ -508,6 +508,51 @@ func (e EntrySortBy) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type EventOrderBy string
+
+const (
+	EventOrderByStartsAtAsc  EventOrderBy = "startsAt_ASC"
+	EventOrderByStartsAtDesc EventOrderBy = "startsAt_DESC"
+	EventOrderByEndsAtAsc    EventOrderBy = "endsAt_ASC"
+	EventOrderByEndsAtDesc   EventOrderBy = "endsAt_DESC"
+)
+
+var AllEventOrderBy = []EventOrderBy{
+	EventOrderByStartsAtAsc,
+	EventOrderByStartsAtDesc,
+	EventOrderByEndsAtAsc,
+	EventOrderByEndsAtDesc,
+}
+
+func (e EventOrderBy) IsValid() bool {
+	switch e {
+	case EventOrderByStartsAtAsc, EventOrderByStartsAtDesc, EventOrderByEndsAtAsc, EventOrderByEndsAtDesc:
+		return true
+	}
+	return false
+}
+
+func (e EventOrderBy) String() string {
+	return string(e)
+}
+
+func (e *EventOrderBy) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EventOrderBy(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EventOrderBy", str)
+	}
+	return nil
+}
+
+func (e EventOrderBy) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type FilePermission string
 
 const (
