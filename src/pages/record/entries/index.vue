@@ -20,7 +20,12 @@
       </div>
     </PageHeader>
     <div v-if="filtersOpen" class="flex items-end gap-2 border-b border-stone-100 px-8 py-2">
-      <EntryFilterStudents></EntryFilterStudents>
+      <DSelect
+        :options="studentOptions"
+        :label="$t('student')"
+        v-model:search="studentSearch"
+        v-model="student"
+      ></DSelect>
       <DFilter :options="teacherOptions" :label="$t('teacher')" v-model="teacher"></DFilter>
       <DFilter :options="tagOptions" :label="$t('tag', 2)" multiple v-model="tags">
         <div class="flex flex-wrap gap-2">
@@ -29,7 +34,6 @@
           </DTag>
         </div>
       </DFilter>
-      <DSelect></DSelect>
     </div>
 
     <DTable
@@ -100,7 +104,7 @@ import { useQuery } from "@urql/vue";
 import DButton from "../../../components/d-button/d-button.vue";
 import { Plus } from "lucide-vue-next";
 import { ListFilter } from "lucide-vue-next";
-import { ref, computed } from "vue";
+import { ref, computed, reactive } from "vue";
 import DFilter from "@/components/d-filter/d-filter.vue";
 import { graphql } from "@/gql";
 import DTag from "@/components/d-tag/d-tag.vue";
@@ -111,6 +115,7 @@ import { EntrySortBy } from "@/gql/graphql";
 import DTable from "@/components/d-table/d-table.vue";
 import { useRouter } from "vue-router";
 import { PageVariables } from "@/types/types";
+import DSelect from "@/components/d-select/d-select.vue";
 
 const i18nLocale = useI18n();
 const router = useRouter();
@@ -222,10 +227,11 @@ const entriesQuery = graphql(`
   }
 `);
 
+const teacherSearch = ref(null);
 const { data: teacherData } = useQuery({
   query: graphql(`
-    query getEntryFilterTeachers {
-      users(filter: { role: [owner, admin, teacher, educator] }, limit: 500) {
+    query getEntryFilterTeachers($search: String) {
+      users(filter: { role: [owner, admin, teacher, educator] }, limit: 500, search: $search) {
         edges {
           id
           firstName
@@ -234,6 +240,27 @@ const { data: teacherData } = useQuery({
       }
     }
   `),
+  variables: reactive({
+    search: teacherSearch,
+  }),
+});
+
+const studentSearch = ref("");
+const { data: studentData } = useQuery({
+  query: graphql(`
+    query getEntryFilterStudents($search: String) {
+      users(filter: { role: [student] }, limit: 150, search: $search) {
+        edges {
+          id
+          firstName
+          lastName
+        }
+      }
+    }
+  `),
+  variables: reactive({
+    search: studentSearch,
+  }),
 });
 
 const { data: tagData } = useQuery({
@@ -253,6 +280,14 @@ const { data: tagData } = useQuery({
 const teacherOptions = computed(
   () =>
     teacherData?.value?.users?.edges?.map((edge: any) => ({
+      label: `${edge.firstName} ${edge.lastName}`,
+      value: edge.id,
+    })) || []
+);
+
+const studentOptions = computed(
+  () =>
+    studentData?.value?.users?.edges?.map((edge: any) => ({
       label: `${edge.firstName} ${edge.lastName}`,
       value: edge.id,
     })) || []

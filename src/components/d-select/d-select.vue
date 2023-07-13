@@ -12,26 +12,17 @@
       ref="container"
       class="absolute top-10 max-h-[200px] w-full overflow-y-auto rounded-md bg-white px-1 pb-2 pt-1 shadow"
     >
-      <div class="mb-1 flex w-full items-center gap-1 rounded border border-stone-100 py-0.5 pl-1 text-sm">
-        <Search class="h-4 w-4 shrink-0 text-subtle"></Search>
-        <input class="w-full focus:!outline-none" v-if="searchable" v-model="search" @input="onSearch" />
-      </div>
-      <PageSearchResult
-        v-for="(variables, i) in vars"
-        v-if="query"
-        :variables="variables"
-        :key="i"
-        :query="query"
-        :objectName="objectName"
+      <div
+        v-if="search != null"
+        class="mb-1 flex w-full items-center gap-1 rounded border border-stone-100 py-0.5 pl-1 text-sm"
       >
-        <template v-slot="{ row }">
-          <div class="rounded-md px-1.5 py-1 text-sm text-strong hover:bg-stone-100" @click="onSelect">
-            <slot :row="row" />
-          </div>
-        </template>
-      </PageSearchResult>
-      <div v-else v-for="option in options">
-        <pre>{{ option }}</pre>
+        <Search class="h-4 w-4 shrink-0 text-subtle"></Search>
+        <input class="w-full focus:!outline-none" v-if="search != null" @input="onSearch" />
+      </div>
+      <div class="container gap-1 overflow-y-auto text-sm">
+        <div v-for="option in options">
+          <div @click="onSelect(option)" class="px-1 py-0.5 hover:bg-stone-50">{{ option.label }}</div>
+        </div>
       </div>
     </div>
   </div>
@@ -40,81 +31,52 @@
 <script lang="ts" setup>
 import { ChevronRight } from "lucide-vue-next";
 import { ref, toRef } from "vue";
-import { onClickOutside, useInfiniteScroll } from "@vueuse/core";
-import PageSearchResult from "../PageSearchResult.vue";
+import { onClickOutside } from "@vueuse/core";
 import { Search } from "lucide-vue-next";
 
-const emit = defineEmits(["loadMore", "search", "update:modelValue"]);
-const search = ref("");
+const emit = defineEmits(["update:modelValue", "update:search"]);
 
-const props = defineProps({
-  label: {
-    type: String,
-    default: "Label",
-  },
-  multiple: {
-    type: Boolean,
-    default: false,
-  },
-  modelValue: {
-    type: [String, Array],
-    default: "",
-  },
-  options: {
-    type: Array,
-    default: () => [],
-  },
-  query: {
-    type: Function,
-    default: () => {},
-  },
-  objectName: {
-    type: String,
-    default: "",
-  },
-  pageVariables: {
-    type: Object,
-    default: () => {},
-  },
-  searchable: {
-    type: Boolean,
-    default: false,
-  },
+interface Props {
+  label?: string;
+  multiple?: boolean;
+  modelValue?: string | string[];
+  search?: string | null;
+  options?: { label: string; value: string }[];
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  label: "Label",
+  multiple: false,
+  modelValue: "",
+  search: null,
+  options: () => [],
 });
 
 const open = ref(false);
 const select = ref(null);
 const container = ref(null);
-const vars = toRef(props, "pageVariables");
 const model = toRef(props, "modelValue");
 
 onClickOutside(select, () => (open.value = false));
-useInfiniteScroll(container, () => {
-  emit("loadMore");
-});
 
 const toggleSelect = () => {
   open.value = !open.value;
 };
 
-const onSearch = () => {
-  emit("search", search.value);
+const onSearch = (event) => {
+  emit("update:search", event.target?.value);
 };
 
-const onSelect = (row) => {
-  if (props.multiple) {
-    if (model.value.includes(row.id)) {
-      model.value = model.value.filter((id) => id !== row.id);
+const onSelect = (option: { label: string; value: string }) => {
+  if (props.multiple && Array.isArray(model.value)) {
+    if (model.value.includes(option.value)) {
+      model.value = model.value.filter((id: string) => id !== option.value);
     } else {
-      model.value = [...model.value, row.id];
+      model.value = [...model.value, option.value];
     }
     return;
   }
 
-  emit("update:modelValue", row.id);
+  emit("update:modelValue", option.value);
 };
-
-// TODO: Support multiple
-// TODO: Support search
-// TODO: Add infinite scroll? option to query?
 </script>
