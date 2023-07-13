@@ -57,7 +57,7 @@
       :columns="columns"
       objectName="events"
       :query="eventsQuery"
-      defaultSort="createdAt"
+      defaultSort="startsAt"
       @row-click="onRowClick"
     >
       <template #body-data="{ column }">
@@ -93,6 +93,7 @@ import { ListFilter } from "lucide-vue-next";
 import DTable from "@/components/d-table/d-table.vue";
 import { useRouter } from "vue-router";
 import { PageVariables } from "@/types/types";
+import { EventOrderBy } from "@/gql/graphql";
 
 const sheet = ref<HTMLElement | null>(null);
 
@@ -136,10 +137,18 @@ const columns = [
   {
     label: "starts_at",
     key: "startsAt",
+    sortable: {
+      asc: EventOrderBy.StartsAtAsc,
+      desc: EventOrderBy.StartsAtDesc,
+    },
   },
   {
     label: "ends_at",
     key: "endsAt",
+    sortable: {
+      asc: EventOrderBy.EndsAtAsc,
+      desc: EventOrderBy.EndsAtDesc,
+    },
   },
 ];
 
@@ -150,6 +159,7 @@ const pageVariables = ref<Variables[]>([
       to: undefined,
     },
     search: "",
+    order: EventOrderBy.StartsAtAsc,
     limit: 50,
     offset: 0,
     nextPage: undefined,
@@ -161,6 +171,7 @@ const onRowClick = (row: Record<string, string>) => {
 };
 
 watch([search, startTimestamp, endsTimestamp], () => {
+  const lastPage = pageVariables.value[pageVariables.value.length - 1];
   pageVariables.value = [
     {
       filter: {
@@ -168,6 +179,7 @@ watch([search, startTimestamp, endsTimestamp], () => {
         to: endsTimestamp.value,
       },
       search: search.value,
+      order: lastPage.order,
       limit: 50,
       offset: 0,
       nextPage: undefined,
@@ -176,8 +188,8 @@ watch([search, startTimestamp, endsTimestamp], () => {
 });
 
 const eventsQuery = graphql(`
-  query eventWithSearch($search: String, $offset: Int, $filter: EventFilterInput) {
-    events(search: $search, limit: 50, offset: $offset, filter: $filter) {
+  query eventWithSearch($search: String, $offset: Int, $order: EventOrderBy, $filter: EventFilterInput) {
+    events(search: $search, limit: 50, offset: $offset, order: $order, filter: $filter) {
       pageInfo {
         hasNextPage
         hasPreviousPage
