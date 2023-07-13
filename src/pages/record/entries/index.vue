@@ -26,14 +26,14 @@
         v-model:search="studentSearch"
         v-model="student"
       ></DSelect>
-      <DFilter :options="teacherOptions" :label="$t('teacher')" v-model="teacher"></DFilter>
-      <DFilter :options="tagOptions" :label="$t('tag', 2)" multiple v-model="tags">
+      <DSelect :options="teacherOptions" :label="$t('teacher')" v-model="teacher" v-model:search="teacherSearch" />
+      <DSelect :options="tagOptions" :label="$t('tag', 2)" multiple v-model="tags">
         <div class="flex flex-wrap gap-2">
           <DTag v-for="tag in tags" :key="tag" :color="getTagColor(tag)" removable :id="tag" @remove="removeTag">
             {{ getTagName(tag) }}
           </DTag>
         </div>
-      </DFilter>
+      </DSelect>
     </div>
 
     <DTable
@@ -105,7 +105,6 @@ import DButton from "../../../components/d-button/d-button.vue";
 import { Plus } from "lucide-vue-next";
 import { ListFilter } from "lucide-vue-next";
 import { ref, computed, reactive } from "vue";
-import DFilter from "@/components/d-filter/d-filter.vue";
 import { graphql } from "@/gql";
 import DTag from "@/components/d-tag/d-tag.vue";
 import { useI18n } from "vue-i18n";
@@ -227,7 +226,7 @@ const entriesQuery = graphql(`
   }
 `);
 
-const teacherSearch = ref(null);
+const teacherSearch = ref("");
 const { data: teacherData } = useQuery({
   query: graphql(`
     query getEntryFilterTeachers($search: String) {
@@ -266,7 +265,7 @@ const { data: studentData } = useQuery({
 const { data: tagData } = useQuery({
   query: graphql(`
     query getEntryFilterTags {
-      tags(limit: 1000) {
+      tags(limit: 100) {
         edges {
           id
           name

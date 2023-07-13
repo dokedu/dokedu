@@ -46,7 +46,7 @@ const documents = {
     "\n  query getEntries($filter: EntryFilterInput, $limit: Int, $order: EntrySortBy, $offset: Int) {\n    entries(filter: $filter, limit: $limit, sortBy: $order, offset: $offset) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n      edges {\n        id\n        date\n        body\n        user {\n          id\n          firstName\n          lastName\n        }\n        createdAt\n        events {\n          id\n          title\n        }\n        tags {\n          id\n          name\n          color\n        }\n      }\n    }\n  }\n": types.GetEntriesDocument,
     "\n    query getEntryFilterTeachers($search: String) {\n      users(filter: { role: [owner, admin, teacher, educator] }, limit: 500, search: $search) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  ": types.GetEntryFilterTeachersDocument,
     "\n    query getEntryFilterStudents($search: String) {\n      users(filter: { role: [student] }, limit: 150, search: $search) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  ": types.GetEntryFilterStudentsDocument,
-    "\n    query getEntryFilterTags {\n      tags(limit: 1000) {\n        edges {\n          id\n          name\n          color\n        }\n      }\n    }\n  ": types.GetEntryFilterTagsDocument,
+    "\n    query getEntryFilterTags {\n      tags(limit: 100) {\n        edges {\n          id\n          name\n          color\n        }\n      }\n    }\n  ": types.GetEntryFilterTagsDocument,
     "\n    mutation toggleEventCompetence($input: AddEventCompetenceInput!) {\n      toggleEventCompetence(input: $input) {\n        id\n      }\n    }\n  ": types.ToggleEventCompetenceDocument,
     "\n    mutation archiveEvent($id: ID!) {\n      archiveEvent(id: $id) {\n        id\n      }\n    }\n  ": types.ArchiveEventDocument,
     "\n    mutation createEvent($input: CreateEventInput!) {\n      createEvent(input: $input) {\n        id\n        title\n        image {\n          id\n        }\n        body\n        startsAt\n        endsAt\n        recurrence\n        createdAt\n      }\n    }\n  ": types.CreateEventDocument,
@@ -222,7 +222,7 @@ export function graphql(source: "\n    query getEntryFilterStudents($search: Str
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n    query getEntryFilterTags {\n      tags(limit: 1000) {\n        edges {\n          id\n          name\n          color\n        }\n      }\n    }\n  "): (typeof documents)["\n    query getEntryFilterTags {\n      tags(limit: 1000) {\n        edges {\n          id\n          name\n          color\n        }\n      }\n    }\n  "];
+export function graphql(source: "\n    query getEntryFilterTags {\n      tags(limit: 100) {\n        edges {\n          id\n          name\n          color\n        }\n      }\n    }\n  "): (typeof documents)["\n    query getEntryFilterTags {\n      tags(limit: 100) {\n        edges {\n          id\n          name\n          color\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
