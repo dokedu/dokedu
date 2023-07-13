@@ -52,52 +52,63 @@
         />
       </div>
     </div>
-    <div class="flex flex-col overflow-scroll" ref="events">
-      <PageSearchResult
-        v-for="(variables, i) in pageVariables"
-        :key="i"
-        :variables="variables"
-        :query="eventsQuery"
-        objectName="events"
-      >
-        <template v-slot="{ row }">
-          <router-link
-            :to="{ name: 'record-projects-project', params: { id: row.id } }"
-            class="flex border-b border-stone-100 text-sm transition-all hover:bg-stone-50"
-            :class="{
-              '!bg-stone-100': row?.id === $route.params.id,
-            }"
-          >
-            <div class="w-2/6 p-2 pl-8 text-strong">{{ row.title }}</div>
-            <div class="w-3/6 p-2 pl-8 text-subtle">{{ row.body?.slice(0, 50) }}...</div>
-            <div class="w-2/6 p-2 px-4 text-subtle">
-              {{ formatDate(new Date(Date.parse(row.startsAt)), "DD.MM.YYYY") }} -
-              {{ formatDate(new Date(Date.parse(row.endsAt)), "DD.MM.YYYY") }}
-            </div>
-          </router-link>
-        </template>
-      </PageSearchResult>
-    </div>
+    <DTable
+      v-model:variables="pageVariables"
+      :columns="columns"
+      objectName="events"
+      :query="eventsQuery"
+      defaultSort="createdAt"
+      @row-click="onRowClick"
+    >
+      <template #body-data="{ column }">
+        <div class="truncate text-subtle">{{ column }}</div>
+      </template>
+      <template #startsAt-data="{ column }">
+        <div class="text-subtle">{{ formatDate(new Date(Date.parse(column)), "DD.MM.YYYY") }}</div>
+      </template>
+      <template #endsAt-data="{ column }">
+        <div class="text-subtle">{{ formatDate(new Date(Date.parse(column)), "DD.MM.YYYY") }}</div>
+      </template>
+    </DTable>
   </PageWrapper>
-  <router-view />
+
+  <div
+    ref="sheet"
+    v-if="$route.params.id || $route.name === 'record-projects-new'"
+    class="absolute right-0 top-0 h-screen w-full max-w-xl overflow-scroll bg-white shadow-md shadow-stone-300"
+  >
+    <router-view />
+  </div>
 </template>
 <script setup lang="ts">
 import PageHeader from "../../../components/PageHeader.vue";
 import PageWrapper from "../../../components/PageWrapper.vue";
-import { formatDate } from "@vueuse/core";
+import { formatDate, onClickOutside, onKeyStroke } from "@vueuse/core";
 import DButton from "../../../components/d-button/d-button.vue";
 import { Plus } from "lucide-vue-next";
 import { Share } from "lucide-vue-next";
 import { ref, computed, watch } from "vue";
 import { graphql } from "../../../gql";
 import { ListFilter } from "lucide-vue-next";
-import { useInfiniteScroll } from "@vueuse/core";
-import PageSearchResult from "@/components/PageSearchResult.vue";
+import DTable from "@/components/d-table/d-table.vue";
+import { useRouter } from "vue-router";
+import { PageVariables } from "@/types/types";
+
+const sheet = ref<HTMLElement | null>(null);
+
+onClickOutside(sheet, async () => {
+  await router.push({ name: "record-projects" });
+});
+
+onKeyStroke("Escape", async () => {
+  await router.push({ name: "record-projects" });
+});
 
 const search = ref("");
 const filtersOpen = ref(false);
 const startsAt = ref();
 const endsAt = ref();
+const router = useRouter();
 
 const startTimestamp = computed(() => startsAt.value && new Date(startsAt.value).toISOString());
 const endsTimestamp = computed(() => endsAt.value && new Date(endsAt.value).toISOString());
@@ -106,32 +117,47 @@ function toggleFilters() {
   filtersOpen.value = !filtersOpen.value;
 }
 
-const pageVariables = ref([
+interface Variables extends PageVariables {
+  filter: {
+    from?: string;
+    to?: string;
+  };
+}
+
+const columns = [
+  {
+    label: "title",
+    key: "title",
+  },
+  {
+    label: "description",
+    key: "body",
+  },
+  {
+    label: "starts_at",
+    key: "startsAt",
+  },
+  {
+    label: "ends_at",
+    key: "endsAt",
+  },
+];
+
+const pageVariables = ref<Variables[]>([
   {
     filter: {
-      from: null,
-      to: null,
+      from: undefined,
+      to: undefined,
     },
     search: "",
     limit: 50,
     offset: 0,
-    nextPage: null,
+    nextPage: undefined,
   },
 ]);
 
-const loadMore = () => {
-  const lastPage = pageVariables.value[pageVariables.value.length - 1];
-  if (!lastPage.nextPage) return;
-  pageVariables.value.push({
-    filter: {
-      from: startTimestamp.value,
-      to: endsTimestamp.value,
-    },
-    search: search.value,
-    limit: 50,
-    offset: lastPage.offset + 50,
-    nextPage: null,
-  });
+const onRowClick = (row: Record<string, string>) => {
+  router.push({ name: "record-projects-project-inline", params: { id: row.id } });
 };
 
 watch([search, startTimestamp, endsTimestamp], () => {
@@ -144,13 +170,10 @@ watch([search, startTimestamp, endsTimestamp], () => {
       search: search.value,
       limit: 50,
       offset: 0,
-      nextPage: null,
+      nextPage: undefined,
     },
   ];
 });
-
-const events = ref<HTMLElement | null>(null);
-useInfiniteScroll(events, loadMore);
 
 const eventsQuery = graphql(`
   query eventWithSearch($search: String, $offset: Int, $filter: EventFilterInput) {

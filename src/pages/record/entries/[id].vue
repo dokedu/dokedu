@@ -61,6 +61,7 @@ const { data: entry } = useQuery({
               id
               name
               grades
+              color
             }
           }
         }

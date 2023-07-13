@@ -1,17 +1,12 @@
 <template>
-  <div
-    ref="sheet"
-    class="absolute right-0 top-0 h-screen w-full max-w-xl overflow-scroll bg-white shadow-md shadow-stone-300"
-  >
-    <div v-if="data?.event" class="p-4">
-      <d-project-form :project="(data?.event as Event)" :cancel="data?.event" @cancel="cancel" />
-    </div>
+  <div v-if="data?.event" class="h-full w-full">
+    <d-project-form :project="(data?.event as Event)" :cancel="data?.event" @cancel="cancel" @save="save" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onClickOutside, onKeyStroke } from "@vueuse/core";
-import { reactive, ref } from "vue";
+import { onKeyStroke } from "@vueuse/core";
+import { reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import DProjectForm from "./DProjectForm.vue";
 import { useQuery } from "@urql/vue";
@@ -20,17 +15,18 @@ import { Event } from "@/gql/graphql";
 
 const route = useRoute();
 const router = useRouter();
-const sheet = ref<HTMLElement | null>(null);
 
 async function cancel() {
   await router.push({ name: "record-projects" });
 }
 
-onClickOutside(sheet, async () => {
-  await cancel();
-});
+async function save() {
+  if (route.name === "record-projects-project") return;
+  await router.push({ name: "record-projects" });
+}
 
 onKeyStroke("Escape", async () => {
+  if (route.name === "record-projects-project") return;
   await cancel();
 });
 
@@ -54,6 +50,7 @@ const { data } = useQuery({
             name
             type
             grades
+            color
           }
         }
       }

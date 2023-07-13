@@ -1,8 +1,8 @@
 <template>
-  <PageHeader class="flex justify-between">
+  <PageHeader class="flex select-none justify-between">
     <div class="flex gap-2 text-strong">
       <router-link :to="{ name: 'drive-my-drive' }">My Drive</router-link>
-      <template v-if="folder?.file">
+      <template v-if="!queryFolder && folder">
         <template v-for="parent in folder.file.parents" class="stroke-colors">
           <span>/</span>
           <router-link :to="{ name: 'drive-my-drive-folders-folder', params: { id: parent.id } }">
@@ -41,7 +41,7 @@ const newFolderDialog = ref(false);
 
 const route = useRoute();
 
-const folderId = computed(() => route.params.id);
+const folderId = computed<string>(() => route.params.id as string);
 const emit = defineEmits(["upload"]);
 
 onChange(async (e) => {
@@ -80,6 +80,10 @@ const { executeMutation: createFolder } = useMutation(
   `)
 );
 
+const queryFolder = computed(() => {
+  return folderId.value === undefined || folderId.value === null;
+});
+
 const { data: folder } = useQuery({
   query: graphql(`
     query fileById($id: ID!) {
@@ -94,8 +98,8 @@ const { data: folder } = useQuery({
     }
   `),
   variables: reactive({
-    id: folderId.value as string,
+    id: folderId,
   }),
-  pause: !folderId.value,
+  pause: queryFolder,
 });
 </script>

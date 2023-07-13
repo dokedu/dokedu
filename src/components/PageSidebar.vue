@@ -12,7 +12,7 @@
             <div class="text-sm text-stone-700 transition-all duration-100 hover:text-stone-950">{{ app?.name }}</div>
           </div>
           <div class="rounded-md border border-stone-200 p-1.5 transition-all hover:bg-stone-200">
-            <Grip :size="16" class="stroke-stone-700" />
+            <grip :size="16" class="stroke-stone-700" />
           </div>
         </div>
       </div>
@@ -56,7 +56,7 @@
       <div
         class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
       >
-        <Globe class="stroke-stone-500" :size="18" />
+        <globe class="stroke-stone-500" :size="18" />
         <select
           name="language"
           id="lang"
@@ -72,7 +72,7 @@
         class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
         @click="signOut"
       >
-        <LogOut class="stroke-stone-500" :size="18" />
+        <log-out class="stroke-stone-500" :size="18" />
         <div class="text-sm">{{ $t("log_out") }}</div>
       </div>
     </div>
@@ -107,6 +107,9 @@ import { watch } from "vue";
 import i18n from "@/i18n";
 import { useI18n } from "vue-i18n";
 import { UserLanguage } from "@/gql/graphql";
+import { Landmark } from "lucide-vue-next";
+import { Settings } from "lucide-vue-next";
+import { School } from "lucide-vue-next";
 
 const { t } = useI18n();
 
@@ -242,15 +245,39 @@ const apps = computed<App[]>(() => [
     links: [
       {
         // icon: "👥",
+        icon: Settings,
+        name: t("general"),
+        route: "admin-general",
+      },
+      {
+        // icon: "👥",
         icon: Users,
-        name: "Users",
+        name: t("user", 2),
         route: "admin-users",
       },
       {
         // icon: "👥",
+        icon: Landmark,
+        name: t("billing"),
+        route: "admin-billing",
+      },
+    ],
+  },
+  {
+    id: "my_school",
+    icon: School,
+    name: "My school",
+    links: [
+      {
+        // icon: "👥",
         icon: UserSquare,
-        name: "Students",
+        name: t("student", 2),
         route: "admin-students",
+      },
+      {
+        icon: CopyCheck,
+        name: t("competence", 2),
+        route: "record-competences",
       },
     ],
   },

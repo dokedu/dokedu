@@ -1,12 +1,5 @@
 <template>
-  <div
-    ref="sheet"
-    class="absolute right-0 top-0 h-screen w-full max-w-xl overflow-scroll bg-white shadow-md shadow-stone-300"
-  >
-    <div class="p-4">
-      <d-project-form :project="(project as Event)" @cancel="cancel" />
-    </div>
-  </div>
+  <d-project-form :project="(project as Event)" @cancel="cancel" />
 </template>
 
 <script lang="ts" setup>
@@ -27,8 +20,8 @@ async function cancel() {
 const project = ref<Event>({
   title: "",
   body: "",
-  startsAt: "",
-  endsAt: "",
+  startsAt: new Date().toISOString(),
+  endsAt: new Date().toISOString(),
   competences: [],
 });
 

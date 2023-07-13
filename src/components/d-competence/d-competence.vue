@@ -15,10 +15,15 @@
       <div v-for="(parent, index) in competence.parents" class="flex items-center py-0.5">
         <div v-if="index !== 0" class="mx-1 text-muted">/</div>
         <div
-          :class="{
-            'block rounded-full border border-stone-200 px-2 py-0.5 text-strong': index === 0,
-            'line-clamp-1 pl-0.5 pr-0 text-subtle': index !== 0,
-          }"
+          :class="[
+            index === 0 ? 'block rounded-full px-2 py-0.5 text-strong' : '',
+            index !== 0 ? 'line-clamp-1 pl-0.5 pr-0 text-subtle' : '',
+            parent.color && parent.color.length > 0
+              ? `bg-${parent.color}-50 !text-${parent.color}-700`
+              : index === 0
+              ? 'border border-stone-200'
+              : '',
+          ]"
         >
           {{ parent.name }}
         </div>

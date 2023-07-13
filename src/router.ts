@@ -38,6 +38,18 @@ const router = createRouter({
       name: "admin-users",
       path: "/admin/users",
       component: () => import("./pages/admin/users/index.vue"),
+      children: [
+        {
+          name: "admin-users-new",
+          path: "new",
+          component: () => import("./pages/admin/users/new.vue"),
+        },
+        {
+          name: "admin-users-user",
+          path: ":id",
+          component: () => import("./pages/admin/users/[id].vue"),
+        },
+      ],
     },
     {
       name: "admin-students",
@@ -55,6 +67,16 @@ const router = createRouter({
           component: () => import("./pages/admin/students/[id].vue"),
         },
       ],
+    },
+    {
+      name: "admin-billing",
+      path: "/admin/billing",
+      component: () => import("./pages/admin/billing/index.vue"),
+    },
+    {
+      name: "admin-general",
+      path: "/admin/general",
+      component: () => import("./pages/admin/general/index.vue"),
     },
     {
       name: "record-entries",
@@ -110,6 +132,11 @@ const router = createRouter({
       component: () => import("./pages/record/reports/new.vue"),
     },
     {
+      name: "record-projects-project",
+      path: "/record/projects/:id",
+      component: () => import("./pages/record/projects/[id].vue"),
+    },
+    {
       name: "record-projects",
       path: "/record/projects",
       component: () => import("./pages/record/projects/index.vue"),
@@ -120,7 +147,7 @@ const router = createRouter({
           component: () => import("./pages/record/projects/new.vue"),
         },
         {
-          name: "record-projects-project",
+          name: "record-projects-project-inline",
           path: ":id",
           component: () => import("./pages/record/projects/[id].vue"),
         },
@@ -134,7 +161,7 @@ const router = createRouter({
     {
       name: "drive-my-drive",
       path: "/drive/my-drive",
-      component: () => import("./pages/drive/my-drive.vue"),
+      component: () => import("./pages/drive/folders/[id].vue"),
     },
     {
       name: "drive-my-drive-folders-folder",

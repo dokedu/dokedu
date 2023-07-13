@@ -31,89 +31,66 @@
       </DFilter>
       <DSelect></DSelect>
     </div>
-    <div class="flex w-full items-start gap-3 border-b border-stone-100 py-3 text-sm">
-      <div class="flex flex-1 items-center pl-8 text-muted">
-        <div>Description</div>
-      </div>
-      <div class="flex w-[200px] items-center justify-end gap-1 text-muted">
-        <div @click="sortBy('date')">Date</div>
-        <ArrowDown
-          v-if="currentSort == EntrySortBy.DateAsc || currentSort == EntrySortBy.DateDesc"
-          class="h-4 w-4 transition-all ease-in-out"
-          :class="currentSort == EntrySortBy.DateAsc ? 'rotate-180' : 'rotate-0'"
-        />
-      </div>
-      <div class="flex w-[180px] items-center justify-end gap-1 pr-8 text-muted">
-        <div @click="sortBy('createdAt')">Created at</div>
-        <ArrowDown
-          v-if="currentSort == EntrySortBy.CreatedAtAsc || currentSort == EntrySortBy.CreatedAtDesc"
-          class="h-4 w-4 transition-all ease-in-out"
-          :class="currentSort == EntrySortBy.CreatedAtAsc ? 'rotate-180' : 'rotate-0'"
-        />
-      </div>
-    </div>
-    <div class="flex flex-col overflow-scroll" ref="el">
-      <PageSearchResult
-        v-for="(variables, i) in pageVariables"
-        :key="i"
-        :variables="variables"
-        :query="entriesQuery"
-        objectName="entries"
-      >
-        <template v-slot="{ row }">
-          <router-link
-            :to="{ name: 'record-entries-entry', params: { id: row.id } }"
-            class="flex items-center border-b border-stone-100 text-sm text-strong transition-all hover:bg-stone-50"
-          >
-            <div class="line-clamp-1 h-[2rem] flex-1 p-2 pl-8">{{ row.body }}</div>
-            <div class="line-clamp-1 flex gap-1 p-2 pl-8">
-              <div v-if="row.events?.length > 3">
-                <DTag color="neutral" class="w-1/4 p-2">{{ row.events?.length }} {{ $t("project", 2) }} </DTag>
-              </div>
-              <div v-else v-for="event in row.events" class="flex gap-1">
-                <router-link
-                  :to="{ name: 'record-projects-project', params: { id: event.id } }"
-                  class="line-clamp-1 inline-flex h-7 max-w-[120px] items-center gap-1.5 text-ellipsis whitespace-nowrap rounded-full border bg-default px-3 py-1 transition-all duration-150 ease-linear hover:max-w-[250px] hover:bg-subtle"
-                >
-                  <LayoutGrid class="stroke-subtle w-4 min-w-[16px]" />
-                  <div class="flex-1 overflow-hidden text-ellipsis">
-                    {{ event.title }}
-                  </div>
-                </router-link>
-              </div>
-              <div v-if="row.tags.length > 5">
-                <DTag color="neutral" class="w-1/4 p-2">{{ row.tags.length }} {{ $t("label", 2) }}</DTag>
-              </div>
-              <div v-else v-for="tag in row.tags" class="flex gap-1">
-                <DTag :color="tag.color" class="w-1/4 p-2">{{ tag.name }}</DTag>
-              </div>
+
+    <DTable
+      v-model:variables="pageVariables"
+      :columns="columns"
+      objectName="entries"
+      :query="entriesQuery"
+      defaultSort="createdAt"
+      @row-click="goToEntry"
+      :watchers="[student, teacher, tags]"
+    >
+      <template #body-data="{ column, item }">
+        <div class="flex h-full w-full items-center justify-between gap-2">
+          <div class="truncate">{{ column }}</div>
+          <div class="overflow-hiden flex items-center justify-end gap-1">
+            <div v-if="item.events?.length > 3">
+              <DTag color="neutral" class="w-1/4 p-2">{{ item.events?.length }} {{ $t("project", 2) }} </DTag>
             </div>
-            <div class="w-[120px] p-2 text-right text-subtle">{{ dateOnly(row.date) }}</div>
-            <div class="flex w-[180px] items-center justify-end gap-2 p-2 pr-8 text-right text-subtle">
-              <div>
-                {{ dateOnly(row.createdAt) }}
-              </div>
+            <div v-else v-for="event in item.events" class="flex gap-1">
               <div
-                :title="`${row.user?.firstName} ${row.user?.lastName}`"
-                class="h-8 w-8 rounded-full"
-                :class="`bg-subtle`"
+                @click.stop="goToProject(event.id)"
+                class="line-clamp-1 inline-flex h-7 max-w-[120px] items-center gap-1.5 text-ellipsis whitespace-nowrap rounded-full border bg-default px-3 py-1 transition-all duration-150 ease-linear hover:max-w-[250px] hover:bg-subtle"
               >
-                <div class="flex h-full w-full items-center justify-center">
-                  <div class="text-xs font-bold text-subtle">
-                    {{ row.user?.firstName[0] }}{{ row.user?.lastName[0] }}
-                  </div>
+                <LayoutGrid class="stroke-subtle w-4 min-w-[16px]" />
+                <div class="flex-1 overflow-hidden text-ellipsis">
+                  {{ event.title }}
                 </div>
               </div>
             </div>
-          </router-link>
-        </template>
-        <template #placeholder>
-          <div class="select-none px-8 py-4 text-sm text-default">
-            {{ $t("entry_placeholder") }}
+            <div v-if="item.tags.length > 5">
+              <DTag color="neutral" class="w-1/4 p-2">{{ item.tags.length }} {{ $t("label", 2) }}</DTag>
+            </div>
+            <div v-else v-for="tag in item.tags" class="flex gap-1">
+              <DTag :color="tag.color" class="w-1/4 p-2">{{ tag.name }}</DTag>
+            </div>
           </div>
-        </template>
-      </PageSearchResult>
-    </div>
+        </div>
+      </template>
+      <template #date-data="{ column }">
+        <div class="flex h-full items-center">
+          {{ dateOnly(column) }}
+        </div>
+      </template>
+      <template #createdAt-data="{ column, item }">
+        <div class="flex items-center gap-2">
+          <div>
+            {{ dateOnly(column) }}
+          </div>
+
+          <div
+            :title="`${item.user?.firstName} ${item.user?.lastName}`"
+            class="h-8 w-8 rounded-full"
+            :class="`bg-subtle`"
+          >
+            <div class="flex h-full w-full items-center justify-center">
+              <div class="text-xs font-bold text-subtle">{{ item.user?.firstName[0] }}{{ item.user?.lastName[0] }}</div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </DTable>
   </PageWrapper>
 </template>
 <script setup lang="ts">
@@ -123,98 +100,100 @@ import { useQuery } from "@urql/vue";
 import DButton from "../../../components/d-button/d-button.vue";
 import { Plus } from "lucide-vue-next";
 import { ListFilter } from "lucide-vue-next";
-import { ref, computed, reactive } from "vue";
+import { ref, computed } from "vue";
 import DFilter from "@/components/d-filter/d-filter.vue";
 import { graphql } from "@/gql";
 import DTag from "@/components/d-tag/d-tag.vue";
 import { useI18n } from "vue-i18n";
-import { useInfiniteScroll } from "@vueuse/core";
 import { watch } from "vue";
 import { LayoutGrid } from "lucide-vue-next";
-import { ArrowDown } from "lucide-vue-next";
 import { EntrySortBy } from "@/gql/graphql";
-import PageSearchResult from "@/components/PageSearchResult.vue";
-import DSelect from "@/components/d-select/d-select.vue";
-import EntryFilterStudents from "./EntryFilterStudents.vue";
+import DTable from "@/components/d-table/d-table.vue";
+import { useRouter } from "vue-router";
+import { PageVariables } from "@/types/types";
 
 const i18nLocale = useI18n();
+const router = useRouter();
 
 const student = ref();
 const teacher = ref();
-const tags = ref([]);
-const currentSort = ref(EntrySortBy.CreatedAtDesc);
+const tags = ref<string[]>([]);
 
-const sortColumns = reactive<{ [key: string]: { [key: string]: EntrySortBy } }>({
-  date: {
-    asc: EntrySortBy.DateAsc,
-    desc: EntrySortBy.DateDesc,
-  },
-  createdAt: {
-    asc: EntrySortBy.CreatedAtAsc,
-    desc: EntrySortBy.CreatedAtDesc,
-  },
-});
-
-function sortBy(column: string) {
-  if (currentSort.value === sortColumns[column].asc) {
-    currentSort.value = sortColumns[column].desc;
-  } else {
-    currentSort.value = sortColumns[column].asc;
-  }
+interface Variables extends PageVariables {
+  filter: {
+    users?: string;
+    authors?: string;
+    tags?: string[];
+  };
 }
 
-const pageVariables = ref([
+const columns = [
+  {
+    key: "body",
+    label: "description",
+    width: 0.6,
+  },
+  {
+    key: "date",
+    label: "date",
+    sortable: {
+      asc: EntrySortBy.DateAsc,
+      desc: EntrySortBy.DateDesc,
+    },
+  },
+  {
+    key: "createdAt",
+    label: "created_at",
+    sortable: {
+      asc: EntrySortBy.CreatedAtAsc,
+      desc: EntrySortBy.CreatedAtDesc,
+    },
+  },
+];
+
+const goToEntry = <Type extends { id: string }>(row: Type) => {
+  router.push({ name: "record-entries-entry", params: { id: row.id } });
+};
+
+const goToProject = (id: string) => {
+  router.push({ name: "record-projects-project", params: { id } });
+};
+
+const pageVariables = ref<Variables[]>([
   {
     filter: {
-      users: student,
-      authors: teacher,
-      tags: tags,
+      users: student.value,
+      authors: teacher.value,
+      tags: tags.value,
     },
-    limit: 20,
-    sortBy: currentSort,
+    limit: 30,
+    order: EntrySortBy.CreatedAtDesc,
     offset: 0,
-    nextPage: null,
+    nextPage: undefined,
   },
 ]);
 
-const loadMore = () => {
+watch([student, teacher, tags], () => {
+  // Get last page
   const lastPage = pageVariables.value[pageVariables.value.length - 1];
-  if (!lastPage.nextPage) return;
-  pageVariables.value.push({
-    filter: {
-      users: student,
-      authors: teacher,
-      tags: tags.value,
-    },
-    limit: 20,
-    sortBy: currentSort.value,
-    offset: lastPage.offset + lastPage.limit,
-    nextPage: null,
-  });
-};
-
-watch([student, teacher, tags, currentSort], () => {
   pageVariables.value = [
     {
       filter: {
-        users: student,
-        authors: teacher,
+        users: student.value,
+        authors: teacher.value,
         tags: tags.value,
       },
-      limit: 20,
-      sortBy: currentSort.value,
+      limit: 30,
+      order: lastPage.order,
       offset: 0,
-      nextPage: null,
+      nextPage: undefined,
     },
   ];
 });
 
-const el = ref<HTMLElement | null>(null);
-useInfiniteScroll(el, loadMore);
-
 const entriesQuery = graphql(`
-  query getEntries($filter: EntryFilterInput, $limit: Int, $sortBy: EntrySortBy, $offset: Int) {
-    entries(filter: $filter, limit: $limit, sortBy: $sortBy, offset: $offset) {
+  query getEntries($filter: EntryFilterInput, $limit: Int, $order: EntrySortBy, $offset: Int) {
+    entries(filter: $filter, limit: $limit, sortBy: $order, offset: $offset) {
       pageInfo {
         hasNextPage
         hasPreviousPage
@@ -260,10 +239,12 @@ const { data: teacherData } = useQuery({
 const { data: tagData } = useQuery({
   query: graphql(`
     query getEntryFilterTags {
-      tags {
-        id
-        name
-        color
+      tags(limit: 1000) {
+        edges {
+          id
+          name
+          color
+        }
       }
     }
   `),
@@ -279,18 +260,18 @@ const teacherOptions = computed(
 
 const tagOptions = computed(
   () =>
-    tagData?.value?.tags?.map((edge: any) => ({
+    tagData?.value?.tags?.edges?.map((edge: any) => ({
       label: edge.name,
       value: edge.id,
     })) || []
 );
 
 function getTagColor(id: string) {
-  return tagData?.value?.tags?.find((e: any) => e.id === id)?.color || "gray";
+  return tagData?.value?.tags?.edges?.find((e: any) => e.id === id)?.color || "gray";
 }
 
 function getTagName(id: string) {
-  return tagData?.value?.tags?.find((e: any) => e.id === id)?.name || "gray";
+  return tagData?.value?.tags?.edges?.find((e: any) => e.id === id)?.name || "gray";
 }
 
 function removeTag(id: string) {

@@ -8,8 +8,12 @@ import i18n from './i18n.ts'
 
 const app = createApp(App);
 
+export const urqlClient = makeClient()
+
 app.use(router);
-app.use(urql, makeClient())
+app.use(urql, urqlClient)
 app.use(i18n)
 
 app.mount("#app");
+
+urqlClient.mutation

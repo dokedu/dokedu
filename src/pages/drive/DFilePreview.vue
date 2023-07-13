@@ -15,11 +15,10 @@
 </template>
 
 <script lang="ts" setup>
-import { useMutation } from "@urql/vue";
-import { graphql } from "../../gql";
 import { File } from "../../gql/graphql";
 import { ref, watch } from "vue";
 import { onKeyStroke } from "@vueuse/core";
+import useDownloadFile from "@/composables/useDownloadFile";
 
 export interface Props {
   file: File | null;
@@ -38,6 +37,8 @@ onKeyStroke("Escape", () => {
 const canvas = ref<HTMLCanvasElement | null>(null);
 const url = ref<string | null>();
 
+const { getFileURL } = useDownloadFile();
+
 watch(
   // @ts-expect-error
   () => props.file,
@@ -45,12 +46,10 @@ watch(
     if (file) {
       url.value = null;
       const { data } = await getFileURL({
-        input: {
-          id: file.id,
-        },
+        id: file.id,
       });
-      // @ts-expect-error
-      url.value = data.generateFileURL.url;
+
+      url.value = data?.previewFile.url;
 
       if (file.name.includes(".pdf")) {
         renderPDF(url.value);
@@ -71,7 +70,7 @@ async function renderPDF(url) {
   await loadingTask.promise.then(async (pdf) => {
     const page = await pdf.getPage(1);
 
-    const viewport = page.getViewport({ scale: 1 });
+    const viewport = page.getViewport({ scale: 1.2 });
 
     const context = canvas.value?.getContext("2d");
 
@@ -88,14 +87,4 @@ async function renderPDF(url) {
     }
   });
 }
-
-const { executeMutation: getFileURL } = useMutation(
-  graphql(`
-    mutation generateFileURL($input: GenerateFileURLInput!) {
-      generateFileURL(input: $input) {
-        url
-      }
-    }
-  `)
-);
 </script>
