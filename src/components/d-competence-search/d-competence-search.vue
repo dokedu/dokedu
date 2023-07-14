@@ -6,7 +6,7 @@
         class="w-full rounded-md border border-stone-200 px-3 py-1.5 text-sm text-strong placeholder:text-subtle"
         type="text"
         autocomplete="off"
-        placeholder="Search for a competence"
+        :placeholder="$t('search_competences')"
       />
       <div class="flex flex-wrap gap-1 px-1 pt-1 text-subtle">
         <div @click="parentId = null">Fächer</div>
