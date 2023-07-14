@@ -123,7 +123,6 @@ import { Trash, X } from "lucide-vue-next";
 import DInput from "@/components/d-input/d-input.vue";
 import DCompetenceSearch from "@/components/d-competence-search/d-competence-search.vue";
 import { useRoute } from "vue-router";
-import PageHeader from "@/components/PageHeader.vue";
 
 const route = useRoute();
 const editCompetences = ref(false);
