@@ -20,15 +20,20 @@
       </div>
     </PageHeader>
     <div v-if="filtersOpen" class="flex items-end gap-2 border-b border-stone-100 px-8 py-2">
-      <DFilter :options="studentOptions" :label="$t('student')" v-model="student"></DFilter>
-      <DFilter :options="teacherOptions" :label="$t('teacher')" v-model="teacher"></DFilter>
-      <DFilter :options="tagOptions" :label="$t('tag', 2)" multiple v-model="tags">
+      <DSelect
+        :options="studentOptions"
+        :label="$t('student')"
+        v-model:search="studentSearch"
+        v-model="student"
+      ></DSelect>
+      <DSelect :options="teacherOptions" :label="$t('teacher')" v-model="teacher" v-model:search="teacherSearch" />
+      <DSelect :options="tagOptions" :label="$t('tag', 2)" multiple v-model="tags">
         <div class="flex flex-wrap gap-2">
           <DTag v-for="tag in tags" :key="tag" :color="getTagColor(tag)" removable :id="tag" @remove="removeTag">
             {{ getTagName(tag) }}
           </DTag>
         </div>
-      </DFilter>
+      </DSelect>
     </div>
 
     <DTable
@@ -102,8 +107,7 @@ import { useQuery } from "@urql/vue";
 import DButton from "../../../components/d-button/d-button.vue";
 import { Plus } from "lucide-vue-next";
 import { ListFilter } from "lucide-vue-next";
-import { ref, computed } from "vue";
-import DFilter from "@/components/d-filter/d-filter.vue";
+import { ref, computed, reactive } from "vue";
 import { graphql } from "@/gql";
 import DTag from "@/components/d-tag/d-tag.vue";
 import { useI18n } from "vue-i18n";
@@ -113,6 +117,7 @@ import { EntrySortBy } from "@/gql/graphql";
 import DTable from "@/components/d-table/d-table.vue";
 import { useRouter } from "vue-router";
 import { PageVariables } from "@/types/types";
+import DSelect from "@/components/d-select/d-select.vue";
 
 const i18nLocale = useI18n();
 const router = useRouter();
@@ -224,25 +229,11 @@ const entriesQuery = graphql(`
   }
 `);
 
-// TODO: Add infinite scroll here possibly too? no reason to have high limit
-const { data: studentData } = useQuery({
-  query: graphql(`
-    query getEntryFilterStudents {
-      users(filter: { role: [student] }, limit: 1000) {
-        edges {
-          id
-          firstName
-          lastName
-        }
-      }
-    }
-  `),
-});
-
+const teacherSearch = ref("");
 const { data: teacherData } = useQuery({
   query: graphql(`
-    query getEntryFilterTeachers {
-      users(filter: { role: [owner, admin, teacher, educator] }, limit: 500) {
+    query getEntryFilterTeachers($search: String) {
+      users(filter: { role: [owner, admin, teacher, educator] }, limit: 500, search: $search) {
         edges {
           id
           firstName
@@ -251,12 +242,33 @@ const { data: teacherData } = useQuery({
       }
     }
   `),
+  variables: reactive({
+    search: teacherSearch,
+  }),
+});
+
+const studentSearch = ref("");
+const { data: studentData } = useQuery({
+  query: graphql(`
+    query getEntryFilterStudents($search: String) {
+      users(filter: { role: [student] }, limit: 150, search: $search) {
+        edges {
+          id
+          firstName
+          lastName
+        }
+      }
+    }
+  `),
+  variables: reactive({
+    search: studentSearch,
+  }),
 });
 
 const { data: tagData } = useQuery({
   query: graphql(`
     query getEntryFilterTags {
-      tags(limit: 1000) {
+      tags(limit: 100) {
         edges {
           id
           name
@@ -267,17 +279,17 @@ const { data: tagData } = useQuery({
   `),
 });
 
-const studentOptions = computed(
+const teacherOptions = computed(
   () =>
-    studentData?.value?.users?.edges?.map((edge: any) => ({
+    teacherData?.value?.users?.edges?.map((edge: any) => ({
       label: `${edge.firstName} ${edge.lastName}`,
       value: edge.id,
     })) || []
 );
 
-const teacherOptions = computed(
+const studentOptions = computed(
   () =>
-    teacherData?.value?.users?.edges?.map((edge: any) => ({
+    studentData?.value?.users?.edges?.map((edge: any) => ({
       label: `${edge.firstName} ${edge.lastName}`,
       value: edge.id,
     })) || []

@@ -9,3 +9,8 @@ body {
 * {
     @apply !cursor-default
 }
+
+.slide-enter-from, .slide-leave-to {
+    transform: scaleY(0);
+    opacity: 0;
+}

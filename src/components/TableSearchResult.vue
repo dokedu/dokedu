@@ -13,7 +13,7 @@
   >
     <slot :row="row" :fetching="fetching"></slot>
   </div>
-  <slot name="empty" v-if="!fetching && !data[objectName]?.edges && pageVariables.offset === 0" />
+  <slot name="empty" v-if="!fetching && data[objectName]?.edges?.length === 0 && pageVariables.offset === 0" />
 </template>
 
 <script lang="ts" setup>
