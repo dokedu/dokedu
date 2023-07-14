@@ -1,6 +1,8 @@
 <template>
-  <div class="h-full select-none text-sm @container">
-    <PageHeader class="justify-between">
+  <div class="flex h-screen select-none flex-col text-sm @container">
+    <div
+      class="flex h-[56px] min-h-0 w-full items-center justify-between border-b border-stone-100 px-8 py-2 text-sm text-stone-700"
+    >
       <div class="flex items-center gap-2">
         <router-link
           v-if="isFullPage && $route.name !== 'record-projects-new'"
@@ -24,9 +26,9 @@
       <d-button v-if="project.id" type="transparent" size="xs" :icon-left="Trash" @click="trash">
         {{ $t("delete") }}
       </d-button>
-    </PageHeader>
-    <div class="grid grid-cols-1 gap-4 overflow-scroll px-8 py-4 @3xl:grid-cols-2">
-      <div>
+    </div>
+    <div class="grid h-[calc(100%-56px)] flex-1 grid-cols-1 gap-4 px-8 py-4 @3xl:grid-cols-2">
+      <div class="h-full">
         <div class="mb-4 flex flex-col gap-2">
           <div v-if="false" class="flex min-h-[8rem] w-full items-center justify-start rounded-lg bg-stone-100">
             <div class="mx-auto text-center">
@@ -71,25 +73,26 @@
           <d-button v-if="project.id" type="primary" :icon-left="Save" @click="update">{{ $t("save") }}</d-button>
         </div>
       </div>
-      <div v-if="$route.name !== 'record-projects-new'">
-        <div class="flex select-none flex-col gap-2">
-          <header class="flex items-baseline justify-between">
-            <div class="text-sm text-subtle">{{ $t("competence", 2) }}</div>
-            <div v-if="isFullPage">
-              <d-button type="transparent" size="xs" @click="editCompetences = true">{{ $t("add") }}</d-button>
-            </div>
-          </header>
-          <div v-if="project.competences && project.competences.length > 0" class="flex flex-col gap-1">
-            <d-competence v-for="competence in project.competences" :key="competence.id" :competence="competence">
-              <div class="rounded-lg p-0.5 hover:bg-stone-100" @click="toggleCompetence(competence)">
-                <X :size="18" class="stroke-colors-default" />
-              </div>
-            </d-competence>
+      <div v-if="$route.name !== 'record-projects-new'" class="flex h-full select-none flex-col gap-2 overflow-scroll">
+        <header class="flex min-h-0 items-baseline justify-between">
+          <div class="text-sm text-subtle">{{ $t("competence", 2) }}</div>
+          <div v-if="isFullPage">
+            <d-button type="transparent" size="xs" @click="editCompetences = true">{{ $t("add") }}</d-button>
           </div>
-          <div v-else class="text-stone-500">
-            <div class="mx-auto mt-4 w-fit rounded-lg bg-stone-50 p-8 text-center">
-              {{ $t("no_competences") }}
+        </header>
+        <div
+          v-if="project.competences && project.competences.length > 0"
+          class="flex flex-1 flex-col gap-1 overflow-scroll"
+        >
+          <d-competence v-for="competence in project.competences" :key="competence.id" :competence="competence">
+            <div class="rounded-lg p-0.5 hover:bg-stone-100" @click="toggleCompetence(competence)">
+              <X :size="18" class="stroke-colors-default" />
             </div>
+          </d-competence>
+        </div>
+        <div v-else class="text-stone-500">
+          <div class="mx-auto mt-4 w-fit rounded-lg bg-stone-50 p-8 text-center">
+            {{ $t("no_competences") }}
           </div>
         </div>
       </div>
@@ -120,7 +123,6 @@ import { Trash, X } from "lucide-vue-next";
 import DInput from "@/components/d-input/d-input.vue";
 import DCompetenceSearch from "@/components/d-competence-search/d-competence-search.vue";
 import { useRoute } from "vue-router";
-import PageHeader from "@/components/PageHeader.vue";
 
 const route = useRoute();
 const editCompetences = ref(false);
