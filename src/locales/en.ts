@@ -48,6 +48,12 @@ export const en = {
   bankaccount_ending_in: "Bank account ending in",
   general: "General",
 
+  // Admin Email
+  group: "Group | Groups",
+  domain: "Domain | Domains",
+  add_domain: "Add domain",
+  edit_domain: "Edit domain",
+
   // Students
   search: "Search",
   profile: "Profile",

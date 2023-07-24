@@ -110,6 +110,8 @@ import { UserLanguage } from "@/gql/graphql";
 import { Landmark } from "lucide-vue-next";
 import { Settings } from "lucide-vue-next";
 import { School } from "lucide-vue-next";
+import { Mail } from "lucide-vue-next";
+import { Mails } from "lucide-vue-next";
 
 const { t } = useI18n();
 
@@ -260,6 +262,16 @@ const apps = computed<App[]>(() => [
         icon: Landmark,
         name: t("billing"),
         route: "admin-billing",
+      },
+      {
+        icon: Mails,
+        name: t("group", 2),
+        route: "admin-billing",
+      },
+      {
+        icon: Globe,
+        name: t("domain", 2),
+        route: "admin-domains",
       },
     ],
   },
