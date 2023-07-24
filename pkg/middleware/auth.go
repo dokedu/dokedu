@@ -102,6 +102,10 @@ type UserContext struct {
 	Token string
 }
 
+func (c UserContext) HasPermissionAdmin() bool {
+	return c.Role == "admin" || c.Role == "owner"
+}
+
 // Helper function to get the current user from the context.
 func GetUser(ctx context.Context) (*UserContext, error) {
 	currentUser := ForContext(ctx)
