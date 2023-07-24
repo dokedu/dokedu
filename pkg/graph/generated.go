@@ -206,17 +206,17 @@ type ComplexityRoot struct {
 		TotalCount func(childComplexity int) int
 	}
 
-	EmailGroupConnection struct {
-		Edges      func(childComplexity int) int
-		PageInfo   func(childComplexity int) int
-		TotalCount func(childComplexity int) int
-	}
-
 	EmailGroupMember struct {
 		CreatedAt func(childComplexity int) int
 		ID        func(childComplexity int) int
 		MemberOf  func(childComplexity int) int
 		Name      func(childComplexity int) int
+	}
+
+	EmailGroupMemberConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
 	}
 
 	Entry struct {
@@ -374,38 +374,38 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Bucket           func(childComplexity int, id string) int
-		Buckets          func(childComplexity int, input *model.BucketFilterInput) int
-		Chat             func(childComplexity int, id string) int
-		Chats            func(childComplexity int, limit *int, offset *int) int
-		Competence       func(childComplexity int, id string) int
-		Competences      func(childComplexity int, limit *int, offset *int, filter *model.CompetenceFilterInput, search *string, sort *model.CompetenceSort) int
-		Domain           func(childComplexity int, id string) int
-		Domains          func(childComplexity int) int
-		Email            func(childComplexity int, id string) int
-		EmailAccount     func(childComplexity int, id string) int
-		EmailAccounts    func(childComplexity int) int
-		EmailForwarding  func(childComplexity int, id string) int
-		EmailForwardings func(childComplexity int) int
-		EmailGroup       func(childComplexity int, id string) int
-		EmailGroups      func(childComplexity int) int
-		Emails           func(childComplexity int) int
-		Entries          func(childComplexity int, limit *int, offset *int, filter *model.EntryFilterInput, sortBy *model.EntrySortBy, search *string) int
-		Entry            func(childComplexity int, id string) int
-		Event            func(childComplexity int, id string) int
-		Events           func(childComplexity int, limit *int, offset *int, filter *model.EventFilterInput, order *model.EventOrderBy, search *string) int
-		ExportEvents     func(childComplexity int, input model.ExportEventsInput) int
-		File             func(childComplexity int, id string) int
-		Files            func(childComplexity int, input *model.FilesFilterInput, limit *int, offset *int) int
-		Organisation     func(childComplexity int) int
-		Report           func(childComplexity int, id string) int
-		Reports          func(childComplexity int, limit *int, offset *int) int
-		Tag              func(childComplexity int, id string) int
-		Tags             func(childComplexity int, limit *int, offset *int) int
-		User             func(childComplexity int, id string) int
-		UserStudent      func(childComplexity int, id string) int
-		UserStudents     func(childComplexity int, limit *int, offset *int) int
-		Users            func(childComplexity int, limit *int, offset *int, filter *model.UserFilterInput, search *string) int
+		Bucket            func(childComplexity int, id string) int
+		Buckets           func(childComplexity int, input *model.BucketFilterInput) int
+		Chat              func(childComplexity int, id string) int
+		Chats             func(childComplexity int, limit *int, offset *int) int
+		Competence        func(childComplexity int, id string) int
+		Competences       func(childComplexity int, limit *int, offset *int, filter *model.CompetenceFilterInput, search *string, sort *model.CompetenceSort) int
+		Domain            func(childComplexity int, id string) int
+		Domains           func(childComplexity int) int
+		Email             func(childComplexity int, id string) int
+		EmailAccount      func(childComplexity int, id string) int
+		EmailAccounts     func(childComplexity int, filter *model.EmailAccountFilter) int
+		EmailForwarding   func(childComplexity int, id string) int
+		EmailForwardings  func(childComplexity int) int
+		EmailGroupMember  func(childComplexity int, id string) int
+		EmailGroupMembers func(childComplexity int) int
+		Emails            func(childComplexity int) int
+		Entries           func(childComplexity int, limit *int, offset *int, filter *model.EntryFilterInput, sortBy *model.EntrySortBy, search *string) int
+		Entry             func(childComplexity int, id string) int
+		Event             func(childComplexity int, id string) int
+		Events            func(childComplexity int, limit *int, offset *int, filter *model.EventFilterInput, order *model.EventOrderBy, search *string) int
+		ExportEvents      func(childComplexity int, input model.ExportEventsInput) int
+		File              func(childComplexity int, id string) int
+		Files             func(childComplexity int, input *model.FilesFilterInput, limit *int, offset *int) int
+		Organisation      func(childComplexity int) int
+		Report            func(childComplexity int, id string) int
+		Reports           func(childComplexity int, limit *int, offset *int) int
+		Tag               func(childComplexity int, id string) int
+		Tags              func(childComplexity int, limit *int, offset *int) int
+		User              func(childComplexity int, id string) int
+		UserStudent       func(childComplexity int, id string) int
+		UserStudents      func(childComplexity int, limit *int, offset *int) int
+		Users             func(childComplexity int, limit *int, offset *int, filter *model.UserFilterInput, search *string) int
 	}
 
 	Report struct {
@@ -649,10 +649,10 @@ type QueryResolver interface {
 	Bucket(ctx context.Context, id string) (*db.Bucket, error)
 	File(ctx context.Context, id string) (*db.File, error)
 	Files(ctx context.Context, input *model.FilesFilterInput, limit *int, offset *int) (*model.FileConnection, error)
-	EmailAccounts(ctx context.Context) (*model.EmailAccountConnection, error)
+	EmailAccounts(ctx context.Context, filter *model.EmailAccountFilter) (*model.EmailAccountConnection, error)
 	EmailAccount(ctx context.Context, id string) (*db.EmailAccount, error)
-	EmailGroups(ctx context.Context) (*model.EmailGroupConnection, error)
-	EmailGroup(ctx context.Context, id string) (*db.EmailGroupMember, error)
+	EmailGroupMembers(ctx context.Context) (*model.EmailGroupMemberConnection, error)
+	EmailGroupMember(ctx context.Context, id string) (*db.EmailGroupMember, error)
 	Emails(ctx context.Context) (*model.EmailConnection, error)
 	Email(ctx context.Context, id string) (*db.Email, error)
 	EmailForwardings(ctx context.Context) (*model.EmailForwardingConnection, error)
@@ -1282,27 +1282,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EmailForwardingConnection.TotalCount(childComplexity), true
 
-	case "EmailGroupConnection.edges":
-		if e.complexity.EmailGroupConnection.Edges == nil {
-			break
-		}
-
-		return e.complexity.EmailGroupConnection.Edges(childComplexity), true
-
-	case "EmailGroupConnection.pageInfo":
-		if e.complexity.EmailGroupConnection.PageInfo == nil {
-			break
-		}
-
-		return e.complexity.EmailGroupConnection.PageInfo(childComplexity), true
-
-	case "EmailGroupConnection.totalCount":
-		if e.complexity.EmailGroupConnection.TotalCount == nil {
-			break
-		}
-
-		return e.complexity.EmailGroupConnection.TotalCount(childComplexity), true
-
 	case "EmailGroupMember.createdAt":
 		if e.complexity.EmailGroupMember.CreatedAt == nil {
 			break
@@ -1330,6 +1309,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.EmailGroupMember.Name(childComplexity), true
+
+	case "EmailGroupMemberConnection.edges":
+		if e.complexity.EmailGroupMemberConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.EmailGroupMemberConnection.Edges(childComplexity), true
+
+	case "EmailGroupMemberConnection.pageInfo":
+		if e.complexity.EmailGroupMemberConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.EmailGroupMemberConnection.PageInfo(childComplexity), true
+
+	case "EmailGroupMemberConnection.totalCount":
+		if e.complexity.EmailGroupMemberConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.EmailGroupMemberConnection.TotalCount(childComplexity), true
 
 	case "Entry.body":
 		if e.complexity.Entry.Body == nil {
@@ -2495,7 +2495,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Query.EmailAccounts(childComplexity), true
+		args, err := ec.field_Query_emailAccounts_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.EmailAccounts(childComplexity, args["filter"].(*model.EmailAccountFilter)), true
 
 	case "Query.emailForwarding":
 		if e.complexity.Query.EmailForwarding == nil {
@@ -2516,24 +2521,24 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.EmailForwardings(childComplexity), true
 
-	case "Query.emailGroup":
-		if e.complexity.Query.EmailGroup == nil {
+	case "Query.EmailGroupMember":
+		if e.complexity.Query.EmailGroupMember == nil {
 			break
 		}
 
-		args, err := ec.field_Query_emailGroup_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_EmailGroupMember_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.EmailGroup(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.EmailGroupMember(childComplexity, args["id"].(string)), true
 
-	case "Query.emailGroups":
-		if e.complexity.Query.EmailGroups == nil {
+	case "Query.EmailGroupMembers":
+		if e.complexity.Query.EmailGroupMembers == nil {
 			break
 		}
 
-		return e.complexity.Query.EmailGroups(childComplexity), true
+		return e.complexity.Query.EmailGroupMembers(childComplexity), true
 
 	case "Query.emails":
 		if e.complexity.Query.Emails == nil {
@@ -3241,6 +3246,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputDeleteFilesInput,
 		ec.unmarshalInputDownloadFileInput,
 		ec.unmarshalInputDownloadFilesInput,
+		ec.unmarshalInputEmailAccountFilter,
 		ec.unmarshalInputEntryFilterInput,
 		ec.unmarshalInputEventFilterInput,
 		ec.unmarshalInputExportEventsInput,
@@ -4199,6 +4205,21 @@ func (ec *executionContext) field_Mutation_uploadFiles_args(ctx context.Context,
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_EmailGroupMember_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -4379,22 +4400,22 @@ func (ec *executionContext) field_Query_emailAccount_args(ctx context.Context, r
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_emailForwarding_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_emailAccounts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+	var arg0 *model.EmailAccountFilter
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg0, err = ec.unmarshalOEmailAccountFilter2ᚖexampleᚋpkgᚋgraphᚋmodelᚐEmailAccountFilter(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["id"] = arg0
+	args["filter"] = arg0
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_emailGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_emailForwarding_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -8655,153 +8676,6 @@ func (ec *executionContext) fieldContext_EmailForwardingConnection_totalCount(ct
 	return fc, nil
 }
 
-func (ec *executionContext) _EmailGroupConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.EmailGroupConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailGroupConnection_edges(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Edges, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*db.EmailGroupMember)
-	fc.Result = res
-	return ec.marshalOEmailGroupMember2ᚕᚖexampleᚋpkgᚋdbᚐEmailGroupMember(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailGroupConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailGroupConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EmailGroupMember_id(ctx, field)
-			case "name":
-				return ec.fieldContext_EmailGroupMember_name(ctx, field)
-			case "memberOf":
-				return ec.fieldContext_EmailGroupMember_memberOf(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_EmailGroupMember_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailGroupMember", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailGroupConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.EmailGroupConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailGroupConnection_pageInfo(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PageInfo, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.PageInfo)
-	fc.Result = res
-	return ec.marshalNPageInfo2ᚖexampleᚋpkgᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailGroupConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailGroupConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "hasNextPage":
-				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
-			case "hasPreviousPage":
-				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
-			case "currentPage":
-				return ec.fieldContext_PageInfo_currentPage(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailGroupConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.EmailGroupConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailGroupConnection_totalCount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TotalCount, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailGroupConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailGroupConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _EmailGroupMember_id(ctx context.Context, field graphql.CollectedField, obj *db.EmailGroupMember) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EmailGroupMember_id(ctx, field)
 	if err != nil {
@@ -8973,6 +8847,153 @@ func (ec *executionContext) fieldContext_EmailGroupMember_createdAt(ctx context.
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EmailGroupMemberConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.EmailGroupMemberConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EmailGroupMemberConnection_edges(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Edges, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*db.EmailGroupMember)
+	fc.Result = res
+	return ec.marshalOEmailGroupMember2ᚕᚖexampleᚋpkgᚋdbᚐEmailGroupMember(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EmailGroupMemberConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EmailGroupMemberConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_EmailGroupMember_id(ctx, field)
+			case "name":
+				return ec.fieldContext_EmailGroupMember_name(ctx, field)
+			case "memberOf":
+				return ec.fieldContext_EmailGroupMember_memberOf(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_EmailGroupMember_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type EmailGroupMember", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EmailGroupMemberConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.EmailGroupMemberConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EmailGroupMemberConnection_pageInfo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.PageInfo)
+	fc.Result = res
+	return ec.marshalNPageInfo2ᚖexampleᚋpkgᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EmailGroupMemberConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EmailGroupMemberConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			case "hasPreviousPage":
+				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
+			case "currentPage":
+				return ec.fieldContext_PageInfo_currentPage(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EmailGroupMemberConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.EmailGroupMemberConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EmailGroupMemberConnection_totalCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EmailGroupMemberConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EmailGroupMemberConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -16034,7 +16055,7 @@ func (ec *executionContext) _Query_emailAccounts(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().EmailAccounts(rctx)
+		return ec.resolvers.Query().EmailAccounts(rctx, fc.Args["filter"].(*model.EmailAccountFilter))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -16065,6 +16086,17 @@ func (ec *executionContext) fieldContext_Query_emailAccounts(ctx context.Context
 			}
 			return nil, fmt.Errorf("no field named %q was found under type EmailAccountConnection", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_emailAccounts_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
 	}
 	return fc, nil
 }
@@ -16139,8 +16171,8 @@ func (ec *executionContext) fieldContext_Query_emailAccount(ctx context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_emailGroups(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_emailGroups(ctx, field)
+func (ec *executionContext) _Query_EmailGroupMembers(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_EmailGroupMembers(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -16153,7 +16185,7 @@ func (ec *executionContext) _Query_emailGroups(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().EmailGroups(rctx)
+		return ec.resolvers.Query().EmailGroupMembers(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -16162,12 +16194,12 @@ func (ec *executionContext) _Query_emailGroups(ctx context.Context, field graphq
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.EmailGroupConnection)
+	res := resTmp.(*model.EmailGroupMemberConnection)
 	fc.Result = res
-	return ec.marshalOEmailGroupConnection2ᚖexampleᚋpkgᚋgraphᚋmodelᚐEmailGroupConnection(ctx, field.Selections, res)
+	return ec.marshalOEmailGroupMemberConnection2ᚖexampleᚋpkgᚋgraphᚋmodelᚐEmailGroupMemberConnection(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_emailGroups(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_EmailGroupMembers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -16176,20 +16208,20 @@ func (ec *executionContext) fieldContext_Query_emailGroups(ctx context.Context, 
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "edges":
-				return ec.fieldContext_EmailGroupConnection_edges(ctx, field)
+				return ec.fieldContext_EmailGroupMemberConnection_edges(ctx, field)
 			case "pageInfo":
-				return ec.fieldContext_EmailGroupConnection_pageInfo(ctx, field)
+				return ec.fieldContext_EmailGroupMemberConnection_pageInfo(ctx, field)
 			case "totalCount":
-				return ec.fieldContext_EmailGroupConnection_totalCount(ctx, field)
+				return ec.fieldContext_EmailGroupMemberConnection_totalCount(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailGroupConnection", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type EmailGroupMemberConnection", field.Name)
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_emailGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_emailGroup(ctx, field)
+func (ec *executionContext) _Query_EmailGroupMember(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_EmailGroupMember(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -16202,7 +16234,7 @@ func (ec *executionContext) _Query_emailGroup(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().EmailGroup(rctx, fc.Args["id"].(string))
+		return ec.resolvers.Query().EmailGroupMember(rctx, fc.Args["id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -16216,7 +16248,7 @@ func (ec *executionContext) _Query_emailGroup(ctx context.Context, field graphql
 	return ec.marshalOEmailGroupMember2ᚖexampleᚋpkgᚋdbᚐEmailGroupMember(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_emailGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_EmailGroupMember(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -16243,7 +16275,7 @@ func (ec *executionContext) fieldContext_Query_emailGroup(ctx context.Context, f
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_emailGroup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_EmailGroupMember_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -24031,6 +24063,34 @@ func (ec *executionContext) unmarshalInputDownloadFilesInput(ctx context.Context
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputEmailAccountFilter(ctx context.Context, obj interface{}) (model.EmailAccountFilter, error) {
+	var it model.EmailAccountFilter
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"type"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "type":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+			it.Type, err = ec.unmarshalOEmailAccountType2ᚖexampleᚋpkgᚋdbᚐEmailAccountType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputEntryFilterInput(ctx context.Context, obj interface{}) (model.EntryFilterInput, error) {
 	var it model.EntryFilterInput
 	asMap := map[string]interface{}{}
@@ -26475,45 +26535,6 @@ func (ec *executionContext) _EmailForwardingConnection(ctx context.Context, sel 
 	return out
 }
 
-var emailGroupConnectionImplementors = []string{"EmailGroupConnection"}
-
-func (ec *executionContext) _EmailGroupConnection(ctx context.Context, sel ast.SelectionSet, obj *model.EmailGroupConnection) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, emailGroupConnectionImplementors)
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("EmailGroupConnection")
-		case "edges":
-
-			out.Values[i] = ec._EmailGroupConnection_edges(ctx, field, obj)
-
-		case "pageInfo":
-
-			out.Values[i] = ec._EmailGroupConnection_pageInfo(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "totalCount":
-
-			out.Values[i] = ec._EmailGroupConnection_totalCount(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
 var emailGroupMemberImplementors = []string{"EmailGroupMember"}
 
 func (ec *executionContext) _EmailGroupMember(ctx context.Context, sel ast.SelectionSet, obj *db.EmailGroupMember) graphql.Marshaler {
@@ -26565,6 +26586,45 @@ func (ec *executionContext) _EmailGroupMember(ctx context.Context, sel ast.Selec
 				return innerFunc(ctx)
 
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var emailGroupMemberConnectionImplementors = []string{"EmailGroupMemberConnection"}
+
+func (ec *executionContext) _EmailGroupMemberConnection(ctx context.Context, sel ast.SelectionSet, obj *model.EmailGroupMemberConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, emailGroupMemberConnectionImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EmailGroupMemberConnection")
+		case "edges":
+
+			out.Values[i] = ec._EmailGroupMemberConnection_edges(ctx, field, obj)
+
+		case "pageInfo":
+
+			out.Values[i] = ec._EmailGroupMemberConnection_pageInfo(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "totalCount":
+
+			out.Values[i] = ec._EmailGroupMemberConnection_totalCount(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -28108,7 +28168,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
-		case "emailGroups":
+		case "EmailGroupMembers":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -28117,7 +28177,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_emailGroups(ctx, field)
+				res = ec._Query_EmailGroupMembers(ctx, field)
 				return res
 			}
 
@@ -28128,7 +28188,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
-		case "emailGroup":
+		case "EmailGroupMember":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -28137,7 +28197,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_emailGroup(ctx, field)
+				res = ec._Query_EmailGroupMember(ctx, field)
 				return res
 			}
 
@@ -32210,6 +32270,14 @@ func (ec *executionContext) marshalOEmailAccountConnection2ᚖexampleᚋpkgᚋgr
 	return ec._EmailAccountConnection(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalOEmailAccountFilter2ᚖexampleᚋpkgᚋgraphᚋmodelᚐEmailAccountFilter(ctx context.Context, v interface{}) (*model.EmailAccountFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputEmailAccountFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalOEmailAccountType2ᚖexampleᚋpkgᚋdbᚐEmailAccountType(ctx context.Context, v interface{}) (*db.EmailAccountType, error) {
 	if v == nil {
 		return nil, nil
@@ -32289,13 +32357,6 @@ func (ec *executionContext) marshalOEmailForwardingConnection2ᚖexampleᚋpkg�
 	return ec._EmailForwardingConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOEmailGroupConnection2ᚖexampleᚋpkgᚋgraphᚋmodelᚐEmailGroupConnection(ctx context.Context, sel ast.SelectionSet, v *model.EmailGroupConnection) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._EmailGroupConnection(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalOEmailGroupMember2ᚕᚖexampleᚋpkgᚋdbᚐEmailGroupMember(ctx context.Context, sel ast.SelectionSet, v []*db.EmailGroupMember) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -32342,6 +32403,13 @@ func (ec *executionContext) marshalOEmailGroupMember2ᚖexampleᚋpkgᚋdbᚐEma
 		return graphql.Null
 	}
 	return ec._EmailGroupMember(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOEmailGroupMemberConnection2ᚖexampleᚋpkgᚋgraphᚋmodelᚐEmailGroupMemberConnection(ctx context.Context, sel ast.SelectionSet, v *model.EmailGroupMemberConnection) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._EmailGroupMemberConnection(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOEntry2ᚕᚖexampleᚋpkgᚋdbᚐEntry(ctx context.Context, sel ast.SelectionSet, v []*db.Entry) graphql.Marshaler {

@@ -222,6 +222,10 @@ type EmailAccountConnection struct {
 	TotalCount int                `json:"totalCount"`
 }
 
+type EmailAccountFilter struct {
+	Type *db.EmailAccountType `json:"type,omitempty"`
+}
+
 type EmailConnection struct {
 	Edges      []*db.Email `json:"edges,omitempty"`
 	PageInfo   *PageInfo   `json:"pageInfo"`
@@ -234,7 +238,7 @@ type EmailForwardingConnection struct {
 	TotalCount int                   `json:"totalCount"`
 }
 
-type EmailGroupConnection struct {
+type EmailGroupMemberConnection struct {
 	Edges      []*db.EmailGroupMember `json:"edges,omitempty"`
 	PageInfo   *PageInfo              `json:"pageInfo"`
 	TotalCount int                    `json:"totalCount"`

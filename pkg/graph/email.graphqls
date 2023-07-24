@@ -57,7 +57,7 @@ type EmailAccountConnection {
     pageInfo: PageInfo!
     totalCount: Int!
 }
-type EmailGroupConnection {
+type EmailGroupMemberConnection {
     edges: [EmailGroupMember]
     pageInfo: PageInfo!
     totalCount: Int!
@@ -78,11 +78,15 @@ type DomainConnection {
     totalCount: Int!
 }
 
+input EmailAccountFilter {
+    type: EmailAccountType
+}
+
 extend type Query {
-    emailAccounts: EmailAccountConnection
+    emailAccounts(filter: EmailAccountFilter): EmailAccountConnection
     emailAccount(id: ID!): EmailAccount
-    emailGroups: EmailGroupConnection
-    emailGroup(id: ID!): EmailGroupMember
+    EmailGroupMembers: EmailGroupMemberConnection
+    EmailGroupMember(id: ID!): EmailGroupMember
     emails: EmailConnection
     email(id: ID!): Email
     emailForwardings: EmailForwardingConnection

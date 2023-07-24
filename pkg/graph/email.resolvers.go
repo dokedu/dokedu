@@ -333,7 +333,7 @@ func (r *mutationResolver) DeleteDomain(ctx context.Context, input model.DeleteD
 }
 
 // EmailAccounts is the resolver for the emailAccounts field.
-func (r *queryResolver) EmailAccounts(ctx context.Context) (*model.EmailAccountConnection, error) {
+func (r *queryResolver) EmailAccounts(ctx context.Context, filter *model.EmailAccountFilter) (*model.EmailAccountConnection, error) {
 	currentUser := middleware.ForContext(ctx)
 	if currentUser == nil {
 		return nil, errors.New("no user found in the context")
@@ -343,7 +343,15 @@ func (r *queryResolver) EmailAccounts(ctx context.Context) (*model.EmailAccountC
 	}
 
 	var emailAccounts []*db.EmailAccount
-	err := r.DB.NewSelect().Model(&emailAccounts).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	query := r.DB.NewSelect().Model(&emailAccounts).Where("organisation_id = ?", currentUser.OrganisationID)
+
+	if filter != nil {
+		if filter.Type != nil {
+			query.Where("type = ?", *filter.Type)
+		}
+	}
+
+	err := query.Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -376,8 +384,8 @@ func (r *queryResolver) EmailAccount(ctx context.Context, id string) (*db.EmailA
 	return &emailAccount, nil
 }
 
-// EmailGroups is the resolver for the emailGroups field.
-func (r *queryResolver) EmailGroups(ctx context.Context) (*model.EmailGroupConnection, error) {
+// EmailGroupMembers is the resolver for the EmailGroupMembers field.
+func (r *queryResolver) EmailGroupMembers(ctx context.Context) (*model.EmailGroupMemberConnection, error) {
 	currentUser := middleware.ForContext(ctx)
 	if currentUser == nil {
 		return nil, errors.New("no user found in the context")
@@ -386,14 +394,14 @@ func (r *queryResolver) EmailGroups(ctx context.Context) (*model.EmailGroupConne
 		return nil, errors.New("no permission")
 	}
 
-	var emailGroups []*db.EmailGroupMember
-	err := r.DB.NewSelect().Model(&emailGroups).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	var emailGroupMembers []*db.EmailGroupMember
+	err := r.DB.NewSelect().Model(&emailGroupMembers).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return &model.EmailGroupConnection{
-		Edges: emailGroups,
+	return &model.EmailGroupMemberConnection{
+		Edges: emailGroupMembers,
 		PageInfo: &model.PageInfo{
 			HasNextPage:     false,
 			HasPreviousPage: false,
@@ -401,8 +409,9 @@ func (r *queryResolver) EmailGroups(ctx context.Context) (*model.EmailGroupConne
 	}, nil
 }
 
-// EmailGroup is the resolver for the emailGroup field.
-func (r *queryResolver) EmailGroup(ctx context.Context, id string) (*db.EmailGroupMember, error) {
+// EmailGroupMember is the resolver for the EmailGroupMember field.
+func (r *queryResolver) EmailGroupMember(ctx context.Context, id string) (*db.EmailGroupMember, error) {
+
 	currentUser := middleware.ForContext(ctx)
 	if currentUser == nil {
 		return nil, errors.New("no user found in the context")
