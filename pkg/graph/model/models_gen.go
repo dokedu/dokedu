@@ -64,6 +64,33 @@ type CopyFilesPayload struct {
 	Files []*db.File `json:"files"`
 }
 
+type CreateDomainInput struct {
+	Name string `json:"name"`
+}
+
+type CreateEmailAccountInput struct {
+	Name        string              `json:"name"`
+	Description *string             `json:"description,omitempty"`
+	Type        db.EmailAccountType `json:"type"`
+	Quota       *int                `json:"quota,omitempty"`
+}
+
+type CreateEmailForwardingInput struct {
+	Origin string `json:"origin"`
+	Target string `json:"target"`
+}
+
+type CreateEmailGroupMemberInput struct {
+	Name     string `json:"name"`
+	MemberOf string `json:"memberOf"`
+}
+
+type CreateEmailInput struct {
+	Name    string       `json:"name"`
+	Address string       `json:"address"`
+	Type    db.EmailType `json:"type"`
+}
+
 type CreateEntryInput struct {
 	Date            string                       `json:"date"`
 	Body            string                       `json:"body"`
@@ -128,6 +155,26 @@ type CreateUserInput struct {
 	JoinedAt  *time.Time  `json:"joinedAt,omitempty"`
 }
 
+type DeleteDomainInput struct {
+	ID string `json:"id"`
+}
+
+type DeleteEmailAccountInput struct {
+	ID string `json:"id"`
+}
+
+type DeleteEmailForwardingInput struct {
+	ID string `json:"id"`
+}
+
+type DeleteEmailGroupMemberInput struct {
+	ID string `json:"id"`
+}
+
+type DeleteEmailInput struct {
+	ID string `json:"id"`
+}
+
 type DeleteFileInput struct {
 	ID string `json:"id"`
 }
@@ -146,6 +193,12 @@ type DeleteFilesPayload struct {
 	Files   []*db.File `json:"files"`
 }
 
+type DomainConnection struct {
+	Edges      []*db.Domain `json:"edges,omitempty"`
+	PageInfo   *PageInfo    `json:"pageInfo"`
+	TotalCount int          `json:"totalCount"`
+}
+
 type DownloadFileInput struct {
 	ID string `json:"id"`
 }
@@ -161,6 +214,30 @@ type DownloadFilesInput struct {
 type DownloadFilesPayload struct {
 	// The url to download a zip file containing all the files.
 	URL string `json:"url"`
+}
+
+type EmailAccountConnection struct {
+	Edges      []*db.EmailAccount `json:"edges,omitempty"`
+	PageInfo   *PageInfo          `json:"pageInfo"`
+	TotalCount int                `json:"totalCount"`
+}
+
+type EmailConnection struct {
+	Edges      []*db.Email `json:"edges,omitempty"`
+	PageInfo   *PageInfo   `json:"pageInfo"`
+	TotalCount int         `json:"totalCount"`
+}
+
+type EmailForwardingConnection struct {
+	Edges      []*db.EmailForwarding `json:"edges,omitempty"`
+	PageInfo   *PageInfo             `json:"pageInfo"`
+	TotalCount int                   `json:"totalCount"`
+}
+
+type EmailGroupConnection struct {
+	Edges      []*db.EmailGroupMember `json:"edges,omitempty"`
+	PageInfo   *PageInfo              `json:"pageInfo"`
+	TotalCount int                    `json:"totalCount"`
 }
 
 type EntryConnection struct {
@@ -344,6 +421,15 @@ type UpdateCompetenceInput struct {
 
 type UpdateCompetenceSortingInput struct {
 	Competences []*SortCompetenceInput `json:"competences"`
+}
+
+type UpdateEmailAccountInput struct {
+	ID          string               `json:"id"`
+	Name        *string              `json:"name,omitempty"`
+	Description *string              `json:"description,omitempty"`
+	Type        *db.EmailAccountType `json:"type,omitempty"`
+	Quota       *int                 `json:"quota,omitempty"`
+	Active      *bool                `json:"active,omitempty"`
 }
 
 type UpdateEntryInput struct {

@@ -419,3 +419,73 @@ type Session struct {
 	CreatedAt time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
 	DeletedAt bun.NullTime `bun:",soft_delete,nullzero"`
 }
+
+type EmailAccountType string
+
+const (
+	EmailAccountTypeIndividual EmailAccountType = "individual"
+	EmailAccountTypeGroup      EmailAccountType = "group"
+)
+
+type EmailAccount struct {
+	bun.BaseModel
+
+	ID             string           `bun:",nullzero,pk" json:"id"`
+	Name           string           `json:"name"`
+	Secret         string           `json:"secret"`
+	Description    string           `json:"description"`
+	Type           EmailAccountType `bun:",notnull" json:"type"`
+	Quota          int              `bun:",default:0" json:"quota"`
+	Active         bool             `bun:",default:true" json:"active"`
+	UserID         sql.NullString   `json:"user_id"`
+	OrganisationID string           `json:"organisation_id"`
+	CreatedAt      time.Time        `bun:",nullzero,notnull,default:now()" json:"created_at"`
+}
+
+type EmailGroupMember struct {
+	bun.BaseModel
+
+	ID             string    `bun:",nullzero,pk" json:"id"`
+	Name           string    `json:"name"`
+	MemberOf       string    `json:"member_of"`
+	OrganisationID string    `json:"organisation_id"`
+	CreatedAt      time.Time `bun:",nullzero,notnull,default:now()" json:"created_at"`
+}
+
+type EmailType string
+
+const (
+	EmailTypePrimary EmailType = "primary"
+	EmailTypeAlias   EmailType = "alias"
+	EmailTypeList    EmailType = "list"
+)
+
+type Email struct {
+	bun.BaseModel
+
+	ID             string    `bun:",nullzero,pk" json:"id"`
+	Name           string    `json:"name"`
+	Address        string    `json:"address"`
+	Type           EmailType `json:"type"`
+	OrganisationID string    `json:"organisation_id"`
+	CreatedAt      time.Time `bun:",nullzero,notnull,default:now()" json:"created_at"`
+}
+
+type EmailForwarding struct {
+	bun.BaseModel
+
+	ID             string    `bun:",nullzero,pk" json:"id"`
+	Origin         string    `json:"origin"`
+	Target         string    `json:"target"`
+	OrganisationID string    `json:"organisation_id"`
+	CreatedAt      time.Time `bun:",nullzero,notnull,default:now()" json:"created_at"`
+}
+
+type Domain struct {
+	bun.BaseModel
+
+	ID             string    `bun:",nullzero,pk" json:"id"`
+	Name           string    `json:"name"`
+	OrganisationID string    `json:"organisation_id"`
+	CreatedAt      time.Time `bun:",nullzero,notnull,default:now()" json:"created_at"`
+}

@@ -1,0 +1,163 @@
+enum EmailAccountType {
+    INDIVIDUAL
+    GROUP
+}
+
+type EmailAccount {
+    id: ID!
+    name: String!
+    description: String
+    type: EmailAccountType!
+    quota: Int
+    active: Boolean
+    user: User
+    createdAt: String!
+}
+
+type EmailGroupMember {
+    id: ID!
+    name: String!
+    memberOf: String!
+    createdAt: String!
+}
+
+enum EmailType {
+    PRIMARY
+    ALIAS
+    LIST
+}
+
+type Email {
+    id: ID!
+    name: String!
+    address: String!
+    type: EmailType!
+    createdAt: String!
+}
+
+type EmailForwarding {
+    id: ID!
+    origin: String!
+    target: String!
+    createdAt: String!
+}
+
+type Domain {
+    id: ID!
+    name: String!
+    createdAt: String!
+}
+
+extend type User {
+    emailAccounts: [EmailAccount]
+}
+
+type EmailAccountConnection {
+    edges: [EmailAccount]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+type EmailGroupConnection {
+    edges: [EmailGroupMember]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+type EmailConnection {
+    edges: [Email]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+type EmailForwardingConnection {
+    edges: [EmailForwarding]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+type DomainConnection {
+    edges: [Domain]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+extend type Query {
+    emailAccounts: EmailAccountConnection
+    emailAccount(id: ID!): EmailAccount
+    emailGroups: EmailGroupConnection
+    emailGroup(id: ID!): EmailGroupMember
+    emails: EmailConnection
+    email(id: ID!): Email
+    emailForwardings: EmailForwardingConnection
+    emailForwarding(id: ID!): EmailForwarding
+    domains: DomainConnection
+    domain(id: ID!): Domain
+}
+
+extend type Mutation {
+    createEmailAccount(input: CreateEmailAccountInput!): EmailAccount
+    updateEmailAccount(input: UpdateEmailAccountInput!): EmailAccount
+    deleteEmailAccount(input: DeleteEmailAccountInput!): EmailAccount
+    createEmailGroupMember(input: CreateEmailGroupMemberInput!): EmailGroupMember
+    deleteEmailGroupMember(input: DeleteEmailGroupMemberInput!): EmailGroupMember
+    createEmail(input: CreateEmailInput!): Email
+    deleteEmail(input: DeleteEmailInput!): Email
+    createEmailForwarding(input: CreateEmailForwardingInput!): EmailForwarding
+    deleteEmailForwarding(input: DeleteEmailForwardingInput!): EmailForwarding
+    createDomain(input: CreateDomainInput!): Domain
+    deleteDomain(input: DeleteDomainInput!): Domain
+}
+
+
+input CreateEmailAccountInput {
+    name: String!,
+    description: String,
+    type: EmailAccountType!,
+    quota: Int,
+}
+
+input UpdateEmailAccountInput {
+    id: ID!
+    name: String,
+    description: String,
+    type: EmailAccountType,
+    quota: Int,
+    active: Boolean
+}
+
+input DeleteEmailAccountInput {
+    id: ID!
+}
+
+input CreateEmailGroupMemberInput {
+    name: String!,
+    memberOf: String!
+}
+
+input DeleteEmailGroupMemberInput {
+    id: ID!
+}
+
+input CreateEmailInput {
+    name: String!,
+    address: String!,
+    type: EmailType!
+}
+
+input DeleteEmailInput {
+    id: ID!
+}
+
+input CreateEmailForwardingInput {
+    origin: String!,
+    target: String!
+}
+
+input DeleteEmailForwardingInput {
+    id: ID!
+}
+
+input CreateDomainInput {
+    name: String!
+}
+
+input DeleteDomainInput {
+    id: ID!
+}
