@@ -266,7 +266,7 @@ const apps = computed<App[]>(() => [
       {
         icon: Mails,
         name: t("group", 2),
-        route: "admin-billing",
+        route: "admin-groups",
       },
       {
         icon: Globe,

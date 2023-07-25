@@ -91,6 +91,23 @@ const router = createRouter({
       ]
     },
     {
+      name: "admin-groups",
+      path: "/admin/groups",
+      component: () => import("./pages/admin/groups/index.vue"),
+      children: [
+        {
+          name: "admin-groups-new",
+          path: "/admin/groups/new",
+          component: () => import("./pages/admin/groups/new.vue"),
+        },
+        {
+          name: "admin-groups-domain",
+          path: "/admin/groups/:id",
+          component: () => import("./pages/admin/groups/[id].vue"),
+        },
+      ]
+    },
+    {
       name: "admin-general",
       path: "/admin/general",
       component: () => import("./pages/admin/general/index.vue"),
