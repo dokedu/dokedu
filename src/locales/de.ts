@@ -145,4 +145,5 @@ export const de = {
   edit_student: "Schüler bearbeiten",
 
   title: "Titel",
+  add_group: "Gruppe hinzufügen",
 };

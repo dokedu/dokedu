@@ -2,7 +2,7 @@
   <PageWrapper>
     <PageHeader class="justify-between">
       <div class="flex items-center gap-4">
-        <div class="font-medium text-stone-950">{{ $t("groups", 2) }}</div>
+        <div class="font-medium text-stone-950">{{ $t("group", 2) }}</div>
         <input
           v-if="false"
           v-model="search"

@@ -1,17 +1,36 @@
 <template>
   <d-sidebar :title="title" :delete="deletable" @cancel="onCancel" @delete="onDelete">
     <template #main>
-      <div class="flex flex-col gap-2">
-        <d-input name="name" :label="$t('name')" v-model="emailAccount.name"></d-input>
-        <d-select :options="domainOptions" :label="$t('domain')" v-model="domain">
-          <div v-for="domain in domainData.domains.edges">{{ domain.name }}</div>
-        </d-select>
+      <div class="flex flex-col gap-4">
+        <div class="flex items-center gap-6">
+          <p class="w-[100px] text-sm font-semibold text-stone-600">{{ $t("description") }}</p>
+          <d-input name="name" :placeholder="$t('description')" v-model="account.description" class="flex-1"></d-input>
+        </div>
+        <div class="flex items-center gap-6">
+          <p class="w-[100px] text-sm font-semibold text-stone-600">{{ $t("name") }}</p>
+          <d-input name="name" :placeholder="$t('name')" v-model="account.name" class="flex-1"></d-input>
+        </div>
+        <div class="flex items-center gap-6">
+          <p class="w-[100px] text-sm font-semibold text-stone-600">Domain</p>
+          <d-select :options="domainOptions" :label="$t('domain')" v-model="account.domain" class="flex-1"></d-select>
+        </div>
+        <div class="flex items-center gap-6">
+          <p class="w-[100px] text-sm font-semibold text-stone-600">Users</p>
+          <d-select
+            v-model:search="userSearch"
+            :options="userOptions"
+            :label="$t('user', 2)"
+            multiple
+            v-model="account.users"
+            class="flex-1"
+          ></d-select>
+        </div>
       </div>
     </template>
     <template #footer>
       <div class="flex w-full justify-between">
         <d-button type="outline" size="md" @click="onCancel">{{ $t("cancel") }}</d-button>
-        <d-button v-if="!emailAccount" type="primary" size="md" @click="onSave">{{ $t("create") }}</d-button>
+        <d-button v-if="account.name" type="primary" size="md" @click="onSave">{{ $t("create") }}</d-button>
       </div>
     </template>
   </d-sidebar>
@@ -20,7 +39,7 @@
 <script lang="ts" setup>
 import DSidebar from "@/components/d-sidebar/d-sidebar.vue";
 import DSelect from "@/components/d-select/d-select.vue";
-import { EmailAccount } from "@/gql/graphql";
+import { Group } from "@/gql/graphql";
 import { graphql } from "@/gql";
 import DInput from "@/components/d-input/d-input.vue";
 import DButton from "@/components/d-button/d-button.vue";
@@ -29,31 +48,25 @@ import { useRouter } from "vue-router";
 import { useQuery } from "@urql/vue";
 
 const router = useRouter();
-const domain = ref<string | undefined>(undefined);
 
 const domainOptions = computed(
   () =>
-    domainData?.value?.tags?.edges?.map((edge: any) => ({
+    domainData?.value?.domains?.edges?.map((edge: any) => ({
       label: edge.name,
       value: edge.id,
     })) || []
 );
 
 export interface Props {
-  emailAccount: EmailAccount;
+  emailAccount: Group;
   title: string;
   deletable?: boolean;
 }
+
 const props = defineProps<Props>();
 const emit = defineEmits(["save", "delete"]);
-const emailAccount = toRef(props, "emailAccount");
 
-interface DNSRecord {
-  hostname?: string;
-  type: "MX" | "TXT";
-  ttl?: number;
-  value: string;
-}
+const account = toRef(props, "emailAccount");
 
 const { data: domainData } = useQuery({
   query: graphql(`
@@ -73,23 +86,25 @@ const { data: domainData } = useQuery({
   `),
 });
 
-const records = computed<DNSRecord[]>(() => {
-  return [
-    {
-      hostname: "",
-      type: "MX",
-      value: "10 mail.dokedu.org",
-    },
-    {
-      type: "TXT",
-      value: "v=spf1 ~all",
-    },
-    {
-      // dkim
-      type: "TXT",
-      value: "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BA",
-    },
-  ] as DNSRecord[];
+const userSearch = ref("");
+const { data: userData } = useQuery({
+  query: graphql(`
+    query groupUsers {
+      emailAccounts(filter: { type: INDIVIDUAL }) {
+        edges {
+          id
+          name
+        }
+      }
+    }
+  `),
+});
+
+const userOptions = computed(() => {
+  return userData?.value?.emailAccounts?.edges?.map((edge: any) => ({
+    label: edge.name,
+    value: edge.id,
+  }));
 });
 
 const onCancel = () => {

@@ -85,6 +85,7 @@ const toggle = ref();
 const onClose = () => {
   open.value = false;
   focusedOptionIndex.value = null;
+  emit("update:search", "");
 };
 
 onClickOutside(select, onClose);

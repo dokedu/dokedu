@@ -1,6 +1,6 @@
 <template>
   <DGroupForm
-    :emailAccount="(emailAccount as EmailAccount)"
+    :emailAccount="(emailAccount as Group)"
     :title="$t('add_group')"
     @save="onCreateEmailAccount"
   ></DGroupForm>
@@ -8,31 +8,43 @@
 
 <script lang="ts" setup>
 import DGroupForm from "./DGroupForm.vue";
-import { EmailAccount } from "@/gql/graphql";
-import { reactive } from "vue";
+import { CreateGroupInput, Group } from "@/gql/graphql";
+import { reactive, watch } from "vue";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { createNotification } from "@/composables/useToast";
 import { useRouter } from "vue-router";
-import { CreateEmailAccountInput } from "@/gql/graphql";
 
 const router = useRouter();
 
-const emailAccount = reactive<CreateEmailAccountInput>({
+const emailAccount = reactive<CreateGroupInput>({
   name: "",
+  description: "",
+  domain: "",
+  users: [],
 });
 
 const { executeMutation: createEmailAccount } = useMutation(
   graphql(`
-    mutation createEmailAccount($input: CreateEmailAccountInput!) {
-      createEmailAccount(input: $input) {
+    mutation createGroup($input: CreateGroupInput!) {
+      createGroup(input: $input) {
         id
         name
         description
-        createdAt
       }
     }
   `)
+);
+
+watch(
+  () => emailAccount.description,
+  (newValue, oldValue) => {
+    if (!newValue) return;
+    if (emailAccount.name != oldValue?.toLowerCase().replace(/\s/g, ".")) return;
+    const generated = newValue.toLowerCase().replace(/\s/g, ".");
+
+    emailAccount.name = generated;
+  }
 );
 
 const onCreateEmailAccount = async () => {
@@ -44,6 +56,9 @@ const onCreateEmailAccount = async () => {
   const { error } = await createEmailAccount({
     input: {
       name: emailAccount.name,
+      description: emailAccount.description,
+      domain: emailAccount.domain,
+      users: emailAccount.users,
     },
   });
 
@@ -55,7 +70,7 @@ const onCreateEmailAccount = async () => {
     return;
   }
 
-  await router.push({ name: "admin-emailAccounts" });
+  await router.push({ name: "admin-groups" });
 
   createNotification({
     title: "EmailAccount created",

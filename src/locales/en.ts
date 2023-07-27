@@ -149,4 +149,5 @@ export const en = {
   edit_student: "Edit student",
 
   title: "Title",
+  add_group: "Add group",
 };
