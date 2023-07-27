@@ -116,6 +116,13 @@ type CreateFolderInput struct {
 	BucketID *string `json:"bucketId,omitempty"`
 }
 
+type CreateGroupInput struct {
+	Name        string    `json:"name"`
+	Domain      string    `json:"domain"`
+	Users       []*string `json:"users,omitempty"`
+	Description *string   `json:"description,omitempty"`
+}
+
 type CreateReportInput struct {
 	Format      db.ReportFormat `json:"format"`
 	Kind        db.ReportKind   `json:"kind"`
@@ -319,6 +326,15 @@ type GenerateFileURLInput struct {
 	ID string `json:"id"`
 }
 
+type Group struct {
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	Description *string   `json:"description,omitempty"`
+	Domain      string    `json:"domain"`
+	Users       []*string `json:"users,omitempty"`
+	CreatedAt   string    `json:"createdAt"`
+}
+
 type MoveFileInput struct {
 	ID       string `json:"id"`
 	TargetID string `json:"targetId"`
@@ -455,6 +471,14 @@ type UpdateEventInput struct {
 	StartsAt   *string         `json:"startsAt,omitempty"`
 	EndsAt     *string         `json:"endsAt,omitempty"`
 	Recurrence []*string       `json:"recurrence,omitempty"`
+}
+
+type UpdateGroupInput struct {
+	ID          string    `json:"id"`
+	Name        *string   `json:"name,omitempty"`
+	Domain      *string   `json:"domain,omitempty"`
+	Users       []*string `json:"users,omitempty"`
+	Description *string   `json:"description,omitempty"`
 }
 
 type UpdateUserCompetenceInput struct {

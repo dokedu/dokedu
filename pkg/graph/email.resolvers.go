@@ -332,6 +332,55 @@ func (r *mutationResolver) DeleteDomain(ctx context.Context, input model.DeleteD
 	return &domain, nil
 }
 
+// CreateGroup is the resolver for the createGroup field.
+func (r *mutationResolver) CreateGroup(ctx context.Context, input model.CreateGroupInput) (*model.Group, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, errors.New("no user found in the context")
+	}
+	if !currentUser.HasPermissionAdmin() {
+		return nil, errors.New("no permission")
+	}
+
+	group := model.Group{
+		Name:        input.Name,
+		Description: input.Description,
+		Domain:      input.Domain,
+		Users:       input.Users,
+	}
+
+	// Insert new email account of type group
+	account := db.EmailAccount{
+		Name:           input.Name + "@" + input.Domain,
+		Type:           "GROUP",
+		Description:    *input.Description,
+		OrganisationID: currentUser.OrganisationID,
+	}
+	err = r.DB.NewInsert().Model(&account).Scan(ctx)
+
+	// For each user in the group, create a new email group member
+	for _, user := range input.Users {
+		groupMember := db.EmailGroupMember{
+			Name:           *user,
+			OrganisationID: currentUser.OrganisationID,
+			MemberOf:       input.Name,
+		}
+		err = r.DB.NewInsert().Model(&groupMember).Scan(ctx)
+	}
+
+	return &group, nil
+}
+
+// UpdateGroup is the resolver for the updateGroup field.
+func (r *mutationResolver) UpdateGroup(ctx context.Context, input model.UpdateGroupInput) (*model.Group, error) {
+	panic(fmt.Errorf("not implemented: UpdateGroup - updateGroup"))
+}
+
+// DeleteGroup is the resolver for the deleteGroup field.
+func (r *mutationResolver) DeleteGroup(ctx context.Context, id string) (*model.Group, error) {
+	panic(fmt.Errorf("not implemented: DeleteGroup - deleteGroup"))
+}
+
 // EmailAccounts is the resolver for the emailAccounts field.
 func (r *queryResolver) EmailAccounts(ctx context.Context, filter *model.EmailAccountFilter) (*model.EmailAccountConnection, error) {
 	currentUser := middleware.ForContext(ctx)
@@ -411,7 +460,6 @@ func (r *queryResolver) EmailGroupMembers(ctx context.Context) (*model.EmailGrou
 
 // EmailGroupMember is the resolver for the EmailGroupMember field.
 func (r *queryResolver) EmailGroupMember(ctx context.Context, id string) (*db.EmailGroupMember, error) {
-
 	currentUser := middleware.ForContext(ctx)
 	if currentUser == nil {
 		return nil, errors.New("no user found in the context")

@@ -291,6 +291,15 @@ type ComplexityRoot struct {
 		Success func(childComplexity int) int
 	}
 
+	Group struct {
+		CreatedAt   func(childComplexity int) int
+		Description func(childComplexity int) int
+		Domain      func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Name        func(childComplexity int) int
+		Users       func(childComplexity int) int
+	}
+
 	MoveFilesPayload struct {
 		Files func(childComplexity int) int
 	}
@@ -313,6 +322,7 @@ type ComplexityRoot struct {
 		CreateEntry             func(childComplexity int, input model.CreateEntryInput) int
 		CreateEvent             func(childComplexity int, input model.CreateEventInput) int
 		CreateFolder            func(childComplexity int, input model.CreateFolderInput) int
+		CreateGroup             func(childComplexity int, input model.CreateGroupInput) int
 		CreateReport            func(childComplexity int, input model.CreateReportInput) int
 		CreateStudent           func(childComplexity int, input model.CreateStudentInput) int
 		CreateTag               func(childComplexity int, input model.CreateTagInput) int
@@ -325,6 +335,7 @@ type ComplexityRoot struct {
 		DeleteEmailGroupMember  func(childComplexity int, input model.DeleteEmailGroupMemberInput) int
 		DeleteFile              func(childComplexity int, input model.DeleteFileInput) int
 		DeleteFiles             func(childComplexity int, input model.DeleteFilesInput) int
+		DeleteGroup             func(childComplexity int, id string) int
 		DownloadFile            func(childComplexity int, input model.DownloadFileInput) int
 		DownloadFiles           func(childComplexity int, input model.DownloadFilesInput) int
 		ForgotPassword          func(childComplexity int, input model.ForgotPasswordInput) int
@@ -343,6 +354,7 @@ type ComplexityRoot struct {
 		UpdateEmailAccount      func(childComplexity int, input model.UpdateEmailAccountInput) int
 		UpdateEntry             func(childComplexity int, input model.UpdateEntryInput) int
 		UpdateEvent             func(childComplexity int, input model.UpdateEventInput) int
+		UpdateGroup             func(childComplexity int, input model.UpdateGroupInput) int
 		UpdatePassword          func(childComplexity int, oldPassword string, newPassword string) int
 		UpdateTag               func(childComplexity int, id string, input model.CreateTagInput) int
 		UpdateUser              func(childComplexity int, input model.UpdateUserInput) int
@@ -611,6 +623,9 @@ type MutationResolver interface {
 	DeleteEmailForwarding(ctx context.Context, input model.DeleteEmailForwardingInput) (*db.EmailForwarding, error)
 	CreateDomain(ctx context.Context, input model.CreateDomainInput) (*db.Domain, error)
 	DeleteDomain(ctx context.Context, input model.DeleteDomainInput) (*db.Domain, error)
+	CreateGroup(ctx context.Context, input model.CreateGroupInput) (*model.Group, error)
+	UpdateGroup(ctx context.Context, input model.UpdateGroupInput) (*model.Group, error)
+	DeleteGroup(ctx context.Context, id string) (*model.Group, error)
 	CreateEntry(ctx context.Context, input model.CreateEntryInput) (*db.Entry, error)
 	UpdateEntry(ctx context.Context, input model.UpdateEntryInput) (*db.Entry, error)
 	ArchiveEntry(ctx context.Context, id string) (*db.Entry, error)
@@ -1667,6 +1682,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ForgotPasswordPayload.Success(childComplexity), true
 
+	case "Group.createdAt":
+		if e.complexity.Group.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Group.CreatedAt(childComplexity), true
+
+	case "Group.description":
+		if e.complexity.Group.Description == nil {
+			break
+		}
+
+		return e.complexity.Group.Description(childComplexity), true
+
+	case "Group.domain":
+		if e.complexity.Group.Domain == nil {
+			break
+		}
+
+		return e.complexity.Group.Domain(childComplexity), true
+
+	case "Group.id":
+		if e.complexity.Group.ID == nil {
+			break
+		}
+
+		return e.complexity.Group.ID(childComplexity), true
+
+	case "Group.name":
+		if e.complexity.Group.Name == nil {
+			break
+		}
+
+		return e.complexity.Group.Name(childComplexity), true
+
+	case "Group.users":
+		if e.complexity.Group.Users == nil {
+			break
+		}
+
+		return e.complexity.Group.Users(childComplexity), true
+
 	case "MoveFilesPayload.files":
 		if e.complexity.MoveFilesPayload.Files == nil {
 			break
@@ -1878,6 +1935,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateFolder(childComplexity, args["input"].(model.CreateFolderInput)), true
 
+	case "Mutation.createGroup":
+		if e.complexity.Mutation.CreateGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createGroup_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateGroup(childComplexity, args["input"].(model.CreateGroupInput)), true
+
 	case "Mutation.createReport":
 		if e.complexity.Mutation.CreateReport == nil {
 			break
@@ -2021,6 +2090,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteFiles(childComplexity, args["input"].(model.DeleteFilesInput)), true
+
+	case "Mutation.deleteGroup":
+		if e.complexity.Mutation.DeleteGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteGroup_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteGroup(childComplexity, args["id"].(string)), true
 
 	case "Mutation.downloadFile":
 		if e.complexity.Mutation.DownloadFile == nil {
@@ -2232,6 +2313,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateEvent(childComplexity, args["input"].(model.UpdateEventInput)), true
+
+	case "Mutation.updateGroup":
+		if e.complexity.Mutation.UpdateGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateGroup_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateGroup(childComplexity, args["input"].(model.UpdateGroupInput)), true
 
 	case "Mutation.updatePassword":
 		if e.complexity.Mutation.UpdatePassword == nil {
@@ -3232,6 +3325,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCreateEntryInput,
 		ec.unmarshalInputCreateEventInput,
 		ec.unmarshalInputCreateFolderInput,
+		ec.unmarshalInputCreateGroupInput,
 		ec.unmarshalInputCreateReportInput,
 		ec.unmarshalInputCreateStudentInput,
 		ec.unmarshalInputCreateTagInput,
@@ -3270,6 +3364,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputUpdateEmailAccountInput,
 		ec.unmarshalInputUpdateEntryInput,
 		ec.unmarshalInputUpdateEventInput,
+		ec.unmarshalInputUpdateGroupInput,
 		ec.unmarshalInputUpdateUserCompetenceInput,
 		ec.unmarshalInputUpdateUserInput,
 		ec.unmarshalInputUserCompetenceFilterInput,
@@ -3662,6 +3757,21 @@ func (ec *executionContext) field_Mutation_createFolder_args(ctx context.Context
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_createGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CreateGroupInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNCreateGroupInput2exampleᚋpkgᚋgraphᚋmodelᚐCreateGroupInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createReport_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -3839,6 +3949,21 @@ func (ec *executionContext) field_Mutation_deleteFiles_args(ctx context.Context,
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -4089,6 +4214,21 @@ func (ec *executionContext) field_Mutation_updateEvent_args(ctx context.Context,
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNUpdateEventInput2exampleᚋpkgᚋgraphᚋmodelᚐUpdateEventInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.UpdateGroupInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNUpdateGroupInput2exampleᚋpkgᚋgraphᚋmodelᚐUpdateGroupInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -11427,6 +11567,264 @@ func (ec *executionContext) fieldContext_ForgotPasswordPayload_success(ctx conte
 	return fc, nil
 }
 
+func (ec *executionContext) _Group_id(ctx context.Context, field graphql.CollectedField, obj *model.Group) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Group_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Group_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Group",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Group_name(ctx context.Context, field graphql.CollectedField, obj *model.Group) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Group_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Group_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Group",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Group_description(ctx context.Context, field graphql.CollectedField, obj *model.Group) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Group_description(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Group_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Group",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Group_domain(ctx context.Context, field graphql.CollectedField, obj *model.Group) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Group_domain(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Domain, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Group_domain(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Group",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Group_users(ctx context.Context, field graphql.CollectedField, obj *model.Group) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Group_users(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Users, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*string)
+	fc.Result = res
+	return ec.marshalOString2ᚕᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Group_users(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Group",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Group_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Group) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Group_createdAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Group_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Group",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _MoveFilesPayload_files(ctx context.Context, field graphql.CollectedField, obj *model.MoveFilesPayload) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_MoveFilesPayload_files(ctx, field)
 	if err != nil {
@@ -13224,6 +13622,204 @@ func (ec *executionContext) fieldContext_Mutation_deleteDomain(ctx context.Conte
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_deleteDomain_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createGroup(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateGroup(rctx, fc.Args["input"].(model.CreateGroupInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Group)
+	fc.Result = res
+	return ec.marshalOGroup2ᚖexampleᚋpkgᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Group_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Group_name(ctx, field)
+			case "description":
+				return ec.fieldContext_Group_description(ctx, field)
+			case "domain":
+				return ec.fieldContext_Group_domain(ctx, field)
+			case "users":
+				return ec.fieldContext_Group_users(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Group_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Group", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createGroup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateGroup(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateGroup(rctx, fc.Args["input"].(model.UpdateGroupInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Group)
+	fc.Result = res
+	return ec.marshalOGroup2ᚖexampleᚋpkgᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Group_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Group_name(ctx, field)
+			case "description":
+				return ec.fieldContext_Group_description(ctx, field)
+			case "domain":
+				return ec.fieldContext_Group_domain(ctx, field)
+			case "users":
+				return ec.fieldContext_Group_users(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Group_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Group", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateGroup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deleteGroup(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteGroup(rctx, fc.Args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Group)
+	fc.Result = res
+	return ec.marshalOGroup2ᚖexampleᚋpkgᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Group_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Group_name(ctx, field)
+			case "description":
+				return ec.fieldContext_Group_description(ctx, field)
+			case "domain":
+				return ec.fieldContext_Group_domain(ctx, field)
+			case "users":
+				return ec.fieldContext_Group_users(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Group_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Group", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteGroup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -23519,6 +24115,58 @@ func (ec *executionContext) unmarshalInputCreateFolderInput(ctx context.Context,
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputCreateGroupInput(ctx context.Context, obj interface{}) (model.CreateGroupInput, error) {
+	var it model.CreateGroupInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "domain", "users", "description"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "domain":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("domain"))
+			it.Domain, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "users":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("users"))
+			it.Users, err = ec.unmarshalOString2ᚕᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreateReportInput(ctx context.Context, obj interface{}) (model.CreateReportInput, error) {
 	var it model.CreateReportInput
 	asMap := map[string]interface{}{}
@@ -25086,6 +25734,66 @@ func (ec *executionContext) unmarshalInputUpdateEventInput(ctx context.Context, 
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("recurrence"))
 			it.Recurrence, err = ec.unmarshalOString2ᚕᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateGroupInput(ctx context.Context, obj interface{}) (model.UpdateGroupInput, error) {
+	var it model.UpdateGroupInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "name", "domain", "users", "description"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "domain":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("domain"))
+			it.Domain, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "users":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("users"))
+			it.Users, err = ec.unmarshalOString2ᚕᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -27305,6 +28013,63 @@ func (ec *executionContext) _ForgotPasswordPayload(ctx context.Context, sel ast.
 	return out
 }
 
+var groupImplementors = []string{"Group"}
+
+func (ec *executionContext) _Group(ctx context.Context, sel ast.SelectionSet, obj *model.Group) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, groupImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Group")
+		case "id":
+
+			out.Values[i] = ec._Group_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+
+			out.Values[i] = ec._Group_name(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "description":
+
+			out.Values[i] = ec._Group_description(ctx, field, obj)
+
+		case "domain":
+
+			out.Values[i] = ec._Group_domain(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "users":
+
+			out.Values[i] = ec._Group_users(ctx, field, obj)
+
+		case "createdAt":
+
+			out.Values[i] = ec._Group_createdAt(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var moveFilesPayloadImplementors = []string{"MoveFilesPayload"}
 
 func (ec *executionContext) _MoveFilesPayload(ctx context.Context, sel ast.SelectionSet, obj *model.MoveFilesPayload) graphql.Marshaler {
@@ -27551,6 +28316,24 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deleteDomain(ctx, field)
+			})
+
+		case "createGroup":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createGroup(ctx, field)
+			})
+
+		case "updateGroup":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateGroup(ctx, field)
+			})
+
+		case "deleteGroup":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteGroup(ctx, field)
 			})
 
 		case "createEntry":
@@ -30409,6 +31192,11 @@ func (ec *executionContext) unmarshalNCreateFolderInput2exampleᚋpkgᚋgraphᚋ
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNCreateGroupInput2exampleᚋpkgᚋgraphᚋmodelᚐCreateGroupInput(ctx context.Context, v interface{}) (model.CreateGroupInput, error) {
+	res, err := ec.unmarshalInputCreateGroupInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNCreateReportInput2exampleᚋpkgᚋgraphᚋmodelᚐCreateReportInput(ctx context.Context, v interface{}) (model.CreateReportInput, error) {
 	res, err := ec.unmarshalInputCreateReportInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -31345,6 +32133,11 @@ func (ec *executionContext) unmarshalNUpdateEntryInput2exampleᚋpkgᚋgraphᚋm
 
 func (ec *executionContext) unmarshalNUpdateEventInput2exampleᚋpkgᚋgraphᚋmodelᚐUpdateEventInput(ctx context.Context, v interface{}) (model.UpdateEventInput, error) {
 	res, err := ec.unmarshalInputUpdateEventInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateGroupInput2exampleᚋpkgᚋgraphᚋmodelᚐUpdateGroupInput(ctx context.Context, v interface{}) (model.UpdateGroupInput, error) {
+	res, err := ec.unmarshalInputUpdateGroupInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -32576,6 +33369,13 @@ func (ec *executionContext) unmarshalOFilesFilterInput2ᚖexampleᚋpkgᚋgraph�
 	}
 	res, err := ec.unmarshalInputFilesFilterInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOGroup2ᚖexampleᚋpkgᚋgraphᚋmodelᚐGroup(ctx context.Context, sel ast.SelectionSet, v *model.Group) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Group(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOID2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
