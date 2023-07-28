@@ -21,7 +21,7 @@
       v-model:variables="pageVariables"
       :search="search"
       :columns="columns"
-      objectName="emailAccounts"
+      objectName="groups"
       :query="emailAccountsQuery"
       @row-click="goToEmailAccount"
     >
@@ -48,6 +48,10 @@ const columns = [
   {
     label: "name",
     key: "name",
+  },
+  {
+    label: "description",
+    key: "description",
   },
 ];
 
@@ -80,13 +84,12 @@ watchDebounced(
 );
 
 const emailAccountsQuery = graphql(`
-  query emailAccounts {
-    emailAccounts(filter: { type: GROUP }) {
+  query groups {
+    groups {
       edges {
         id
         name
         description
-        createdAt
       }
       totalCount
       pageInfo {

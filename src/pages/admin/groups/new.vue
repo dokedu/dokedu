@@ -64,7 +64,7 @@ const onCreateEmailAccount = async () => {
 
   if (error) {
     createNotification({
-      title: "EmailAccount creation failed",
+      title: "Group creation failed",
       description: error.message,
     });
     return;
@@ -73,7 +73,7 @@ const onCreateEmailAccount = async () => {
   await router.push({ name: "admin-groups" });
 
   createNotification({
-    title: "EmailAccount created",
+    title: "Group created",
     description: `${emailAccount.name} was created`,
   });
 };
