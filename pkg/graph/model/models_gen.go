@@ -335,6 +335,12 @@ type Group struct {
 	CreatedAt   string    `json:"createdAt"`
 }
 
+type GroupConnection struct {
+	Edges      []*Group  `json:"edges,omitempty"`
+	PageInfo   *PageInfo `json:"pageInfo"`
+	TotalCount int       `json:"totalCount"`
+}
+
 type MoveFileInput struct {
 	ID       string `json:"id"`
 	TargetID string `json:"targetId"`

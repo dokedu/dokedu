@@ -77,6 +77,11 @@ type DomainConnection {
     pageInfo: PageInfo!
     totalCount: Int!
 }
+type GroupConnection {
+    edges: [Group]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
 
 input EmailAccountFilter {
     type: EmailAccountType
@@ -102,6 +107,8 @@ extend type Query {
     emailForwarding(id: ID!): EmailForwarding
     domains: DomainConnection
     domain(id: ID!): Domain
+    group(id: ID!): Group
+    groups: GroupConnection
 }
 
 extend type Mutation {

@@ -12,6 +12,7 @@ import (
 	"example/pkg/graph/model"
 	"example/pkg/middleware"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -349,21 +350,24 @@ func (r *mutationResolver) CreateGroup(ctx context.Context, input model.CreateGr
 		Users:       input.Users,
 	}
 
+	generatedName := input.Name + "@" + input.Domain
 	// Insert new email account of type group
 	account := db.EmailAccount{
-		Name:           input.Name + "@" + input.Domain,
+		Name:           generatedName,
 		Type:           "GROUP",
 		Description:    *input.Description,
 		OrganisationID: currentUser.OrganisationID,
 	}
 	err = r.DB.NewInsert().Model(&account).Scan(ctx)
 
+	group.ID = account.ID
+
 	// For each user in the group, create a new email group member
 	for _, user := range input.Users {
 		groupMember := db.EmailGroupMember{
 			Name:           *user,
 			OrganisationID: currentUser.OrganisationID,
-			MemberOf:       input.Name,
+			MemberOf:       generatedName,
 		}
 		err = r.DB.NewInsert().Model(&groupMember).Scan(ctx)
 	}
@@ -373,12 +377,145 @@ func (r *mutationResolver) CreateGroup(ctx context.Context, input model.CreateGr
 
 // UpdateGroup is the resolver for the updateGroup field.
 func (r *mutationResolver) UpdateGroup(ctx context.Context, input model.UpdateGroupInput) (*model.Group, error) {
-	panic(fmt.Errorf("not implemented: UpdateGroup - updateGroup"))
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, errors.New("no user found in the context")
+	}
+	if !currentUser.HasPermissionAdmin() {
+		return nil, errors.New("no permission")
+	}
+	// Fetch the current group
+	var group db.EmailAccount
+	err = r.DB.NewSelect().Model(&group).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+
+	// Update email account of type group
+	account := db.EmailAccount{
+		ID:             input.ID,
+		Name:           *input.Name + "@" + *input.Domain,
+		Type:           "GROUP",
+		Description:    *input.Description,
+		OrganisationID: currentUser.OrganisationID,
+		CreatedAt:      group.CreatedAt,
+	}
+
+	// Check if the group name has changed
+	if account.Name != group.Name {
+		// Update group members with new group name
+		var groupMembers []db.EmailGroupMember
+		err = r.DB.NewSelect().Model(&groupMembers).Where("member_of = ?", group.Name).Scan(ctx)
+
+		// Update each entry
+		for _, member := range groupMembers {
+			member.MemberOf = account.Name
+			err = r.DB.NewUpdate().Model(&member).Scan(ctx)
+		}
+	}
+
+	// Update the group
+	_, err = r.DB.NewUpdate().Model(&account).Where("id = ?", input.ID).Returning("*").Exec(ctx)
+
+	// Get the current group members
+	var groupMembers []db.EmailGroupMember
+	err = r.DB.NewSelect().Model(&groupMembers).Where("member_of = ?", account.Name).Scan(ctx)
+
+	// Remove the ones not in input.Users
+	for _, member := range groupMembers {
+		found := false
+		for _, user := range input.Users {
+			if *user == member.Name {
+				found = true
+			}
+		}
+
+		if !found {
+			// Delete the group member
+			_, err = r.DB.NewDelete().Model(&member).Where("id = ?", member.ID).Exec(ctx)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	// Add all users that are currently not in group
+	for _, user := range input.Users {
+		found := false
+		for _, member := range groupMembers {
+			if *user == member.Name {
+				found = true
+			}
+		}
+
+		if !found {
+			// Create the group member
+			groupMember := db.EmailGroupMember{
+				Name:           *user,
+				OrganisationID: currentUser.OrganisationID,
+				MemberOf:       account.Name,
+			}
+			err = r.DB.NewInsert().Model(&groupMember).Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return &model.Group{
+		ID:          input.ID,
+		Name:        *input.Name,
+		Description: input.Description,
+		Domain:      *input.Domain,
+		Users:       input.Users}, nil
 }
 
 // DeleteGroup is the resolver for the deleteGroup field.
 func (r *mutationResolver) DeleteGroup(ctx context.Context, id string) (*model.Group, error) {
-	panic(fmt.Errorf("not implemented: DeleteGroup - deleteGroup"))
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, errors.New("no user found in the context")
+	}
+	if !currentUser.HasPermissionAdmin() {
+		return nil, errors.New("no permission")
+	}
+
+	// Fetch the current group
+	var group db.EmailAccount
+	err = r.DB.NewSelect().Model(&group).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Delete the group
+	_, err = r.DB.NewDelete().Model(&group).Where("id = ?", id).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Delete the group members
+	var groupMembers []db.EmailGroupMember
+	err = r.DB.NewSelect().Model(&groupMembers).Where("member_of = ?", group.Name).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	memberNames := make([]*string, len(groupMembers))
+	if len(groupMembers) != 0 {
+		for i, member := range groupMembers {
+			memberNames[i] = &member.Name
+			_, err = r.DB.NewDelete().Model(&member).Where("id = ?", member.ID).Exec(ctx)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	address := strings.Split(group.Name, "@")
+	return &model.Group{
+		ID:          group.ID,
+		Name:        address[0],
+		Description: &group.Description,
+		Domain:      address[1],
+		Users:       memberNames,
+	}, nil
 }
 
 // EmailAccounts is the resolver for the emailAccounts field.
@@ -607,6 +744,97 @@ func (r *queryResolver) Domain(ctx context.Context, id string) (*db.Domain, erro
 	}
 
 	return &domain, nil
+}
+
+// Group is the resolver for the group field.
+func (r *queryResolver) Group(ctx context.Context, id string) (*model.Group, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !currentUser.HasPermissionAdmin() {
+		return nil, errors.New("no permission")
+	}
+
+	var group db.EmailAccount
+	err = r.DB.NewSelect().Model(&group).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the group member names
+	var groupMembers []*db.EmailGroupMember
+	err = r.DB.NewSelect().Model(&groupMembers).Where("member_of = ?", group.Name).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	memberNames := make([]*string, len(groupMembers))
+	if len(groupMembers) != 0 {
+		for i, groupMember := range groupMembers {
+			memberNames[i] = &groupMember.Name
+		}
+	}
+
+	address := strings.Split(group.Name, "@")
+	return &model.Group{
+		ID:          group.ID,
+		Name:        address[0],
+		Domain:      address[1],
+		Description: &group.Description,
+		Users:       memberNames,
+	}, nil
+}
+
+// Groups is the resolver for the groups field.
+func (r *queryResolver) Groups(ctx context.Context) (*model.GroupConnection, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !currentUser.HasPermissionAdmin() {
+		return nil, errors.New("no permission")
+	}
+
+	var groups []*db.EmailAccount
+	err = r.DB.NewSelect().Model(&groups).Where("organisation_id = ?", currentUser.OrganisationID).Where("type = ?", "GROUP").Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var groupEdges []*model.Group
+	for _, group := range groups {
+		// Get the group member names
+		var groupMembers []db.EmailGroupMember
+		err = r.DB.NewSelect().Model(&groupMembers).Where("member_of = ?", group.Name).Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		memberNames := make([]*string, len(groupMembers))
+		if len(groupMembers) != 0 {
+			for i, groupMember := range groupMembers {
+				memberNames[i] = &groupMember.Name
+			}
+		}
+
+		address := strings.Split(group.Name, "@")
+		groupEdges = append(groupEdges, &model.Group{
+			ID:          group.ID,
+			Name:        address[0],
+			Domain:      address[1],
+			Description: &group.Description,
+			Users:       memberNames,
+		})
+	}
+
+	return &model.GroupConnection{
+		Edges: groupEdges,
+		PageInfo: &model.PageInfo{
+			HasNextPage:     false,
+			HasPreviousPage: false,
+		},
+	}, nil
 }
 
 // EmailAccounts is the resolver for the emailAccounts field.
