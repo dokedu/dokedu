@@ -190,6 +190,7 @@ useInfiniteScroll(
       order: lastPage.order,
       search: lastPage.search,
       sortBy: lastPage.sortBy,
+      filter: lastPage.filter,
       offset: (lastPage.offset as number) + ((lastPage.limit as number) || 50),
       nextPage: undefined,
     } as K;

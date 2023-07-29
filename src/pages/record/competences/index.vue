@@ -24,6 +24,7 @@
       @row-click="goToCompetence"
     >
       <template #name-data="{ item }">
+        <Folder v-if="item.type !== 'competence'" :size="16" class="fill-stone-700 stroke-stone-700" />
         <DTag :color="item.color">{{ item.name }}</DTag>
       </template>
       <template #grade-data="{ item }">
@@ -48,7 +49,7 @@ import PageHeader from "@/components/PageHeader.vue";
 import PageWrapper from "@/components/PageWrapper.vue";
 import { graphql } from "@/gql";
 import { ref } from "vue";
-import { Edit2 } from "lucide-vue-next";
+import { Edit2, Folder } from "lucide-vue-next";
 import DCompetenceEditDialog from "./DCompetenceEditDialog.vue";
 import { Competence } from "@/gql/graphql";
 import DTag from "@/components/d-tag/d-tag.vue";
@@ -106,7 +107,10 @@ function grades(competence: Competence) {
   if (competence.grades.length === 1) {
     return competence.grades[0].toString();
   }
-  return `${competence.grades[0]} - ${competence.grades[competence.grades.length - 1]}`;
+
+  const sorted = competence.grades.sort((a, b) => a - b);
+
+  return `${sorted[0]} - ${sorted[sorted.length - 1]}`;
 }
 
 const competencesQuery = graphql(`

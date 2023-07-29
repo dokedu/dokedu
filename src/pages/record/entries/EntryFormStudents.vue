@@ -86,7 +86,7 @@ const props = defineProps<{
 const { data: students } = useQuery({
   query: graphql(`
     query users($search: String) {
-      users(filter: { role: [student] }, search: $search, limit: 1000) {
+      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {
         edges {
           id
           firstName

@@ -15,6 +15,23 @@
         />
       </div>
     </PageHeader>
+    <div
+      v-if="breadcrumbs.length > 0"
+      class="flex select-none flex-wrap items-center gap-1 px-7 py-2 text-sm text-stone-700"
+    >
+      <router-link class="rounded-lg px-1.5 py-0.5 hover:bg-stone-100" :to="{ name: 'record-competences' }">
+        Fächer
+      </router-link>
+      <template v-for="parent in breadcrumbs" :key="parent.id">
+        <span>/</span>
+        <router-link
+          :to="{ name: 'record-competences-competence', params: { id: parent.id } }"
+          class="rounded-lg px-1.5 py-0.5 hover:bg-stone-100"
+        >
+          {{ parent.name }}
+        </router-link>
+      </template>
+    </div>
     <DTable
       :query="competenceQuery"
       :columns="columns"
@@ -24,6 +41,12 @@
       @row-click="goToCompetence"
       :search="search"
     >
+      <template #name-data="{ item }">
+        <div class="flex items-center gap-2">
+          <Folder v-if="item.type !== 'competence'" :size="16" class="fill-stone-700 stroke-stone-700" />
+          <div>{{ item.name }}</div>
+        </div>
+      </template>
       <template #grade-data="{ item }">
         <div class="flex w-full justify-end text-right">{{ grades(item) }}</div>
       </template>
@@ -35,12 +58,14 @@
 import PageHeader from "@/components/PageHeader.vue";
 import PageWrapper from "@/components/PageWrapper.vue";
 import { graphql } from "@/gql";
-import { computed, ref, watch } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import DTable from "@/components/d-table/d-table.vue";
 import { watchDebounced } from "@vueuse/core";
 import { PageVariables } from "@/types/types";
 import { Competence } from "@/gql/graphql";
+import { Folder } from "lucide-vue-next";
+import { useQuery } from "@urql/vue";
 
 const search = ref("");
 const route = useRoute();
@@ -48,16 +73,14 @@ const router = useRouter();
 
 const id = computed(() => route.params.id as string);
 
-interface Variables extends PageVariables {
-  parent: string[];
-}
+interface Variables extends PageVariables {}
 
 const pageVariables = ref<Variables[]>([
   {
     search: "",
     limit: 50,
     offset: 0,
-    parent: [id.value],
+    filter: { parents: id.value },
     nextPage: undefined,
   },
 ]);
@@ -70,8 +93,8 @@ watchDebounced(
         search: search.value,
         limit: 50,
         offset: 0,
+        filter: { parents: id.value },
         nextPage: undefined,
-        parent: [id.value],
       },
     ];
   },
@@ -85,7 +108,7 @@ watch(id, () => {
       search: "",
       limit: 50,
       offset: 0,
-      parent: [id.value],
+      filter: { parents: id.value },
       nextPage: undefined,
     },
   ];
@@ -108,7 +131,10 @@ function grades(competence: Competence) {
   if (competence.grades.length === 1) {
     return competence.grades[0].toString();
   }
-  return `${competence.grades[0]} - ${competence.grades[competence.grades.length - 1]}`;
+
+  const sorted = competence.grades.sort((a, b) => a - b);
+
+  return `${sorted[0]} - ${sorted[sorted.length - 1]}`;
 }
 
 function goToCompetence<Type extends { id: string; type: string }>(row: Type) {
@@ -117,9 +143,9 @@ function goToCompetence<Type extends { id: string; type: string }>(row: Type) {
 }
 
 const competenceQuery = graphql(`
-  query competence($search: String, $limit: Int, $offset: Int, $parent: [ID]) {
+  query competence($search: String, $limit: Int, $offset: Int, $filter: CompetenceFilterInput) {
     competences(
-      filter: { parents: $parent }
+      filter: $filter
       search: $search
       limit: $limit
       offset: $offset
@@ -146,4 +172,29 @@ const competenceQuery = graphql(`
     }
   }
 `);
+
+const { data: parents } = useQuery({
+  query: graphql(`
+    query zeCompetenceParents($id: ID!) {
+      competence(id: $id) {
+        id
+        name
+        type
+        grades
+        parents {
+          id
+          name
+          type
+          grades
+        }
+      }
+    }
+  `),
+  variables: reactive({ id: id }),
+});
+
+const breadcrumbs = computed(() => {
+  if (!parents.value?.competence) return [];
+  return [...parents.value.competence.parents, parents.value.competence];
+});
 </script>

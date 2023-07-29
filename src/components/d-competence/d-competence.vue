@@ -1,7 +1,8 @@
 <template>
   <div class="rounded-lg border border-gray-200 px-2 py-1 text-sm">
     <div class="flex items-baseline justify-between">
-      <div class="p-1 text-strong">
+      <div class="flex items-center gap-1.5 p-1 text-strong">
+        <Folder v-if="competence.type !== 'competence'" :size="12" class="fill-stone-700 stroke-stone-700" />
         {{ competence.name }}
       </div>
       <div class="flex items-center gap-2">
@@ -36,9 +37,10 @@
 <script lang="ts" setup>
 import { toRef } from "vue";
 import { Competence } from "../../gql/graphql";
+import { Folder } from "lucide-vue-next";
 
 export interface Props {
-  competence: Pick<Competence, "grades" | "name" | "parents">;
+  competence: Pick<Competence, "grades" | "name" | "parents" | "type">;
 }
 
 const props = defineProps<Props>();
@@ -49,6 +51,8 @@ function grades(competence: Pick<Competence, "grades">) {
   if (competence.grades.length === 1) {
     return competence.grades[0].toString();
   }
-  return `${competence.grades[0]} - ${competence.grades[competence.grades.length - 1]}`;
+
+  const sorted = competence.grades.sort((a, b) => a - b);
+  return `${sorted[0]} - ${sorted[sorted.length - 1]}`;
 }
 </script>
