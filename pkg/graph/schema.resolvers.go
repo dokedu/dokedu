@@ -1028,6 +1028,7 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 		query.Where("id IN (?)", bun.In(ids))
 	} else {
 		if sort != nil {
+			query.Order("competence_type")
 			switch sort.Field {
 			case model.CompetenceSortFieldSortOrder:
 				query.Order("sort_order ASC")
@@ -1037,6 +1038,7 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 				query.Order("created_at ASC")
 			}
 		} else {
+			query.Order("competence_type")
 			query.Order("name ASC")
 		}
 
