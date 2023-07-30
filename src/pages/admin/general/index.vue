@@ -21,12 +21,70 @@ import PageHeader from "@/components/PageHeader.vue";
 import PageWrapper from "@/components/PageWrapper.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import DInput from "@/components/d-input/d-input.vue";
-import { ref } from "vue";
+import { graphql } from "@/gql";
+import { useMutation, useQuery } from "@urql/vue";
+import { computed } from "vue";
+import { createNotification } from "@/composables/useToast";
 
-const name = ref("Muster");
-const legalName = ref("Muster GmbH");
+async function onSave() {
+  if (!data?.value?.organisation) return;
 
-function onSave() {
-  alert("Not implemented");
+  await updateOrganisation({
+    input: {
+      id: data.value.organisation.id,
+      name: name.value,
+      legalName: legalName.value,
+    },
+  });
+
+  createNotification({
+    title: "Organisation updated",
+    description: `The organisation ${name.value} was updated.`,
+  });
 }
+
+const { data } = useQuery({
+  query: graphql(`
+    query organisation {
+      organisation {
+        id
+        name
+        legalName
+      }
+    }
+  `),
+});
+
+const name = computed({
+  get: () => {
+    if (!data?.value?.organisation) return;
+    return data.value?.organisation?.name;
+  },
+  set: (value) => {
+    if (!data?.value?.organisation) return;
+    data.value.organisation.name = value as string;
+  },
+});
+const legalName = computed({
+  get: () => {
+    if (!data?.value?.organisation) return;
+    return data.value?.organisation?.legalName;
+  },
+  set: (value) => {
+    if (!data?.value?.organisation) return;
+    data.value.organisation.legalName = value as string;
+  },
+});
+
+const { executeMutation: updateOrganisation } = useMutation(
+  graphql(`
+    mutation updateOrganisation($input: UpdateOrganisationInput!) {
+      updateOrganisation(input: $input) {
+        id
+        name
+        legalName
+      }
+    }
+  `)
+);
 </script>
