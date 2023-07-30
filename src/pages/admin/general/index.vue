@@ -57,8 +57,8 @@ const { data } = useQuery({
 
 const name = computed({
   get: () => {
-    if (!data?.value?.organisation) return;
-    return data.value?.organisation?.name;
+    if (!data?.value?.organisation) return "";
+    return data.value?.organisation?.name as string;
   },
   set: (value) => {
     if (!data?.value?.organisation) return;
@@ -67,8 +67,8 @@ const name = computed({
 });
 const legalName = computed({
   get: () => {
-    if (!data?.value?.organisation) return;
-    return data.value?.organisation?.legalName;
+    if (!data?.value?.organisation) return "";
+    return data.value?.organisation?.legalName as string;
   },
   set: (value) => {
     if (!data?.value?.organisation) return;
