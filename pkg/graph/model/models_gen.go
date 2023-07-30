@@ -337,12 +337,6 @@ type MyFilesFilterInput struct {
 	ParentID *string `json:"parentId,omitempty"`
 }
 
-type OrganisationConnection struct {
-	Edges      []*db.Organisation `json:"edges,omitempty"`
-	PageInfo   *PageInfo          `json:"pageInfo"`
-	TotalCount int                `json:"totalCount"`
-}
-
 type PageInfo struct {
 	HasNextPage     bool `json:"hasNextPage"`
 	HasPreviousPage bool `json:"hasPreviousPage"`
@@ -455,6 +449,14 @@ type UpdateEventInput struct {
 	StartsAt   *string         `json:"startsAt,omitempty"`
 	EndsAt     *string         `json:"endsAt,omitempty"`
 	Recurrence []*string       `json:"recurrence,omitempty"`
+}
+
+type UpdateOrganisationInput struct {
+	ID        string  `json:"id"`
+	Name      *string `json:"name,omitempty"`
+	LegalName *string `json:"legalName,omitempty"`
+	Website   *string `json:"website,omitempty"`
+	Phone     *string `json:"phone,omitempty"`
 }
 
 type UpdateUserCompetenceInput struct {

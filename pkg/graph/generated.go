@@ -343,6 +343,7 @@ type ComplexityRoot struct {
 		UpdateEmailAccount      func(childComplexity int, input model.UpdateEmailAccountInput) int
 		UpdateEntry             func(childComplexity int, input model.UpdateEntryInput) int
 		UpdateEvent             func(childComplexity int, input model.UpdateEventInput) int
+		UpdateOrganisation      func(childComplexity int, input model.UpdateOrganisationInput) int
 		UpdatePassword          func(childComplexity int, oldPassword string, newPassword string) int
 		UpdateTag               func(childComplexity int, id string, input model.CreateTagInput) int
 		UpdateUser              func(childComplexity int, input model.UpdateUserInput) int
@@ -352,15 +353,12 @@ type ComplexityRoot struct {
 	}
 
 	Organisation struct {
-		ID    func(childComplexity int) int
-		Name  func(childComplexity int) int
-		Owner func(childComplexity int) int
-	}
-
-	OrganisationConnection struct {
-		Edges      func(childComplexity int) int
-		PageInfo   func(childComplexity int) int
-		TotalCount func(childComplexity int) int
+		ID        func(childComplexity int) int
+		LegalName func(childComplexity int) int
+		Name      func(childComplexity int) int
+		Owner     func(childComplexity int) int
+		Phone     func(childComplexity int) int
+		Website   func(childComplexity int) int
 	}
 
 	PageInfo struct {
@@ -618,6 +616,7 @@ type MutationResolver interface {
 	UpdateEvent(ctx context.Context, input model.UpdateEventInput) (*db.Event, error)
 	ToggleEventCompetence(ctx context.Context, input model.AddEventCompetenceInput) (*db.Event, error)
 	ArchiveEvent(ctx context.Context, id string) (*db.Event, error)
+	UpdateOrganisation(ctx context.Context, input model.UpdateOrganisationInput) (*db.Organisation, error)
 	SignIn(ctx context.Context, input model.SignInInput) (*model.SignInPayload, error)
 	ResetPassword(ctx context.Context, input model.ResetPasswordInput) (*model.ResetPasswordPayload, error)
 	ForgotPassword(ctx context.Context, input model.ForgotPasswordInput) (*model.ForgotPasswordPayload, error)
@@ -2233,6 +2232,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateEvent(childComplexity, args["input"].(model.UpdateEventInput)), true
 
+	case "Mutation.updateOrganisation":
+		if e.complexity.Mutation.UpdateOrganisation == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateOrganisation_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateOrganisation(childComplexity, args["input"].(model.UpdateOrganisationInput)), true
+
 	case "Mutation.updatePassword":
 		if e.complexity.Mutation.UpdatePassword == nil {
 			break
@@ -2312,6 +2323,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Organisation.ID(childComplexity), true
 
+	case "Organisation.legalName":
+		if e.complexity.Organisation.LegalName == nil {
+			break
+		}
+
+		return e.complexity.Organisation.LegalName(childComplexity), true
+
 	case "Organisation.name":
 		if e.complexity.Organisation.Name == nil {
 			break
@@ -2326,26 +2344,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Organisation.Owner(childComplexity), true
 
-	case "OrganisationConnection.edges":
-		if e.complexity.OrganisationConnection.Edges == nil {
+	case "Organisation.phone":
+		if e.complexity.Organisation.Phone == nil {
 			break
 		}
 
-		return e.complexity.OrganisationConnection.Edges(childComplexity), true
+		return e.complexity.Organisation.Phone(childComplexity), true
 
-	case "OrganisationConnection.pageInfo":
-		if e.complexity.OrganisationConnection.PageInfo == nil {
+	case "Organisation.website":
+		if e.complexity.Organisation.Website == nil {
 			break
 		}
 
-		return e.complexity.OrganisationConnection.PageInfo(childComplexity), true
-
-	case "OrganisationConnection.totalCount":
-		if e.complexity.OrganisationConnection.TotalCount == nil {
-			break
-		}
-
-		return e.complexity.OrganisationConnection.TotalCount(childComplexity), true
+		return e.complexity.Organisation.Website(childComplexity), true
 
 	case "PageInfo.currentPage":
 		if e.complexity.PageInfo.CurrentPage == nil {
@@ -3270,6 +3281,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputUpdateEmailAccountInput,
 		ec.unmarshalInputUpdateEntryInput,
 		ec.unmarshalInputUpdateEventInput,
+		ec.unmarshalInputUpdateOrganisationInput,
 		ec.unmarshalInputUpdateUserCompetenceInput,
 		ec.unmarshalInputUpdateUserInput,
 		ec.unmarshalInputUserCompetenceFilterInput,
@@ -3334,7 +3346,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-//go:embed "chat.graphqls" "drive.graphqls" "email.graphqls" "entry.graphqls" "event.graphqls" "schema.graphqls"
+//go:embed "chat.graphqls" "drive.graphqls" "email.graphqls" "entry.graphqls" "event.graphqls" "organisation.graphqls" "schema.graphqls"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -3351,6 +3363,7 @@ var sources = []*ast.Source{
 	{Name: "email.graphqls", Input: sourceData("email.graphqls"), BuiltIn: false},
 	{Name: "entry.graphqls", Input: sourceData("entry.graphqls"), BuiltIn: false},
 	{Name: "event.graphqls", Input: sourceData("event.graphqls"), BuiltIn: false},
+	{Name: "organisation.graphqls", Input: sourceData("organisation.graphqls"), BuiltIn: false},
 	{Name: "schema.graphqls", Input: sourceData("schema.graphqls"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -4089,6 +4102,21 @@ func (ec *executionContext) field_Mutation_updateEvent_args(ctx context.Context,
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNUpdateEventInput2exampleᚋpkgᚋgraphᚋmodelᚐUpdateEventInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateOrganisation_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.UpdateOrganisationInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNUpdateOrganisationInput2exampleᚋpkgᚋgraphᚋmodelᚐUpdateOrganisationInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -13775,6 +13803,75 @@ func (ec *executionContext) fieldContext_Mutation_archiveEvent(ctx context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_updateOrganisation(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateOrganisation(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateOrganisation(rctx, fc.Args["input"].(model.UpdateOrganisationInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.Organisation)
+	fc.Result = res
+	return ec.marshalNOrganisation2ᚖexampleᚋpkgᚋdbᚐOrganisation(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateOrganisation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Organisation_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Organisation_name(ctx, field)
+			case "legalName":
+				return ec.fieldContext_Organisation_legalName(ctx, field)
+			case "website":
+				return ec.fieldContext_Organisation_website(ctx, field)
+			case "phone":
+				return ec.fieldContext_Organisation_phone(ctx, field)
+			case "owner":
+				return ec.fieldContext_Organisation_owner(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Organisation", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateOrganisation_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_signIn(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_signIn(ctx, field)
 	if err != nil {
@@ -15250,6 +15347,132 @@ func (ec *executionContext) fieldContext_Organisation_name(ctx context.Context, 
 	return fc, nil
 }
 
+func (ec *executionContext) _Organisation_legalName(ctx context.Context, field graphql.CollectedField, obj *db.Organisation) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Organisation_legalName(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LegalName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Organisation_legalName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Organisation",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Organisation_website(ctx context.Context, field graphql.CollectedField, obj *db.Organisation) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Organisation_website(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Website, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Organisation_website(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Organisation",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Organisation_phone(ctx context.Context, field graphql.CollectedField, obj *db.Organisation) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Organisation_phone(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Phone, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Organisation_phone(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Organisation",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Organisation_owner(ctx context.Context, field graphql.CollectedField, obj *db.Organisation) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Organisation_owner(ctx, field)
 	if err != nil {
@@ -15311,151 +15534,6 @@ func (ec *executionContext) fieldContext_Organisation_owner(ctx context.Context,
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _OrganisationConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.OrganisationConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_OrganisationConnection_edges(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Edges, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*db.Organisation)
-	fc.Result = res
-	return ec.marshalOOrganisation2ᚕᚖexampleᚋpkgᚋdbᚐOrganisation(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_OrganisationConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "OrganisationConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Organisation_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Organisation_name(ctx, field)
-			case "owner":
-				return ec.fieldContext_Organisation_owner(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Organisation", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _OrganisationConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.OrganisationConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_OrganisationConnection_pageInfo(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PageInfo, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.PageInfo)
-	fc.Result = res
-	return ec.marshalNPageInfo2ᚖexampleᚋpkgᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_OrganisationConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "OrganisationConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "hasNextPage":
-				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
-			case "hasPreviousPage":
-				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
-			case "currentPage":
-				return ec.fieldContext_PageInfo_currentPage(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _OrganisationConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.OrganisationConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_OrganisationConnection_totalCount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TotalCount, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_OrganisationConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "OrganisationConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -16987,14 +17065,11 @@ func (ec *executionContext) _Query_organisation(ctx context.Context, field graph
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.(*db.Organisation)
 	fc.Result = res
-	return ec.marshalNOrganisation2ᚖexampleᚋpkgᚋdbᚐOrganisation(ctx, field.Selections, res)
+	return ec.marshalOOrganisation2ᚖexampleᚋpkgᚋdbᚐOrganisation(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_organisation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17009,6 +17084,12 @@ func (ec *executionContext) fieldContext_Query_organisation(ctx context.Context,
 				return ec.fieldContext_Organisation_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Organisation_name(ctx, field)
+			case "legalName":
+				return ec.fieldContext_Organisation_legalName(ctx, field)
+			case "website":
+				return ec.fieldContext_Organisation_website(ctx, field)
+			case "phone":
+				return ec.fieldContext_Organisation_phone(ctx, field)
 			case "owner":
 				return ec.fieldContext_Organisation_owner(ctx, field)
 			}
@@ -25095,6 +25176,66 @@ func (ec *executionContext) unmarshalInputUpdateEventInput(ctx context.Context, 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateOrganisationInput(ctx context.Context, obj interface{}) (model.UpdateOrganisationInput, error) {
+	var it model.UpdateOrganisationInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "name", "legalName", "website", "phone"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "legalName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("legalName"))
+			it.LegalName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "website":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("website"))
+			it.Website, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "phone":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone"))
+			it.Phone, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateUserCompetenceInput(ctx context.Context, obj interface{}) (model.UpdateUserCompetenceInput, error) {
 	var it model.UpdateUserCompetenceInput
 	asMap := map[string]interface{}{}
@@ -27616,6 +27757,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "updateOrganisation":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateOrganisation(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "signIn":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -27831,6 +27981,21 @@ func (ec *executionContext) _Organisation(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "legalName":
+
+			out.Values[i] = ec._Organisation_legalName(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "website":
+
+			out.Values[i] = ec._Organisation_website(ctx, field, obj)
+
+		case "phone":
+
+			out.Values[i] = ec._Organisation_phone(ctx, field, obj)
+
 		case "owner":
 			field := field
 
@@ -27851,45 +28016,6 @@ func (ec *executionContext) _Organisation(ctx context.Context, sel ast.Selection
 				return innerFunc(ctx)
 
 			})
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var organisationConnectionImplementors = []string{"OrganisationConnection"}
-
-func (ec *executionContext) _OrganisationConnection(ctx context.Context, sel ast.SelectionSet, obj *model.OrganisationConnection) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, organisationConnectionImplementors)
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("OrganisationConnection")
-		case "edges":
-
-			out.Values[i] = ec._OrganisationConnection_edges(ctx, field, obj)
-
-		case "pageInfo":
-
-			out.Values[i] = ec._OrganisationConnection_pageInfo(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "totalCount":
-
-			out.Values[i] = ec._OrganisationConnection_totalCount(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -28453,9 +28579,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_organisation(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 
@@ -31348,6 +31471,11 @@ func (ec *executionContext) unmarshalNUpdateEventInput2exampleᚋpkgᚋgraphᚋm
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNUpdateOrganisationInput2exampleᚋpkgᚋgraphᚋmodelᚐUpdateOrganisationInput(ctx context.Context, v interface{}) (model.UpdateOrganisationInput, error) {
+	res, err := ec.unmarshalInputUpdateOrganisationInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNUpdateUserCompetenceInput2ᚖexampleᚋpkgᚋgraphᚋmodelᚐUpdateUserCompetenceInput(ctx context.Context, v interface{}) (*model.UpdateUserCompetenceInput, error) {
 	res, err := ec.unmarshalInputUpdateUserCompetenceInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
@@ -32688,47 +32816,6 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	}
 	res := graphql.MarshalInt(*v)
 	return res
-}
-
-func (ec *executionContext) marshalOOrganisation2ᚕᚖexampleᚋpkgᚋdbᚐOrganisation(ctx context.Context, sel ast.SelectionSet, v []*db.Organisation) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOOrganisation2ᚖexampleᚋpkgᚋdbᚐOrganisation(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	return ret
 }
 
 func (ec *executionContext) marshalOOrganisation2ᚖexampleᚋpkgᚋdbᚐOrganisation(ctx context.Context, sel ast.SelectionSet, v *db.Organisation) graphql.Marshaler {

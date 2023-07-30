@@ -4,11 +4,7 @@
 
 scalar Time
 
-type Organisation {
-    id: ID!
-    name: String!
-    owner: User!
-}
+
 
 enum UserRole {
     owner
@@ -141,12 +137,6 @@ type PageInfo {
     currentPage: Int!
 }
 
-type OrganisationConnection {
-    edges: [Organisation]
-    pageInfo: PageInfo!
-    totalCount: Int!
-}
-
 type UserConnection {
     edges: [User]
     pageInfo: PageInfo!
@@ -240,8 +230,6 @@ type Query
 type Mutation
 
 extend type Query {
-    organisation: Organisation!
-
     users(limit: Int, offset: Int, filter: UserFilterInput, search: String): UserConnection!
     user(id: ID!): User!
 

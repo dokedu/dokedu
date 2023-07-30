@@ -806,38 +806,6 @@ func (r *mutationResolver) UpdateCompetenceSorting(ctx context.Context, input mo
 	return competences, nil
 }
 
-// Owner is the resolver for the owner field.
-func (r *organisationResolver) Owner(ctx context.Context, obj *db.Organisation) (*db.User, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, nil
-	}
-
-	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.OwnerID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
-}
-
-// Organisation is the resolver for the organisation field.
-func (r *queryResolver) Organisation(ctx context.Context) (*db.Organisation, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, nil
-	}
-
-	var organisation db.Organisation
-	err = r.DB.NewSelect().Model(&organisation).Where("id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &organisation, nil
-}
-
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filter *model.UserFilterInput, search *string) (*model.UserConnection, error) {
 	currentUser, err := middleware.GetUser(ctx)
@@ -1581,9 +1549,6 @@ func (r *Resolver) Competence() CompetenceResolver { return &competenceResolver{
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
-// Organisation returns OrganisationResolver implementation.
-func (r *Resolver) Organisation() OrganisationResolver { return &organisationResolver{r} }
-
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
@@ -1604,7 +1569,6 @@ func (r *Resolver) UserStudent() UserStudentResolver { return &userStudentResolv
 
 type competenceResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
-type organisationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type reportResolver struct{ *Resolver }
 type tagResolver struct{ *Resolver }
