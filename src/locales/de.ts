@@ -145,4 +145,12 @@ export const de = {
   edit_student: "Schüler bearbeiten",
 
   title: "Titel",
+  add_group: "Gruppe hinzufügen",
+  edit_group: "Gruppe bearbeiten",
+  domain: "Domain | Domains",
+  group: "Gruppe | Gruppen",
+  name_required: "Name ist erforderlich",
+  description_required: "Beschreibung ist erforderlich",
+  domain_required: "Domain ist erforderlich",
+  name_spaces: "Name darf keine Leerzeichen enthalten",
 };

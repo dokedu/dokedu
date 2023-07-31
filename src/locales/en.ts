@@ -48,6 +48,12 @@ export const en = {
   bankaccount_ending_in: "Bank account ending in",
   general: "General",
 
+  // Admin Email
+  group: "Group | Groups",
+  domain: "Domain | Domains",
+  add_domain: "Add domain",
+  edit_domain: "Edit domain",
+
   // Students
   search: "Search",
   profile: "Profile",
@@ -143,4 +149,10 @@ export const en = {
   edit_student: "Edit student",
 
   title: "Title",
+  add_group: "Add group",
+  edit_group: "Edit Group",
+  name_required: "Name is required",
+  description_required: "Description is required",
+  domain_required: "Domain is required",
+  name_spaces: "Name cannot contain spaces",
 };

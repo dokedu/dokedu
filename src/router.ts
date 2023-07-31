@@ -74,6 +74,40 @@ const router = createRouter({
       component: () => import("./pages/admin/billing/index.vue"),
     },
     {
+      name: "admin-domains",
+      path: "/admin/domains",
+      component: () => import("./pages/admin/domains/index.vue"),
+      children: [
+        {
+          name: "admin-domains-new",
+          path: "/admin/domains/new",
+          component: () => import("./pages/admin/domains/new.vue"),
+        },
+        {
+          name: "admin-domains-domain",
+          path: "/admin/domains/:id",
+          component: () => import("./pages/admin/domains/[id].vue"),
+        },
+      ]
+    },
+    {
+      name: "admin-groups",
+      path: "/admin/groups",
+      component: () => import("./pages/admin/groups/index.vue"),
+      children: [
+        {
+          name: "admin-groups-new",
+          path: "/admin/groups/new",
+          component: () => import("./pages/admin/groups/new.vue"),
+        },
+        {
+          name: "admin-groups-group",
+          path: "/admin/groups/:id",
+          component: () => import("./pages/admin/groups/[id].vue"),
+        },
+      ]
+    },
+    {
       name: "admin-general",
       path: "/admin/general",
       component: () => import("./pages/admin/general/index.vue"),

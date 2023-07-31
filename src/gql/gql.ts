@@ -18,8 +18,19 @@ const documents = {
     "\n    query competenceSearch($search: String, $filter: CompetenceFilterInput) {\n      competences(search: $search, filter: $filter, sort: { field: sort_order, order: asc }) {\n        edges {\n          id\n          name\n          type\n          color\n          grades\n          parents {\n            id\n            name\n            type\n            grades\n            color\n          }\n        }\n      }\n    }\n  ": types.CompetenceSearchDocument,
     "\n    query competencePath($id: ID!) {\n      competence(id: $id) {\n        id\n        name\n        type\n        color\n        grades\n        parents {\n          id\n          name\n          type\n          grades\n          color\n        }\n      }\n    }\n  ": types.CompetencePathDocument,
     "\n    mutation previewFile($id: ID!) {\n      previewFile(input: { id: $id }) {\n        url\n      }\n    }\n  ": types.PreviewFileDocument,
+    "\n    query adminDomainById($id: ID!) {\n      domain(id: $id) {\n        id\n        name\n        createdAt\n      }\n    }\n  ": types.AdminDomainByIdDocument,
+    "\n    mutation deleteDomain($input: DeleteDomainInput!) {\n      deleteDomain(input: $input) {\n        name\n        createdAt\n      }\n    }\n  ": types.DeleteDomainDocument,
+    "\n  query domains {\n    domains {\n      edges {\n        id\n        name\n        createdAt\n      }\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n": types.DomainsDocument,
+    "\n    mutation createDomain($input: CreateDomainInput!) {\n      createDomain(input: $input) {\n        id\n        name\n        createdAt\n      }\n    }\n  ": types.CreateDomainDocument,
     "\n    query organisation {\n      organisation {\n        id\n        name\n        legalName\n      }\n    }\n  ": types.OrganisationDocument,
     "\n    mutation updateOrganisation($input: UpdateOrganisationInput!) {\n      updateOrganisation(input: $input) {\n        id\n        name\n        legalName\n      }\n    }\n  ": types.UpdateOrganisationDocument,
+    "\n    query domains {\n      domains {\n        edges {\n          id\n          name\n          createdAt\n        }\n        pageInfo {\n          hasNextPage\n          hasPreviousPage\n        }\n      }\n    }\n  ": types.DomainsDocument,
+    "\n    query groupUsers {\n      emailAccounts(filter: { type: INDIVIDUAL }) {\n        edges {\n          id\n          name\n        }\n      }\n    }\n  ": types.GroupUsersDocument,
+    "\n    query adminGroupById($id: ID!) {\n      emailAccount(id: $id) {\n        id\n        name\n        description\n        members {\n          name\n        }\n      }\n    }\n  ": types.AdminGroupByIdDocument,
+    "\n    mutation deleteEmailGroup($id: ID!) {\n      deleteEmailGroup(id: $id) {\n        id\n        name\n      }\n    }\n  ": types.DeleteEmailGroupDocument,
+    "\n    mutation editEmailGroup($input: UpdateEmailGroupInput!) {\n      updateEmailGroup(input: $input) {\n        id\n        name\n        description\n      }\n    }\n  ": types.EditEmailGroupDocument,
+    "\n  query groups {\n    emailAccounts(filter: { type: GROUP }) {\n      edges {\n        id\n        name\n        description\n      }\n      totalCount\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n": types.GroupsDocument,
+    "\n    mutation createEmailGroup($input: CreateEmailGroupInput!) {\n      createEmailGroup(input: $input) {\n        id\n        name\n        description\n        members {\n          name\n        }\n      }\n    }\n  ": types.CreateEmailGroupDocument,
     "\n    query adminStudentById($id: ID!) {\n      user(id: $id) {\n        id\n        firstName\n        lastName\n        role\n        student {\n          id\n          grade\n          birthday\n          joinedAt\n          leftAt\n        }\n      }\n    }\n  ": types.AdminStudentByIdDocument,
     "\n    mutation updateStudent($student: UpdateUserInput!) {\n      updateUser(input: $student) {\n        id\n        firstName\n        lastName\n        role\n        student {\n          id\n          birthday\n          grade\n          leftAt\n          joinedAt\n        }\n      }\n    }\n  ": types.UpdateStudentDocument,
     "\n    mutation archiveStudent($id: ID!) {\n      archiveUser(id: $id) {\n        id\n        firstName\n        lastName\n        role\n        student {\n          birthday\n          grade\n          leftAt\n          joinedAt\n        }\n      }\n    }\n  ": types.ArchiveStudentDocument,
@@ -113,11 +124,55 @@ export function graphql(source: "\n    mutation previewFile($id: ID!) {\n      p
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n    query adminDomainById($id: ID!) {\n      domain(id: $id) {\n        id\n        name\n        createdAt\n      }\n    }\n  "): (typeof documents)["\n    query adminDomainById($id: ID!) {\n      domain(id: $id) {\n        id\n        name\n        createdAt\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation deleteDomain($input: DeleteDomainInput!) {\n      deleteDomain(input: $input) {\n        name\n        createdAt\n      }\n    }\n  "): (typeof documents)["\n    mutation deleteDomain($input: DeleteDomainInput!) {\n      deleteDomain(input: $input) {\n        name\n        createdAt\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query domains {\n    domains {\n      edges {\n        id\n        name\n        createdAt\n      }\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n"): (typeof documents)["\n  query domains {\n    domains {\n      edges {\n        id\n        name\n        createdAt\n      }\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation createDomain($input: CreateDomainInput!) {\n      createDomain(input: $input) {\n        id\n        name\n        createdAt\n      }\n    }\n  "): (typeof documents)["\n    mutation createDomain($input: CreateDomainInput!) {\n      createDomain(input: $input) {\n        id\n        name\n        createdAt\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n    query organisation {\n      organisation {\n        id\n        name\n        legalName\n      }\n    }\n  "): (typeof documents)["\n    query organisation {\n      organisation {\n        id\n        name\n        legalName\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    mutation updateOrganisation($input: UpdateOrganisationInput!) {\n      updateOrganisation(input: $input) {\n        id\n        name\n        legalName\n      }\n    }\n  "): (typeof documents)["\n    mutation updateOrganisation($input: UpdateOrganisationInput!) {\n      updateOrganisation(input: $input) {\n        id\n        name\n        legalName\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    query domains {\n      domains {\n        edges {\n          id\n          name\n          createdAt\n        }\n        pageInfo {\n          hasNextPage\n          hasPreviousPage\n        }\n      }\n    }\n  "): (typeof documents)["\n    query domains {\n      domains {\n        edges {\n          id\n          name\n          createdAt\n        }\n        pageInfo {\n          hasNextPage\n          hasPreviousPage\n        }\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    query groupUsers {\n      emailAccounts(filter: { type: INDIVIDUAL }) {\n        edges {\n          id\n          name\n        }\n      }\n    }\n  "): (typeof documents)["\n    query groupUsers {\n      emailAccounts(filter: { type: INDIVIDUAL }) {\n        edges {\n          id\n          name\n        }\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    query adminGroupById($id: ID!) {\n      emailAccount(id: $id) {\n        id\n        name\n        description\n        members {\n          name\n        }\n      }\n    }\n  "): (typeof documents)["\n    query adminGroupById($id: ID!) {\n      emailAccount(id: $id) {\n        id\n        name\n        description\n        members {\n          name\n        }\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation deleteEmailGroup($id: ID!) {\n      deleteEmailGroup(id: $id) {\n        id\n        name\n      }\n    }\n  "): (typeof documents)["\n    mutation deleteEmailGroup($id: ID!) {\n      deleteEmailGroup(id: $id) {\n        id\n        name\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation editEmailGroup($input: UpdateEmailGroupInput!) {\n      updateEmailGroup(input: $input) {\n        id\n        name\n        description\n      }\n    }\n  "): (typeof documents)["\n    mutation editEmailGroup($input: UpdateEmailGroupInput!) {\n      updateEmailGroup(input: $input) {\n        id\n        name\n        description\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query groups {\n    emailAccounts(filter: { type: GROUP }) {\n      edges {\n        id\n        name\n        description\n      }\n      totalCount\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n"): (typeof documents)["\n  query groups {\n    emailAccounts(filter: { type: GROUP }) {\n      edges {\n        id\n        name\n        description\n      }\n      totalCount\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation createEmailGroup($input: CreateEmailGroupInput!) {\n      createEmailGroup(input: $input) {\n        id\n        name\n        description\n        members {\n          name\n        }\n      }\n    }\n  "): (typeof documents)["\n    mutation createEmailGroup($input: CreateEmailGroupInput!) {\n      createEmailGroup(input: $input) {\n        id\n        name\n        description\n        members {\n          name\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
