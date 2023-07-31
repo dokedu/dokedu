@@ -6,18 +6,30 @@
   >
     <div class="flex h-14 w-full items-center justify-between px-2 text-sm" @click.stop>
       <div class="flex items-center gap-2 text-white">
-        <button type="button" class="rounded-lg p-2 hover:bg-white/10 focus:outline-none active:bg-white/20">
-          <ArrowLeft class="stroke-white" :size="18" @click.stop="emit('close')" />
+        <button
+          type="button"
+          class="rounded-lg p-2 hover:bg-white/10 focus:outline-none active:bg-white/20"
+          @click.stop="emit('close')"
+        >
+          <ArrowLeft class="stroke-white" :size="18" />
         </button>
         <div>
           {{ file.name }}
         </div>
       </div>
       <div class="flex items-center gap-1 text-white">
-        <button type="button" class="rounded-lg p-2 hover:bg-white/10 focus:outline-none active:bg-white/20">
-          <Download class="stroke-white" :size="18" @click.stop="download" />
+        <button
+          type="button"
+          class="rounded-lg p-2 hover:bg-white/10 focus:outline-none active:bg-white/20"
+          @click.stop="download"
+        >
+          <Download class="stroke-white" :size="18" />
         </button>
-        <div class="rounded-lg p-2 hover:bg-white/10">
+        <div
+          v-if="(isFileOfType(file) === 'image' || isFileOfType(file) === 'pdf') && url"
+          @click="print"
+          class="rounded-lg p-2 hover:bg-white/10"
+        >
           <Printer class="stroke-white" :size="18" />
         </div>
         <div class="rounded-lg p-2 hover:bg-white/10">
@@ -107,6 +119,46 @@ const { getFileURL, downloadFile } = useDownloadFile();
 function download() {
   if (props.file) {
     downloadFile(props.file);
+  }
+}
+
+function print() {
+  if (props.file && url.value) {
+    if (isFileOfType(props.file) === "pdf") {
+      window.open(url.value, "_blank");
+      return;
+    }
+    // is image
+    if (isFileOfType(props.file) === "image") {
+      // open print modal with image on a page
+      const img = document.createElement("img");
+      img.src = url.value;
+
+      // Wait for the image to load before opening the print modal
+      img.onload = function () {
+        // Create a new window to display the image
+        const printWindow = window.open();
+
+        if (!printWindow) {
+          return;
+        }
+
+        // Append the image to the new window's document
+        printWindow.document.write('<html><body style="margin: 0;">');
+        printWindow.document.write('<img src="' + url.value + '" style="max-width: 100%; max-height: 100%;">');
+        printWindow.document.write("</body></html>");
+        printWindow.document.close();
+
+        // Wait for the image to be fully loaded in the new window before printing
+        printWindow.onload = function () {
+          // Trigger the print modal for the new window
+          printWindow.print();
+        };
+      };
+
+      // destroy image
+      img.remove();
+    }
   }
 }
 
