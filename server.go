@@ -12,15 +12,19 @@ import (
 	"example/pkg/services/report_generation/config"
 	"fmt"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/labstack/echo/v4"
+	middleware2 "github.com/labstack/echo/v4/middleware"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -94,11 +98,13 @@ func main() {
 	e.Use(dataloaders.Middleware(loader))
 
 	e.Use(middleware.CORS())
+	e.Use(middleware2.BodyLimit("5G"))
+	e.Use(middleware2.RateLimiter(middleware2.NewRateLimiterMemoryStore(60)))
 
 	// Auth
 	e.Use(middleware.Auth(dbClient))
 
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
+	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
 		DB:            dbClient,
 		MinioClient:   minioClient,
 		Mailer:        mailer,
@@ -106,7 +112,26 @@ func main() {
 		Meili:         meili,
 	}}))
 
-	srv.AddTransport(&transport.Websocket{})
+	var gb int64 = 1 << 30
+
+	srv.AddTransport(transport.Websocket{
+		KeepAlivePingInterval: 10 * time.Second,
+	})
+	srv.AddTransport(transport.Options{})
+	srv.AddTransport(transport.GET{})
+	srv.AddTransport(transport.POST{})
+	srv.AddTransport(transport.MultipartForm{
+		// 5 GB
+		MaxMemory:     5 * gb,
+		MaxUploadSize: 5 * gb,
+	})
+
+	srv.SetQueryCache(lru.New(1000))
+
+	srv.Use(extension.Introspection{})
+	srv.Use(extension.AutomaticPersistedQuery{
+		Cache: lru.New(100),
+	})
 
 	playgroundHandler := playground.Handler("GraphQL playground", "/query")
 
