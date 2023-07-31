@@ -13,7 +13,7 @@
 import DDomainForm from "./DDomainForm.vue";
 import { useQuery, useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
-import { computed, reactive, ref } from "vue";
+import { computed, reactive } from "vue";
 import { Domain } from "@/gql/graphql";
 import { useRoute } from "vue-router";
 import { createNotification } from "@/composables/useToast";
@@ -49,7 +49,7 @@ const { executeMutation: deleteDomain } = useMutation(
 const onDeleteDomain = async () => {
   const domain = data?.value?.domain;
 
-  await deleteDomain({ id: id.value });
+  await deleteDomain({ input: { id: id.value } });
 
   await router.push({ name: "admin-domains" });
 

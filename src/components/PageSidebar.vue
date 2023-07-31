@@ -110,7 +110,6 @@ import { UserLanguage } from "@/gql/graphql";
 import { Landmark } from "lucide-vue-next";
 import { Settings } from "lucide-vue-next";
 import { School } from "lucide-vue-next";
-import { Mail } from "lucide-vue-next";
 import { Mails } from "lucide-vue-next";
 
 const { t } = useI18n();
