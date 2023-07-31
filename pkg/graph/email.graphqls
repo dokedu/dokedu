@@ -12,6 +12,7 @@ type EmailAccount {
     active: Boolean
     user: User
     createdAt: String!
+    members: [EmailGroupMember]
 }
 
 type EmailGroupMember {
@@ -77,23 +78,9 @@ type DomainConnection {
     pageInfo: PageInfo!
     totalCount: Int!
 }
-type GroupConnection {
-    edges: [Group]
-    pageInfo: PageInfo!
-    totalCount: Int!
-}
 
 input EmailAccountFilter {
     type: EmailAccountType
-}
-
-type Group {
-    id: ID!
-    name: String!
-    description: String
-    domain: String!
-    users: [String]
-    createdAt: String!
 }
 
 extend type Query {
@@ -107,8 +94,6 @@ extend type Query {
     emailForwarding(id: ID!): EmailForwarding
     domains: DomainConnection
     domain(id: ID!): Domain
-    group(id: ID!): Group
-    groups: GroupConnection
 }
 
 extend type Mutation {
@@ -123,9 +108,9 @@ extend type Mutation {
     deleteEmailForwarding(input: DeleteEmailForwardingInput!): EmailForwarding
     createDomain(input: CreateDomainInput!): Domain
     deleteDomain(input: DeleteDomainInput!): Domain
-    createGroup(input: CreateGroupInput!): Group
-    updateGroup(input: UpdateGroupInput!): Group
-    deleteGroup(id: ID!): Group
+    createEmailGroup(input: CreateEmailGroupInput!): EmailAccount
+    updateEmailGroup(input: UpdateEmailGroupInput!): EmailAccount
+    deleteEmailGroup(id: ID!): EmailAccount
 }
 
 
@@ -185,17 +170,15 @@ input DeleteDomainInput {
     id: ID!
 }
 
-input CreateGroupInput {
+input CreateEmailGroupInput {
     name: String!
-    domain: String!
-    users: [String]
+    members: [String]
     description: String
 }
 
-input UpdateGroupInput {
+input UpdateEmailGroupInput {
     id: ID!
     name: String
-    domain: String
-    users: [String]
+    members: [String]
     description: String
 }

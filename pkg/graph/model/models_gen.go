@@ -80,6 +80,12 @@ type CreateEmailForwardingInput struct {
 	Target string `json:"target"`
 }
 
+type CreateEmailGroupInput struct {
+	Name        string    `json:"name"`
+	Members     []*string `json:"members,omitempty"`
+	Description *string   `json:"description,omitempty"`
+}
+
 type CreateEmailGroupMemberInput struct {
 	Name     string `json:"name"`
 	MemberOf string `json:"memberOf"`
@@ -114,13 +120,6 @@ type CreateFolderInput struct {
 	Name     string  `json:"name"`
 	ParentID *string `json:"parentId,omitempty"`
 	BucketID *string `json:"bucketId,omitempty"`
-}
-
-type CreateGroupInput struct {
-	Name        string    `json:"name"`
-	Domain      string    `json:"domain"`
-	Users       []*string `json:"users,omitempty"`
-	Description *string   `json:"description,omitempty"`
 }
 
 type CreateReportInput struct {
@@ -326,21 +325,6 @@ type GenerateFileURLInput struct {
 	ID string `json:"id"`
 }
 
-type Group struct {
-	ID          string    `json:"id"`
-	Name        string    `json:"name"`
-	Description *string   `json:"description,omitempty"`
-	Domain      string    `json:"domain"`
-	Users       []*string `json:"users,omitempty"`
-	CreatedAt   string    `json:"createdAt"`
-}
-
-type GroupConnection struct {
-	Edges      []*Group  `json:"edges,omitempty"`
-	PageInfo   *PageInfo `json:"pageInfo"`
-	TotalCount int       `json:"totalCount"`
-}
-
 type MoveFileInput struct {
 	ID       string `json:"id"`
 	TargetID string `json:"targetId"`
@@ -458,6 +442,13 @@ type UpdateEmailAccountInput struct {
 	Active      *bool                `json:"active,omitempty"`
 }
 
+type UpdateEmailGroupInput struct {
+	ID          string    `json:"id"`
+	Name        *string   `json:"name,omitempty"`
+	Members     []*string `json:"members,omitempty"`
+	Description *string   `json:"description,omitempty"`
+}
+
 type UpdateEntryInput struct {
 	ID              string                       `json:"id"`
 	Date            *string                      `json:"date,omitempty"`
@@ -477,14 +468,6 @@ type UpdateEventInput struct {
 	StartsAt   *string         `json:"startsAt,omitempty"`
 	EndsAt     *string         `json:"endsAt,omitempty"`
 	Recurrence []*string       `json:"recurrence,omitempty"`
-}
-
-type UpdateGroupInput struct {
-	ID          string    `json:"id"`
-	Name        *string   `json:"name,omitempty"`
-	Domain      *string   `json:"domain,omitempty"`
-	Users       []*string `json:"users,omitempty"`
-	Description *string   `json:"description,omitempty"`
 }
 
 type UpdateUserCompetenceInput struct {
