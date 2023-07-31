@@ -72,7 +72,7 @@ import { computed, ref } from "vue";
 import useDownloadFile from "@/composables/useDownloadFile";
 import { Archive } from "lucide-vue-next";
 import { useRoute } from "vue-router";
-import { File as FileFile, Trash } from "lucide-vue-next";
+import { File as FileFile, Trash, FileVideo } from "lucide-vue-next";
 import DDialogRenameFile from "./folders/DDialogRenameFile.vue";
 import { useMutation } from "@urql/vue";
 
@@ -149,6 +149,9 @@ function useFileIcon(file: File) {
       return FileImage;
     case "application/zip":
       return Archive;
+    // video
+    case "video/mp4":
+      return FileVideo;
     default:
       return FileFile;
   }

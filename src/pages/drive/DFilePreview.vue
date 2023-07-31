@@ -31,17 +31,28 @@
     <div class="flex h-[calc(100%-14rem)] w-full flex-1 items-center p-8">
       <img
         @click.stop
-        v-if="!file.name.includes('.pdf') && url"
+        v-if="isFileOfType(file) === 'image' && url"
         :src="url"
         alt=""
         class="block h-fit w-full bg-stone-900 object-contain"
       />
       <canvas
         @click.stop
-        v-if="file.name.includes('.pdf')"
+        v-if="isFileOfType(file) === 'pdf' && url"
         ref="canvas"
         class="mx-auto block h-fit max-h-full w-fit object-contain"
       ></canvas>
+      <video
+        @click.stop
+        v-if="isFileOfType(file) === 'video' && url"
+        :src="url"
+        controls
+        class="mx-auto block h-fit max-h-full w-fit object-contain"
+      ></video>
+      <audio @click.stop v-if="isFileOfType(file) === 'audio' && url" :src="url" controls class="mx-auto"></audio>
+      <div v-if="!isFileOfType(file)" class="mx-auto text-center text-white">
+        Previewing this file is not supported yet.
+      </div>
     </div>
   </div>
 </template>
@@ -55,6 +66,27 @@ import { ArrowLeft, Download, Star, Printer, MoreVertical } from "lucide-vue-nex
 
 export interface Props {
   file: File | null;
+}
+
+function isFileOfType(file: File) {
+  switch (file.MIMEType) {
+    case "image/jpeg":
+    case "image/png":
+    case "image/gif":
+      return "image";
+    case "application/pdf":
+      return "pdf";
+    case "video/mp4":
+    case "video/ogg":
+    case "video/webm":
+      return "video";
+    case "audio/mpeg":
+    case "audio/ogg":
+    case "audio/wav":
+      return "audio";
+    default:
+      return false;
+  }
 }
 
 const props = withDefaults(defineProps<Props>(), {
