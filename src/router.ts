@@ -203,6 +203,14 @@ const router = createRouter({
       component: () => import("./pages/drive/folders/[id].vue"),
     },
     {
+      name: "drive-file",
+      path: "/drive/files/:id",
+      meta: {
+        layout: "none",
+      },
+      component: () => import("./pages/drive/files/[id].vue"),
+    },
+    {
       name: "record-tags",
       path: "/record/tags",
       component: () => import("./pages/record/tags/index.vue"),

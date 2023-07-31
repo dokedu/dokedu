@@ -1,15 +1,47 @@
 <template>
-  <div v-if="file" class="absolute left-0 top-0 z-50 h-screen w-full bg-stone-900/80" @click="emit('close')">
-    <div class="flex h-full w-full items-center justify-between p-4">
+  <div
+    v-if="file"
+    class="absolute left-0 top-0 z-40 flex h-screen max-h-screen w-full select-none flex-col bg-stone-900/90"
+    @click="emit('close')"
+  >
+    <div class="flex h-14 w-full items-center justify-between px-2 text-sm" @click.stop>
+      <div class="flex items-center gap-2 text-white">
+        <button type="button" class="rounded-lg p-2 hover:bg-white/10 focus:outline-none active:bg-white/20">
+          <ArrowLeft class="stroke-white" :size="18" @click.stop="emit('close')" />
+        </button>
+        <div>
+          {{ file.name }}
+        </div>
+      </div>
+      <div class="flex items-center gap-1 text-white">
+        <button type="button" class="rounded-lg p-2 hover:bg-white/10 focus:outline-none active:bg-white/20">
+          <Download class="stroke-white" :size="18" @click.stop="download" />
+        </button>
+        <div class="rounded-lg p-2 hover:bg-white/10">
+          <Printer class="stroke-white" :size="18" />
+        </div>
+        <div class="rounded-lg p-2 hover:bg-white/10">
+          <Star class="stroke-white" :size="18" />
+        </div>
+        <div class="rounded-lg p-2 hover:bg-white/10">
+          <MoreVertical class="stroke-white" :size="18" />
+        </div>
+      </div>
+    </div>
+    <div class="flex h-[calc(100%-14rem)] w-full flex-1 items-center p-8">
       <img
+        @click.stop
         v-if="!file.name.includes('.pdf') && url"
         :src="url"
         alt=""
-        class="mx-auto max-h-full rounded-lg bg-stone-900/10 object-contain backdrop-blur-sm"
+        class="block h-fit w-full bg-stone-900 object-contain"
       />
-      <div v-if="file.name.includes('.pdf')" class="mx-auto h-fit max-h-full overflow-scroll rounded-lg shadow-xl">
-        <canvas ref="canvas"></canvas>
-      </div>
+      <canvas
+        @click.stop
+        v-if="file.name.includes('.pdf')"
+        ref="canvas"
+        class="mx-auto block h-fit max-h-full w-fit object-contain"
+      ></canvas>
     </div>
   </div>
 </template>
@@ -19,6 +51,7 @@ import { File } from "../../gql/graphql";
 import { ref, watch } from "vue";
 import { onKeyStroke } from "@vueuse/core";
 import useDownloadFile from "@/composables/useDownloadFile";
+import { ArrowLeft, Download, Star, Printer, MoreVertical } from "lucide-vue-next";
 
 export interface Props {
   file: File | null;
@@ -37,7 +70,13 @@ onKeyStroke("Escape", () => {
 const canvas = ref<HTMLCanvasElement | null>(null);
 const url = ref<string | null>();
 
-const { getFileURL } = useDownloadFile();
+const { getFileURL, downloadFile } = useDownloadFile();
+
+function download() {
+  if (props.file) {
+    downloadFile(props.file);
+  }
+}
 
 watch(
   // @ts-expect-error
@@ -70,7 +109,7 @@ async function renderPDF(url) {
   await loadingTask.promise.then(async (pdf) => {
     const page = await pdf.getPage(1);
 
-    const viewport = page.getViewport({ scale: 1.2 });
+    const viewport = page.getViewport({ scale: 2 });
 
     const context = canvas.value?.getContext("2d");
 

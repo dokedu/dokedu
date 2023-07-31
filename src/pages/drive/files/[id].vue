@@ -1,0 +1,33 @@
+<template>
+  <div v-i="data && data.file && data.file">
+    <DFilePreview :file="(data?.file as File)" />
+  </div>
+</template>
+<script setup lang="ts">
+import { reactive } from "vue";
+import { useRoute } from "vue-router";
+import DFilePreview from "./../DFilePreview.vue";
+import { graphql } from "@/gql";
+import { useQuery } from "@urql/vue";
+import { File } from "@/gql/graphql";
+
+const route = useRoute();
+
+const { data } = useQuery({
+  query: graphql(`
+    query file($id: ID!) {
+      file(id: $id) {
+        id
+        name
+        fileType
+        MIMEType
+        size
+        createdAt
+      }
+    }
+  `),
+  variables: reactive({
+    id: route.params.id as string,
+  }),
+});
+</script>

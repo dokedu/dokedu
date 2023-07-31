@@ -7,16 +7,22 @@
 <script setup lang="ts">
 import Default from "./layout/default.vue";
 import Auth from "./layout/auth.vue";
+import None from "./layout/none.vue";
 import { useRoute } from "vue-router";
 import { computed } from "vue";
 
 const route = useRoute();
 
 const layout = computed(() => {
-  if (route.meta.layout === "auth") {
-    return Auth;
+  switch (route.meta.layout) {
+    case "default":
+      return Default;
+    case "auth":
+      return Auth;
+    case "none":
+      return None;
+    default:
+      return Default;
   }
-
-  return Default;
 });
 </script>
