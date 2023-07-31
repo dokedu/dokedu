@@ -80,6 +80,12 @@ type CreateEmailForwardingInput struct {
 	Target string `json:"target"`
 }
 
+type CreateEmailGroupInput struct {
+	Name        string    `json:"name"`
+	Members     []*string `json:"members,omitempty"`
+	Description *string   `json:"description,omitempty"`
+}
+
 type CreateEmailGroupMemberInput struct {
 	Name     string `json:"name"`
 	MemberOf string `json:"memberOf"`
@@ -428,6 +434,13 @@ type UpdateEmailAccountInput struct {
 	Type        *db.EmailAccountType `json:"type,omitempty"`
 	Quota       *int                 `json:"quota,omitempty"`
 	Active      *bool                `json:"active,omitempty"`
+}
+
+type UpdateEmailGroupInput struct {
+	ID          string    `json:"id"`
+	Name        *string   `json:"name,omitempty"`
+	Members     []*string `json:"members,omitempty"`
+	Description *string   `json:"description,omitempty"`
 }
 
 type UpdateEntryInput struct {

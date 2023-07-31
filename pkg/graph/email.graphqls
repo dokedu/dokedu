@@ -12,6 +12,7 @@ type EmailAccount {
     active: Boolean
     user: User
     createdAt: String!
+    members: [EmailGroupMember]
 }
 
 type EmailGroupMember {
@@ -107,6 +108,9 @@ extend type Mutation {
     deleteEmailForwarding(input: DeleteEmailForwardingInput!): EmailForwarding
     createDomain(input: CreateDomainInput!): Domain
     deleteDomain(input: DeleteDomainInput!): Domain
+    createEmailGroup(input: CreateEmailGroupInput!): EmailAccount
+    updateEmailGroup(input: UpdateEmailGroupInput!): EmailAccount
+    deleteEmailGroup(id: ID!): EmailAccount
 }
 
 
@@ -164,4 +168,17 @@ input CreateDomainInput {
 
 input DeleteDomainInput {
     id: ID!
+}
+
+input CreateEmailGroupInput {
+    name: String!
+    members: [String]
+    description: String
+}
+
+input UpdateEmailGroupInput {
+    id: ID!
+    name: String
+    members: [String]
+    description: String
 }
