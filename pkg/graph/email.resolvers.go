@@ -79,7 +79,7 @@ func (r *emailAccountResolver) Members(ctx context.Context, obj *db.EmailAccount
 
 	// Fetch the members
 	var members []*db.EmailGroupMember
-	err = r.DB.NewSelect().Model(&members).Where("member_of = ?", obj.Name).Scan(ctx)
+	err = r.DB.NewSelect().Model(&members).Where("member_of = ?", obj.Name).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -390,7 +390,7 @@ func (r *mutationResolver) CreateEmailGroup(ctx context.Context, input model.Cre
 		}
 	}
 
-	_, err = r.DB.NewInsert().Model(&account).Returning("*").Exec(ctx)
+	_, err = r.DB.NewInsert().Model(&account).Where("organisation_id = ?", currentUser.OrganisationID).Returning("*").Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -402,7 +402,7 @@ func (r *mutationResolver) CreateEmailGroup(ctx context.Context, input model.Cre
 			OrganisationID: currentUser.OrganisationID,
 			MemberOf:       input.Name,
 		}
-		err = r.DB.NewInsert().Model(&groupMember).Scan(ctx)
+		err = r.DB.NewInsert().Model(&groupMember).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -423,6 +423,9 @@ func (r *mutationResolver) UpdateEmailGroup(ctx context.Context, input model.Upd
 	// Fetch the current group
 	var group db.EmailAccount
 	err = r.DB.NewSelect().Model(&group).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	// Update email account of type group
 	account := db.EmailAccount{
@@ -452,7 +455,7 @@ func (r *mutationResolver) UpdateEmailGroup(ctx context.Context, input model.Upd
 	if account.Name != group.Name {
 		// Update group members with new group name
 		var groupMembers []db.EmailGroupMember
-		err = r.DB.NewSelect().Model(&groupMembers).Where("member_of = ?", group.Name).Scan(ctx)
+		err = r.DB.NewSelect().Model(&groupMembers).Where("member_of = ?", group.Name).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -460,7 +463,7 @@ func (r *mutationResolver) UpdateEmailGroup(ctx context.Context, input model.Upd
 		// Update each entry
 		for _, member := range groupMembers {
 			member.MemberOf = account.Name
-			_, err = r.DB.NewUpdate().Model(&member).Where("name = ?", member.Name).Where("member_of = ?", group.Name).Exec(ctx)
+			_, err = r.DB.NewUpdate().Model(&member).Where("name = ?", member.Name).Where("member_of = ?", group.Name).Where("organisation_id = ?", currentUser.OrganisationID).Exec(ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -468,11 +471,14 @@ func (r *mutationResolver) UpdateEmailGroup(ctx context.Context, input model.Upd
 	}
 
 	// Update the group
-	_, err = r.DB.NewUpdate().Model(&account).Where("id = ?", input.ID).Returning("*").Exec(ctx)
+	_, err = r.DB.NewUpdate().Model(&account).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Returning("*").Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	// Get the current group members
 	var groupMembers []db.EmailGroupMember
-	err = r.DB.NewSelect().Model(&groupMembers).Where("member_of = ?", account.Name).Scan(ctx)
+	err = r.DB.NewSelect().Model(&groupMembers).Where("member_of = ?", account.Name).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -488,7 +494,7 @@ func (r *mutationResolver) UpdateEmailGroup(ctx context.Context, input model.Upd
 
 		if !found {
 			// Delete the group member
-			_, err = r.DB.NewDelete().Model(&member).Where("id = ?", member.ID).Exec(ctx)
+			_, err = r.DB.NewDelete().Model(&member).Where("id = ?", member.ID).Where("organisation_id = ?", currentUser.OrganisationID).Exec(ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -511,7 +517,7 @@ func (r *mutationResolver) UpdateEmailGroup(ctx context.Context, input model.Upd
 				OrganisationID: currentUser.OrganisationID,
 				MemberOf:       account.Name,
 			}
-			err = r.DB.NewInsert().Model(&groupMember).Scan(ctx)
+			err = r.DB.NewInsert().Model(&groupMember).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -539,7 +545,7 @@ func (r *mutationResolver) DeleteEmailGroup(ctx context.Context, id string) (*db
 	}
 
 	// Delete the group
-	_, err = r.DB.NewDelete().Model(&group).Where("id = ?", id).Exec(ctx)
+	_, err = r.DB.NewDelete().Model(&group).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -547,6 +553,9 @@ func (r *mutationResolver) DeleteEmailGroup(ctx context.Context, id string) (*db
 	// Delete the group members
 	var groupMembers []db.EmailGroupMember
 	_, err = r.DB.NewDelete().Model(&groupMembers).Where("member_of = ?", group.Name).Where("organisation_id = ?", currentUser.OrganisationID).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	return &group, nil
 }
