@@ -150,4 +150,9 @@ export const en = {
 
   title: "Title",
   add_group: "Add group",
+  edit_group: "Edit Group",
+  name_required: "Name is required",
+  description_required: "Description is required",
+  domain_required: "Domain is required",
+  name_spaces: "Name cannot contain spaces",
 };

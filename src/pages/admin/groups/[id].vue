@@ -1,7 +1,7 @@
 <template>
-  <div v-if="data?.group">
+  <div v-if="data?.emailAccount">
     <d-group-form
-      :email-account="(data.group as Group)"
+      :email-account="(data.emailAccount as EmailAccount)"
       :title="$t('edit_group')"
       deletable
       @delete="onDeleteGroup"
@@ -15,10 +15,10 @@ import DGroupForm from "./DGroupForm.vue";
 import { useQuery, useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { computed, reactive } from "vue";
-import { Group } from "@/gql/graphql";
 import { useRoute } from "vue-router";
 import { createNotification } from "@/composables/useToast";
 import router from "@/router";
+import { EmailAccount } from "@/gql/graphql";
 
 const route = useRoute();
 const id = computed(() => route.params.id as string);
@@ -26,12 +26,13 @@ const id = computed(() => route.params.id as string);
 const { data } = useQuery({
   query: graphql(`
     query adminGroupById($id: ID!) {
-      group(id: $id) {
+      emailAccount(id: $id) {
         id
         name
         description
-        domain
-        users
+        members {
+          name
+        }
       }
     }
   `),
@@ -40,11 +41,10 @@ const { data } = useQuery({
 
 const { executeMutation: deleteGroup } = useMutation(
   graphql(`
-    mutation deleteGroup($id: ID!) {
-      deleteGroup(id: $id) {
+    mutation deleteEmailGroup($id: ID!) {
+      deleteEmailGroup(id: $id) {
         id
         name
-        domain
       }
     }
   `)
@@ -52,19 +52,18 @@ const { executeMutation: deleteGroup } = useMutation(
 
 const { executeMutation: editGroup } = useMutation(
   graphql(`
-    mutation editGroup($input: UpdateGroupInput!) {
-      updateGroup(input: $input) {
+    mutation editEmailGroup($input: UpdateEmailGroupInput!) {
+      updateEmailGroup(input: $input) {
         id
         name
         description
-        domain
       }
     }
   `)
 );
 
 const onDeleteGroup = async () => {
-  const { error } = await deleteGroup({ id: data?.value?.group?.id as string });
+  const { error } = await deleteGroup({ id: data?.value?.emailAccount?.id as string });
 
   if (error) {
     createNotification({
@@ -82,14 +81,13 @@ const onDeleteGroup = async () => {
   router.push("/admin/groups");
 };
 
-const onEditGroup = async () => {
+const onEditGroup = async (input: { name: string; domain: string; members: string[] }) => {
   const { error } = await editGroup({
     input: {
-      id: data?.value?.group?.id as string,
-      name: data?.value?.group?.name as string,
-      description: data?.value?.group?.description as string,
-      domain: data?.value?.group?.domain as string,
-      users: data?.value?.group?.users as string[],
+      id: data?.value?.emailAccount?.id as string,
+      name: input.name,
+      description: data?.value?.emailAccount?.description as string,
+      members: input.members,
     },
   });
 

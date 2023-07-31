@@ -12,25 +12,25 @@
         <div class="flex items-center gap-6">
           <p class="w-[100px] text-sm font-semibold text-stone-600">{{ $t("name") }}</p>
           <div class="flex-1 space-y-1">
-            <d-input name="name" :placeholder="$t('name')" v-model="account.name" class="flex-1"></d-input>
+            <d-input name="name" :placeholder="$t('name')" v-model="name" class="flex-1"></d-input>
             <p class="text-sm text-red-500" v-if="errors.name">{{ errors.name }}</p>
           </div>
         </div>
         <div class="flex items-center gap-6">
-          <p class="w-[100px] text-sm font-semibold text-stone-600">Domain</p>
+          <p class="w-[100px] text-sm font-semibold text-stone-600">{{ $t("domain") }}</p>
           <div class="flex-1 space-y-1">
-            <d-select :options="domainOptions" :label="$t('domain')" v-model="account.domain" class="flex-1"></d-select>
+            <d-select :options="domainOptions" :label="$t('domain')" v-model="domain" class="flex-1"></d-select>
             <p class="text-sm text-red-500" v-if="errors.domain">{{ errors.domain }}</p>
           </div>
         </div>
         <div class="flex items-center gap-6">
-          <p class="w-[100px] text-sm font-semibold text-stone-600">Users</p>
+          <p class="w-[100px] text-sm font-semibold text-stone-600">{{ $t("user", 2) }}</p>
           <d-select
             v-model:search="userSearch"
             :options="userOptions"
             :label="$t('user', 2)"
             multiple
-            v-model="(account.users as string[])"
+            v-model="members"
             class="flex-1"
           ></d-select>
         </div>
@@ -48,15 +48,17 @@
 <script lang="ts" setup>
 import DSidebar from "@/components/d-sidebar/d-sidebar.vue";
 import DSelect from "@/components/d-select/d-select.vue";
-import { Group } from "@/gql/graphql";
 import { graphql } from "@/gql";
 import DInput from "@/components/d-input/d-input.vue";
 import DButton from "@/components/d-button/d-button.vue";
-import { computed, ref, toRef } from "vue";
+import { computed, ref, toRef, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useQuery } from "@urql/vue";
+import { EmailAccount } from "@/gql/graphql";
+import { useI18n } from "vue-i18n";
 
 const router = useRouter();
+const t = useI18n().t;
 
 const domainOptions = computed(
   () =>
@@ -67,7 +69,7 @@ const domainOptions = computed(
 );
 
 export interface Props {
-  emailAccount: Group;
+  emailAccount: EmailAccount;
   title: string;
   deletable?: boolean;
 }
@@ -76,6 +78,14 @@ const props = defineProps<Props>();
 const emit = defineEmits(["save", "delete"]);
 
 const account = toRef(props, "emailAccount");
+const name = ref(account.value.name.split("@")[0]);
+const domain = ref(account.value.name.split("@")[1]);
+const members = ref(
+  account.value.members?.map((member) => {
+    if (!member) return;
+    return member.name;
+  }) as string[]
+);
 
 const { data: domainData } = useQuery({
   query: graphql(`
@@ -116,6 +126,17 @@ const userOptions = computed(() => {
   }));
 });
 
+watch(
+  () => account.value.description,
+  (newValue, oldValue) => {
+    if (!newValue) return;
+    if (name.value != oldValue?.toLowerCase().replace(/\s/g, ".")) return;
+    const generated = newValue.toLowerCase().replace(/\s/g, ".");
+
+    name.value = generated;
+  }
+);
+
 const onCancel = () => {
   router.push({ name: "admin-groups" });
 };
@@ -138,18 +159,19 @@ const onSave = () => {
   };
 
   if (!account.value.description) {
-    errors.value.description = "Name is required";
+    errors.value.description = t("description_required");
   }
-  if (!account.value.name) {
-    errors.value.name = "Name is required";
+  if (!name.value) {
+    errors.value.name = t("name_required");
   }
-  if (!account.value.domain) {
-    errors.value.domain = "Domain is required";
+
+  if (!domain.value) {
+    errors.value.domain = t("domain_required");
   }
 
   // Check if name doesn't have spaces
-  if (account.value.name?.includes(" ")) {
-    errors.value.name = "Name cannot contain spaces";
+  if (name.value.includes(" ")) {
+    errors.value.name = t("name_spaces");
   }
 
   // Return if errors
@@ -157,6 +179,10 @@ const onSave = () => {
     return;
   }
 
-  emit("save");
+  emit("save", {
+    name: `${name.value}@${domain.value}`,
+    domain: domain.value,
+    members: members.value,
+  });
 };
 </script>

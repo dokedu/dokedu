@@ -21,7 +21,7 @@
       v-model:variables="pageVariables"
       :search="search"
       :columns="columns"
-      objectName="groups"
+      objectName="emailAccounts"
       :query="emailAccountsQuery"
       @row-click="goToEmailAccount"
     >
@@ -85,7 +85,7 @@ watchDebounced(
 
 const emailAccountsQuery = graphql(`
   query groups {
-    groups {
+    emailAccounts(filter: { type: GROUP }) {
       edges {
         id
         name

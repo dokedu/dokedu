@@ -17,7 +17,7 @@
                 <div class="select-all">{{ record.hostname }}</div>
                 <div class="select-all">{{ record.type }}</div>
                 <div class="select-all">{{ record.ttl }}</div>
-                <div class="select-all">{{ record.value }}</div>
+                <div class="select-all truncate">{{ record.value }}</div>
               </template>
             </div>
           </div>
@@ -71,9 +71,13 @@ const records = computed<DNSRecord[]>(() => {
       value: "v=spf1 ~all",
     },
     {
-      // dkim
       type: "TXT",
-      value: "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BA",
+      value:
+        'v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2iuKGW084CSLAV4eg+56nXs6rx/YCypG2ZRLJY8zhttyJm6UGoa2M78JBPyHmtO2fn8zQw7b1dVHjLYI79F+2GvjTF9K0RYIaUPXAvU1Hfh83OLbcvMwAQKgRPsYZSIF72Q6fHLSGs6Boqz9dFTPziQkoh1a86EnFbb4NoLt8CHYjqeW6mHP3ZaLZkwWsST1A" "HS133F4XMopYrZ/HGKFdpJg3LbmYGwuK6Yh0adRvVpFJLdB5GfcCoLGloo8UKw7tT1E2Nr6V5Hn3nuy5GniORAf5neXBEnHBM3rXv2JBUFrnAUKb7iAqaxJtm6BMT7MlXq76zSFR4JaRerzptPdrQIDAQAB',
+    },
+    {
+      type: "TXT",
+      value: "v=DMARC1; p=none; rua=mailto:postmaster@domain.com; ruf=mailto:postmaster@domain.com",
     },
   ] as DNSRecord[];
 });
