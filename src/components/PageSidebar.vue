@@ -87,8 +87,6 @@ import {
   PieChart,
   Users,
   Grip,
-  Star,
-  Clock,
   Folder,
   Wrench,
   Users2,

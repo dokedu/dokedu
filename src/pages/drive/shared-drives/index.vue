@@ -10,7 +10,7 @@
       <DTable
         v-model:variables="pageVariables"
         :columns="columns"
-        object-name="buckets"
+        objectName="buckets"
         :query="sharedDrivesQuery"
         defaultSort="createdAt"
       >
@@ -23,7 +23,7 @@
         <template #id-data="{ item }">
           <div>
             <div class="flex w-[80px] justify-end gap-1 pr-4">
-              <div class="group/icon w-fit rounded-lg p-1.5 hover:bg-blue-100" @click.stop="openDeleteFileDialog(item)">
+              <div class="group/icon w-fit rounded-lg p-1.5 hover:bg-blue-100" @click.stop="onClickMore(item)">
                 <MoreVertical class="stroke-colors-subtle group-hover/icon:stroke-blue-900" :size="16" />
               </div>
             </div>
@@ -44,6 +44,7 @@ import DButton from "@/components/d-button/d-button.vue";
 import { PageVariables } from "@/types/types";
 import { ref } from "vue";
 import { Plus, Folder, MoreVertical } from "lucide-vue-next";
+import { graphql } from "@/gql";
 
 function newSharedDrive() {
   alert("new shared drive");
@@ -66,6 +67,10 @@ const columns = [
   },
 ];
 
+function onClickMore(item: any) {
+  alert(item);
+}
+
 interface Variables extends PageVariables {}
 
 const pageVariables = ref<Variables[]>([
@@ -75,21 +80,21 @@ const pageVariables = ref<Variables[]>([
   },
 ]);
 
-const sharedDrivesQuery = `
-query buckets {
-  buckets(input: {shared: true}) {
-    edges {
-      id
-      name
-      shared
-      createdAt
-    }
-    totalCount
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
+const sharedDrivesQuery = graphql(`
+  query buckets {
+    buckets(input: { shared: true }) {
+      edges {
+        id
+        name
+        shared
+        createdAt
+      }
+      totalCount
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+      }
     }
   }
-}
-`;
+`);
 </script>
