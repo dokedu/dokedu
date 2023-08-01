@@ -1,6 +1,6 @@
 <template>
   <PageHeader class="flex min-h-0 select-none justify-between">
-    <div class="flex items-center gap-2 text-strong">
+    <div class="flex flex-1 items-center gap-2 overflow-hidden text-strong">
       <router-link
         :to="{ name: 'drive-my-drive' }"
         class="w-fit whitespace-nowrap rounded-lg px-1 py-0.5 hover:bg-stone-100"
