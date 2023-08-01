@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { reactive } from "vue";
 import { useRoute } from "vue-router";
-import DFilePreview from "./../DFilePreview.vue";
+import DFilePreview from "./../components/DFilePreview.vue";
 import { graphql } from "@/gql";
 import { useQuery } from "@urql/vue";
 import { File } from "@/gql/graphql";

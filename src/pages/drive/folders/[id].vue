@@ -1,26 +1,25 @@
 <template>
   <PageWrapper>
     <PageHeaderDrive @upload="upload" />
-    <PageContent>
+    <div class="h-[100%-14rem] max-h-[100%-14rem] overflow-auto">
       <DFileDropZone @upload="upload">
         <DFileList @click="clickFile" />
       </DFileDropZone>
-    </PageContent>
+    </div>
   </PageWrapper>
   <DFilePreview :file="previewFile" @close="previewFile = null" />
 </template>
 <script setup lang="ts">
 import PageWrapper from "@/components/PageWrapper.vue";
-import PageContent from "@/components/PageContent.vue";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { File } from "@/gql/graphql";
-import DFileList from "./../DFileList.vue";
-import DFileDropZone from "./../DFileDropZone.vue";
-import PageHeaderDrive from "./../PageHeaderDrive.vue";
-import DFilePreview from "./../DFilePreview.vue";
+import DFileList from "./../components/DFileList.vue";
+import DFileDropZone from "./../components/DFileDropZone.vue";
+import PageHeaderDrive from "./../components/PageHeaderDrive.vue";
+import DFilePreview from "./../components/DFilePreview.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -32,14 +31,16 @@ const folderId = computed(() => {
 const previewFile = ref<File | null>(null);
 
 // @ts-expect-error
-async function upload({ file, parentId = folderId.value }) {
-  console.log(parentId);
-  await uploadFile({
-    input: {
-      file: file,
-      parentId: parentId as string,
-    },
-  });
+async function upload({ files, parentId = folderId.value }) {
+  for (const file of files) {
+    await uploadFile({
+      input: {
+        file: file,
+        parentId: parentId as string,
+      },
+    });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
 }
 
 const { executeMutation: uploadFile } = useMutation(

@@ -4,7 +4,9 @@
       <div class="font-medium text-strong">Rename file</div>
     </template>
     <template #main>
-      <d-input v-if="file" v-model="file.name" name="name"></d-input>
+      <div class="min-w-[300px]">
+        <d-input v-if="file" v-model="file.name" name="name"></d-input>
+      </div>
     </template>
     <template #footer>
       <div class="flex justify-between">

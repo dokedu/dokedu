@@ -28,8 +28,9 @@ async function dropHandler(event: any) {
   if (event.dataTransfer) {
     if (event.dataTransfer.files.length > 0) {
       emit("upload", {
-        file: event.dataTransfer.files[0],
+        files: event.dataTransfer.files,
       });
+
       hasDragover.value = false;
     }
   }

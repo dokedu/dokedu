@@ -215,27 +215,27 @@ const apps = computed<App[]>(() => [
       {
         icon: HardDrive,
         name: "Shared Drives",
-        route: "admin-users",
+        route: "drive-shared-drives",
       },
       {
         icon: Users2,
         name: "Shared with me",
-        route: "admin-users",
+        route: "drive-shared-with-me",
       },
-      {
-        icon: Clock,
-        name: "Recent",
-        route: "admin-users",
-      },
-      {
-        icon: Star,
-        name: "Starred",
-        route: "admin-users",
-      },
+      // {
+      //   icon: Clock,
+      //   name: "Recent",
+      //   route: "admin-users",
+      // },
+      // {
+      //   icon: Star,
+      //   name: "Starred",
+      //   route: "admin-users",
+      // },
       {
         icon: Trash2,
         name: "Trash",
-        route: "admin-users",
+        route: "drive-trash",
       },
     ],
   },

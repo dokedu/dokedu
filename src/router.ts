@@ -211,6 +211,21 @@ const router = createRouter({
       component: () => import("./pages/drive/files/[id].vue"),
     },
     {
+      name: "drive-shared-with-me",
+      path: "/drive/shared-with-me",
+      component: () => import("./pages/drive/shared-with-me/index.vue"),
+    },
+    {
+      name: "drive-shared-drives",
+      path: "/drive/shared-drives",
+      component: () => import("./pages/drive/shared-drives/index.vue"),
+    },
+    {
+      name: "drive-trash",
+      path: "/drive/trash",
+      component: () => import("./pages/drive/trash/index.vue"),
+    },
+    {
       name: "record-tags",
       path: "/record/tags",
       component: () => import("./pages/record/tags/index.vue"),

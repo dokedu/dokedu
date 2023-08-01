@@ -46,7 +46,7 @@
         v-if="isFileOfType(file) === 'image' && url"
         :src="url"
         alt=""
-        class="block h-fit w-full bg-stone-900 object-contain"
+        class="mx-auto block h-fit max-h-full max-w-fit bg-stone-900 object-contain"
       />
       <canvas
         @click.stop
@@ -70,7 +70,7 @@
 </template>
 
 <script lang="ts" setup>
-import { File } from "../../gql/graphql";
+import { File } from "@/gql/graphql";
 import { ref, watch } from "vue";
 import { onKeyStroke } from "@vueuse/core";
 import useDownloadFile from "@/composables/useDownloadFile";

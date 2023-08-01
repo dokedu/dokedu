@@ -1,16 +1,24 @@
 <template>
-  <PageHeader class="flex select-none justify-between">
-    <div class="flex gap-2 text-strong">
-      <router-link :to="{ name: 'drive-my-drive' }">My Drive</router-link>
+  <PageHeader class="flex min-h-0 select-none justify-between">
+    <div class="flex items-center gap-2 text-strong">
+      <router-link :to="{ name: 'drive-my-drive' }" class="rounded-lg px-1 py-0.5 hover:bg-stone-100"
+        >My Drive</router-link
+      >
       <template v-if="!queryFolder && folder">
         <template v-for="parent in folder.file.parents" class="stroke-colors">
           <span>/</span>
-          <router-link :to="{ name: 'drive-my-drive-folders-folder', params: { id: parent.id } }">
+          <router-link
+            :to="{ name: 'drive-my-drive-folders-folder', params: { id: parent.id } }"
+            class="rounded-lg px-1 py-0.5 hover:bg-stone-100"
+          >
             {{ parent.name }}
           </router-link>
         </template>
         <span>/</span>
-        <router-link :to="{ name: 'drive-my-drive-folders-folder', params: { id: folder.file.id } }">
+        <router-link
+          :to="{ name: 'drive-my-drive-folders-folder', params: { id: folder.file.id } }"
+          class="rounded-lg px-1 py-0.5 hover:bg-stone-100"
+        >
           {{ folder?.file.name }}
         </router-link>
       </template>
@@ -26,14 +34,14 @@
 </template>
 
 <script lang="ts" setup>
-import PageHeader from "../../components/PageHeader.vue";
-import DButton from "../../components/d-button/d-button.vue";
+import PageHeader from "@/components/PageHeader.vue";
+import DButton from "@/components/d-button/d-button.vue";
 import { FolderPlus, Plus } from "lucide-vue-next";
-import DDialog from "../../components/d-dialog/d-dialog.vue";
+import DDialog from "@/components/d-dialog/d-dialog.vue";
 import { useFileDialog } from "@vueuse/core";
 import { computed, reactive, ref } from "vue";
 import { useMutation, useQuery } from "@urql/vue";
-import { graphql } from "../../gql";
+import { graphql } from "@/gql";
 import { useRoute } from "vue-router";
 
 const { open, reset, onChange } = useFileDialog();

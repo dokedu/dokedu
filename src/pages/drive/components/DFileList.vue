@@ -39,7 +39,7 @@
           <div class="group/icon w-fit rounded-lg p-1.5 hover:bg-blue-100" @click.stop="onRenameFile(item)">
             <Edit class="stroke-colors-subtle group-hover/icon:stroke-blue-900" :size="16" />
           </div>
-          <div class="group/icon w-fit rounded-lg p-1.5 hover:bg-blue-100" @click.stop="onDeleteFile(item)">
+          <div class="group/icon w-fit rounded-lg p-1.5 hover:bg-blue-100" @click.stop="openDeleteFileDialog(item)">
             <Trash class="stroke-colors-subtle group-hover/icon:stroke-blue-900" :size="16" />
           </div>
         </div>
@@ -59,12 +59,18 @@
   </d-table>
 
   <d-dialog-rename-file :open="showRenameDialog" v-model="renameDialogFile" @close="closeRenameDialog" />
+  <d-dialog-delete-file
+    :open="showDeleteDialog"
+    v-model="deleteDialogFile"
+    @close="closeDeleteDialog"
+    @delete="onDeleteFile"
+  />
 </template>
 
 <script lang="ts" setup>
 import { FileText, Download, Edit, FileImage, Folder } from "lucide-vue-next";
-import { File } from "../../gql/graphql";
-import { graphql } from "../../gql";
+import { File } from "@/gql/graphql";
+import { graphql } from "@/gql";
 import { formatDate } from "@vueuse/core";
 import DTable from "@/components/d-table/d-table.vue";
 import { PageVariables } from "@/types/types";
@@ -73,7 +79,8 @@ import useDownloadFile from "@/composables/useDownloadFile";
 import { Archive } from "lucide-vue-next";
 import { useRoute } from "vue-router";
 import { File as FileFile, Trash, FileVideo } from "lucide-vue-next";
-import DDialogRenameFile from "./folders/DDialogRenameFile.vue";
+import DDialogRenameFile from "./DDialogRenameFile.vue";
+import DDialogDeleteFile from "./DDialogDeleteFile.vue";
 import { useMutation } from "@urql/vue";
 
 const route = useRoute();
@@ -83,20 +90,26 @@ interface Variables extends PageVariables {}
 const parentId = computed(() => route.params.id);
 
 const showRenameDialog = ref(false);
-
 const renameDialogFile = ref<File | null>(null);
-
 function onRenameFile(file: File) {
   renameDialogFile.value = file;
   showRenameDialog.value = true;
 }
-
 function closeRenameDialog() {
   showRenameDialog.value = false;
 }
 
+const showDeleteDialog = ref(false);
+const deleteDialogFile = ref<File | null>(null);
+function closeDeleteDialog() {
+  showDeleteDialog.value = false;
+}
+function openDeleteFileDialog(file: File) {
+  deleteDialogFile.value = file;
+  showDeleteDialog.value = true;
+}
 async function onDeleteFile(file: File) {
-  await deleteFile({ id: file.id });
+  deleteFile({ id: file.id });
 }
 
 const { executeMutation: deleteFile } = useMutation(
