@@ -67,7 +67,7 @@ type FileConnection {
 }
 
 extend type Query {
-    buckets(input: BucketFilterInput): BucketConnection!
+    buckets(input: BucketFilterInput, limit: Int, offset: Int): BucketConnection!
     bucket(id: ID!): Bucket!
 
     file(id: ID!): File!

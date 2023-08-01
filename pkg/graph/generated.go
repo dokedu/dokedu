@@ -377,7 +377,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Bucket            func(childComplexity int, id string) int
-		Buckets           func(childComplexity int, input *model.BucketFilterInput) int
+		Buckets           func(childComplexity int, input *model.BucketFilterInput, limit *int, offset *int) int
 		Chat              func(childComplexity int, id string) int
 		Chats             func(childComplexity int, limit *int, offset *int) int
 		Competence        func(childComplexity int, id string) int
@@ -652,7 +652,7 @@ type OrganisationResolver interface {
 type QueryResolver interface {
 	Chat(ctx context.Context, id string) (*db.Chat, error)
 	Chats(ctx context.Context, limit *int, offset *int) (*model.ChatConnection, error)
-	Buckets(ctx context.Context, input *model.BucketFilterInput) (*model.BucketConnection, error)
+	Buckets(ctx context.Context, input *model.BucketFilterInput, limit *int, offset *int) (*model.BucketConnection, error)
 	Bucket(ctx context.Context, id string) (*db.Bucket, error)
 	File(ctx context.Context, id string) (*db.File, error)
 	Files(ctx context.Context, input *model.FilesFilterInput, limit *int, offset *int) (*model.FileConnection, error)
@@ -2459,7 +2459,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Buckets(childComplexity, args["input"].(*model.BucketFilterInput)), true
+		return e.complexity.Query.Buckets(childComplexity, args["input"].(*model.BucketFilterInput), args["limit"].(*int), args["offset"].(*int)), true
 
 	case "Query.chat":
 		if e.complexity.Query.Chat == nil {
@@ -4388,6 +4388,24 @@ func (ec *executionContext) field_Query_buckets_args(ctx context.Context, rawArg
 		}
 	}
 	args["input"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["limit"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["limit"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg2
 	return args, nil
 }
 
@@ -16230,7 +16248,7 @@ func (ec *executionContext) _Query_buckets(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Buckets(rctx, fc.Args["input"].(*model.BucketFilterInput))
+		return ec.resolvers.Query().Buckets(rctx, fc.Args["input"].(*model.BucketFilterInput), fc.Args["limit"].(*int), fc.Args["offset"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

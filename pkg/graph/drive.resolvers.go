@@ -396,10 +396,23 @@ func (r *mutationResolver) RemoveFileShare(ctx context.Context, input string) (*
 }
 
 // Buckets is the resolver for the buckets field.
-func (r *queryResolver) Buckets(ctx context.Context, input *model.BucketFilterInput) (*model.BucketConnection, error) {
+func (r *queryResolver) Buckets(ctx context.Context, input *model.BucketFilterInput, limit *int, offset *int) (*model.BucketConnection, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, nil
+	}
+
+	pageLimit := 100
+	if limit != nil {
+		if *limit > 1000 {
+			return nil, fmt.Errorf("limit cannot be greater than 1000")
+		}
+		pageLimit = *limit
+	}
+
+	pageOffset := 0
+	if offset != nil {
+		pageOffset = *offset
 	}
 
 	var buckets []*db.Bucket
@@ -416,9 +429,32 @@ func (r *queryResolver) Buckets(ctx context.Context, input *model.BucketFilterIn
 		return nil, err
 	}
 
+	pageInfo := &model.PageInfo{}
+
+	if count < pageOffset+pageLimit {
+		pageInfo.HasNextPage = false
+	} else {
+		pageInfo.HasNextPage = true
+	}
+
+	if pageOffset > 0 {
+		pageInfo.HasPreviousPage = true
+	} else {
+		pageInfo.HasPreviousPage = false
+	}
+
+	pageInfo.CurrentPage = pageOffset / pageLimit
+
+	if pageOffset > 0 {
+		pageInfo.HasPreviousPage = true
+	} else {
+		pageInfo.HasPreviousPage = false
+	}
+
 	return &model.BucketConnection{
 		Edges:      buckets,
 		TotalCount: count,
+		PageInfo:   pageInfo,
 	}, nil
 }
 
