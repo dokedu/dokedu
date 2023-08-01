@@ -1,15 +1,18 @@
 <template>
   <PageHeader class="flex min-h-0 select-none justify-between">
     <div class="flex items-center gap-2 text-strong">
-      <router-link :to="{ name: 'drive-my-drive' }" class="rounded-lg px-1 py-0.5 hover:bg-stone-100"
-        >My Drive</router-link
+      <router-link
+        :to="{ name: 'drive-my-drive' }"
+        class="w-fit whitespace-nowrap rounded-lg px-1 py-0.5 hover:bg-stone-100"
       >
+        My Drive
+      </router-link>
       <template v-if="!queryFolder && folder">
         <template v-for="parent in folder.file.parents" class="stroke-colors">
           <span>/</span>
           <router-link
             :to="{ name: 'drive-my-drive-folders-folder', params: { id: parent.id } }"
-            class="rounded-lg px-1 py-0.5 hover:bg-stone-100"
+            class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 hover:bg-stone-100"
           >
             {{ parent.name }}
           </router-link>
@@ -17,7 +20,7 @@
         <span>/</span>
         <router-link
           :to="{ name: 'drive-my-drive-folders-folder', params: { id: folder.file.id } }"
-          class="rounded-lg px-1 py-0.5 hover:bg-stone-100"
+          class="whitespace-nowrap rounded-lg px-1 py-0.5 hover:bg-stone-100"
         >
           {{ folder?.file.name }}
         </router-link>
