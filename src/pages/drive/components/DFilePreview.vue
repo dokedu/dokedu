@@ -46,7 +46,7 @@
         v-if="isFileOfType(file) === 'image' && url"
         :src="url"
         alt=""
-        class="mx-auto block h-fit max-h-full max-w-fit bg-stone-900 object-contain"
+        class="mx-auto block h-fit max-h-full w-fit max-w-full bg-stone-900 object-contain"
       />
       <canvas
         @click.stop
