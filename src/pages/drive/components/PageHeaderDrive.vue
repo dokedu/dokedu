@@ -1,5 +1,5 @@
 <template>
-  <PageHeader class="flex min-h-0 select-none justify-between">
+  <PageHeader class="flex min-h-0 select-none justify-between gap-4">
     <div class="flex flex-1 items-center gap-2 overflow-hidden text-strong">
       <router-link
         :to="{ name: 'drive-my-drive' }"
