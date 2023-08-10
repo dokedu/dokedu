@@ -33,7 +33,7 @@
           <div class="text-sm">{{ link.name }}</div>
         </router-link>
       </div>
-      <div ref="appswitcher" v-show="visibleAppSwitcher" class="absolute w-full p-1">
+      <div ref="appSwitcher" v-show="visibleAppSwitcher" class="absolute w-full p-1">
         <div class="flex w-full flex-col gap-1 rounded-lg bg-white p-1 shadow-md">
           <div
             v-for="_app in enabledApps"
@@ -79,36 +79,35 @@
   </header>
 </template>
 <script setup lang="ts">
-import { computed, FunctionalComponent, ref } from "vue";
+import { computed, FunctionalComponent, ref, watch } from "vue";
 import {
   CopyCheck,
+  Folder,
+  Globe,
   Grid,
+  Grip,
+  HardDrive,
+  Landmark,
+  LogOut,
+  Mails,
   Pen,
   PieChart,
-  Users,
-  Grip,
-  Folder,
-  Wrench,
-  Users2,
+  School,
+  Settings,
+  Tag,
   Trash2,
-  HardDrive,
-  LogOut,
-  Globe,
+  Users,
+  Users2,
+  UserSquare,
+  Wrench,
 } from "lucide-vue-next";
-import { Tag } from "lucide-vue-next";
 import { onClickOutside, useStorage } from "@vueuse/core";
 import { useRoute, useRouter } from "vue-router/auto";
-import { UserSquare } from "lucide-vue-next";
-import { useMutation } from "@urql/vue";
+import { useMutation, useQuery } from "@urql/vue";
 import { graphql } from "@/gql";
-import { watch } from "vue";
 import i18n from "@/i18n";
 import { useI18n } from "vue-i18n";
 import { UserLanguage } from "@/gql/graphql";
-import { Landmark } from "lucide-vue-next";
-import { Settings } from "lucide-vue-next";
-import { School } from "lucide-vue-next";
-import { Mails } from "lucide-vue-next";
 import type { RouteNamedMap } from "vue-router/auto/routes";
 
 const { t } = useI18n();
@@ -125,16 +124,30 @@ interface AppLink {
   route: keyof RouteNamedMap;
 }
 
+type Role = "owner" | "admin" | "teacher" | "student";
+
 interface App {
   id: string;
+  allowedRoles: Role[];
   icon: FunctionalComponent;
   name: string;
   links: AppLink[];
 }
 
-const appswitcher = ref();
+const { data: userData } = useQuery({
+  query: graphql(`
+    query me {
+      me {
+        id
+        role
+      }
+    }
+  `),
+});
 
-onClickOutside(appswitcher, () => {
+const appSwitcher = ref();
+
+onClickOutside(appSwitcher, () => {
   visibleAppSwitcher.value = false;
 });
 
@@ -143,19 +156,21 @@ function isLinkActive(link: AppLink) {
   return name.startsWith(link.route);
 }
 
-const enabledAppList = useStorage("enabled_apps", []);
+const enabledAppList = useStorage<string[]>("enabled_apps", []);
 
 const app = computed(() => apps.value.find((el) => el.id === activeApp.value) || null);
 
 const enabledApps = computed(() => {
-  // @ts-expect-error
-  return apps.value.filter((el: { id: string }) => enabledAppList.value.includes(el.id));
+  const enabled = apps.value.filter((el: { id: string }) => enabledAppList.value.includes(el.id));
+  const role = userData.value?.me?.role;
+  return enabled.filter((el: { allowedRoles: Role[] }) => el.allowedRoles.includes(role as Role));
 });
 
 const apps = computed<App[]>(() => [
   {
     id: "record",
     icon: Pen,
+    allowedRoles: ["owner", "admin", "teacher"],
     name: "Dokumentation",
     links: [
       {
@@ -203,6 +218,7 @@ const apps = computed<App[]>(() => [
   {
     id: "drive",
     icon: Folder,
+    allowedRoles: ["owner", "admin", "teacher", "student"],
     name: "Drive",
     links: [
       {
@@ -240,6 +256,7 @@ const apps = computed<App[]>(() => [
   {
     id: "admin",
     icon: Wrench,
+    allowedRoles: ["owner", "admin"],
     name: "Admin",
     links: [
       {
@@ -275,18 +292,14 @@ const apps = computed<App[]>(() => [
   {
     id: "my_school",
     icon: School,
-    name: "My school",
+    allowedRoles: ["owner", "admin", "teacher"],
+    name: "Schulverwaltung",
     links: [
       {
         // icon: "👥",
         icon: UserSquare,
         name: t("student", 2),
         route: "/my_school/students",
-      },
-      {
-        icon: CopyCheck,
-        name: t("competence", 2),
-        route: "/record/competences/",
       },
     ],
   },
