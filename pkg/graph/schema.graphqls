@@ -232,6 +232,7 @@ type Mutation
 extend type Query {
     users(limit: Int, offset: Int, filter: UserFilterInput, search: String): UserConnection!
     user(id: ID!): User!
+    me: User!
 
     competence(id: ID!): Competence!
     competences(limit: Int, offset: Int, filter: CompetenceFilterInput, search: String, sort: CompetenceSort): CompetenceConnection!
