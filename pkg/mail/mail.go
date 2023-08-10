@@ -56,3 +56,17 @@ func (m Mailer) SendPasswordReset(to string, name string, token string) error {
 
 	return m.Send([]string{to}, "Password Reset", template)
 }
+
+func (m Mailer) SendInvite(to string, name string, organisationName string, token string) error {
+	frontendUrl := os.Getenv("FRONTEND_URL")
+
+	link := fmt.Sprintf("%s/invite#token=%s", frontendUrl, token)
+
+	template, err := InviteMailTemplate(name, link, organisationName)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return m.Send([]string{to}, "Welcome to dokedu", template)
+}

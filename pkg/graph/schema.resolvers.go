@@ -275,16 +275,11 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 		return nil, err
 	}
 
-	// check if the email is in the allowed domains
-	if isStringInArray(input.Email, organisation.AllowedDomains) {
-		return nil, errors.New("email is not in the allowed domains (allowed domains: " + strings.Join(organisation.AllowedDomains, ", ") + ")")
-	}
+	//// check if the email is in the allowed domains
+	//if isStringInArray(input.Email, organisation.AllowedDomains) {
+	//	return nil, errors.New("email is not in the allowed domains (allowed domains: " + strings.Join(organisation.AllowedDomains, ", ") + ")")
+	//}
 
-	// check if the email is already in the database
-	//count, err := r.DB.middleware.GetUserByEmail(ctx, db.middleware.GetUserByEmailParams{
-	//	OrganisationID: currentUser.OrganisationID,
-	//	Email:          input.Email,
-	//})
 	var count int
 	count, err = r.DB.NewSelect().Model(&db.User{}).Where("organisation_id = ?", currentUser.OrganisationID).Where("email = ?", input.Email).Count(ctx)
 	if err != nil {
@@ -304,7 +299,19 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 	}
 
 	// insert the user into the database
-	err = r.DB.NewInsert().Model(&user).Scan(ctx)
+	err = r.DB.NewInsert().Model(&user).Returning("*").Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Send an email to the user
+	token := nanoid.Must(32)
+	_, err = r.DB.NewUpdate().Model(&user).Set("recovery_token = ?", token).Set("recovery_sent_at = now()").Where("id = ?", user.ID).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.Mailer.SendInvite(input.Email, user.FirstName, organisation.Name, token)
 	if err != nil {
 		return nil, err
 	}
@@ -390,10 +397,10 @@ func (r *mutationResolver) InviteUser(ctx context.Context, input model.CreateUse
 		return nil, errors.New("email is required")
 	}
 
-	// check if the email is in the allowed domains
-	if isStringInArray(input.Email, organisation.AllowedDomains) {
-		return nil, errors.New("email is not in the allowed domains (allowed domains: " + strings.Join(organisation.AllowedDomains, ", ") + ")")
-	}
+	//// check if the email is in the allowed domains
+	//if isStringInArray(input.Email, organisation.AllowedDomains) {
+	//	return nil, errors.New("email is not in the allowed domains (allowed domains: " + strings.Join(organisation.AllowedDomains, ", ") + ")")
+	//}
 
 	// check if the email is already in the database
 	//count, err := r.DB.middleware.GetUserByEmail(ctx, db.middleware.GetUserByEmailParams{
