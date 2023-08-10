@@ -5,15 +5,15 @@
 <script lang="ts" setup>
 import { onClickOutside, onKeyStroke } from "@vueuse/core";
 import { ref } from "vue";
-import { useRouter } from "vue-router";
-import DProjectForm from "./DProjectForm.vue";
+import { useRouter } from "vue-router/auto";
+import DProjectForm from "@/components/DProjectForm.vue";
 import { Event } from "@/gql/graphql";
 
 const router = useRouter();
 const sheet = ref<HTMLElement | null>(null);
 
 async function cancel() {
-  await router.push({ name: "record-projects" });
+  await router.push({ name: "/record/projects/" });
 }
 
 // @ts-expect-error

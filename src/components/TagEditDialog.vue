@@ -56,18 +56,18 @@
 </template>
 
 <script setup lang="ts">
-import DDialog from "../../../components/d-dialog/d-dialog.vue";
-import DButton from "../../../components/d-button/d-button.vue";
-import DIconButton from "../../../components/d-icon-button/d-icon-button.vue";
+import DDialog from "./d-dialog/d-dialog.vue";
+import DButton from "./d-button/d-button.vue";
+import DIconButton from "./d-icon-button/d-icon-button.vue";
 import { X } from "lucide-vue-next";
 import { toRef, ref } from "vue";
-import DInput from "../../../components/d-input/d-input.vue";
-import DContextMenu from "../../../components/d-context-menu/d-context-menu.vue";
-import { ContextMenuAlignment } from "../../../components/d-context-menu/d-context-menu.vue";
-import DTag from "../../../components/d-tag/d-tag.vue";
+import DInput from "./d-input/d-input.vue";
+import DContextMenu from "./d-context-menu/d-context-menu.vue";
+import { ContextMenuAlignment } from "./d-context-menu/d-context-menu.vue";
+import DTag from "./d-tag/d-tag.vue";
 import { useMutation } from "@urql/vue";
-import { graphql } from "../../../gql";
-import { Tag } from "../../../gql/graphql";
+import { graphql } from "../gql";
+import { Tag } from "../gql/graphql";
 
 const colors = ["red", "orange", "yellow", "green", "blue", "indigo", "purple", "pink", "gray"];
 

@@ -12,7 +12,7 @@
           class="h-8 rounded-md border border-stone-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-stone-200 focus:shadow-sm focus:ring-0"
         />
       </div>
-      <RouterLink :to="{ name: 'admin-users-new' }">
+      <RouterLink :to="{ name: '/admin/users/new' }">
         <DButton type="primary" size="md" :icon-left="Plus">{{ $t("add_user") }}</DButton>
       </RouterLink>
     </PageHeader>
@@ -44,7 +44,7 @@ import { ref } from "vue";
 import { UserOrderBy } from "@/gql/graphql";
 import { graphql } from "@/gql";
 import DTable from "@/components/d-table/d-table.vue";
-import { useRouter } from "vue-router";
+import { useRouter } from "vue-router/auto";
 import { formatDate, watchDebounced } from "@vueuse/core";
 import type { PageVariables } from "@/types/types";
 
@@ -120,6 +120,6 @@ const usersQuery = graphql(`
 `);
 
 const goToUser = <Type extends { id: string }>(row: Type) => {
-  router.push({ name: "admin-users-user", params: { id: row.id } });
+  router.push({ name: "/admin/users/[id]", params: { id: row.id } });
 };
 </script>

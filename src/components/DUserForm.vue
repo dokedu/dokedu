@@ -36,7 +36,7 @@
 <script lang="ts" setup>
 import DSidebar from "@/components/d-sidebar/d-sidebar.vue";
 import { User } from "@/gql/graphql";
-import { useRouter } from "vue-router";
+import { useRouter } from "vue-router/auto";
 import DInput from "@/components/d-input/d-input.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { toRef } from "vue";
@@ -53,7 +53,7 @@ const emit = defineEmits(["save", "delete"]);
 const user = toRef(props, "user");
 
 const onCancel = () => {
-  router.push({ name: "admin-users" });
+  router.push({ name: "/admin/users" });
 };
 
 const onDelete = () => {

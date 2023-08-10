@@ -44,11 +44,11 @@
 
 <script lang="ts" setup>
 import { ref, toRef } from "vue";
-import DContextMenu, { ContextMenuAlignment } from "../../../components/d-context-menu/d-context-menu.vue";
-import { Entry, Tag } from "../../../gql/graphql";
+import DContextMenu, { ContextMenuAlignment } from "../d-context-menu/d-context-menu.vue";
+import { Entry, Tag } from "../../gql/graphql";
 import { useQuery } from "@urql/vue";
-import DTag from "../../../components/d-tag/d-tag.vue";
-import tagQuery from "../../../queries/tags";
+import DTag from "../d-tag/d-tag.vue";
+import tagQuery from "../../queries/tags";
 
 const props = defineProps<{
   entry: Partial<Entry>;

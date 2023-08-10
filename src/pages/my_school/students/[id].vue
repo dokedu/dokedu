@@ -11,16 +11,16 @@
 </template>
 
 <script lang="ts" setup>
-import DStudentForm from "./DStudentForm.vue";
+import DStudentForm from "@/components/DStudentForm.vue";
 import { useQuery, useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { computed, reactive, ref } from "vue";
 import { User } from "@/gql/graphql";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router/auto";
 import { createNotification } from "@/composables/useToast";
-import router from "@/router";
 
-const route = useRoute();
+const route = useRoute<"/my_school/students/[id]">();
+const router = useRouter();
 const id = computed(() => route.params.id as string);
 
 const { data } = useQuery({
@@ -125,9 +125,9 @@ const onDeleteStudent = async () => {
 
   await archiveStudent({ id: id.value });
 
-  await router.push({ name: "admin-students" });
+  await router.push({ name: "/my_school/students" });
 
-  await createNotification({
+  createNotification({
     title: "Student updated",
     description: `${student?.firstName} ${student?.lastName} was updated`,
   });

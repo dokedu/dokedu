@@ -47,11 +47,19 @@
   </div>
 </template>
 
+<route lang="json">
+{
+  "meta": {
+    "layout": "auth"
+  }
+}
+</route>
+
 <script lang="ts" setup>
 import { ref } from "vue";
-import signInMutation from "../queries/signIn.mutation.ts";
+import signInMutation from "../queries/signIn.mutation";
 import { useMutation } from "@urql/vue";
-import { useRouter } from "vue-router";
+import { useRouter } from "vue-router/auto";
 import i18n from "@/i18n";
 
 const router = useRouter();
@@ -78,7 +86,19 @@ async function onSubmit() {
 
     // Set the i18n locale to the user's language
     i18n.global.locale.value = language;
-    await router.push({ name: "record-entries" });
+
+    // enabled_apps
+
+    if (enabled_apps.includes("record")) {
+      await router.push({ name: "/record/entries/" });
+      return;
+    } else if (enabled_apps.includes("drive")) {
+      await router.push({ name: "/drive/my-drive/" });
+      return;
+    } else if (enabled_apps.includes("admin")) {
+      await router.push({ name: "/admin/general/" });
+      return;
+    }
   }
 }
 </script>

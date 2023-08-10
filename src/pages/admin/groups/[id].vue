@@ -11,16 +11,16 @@
 </template>
 
 <script lang="ts" setup>
-import DGroupForm from "./DGroupForm.vue";
+import DGroupForm from "@/components/DGroupForm.vue";
 import { useQuery, useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { computed, reactive } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute } from "vue-router/auto";
 import { createNotification } from "@/composables/useToast";
 import router from "@/router";
 import { EmailAccount } from "@/gql/graphql";
 
-const route = useRoute();
+const route = useRoute<"/admin/groups/[id]">();
 const id = computed(() => route.params.id as string);
 
 const { data } = useQuery({

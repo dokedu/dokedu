@@ -77,17 +77,20 @@ import { PageVariables } from "@/types/types";
 import { computed, ref } from "vue";
 import useDownloadFile from "@/composables/useDownloadFile";
 import { Archive } from "lucide-vue-next";
-import { useRoute } from "vue-router";
+import { useRoute } from "vue-router/auto";
 import { File as FileFile, Trash, FileVideo } from "lucide-vue-next";
 import DDialogRenameFile from "./DDialogRenameFile.vue";
 import DDialogDeleteFile from "./DDialogDeleteFile.vue";
 import { useMutation } from "@urql/vue";
 
-const route = useRoute();
+const route = useRoute<any>();
 
 interface Variables extends PageVariables {}
 
-const parentId = computed(() => route.params.id);
+const parentId = computed(() => {
+  if (!route.params.id) return null;
+  return route.params.id;
+});
 
 const showRenameDialog = ref(false);
 const renameDialogFile = ref<File | null>(null);

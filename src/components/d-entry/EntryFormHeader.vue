@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-14 items-center justify-between border-b border-stone-100 px-8 py-3">
     <div class="flex items-center">
-      <router-link :to="{ name: 'record-entries' }">
+      <router-link :to="{ name: '/record/entries/' }">
         <d-icon-button size="md" :icon="X"> </d-icon-button>
       </router-link>
     </div>
@@ -16,8 +16,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-import DButton from "../../../components/d-button/d-button.vue";
-import DIconButton from "../../../components/d-icon-button/d-icon-button.vue";
+import DButton from "../d-button/d-button.vue";
+import DIconButton from "../d-icon-button/d-icon-button.vue";
 import { Save, X, Trash2 } from "lucide-vue-next";
 
 defineProps<{ mode: "new" | "edit" }>();

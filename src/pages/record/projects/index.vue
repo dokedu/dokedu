@@ -20,10 +20,10 @@
           @click="toggleFilters"
           >{{ $t("filter") }}</DButton
         >
-        <router-link :to="{ name: 'record-projects-export' }">
+        <router-link :to="{ name: '/record/projects/export' }">
           <d-button type="transparent" :icon-left="Share">{{ $t("export") }}</d-button>
         </router-link>
-        <router-link :to="{ name: 'record-projects-new' }">
+        <router-link :to="{ name: '/record/projects/new' }">
           <d-button type="primary" :icon-left="Plus"> {{ $t("new") }} </d-button>
         </router-link>
       </div>
@@ -71,38 +71,30 @@
       </template>
     </DTable>
   </PageWrapper>
-
-  <div
-    ref="sheet"
-    v-if="$route.params.id || $route.name === 'record-projects-new'"
-    class="absolute right-0 top-0 h-screen w-full max-w-xl overflow-scroll bg-white shadow-md shadow-stone-300"
-  >
-    <router-view />
-  </div>
 </template>
 <script setup lang="ts">
-import PageHeader from "../../../components/PageHeader.vue";
-import PageWrapper from "../../../components/PageWrapper.vue";
+import PageHeader from "@/components/PageHeader.vue";
+import PageWrapper from "@/components/PageWrapper.vue";
 import { formatDate, onClickOutside, onKeyStroke } from "@vueuse/core";
-import DButton from "../../../components/d-button/d-button.vue";
+import DButton from "@/components/d-button/d-button.vue";
 import { Plus } from "lucide-vue-next";
 import { Share } from "lucide-vue-next";
 import { ref, computed, watch } from "vue";
-import { graphql } from "../../../gql";
+import { graphql } from "@/gql";
 import { ListFilter } from "lucide-vue-next";
 import DTable from "@/components/d-table/d-table.vue";
-import { useRouter } from "vue-router";
-import { PageVariables } from "@/types/types";
-import { EventOrderBy } from "@/gql/graphql";
+import { useRouter } from "vue-router/auto";
+import { PageVariables } from "@/types/types.ts";
+import { EventOrderBy } from "@/gql/graphql.ts";
 
 const sheet = ref<HTMLElement | null>(null);
 
 onClickOutside(sheet, async () => {
-  await router.push({ name: "record-projects" });
+  await router.push({ name: "/record/projects/" });
 });
 
 onKeyStroke("Escape", async () => {
-  await router.push({ name: "record-projects" });
+  await router.push({ name: "/record/projects/" });
 });
 
 const search = ref("");
@@ -167,7 +159,8 @@ const pageVariables = ref<Variables[]>([
 ]);
 
 const onRowClick = (row: Record<string, string>) => {
-  router.push({ name: "record-projects-project-inline", params: { id: row.id } });
+  // router.push({ name: "record-projects-project-inline", params: { id: row.id } });
+  router.push({ name: "/record/projects/[id]", params: { id: row.id } });
 };
 
 watch([search, startTimestamp, endsTimestamp], () => {

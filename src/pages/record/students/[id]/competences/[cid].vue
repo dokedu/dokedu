@@ -1,16 +1,21 @@
 <template>
   <div class="flex min-h-full flex-col">
     <div class="mb-4 flex h-fit gap-2 text-sm text-subtle">
-      <router-link :to="{ name: 'record-students-student-competences' }">{{ $t("subject", 2) }}</router-link>
+      <router-link :to="{ name: '/record/students/[id]/competences/' }">{{ $t("subject", 2) }}</router-link>
       <template v-for="parent in data?.competence.parents">
         <span>{{ ">" }}</span>
-        <router-link :to="{ name: 'record-students-student-competences-competence', params: { subject: parent?.id } }">
+        <router-link
+          :to="{ name: '/record/students/[id]/competences/[cid]', params: { id: route.params.id, cid: parent?.id } }"
+        >
           {{ parent.name }}
         </router-link>
       </template>
       <span>{{ ">" }}</span>
       <router-link
-        :to="{ name: 'record-students-student-competences-competence', params: { subject: data?.competence?.id } }"
+        :to="{
+          name: '/record/students/[id]/competences/[cid]',
+          params: { id: route.params.id, cid: data?.competence?.id as string },
+        }"
       >
         {{ data?.competence.name }}
       </router-link>
@@ -20,7 +25,10 @@
         <component
           v-for="competence in (data?.competence?.competences as Competence[])"
           :is="competence?.type !== 'competence' ? 'router-link' : 'div'"
-          :to="{ name: 'record-students-student-competences-competence', params: { subject: competence?.id } }"
+          :to="{
+            name: '/record/students/[id]/competences/[cid]',
+            params: { id: route.params.id, cid: competence?.id },
+          }"
         >
           <DCompetence v-if="competence" :competence="competence">
             <DCompetenceLevel
@@ -29,12 +37,10 @@
               :editable="competence.type == 'subject' ? false : true"
               @update="(val) => createUserCompetence({ level: val.level, id: competence.id })"
               class="z-10"
-            ></DCompetenceLevel>
+            />
             <template #footer>
               <div v-if="competence.userCompetences.length > 0">
-                <DCompetenceEntries
-                  :competences="(competence.userCompetences as UserCompetence[])"
-                ></DCompetenceEntries>
+                <DCompetenceEntries :competences="(competence.userCompetences as UserCompetence[])" />
               </div>
             </template>
           </DCompetence>
@@ -47,15 +53,15 @@
 <script lang="ts" setup>
 import { useQuery, useMutation } from "@urql/vue";
 import { graphql } from "../../../../../gql";
-import { useRoute } from "vue-router";
+import { useRoute } from "vue-router/auto";
 import { computed, reactive } from "vue";
 import DCompetence from "@/components/d-competence/d-competence.vue";
 import DCompetenceLevel from "@/components/d-competence-level.vue";
 import DCompetenceEntries from "@/components/d-competence-entries.vue";
 import { Competence, UserCompetence } from "@/gql/graphql";
 
-const route = computed(() => useRoute());
-const competenceId = computed(() => route.value.params.subject as string);
+const route = computed(() => useRoute("/record/students/[id]/competences/[cid]"));
+const competenceId = computed(() => route.value.params.cid as string);
 const id = computed(() => route.value.params.id as string);
 
 const getLevel = (competence: Competence) => {

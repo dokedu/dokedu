@@ -52,7 +52,7 @@ import { graphql } from "@/gql";
 import DInput from "@/components/d-input/d-input.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { computed, ref, toRef, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter } from "vue-router/auto";
 import { useQuery } from "@urql/vue";
 import { EmailAccount } from "@/gql/graphql";
 import { useI18n } from "vue-i18n";
@@ -138,7 +138,7 @@ watch(
 );
 
 const onCancel = () => {
-  router.push({ name: "admin-groups" });
+  router.push({ name: "/admin/groups" });
 };
 
 const onDelete = () => {

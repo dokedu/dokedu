@@ -4,7 +4,7 @@
       <div class="font-medium text-stone-950">{{ $t("report", 2) }}</div>
       <div class="flex gap-2">
         <d-button v-if="false" type="transparent" :icon-left="Newspaper">{{ $t("prepare_annual_reports") }}</d-button>
-        <router-link :to="{ name: 'record-reports-new' }">
+        <router-link :to="{ name: '/record/reports/new' }">
           <d-button type="primary" :icon-left="Plus">{{ $t("create") }}</d-button>
         </router-link>
       </div>
@@ -66,7 +66,7 @@ import { Plus, Loader2 } from "lucide-vue-next";
 import { graphql } from "@/gql";
 import { formatDate } from "@vueuse/core";
 import { Report } from "@/gql/graphql";
-import DReportStatus from "./DReportStatus.vue";
+import DReportStatus from "@/components/DReportStatus.vue";
 import { ref } from "vue";
 import DTable from "@/components/d-table/d-table.vue";
 import type { PageVariables } from "@/types/types";

@@ -3,13 +3,13 @@
 </template>
 
 <script lang="ts" setup>
-import DStudentForm from "./DStudentForm.vue";
+import DStudentForm from "@/components/DStudentForm.vue";
 import { User } from "@/gql/graphql";
 import { reactive } from "vue";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { createNotification } from "@/composables/useToast";
-import { useRouter } from "vue-router";
+import { useRouter } from "vue-router/auto";
 
 const router = useRouter();
 
@@ -73,9 +73,9 @@ const onCreateStudent = async () => {
     },
   });
 
-  await router.push({ name: "admin-students" });
+  await router.push({ name: "/my_school/students" });
 
-  await createNotification({
+  createNotification({
     title: "Student created",
     description: `${student.firstName} ${student.lastName} was created`,
   });

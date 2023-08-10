@@ -2,7 +2,7 @@
   <PageHeader class="flex min-h-0 select-none justify-between gap-4">
     <div class="flex flex-1 items-center gap-2 overflow-hidden text-strong">
       <router-link
-        :to="{ name: 'drive-my-drive' }"
+        :to="{ name: '/drive/my-drive/' }"
         class="w-fit whitespace-nowrap rounded-lg px-1 py-0.5 hover:bg-stone-100"
       >
         My Drive
@@ -11,7 +11,7 @@
         <template v-for="parent in folder.file.parents" class="stroke-colors">
           <span>/</span>
           <router-link
-            :to="{ name: 'drive-my-drive-folders-folder', params: { id: parent.id } }"
+            :to="{ name: '/drive/my-drive/folders/[id]', params: { id: parent.id } }"
             class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 hover:bg-stone-100"
           >
             {{ parent.name }}
@@ -19,7 +19,7 @@
         </template>
         <span>/</span>
         <router-link
-          :to="{ name: 'drive-my-drive-folders-folder', params: { id: folder.file.id } }"
+          :to="{ name: '/drive/my-drive/folders/[id]', params: { id: folder.file.id } }"
           class="whitespace-nowrap rounded-lg px-1 py-0.5 hover:bg-stone-100"
         >
           {{ folder?.file.name }}
@@ -45,12 +45,12 @@ import { useFileDialog } from "@vueuse/core";
 import { computed, reactive, ref } from "vue";
 import { useMutation, useQuery } from "@urql/vue";
 import { graphql } from "@/gql";
-import { useRoute } from "vue-router";
+import { useRoute } from "vue-router/auto";
 
 const { open, reset, onChange } = useFileDialog();
 const newFolderDialog = ref(false);
 
-const route = useRoute();
+const route = useRoute("/drive/my-drive/folders/[id]");
 
 const folderId = computed<string>(() => route.params.id as string);
 const emit = defineEmits(["upload"]);

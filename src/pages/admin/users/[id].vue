@@ -11,16 +11,16 @@
 </template>
 
 <script lang="ts" setup>
-import DUserForm from "./DUserForm.vue";
+import DUserForm from "@/components/DUserForm.vue";
 import { useQuery, useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { computed, reactive, ref } from "vue";
 import { User } from "@/gql/graphql";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router/auto";
 import { createNotification } from "@/composables/useToast";
-import router from "@/router";
 
-const route = useRoute();
+const route = useRoute<"/admin/users/[id]">();
+const router = useRouter();
 const id = computed(() => route.params.id as string);
 
 const { data } = useQuery({
@@ -105,7 +105,7 @@ const onDeleteUser = async () => {
 
   await archiveUser({ id: id.value });
 
-  await router.push({ name: "admin-users" });
+  await router.push({ name: "/admin/users" });
 
   createNotification({
     title: "User updated",

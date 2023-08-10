@@ -5,8 +5,8 @@ import router from "./router";
 
 const url = import.meta.env.VITE_API_URL as string;
 const getToken = () => {
-  return localStorage.getItem("authorization")
-}
+  return localStorage.getItem("authorization");
+};
 
 function makeClient() {
   return createClient({
@@ -14,7 +14,7 @@ function makeClient() {
     requestPolicy: "cache-and-network",
     exchanges: [
       cacheExchange,
-      authExchange(async utils => {
+      authExchange(async (utils) => {
         return {
           addAuthToOperation(operation) {
             const token = getToken();
@@ -41,18 +41,18 @@ function makeClient() {
             return false;
           },
           didAuthError(error, _operation) {
-            return error.graphQLErrors.some(e => e.extensions?.code === 'UNAUTHENTICATED');
+            return error.graphQLErrors.some((e) => e.extensions?.code === "UNAUTHENTICATED");
           },
           async refreshAuth() {
-            localStorage.removeItem('authorization')
-            localStorage.removeItem('enabled_apps')
-            await router.push({ name: 'login' })
-          }
-        }
+            localStorage.removeItem("authorization");
+            localStorage.removeItem("enabled_apps");
+            await router.push({ name: "/login" });
+          },
+        };
       }),
       fetchExchange,
     ],
-  })
+  });
 }
 
 export default makeClient;

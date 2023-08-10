@@ -17,7 +17,7 @@
         </span>
         {{ $t("in") }}
         <RouterLink
-          :to="{ name: 'record-entries-entry', params: { id: competence.entry.id } }"
+          :to="{ name: '/record/entries/[id]', params: { id: competence.entry.id } }"
           class="font-medium text-strong"
           >{{ $t("entry") }}</RouterLink
         >

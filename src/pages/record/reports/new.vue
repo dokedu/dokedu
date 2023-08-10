@@ -32,16 +32,16 @@ import PageWrapper from "@/components/PageWrapper.vue";
 import PageContent from "@/components/PageContent.vue";
 import { Save } from "lucide-vue-next";
 import dButton from "@/components/d-button/d-button.vue";
-import StudentList from "./ReportStudentList.vue";
-import ReportTypeList from "./ReportTypeList.vue";
-import ReportTagList from "./ReportTagList.vue";
+import StudentList from "@/components/ReportStudentList.vue";
+import ReportTypeList from "@/components/ReportTypeList.vue";
+import ReportTagList from "@/components/ReportTagList.vue";
 import { User, Tag } from "@/gql/graphql";
 import { ref } from "vue";
 import dInput from "@/components/d-input/d-input.vue";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
-import { ReportType } from "./ReportTypeList.vue";
-import { useRouter } from "vue-router";
+import { ReportType } from "@/components/ReportTypeList.vue";
+import { useRouter } from "vue-router/auto";
 
 const router = useRouter();
 
@@ -73,6 +73,6 @@ async function createReport() {
 
   // @ts-expect-error
   await createReportMutation({ input });
-  router.push({ name: "record-reports" });
+  router.push({ name: "/record/reports/" });
 }
 </script>

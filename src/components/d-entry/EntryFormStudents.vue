@@ -73,8 +73,8 @@
 import { useQuery } from "@urql/vue";
 import { Plus, X, Check } from "lucide-vue-next";
 import { reactive, ref, toRef } from "vue";
-import { graphql } from "../../../gql";
-import { Entry, User } from "../../../gql/graphql";
+import { graphql } from "@/gql";
+import { Entry, User } from "@/gql/graphql";
 
 const dialogStudents = ref();
 const search = ref();

@@ -12,7 +12,7 @@
               @click="toggleFilters"
               >{{ $t("filter") }}</DButton
             >
-            <router-link :to="{ name: 'record-entries-new' }">
+            <router-link :to="{ name: '/record/entries/new' }">
               <DButton type="primary" size="md" :icon-left="Plus">{{ $t("new") }}</DButton>
             </router-link>
           </div>
@@ -101,10 +101,10 @@
   </PageWrapper>
 </template>
 <script setup lang="ts">
-import PageHeader from "../../../components/PageHeader.vue";
-import PageWrapper from "../../../components/PageWrapper.vue";
+import PageHeader from "@/components/PageHeader.vue";
+import PageWrapper from "@/components/PageWrapper.vue";
 import { useQuery } from "@urql/vue";
-import DButton from "../../../components/d-button/d-button.vue";
+import DButton from "@/components/d-button/d-button.vue";
 import { Plus } from "lucide-vue-next";
 import { ListFilter } from "lucide-vue-next";
 import { ref, computed, reactive } from "vue";
@@ -115,7 +115,7 @@ import { watch } from "vue";
 import { LayoutGrid } from "lucide-vue-next";
 import { EntrySortBy } from "@/gql/graphql";
 import DTable from "@/components/d-table/d-table.vue";
-import { useRouter } from "vue-router";
+import { useRouter } from "vue-router/auto";
 import { PageVariables } from "@/types/types";
 import DSelect from "@/components/d-select/d-select.vue";
 
@@ -159,11 +159,11 @@ const columns = [
 ];
 
 const goToEntry = <Type extends { id: string }>(row: Type) => {
-  router.push({ name: "record-entries-entry", params: { id: row.id } });
+  router.push({ name: "/record/entries/[id]", params: { id: row.id } });
 };
 
 const goToProject = (id: string) => {
-  router.push({ name: "record-projects-project", params: { id } });
+  router.push({ name: "/record/projects/[id]", params: { id } });
 };
 
 const pageVariables = ref<Variables[]>([

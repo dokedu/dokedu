@@ -33,6 +33,14 @@
   </div>
 </template>
 
+<route lang="json">
+{
+  "meta": {
+    "layout": "auth"
+  }
+}
+</route>
+
 <script lang="ts" setup>
 import { ref } from "vue";
 import { useMutation } from "@urql/vue";

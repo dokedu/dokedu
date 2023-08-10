@@ -19,7 +19,7 @@
       <div class="flex flex-col gap-1 p-3">
         <router-link
           v-for="link in app?.links"
-          :to="{ name: link.route }"
+          :to="link.route"
           class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
           active-class=""
           :class="{ '!bg-stone-200 text-stone-900': isLinkActive(link) }"
@@ -97,7 +97,7 @@ import {
 } from "lucide-vue-next";
 import { Tag } from "lucide-vue-next";
 import { onClickOutside, useStorage } from "@vueuse/core";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router/auto";
 import { UserSquare } from "lucide-vue-next";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
@@ -109,6 +109,7 @@ import { Landmark } from "lucide-vue-next";
 import { Settings } from "lucide-vue-next";
 import { School } from "lucide-vue-next";
 import { Mails } from "lucide-vue-next";
+import type { RouteNamedMap } from "vue-router/auto/routes";
 
 const { t } = useI18n();
 
@@ -121,7 +122,7 @@ const router = useRouter();
 interface AppLink {
   icon: FunctionalComponent;
   name: string;
-  route: string;
+  route: keyof RouteNamedMap;
 }
 
 interface App {
@@ -139,7 +140,6 @@ onClickOutside(appswitcher, () => {
 
 function isLinkActive(link: AppLink) {
   const name = route.name || "";
-  // @ts-expect-error
   return name.startsWith(link.route);
 }
 
@@ -162,13 +162,13 @@ const apps = computed<App[]>(() => [
         // icon: "file-check-02",
         icon: Pen,
         name: t("entry", 2),
-        route: "record-entries",
+        route: "/record/entries/",
       },
       {
         // icon: "users-01",
         icon: Users,
         name: t("student", 2),
-        route: "record-students",
+        route: "/record/students/",
       },
       // {
       //   // icon: "flag-04",
@@ -180,23 +180,23 @@ const apps = computed<App[]>(() => [
         // icon: "grid-01",
         icon: Grid,
         name: t("project", 2),
-        route: "record-projects",
+        route: "/record/projects/",
       },
       {
         // icon: "check-done-01",
         icon: CopyCheck,
         name: t("competence", 2),
-        route: "record-competences",
+        route: "/record/competences/",
       },
       {
         icon: PieChart,
         name: t("report", 2),
-        route: "record-reports",
+        route: "/record/reports/",
       },
       {
         icon: Tag,
         name: t("tag", 2),
-        route: "record-tags",
+        route: "/record/tags/",
       },
     ],
   },
@@ -208,17 +208,17 @@ const apps = computed<App[]>(() => [
       {
         icon: HardDrive,
         name: "My Drive",
-        route: "drive-my-drive",
+        route: "/drive/my-drive/",
       },
       {
         icon: HardDrive,
         name: "Shared Drives",
-        route: "drive-shared-drives",
+        route: "/drive/shared-drives/",
       },
       {
         icon: Users2,
         name: "Shared with me",
-        route: "drive-shared-with-me",
+        route: "/drive/shared-with-me/",
       },
       // {
       //   icon: Clock,
@@ -233,7 +233,7 @@ const apps = computed<App[]>(() => [
       {
         icon: Trash2,
         name: "Trash",
-        route: "drive-trash",
+        route: "/drive/trash/",
       },
     ],
   },
@@ -246,29 +246,29 @@ const apps = computed<App[]>(() => [
         // icon: "👥",
         icon: Settings,
         name: t("general"),
-        route: "admin-general",
+        route: "/admin/general/",
       },
       {
         // icon: "👥",
         icon: Users,
         name: t("user", 2),
-        route: "admin-users",
+        route: "/admin/users",
       },
       {
         // icon: "👥",
         icon: Landmark,
         name: t("billing"),
-        route: "admin-billing",
+        route: "/admin/billing/",
       },
       {
         icon: Mails,
         name: t("group", 2),
-        route: "admin-groups",
+        route: "/admin/groups",
       },
       {
         icon: Globe,
         name: t("domain", 2),
-        route: "admin-domains",
+        route: "/admin/domains",
       },
     ],
   },
@@ -281,12 +281,12 @@ const apps = computed<App[]>(() => [
         // icon: "👥",
         icon: UserSquare,
         name: t("student", 2),
-        route: "admin-students",
+        route: "/my_school/students",
       },
       {
         icon: CopyCheck,
         name: t("competence", 2),
-        route: "record-competences",
+        route: "/record/competences/",
       },
     ],
   },

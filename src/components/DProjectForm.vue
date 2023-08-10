@@ -1,25 +1,21 @@
 <template>
-  <div class="flex h-screen select-none flex-col text-sm @container">
+  <div class="flex h-screen w-full select-none flex-col text-sm @container">
     <div
       class="flex h-[56px] min-h-0 w-full items-center justify-between border-b border-stone-100 px-8 py-2 text-sm text-stone-700"
     >
       <div class="flex items-center gap-2">
-        <router-link
-          v-if="isFullPage && $route.name !== 'record-projects-new'"
-          :to="{ name: 'record-projects' }"
-          class="select-none text-sm font-medium text-strong"
-        >
+        <router-link to="/record/projects/" class="select-none text-sm font-medium text-strong">
           {{ $t("project", 2) }}
         </router-link>
-        <ChevronRight v-if="isFullPage" :size="16" />
+        <ChevronRight :size="16" />
         <router-link
-          v-if="$route.name !== 'record-projects-new'"
-          :to="{ name: 'record-projects-project' }"
+          v-if="$route.name !== '/record/projects/new'"
+          :to="{ name: '/record/projects/[id]' }"
           class="select-none text-sm font-medium text-strong"
         >
           {{ $t("project", 1) }}
         </router-link>
-        <div v-if="$route.name === 'record-projects-new'" class="select-none text-sm font-medium text-strong">
+        <div v-if="$route.name === '/record/projects/new'" class="select-none text-sm font-medium text-strong">
           {{ $t("project", 1) }}
         </div>
       </div>
@@ -73,7 +69,7 @@
           <d-button v-if="project.id" type="primary" :icon-left="Save" @click="update">{{ $t("save") }}</d-button>
         </div>
       </div>
-      <div v-if="$route.name !== 'record-projects-new'" class="flex h-full select-none flex-col gap-2 overflow-scroll">
+      <div v-if="$route.name !== '/record/projects/new'" class="flex h-full select-none flex-col gap-2 overflow-scroll">
         <header class="flex min-h-0 items-baseline justify-between">
           <div class="text-sm text-subtle">{{ $t("competence", 2) }}</div>
           <div v-if="isFullPage">
@@ -122,14 +118,14 @@ import DCompetence from "@/components/d-competence/d-competence.vue";
 import { Trash, X } from "lucide-vue-next";
 import DInput from "@/components/d-input/d-input.vue";
 import DCompetenceSearch from "@/components/d-competence-search/d-competence-search.vue";
-import { useRoute } from "vue-router";
+import { useRoute } from "vue-router/auto";
 
 const route = useRoute();
 const editCompetences = ref(false);
 const edit = ref();
 
 const isFullPage = computed(() => {
-  return route.name === "record-projects-project";
+  return route.name === "/record/projects/[id]";
 });
 
 onClickOutside(edit, () => {

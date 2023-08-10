@@ -7,10 +7,10 @@
         <div class="flex w-full flex-col px-6 py-4">
           <div class="border-b border-stone-100 pb-4">
             <div class="flex items-center gap-1 text-strong">
-              <router-link :to="{ name: 'record-students' }" class="mr-2">
+              <router-link :to="{ name: '/record/students/' }" class="mr-2">
                 <DIconButton :icon="X" size="md"></DIconButton>
               </router-link>
-              <router-link :to="{ name: 'record-students' }" class="cursor-pointer rounded text-sm font-medium">
+              <router-link :to="{ name: '/record/students/' }" class="cursor-pointer rounded text-sm font-medium">
                 {{ $t("student", 2) }}
               </router-link>
               <ChevronRight :size="18" class="stroke-stone-500" />
@@ -19,7 +19,7 @@
           </div>
           <div class="flex flex-col overflow-scroll pt-4">
             <div class="flex h-fit gap-1">
-              <RouterLink :to="{ name: 'record-students-student-competences' }">
+              <RouterLink :to="{ name: '/record/students/[id]/competences/' }">
                 <DButton
                   :type="
                     $route.matched.some(({ path }) => path.includes('/record/students/:id/competences'))
@@ -31,7 +31,7 @@
                   >{{ $t("competence", 2) }}</DButton
                 >
               </RouterLink>
-              <RouterLink :to="{ name: 'record-students-student-entries' }">
+              <RouterLink :to="{ name: '/record/students/[id]/entries' }">
                 <DButton
                   :type="
                     $route.matched.some(({ path }) => path.includes('/record/students/:id/entries'))
@@ -109,15 +109,20 @@
 <script setup lang="ts">
 import PageWrapper from "../../../components/PageWrapper.vue";
 import { useQuery } from "@urql/vue";
-import { useRoute } from "vue-router";
+import { useRoute } from "vue-router/auto";
 import { ChevronRight, X } from "lucide-vue-next";
-import { graphql } from "../../../gql";
+import { graphql } from "@/gql";
 import { computed, reactive, ref } from "vue";
 import DButton from "../../../components/d-button/d-button.vue";
 import DIconButton from "@/components/d-icon-button/d-icon-button.vue";
 import { CopyCheck, FileCheck } from "lucide-vue-next";
+import { definePage } from "vue-router/auto";
 
-const route = useRoute();
+definePage({
+  redirect: () => ({ name: "/record/students/[id]/competences/" }),
+});
+
+const route = useRoute<"/record/students/[id]">();
 
 const id = computed<string>(() => route.params.id as string);
 

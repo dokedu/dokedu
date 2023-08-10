@@ -7,26 +7,26 @@
 <script lang="ts" setup>
 import { onKeyStroke } from "@vueuse/core";
 import { reactive } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import DProjectForm from "./DProjectForm.vue";
+import { useRoute, useRouter } from "vue-router/auto";
+import DProjectForm from "@/components/DProjectForm.vue";
 import { useQuery } from "@urql/vue";
-import { graphql } from "../../../gql";
+import { graphql } from "@/gql";
 import { Event } from "@/gql/graphql";
 
-const route = useRoute();
+const route = useRoute<"/record/projects/[id]">();
 const router = useRouter();
 
 async function cancel() {
-  await router.push({ name: "record-projects" });
+  await router.push({ name: "/record/projects/" });
 }
 
 async function save() {
-  if (route.name === "record-projects-project") return;
-  await router.push({ name: "record-projects" });
+  if (route.name === "/record/projects/[id]") return;
+  await router.push({ name: "/record/projects/" });
 }
 
 onKeyStroke("Escape", async () => {
-  if (route.name === "record-projects-project") return;
+  if (route.name === "/record/projects/[id]") return;
   await cancel();
 });
 

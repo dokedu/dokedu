@@ -5,14 +5,21 @@ import { urqlClient } from "@/main";
 function forceDownload(url: string, fileName: string) {
   const xhr = new XMLHttpRequest();
 
+  // progress
+  xhr.addEventListener("progress", (e) => {
+    if (e.lengthComputable) {
+      const percentComplete = e.loaded / e.total;
+      console.info(percentComplete);
+    }
+  })
 
   xhr.open("GET", url, true);
   xhr.responseType = "blob";
   xhr.onload = function () {
     const urlCreator = window.URL || window.webkitURL;
-    const imageUrl = urlCreator.createObjectURL(this.response);
+    const fileUrl = urlCreator.createObjectURL(this.response);
     const tag = document.createElement("a");
-    tag.href = imageUrl;
+    tag.href = fileUrl;
     tag.download = fileName;
     document.body.appendChild(tag);
     tag.click();

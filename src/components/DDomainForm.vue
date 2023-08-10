@@ -39,7 +39,7 @@ import { Domain } from "@/gql/graphql";
 import DInput from "@/components/d-input/d-input.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { computed, toRef } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter } from "vue-router/auto";
 
 const router = useRouter();
 
@@ -83,7 +83,7 @@ const records = computed<DNSRecord[]>(() => {
 });
 
 const onCancel = () => {
-  router.push({ name: "admin-domains" });
+  router.push({ name: "/admin/domains" });
 };
 
 const onDelete = () => {

@@ -2,7 +2,7 @@
   <PageWrapper>
     <PageHeader class="justify-between">
       <div class="flex items-center gap-4">
-        <div class="font-medium text-stone-950">{{ $t("domain", 2) }}</div>
+        <div class="font-medium text-stone-950">{{ $t("group", 2) }}</div>
         <input
           v-if="false"
           v-model="search"
@@ -13,17 +13,17 @@
           class="h-8 rounded-md border border-stone-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-stone-200 focus:shadow-sm focus:ring-0"
         />
       </div>
-      <RouterLink :to="{ name: 'admin-domains-new' }">
-        <DButton type="primary" size="md" :icon-left="Plus">{{ $t("add_domain") }}</DButton>
+      <RouterLink :to="{ name: '/admin/groups/new' }">
+        <DButton type="primary" size="md" :icon-left="Plus">{{ $t("add_group") }}</DButton>
       </RouterLink>
     </PageHeader>
     <DTable
       v-model:variables="pageVariables"
       :search="search"
       :columns="columns"
-      objectName="domains"
-      :query="domainsQuery"
-      @row-click="goToDomain"
+      objectName="emailAccounts"
+      :query="emailAccountsQuery"
+      @row-click="goToEmailAccount"
     >
     </DTable>
   </PageWrapper>
@@ -37,7 +37,7 @@ import { Plus } from "lucide-vue-next";
 import { ref } from "vue";
 import { graphql } from "@/gql";
 import DTable from "@/components/d-table/d-table.vue";
-import { useRouter } from "vue-router";
+import { useRouter } from "vue-router/auto";
 import { watchDebounced } from "@vueuse/core";
 import type { PageVariables } from "@/types/types";
 
@@ -49,12 +49,16 @@ const columns = [
     label: "name",
     key: "name",
   },
+  {
+    label: "description",
+    key: "description",
+  },
 ];
 
 const pageVariables = ref<PageVariables[]>([
   {
     search: "",
-    // order: DomainOrderBy.LastNameAsc,
+    // order: EmailAccountOrderBy.LastNameAsc,
     limit: 50,
     offset: 0,
     nextPage: undefined,
@@ -79,14 +83,15 @@ watchDebounced(
   { debounce: 250, maxWait: 500 }
 );
 
-const domainsQuery = graphql(`
-  query domains {
-    domains {
+const emailAccountsQuery = graphql(`
+  query groups {
+    emailAccounts(filter: { type: GROUP }) {
       edges {
         id
         name
-        createdAt
+        description
       }
+      totalCount
       pageInfo {
         hasNextPage
         hasPreviousPage
@@ -95,7 +100,7 @@ const domainsQuery = graphql(`
   }
 `);
 
-const goToDomain = <Type extends { id: string }>(row: Type) => {
-  router.push({ name: "admin-domains-domain", params: { id: row.id } });
+const goToEmailAccount = <Type extends { id: string }>(row: Type) => {
+  router.push({ name: "/admin/groups/[id]", params: { id: row.id } });
 };
 </script>

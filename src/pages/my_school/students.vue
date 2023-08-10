@@ -12,7 +12,7 @@
           class="h-8 rounded-md border border-stone-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-stone-200 focus:shadow-sm focus:ring-0"
         />
       </div>
-      <RouterLink :to="{ name: 'admin-students-new' }">
+      <RouterLink :to="{ name: '/my_school/students/new' }">
         <DButton type="primary" size="md" :icon-left="Plus">{{ $t("add_student") }}</DButton>
       </RouterLink>
     </PageHeader>
@@ -41,14 +41,14 @@
 </template>
 <script setup lang="ts">
 import DButton from "@/components/d-button/d-button.vue";
-import PageHeader from "../../../components/PageHeader.vue";
-import PageWrapper from "../../../components/PageWrapper.vue";
+import PageHeader from "@/components/PageHeader.vue";
+import PageWrapper from "@/components/PageWrapper.vue";
 import { Plus } from "lucide-vue-next";
 import { ref } from "vue";
 import { UserOrderBy } from "@/gql/graphql";
 import { graphql } from "@/gql";
 import DTable from "@/components/d-table/d-table.vue";
-import { useRouter } from "vue-router";
+import { useRouter } from "vue-router/auto";
 import { formatDate, watchDebounced } from "@vueuse/core";
 import type { PageVariables } from "@/types/types";
 
@@ -132,7 +132,7 @@ const studentsQuery = graphql(`
 `);
 
 const goToStudent = <Type extends { id: string }>(row: Type) => {
-  router.push({ name: "admin-students-student", params: { id: row.id } });
+  router.push({ name: "/my_school/students/[id]", params: { id: row.id } });
 };
 </script>
 ```

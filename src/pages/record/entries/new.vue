@@ -4,10 +4,10 @@
   </PageWrapper>
 </template>
 <script setup lang="ts">
-import PageWrapper from "../../../components/PageWrapper.vue";
+import PageWrapper from "@/components/PageWrapper.vue";
 import { ref } from "vue";
-import EntryForm from "./EntryForm.vue";
-import { useRouter } from "vue-router";
+import EntryForm from "@/components/d-entry/EntryForm.vue";
+import { useRouter } from "vue-router/auto";
 
 const router = useRouter();
 
@@ -23,6 +23,6 @@ function today() {
 }
 
 function saved(entry: { id: string }) {
-  router.push({ name: "record-entries-entry", params: { id: entry.id } });
+  router.push({ name: "/record/entries/[id]", params: { id: entry.id } });
 }
 </script>

@@ -5,13 +5,13 @@
 </template>
 <script setup lang="ts">
 import { reactive } from "vue";
-import { useRoute } from "vue-router";
-import DFilePreview from "./../components/DFilePreview.vue";
+import { useRoute } from "vue-router/auto";
+import DFilePreview from "@/components/drive/DFilePreview.vue";
 import { graphql } from "@/gql";
 import { useQuery } from "@urql/vue";
 import { File } from "@/gql/graphql";
 
-const route = useRoute();
+const route = useRoute<"/drive/files/[id]">();
 
 const { data } = useQuery({
   query: graphql(`
