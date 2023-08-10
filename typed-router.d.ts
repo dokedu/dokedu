@@ -58,6 +58,7 @@ declare module 'vue-router/auto/routes' {
     '/drive/shared-with-me/': RouteRecordInfo<'/drive/shared-with-me/', '/drive/shared-with-me', Record<never, never>, Record<never, never>>,
     '/drive/trash/': RouteRecordInfo<'/drive/trash/', '/drive/trash', Record<never, never>, Record<never, never>>,
     '/forgot-password': RouteRecordInfo<'/forgot-password', '/forgot-password', Record<never, never>, Record<never, never>>,
+    '/invite': RouteRecordInfo<'/invite', '/invite', Record<never, never>, Record<never, never>>,
     '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
     '/my_school/parents': RouteRecordInfo<'/my_school/parents', '/my_school/parents', Record<never, never>, Record<never, never>>,
     '/my_school/students': RouteRecordInfo<'/my_school/students', '/my_school/students', Record<never, never>, Record<never, never>>,
