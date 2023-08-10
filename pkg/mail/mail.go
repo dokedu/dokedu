@@ -68,5 +68,5 @@ func (m Mailer) SendInvite(to string, name string, organisationName string, toke
 		return err
 	}
 
-	return m.Send([]string{to}, "Welcome to dokedu", template)
+	return m.Send([]string{to}, "Welcome to Dokedu", template)
 }
