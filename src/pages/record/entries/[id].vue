@@ -4,18 +4,18 @@
   </PageWrapper>
 </template>
 <script setup lang="ts">
-import PageWrapper from "../../../components/PageWrapper.vue";
-import EntryForm from "./EntryForm.vue";
-import { useRoute, useRouter } from "vue-router";
+import PageWrapper from "@/components/PageWrapper.vue";
+import EntryForm from "@/components/d-entry/EntryForm.vue";
+import { useRoute, useRouter } from "vue-router/auto";
 import { useQuery } from "@urql/vue";
-import { graphql } from "../../../gql";
+import { graphql } from "@/gql";
 import { Entry } from "@/gql/graphql";
 
+const route = useRoute<"/record/entries/[id]">();
 const router = useRouter();
-const route = useRoute();
 
 async function archived() {
-  await router.push({ name: "record-entries" });
+  await router.push({ name: "/record/entries/" });
 }
 
 function saved() {}

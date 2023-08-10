@@ -6,7 +6,7 @@
     <div class="flex flex-col gap-2">
       <RouterLink
         v-for="competence in data?.competences?.edges"
-        :to="{ name: 'record-students-student-competences-competence', params: { subject: competence?.id } }"
+        :to="{ name: '/record/students/[id]/competences/[cid]', params: { id: route.params.id, cid: competence?.id as string } }"
       >
         <DCompetence v-if="competence" :competence="(competence as Competence)"> </DCompetence>
       </RouterLink>
@@ -19,6 +19,9 @@ import { useQuery } from "@urql/vue";
 import { graphql } from "@/gql";
 import DCompetence from "@/components/d-competence/d-competence.vue";
 import { Competence } from "@/gql/graphql";
+import { useRoute } from "vue-router/auto";
+
+const route = useRoute("/record/students/[id]/competences/");
 
 const { data } = useQuery({
   query: graphql(`

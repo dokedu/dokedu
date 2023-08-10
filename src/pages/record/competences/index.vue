@@ -50,11 +50,11 @@ import PageWrapper from "@/components/PageWrapper.vue";
 import { graphql } from "@/gql";
 import { ref } from "vue";
 import { Edit2, Folder } from "lucide-vue-next";
-import DCompetenceEditDialog from "./DCompetenceEditDialog.vue";
+import DCompetenceEditDialog from "@/components/DCompetenceEditDialog.vue";
 import { Competence } from "@/gql/graphql";
 import DTag from "@/components/d-tag/d-tag.vue";
 import DTable from "@/components/d-table/d-table.vue";
-import { useRouter } from "vue-router";
+import { useRouter } from "vue-router/auto";
 import { watchDebounced } from "@vueuse/core";
 import type { PageVariables } from "@/types/types";
 
@@ -146,7 +146,7 @@ const competencesQuery = graphql(`
 
 const goToCompetence = <Type extends { id: string }>(row: Type) => {
   router.push({
-    name: "record-competences-competence",
+    name: "/record/competences/[id]",
     params: {
       id: row.id,
     },

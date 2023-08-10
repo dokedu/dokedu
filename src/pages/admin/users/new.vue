@@ -3,13 +3,13 @@
 </template>
 
 <script lang="ts" setup>
-import DUserForm from "./DUserForm.vue";
+import DUserForm from "@/components/DUserForm.vue";
 import { User, UserRole } from "@/gql/graphql";
 import { reactive } from "vue";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { createNotification } from "@/composables/useToast";
-import { useRouter } from "vue-router";
+import { useRouter } from "vue-router/auto";
 import { CreateUserInput } from "@/gql/graphql";
 
 const router = useRouter();
@@ -60,7 +60,7 @@ const onCreateUser = async () => {
     },
   });
 
-  await router.push({ name: "admin-users" });
+  await router.push({ name: "/admin/users" });
 
   createNotification({
     title: "User created",

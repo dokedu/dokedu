@@ -3,7 +3,7 @@
     <PageHeader class="flex justify-between">
       <div class="flex w-full items-center justify-between gap-4">
         <div class="font-medium text-stone-950">
-          <router-link :to="{ name: 'record-projects' }">{{ $t("project", 2) }}</router-link>
+          <router-link :to="{ name: '/record/projects' }">{{ $t("project", 2) }}</router-link>
           / {{ $t("export") }}
         </div>
 
@@ -132,11 +132,11 @@
   </PageWrapper>
 </template>
 <script setup lang="ts">
-import PageHeader from "../../../components/PageHeader.vue";
-import PageWrapper from "../../../components/PageWrapper.vue";
-import PageContent from "../../../components/PageContent.vue";
+import PageHeader from "@/components/PageHeader.vue";
+import PageWrapper from "@/components/PageWrapper.vue";
+import PageContent from "@/components/PageContent.vue";
 import { useQuery } from "@urql/vue";
-import { graphql } from "../../../gql";
+import { graphql } from "@/gql";
 import { computed, reactive, ref } from "vue";
 import dButton from "../../../components/d-button/d-button.vue";
 import { Printer } from "lucide-vue-next";

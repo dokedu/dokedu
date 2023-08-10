@@ -3,7 +3,7 @@
     <PageHeader class="flex select-none justify-between">
       <div class="flex items-center gap-4">
         <div class="font-medium text-stone-950">
-          <router-link :to="{ name: 'record-competences' }"> {{ $t("competence", 2) }}</router-link>
+          <router-link :to="{ name: '/record/competences/' }"> {{ $t("competence", 2) }}</router-link>
         </div>
         <input
           v-model="search"
@@ -19,13 +19,13 @@
       v-if="breadcrumbs.length > 0"
       class="flex select-none flex-wrap items-center gap-1 px-7 py-2 text-sm text-stone-700"
     >
-      <router-link class="rounded-lg px-1.5 py-0.5 hover:bg-stone-100" :to="{ name: 'record-competences' }">
+      <router-link class="rounded-lg px-1.5 py-0.5 hover:bg-stone-100" :to="{ name: '/record/competences/' }">
         Fächer
       </router-link>
       <template v-for="parent in breadcrumbs" :key="parent.id">
         <span>/</span>
         <router-link
-          :to="{ name: 'record-competences-competence', params: { id: parent.id } }"
+          :to="{ name: '/record/competences/[id]', params: { id: parent.id } }"
           class="rounded-lg px-1.5 py-0.5 hover:bg-stone-100"
         >
           {{ parent.name }}
@@ -59,7 +59,7 @@ import PageHeader from "@/components/PageHeader.vue";
 import PageWrapper from "@/components/PageWrapper.vue";
 import { graphql } from "@/gql";
 import { computed, reactive, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router/auto";
 import DTable from "@/components/d-table/d-table.vue";
 import { watchDebounced } from "@vueuse/core";
 import { PageVariables } from "@/types/types";
@@ -67,9 +67,10 @@ import { Competence } from "@/gql/graphql";
 import { Folder } from "lucide-vue-next";
 import { useQuery } from "@urql/vue";
 
-const search = ref("");
-const route = useRoute();
+const route = useRoute<"/record/competences/[id]">();
 const router = useRouter();
+
+const search = ref("");
 
 const id = computed(() => route.params.id as string);
 
@@ -139,7 +140,7 @@ function grades(competence: Competence) {
 
 function goToCompetence<Type extends { id: string; type: string }>(row: Type) {
   if (row.type === "competence") return;
-  router.push({ name: "record-competences-competence", params: { id: row.id } });
+  router.push({ name: "/record/competences/[id]", params: { id: row.id } });
 }
 
 const competenceQuery = graphql(`

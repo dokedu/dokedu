@@ -8,7 +8,7 @@
 import Default from "./layout/default.vue";
 import Auth from "./layout/auth.vue";
 import None from "./layout/none.vue";
-import { useRoute } from "vue-router";
+import { useRoute } from "vue-router/auto";
 import { computed } from "vue";
 
 const route = useRoute();

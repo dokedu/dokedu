@@ -1,8 +1,8 @@
 <template>
   <div class="grid grid-cols-3 gap-2">
     <router-link
-      :to="{ name: 'record-entries-entry', params: { id: entry?.id } }"
       v-for="entry in data?.entries.edges"
+      :to="{ name: '/record/entries/[id]', params: { id: entry?.id as string } }"
       class="flex flex-col justify-between space-y-4 rounded-lg border border-stone-200 p-4"
     >
       <div class="space-y-4">
@@ -26,11 +26,11 @@
 <script lang="ts" setup>
 import { useQuery } from "@urql/vue";
 import { graphql } from "@/gql";
-import { useRoute } from "vue-router";
+import { useRoute } from "vue-router/auto";
 import { computed, reactive } from "vue";
 import { formatDate } from "@vueuse/core";
 
-const route = useRoute();
+const route = useRoute<"/record/students/[id]">();
 const id = computed(() => route.params.id as string);
 
 const { data } = useQuery({

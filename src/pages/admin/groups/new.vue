@@ -7,13 +7,13 @@
 </template>
 
 <script lang="ts" setup>
-import DGroupForm from "./DGroupForm.vue";
+import DGroupForm from "@/components/DGroupForm.vue";
 import { CreateEmailGroupInput, EmailAccount } from "@/gql/graphql";
 import { reactive } from "vue";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { createNotification } from "@/composables/useToast";
-import { useRouter } from "vue-router";
+import { useRouter } from "vue-router/auto";
 
 const router = useRouter();
 
@@ -55,7 +55,7 @@ const onCreateEmailAccount = async (input: { name: string; domain: string; membe
     return;
   }
 
-  await router.push({ name: "admin-groups" });
+  await router.push({ name: "/admin/groups" });
 
   createNotification({
     title: "Group created",

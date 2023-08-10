@@ -10,16 +10,16 @@
 </template>
 
 <script lang="ts" setup>
-import DDomainForm from "./DDomainForm.vue";
+import DDomainForm from "@/components/DDomainForm.vue";
 import { useQuery, useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { computed, reactive } from "vue";
 import { Domain } from "@/gql/graphql";
-import { useRoute } from "vue-router";
 import { createNotification } from "@/composables/useToast";
-import router from "@/router";
+import { useRoute, useRouter } from "vue-router/auto";
 
-const route = useRoute();
+const route = useRoute<"/admin/domains/[id]">();
+const router = useRouter();
 const id = computed(() => route.params.id as string);
 
 const { data } = useQuery({
@@ -51,7 +51,7 @@ const onDeleteDomain = async () => {
 
   await deleteDomain({ input: { id: id.value } });
 
-  await router.push({ name: "admin-domains" });
+  await router.push({ name: "/admin/domains" });
 
   createNotification({
     title: "Domain deleted",

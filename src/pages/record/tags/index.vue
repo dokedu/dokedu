@@ -29,10 +29,10 @@ import PageWrapper from "../../../components/PageWrapper.vue";
 import DButton from "../../../components/d-button/d-button.vue";
 import { Plus } from "lucide-vue-next";
 import DTag from "../../../components/d-tag/d-tag.vue";
-import TagCreateDialog from "./TagCreateDialog.vue";
-import TagEditDialog from "./TagEditDialog.vue";
+import TagCreateDialog from "@/components/TagCreateDialog.vue";
+import TagEditDialog from "@/components/TagEditDialog.vue";
 import { ref } from "vue";
-import { graphql } from "../../../gql";
+import { graphql } from "@/gql";
 import DTable from "@/components/d-table/d-table.vue";
 import { PageVariables } from "@/types/types";
 

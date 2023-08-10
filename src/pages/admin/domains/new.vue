@@ -3,13 +3,13 @@
 </template>
 
 <script lang="ts" setup>
-import DDomainForm from "./DDomainForm.vue";
+import DDomainForm from "@/components/DDomainForm.vue";
 import { Domain } from "@/gql/graphql";
 import { reactive } from "vue";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { createNotification } from "@/composables/useToast";
-import { useRouter } from "vue-router";
+import { useRouter } from "vue-router/auto";
 import { CreateDomainInput } from "@/gql/graphql";
 
 const router = useRouter();
@@ -50,7 +50,7 @@ const onCreateDomain = async () => {
     return;
   }
 
-  await router.push({ name: "admin-domains" });
+  await router.push({ name: "/admin/domains" });
 
   createNotification({
     title: "Domain created",

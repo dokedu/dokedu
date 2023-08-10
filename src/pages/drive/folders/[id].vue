@@ -14,15 +14,15 @@ import PageWrapper from "@/components/PageWrapper.vue";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { computed, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router/auto";
 import { File } from "@/gql/graphql";
-import DFileList from "./../components/DFileList.vue";
-import DFileDropZone from "./../components/DFileDropZone.vue";
-import PageHeaderDrive from "./../components/PageHeaderDrive.vue";
-import DFilePreview from "./../components/DFilePreview.vue";
+import DFileList from "@/components/drive/DFileList.vue";
+import DFileDropZone from "@/components/drive/DFileDropZone.vue";
+import PageHeaderDrive from "@/components/drive/PageHeaderDrive.vue";
+import DFilePreview from "@/components/drive/DFilePreview.vue";
 
+const route = useRoute<"/drive/folders/[id]">();
 const router = useRouter();
-const route = useRoute();
 
 const folderId = computed(() => {
   return route.params.id;
@@ -56,7 +56,7 @@ const { executeMutation: uploadFile } = useMutation(
 async function clickFile(file: File) {
   if (file.fileType === "folder") {
     await router.push({
-      name: "drive-my-drive-folders-folder",
+      name: "/drive/my-drive/folders/[id]",
       params: {
         id: file.id,
       },

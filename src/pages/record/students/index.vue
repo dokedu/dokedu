@@ -42,7 +42,7 @@ import PageHeader from "../../../components/PageHeader.vue";
 import PageWrapper from "../../../components/PageWrapper.vue";
 import { formatDate, watchDebounced } from "@vueuse/core";
 import { graphql } from "@/gql";
-import { useRouter } from "vue-router";
+import { useRouter } from "vue-router/auto";
 import { UserOrderBy } from "@/gql/graphql";
 import DTable from "@/components/d-table/d-table.vue";
 import type { PageVariables } from "@/types/types";
@@ -51,7 +51,7 @@ const search = ref("");
 const router = useRouter();
 
 const goToStudent = (row: any) => {
-  router.push({ name: "record-students-student", params: { id: row.id } });
+  router.push({ name: "/record/students/[id]", params: { id: row.id } });
 };
 
 const columns = [
