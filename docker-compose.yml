@@ -28,3 +28,8 @@ services:
       MEILI_MASTER_KEY: "master"
     volumes:
       - ./tmp/meilisearch:/meili_data
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"

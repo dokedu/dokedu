@@ -32,3 +32,28 @@ func PasswordResetMailTemplate(name string, link string) (string, error) {
 
 	return fmt.Sprintf("%s", out), nil
 }
+
+func InviteMailTemplate(name string, link string, organisation string) (string, error) {
+	t, err := template.ParseFS(templateFiles, "templates/*.gohtml")
+	if err != nil {
+		return "", err
+	}
+
+	data := struct {
+		Name             string
+		Link             string
+		OrganisationName string
+	}{
+		Name:             name,
+		Link:             link,
+		OrganisationName: organisation,
+	}
+
+	out := new(bytes.Buffer)
+	err = t.ExecuteTemplate(out, "invite.gohtml", data)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%s", out), nil
+}
