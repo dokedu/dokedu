@@ -19,7 +19,7 @@
       <div class="flex flex-col gap-1 p-3">
         <router-link
           v-for="link in app?.links"
-          :to="{ name: link.route }"
+          :to="link.route"
           class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
           active-class=""
           :class="{ '!bg-stone-200 text-stone-900': isLinkActive(link) }"
@@ -109,6 +109,7 @@ import { Landmark } from "lucide-vue-next";
 import { Settings } from "lucide-vue-next";
 import { School } from "lucide-vue-next";
 import { Mails } from "lucide-vue-next";
+import type { RouteNamedMap } from "vue-router/auto/routes";
 
 const { t } = useI18n();
 
@@ -121,8 +122,7 @@ const router = useRouter();
 interface AppLink {
   icon: FunctionalComponent;
   name: string;
-  // TODO: route is key of RouteNamedMap
-  route: any;
+  route: keyof RouteNamedMap;
 }
 
 interface App {

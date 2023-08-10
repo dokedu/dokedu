@@ -35,7 +35,7 @@
 
 <script lang="ts" setup>
 import DSidebar from "@/components/d-sidebar/d-sidebar.vue";
-import { User } from "@/gql/graphql.ts";
+import { User } from "@/gql/graphql";
 import { useRouter } from "vue-router/auto";
 import DInput from "@/components/d-input/d-input.vue";
 import DButton from "@/components/d-button/d-button.vue";

@@ -44,10 +44,10 @@
 
 <script lang="ts" setup>
 import { ref, toRef } from "vue";
-import DContextMenu, { ContextMenuAlignment } from "../d-context-menu/d-context-menu.vue";
-import { Entry, Event } from "../../gql/graphql.ts";
+import DContextMenu, { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue";
+import { Entry, Event } from "@/gql/graphql";
 import { useQuery } from "@urql/vue";
-import { graphql } from "../../gql";
+import { graphql } from "@/gql";
 
 const props = defineProps<{
   entry: Partial<Entry>;

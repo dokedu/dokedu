@@ -39,7 +39,7 @@ import { ref } from "vue";
 import { useQuery } from "@urql/vue";
 import { graphql } from "@/gql";
 import { Check } from "lucide-vue-next";
-import { User } from "@/gql/graphql.ts";
+import { User } from "@/gql/graphql";
 
 const emit = defineEmits(["update"]);
 

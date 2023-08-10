@@ -116,7 +116,7 @@ import { graphql } from "@/gql";
 import { computed, ref, toRef } from "vue";
 import { useMutation } from "@urql/vue";
 import { onClickOutside, onKeyStroke, useTextareaAutosize } from "@vueuse/core";
-import { Competence, Event } from "@/gql/graphql.ts";
+import { Competence, Event } from "@/gql/graphql";
 import { Save } from "lucide-vue-next";
 import DCompetence from "@/components/d-competence/d-competence.vue";
 import { Trash, X } from "lucide-vue-next";

@@ -54,7 +54,7 @@ import DButton from "@/components/d-button/d-button.vue";
 import { computed, ref, toRef, watch } from "vue";
 import { useRouter } from "vue-router/auto";
 import { useQuery } from "@urql/vue";
-import { EmailAccount } from "@/gql/graphql.ts";
+import { EmailAccount } from "@/gql/graphql";
 import { useI18n } from "vue-i18n";
 
 const router = useRouter();

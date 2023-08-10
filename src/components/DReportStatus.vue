@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ReportStatus } from "@/gql/graphql.ts";
+import { ReportStatus } from "@/gql/graphql";
 import { toRef } from "vue";
 
 export interface Props {

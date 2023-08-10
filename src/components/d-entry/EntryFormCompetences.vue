@@ -48,9 +48,9 @@ import { Plus, X } from "lucide-vue-next";
 import { computed, ref, toRef } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { onKeyStroke } from "@vueuse/core";
-import DCompetenceLevel from "../d-competence-level.vue";
-import { Entry, Competence } from "../../gql/graphql.ts";
-import DCompetence from "../d-competence/d-competence.vue";
+import DCompetenceLevel from "@/components/d-competence-level.vue";
+import { Entry, Competence } from "@/gql/graphql";
+import DCompetence from "@/components/d-competence/d-competence.vue";
 import DCompetenceSearch from "@/components/d-competence-search/d-competence-search.vue";
 
 const dialog = ref(null);

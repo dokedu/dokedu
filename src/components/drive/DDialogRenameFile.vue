@@ -25,7 +25,7 @@ import { toRef } from "vue";
 import { useVModel } from "@vueuse/core";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
-import { File } from "@/gql/graphql.ts";
+import { File } from "@/gql/graphql";
 
 const props = defineProps<{
   modelValue: File | null;

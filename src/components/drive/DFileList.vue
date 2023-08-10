@@ -69,13 +69,13 @@
 
 <script lang="ts" setup>
 import { FileText, Download, Edit, FileImage, Folder } from "lucide-vue-next";
-import { File } from "@/gql/graphql.ts";
+import { File } from "@/gql/graphql";
 import { graphql } from "@/gql";
 import { formatDate } from "@vueuse/core";
 import DTable from "@/components/d-table/d-table.vue";
-import { PageVariables } from "@/types/types.ts";
+import { PageVariables } from "@/types/types";
 import { computed, ref } from "vue";
-import useDownloadFile from "@/composables/useDownloadFile.ts";
+import useDownloadFile from "@/composables/useDownloadFile";
 import { Archive } from "lucide-vue-next";
 import { useRoute } from "vue-router/auto";
 import { File as FileFile, Trash, FileVideo } from "lucide-vue-next";

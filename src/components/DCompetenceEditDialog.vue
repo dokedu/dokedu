@@ -61,7 +61,7 @@ import DContextMenu from "@/components/d-context-menu/d-context-menu.vue";
 import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
-import { Competence } from "@/gql/graphql.ts";
+import { Competence } from "@/gql/graphql";
 import DTag from "@/components/d-tag/d-tag.vue";
 
 const dialog = ref<HTMLDialogElement>();

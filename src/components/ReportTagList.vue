@@ -43,7 +43,7 @@ import DContextMenu from "@/components/d-context-menu/d-context-menu.vue";
 import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue";
 import { ref } from "vue";
 import { Check } from "lucide-vue-next";
-import { Tag } from "@/gql/graphql.ts";
+import { Tag } from "@/gql/graphql";
 import DTag from "@/components/d-tag/d-tag.vue";
 
 const emit = defineEmits(["update"]);

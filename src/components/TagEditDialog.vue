@@ -67,7 +67,7 @@ import { ContextMenuAlignment } from "./d-context-menu/d-context-menu.vue";
 import DTag from "./d-tag/d-tag.vue";
 import { useMutation } from "@urql/vue";
 import { graphql } from "../gql";
-import { Tag } from "../gql/graphql.ts";
+import { Tag } from "../gql/graphql";
 
 const colors = ["red", "orange", "yellow", "green", "blue", "indigo", "purple", "pink", "gray"];
 

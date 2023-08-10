@@ -57,7 +57,7 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
-import signInMutation from "../queries/signIn.mutation.ts";
+import signInMutation from "../queries/signIn.mutation";
 import { useMutation } from "@urql/vue";
 import { useRouter } from "vue-router/auto";
 import i18n from "@/i18n";

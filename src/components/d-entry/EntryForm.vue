@@ -36,15 +36,15 @@
 <script setup lang="ts">
 import { gql, useMutation } from "@urql/vue";
 import { computed, toRef } from "vue";
-import archiveEntryMutation from "../../queries/archiveEntry.mutation.ts";
+import archiveEntryMutation from "@/queries/archiveEntry.mutation";
 import { formatDate, useTextareaAutosize } from "@vueuse/core";
 import EntryFormHeader from "./EntryFormHeader.vue";
 import EntryFormCompetences from "./EntryFormCompetences.vue";
-import { Entry } from "../../gql/graphql.ts";
+import { Entry } from "@/gql/graphql";
 import EntryFormProjects from "./EntryFormProjects.vue";
 import EntryFormLabels from "./EntryFormLabels.vue";
 import EntryFormStudents from "./EntryFormStudents.vue";
-import { createNotification } from "@/composables/useToast.ts";
+import { createNotification } from "@/composables/useToast";
 import { Save } from "lucide-vue-next";
 import { useI18n } from "vue-i18n";
 
