@@ -1,84 +1,89 @@
 <template>
-  <PageWrapper>
-    <PageHeader class="flex justify-between">
-      <div class="flex items-center gap-4">
-        <div class="font-medium text-stone-950">{{ $t("project", 2) }}</div>
-        <input
-          v-model="search"
-          type="text"
-          name="search"
-          id="search"
-          :placeholder="$t('search')"
-          class="h-8 rounded-md border border-stone-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-stone-200 focus:shadow-sm focus:ring-0"
-        />
+  <template v-if="route.name !== '/record/projects/export'">
+    <PageWrapper>
+      <PageHeader class="flex justify-between">
+        <div class="flex items-center gap-4">
+          <div class="font-medium text-stone-950">{{ $t("project", 2) }}</div>
+          <input
+            v-model="search"
+            type="text"
+            name="search"
+            id="search"
+            :placeholder="$t('search')"
+            class="h-8 rounded-md border border-stone-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-stone-200 focus:shadow-sm focus:ring-0"
+          />
+        </div>
+        <div class="flex gap-2">
+          <DButton
+            :type="filtersOpen ? 'outline' : 'transparent'"
+            size="md"
+            :icon-left="ListFilter"
+            @click="toggleFilters"
+            >{{ $t("filter") }}</DButton
+          >
+          <router-link :to="{ name: '/record/projects/export' }">
+            <d-button type="transparent" :icon-left="Share">{{ $t("export") }}</d-button>
+          </router-link>
+          <router-link :to="{ name: '/record/projects/new' }">
+            <d-button type="primary" :icon-left="Plus"> {{ $t("new") }} </d-button>
+          </router-link>
+        </div>
+      </PageHeader>
+      <div v-if="filtersOpen" class="flex items-end gap-2 border-b border-stone-100 px-8 py-2">
+        <div>
+          <label for="starts" class="mb-1 block text-xs font-medium leading-6 text-stone-900">{{
+            $t("starts_at")
+          }}</label>
+          <input
+            v-model="startsAt"
+            class="block w-full select-none rounded-md border-0 py-2 text-sm text-stone-900 shadow-sm ring-1 ring-inset ring-stone-200 placeholder:text-stone-400 focus:ring-2 focus:ring-inset focus:ring-black"
+            type="datetime-local"
+            name="starts"
+            id="starts"
+          />
+        </div>
+        <div>
+          <label for="ends" class="mb-1 block text-xs font-medium leading-6 text-stone-900">{{ $t("ends_at") }}</label>
+          <input
+            v-model="endsAt"
+            class="block w-full select-none rounded-md border-0 py-2 text-sm text-stone-900 shadow-sm ring-1 ring-inset ring-stone-200 placeholder:text-stone-400 focus:ring-2 focus:ring-inset focus:ring-black"
+            type="datetime-local"
+            name="ends"
+            id="ends"
+          />
+        </div>
       </div>
-      <div class="flex gap-2">
-        <DButton
-          :type="filtersOpen ? 'outline' : 'transparent'"
-          size="md"
-          :icon-left="ListFilter"
-          @click="toggleFilters"
-          >{{ $t("filter") }}</DButton
-        >
-        <router-link :to="{ name: '/record/projects/export' }">
-          <d-button type="transparent" :icon-left="Share">{{ $t("export") }}</d-button>
-        </router-link>
-        <router-link :to="{ name: '/record/projects/new' }">
-          <d-button type="primary" :icon-left="Plus"> {{ $t("new") }} </d-button>
-        </router-link>
-      </div>
-    </PageHeader>
-    <div v-if="filtersOpen" class="flex items-end gap-2 border-b border-stone-100 px-8 py-2">
-      <div>
-        <label for="starts" class="mb-1 block text-xs font-medium leading-6 text-stone-900">{{
-          $t("starts_at")
-        }}</label>
-        <input
-          v-model="startsAt"
-          class="block w-full select-none rounded-md border-0 py-2 text-sm text-stone-900 shadow-sm ring-1 ring-inset ring-stone-200 placeholder:text-stone-400 focus:ring-2 focus:ring-inset focus:ring-black"
-          type="datetime-local"
-          name="starts"
-          id="starts"
-        />
-      </div>
-      <div>
-        <label for="ends" class="mb-1 block text-xs font-medium leading-6 text-stone-900">{{ $t("ends_at") }}</label>
-        <input
-          v-model="endsAt"
-          class="block w-full select-none rounded-md border-0 py-2 text-sm text-stone-900 shadow-sm ring-1 ring-inset ring-stone-200 placeholder:text-stone-400 focus:ring-2 focus:ring-inset focus:ring-black"
-          type="datetime-local"
-          name="ends"
-          id="ends"
-        />
-      </div>
-    </div>
-    <DTable
-      v-model:variables="pageVariables"
-      :columns="columns"
-      objectName="events"
-      :query="eventsQuery"
-      defaultSort="startsAt"
-      @row-click="onRowClick"
-    >
-      <template #body-data="{ column }">
-        <div class="truncate text-subtle">{{ column }}</div>
-      </template>
-      <template #startsAt-data="{ column }">
-        <div class="text-subtle">{{ formatDate(new Date(Date.parse(column)), "DD.MM.YYYY") }}</div>
-      </template>
-      <template #endsAt-data="{ column }">
-        <div class="text-subtle">{{ formatDate(new Date(Date.parse(column)), "DD.MM.YYYY") }}</div>
-      </template>
-    </DTable>
-  </PageWrapper>
+      <DTable
+        v-model:variables="pageVariables"
+        :columns="columns"
+        objectName="events"
+        :query="eventsQuery"
+        defaultSort="startsAt"
+        @row-click="onRowClick"
+      >
+        <template #body-data="{ column }">
+          <div class="truncate text-subtle">{{ column }}</div>
+        </template>
+        <template #startsAt-data="{ column }">
+          <div class="text-subtle">{{ formatDate(new Date(Date.parse(column)), "DD.MM.YYYY") }}</div>
+        </template>
+        <template #endsAt-data="{ column }">
+          <div class="text-subtle">{{ formatDate(new Date(Date.parse(column)), "DD.MM.YYYY") }}</div>
+        </template>
+      </DTable>
+    </PageWrapper>
 
-  <div
-    ref="sheet"
-    v-if="route.name === '/record/projects/new' || route.name === '/record/projects/[id]'"
-    class="absolute right-0 top-0 h-screen w-full max-w-xl overflow-scroll bg-white shadow-md shadow-stone-300"
-  >
+    <div
+      ref="sheet"
+      v-if="route.name === '/record/projects/new' || route.name === '/record/projects/[id]'"
+      class="absolute right-0 top-0 h-screen w-full max-w-xl overflow-scroll bg-white shadow-md shadow-stone-300"
+    >
+      <router-view />
+    </div>
+  </template>
+  <template v-else>
     <router-view />
-  </div>
+  </template>
 </template>
 <script setup lang="ts">
 import PageHeader from "@/components/PageHeader.vue";
@@ -96,7 +101,9 @@ import { PageVariables } from "@/types/types";
 import { EventOrderBy } from "@/gql/graphql";
 import { useRoute } from "vue-router/auto";
 
-const route = useRoute<"/record/projects" | "/record/projects/[id]" | "/record/projects/new">();
+const route = useRoute<
+  "/record/projects" | "/record/projects/[id]" | "/record/projects/new" | "/record/projects/export"
+>();
 
 const sheet = ref<HTMLElement | null>(null);
 
