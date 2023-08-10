@@ -3,7 +3,7 @@
     <PageHeader class="flex justify-between">
       <div class="flex w-full items-center justify-between gap-4">
         <div class="font-medium text-stone-950">
-          <router-link :to="{ name: '/record/projects' }">{{ $t("project", 2) }}</router-link>
+          <router-link :to="{ name: '/record/projects/' }">{{ $t("project", 2) }}</router-link>
           / {{ $t("export") }}
         </div>
 

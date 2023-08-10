@@ -68,7 +68,7 @@ declare module 'vue-router/auto/routes' {
     '/record/entries/': RouteRecordInfo<'/record/entries/', '/record/entries', Record<never, never>, Record<never, never>>,
     '/record/entries/[id]': RouteRecordInfo<'/record/entries/[id]', '/record/entries/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/record/entries/new': RouteRecordInfo<'/record/entries/new', '/record/entries/new', Record<never, never>, Record<never, never>>,
-    '/record/projects': RouteRecordInfo<'/record/projects', '/record/projects', Record<never, never>, Record<never, never>>,
+    '/record/projects/': RouteRecordInfo<'/record/projects/', '/record/projects', Record<never, never>, Record<never, never>>,
     '/record/projects/[id]': RouteRecordInfo<'/record/projects/[id]', '/record/projects/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/record/projects/export': RouteRecordInfo<'/record/projects/export', '/record/projects/export', Record<never, never>, Record<never, never>>,
     '/record/projects/new': RouteRecordInfo<'/record/projects/new', '/record/projects/new', Record<never, never>, Record<never, never>>,

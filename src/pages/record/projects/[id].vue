@@ -17,12 +17,12 @@ const route = useRoute<"/record/projects/[id]">();
 const router = useRouter();
 
 async function cancel() {
-  await router.push({ name: "/record/projects" });
+  await router.push({ name: "/record/projects/" });
 }
 
 async function save() {
   if (route.name === "/record/projects/[id]") return;
-  await router.push({ name: "/record/projects" });
+  await router.push({ name: "/record/projects/" });
 }
 
 onKeyStroke("Escape", async () => {

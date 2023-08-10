@@ -180,7 +180,7 @@ const apps = computed<App[]>(() => [
         // icon: "grid-01",
         icon: Grid,
         name: t("project", 2),
-        route: "/record/projects",
+        route: "/record/projects/",
       },
       {
         // icon: "check-done-01",

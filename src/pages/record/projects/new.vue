@@ -13,7 +13,7 @@ const router = useRouter();
 const sheet = ref<HTMLElement | null>(null);
 
 async function cancel() {
-  await router.push({ name: "/record/projects" });
+  await router.push({ name: "/record/projects/" });
 }
 
 // @ts-expect-error

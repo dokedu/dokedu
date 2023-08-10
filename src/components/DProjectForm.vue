@@ -1,17 +1,13 @@
 <template>
-  <div class="flex h-screen select-none flex-col text-sm @container">
+  <div class="flex h-screen w-full select-none flex-col text-sm @container">
     <div
       class="flex h-[56px] min-h-0 w-full items-center justify-between border-b border-stone-100 px-8 py-2 text-sm text-stone-700"
     >
       <div class="flex items-center gap-2">
-        <router-link
-          v-if="isFullPage && $route.name !== '/record/projects/new'"
-          :to="{ name: '/record/projects' }"
-          class="select-none text-sm font-medium text-strong"
-        >
+        <router-link to="/record/projects/" class="select-none text-sm font-medium text-strong">
           {{ $t("project", 2) }}
         </router-link>
-        <ChevronRight v-if="isFullPage" :size="16" />
+        <ChevronRight :size="16" />
         <router-link
           v-if="$route.name !== '/record/projects/new'"
           :to="{ name: '/record/projects/[id]' }"
