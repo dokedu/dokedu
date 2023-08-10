@@ -911,6 +911,22 @@ func (r *queryResolver) User(ctx context.Context, id string) (*db.User, error) {
 	return &user, nil
 }
 
+// Me is the resolver for the me field.
+func (r *queryResolver) Me(ctx context.Context) (*db.User, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	var user db.User
+	err = r.DB.NewSelect().Model(&user).Where("id = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 // Competence is the resolver for the competence field.
 func (r *queryResolver) Competence(ctx context.Context, id string) (*db.Competence, error) {
 	currentUser, err := middleware.GetUser(ctx)
