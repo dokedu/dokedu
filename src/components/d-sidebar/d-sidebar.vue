@@ -3,11 +3,13 @@
     ref="sidebar"
     class="absolute right-0 top-0 h-screen w-full max-w-xl overflow-scroll bg-white p-4 shadow-md shadow-stone-300"
   >
-    <div class="mb-4 flex justify-between">
-      <div class="select-none text-sm font-medium text-strong">{{ title }}</div>
-      <d-button v-if="delete" type="transparent" size="xs" :icon-left="Trash" @click="onTrash">{{
-        $t("delete")
-      }}</d-button>
+    <div class="mb-4 flex flex-wrap justify-between gap-2">
+      <slot name="header">
+        <div class="select-none text-sm font-medium text-strong">{{ title }}</div>
+        <d-button v-if="delete" type="transparent" size="xs" :icon-left="Trash" @click="onTrash">{{
+          $t("delete")
+        }}</d-button>
+      </slot>
     </div>
 
     <div class="mb-4 flex flex-col gap-2">

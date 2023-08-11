@@ -6,6 +6,8 @@
       deletable
       @save="onEditUser"
       @delete="onDeleteUser"
+      @invite="onInviteUser"
+      @resetPassword="onResetPassword"
     ></d-user-form>
   </div>
 </template>
@@ -18,10 +20,12 @@ import { computed, reactive, ref } from "vue";
 import { User } from "@/gql/graphql";
 import { useRoute, useRouter } from "vue-router/auto";
 import { createNotification } from "@/composables/useToast";
+import { useI18n } from "vue-i18n";
 
 const route = useRoute<"/admin/users/[id]">();
 const router = useRouter();
 const id = computed(() => route.params.id as string);
+const { t } = useI18n();
 
 const { data } = useQuery({
   query: graphql(`
@@ -32,11 +36,13 @@ const { data } = useQuery({
         lastName
         email
         role
+        inviteAccepted
       }
     }
   `),
   variables: reactive({ id }),
 });
+
 const { executeMutation: updateUser } = useMutation(
   graphql(`
     mutation updateUser($input: UpdateUserInput!) {
@@ -98,6 +104,59 @@ const onEditUser = async () => {
     title: "User updated",
     description: `${user.value.firstName} ${user.value.lastName} was updated`,
   });
+};
+
+const { executeMutation: forgotPassword } = useMutation(
+  graphql(`
+    mutation forgotPassword($input: ForgotPasswordInput!) {
+      forgotPassword(input: $input) {
+        success
+      }
+    }
+  `)
+);
+
+const { executeMutation: inviteUser } = useMutation(
+  graphql(`
+    mutation sendInvite($id: ID!) {
+      sendUserInvite(id: $id)
+    }
+  `)
+);
+
+const onInviteUser = async () => {
+  const user = ref(data?.value?.user);
+  if (user.value?.inviteAccepted) {
+    alert(t("user_already_invited"));
+    return;
+  }
+
+  const { error } = await inviteUser({
+    id: user.value?.id as string,
+  });
+
+  if (!error) {
+    createNotification({
+      title: t("invite_sent"),
+      description: t("user_invite_sent", { firstName: user.value?.firstName, lastName: user.value?.lastName }),
+    });
+  }
+};
+
+const onResetPassword = async () => {
+  const user = ref(data?.value?.user);
+  const { error } = await forgotPassword({
+    input: {
+      email: user.value?.email as string,
+    },
+  });
+
+  if (!error) {
+    createNotification({
+      title: t("reset_password"),
+      description: t("password_reset_sent", { email: user.value?.email }),
+    });
+  }
 };
 
 const onDeleteUser = async () => {

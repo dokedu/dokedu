@@ -52,14 +52,15 @@ const documents = {
     "\n    mutation editEmailGroup($input: UpdateEmailGroupInput!) {\n      updateEmailGroup(input: $input) {\n        id\n        name\n        description\n      }\n    }\n  ": types.EditEmailGroupDocument,
     "\n    mutation createEmailGroup($input: CreateEmailGroupInput!) {\n      createEmailGroup(input: $input) {\n        id\n        name\n        description\n        members {\n          name\n        }\n      }\n    }\n  ": types.CreateEmailGroupDocument,
     "\n  query adminUsers($search: String, $order: UserOrderBy, $offset: Int) {\n    users(filter: { role: [owner, admin, teacher], orderBy: $order }, search: $search, offset: $offset) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n      edges {\n        id\n        firstName\n        lastName\n        email\n      }\n    }\n  }\n": types.AdminUsersDocument,
-    "\n    query adminUserById($id: ID!) {\n      user(id: $id) {\n        id\n        firstName\n        lastName\n        email\n        role\n      }\n    }\n  ": types.AdminUserByIdDocument,
+    "\n    query adminUserById($id: ID!) {\n      user(id: $id) {\n        id\n        firstName\n        lastName\n        email\n        role\n        inviteAccepted\n      }\n    }\n  ": types.AdminUserByIdDocument,
     "\n    mutation updateUser($input: UpdateUserInput!) {\n      updateUser(input: $input) {\n        id\n        firstName\n        lastName\n        email\n        role\n      }\n    }\n  ": types.UpdateUserDocument,
     "\n    mutation archiveUser($id: ID!) {\n      archiveUser(id: $id) {\n        id\n        firstName\n        lastName\n        email\n        role\n      }\n    }\n  ": types.ArchiveUserDocument,
+    "\n    mutation forgotPassword($input: ForgotPasswordInput!) {\n      forgotPassword(input: $input) {\n        success\n      }\n    }\n  ": types.ForgotPasswordDocument,
+    "\n    mutation sendInvite($id: ID!) {\n      sendUserInvite(id: $id)\n    }\n  ": types.SendInviteDocument,
     "\n    mutation createUser($user: CreateUserInput!) {\n      createUser(input: $user) {\n        id\n        firstName\n        lastName\n      }\n    }\n  ": types.CreateUserDocument,
     "\n    query file($id: ID!) {\n      file(id: $id) {\n        id\n        name\n        fileType\n        MIMEType\n        size\n        createdAt\n      }\n    }\n  ": types.FileDocument,
     "\n    mutation uploadFile($input: FileUploadInput!) {\n      uploadFile(input: $input) {\n        id\n      }\n    }\n  ": types.UploadFileDocument,
     "\n  query buckets {\n    buckets(input: { shared: true }) {\n      edges {\n        id\n        name\n        shared\n        createdAt\n      }\n      totalCount\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n": types.BucketsDocument,
-    "\n    mutation forgotPassword($input: ForgotPasswordInput!) {\n      forgotPassword(input: $input) {\n        success\n      }\n    }\n  ": types.ForgotPasswordDocument,
     "\n    mutation resetPassword($input: ResetPasswordInput!) {\n      resetPassword(input: $input) {\n        success\n      }\n    }\n  ": types.ResetPasswordDocument,
     "\n  query adminStudents($search: String, $order: UserOrderBy, $offset: Int) {\n    users(filter: { role: [student], orderBy: $order }, search: $search, offset: $offset) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n      edges {\n        id\n        firstName\n        lastName\n        student {\n          id\n          birthday\n          grade\n        }\n      }\n    }\n  }\n": types.AdminStudentsDocument,
     "\n    query adminStudentById($id: ID!) {\n      user(id: $id) {\n        id\n        firstName\n        lastName\n        role\n        student {\n          id\n          grade\n          birthday\n          joinedAt\n          leftAt\n        }\n      }\n    }\n  ": types.AdminStudentByIdDocument,
@@ -263,7 +264,7 @@ export function graphql(source: "\n  query adminUsers($search: String, $order: U
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n    query adminUserById($id: ID!) {\n      user(id: $id) {\n        id\n        firstName\n        lastName\n        email\n        role\n      }\n    }\n  "): (typeof documents)["\n    query adminUserById($id: ID!) {\n      user(id: $id) {\n        id\n        firstName\n        lastName\n        email\n        role\n      }\n    }\n  "];
+export function graphql(source: "\n    query adminUserById($id: ID!) {\n      user(id: $id) {\n        id\n        firstName\n        lastName\n        email\n        role\n        inviteAccepted\n      }\n    }\n  "): (typeof documents)["\n    query adminUserById($id: ID!) {\n      user(id: $id) {\n        id\n        firstName\n        lastName\n        email\n        role\n        inviteAccepted\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -272,6 +273,14 @@ export function graphql(source: "\n    mutation updateUser($input: UpdateUserInp
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    mutation archiveUser($id: ID!) {\n      archiveUser(id: $id) {\n        id\n        firstName\n        lastName\n        email\n        role\n      }\n    }\n  "): (typeof documents)["\n    mutation archiveUser($id: ID!) {\n      archiveUser(id: $id) {\n        id\n        firstName\n        lastName\n        email\n        role\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation forgotPassword($input: ForgotPasswordInput!) {\n      forgotPassword(input: $input) {\n        success\n      }\n    }\n  "): (typeof documents)["\n    mutation forgotPassword($input: ForgotPasswordInput!) {\n      forgotPassword(input: $input) {\n        success\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation sendInvite($id: ID!) {\n      sendUserInvite(id: $id)\n    }\n  "): (typeof documents)["\n    mutation sendInvite($id: ID!) {\n      sendUserInvite(id: $id)\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -288,10 +297,6 @@ export function graphql(source: "\n    mutation uploadFile($input: FileUploadInp
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query buckets {\n    buckets(input: { shared: true }) {\n      edges {\n        id\n        name\n        shared\n        createdAt\n      }\n      totalCount\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n"): (typeof documents)["\n  query buckets {\n    buckets(input: { shared: true }) {\n      edges {\n        id\n        name\n        shared\n        createdAt\n      }\n      totalCount\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n    mutation forgotPassword($input: ForgotPasswordInput!) {\n      forgotPassword(input: $input) {\n        success\n      }\n    }\n  "): (typeof documents)["\n    mutation forgotPassword($input: ForgotPasswordInput!) {\n      forgotPassword(input: $input) {\n        success\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
