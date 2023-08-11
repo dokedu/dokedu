@@ -7,6 +7,7 @@
     objectName="files"
     :query="filesQuery"
     defaultSort="createdAt"
+    :additionalTypenames="['File']"
     @row-click="clickFile"
   >
     <template #name-data="{ column, item }">

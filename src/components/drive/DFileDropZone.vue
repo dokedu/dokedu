@@ -1,5 +1,6 @@
 <template>
   <div
+    data-name="d-file-drop-zone"
     class="relative flex h-full flex-col transition-all"
     @drop.prevent="dropHandler"
     @dragenter="hasDragover = true"

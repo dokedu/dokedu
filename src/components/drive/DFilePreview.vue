@@ -84,6 +84,7 @@ function isFileOfType(file: File) {
   switch (file.MIMEType) {
     case "image/jpeg":
     case "image/png":
+    case "image/webp":
     case "image/gif":
       return "image";
     case "application/pdf":

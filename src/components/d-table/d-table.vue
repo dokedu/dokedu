@@ -34,6 +34,7 @@
         :variables="vars"
         :columns="columns"
         :style="gridColumns"
+        :additionalTypenames="additionalTypenames"
         ref="tableRows"
       >
         <template v-slot="{ row }">
@@ -94,6 +95,7 @@ const props = withDefaults(
     hideHeader?: boolean;
     defaultSort?: string;
     search?: string;
+    additionalTypenames?: string[];
   }>(),
   {
     watchers: () => [],

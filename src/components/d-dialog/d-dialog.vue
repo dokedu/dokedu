@@ -1,5 +1,5 @@
 <template>
-  <dialog ref="dialog" class="overflow-visible rounded-lg backdrop:bg-stone-900/50" @close="close">
+  <dialog ref="dialog" class="select-none overflow-visible rounded-lg backdrop:bg-stone-900/50" @close="close">
     <header class="mb-4 text-sm font-medium">
       <slot name="header"></slot>
     </header>

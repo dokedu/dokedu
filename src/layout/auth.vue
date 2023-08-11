@@ -4,7 +4,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import i18n from "@/i18n";
 import { useLocalStorage } from "@vueuse/core";
 

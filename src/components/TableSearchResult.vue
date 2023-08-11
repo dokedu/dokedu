@@ -33,12 +33,15 @@ import { useQuery } from "@urql/vue";
 import { watch } from "vue";
 import { toRef } from "vue";
 
-const props = defineProps(["query", "variables", "objectName", "columns"]);
+const props = defineProps(["query", "variables", "objectName", "columns", "additionalTypenames"]);
 const pageVariables = toRef(props, "variables");
 
 const { data, fetching } = useQuery({
   query: props.query,
   variables: pageVariables,
+  context: {
+    additionalTypenames: (props.additionalTypenames || []) as string[],
+  },
 });
 
 watch(data, () => {
