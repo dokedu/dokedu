@@ -79,60 +79,22 @@
   </header>
 </template>
 <script setup lang="ts">
-import { computed, FunctionalComponent, ref, watch } from "vue";
-import {
-  CopyCheck,
-  Folder,
-  Globe,
-  Grid,
-  Grip,
-  HardDrive,
-  Landmark,
-  LogOut,
-  Mails,
-  Pen,
-  PieChart,
-  School,
-  Settings,
-  Tag,
-  Trash2,
-  Users,
-  Users2,
-  UserSquare,
-  Wrench,
-} from "lucide-vue-next";
+import { computed, ref, watch } from "vue";
+import { LogOut, Globe, Grip } from "lucide-vue-next";
 import { onClickOutside, useStorage } from "@vueuse/core";
 import { useRoute, useRouter } from "vue-router/auto";
 import { useMutation, useQuery } from "@urql/vue";
 import { graphql } from "@/gql";
-import i18n from "@/i18n";
-import { useI18n } from "vue-i18n";
 import { UserLanguage } from "@/gql/graphql";
-import type { RouteNamedMap } from "vue-router/auto/routes";
-
-const { t } = useI18n();
+import { AppLink, apps, UserRole } from "./d-sidebar/d-sidebar";
+import i18n from "@/i18n";
+import { useAuth } from "@/composables/auth";
 
 const visibleAppSwitcher = ref<boolean>(false);
 const activeApp = useStorage("active_app", "drive");
 
 const route = useRoute();
 const router = useRouter();
-
-interface AppLink {
-  icon: FunctionalComponent;
-  name: string;
-  route: keyof RouteNamedMap;
-}
-
-type Role = "owner" | "admin" | "teacher" | "student";
-
-interface App {
-  id: string;
-  allowedRoles: Role[];
-  icon: FunctionalComponent;
-  name: string;
-  links: AppLink[];
-}
 
 const { data: userData } = useQuery({
   query: graphql(`
@@ -163,147 +125,8 @@ const app = computed(() => apps.value.find((el) => el.id === activeApp.value) ||
 const enabledApps = computed(() => {
   const enabled = apps.value.filter((el: { id: string }) => enabledAppList.value.includes(el.id));
   const role = userData.value?.me?.role;
-  return enabled.filter((el: { allowedRoles: Role[] }) => el.allowedRoles.includes(role as Role));
+  return enabled.filter((el: { allowedUserRoles: UserRole[] }) => el.allowedUserRoles.includes(role as UserRole));
 });
-
-const apps = computed<App[]>(() => [
-  {
-    id: "record",
-    icon: Pen,
-    allowedRoles: ["owner", "admin", "teacher"],
-    name: "Dokumentation",
-    links: [
-      {
-        // icon: "file-check-02",
-        icon: Pen,
-        name: t("entry", 2),
-        route: "/record/entries/",
-      },
-      {
-        // icon: "users-01",
-        icon: Users,
-        name: t("student", 2),
-        route: "/record/students/",
-      },
-      // {
-      //   // icon: "flag-04",
-      //   icon: Flag,
-      //   name: "Goals",
-      //   route: "home",
-      // },
-      {
-        // icon: "grid-01",
-        icon: Grid,
-        name: t("project", 2),
-        route: "/record/projects/",
-      },
-      {
-        // icon: "check-done-01",
-        icon: CopyCheck,
-        name: t("competence", 2),
-        route: "/record/competences/",
-      },
-      {
-        icon: PieChart,
-        name: t("report", 2),
-        route: "/record/reports/",
-      },
-      {
-        icon: Tag,
-        name: t("tag", 2),
-        route: "/record/tags/",
-      },
-    ],
-  },
-  {
-    id: "drive",
-    icon: Folder,
-    allowedRoles: ["owner", "admin", "teacher", "student"],
-    name: "Drive",
-    links: [
-      {
-        icon: HardDrive,
-        name: "My Drive",
-        route: "/drive/my-drive/",
-      },
-      {
-        icon: HardDrive,
-        name: "Shared Drives",
-        route: "/drive/shared-drives/",
-      },
-      {
-        icon: Users2,
-        name: "Shared with me",
-        route: "/drive/shared-with-me/",
-      },
-      // {
-      //   icon: Clock,
-      //   name: "Recent",
-      //   route: "admin-users",
-      // },
-      // {
-      //   icon: Star,
-      //   name: "Starred",
-      //   route: "admin-users",
-      // },
-      {
-        icon: Trash2,
-        name: "Trash",
-        route: "/drive/trash/",
-      },
-    ],
-  },
-  {
-    id: "admin",
-    icon: Wrench,
-    allowedRoles: ["owner", "admin"],
-    name: "Admin",
-    links: [
-      {
-        // icon: "👥",
-        icon: Settings,
-        name: t("general"),
-        route: "/admin/general/",
-      },
-      {
-        // icon: "👥",
-        icon: Users,
-        name: t("user", 2),
-        route: "/admin/users",
-      },
-      {
-        // icon: "👥",
-        icon: Landmark,
-        name: t("billing"),
-        route: "/admin/billing/",
-      },
-      {
-        icon: Mails,
-        name: t("group", 2),
-        route: "/admin/groups",
-      },
-      {
-        icon: Globe,
-        name: t("domain", 2),
-        route: "/admin/domains",
-      },
-    ],
-  },
-  {
-    id: "my_school",
-    icon: School,
-    allowedRoles: ["owner", "admin", "teacher"],
-    name: "Schulverwaltung",
-    links: [
-      {
-        // icon: "👥",
-        icon: UserSquare,
-        name: t("student", 2),
-        route: "/my_school/students",
-      },
-    ],
-  },
-]);
 
 function switchApp(appId: string | null = null) {
   if (appId) {
@@ -322,24 +145,7 @@ function switchApp(appId: string | null = null) {
   activeApp.value = enabledApps.value[nextIndex].id;
 }
 
-const { executeMutation: signOutMutation } = useMutation(
-  graphql(`
-    mutation signOut {
-      signOut
-    }
-  `)
-);
-
-async function signOut() {
-  await signOutMutation({});
-
-  // Clear the token and enabled_apps from local storage
-  localStorage.removeItem("token");
-  localStorage.removeItem("enabled_apps");
-
-  // TODO: hack to ensure urql cache is cleared
-  location.reload();
-}
+const { signOut } = useAuth();
 
 const { executeMutation: updateLanguage } = useMutation(
   graphql(`
@@ -352,9 +158,22 @@ const { executeMutation: updateLanguage } = useMutation(
   `)
 );
 
+function getPreferredLanguage() {
+  const languages = navigator.languages;
+  const supported = ["en", "de"];
+
+  for (const lang of languages) {
+    if (supported.includes(lang)) {
+      return lang;
+    }
+  }
+
+  return "en";
+}
+
 // Using the language from the local storage
-// If undefined we set it to english
-const language = useStorage("language", "en");
+// If undefined we set it to preferred language
+const language = useStorage("language", getPreferredLanguage());
 
 const languageOptions: { [key: string]: UserLanguage } = {
   de: UserLanguage.De,

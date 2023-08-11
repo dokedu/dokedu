@@ -46,11 +46,11 @@ function cancel() {
 }
 
 onClickOutside(sidebar, async () => {
-  await cancel();
+  cancel();
 });
 
 onKeyStroke("Escape", async () => {
-  await cancel();
+  cancel();
 });
 
 const onTrash = () => {
