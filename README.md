@@ -1,8 +1,9 @@
+> **Warning**
+> This is an early beta version of the Dokedu frontend. It is not ready for production use.
+
 # Dokedu / Frontend
 
 The productivity suite for innovative schools
-
-- [https://lucide.dev/](https://lucide.dev/)
 
 **[Learn more about Dokedu](https://dokedu.org)**
 
