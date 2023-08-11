@@ -162,4 +162,6 @@ export const en = {
   invite_sent: "Invite sent",
   user_invite_sent: "{firstName} {lastName} was sent an invite",
   password_reset_sent: "Password reset sent to {email}",
+  mobile_not_supported: "Mobile devices are not supported",
+  mobile_not_supported_description: "Please use a desktop browser to use this application",
 };
