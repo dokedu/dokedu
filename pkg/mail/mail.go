@@ -77,7 +77,7 @@ func (m Mailer) SendInvite(to string, name string, organisationName string, lang
 	}
 	var subject string
 	if lang == db.UserLangDe {
-		subject = "Willkommen bei dokedu"
+		subject = "Willkommen bei Dokedu"
 	} else {
 		subject = "Welcome to Dokedu"
 	}
