@@ -72,7 +72,7 @@ const { executeMutation: signIn, error } = useMutation(signInMutation);
 async function onSubmit() {
   const {
     data: {
-      signIn: { token, enabled_apps, language },
+      signIn: { token, enabled_apps, language, setupComplete },
     },
   } = await signIn({
     email: email.value,
@@ -83,9 +83,15 @@ async function onSubmit() {
     localStorage.setItem("enabled_apps", JSON.stringify(enabled_apps));
     localStorage.setItem("authorization", token);
     localStorage.setItem("language", language);
+    localStorage.setItem("setupComplete", setupComplete);
 
     // Set the i18n locale to the user's language
     i18n.global.locale.value = language;
+
+    if (setupComplete === false) {
+      await router.push({ name: "/setup/" });
+      return;
+    }
 
     // enabled_apps
 

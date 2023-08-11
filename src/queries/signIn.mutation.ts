@@ -1,4 +1,4 @@
-import {gql} from '@urql/vue';
+import { gql } from '@urql/vue';
 
 export default gql`
     mutation signIn($email: String!, $password: String!) {
@@ -6,6 +6,7 @@ export default gql`
             token
             enabled_apps
             language
+            setupComplete
         }
     }
 `

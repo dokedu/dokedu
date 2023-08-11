@@ -7,15 +7,24 @@ const router = createRouter({
 const allowedRoutes = ["/login", "/forgot-password", "/reset-password", "/invite"];
 
 router.beforeEach(async (to) => {
-  if (
-    // make sure the user is authenticated
-    !localStorage.getItem("authorization") &&
-    // to.name !== 'login'
-    !allowedRoutes.includes(to.name as string)
-  ) {
-    // redirect the user to the login page
+  const token = localStorage.getItem("authorization");
+  const loggedIn = token && token !== "null" && token !== "undefined";
+  const outsideAllowedRoutes = !allowedRoutes.includes(to.name as string);
+
+  // Redirect to login if user is not logged in and is accessing a page outside of allowed routes
+  if (outsideAllowedRoutes && !loggedIn) {
     return { name: "/login" };
   }
+
+  // If user is logged in and setup is not complete, always redirect to setup
+  if (loggedIn) {
+    const setupComplete = localStorage.getItem("setupComplete");
+    const setupIncomplete = !setupComplete || setupComplete === "false";
+    if (setupIncomplete && to.name !== "/setup/") {
+      return { name: "/setup/" };
+    }
+  }
 });
+
 
 export default router;
