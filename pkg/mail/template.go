@@ -8,11 +8,11 @@ import (
 	"html/template"
 )
 
-//go:embed templates/*.gohtml
+//go:embed templates/*
 var templateFiles embed.FS
 
 func PasswordResetMailTemplate(name string, link string, language db.UserLanguage) (string, error) {
-	t, err := template.ParseFS(templateFiles, "templates/*.gohtml")
+	t, err := template.ParseFS(templateFiles, "templates/"+string(language)+"/*.gohtml")
 	if err != nil {
 		return "", err
 	}
@@ -26,11 +26,7 @@ func PasswordResetMailTemplate(name string, link string, language db.UserLanguag
 	}
 
 	out := new(bytes.Buffer)
-	if language == db.UserLangDe {
-		err = t.ExecuteTemplate(out, "password_reset_de.gohtml", data)
-	} else {
-		err = t.ExecuteTemplate(out, "password_reset.gohtml", data)
-	}
+	err = t.ExecuteTemplate(out, "password_reset.gohtml", data)
 
 	if err != nil {
 		return "", err
@@ -40,7 +36,7 @@ func PasswordResetMailTemplate(name string, link string, language db.UserLanguag
 }
 
 func InviteMailTemplate(name string, link string, organisation string, language db.UserLanguage) (string, error) {
-	t, err := template.ParseFS(templateFiles, "templates/*.gohtml")
+	t, err := template.ParseFS(templateFiles, "templates/"+string(language)+"/*.gohtml")
 	if err != nil {
 		return "", err
 	}
@@ -56,12 +52,7 @@ func InviteMailTemplate(name string, link string, organisation string, language 
 	}
 
 	out := new(bytes.Buffer)
-
-	if language == db.UserLangDe {
-		err = t.ExecuteTemplate(out, "invite_de.gohtml", data)
-	} else {
-		err = t.ExecuteTemplate(out, "invite.gohtml", data)
-	}
+	err = t.ExecuteTemplate(out, "invite.gohtml", data)
 
 	if err != nil {
 		return "", err
