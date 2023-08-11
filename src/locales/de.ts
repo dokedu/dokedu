@@ -160,4 +160,6 @@ export const de = {
   invite_sent: "Einladung gesendet",
   user_invite_sent: "{firstName} {lastName} hat eine Einladung erhalten",
   password_reset_sent: "Passwort zurücksetzen an {email} gesendet",
+  mobile_not_supported: "Mobile Geräte werden nicht unterstützt",
+  mobile_not_supported_description: "Bitte verwende einen Desktop-Browser, um diese Anwendung zu nutzen",
 };
