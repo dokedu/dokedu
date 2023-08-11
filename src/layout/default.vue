@@ -16,18 +16,13 @@
   </div>
 </template>
 <script setup lang="ts">
-import { watch } from "vue";
 import PageSidebar from "../components/PageSidebar.vue";
 import { useWindowSize } from "@vueuse/core";
 import DButton from "@/components/d-button/d-button.vue";
 import { useAuth } from "@/composables/auth";
 
 const { signOut } = useAuth();
-
 const { width } = useWindowSize();
-watch(width, () => {
-  console.log(width);
-});
 
 const onLogOut = async () => {
   await signOut();
