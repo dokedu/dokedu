@@ -1,6 +1,7 @@
 package mail
 
 import (
+	"example/pkg/db"
 	"fmt"
 	"github.com/labstack/gommon/log"
 	"net/smtp"
@@ -43,30 +44,43 @@ func (m Mailer) Send(to []string, subject string, message string) error {
 	return nil
 }
 
-func (m Mailer) SendPasswordReset(to string, name string, token string) error {
+func (m Mailer) SendPasswordReset(to string, name string, lang db.UserLanguage, token string) error {
 	frontendUrl := os.Getenv("FRONTEND_URL")
 
 	link := fmt.Sprintf("%s/reset-password#token=%s", frontendUrl, token)
 
-	template, err := PasswordResetMailTemplate(name, link)
+	template, err := PasswordResetMailTemplate(name, link, lang)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	return m.Send([]string{to}, "Password Reset", template)
+	var subject string
+	if lang == db.UserLangDe {
+		subject = "Passwort zurücksetzen"
+	} else {
+		subject = "Password Reset"
+	}
+
+	return m.Send([]string{to}, subject, template)
 }
 
-func (m Mailer) SendInvite(to string, name string, organisationName string, token string) error {
+func (m Mailer) SendInvite(to string, name string, organisationName string, lang db.UserLanguage, token string) error {
 	frontendUrl := os.Getenv("FRONTEND_URL")
 
 	link := fmt.Sprintf("%s/invite#token=%s", frontendUrl, token)
 
-	template, err := InviteMailTemplate(name, link, organisationName)
+	template, err := InviteMailTemplate(name, link, organisationName, lang)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
+	var subject string
+	if lang == db.UserLangDe {
+		subject = "Willkommen bei dokedu"
+	} else {
+		subject = "Welcome to Dokedu"
+	}
 
-	return m.Send([]string{to}, "Welcome to Dokedu", template)
+	return m.Send([]string{to}, subject, template)
 }
