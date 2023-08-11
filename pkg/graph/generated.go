@@ -331,13 +331,13 @@ type ComplexityRoot struct {
 		DownloadFile            func(childComplexity int, input model.DownloadFileInput) int
 		DownloadFiles           func(childComplexity int, input model.DownloadFilesInput) int
 		ForgotPassword          func(childComplexity int, input model.ForgotPasswordInput) int
-		InviteUser              func(childComplexity int, input model.CreateUserInput) int
 		MoveFile                func(childComplexity int, input model.MoveFileInput) int
 		MoveFiles               func(childComplexity int, input model.MoveFilesInput) int
 		PreviewFile             func(childComplexity int, input model.PreviewFileInput) int
 		RemoveFileShare         func(childComplexity int, input string) int
 		RenameFile              func(childComplexity int, input model.RenameFileInput) int
 		ResetPassword           func(childComplexity int, input model.ResetPasswordInput) int
+		SendUserInvite          func(childComplexity int, id string) int
 		SignIn                  func(childComplexity int, input model.SignInInput) int
 		SignOut                 func(childComplexity int) int
 		ToggleEventCompetence   func(childComplexity int, input model.AddEventCompetenceInput) int
@@ -464,16 +464,17 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		CreatedAt     func(childComplexity int) int
-		DeletedAt     func(childComplexity int) int
-		Email         func(childComplexity int) int
-		EmailAccounts func(childComplexity int) int
-		FirstName     func(childComplexity int) int
-		ID            func(childComplexity int) int
-		Language      func(childComplexity int) int
-		LastName      func(childComplexity int) int
-		Role          func(childComplexity int) int
-		Student       func(childComplexity int) int
+		CreatedAt      func(childComplexity int) int
+		DeletedAt      func(childComplexity int) int
+		Email          func(childComplexity int) int
+		EmailAccounts  func(childComplexity int) int
+		FirstName      func(childComplexity int) int
+		ID             func(childComplexity int) int
+		InviteAccepted func(childComplexity int) int
+		Language       func(childComplexity int) int
+		LastName       func(childComplexity int) int
+		Role           func(childComplexity int) int
+		Student        func(childComplexity int) int
 	}
 
 	UserCompetence struct {
@@ -634,9 +635,9 @@ type MutationResolver interface {
 	AcceptInvite(ctx context.Context, token string, input model.SignUpInput) (*model.SignInPayload, error)
 	CreateUser(ctx context.Context, input model.CreateUserInput) (*db.User, error)
 	UpdateUser(ctx context.Context, input model.UpdateUserInput) (*db.User, error)
-	InviteUser(ctx context.Context, input model.CreateUserInput) (*db.User, error)
 	ArchiveUser(ctx context.Context, id string) (*db.User, error)
 	UpdateUserLanguage(ctx context.Context, language db.UserLanguage) (*db.User, error)
+	SendUserInvite(ctx context.Context, id string) (bool, error)
 	CreateStudent(ctx context.Context, input model.CreateStudentInput) (*db.User, error)
 	CreateUserCompetence(ctx context.Context, input model.CreateUserCompetenceInput) (*db.UserCompetence, error)
 	ArchiveUserCompetence(ctx context.Context, id string) (*db.UserCompetence, error)
@@ -706,6 +707,7 @@ type UserResolver interface {
 	Student(ctx context.Context, obj *db.User) (*db.UserStudent, error)
 
 	DeletedAt(ctx context.Context, obj *db.User) (*time.Time, error)
+	InviteAccepted(ctx context.Context, obj *db.User) (bool, error)
 	EmailAccounts(ctx context.Context, obj *db.User) ([]*db.EmailAccount, error)
 }
 type UserCompetenceResolver interface {
@@ -2099,18 +2101,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.ForgotPassword(childComplexity, args["input"].(model.ForgotPasswordInput)), true
 
-	case "Mutation.inviteUser":
-		if e.complexity.Mutation.InviteUser == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_inviteUser_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.InviteUser(childComplexity, args["input"].(model.CreateUserInput)), true
-
 	case "Mutation.moveFile":
 		if e.complexity.Mutation.MoveFile == nil {
 			break
@@ -2182,6 +2172,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.ResetPassword(childComplexity, args["input"].(model.ResetPasswordInput)), true
+
+	case "Mutation.sendUserInvite":
+		if e.complexity.Mutation.SendUserInvite == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_sendUserInvite_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SendUserInvite(childComplexity, args["id"].(string)), true
 
 	case "Mutation.signIn":
 		if e.complexity.Mutation.SignIn == nil {
@@ -3064,6 +3066,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.ID(childComplexity), true
+
+	case "User.inviteAccepted":
+		if e.complexity.User.InviteAccepted == nil {
+			break
+		}
+
+		return e.complexity.User.InviteAccepted(childComplexity), true
 
 	case "User.language":
 		if e.complexity.User.Language == nil {
@@ -4000,21 +4009,6 @@ func (ec *executionContext) field_Mutation_forgotPassword_args(ctx context.Conte
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_inviteUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.CreateUserInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNCreateUserInput2exampleᚋpkgᚋgraphᚋmodelᚐCreateUserInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_moveFile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -4102,6 +4096,21 @@ func (ec *executionContext) field_Mutation_resetPassword_args(ctx context.Contex
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_sendUserInvite_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -5158,6 +5167,8 @@ func (ec *executionContext) fieldContext_Bucket_user(ctx context.Context, field 
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -5662,6 +5673,8 @@ func (ec *executionContext) fieldContext_Chat_users(ctx context.Context, field g
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -6029,6 +6042,8 @@ func (ec *executionContext) fieldContext_ChatMessage_user(ctx context.Context, f
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -6281,6 +6296,8 @@ func (ec *executionContext) fieldContext_ChatUser_user(ctx context.Context, fiel
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -8157,6 +8174,8 @@ func (ec *executionContext) fieldContext_EmailAccount_user(ctx context.Context, 
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -9484,6 +9503,8 @@ func (ec *executionContext) fieldContext_Entry_user(ctx context.Context, field g
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -9550,6 +9571,8 @@ func (ec *executionContext) fieldContext_Entry_users(ctx context.Context, field 
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -14631,6 +14654,8 @@ func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -14708,6 +14733,8 @@ func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -14722,83 +14749,6 @@ func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updateUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_inviteUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_inviteUser(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().InviteUser(rctx, fc.Args["input"].(model.CreateUserInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚖexampleᚋpkgᚋdbᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_inviteUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "role":
-				return ec.fieldContext_User_role(ctx, field)
-			case "firstName":
-				return ec.fieldContext_User_firstName(ctx, field)
-			case "lastName":
-				return ec.fieldContext_User_lastName(ctx, field)
-			case "student":
-				return ec.fieldContext_User_student(ctx, field)
-			case "language":
-				return ec.fieldContext_User_language(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_User_deletedAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_inviteUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -14862,6 +14812,8 @@ func (ec *executionContext) fieldContext_Mutation_archiveUser(ctx context.Contex
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -14939,6 +14891,8 @@ func (ec *executionContext) fieldContext_Mutation_updateUserLanguage(ctx context
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -14953,6 +14907,61 @@ func (ec *executionContext) fieldContext_Mutation_updateUserLanguage(ctx context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updateUserLanguage_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_sendUserInvite(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_sendUserInvite(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SendUserInvite(rctx, fc.Args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_sendUserInvite(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_sendUserInvite_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -15016,6 +15025,8 @@ func (ec *executionContext) fieldContext_Mutation_createStudent(ctx context.Cont
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -15942,6 +15953,8 @@ func (ec *executionContext) fieldContext_Organisation_owner(ctx context.Context,
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -17633,6 +17646,8 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -17710,6 +17725,8 @@ func (ec *executionContext) fieldContext_Query_me(ctx context.Context, field gra
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -18817,6 +18834,8 @@ func (ec *executionContext) fieldContext_Report_user(ctx context.Context, field 
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -18883,6 +18902,8 @@ func (ec *executionContext) fieldContext_Report_studentUser(ctx context.Context,
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -20315,6 +20336,50 @@ func (ec *executionContext) fieldContext_User_deletedAt(ctx context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _User_inviteAccepted(ctx context.Context, field graphql.CollectedField, obj *db.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_inviteAccepted(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.User().InviteAccepted(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_inviteAccepted(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _User_emailAccounts(ctx context.Context, field graphql.CollectedField, obj *db.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_emailAccounts(ctx, field)
 	if err != nil {
@@ -20652,6 +20717,8 @@ func (ec *executionContext) fieldContext_UserCompetence_user(ctx context.Context
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -20715,6 +20782,8 @@ func (ec *executionContext) fieldContext_UserCompetence_createdBy(ctx context.Co
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -20975,6 +21044,8 @@ func (ec *executionContext) fieldContext_UserConnection_edges(ctx context.Contex
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -28486,15 +28557,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "inviteUser":
-
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_inviteUser(ctx, field)
-			})
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "archiveUser":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -28508,6 +28570,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateUserLanguage(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "sendUserInvite":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_sendUserInvite(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -30055,6 +30126,26 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 					}
 				}()
 				res = ec._User_deletedAt(ctx, field, obj)
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "inviteAccepted":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_inviteAccepted(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			}
 

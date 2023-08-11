@@ -382,58 +382,6 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 	return &user, nil
 }
 
-// InviteUser is the resolver for the inviteUser field.
-func (r *mutationResolver) InviteUser(ctx context.Context, input model.CreateUserInput) (*db.User, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, nil
-	}
-
-	var organisation db.Organisation
-	err = r.DB.NewSelect().Model(&organisation).Where("id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if input.Email == "" {
-		return nil, errors.New("email is required")
-	}
-
-	//// check if the email is in the allowed domains
-	//if isStringInArray(input.Email, organisation.AllowedDomains) {
-	//	return nil, errors.New("email is not in the allowed domains (allowed domains: " + strings.Join(organisation.AllowedDomains, ", ") + ")")
-	//}
-
-	// check if the email is already in the database
-	//count, err := r.DB.middleware.GetUserByEmail(ctx, db.middleware.GetUserByEmailParams{
-	//	OrganisationID: currentUser.OrganisationID,
-	//	Email:          input.Email,
-	//})
-	count, err := r.DB.NewSelect().Model(&db.User{}).Where("organisation_id = ?", currentUser.OrganisationID).Where("email = ?", input.Email).Count(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if count > 0 {
-		return nil, errors.New("email is already in the database")
-	}
-
-	// create a new user
-	user := db.User{
-		OrganisationID: currentUser.OrganisationID,
-		Email:          sql.NullString{String: input.Email, Valid: true},
-		Role:           input.Role,
-		FirstName:      input.FirstName,
-		LastName:       input.LastName,
-	}
-
-	// insert the user into the database
-	err = r.DB.NewInsert().Model(&user).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
-}
-
 // ArchiveUser is the resolver for the archiveUser field.
 func (r *mutationResolver) ArchiveUser(ctx context.Context, id string) (*db.User, error) {
 	currentUser, err := middleware.GetUser(ctx)
@@ -516,6 +464,36 @@ func (r *mutationResolver) UpdateUserLanguage(ctx context.Context, language db.U
 	}
 
 	return &updatedUser, nil
+}
+
+// SendUserInvite is the resolver for the sendUserInvite field.
+func (r *mutationResolver) SendUserInvite(ctx context.Context, id string) (bool, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return false, nil
+	}
+
+	// Get the user
+	var user db.User
+	err = r.DB.NewSelect().Model(&user).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+
+	// Get the organisation
+	var organisation db.Organisation
+	err = r.DB.NewSelect().Model(&organisation).Where("id = ?", currentUser.OrganisationID).Scan(ctx)
+
+	// Send an email to the user
+	token := nanoid.Must(32)
+	_, err = r.DB.NewUpdate().Model(&user).Set("recovery_token = ?", token).Set("recovery_sent_at = now()").Where("id = ?", user.ID).Exec(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	err = r.Mailer.SendInvite(user.Email.String, user.FirstName, organisation.Name, currentUser.Language, token)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 // CreateStudent is the resolver for the createStudent field.
@@ -1401,6 +1379,20 @@ func (r *userResolver) DeletedAt(ctx context.Context, obj *db.User) (*time.Time,
 	return nil, nil
 }
 
+// InviteAccepted is the resolver for the inviteAccepted field.
+func (r *userResolver) InviteAccepted(ctx context.Context, obj *db.User) (bool, error) {
+	_, err := middleware.GetUser(ctx)
+	if err != nil {
+		return false, nil
+	}
+
+	if obj.Password.Valid {
+		return true, nil
+	}
+
+	return false, nil
+}
+
 // Competence is the resolver for the competence field.
 func (r *userCompetenceResolver) Competence(ctx context.Context, obj *db.UserCompetence) (*db.Competence, error) {
 	currentUser, err := middleware.GetUser(ctx)
@@ -1599,19 +1591,3 @@ type tagResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }
 type userCompetenceResolver struct{ *Resolver }
 type userStudentResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//     it when you're done.
-//   - You have helper methods in this file. Move them out to keep these resolver files clean.
-func isStringInArray(s string, a []string) bool {
-	for _, v := range a {
-		if v == s {
-			return true
-		}
-	}
-
-	return false
-}
