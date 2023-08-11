@@ -3,15 +3,16 @@ package mail
 import (
 	"bytes"
 	"embed"
+	"example/pkg/db"
 	"fmt"
 	"html/template"
 )
 
-//go:embed templates/*.gohtml
+//go:embed templates/*
 var templateFiles embed.FS
 
-func PasswordResetMailTemplate(name string, link string) (string, error) {
-	t, err := template.ParseFS(templateFiles, "templates/*.gohtml")
+func PasswordResetMailTemplate(name string, link string, language db.UserLanguage) (string, error) {
+	t, err := template.ParseFS(templateFiles, "templates/"+string(language)+"/*.gohtml")
 	if err != nil {
 		return "", err
 	}
@@ -26,6 +27,7 @@ func PasswordResetMailTemplate(name string, link string) (string, error) {
 
 	out := new(bytes.Buffer)
 	err = t.ExecuteTemplate(out, "password_reset.gohtml", data)
+
 	if err != nil {
 		return "", err
 	}
@@ -33,8 +35,8 @@ func PasswordResetMailTemplate(name string, link string) (string, error) {
 	return fmt.Sprintf("%s", out), nil
 }
 
-func InviteMailTemplate(name string, link string, organisation string) (string, error) {
-	t, err := template.ParseFS(templateFiles, "templates/*.gohtml")
+func InviteMailTemplate(name string, link string, organisation string, language db.UserLanguage) (string, error) {
+	t, err := template.ParseFS(templateFiles, "templates/"+string(language)+"/*.gohtml")
 	if err != nil {
 		return "", err
 	}
@@ -51,6 +53,7 @@ func InviteMailTemplate(name string, link string, organisation string) (string, 
 
 	out := new(bytes.Buffer)
 	err = t.ExecuteTemplate(out, "invite.gohtml", data)
+
 	if err != nil {
 		return "", err
 	}

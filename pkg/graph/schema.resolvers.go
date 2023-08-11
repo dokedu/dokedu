@@ -221,7 +221,7 @@ func (r *mutationResolver) ForgotPassword(ctx context.Context, input model.Forgo
 		}, nil
 	}
 
-	err = r.Mailer.SendPasswordReset(input.Email, user.FirstName, token)
+	err = r.Mailer.SendPasswordReset(input.Email, user.FirstName, user.Language, token)
 	if err != nil {
 		return &model.ForgotPasswordPayload{
 			Success: false,
@@ -311,7 +311,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 		return nil, err
 	}
 
-	err = r.Mailer.SendInvite(input.Email, user.FirstName, organisation.Name, token)
+	err = r.Mailer.SendInvite(input.Email, user.FirstName, organisation.Name, currentUser.Language, token)
 	if err != nil {
 		return nil, err
 	}
