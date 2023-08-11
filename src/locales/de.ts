@@ -160,4 +160,26 @@ export const de = {
   invite_sent: "Einladung gesendet",
   user_invite_sent: "{firstName} {lastName} hat eine Einladung erhalten",
   password_reset_sent: "Passwort zurücksetzen an {email} gesendet",
+
+  password: "Passwort",
+  your_email: "Deine E-Mail",
+  your_password: "Dein Passwort",
+  log_in: "Anmelden",
+  forgot_password: "Passwort vergessen?",
+
+  success: "Erfolg",
+  check_your_email_password_reset: "In deiner E-Mail findest du einen Link zum Zurücksetzen deines Passworts.",
+  send_password_reset: "Passwort zurücksetzen senden",
+  back_to_login: "Zurück zur Anmeldung",
+
+  your_new_password: "Dein neues Passwort",
+  confirm_your_new_password: "Bestätige dein neues Passwort",
+  create_account: "Konto erstellen",
+  passwords_dont_match: "Passwörter stimmen nicht überein",
+  invalid_token: "Ungültiges Token",
+  password_too_short: "Passwort zu kurz",
+  password_set_successfully: "Passwort erfolgreich gesetzt",
+  something_went_wrong: "Etwas ist schief gelaufen",
+  password_reset_successfully: "Passwort erfolgreich zurückgesetzt",
+  confirm_password: "Passwort bestätigen",
 };
