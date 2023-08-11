@@ -162,6 +162,28 @@ export const en = {
   invite_sent: "Invite sent",
   user_invite_sent: "{firstName} {lastName} was sent an invite",
   password_reset_sent: "Password reset sent to {email}",
+
+  password: "Password",
+  your_email: "Your email",
+  your_password: "Your password",
+  log_in: "Log in",
+  forgot_password: "Forgot password?",
+
+  success: "Success",
+  check_your_email_password_reset: "Check your email for a link to reset your password.",
+  send_password_reset: "Send password reset",
+  back_to_login: "Back to login",
+
+  your_new_password: "Your new password",
+  confirm_your_new_password: "Confirm your new password",
+  create_account: "Create account",
+  passwords_dont_match: "Passwords don't match",
+  invalid_token: "Invalid token",
+  password_too_short: "Password too short",
+  password_set_successfully: "Password set successfully",
+  something_went_wrong: "Something went wrong",
+  password_reset_successfully: "Password reset successfully",
+  confirm_password: "Confirm password",
   mobile_not_supported: "Mobile devices are not supported",
   mobile_not_supported_description: "Please use a desktop browser to use this application",
 };
