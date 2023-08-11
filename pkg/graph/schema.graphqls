@@ -122,6 +122,7 @@ type SignInPayload {
     token: String!
     enabled_apps: [String!]!
     language: String!
+    setupComplete: Boolean!
 }
 
 input SignUpInput {

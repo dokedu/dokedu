@@ -395,9 +395,10 @@ type SignInInput struct {
 }
 
 type SignInPayload struct {
-	Token       string   `json:"token"`
-	EnabledApps []string `json:"enabled_apps"`
-	Language    string   `json:"language"`
+	Token         string   `json:"token"`
+	EnabledApps   []string `json:"enabled_apps"`
+	Language      string   `json:"language"`
+	SetupComplete bool     `json:"setupComplete"`
 }
 
 type SignUpInput struct {
