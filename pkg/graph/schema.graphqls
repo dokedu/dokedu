@@ -32,6 +32,8 @@ type User {
 
     createdAt: Time!
     deletedAt: Time
+
+    inviteAccepted: Boolean!
 }
 
 enum CompetenceType {
@@ -335,9 +337,9 @@ extend type Mutation {
 
     createUser(input: CreateUserInput!): User!
     updateUser(input: UpdateUserInput!): User!
-    inviteUser(input: CreateUserInput!): User!
     archiveUser(id: ID!): User!
     updateUserLanguage(language: UserLanguage!): User!
+    sendUserInvite(id: ID!): Boolean!
 
     createStudent(input: CreateStudentInput!): User!
 
