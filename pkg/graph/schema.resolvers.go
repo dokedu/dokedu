@@ -156,9 +156,10 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 	}
 
 	return &model.SignInPayload{
-		Token:       token,
-		EnabledApps: organisation.EnabledApps,
-		Language:    string(user.Language),
+		Token:         token,
+		EnabledApps:   organisation.EnabledApps,
+		Language:      string(user.Language),
+		SetupComplete: organisation.SetupComplete,
 	}, nil
 }
 
