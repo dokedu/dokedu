@@ -102,7 +102,7 @@ async function onSubmit() {
   });
 
   if (data?.resetPassword?.success) {
-    alert("Password reset successfully");
+    alert("Password set successfully");
     await router.push("/login");
   } else {
     alert("Something went wrong");

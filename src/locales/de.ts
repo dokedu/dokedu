@@ -153,4 +153,11 @@ export const de = {
   description_required: "Beschreibung ist erforderlich",
   domain_required: "Domain ist erforderlich",
   name_spaces: "Name darf keine Leerzeichen enthalten",
+
+  send_invite: "Einladung senden",
+  reset_password: "Passwort zurücksetzen",
+  user_already_accepted: "Der Nutzer hat seine Einladung bereits angenommen",
+  invite_sent: "Einladung gesendet",
+  user_invite_sent: "{firstName} {lastName} hat eine Einladung erhalten",
+  password_reset_sent: "Passwort zurücksetzen an {email} gesendet",
 };

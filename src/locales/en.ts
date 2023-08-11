@@ -155,4 +155,11 @@ export const en = {
   description_required: "Description is required",
   domain_required: "Domain is required",
   name_spaces: "Name cannot contain spaces",
+
+  send_invite: "Send invite",
+  reset_password: "Reset password",
+  user_already_accepted: "User has already accepted their invite",
+  invite_sent: "Invite sent",
+  user_invite_sent: "{firstName} {lastName} was sent an invite",
+  password_reset_sent: "Password reset sent to {email}",
 };
