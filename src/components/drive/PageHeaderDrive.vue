@@ -1,31 +1,6 @@
 <template>
   <PageHeader class="flex min-h-0 select-none justify-between gap-4">
-    <div class="flex flex-1 items-center gap-2 overflow-hidden text-strong">
-      <router-link
-        :to="{ name: '/drive/my-drive/' }"
-        class="w-fit whitespace-nowrap rounded-lg px-1 py-0.5 hover:bg-stone-100"
-      >
-        My Drive
-      </router-link>
-      <template v-if="!queryFolder && folder">
-        <template v-for="parent in folder.file.parents" class="stroke-colors">
-          <span>/</span>
-          <router-link
-            :to="{ name: '/drive/my-drive/folders/[id]', params: { id: parent.id } }"
-            class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 hover:bg-stone-100"
-          >
-            {{ parent.name }}
-          </router-link>
-        </template>
-        <span>/</span>
-        <router-link
-          :to="{ name: '/drive/my-drive/folders/[id]', params: { id: folder.file.id } }"
-          class="whitespace-nowrap rounded-lg px-1 py-0.5 hover:bg-stone-100"
-        >
-          {{ folder?.file.name }}
-        </router-link>
-      </template>
-    </div>
+    <d-drive-header-breadcrumbs />
     <div class="flex gap-2">
       <DButton type="transparent" size="md" :icon-left="FolderPlus" @click="addFolder">Folder</DButton>
       <DDialog :open="newFolderDialog" @close="newFolderDialog = false">
@@ -37,22 +12,31 @@
 </template>
 
 <script lang="ts" setup>
+import DDriveHeaderBreadcrumbs from "./DDriveHeaderBreadcrumbs.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { FolderPlus, Plus } from "lucide-vue-next";
 import DDialog from "@/components/d-dialog/d-dialog.vue";
 import { useFileDialog } from "@vueuse/core";
-import { computed, reactive, ref } from "vue";
-import { useMutation, useQuery } from "@urql/vue";
+import { ref, toRefs } from "vue";
+import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
-import { useRoute } from "vue-router/auto";
+
+export interface Props {
+  title: string;
+  folderId: string | null;
+  bucketId: string | null;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  bucketId: null,
+});
+
+const { folderId, bucketId } = toRefs(props);
 
 const { open, reset, onChange } = useFileDialog();
 const newFolderDialog = ref(false);
 
-const route = useRoute("/drive/my-drive/folders/[id]");
-
-const folderId = computed<string>(() => route.params.id as string);
 const emit = defineEmits(["upload"]);
 
 onChange(async (e) => {
@@ -67,17 +51,16 @@ onChange(async (e) => {
 });
 
 async function addFolder() {
-  // newFolderDialog.value = true
-  // alert with input
   const folderName = prompt("Folder name");
+
   if (folderName) {
     await createFolder({
       input: {
         name: folderName,
         parentId: folderId.value as string,
+        ...(bucketId.value && { bucketId: bucketId.value }),
       },
     });
-    // refreshFiles();
   }
 }
 
@@ -90,27 +73,4 @@ const { executeMutation: createFolder } = useMutation(
     }
   `)
 );
-
-const queryFolder = computed(() => {
-  return folderId.value === undefined || folderId.value === null;
-});
-
-const { data: folder } = useQuery({
-  query: graphql(`
-    query fileById($id: ID!) {
-      file(id: $id) {
-        id
-        name
-        parents {
-          id
-          name
-        }
-      }
-    }
-  `),
-  variables: reactive({
-    id: folderId,
-  }),
-  pause: queryFolder,
-});
 </script>

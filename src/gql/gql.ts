@@ -29,15 +29,17 @@ const documents = {
     "\n    mutation ArchiveTag($id: ID!) {\n      archiveTag(id: $id) {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  ": types.ArchiveTagDocument,
     "\n    query competenceSearch($search: String, $filter: CompetenceFilterInput) {\n      competences(search: $search, filter: $filter, sort: { field: sort_order, order: asc }) {\n        edges {\n          id\n          name\n          type\n          color\n          grades\n          parents {\n            id\n            name\n            type\n            grades\n            color\n          }\n        }\n      }\n    }\n  ": types.CompetenceSearchDocument,
     "\n    query competencePath($id: ID!) {\n      competence(id: $id) {\n        id\n        name\n        type\n        color\n        grades\n        parents {\n          id\n          name\n          type\n          grades\n          color\n        }\n      }\n    }\n  ": types.CompetencePathDocument,
+    "\n    mutation uploadFile($input: FileUploadInput!) {\n      uploadFile(input: $input) {\n        id\n      }\n    }\n  ": types.UploadFileDocument,
     "\n  mutation createEntry($input: CreateEntryInput!) {\n    createEntry(input: $input) {\n      id\n      date\n      body\n      deletedAt\n      user {\n        id\n        firstName\n        lastName\n      }\n      createdAt\n      tags {\n        id\n        name\n        color\n      }\n      events {\n        id\n        title\n      }\n      users {\n        id\n        firstName\n        lastName\n      }\n      userCompetences {\n        id\n        level\n        competence {\n          id\n          name\n          color\n          type\n        }\n      }\n    }\n  }\n": types.CreateEntryDocument,
     "\n  mutation updateEntry($input: UpdateEntryInput!) {\n    updateEntry(input: $input) {\n      id\n      date\n      body\n      deletedAt\n      user {\n        id\n        firstName\n        lastName\n      }\n      createdAt\n      tags {\n        id\n        name\n        color\n      }\n      events {\n        id\n        title\n      }\n      users {\n        id\n        firstName\n        lastName\n      }\n      userCompetences {\n        id\n        level\n        competence {\n          id\n          name\n          color\n          type\n        }\n      }\n    }\n  }\n": types.UpdateEntryDocument,
     "\n    query events {\n      events {\n        edges {\n          id\n          title\n        }\n      }\n    }\n  ": types.EventsDocument,
     "\n    query users($search: String) {\n      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  ": types.UsersDocument,
     "\n    mutation renameFile($input: RenameFileInput!) {\n      renameFile(input: $input) {\n        id\n        name\n      }\n    }\n  ": types.RenameFileDocument,
+    "\n    query fileById($id: ID!) {\n      file(id: $id) {\n        id\n        name\n        parents {\n          id\n          name\n        }\n      }\n    }\n  ": types.FileByIdDocument,
+    "\n    query bucketById($id: ID!) {\n      bucket(id: $id) {\n        id\n        name\n      }\n    }\n  ": types.BucketByIdDocument,
     "\n    mutation deleteFile($id: ID!) {\n      deleteFile(input: { id: $id }) {\n        success\n        file {\n          id\n        }\n      }\n    }\n  ": types.DeleteFileDocument,
     "\n  query files($offset: Int, $limit: Int, $filter: FilesFilterInput) {\n    files(input: $filter, limit: $limit, offset: $offset) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n      edges {\n        id\n        name\n        fileType\n        MIMEType\n        size\n        createdAt\n      }\n    }\n  }\n": types.FilesDocument,
     "\n    mutation createFolder($input: CreateFolderInput!) {\n      createFolder(input: $input) {\n        id\n      }\n    }\n  ": types.CreateFolderDocument,
-    "\n    query fileById($id: ID!) {\n      file(id: $id) {\n        id\n        name\n        parents {\n          id\n          name\n        }\n      }\n    }\n  ": types.FileByIdDocument,
     "\n    mutation signOut {\n      signOut\n    }\n  ": types.SignOutDocument,
     "\n    mutation previewFile($id: ID!) {\n      previewFile(input: { id: $id }) {\n        url\n      }\n    }\n  ": types.PreviewFileDocument,
     "\n  query domains {\n    domains {\n      edges {\n        id\n        name\n        createdAt\n      }\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n": types.DomainsDocument,
@@ -59,7 +61,7 @@ const documents = {
     "\n    mutation sendInvite($id: ID!) {\n      sendUserInvite(id: $id)\n    }\n  ": types.SendInviteDocument,
     "\n    mutation createUser($user: CreateUserInput!) {\n      createUser(input: $user) {\n        id\n        firstName\n        lastName\n      }\n    }\n  ": types.CreateUserDocument,
     "\n    query file($id: ID!) {\n      file(id: $id) {\n        id\n        name\n        fileType\n        MIMEType\n        size\n        createdAt\n      }\n    }\n  ": types.FileDocument,
-    "\n    mutation uploadFile($input: FileUploadInput!) {\n      uploadFile(input: $input) {\n        id\n      }\n    }\n  ": types.UploadFileDocument,
+    "\n    mutation createSharedDrive($name: String!) {\n      createSharedDrive(name: $name) {\n        id\n        name\n      }\n    }\n  ": types.CreateSharedDriveDocument,
     "\n  query buckets {\n    buckets(input: { shared: true }) {\n      edges {\n        id\n        name\n        shared\n        createdAt\n      }\n      totalCount\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n": types.BucketsDocument,
     "\n    mutation resetPassword($input: ResetPasswordInput!) {\n      resetPassword(input: $input) {\n        success\n      }\n    }\n  ": types.ResetPasswordDocument,
     "\n  query adminStudents($search: String, $order: UserOrderBy, $offset: Int) {\n    users(filter: { role: [student], orderBy: $order }, search: $search, offset: $offset) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n      edges {\n        id\n        firstName\n        lastName\n        student {\n          id\n          birthday\n          grade\n        }\n      }\n    }\n  }\n": types.AdminStudentsDocument,
@@ -172,6 +174,10 @@ export function graphql(source: "\n    query competencePath($id: ID!) {\n      c
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n    mutation uploadFile($input: FileUploadInput!) {\n      uploadFile(input: $input) {\n        id\n      }\n    }\n  "): (typeof documents)["\n    mutation uploadFile($input: FileUploadInput!) {\n      uploadFile(input: $input) {\n        id\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n  mutation createEntry($input: CreateEntryInput!) {\n    createEntry(input: $input) {\n      id\n      date\n      body\n      deletedAt\n      user {\n        id\n        firstName\n        lastName\n      }\n      createdAt\n      tags {\n        id\n        name\n        color\n      }\n      events {\n        id\n        title\n      }\n      users {\n        id\n        firstName\n        lastName\n      }\n      userCompetences {\n        id\n        level\n        competence {\n          id\n          name\n          color\n          type\n        }\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation createEntry($input: CreateEntryInput!) {\n    createEntry(input: $input) {\n      id\n      date\n      body\n      deletedAt\n      user {\n        id\n        firstName\n        lastName\n      }\n      createdAt\n      tags {\n        id\n        name\n        color\n      }\n      events {\n        id\n        title\n      }\n      users {\n        id\n        firstName\n        lastName\n      }\n      userCompetences {\n        id\n        level\n        competence {\n          id\n          name\n          color\n          type\n        }\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -192,6 +198,14 @@ export function graphql(source: "\n    mutation renameFile($input: RenameFileInp
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n    query fileById($id: ID!) {\n      file(id: $id) {\n        id\n        name\n        parents {\n          id\n          name\n        }\n      }\n    }\n  "): (typeof documents)["\n    query fileById($id: ID!) {\n      file(id: $id) {\n        id\n        name\n        parents {\n          id\n          name\n        }\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    query bucketById($id: ID!) {\n      bucket(id: $id) {\n        id\n        name\n      }\n    }\n  "): (typeof documents)["\n    query bucketById($id: ID!) {\n      bucket(id: $id) {\n        id\n        name\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n    mutation deleteFile($id: ID!) {\n      deleteFile(input: { id: $id }) {\n        success\n        file {\n          id\n        }\n      }\n    }\n  "): (typeof documents)["\n    mutation deleteFile($id: ID!) {\n      deleteFile(input: { id: $id }) {\n        success\n        file {\n          id\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -201,10 +215,6 @@ export function graphql(source: "\n  query files($offset: Int, $limit: Int, $fil
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    mutation createFolder($input: CreateFolderInput!) {\n      createFolder(input: $input) {\n        id\n      }\n    }\n  "): (typeof documents)["\n    mutation createFolder($input: CreateFolderInput!) {\n      createFolder(input: $input) {\n        id\n      }\n    }\n  "];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n    query fileById($id: ID!) {\n      file(id: $id) {\n        id\n        name\n        parents {\n          id\n          name\n        }\n      }\n    }\n  "): (typeof documents)["\n    query fileById($id: ID!) {\n      file(id: $id) {\n        id\n        name\n        parents {\n          id\n          name\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -292,7 +302,7 @@ export function graphql(source: "\n    query file($id: ID!) {\n      file(id: $i
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n    mutation uploadFile($input: FileUploadInput!) {\n      uploadFile(input: $input) {\n        id\n      }\n    }\n  "): (typeof documents)["\n    mutation uploadFile($input: FileUploadInput!) {\n      uploadFile(input: $input) {\n        id\n      }\n    }\n  "];
+export function graphql(source: "\n    mutation createSharedDrive($name: String!) {\n      createSharedDrive(name: $name) {\n        id\n        name\n      }\n    }\n  "): (typeof documents)["\n    mutation createSharedDrive($name: String!) {\n      createSharedDrive(name: $name) {\n        id\n        name\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

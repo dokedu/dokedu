@@ -187,7 +187,6 @@ onKeyStroke("ArrowDown", () => {
 onKeyStroke("ArrowUp", () => {
   if (focusedOptionIndex.value === null) {
     focusedOptionIndex.value = sortedOptions.value.length - 1;
-    console.log(focusedOptionIndex.value);
     return;
   }
 

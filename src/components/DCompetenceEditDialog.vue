@@ -117,7 +117,6 @@ const { executeMutation: updateCompetence } = useMutation(
 );
 
 const onSelectColor = (color: string) => {
-  console.log(color);
   if (competence.value) {
     competence.value.color = color.toLowerCase();
   }

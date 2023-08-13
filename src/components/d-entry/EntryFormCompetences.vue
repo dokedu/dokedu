@@ -94,10 +94,6 @@ function toggleCompetence(competence: { id: string; type: string }) {
     parents.value = [...parents.value, competence];
   }
 
-  if (competence.type === "competence") {
-    console.log(competence);
-  }
-
   // @ts-expect-error
   emitToggleCompetence(competence);
 }

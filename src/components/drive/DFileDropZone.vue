@@ -25,7 +25,6 @@ const emit = defineEmits(["upload"]);
 const events = ["dragenter", "dragover", "dragleave", "drop"];
 
 async function dropHandler(event: any) {
-  console.log(event);
   if (event.dataTransfer) {
     if (event.dataTransfer.files.length > 0) {
       emit("upload", {

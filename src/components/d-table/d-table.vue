@@ -83,25 +83,24 @@ type Column = {
   width?: number;
 };
 
-const props = withDefaults(
-  defineProps<{
-    modelValue?: T | T[];
-    columns: Column[];
-    query: object;
-    variables: K[];
-    selected?: T[];
-    objectName: string;
-    watchers?: U[];
-    hideHeader?: boolean;
-    defaultSort?: string;
-    search?: string;
-    additionalTypenames?: string[];
-  }>(),
-  {
-    watchers: () => [],
-    hideHeader: false,
-  }
-);
+type Props = {
+  modelValue?: T | T[];
+  columns: Column[];
+  query: object;
+  variables: K[];
+  selected?: T[];
+  objectName: string;
+  watchers?: U[];
+  hideHeader?: boolean;
+  defaultSort?: string;
+  search?: string;
+  additionalTypenames?: ["File" | "Bucket"];
+};
+
+const props = withDefaults(defineProps<Props>(), {
+  watchers: () => [],
+  hideHeader: false,
+});
 
 const emit = defineEmits(["update:modelValue", "update:variables", "row-click", "update:selected"]);
 

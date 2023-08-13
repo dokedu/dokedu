@@ -2,7 +2,7 @@
   <PageWrapper>
     <PageHeader>
       <div class="flex w-full items-center justify-between">
-        <div>Shared drives</div>
+        <d-drive-header-breadcrumbs />
         <DButton type="primary" size="md" :icon-left="Plus" @click="newSharedDrive">New</DButton>
       </div>
     </PageHeader>
@@ -13,6 +13,8 @@
         objectName="buckets"
         :query="sharedDrivesQuery"
         defaultSort="createdAt"
+        :additionalTypenames="['Bucket']"
+        @row-click="clickRow"
       >
         <template #name-data="{ column }">
           <div class="flex items-center gap-3">
@@ -36,6 +38,7 @@
 </template>
 
 <script setup lang="ts">
+import DDriveHeaderBreadcrumbs from "@/components/drive/DDriveHeaderBreadcrumbs.vue";
 import PageWrapper from "@/components/PageWrapper.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import PageContent from "@/components/PageContent.vue";
@@ -45,10 +48,36 @@ import { PageVariables } from "@/types/types";
 import { ref } from "vue";
 import { Plus, Folder, MoreVertical } from "lucide-vue-next";
 import { graphql } from "@/gql";
+import { useMutation } from "@urql/vue";
+import router from "@/router";
 
-function newSharedDrive() {
-  alert("new shared drive");
+async function newSharedDrive() {
+  const name = prompt("Enter name");
+
+  if (name) {
+    await createSharedDrive({ name });
+  }
 }
+
+async function clickRow(item: any) {
+  await router.push({
+    name: "/drive/shared-drives/[id]/",
+    params: {
+      id: item.id,
+    },
+  });
+}
+
+const { executeMutation: createSharedDrive } = useMutation(
+  graphql(`
+    mutation createSharedDrive($name: String!) {
+      createSharedDrive(name: $name) {
+        id
+        name
+      }
+    }
+  `)
+);
 
 const columns = [
   {
