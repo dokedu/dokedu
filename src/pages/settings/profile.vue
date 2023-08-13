@@ -2,23 +2,29 @@
   <page-wrapper>
     <page-header class="select-none justify-between">
       <div class="flex items-center gap-4">
-        <div class="font-medium text-stone-950">Profile</div>
+        <div class="font-medium text-stone-950">Profil</div>
       </div>
     </page-header>
     <div class="flex select-none gap-4 px-8 py-4 text-sm text-subtle">
       <div class="flex w-full max-w-xl flex-col gap-4 rounded-lg bg-stone-100 p-6">
-        <div class="font-medium text-stone-950">Change your password</div>
+        <div class="font-medium text-stone-950">{{ $t("password") }}</div>
 
-        <d-input v-model="password" name="password" label="Password" type="password" placeholder="Password" />
+        <d-input
+          v-model="password"
+          name="password"
+          :label="$t('your_new_password')"
+          type="password"
+          :placeholder="$t('your_new_password')"
+        />
         <d-input
           v-model="passwordConfirm"
           name="confirm-password"
-          label="Confirm password"
+          :label="$t('confirm_your_new_password')"
           type="password"
-          placeholder="Confirm password"
+          :placeholder="$t('confirm_your_new_password')"
         />
 
-        <d-button size="md" @click="onSave">Save password</d-button>
+        <d-button size="md" @click="onSave">{{ $t("reset_password") }}</d-button>
       </div>
     </div>
   </page-wrapper>
@@ -33,6 +39,9 @@ import DInput from "@/components/d-input/d-input.vue";
 import { ref } from "vue";
 import { useMutation } from "@urql/vue";
 import resetPasswordMutation from "@/queries/resetPasswordMutation";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const password = ref("");
 const passwordConfirm = ref("");
@@ -40,12 +49,13 @@ const passwordConfirm = ref("");
 const { executeMutation: passwordReset } = useMutation(resetPasswordMutation);
 
 async function onSave() {
-  if (password.value.length < 8) {
-    alert("Password must be at least 8 characters");
+  if (password.value !== passwordConfirm.value) {
+    alert(t("passwords_dont_match"));
     return;
   }
-  if (password.value !== passwordConfirm.value) {
-    alert("Passwords do not match");
+
+  if (password.value.length < 8) {
+    alert(t("password_too_short"));
     return;
   }
 
