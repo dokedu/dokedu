@@ -44,6 +44,20 @@ export interface App {
 
 export const apps = computed<App[]>(() => [
     {
+        id: "settings",
+        icon: Settings,
+        allowedUserRoles: [],
+        name: i18n.global.t("settings"),
+        links: [
+            {
+                // icon: "file-check-02",
+                icon: Settings,
+                name: i18n.global.t("settings"),
+                route: "/settings/profile",
+            },
+        ]
+    },
+    {
         id: "record",
         icon: Pen,
         allowedUserRoles: ["owner", "admin", "teacher"],
