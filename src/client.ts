@@ -2,11 +2,15 @@ import { cacheExchange, fetchExchange } from "@urql/vue";
 import { authExchange } from "@urql/exchange-auth";
 import { createClient } from "@urql/vue";
 import router from "./router";
+import { publicRoutes } from "./router/publicRoutes";
+import { useRoute } from "vue-router/auto";
 
 const url = import.meta.env.VITE_API_URL as string;
 const getToken = () => {
   return localStorage.getItem("authorization");
 };
+
+const route = useRoute()
 
 function makeClient() {
   return createClient({
@@ -44,9 +48,14 @@ function makeClient() {
             return error.graphQLErrors.some((e) => e.extensions?.code === "UNAUTHENTICATED");
           },
           async refreshAuth() {
-            localStorage.removeItem("authorization");
-            localStorage.removeItem("enabled_apps");
-            await router.push({ name: "/login" });
+            if (!route) return;
+            if (!publicRoutes.includes(route.name)) {
+              localStorage.removeItem("authorization");
+              localStorage.removeItem("enabled_apps");
+              localStorage.removeItem("active_app");
+
+              await router.push({ name: "/login" });
+            }
           },
         };
       }),

@@ -57,8 +57,8 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { useMutation } from "@urql/vue";
+import resetPasswordMutation from "@/queries/resetPasswordMutation";
 import { useRoute, useRouter } from "vue-router/auto";
-import { graphql } from "@/gql";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
@@ -66,15 +66,7 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
-const { executeMutation: passwordReset } = useMutation(
-  graphql(`
-    mutation resetPassword($input: ResetPasswordInput!) {
-      resetPassword(input: $input) {
-        success
-      }
-    }
-  `)
-);
+const { executeMutation: passwordReset } = useMutation(resetPasswordMutation);
 
 const password = ref("");
 const passwordConfirm = ref("");

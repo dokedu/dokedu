@@ -53,6 +53,14 @@
       </div>
     </div>
     <div class="px-1 py-4">
+      <router-link
+        to="/settings/profile"
+        class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
+      >
+        <Settings class="stroke-stone-500" :size="18" />
+        <div class="text-sm">{{ $t("settings") }}</div>
+      </router-link>
+
       <div
         class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
       >
@@ -80,7 +88,7 @@
 </template>
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { LogOut, Globe, Grip } from "lucide-vue-next";
+import { LogOut, Globe, Grip, Settings } from "lucide-vue-next";
 import { onClickOutside, useStorage } from "@vueuse/core";
 import { useRoute, useRouter } from "vue-router/auto";
 import { useMutation, useQuery } from "@urql/vue";
@@ -89,9 +97,10 @@ import { UserLanguage } from "@/gql/graphql";
 import { AppLink, apps, UserRole } from "./d-sidebar/d-sidebar";
 import i18n from "@/i18n";
 import { useAuth } from "@/composables/auth";
+import useActiveApp from "@/composables/useActiveApp";
 
 const visibleAppSwitcher = ref<boolean>(false);
-const activeApp = useStorage("active_app", "drive");
+const { activeApp } = useActiveApp();
 
 const route = useRoute();
 const router = useRouter();

@@ -1,15 +1,17 @@
 import { createRouter, createWebHistory } from "vue-router/auto";
+import { publicRoutes } from "./router/publicRoutes";
+import useActiveApp from "@/composables/useActiveApp";
 
 const router = createRouter({
   history: createWebHistory(),
 });
 
-const allowedRoutes = ["/login", "/forgot-password", "/reset-password", "/invite"];
+const { autoUpdateApp } = useActiveApp()
 
 router.beforeEach(async (to) => {
   const token = localStorage.getItem("authorization");
   const loggedIn = token && token !== "null" && token !== "undefined";
-  const outsideAllowedRoutes = !allowedRoutes.includes(to.name as string);
+  const outsideAllowedRoutes = !publicRoutes.includes(to.name as string);
 
   // Redirect to login if user is not logged in and is accessing a page outside of allowed routes
   if (outsideAllowedRoutes && !loggedIn) {
@@ -24,6 +26,8 @@ router.beforeEach(async (to) => {
       return { name: "/setup/" };
     }
   }
+
+  autoUpdateApp(to);
 });
 
 

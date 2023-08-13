@@ -90,6 +90,7 @@ const documents = {
     "\n  query recordStudents($search: String, $order: UserOrderBy, $offset: Int) {\n    users(filter: { role: [student], orderBy: $order }, search: $search, offset: $offset) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n      edges {\n        id\n        firstName\n        lastName\n        student {\n          id\n          birthday\n          grade\n        }\n      }\n    }\n  }\n": types.RecordStudentsDocument,
     "\n  query getTagWithLimit($limit: Int, $offset: Int) {\n    tags(limit: $limit, offset: $offset) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n      edges {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  }\n": types.GetTagWithLimitDocument,
     "\n  mutation archiveEntry($id: ID!) {\n    archiveEntry(id: $id) {\n      id\n    }\n  }\n": types.ArchiveEntryDocument,
+    "\n    mutation resetPassword($input: ResetPasswordInput!) {\n        resetPassword(input: $input) {\n        success\n        }\n    }\n": types.ResetPasswordDocument,
     "\n    mutation signIn($email: String!, $password: String!) {\n        signIn(input: {email: $email, password: $password }) {\n            token\n            enabled_apps\n            language\n            setupComplete\n        }\n    }\n": types.SignInDocument,
 };
 
@@ -415,6 +416,10 @@ export function graphql(source: "\n  query getTagWithLimit($limit: Int, $offset:
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation archiveEntry($id: ID!) {\n    archiveEntry(id: $id) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation archiveEntry($id: ID!) {\n    archiveEntry(id: $id) {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation resetPassword($input: ResetPasswordInput!) {\n        resetPassword(input: $input) {\n        success\n        }\n    }\n"): (typeof documents)["\n    mutation resetPassword($input: ResetPasswordInput!) {\n        resetPassword(input: $input) {\n        success\n        }\n    }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

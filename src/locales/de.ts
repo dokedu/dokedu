@@ -184,4 +184,6 @@ export const de = {
   confirm_password: "Passwort bestätigen",
   mobile_not_supported: "Mobile Geräte werden nicht unterstützt",
   mobile_not_supported_description: "Bitte verwende einen Desktop-Browser, um diese Anwendung zu nutzen",
+
+  settings: "Einstellungen",
 };

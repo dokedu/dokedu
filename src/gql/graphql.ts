@@ -1185,7 +1185,7 @@ export enum ReportStatus {
 
 export type ResetPasswordInput = {
   password: Scalars['String']['input'];
-  token: Scalars['String']['input'];
+  token?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ResetPasswordPayload = {
