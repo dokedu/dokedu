@@ -297,7 +297,7 @@ input CreateTagInput {
 }
 
 input ResetPasswordInput {
-    token: String!
+    token: String
     password: String!
 }
 

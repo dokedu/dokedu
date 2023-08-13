@@ -369,8 +369,8 @@ type ReportConnection struct {
 }
 
 type ResetPasswordInput struct {
-	Token    string `json:"token"`
-	Password string `json:"password"`
+	Token    *string `json:"token,omitempty"`
+	Password string  `json:"password"`
 }
 
 type ResetPasswordPayload struct {

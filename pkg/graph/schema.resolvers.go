@@ -166,19 +166,37 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 // ResetPassword is the resolver for the resetPassword field.
 func (r *mutationResolver) ResetPassword(ctx context.Context, input model.ResetPasswordInput) (*model.ResetPasswordPayload, error) {
 	var user db.User
-	err := r.DB.NewSelect().Model(&user).Where("recovery_token = ?", input.Token).Scan(ctx)
-	if err != nil {
-		return &model.ResetPasswordPayload{
-			Success: false,
-			Message: "invalid token",
-		}, nil
-	}
 
-	if time.Now().After(user.RecoverySentAt.Add(24 * time.Hour)) {
-		return &model.ResetPasswordPayload{
-			Success: false,
-			Message: "token expired",
-		}, nil
+	if input.Token == nil {
+		currentUser := middleware.ForContext(ctx)
+		if currentUser == nil {
+			return nil, errors.New("no user found in the context")
+		}
+
+		err := r.DB.NewSelect().Model(&user).Where("id = ?", currentUser.ID).Scan(ctx)
+		if err != nil {
+			return &model.ResetPasswordPayload{
+				Success: false,
+				Message: "unauthorized",
+			}, nil
+		}
+
+	} else {
+		err := r.DB.NewSelect().Model(&user).Where("recovery_token = ?", input.Token).Scan(ctx)
+		if err != nil {
+			return &model.ResetPasswordPayload{
+				Success: false,
+				Message: "invalid token",
+			}, nil
+		}
+
+		if time.Now().After(user.RecoverySentAt.Add(24 * time.Hour)) {
+			return &model.ResetPasswordPayload{
+				Success: false,
+				Message: "token expired",
+			}, nil
+		}
+
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
@@ -189,7 +207,7 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, input model.ResetP
 		}, nil
 	}
 
-	_, err = r.DB.NewUpdate().Model(&user).Set("password = ?", string(hashedPassword)).Set("recovery_token = NULL").Set("recovery_sent_at = NULL").Where("id = ?", user.ID).Exec(ctx)
+	_, err = r.DB.NewUpdate().Model(&user).Set("password = ?", string(hashedPassword)).Set("recovery_token = NULL").Set("recovery_sent_at = NULL").WherePK().Exec(ctx)
 	if err != nil {
 		return &model.ResetPasswordPayload{
 			Success: false,
