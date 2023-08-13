@@ -214,4 +214,6 @@ extend type Mutation {
 
     addFileShare(input: ShareFileInput!): File!
     removeFileShare(input: ID!): File!
+
+    createSharedDrive(name: String!): Bucket!
 }

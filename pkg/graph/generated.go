@@ -316,6 +316,7 @@ type ComplexityRoot struct {
 		CreateEvent             func(childComplexity int, input model.CreateEventInput) int
 		CreateFolder            func(childComplexity int, input model.CreateFolderInput) int
 		CreateReport            func(childComplexity int, input model.CreateReportInput) int
+		CreateSharedDrive       func(childComplexity int, name string) int
 		CreateStudent           func(childComplexity int, input model.CreateStudentInput) int
 		CreateTag               func(childComplexity int, input model.CreateTagInput) int
 		CreateUser              func(childComplexity int, input model.CreateUserInput) int
@@ -606,6 +607,7 @@ type MutationResolver interface {
 	DownloadFiles(ctx context.Context, input model.DownloadFilesInput) (*model.DownloadFilesPayload, error)
 	AddFileShare(ctx context.Context, input model.ShareFileInput) (*db.File, error)
 	RemoveFileShare(ctx context.Context, input string) (*db.File, error)
+	CreateSharedDrive(ctx context.Context, name string) (*db.Bucket, error)
 	CreateEmailAccount(ctx context.Context, input model.CreateEmailAccountInput) (*db.EmailAccount, error)
 	UpdateEmailAccount(ctx context.Context, input model.UpdateEmailAccountInput) (*db.EmailAccount, error)
 	DeleteEmailAccount(ctx context.Context, input model.DeleteEmailAccountInput) (*db.EmailAccount, error)
@@ -1920,6 +1922,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateReport(childComplexity, args["input"].(model.CreateReportInput)), true
+
+	case "Mutation.createSharedDrive":
+		if e.complexity.Mutation.CreateSharedDrive == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createSharedDrive_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateSharedDrive(childComplexity, args["name"].(string)), true
 
 	case "Mutation.createStudent":
 		if e.complexity.Mutation.CreateStudent == nil {
@@ -3781,6 +3795,21 @@ func (ec *executionContext) field_Mutation_createReport_args(ctx context.Context
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createSharedDrive_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
 	return args, nil
 }
 
@@ -12755,6 +12784,77 @@ func (ec *executionContext) fieldContext_Mutation_removeFileShare(ctx context.Co
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_removeFileShare_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createSharedDrive(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createSharedDrive(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateSharedDrive(rctx, fc.Args["name"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.Bucket)
+	fc.Result = res
+	return ec.marshalNBucket2ᚖexampleᚋpkgᚋdbᚐBucket(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createSharedDrive(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Bucket_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Bucket_name(ctx, field)
+			case "user":
+				return ec.fieldContext_Bucket_user(ctx, field)
+			case "shared":
+				return ec.fieldContext_Bucket_shared(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Bucket_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Bucket_deletedAt(ctx, field)
+			case "files":
+				return ec.fieldContext_Bucket_files(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Bucket", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createSharedDrive_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -28333,6 +28433,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_removeFileShare(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createSharedDrive":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createSharedDrive(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {

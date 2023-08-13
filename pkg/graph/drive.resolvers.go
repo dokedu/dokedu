@@ -177,6 +177,7 @@ func (r *mutationResolver) UploadFile(ctx context.Context, input model.FileUploa
 
 	if input.BucketID != nil && len(*input.BucketID) > 0 {
 		file.BucketID = *input.BucketID
+		bucket.ID = *input.BucketID
 	} else {
 		err := r.DB.NewSelect().Model(&bucket).Column("id").Where("user_id = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 
@@ -395,6 +396,34 @@ func (r *mutationResolver) RemoveFileShare(ctx context.Context, input string) (*
 	panic(fmt.Errorf("not implemented: RemoveFileShare - removeFileShare"))
 }
 
+// CreateSharedDrive is the resolver for the createSharedDrive field.
+func (r *mutationResolver) CreateSharedDrive(ctx context.Context, name string) (*db.Bucket, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	bucket := &db.Bucket{
+		Name:           name,
+		UserID:         sql.NullString{String: currentUser.ID, Valid: true},
+		Shared:         true,
+		OrganisationID: currentUser.OrganisationID,
+	}
+
+	err = r.DB.NewInsert().Model(bucket).Returning("*").Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create minio bucket
+	err = r.MinioClient.MakeBucket(ctx, bucket.ID, minio.MakeBucketOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return bucket, nil
+}
+
 // Buckets is the resolver for the buckets field.
 func (r *queryResolver) Buckets(ctx context.Context, input *model.BucketFilterInput, limit *int, offset *int) (*model.BucketConnection, error) {
 	currentUser, err := middleware.GetUser(ctx)
@@ -416,7 +445,11 @@ func (r *queryResolver) Buckets(ctx context.Context, input *model.BucketFilterIn
 	}
 
 	var buckets []*db.Bucket
-	query := r.DB.NewSelect().Model(&buckets).Where("user_id = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID)
+	query := r.DB.NewSelect().
+		Model(&buckets).
+		Where("user_id = ?", currentUser.ID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Order("name ASC")
 
 	if input != nil {
 		if input.Shared != nil {
