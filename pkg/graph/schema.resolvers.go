@@ -215,6 +215,18 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, input model.ResetP
 		}, nil
 	}
 
+	var emailAccount db.EmailAccount
+	_ = r.DB.NewSelect().Model(&emailAccount).Where("user_id = ?", user.ID).Scan(ctx)
+	if len(emailAccount.ID) > 1 {
+		err = r.DB.NewUpdate().Model(&emailAccount).Set("secret = ?", string(hashedPassword)).WherePK().Where("organisation_id = ?", user.OrganisationID).Scan(ctx)
+		if err != nil {
+			return &model.ResetPasswordPayload{
+				Success: false,
+				Message: "resetting email account password failed",
+			}, nil
+		}
+	}
+
 	return &model.ResetPasswordPayload{
 		Success: true,
 		Message: "successfully reset password",
