@@ -104,6 +104,9 @@ async function onSubmit() {
     } else if (enabled_apps.includes("admin")) {
       await router.push({ name: "/admin/general/" });
       return;
+    } else {
+      await router.push({ name: "/settings/profile" });
+      return;
     }
   }
 }
