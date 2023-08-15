@@ -78,7 +78,7 @@
 
       <div
         class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
-        @click="signOut"
+        @click="logOut()"
       >
         <log-out class="stroke-stone-500" :size="18" />
         <div class="text-sm">{{ $t("log_out") }}</div>
@@ -155,6 +155,10 @@ function switchApp(appId: string | null = null) {
 }
 
 const { signOut } = useAuth();
+
+async function logOut() {
+  await signOut();
+}
 
 const { executeMutation: updateLanguage } = useMutation(
   graphql(`

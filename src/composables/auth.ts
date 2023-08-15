@@ -24,6 +24,13 @@ async function signOut() {
   }
 
   localStorage.clear()
+
+  localStorage.removeItem("setupComplete")
+  localStorage.removeItem("language")
+  localStorage.removeItem("active_app")
+  localStorage.removeItem("enabled_apps")
+  localStorage.removeItem("authorizatio")
+
   await router.push({ name: "/login" });
   // ensure urql cache is cleared
   location.reload();

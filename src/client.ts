@@ -50,9 +50,11 @@ function makeClient() {
           async refreshAuth() {
             if (!route) return;
             if (!publicRoutes.includes(route.name)) {
-              localStorage.removeItem("authorization");
-              localStorage.removeItem("enabled_apps");
-              localStorage.removeItem("active_app");
+              localStorage.removeItem("setupComplete")
+              localStorage.removeItem("language")
+              localStorage.removeItem("active_app")
+              localStorage.removeItem("enabled_apps")
+              localStorage.removeItem("authorizatio")
 
               await router.push({ name: "/login" });
             }
