@@ -16,3 +16,4 @@ app.use(i18n);
 
 app.mount("#app");
 
+urqlClient.mutation;

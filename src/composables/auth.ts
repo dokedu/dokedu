@@ -17,13 +17,10 @@ function signOutMutation() {
 
 async function signOut() {
   try {
-    const res = await signOutMutation();
-    if (res.error) return console.error(res.error);
-  } catch (err) {
-    console.error(err);
+    await signOutMutation();
+  } catch (e) {
+    console.log(e)
   }
-
-  localStorage.clear()
 
   localStorage.removeItem("setupComplete")
   localStorage.removeItem("language")
@@ -32,8 +29,9 @@ async function signOut() {
   localStorage.removeItem("authorizatio")
 
   await router.push({ name: "/login" });
+
   // ensure urql cache is cleared
-  location.reload();
+  // location.reload();
 
 }
 

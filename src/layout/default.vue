@@ -21,10 +21,9 @@ import { useWindowSize } from "@vueuse/core";
 import DButton from "@/components/d-button/d-button.vue";
 import { useAuth } from "@/composables/auth";
 
-const { signOut } = useAuth();
 const { width } = useWindowSize();
 
 const onLogOut = async () => {
-  await signOut();
+  await useAuth().signOut();
 };
 </script>
