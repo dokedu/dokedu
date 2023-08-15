@@ -10,6 +10,10 @@ const router = createRouter({
 const { autoUpdateApp } = useActiveApp()
 
 router.beforeEach(async (to) => {
+  if (to.path = "/") {
+    return { name: "/login" };
+  }
+
   const token = localStorage.getItem("authorization");
   const loggedIn = token && token !== "null" && token !== "undefined";
 
