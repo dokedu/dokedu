@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"errors"
 	"example/pkg/db"
 	"example/pkg/graph/model"
 	"example/pkg/middleware"
@@ -16,13 +15,13 @@ import (
 
 // Image is the resolver for the image field.
 func (r *eventResolver) Image(ctx context.Context, obj *db.Event) (*db.File, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	var file db.File
-	err := r.DB.NewSelect().Model(&file).Where("id = ?", obj.ImageFileID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&file).Where("id = ?", obj.ImageFileID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -41,13 +40,13 @@ func (r *eventResolver) DeletedAt(ctx context.Context, obj *db.Event) (*time.Tim
 
 // Competences is the resolver for the competences field.
 func (r *eventResolver) Competences(ctx context.Context, obj *db.Event) ([]*db.Competence, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	var competences []*db.Competence
-	err := r.DB.NewSelect().
+	err = r.DB.NewSelect().
 		Model(&competences).
 		Join("JOIN event_competences ON event_competences.competence_id = competence.id and event_competences.deleted_at is null").
 		Where("event_competences.event_id = ?", obj.ID).
@@ -62,9 +61,9 @@ func (r *eventResolver) Competences(ctx context.Context, obj *db.Event) ([]*db.C
 
 // CreateEvent is the resolver for the createEvent field.
 func (r *mutationResolver) CreateEvent(ctx context.Context, input model.CreateEventInput) (*db.Event, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	var event db.Event
@@ -102,9 +101,9 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input model.CreateEv
 
 // UpdateEvent is the resolver for the updateEvent field.
 func (r *mutationResolver) UpdateEvent(ctx context.Context, input model.UpdateEventInput) (*db.Event, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	var event db.Event
@@ -148,7 +147,7 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input model.UpdateEv
 		//query.Set("recurrence = ?", event.Recurrence)
 	}
 
-	err := query.Scan(ctx)
+	err = query.Scan(ctx)
 
 	if err != nil {
 		return nil, err
@@ -159,9 +158,9 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input model.UpdateEv
 
 // ToggleEventCompetence is the resolver for the toggleEventCompetence field.
 func (r *mutationResolver) ToggleEventCompetence(ctx context.Context, input model.AddEventCompetenceInput) (*db.Event, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	var eventCompetence db.EventCompetence
@@ -169,7 +168,7 @@ func (r *mutationResolver) ToggleEventCompetence(ctx context.Context, input mode
 	eventCompetence.CompetenceID = input.CompetenceID
 	eventCompetence.OrganisationID = currentUser.OrganisationID
 
-	err := r.DB.NewInsert().
+	err = r.DB.NewInsert().
 		Model(&eventCompetence).
 		Where("\"event_competence\".organisation_id = ?", currentUser.OrganisationID).
 		On("CONFLICT (event_id, competence_id) DO UPDATE").
@@ -195,14 +194,14 @@ func (r *mutationResolver) ToggleEventCompetence(ctx context.Context, input mode
 
 // ArchiveEvent is the resolver for the archiveEvent field.
 func (r *mutationResolver) ArchiveEvent(ctx context.Context, id string) (*db.Event, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	var event db.Event
 	// mark event.deleted_at as now
-	err := r.DB.NewUpdate().
+	err = r.DB.NewUpdate().
 		Model(&event).
 		Set("deleted_at = ?", time.Now()).
 		Where("id = ?", id).
@@ -219,13 +218,13 @@ func (r *mutationResolver) ArchiveEvent(ctx context.Context, id string) (*db.Eve
 
 // Event is the resolver for the event field.
 func (r *queryResolver) Event(ctx context.Context, id string) (*db.Event, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	var event db.Event
-	err := r.DB.NewSelect().Model(&event).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&event).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -235,9 +234,9 @@ func (r *queryResolver) Event(ctx context.Context, id string) (*db.Event, error)
 
 // Events is the resolver for the events field.
 func (r *queryResolver) Events(ctx context.Context, limit *int, offset *int, filter *model.EventFilterInput, order *model.EventOrderBy, search *string) (*model.EventConnection, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	pageLimit := 10
@@ -335,9 +334,9 @@ func (r *queryResolver) Events(ctx context.Context, limit *int, offset *int, fil
 
 // ExportEvents is the resolver for the exportEvents field.
 func (r *queryResolver) ExportEvents(ctx context.Context, input model.ExportEventsInput) ([]*model.ExportEventsPayload, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	orgId := currentUser.OrganisationID
@@ -347,7 +346,7 @@ func (r *queryResolver) ExportEvents(ctx context.Context, input model.ExportEven
 	deleted := input.Deleted
 
 	var events []*model.ExportEventsPayload
-	err := r.DB.NewRaw("SELECT * FROM export_events(?, ?, ?, ?)", orgId, from, to, deleted).Scan(ctx, &events)
+	err = r.DB.NewRaw("SELECT * FROM export_events(?, ?, ?, ?)", orgId, from, to, deleted).Scan(ctx, &events)
 	if err != nil {
 		return nil, err
 	}

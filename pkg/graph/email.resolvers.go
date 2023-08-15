@@ -36,16 +36,16 @@ func (r *emailResolver) CreatedAt(ctx context.Context, obj *db.Email) (string, e
 
 // User is the resolver for the user field.
 func (r *emailAccountResolver) User(ctx context.Context, obj *db.EmailAccount) (*db.User, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
 	}
 
 	var user db.User
-	err := r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -107,9 +107,9 @@ func (r *emailGroupMemberResolver) CreatedAt(ctx context.Context, obj *db.EmailG
 
 // CreateEmailAccount is the resolver for the createEmailAccount field.
 func (r *mutationResolver) CreateEmailAccount(ctx context.Context, input model.CreateEmailAccountInput) (*db.EmailAccount, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
@@ -129,7 +129,7 @@ func (r *mutationResolver) CreateEmailAccount(ctx context.Context, input model.C
 		emailAccount.Description = *input.Description
 	}
 
-	err := r.DB.NewInsert().Model(&emailAccount).Scan(ctx)
+	err = r.DB.NewInsert().Model(&emailAccount).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -139,16 +139,16 @@ func (r *mutationResolver) CreateEmailAccount(ctx context.Context, input model.C
 
 // UpdateEmailAccount is the resolver for the updateEmailAccount field.
 func (r *mutationResolver) UpdateEmailAccount(ctx context.Context, input model.UpdateEmailAccountInput) (*db.EmailAccount, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
 	}
 
 	var emailAccount db.EmailAccount
-	err := r.DB.NewSelect().Model(&emailAccount).Where("name = ?", input.Name).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&emailAccount).Where("name = ?", input.Name).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -178,16 +178,16 @@ func (r *mutationResolver) UpdateEmailAccount(ctx context.Context, input model.U
 
 // DeleteEmailAccount is the resolver for the deleteEmailAccount field.
 func (r *mutationResolver) DeleteEmailAccount(ctx context.Context, input model.DeleteEmailAccountInput) (*db.EmailAccount, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
 	}
 
 	var emailAccount db.EmailAccount
-	err := r.DB.NewSelect().Model(&emailAccount).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&emailAccount).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -205,9 +205,9 @@ func (r *mutationResolver) DeleteEmailAccount(ctx context.Context, input model.D
 
 // CreateEmailGroupMember is the resolver for the createEmailGroupMember field.
 func (r *mutationResolver) CreateEmailGroupMember(ctx context.Context, input model.CreateEmailGroupMemberInput) (*db.EmailGroupMember, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
@@ -219,7 +219,7 @@ func (r *mutationResolver) CreateEmailGroupMember(ctx context.Context, input mod
 		OrganisationID: currentUser.OrganisationID,
 	}
 
-	err := r.DB.NewInsert().Model(&emailGroupMember).Scan(ctx)
+	err = r.DB.NewInsert().Model(&emailGroupMember).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -229,16 +229,16 @@ func (r *mutationResolver) CreateEmailGroupMember(ctx context.Context, input mod
 
 // DeleteEmailGroupMember is the resolver for the deleteEmailGroupMember field.
 func (r *mutationResolver) DeleteEmailGroupMember(ctx context.Context, input model.DeleteEmailGroupMemberInput) (*db.EmailGroupMember, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
 	}
 
 	var emailGroupMember db.EmailGroupMember
-	err := r.DB.NewSelect().Model(&emailGroupMember).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&emailGroupMember).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -254,9 +254,9 @@ func (r *mutationResolver) DeleteEmailGroupMember(ctx context.Context, input mod
 
 // CreateEmail is the resolver for the createEmail field.
 func (r *mutationResolver) CreateEmail(ctx context.Context, input model.CreateEmailInput) (*db.Email, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
@@ -268,7 +268,7 @@ func (r *mutationResolver) CreateEmail(ctx context.Context, input model.CreateEm
 		Type:           input.Type,
 		OrganisationID: currentUser.OrganisationID,
 	}
-	err := r.DB.NewInsert().Model(&email).Scan(ctx)
+	err = r.DB.NewInsert().Model(&email).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -278,16 +278,16 @@ func (r *mutationResolver) CreateEmail(ctx context.Context, input model.CreateEm
 
 // DeleteEmail is the resolver for the deleteEmail field.
 func (r *mutationResolver) DeleteEmail(ctx context.Context, input model.DeleteEmailInput) (*db.Email, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
 	}
 
 	var email db.Email
-	err := r.DB.NewSelect().Model(&email).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&email).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -313,9 +313,9 @@ func (r *mutationResolver) DeleteEmailForwarding(ctx context.Context, input mode
 
 // CreateDomain is the resolver for the createDomain field.
 func (r *mutationResolver) CreateDomain(ctx context.Context, input model.CreateDomainInput) (*db.Domain, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
@@ -325,7 +325,7 @@ func (r *mutationResolver) CreateDomain(ctx context.Context, input model.CreateD
 		Name:           input.Name,
 		OrganisationID: currentUser.OrganisationID,
 	}
-	err := r.DB.NewInsert().Model(&domain).Scan(ctx)
+	err = r.DB.NewInsert().Model(&domain).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -335,16 +335,16 @@ func (r *mutationResolver) CreateDomain(ctx context.Context, input model.CreateD
 
 // DeleteDomain is the resolver for the deleteDomain field.
 func (r *mutationResolver) DeleteDomain(ctx context.Context, input model.DeleteDomainInput) (*db.Domain, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
 	}
 
 	var domain db.Domain
-	err := r.DB.NewSelect().Model(&domain).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&domain).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -562,9 +562,9 @@ func (r *mutationResolver) DeleteEmailGroup(ctx context.Context, id string) (*db
 
 // EmailAccounts is the resolver for the emailAccounts field.
 func (r *queryResolver) EmailAccounts(ctx context.Context, filter *model.EmailAccountFilter) (*model.EmailAccountConnection, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
@@ -584,7 +584,7 @@ func (r *queryResolver) EmailAccounts(ctx context.Context, filter *model.EmailAc
 		}
 	}
 
-	err := query.Scan(ctx)
+	err = query.Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -600,16 +600,16 @@ func (r *queryResolver) EmailAccounts(ctx context.Context, filter *model.EmailAc
 
 // EmailAccount is the resolver for the emailAccount field.
 func (r *queryResolver) EmailAccount(ctx context.Context, id string) (*db.EmailAccount, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
 	}
 
 	var emailAccount db.EmailAccount
-	err := r.DB.NewSelect().Model(&emailAccount).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&emailAccount).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -619,16 +619,16 @@ func (r *queryResolver) EmailAccount(ctx context.Context, id string) (*db.EmailA
 
 // EmailGroupMembers is the resolver for the EmailGroupMembers field.
 func (r *queryResolver) EmailGroupMembers(ctx context.Context) (*model.EmailGroupMemberConnection, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
 	}
 
 	var emailGroupMembers []*db.EmailGroupMember
-	err := r.DB.NewSelect().Model(&emailGroupMembers).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&emailGroupMembers).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -644,16 +644,16 @@ func (r *queryResolver) EmailGroupMembers(ctx context.Context) (*model.EmailGrou
 
 // EmailGroupMember is the resolver for the EmailGroupMember field.
 func (r *queryResolver) EmailGroupMember(ctx context.Context, id string) (*db.EmailGroupMember, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
 	}
 
 	var emailGroups *db.EmailGroupMember
-	err := r.DB.NewSelect().Model(&emailGroups).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&emailGroups).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -663,16 +663,16 @@ func (r *queryResolver) EmailGroupMember(ctx context.Context, id string) (*db.Em
 
 // Emails is the resolver for the emails field.
 func (r *queryResolver) Emails(ctx context.Context) (*model.EmailConnection, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
 	}
 
 	var emails []*db.Email
-	err := r.DB.NewSelect().Model(&emails).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&emails).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -688,16 +688,16 @@ func (r *queryResolver) Emails(ctx context.Context) (*model.EmailConnection, err
 
 // Email is the resolver for the email field.
 func (r *queryResolver) Email(ctx context.Context, id string) (*db.Email, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
 	}
 
 	var email db.Email
-	err := r.DB.NewSelect().Model(&email).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&email).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -707,16 +707,16 @@ func (r *queryResolver) Email(ctx context.Context, id string) (*db.Email, error)
 
 // EmailForwardings is the resolver for the emailForwardings field.
 func (r *queryResolver) EmailForwardings(ctx context.Context) (*model.EmailForwardingConnection, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
 	}
 
 	var emailForwardings []*db.EmailForwarding
-	err := r.DB.NewSelect().Model(&emailForwardings).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&emailForwardings).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -732,16 +732,16 @@ func (r *queryResolver) EmailForwardings(ctx context.Context) (*model.EmailForwa
 
 // EmailForwarding is the resolver for the emailForwarding field.
 func (r *queryResolver) EmailForwarding(ctx context.Context, id string) (*db.EmailForwarding, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
 	}
 
 	var emailForwarding db.EmailForwarding
-	err := r.DB.NewSelect().Model(&emailForwarding).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&emailForwarding).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -751,16 +751,16 @@ func (r *queryResolver) EmailForwarding(ctx context.Context, id string) (*db.Ema
 
 // Domains is the resolver for the domains field.
 func (r *queryResolver) Domains(ctx context.Context) (*model.DomainConnection, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
 	}
 
 	var domains []*db.Domain
-	err := r.DB.NewSelect().Model(&domains).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&domains).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -776,16 +776,16 @@ func (r *queryResolver) Domains(ctx context.Context) (*model.DomainConnection, e
 
 // Domain is the resolver for the domain field.
 func (r *queryResolver) Domain(ctx context.Context, id string) (*db.Domain, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
 	}
 
 	var domain db.Domain
-	err := r.DB.NewSelect().Model(&domain).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&domain).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -795,16 +795,16 @@ func (r *queryResolver) Domain(ctx context.Context, id string) (*db.Domain, erro
 
 // EmailAccounts is the resolver for the emailAccounts field.
 func (r *userResolver) EmailAccounts(ctx context.Context, obj *db.User) ([]*db.EmailAccount, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return nil, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !currentUser.HasPermissionAdmin() {
 		return nil, errors.New("no permission")
 	}
 
 	var emailAccounts []*db.EmailAccount
-	err := r.DB.NewSelect().Model(&emailAccounts).Where("user_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	err = r.DB.NewSelect().Model(&emailAccounts).Where("user_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
