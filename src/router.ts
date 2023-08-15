@@ -12,8 +12,11 @@ const { autoUpdateApp } = useActiveApp()
 router.beforeEach(async (to) => {
   const token = localStorage.getItem("authorization");
   const loggedIn = token && token !== "null" && token !== "undefined";
-
   const outsideAllowedRoutes = !publicRoutes.includes(to.name as RouteRecordName);
+
+  if (!loggedIn && to.path === "/") {
+    return { name: "/login" };
+  }
 
   // Redirect to login if user is not logged in and is accessing a page outside of allowed routes
   if (outsideAllowedRoutes && !loggedIn) {
@@ -29,8 +32,11 @@ router.beforeEach(async (to) => {
     }
   }
 
+  if (loggedIn && to.path === "/") {
+    return { name: "/settings/profile" };
+  }
+
   autoUpdateApp(to);
 });
-
 
 export default router;
