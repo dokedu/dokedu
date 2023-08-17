@@ -131,6 +131,13 @@ type CreateReportInput struct {
 	StudentUser string          `json:"studentUser"`
 }
 
+type CreateShareInput struct {
+	FileID     *string        `json:"fileId,omitempty"`
+	BucketID   *string        `json:"bucketId,omitempty"`
+	User       string         `json:"user"`
+	Permission FilePermission `json:"permission"`
+}
+
 type CreateStudentInput struct {
 	FirstName string     `json:"firstName"`
 	LastName  string     `json:"lastName"`
@@ -197,6 +204,12 @@ type DeleteFilesInput struct {
 type DeleteFilesPayload struct {
 	Success bool       `json:"success"`
 	Files   []*db.File `json:"files"`
+}
+
+type DeleteShareInput struct {
+	FileID   *string `json:"fileId,omitempty"`
+	BucketID *string `json:"bucketId,omitempty"`
+	User     string  `json:"user"`
 }
 
 type DomainConnection struct {
@@ -382,6 +395,16 @@ type ShareFileInput struct {
 	FileID     string         `json:"fileId"`
 	Users      []string       `json:"users"`
 	Emails     []string       `json:"emails"`
+	Permission FilePermission `json:"permission"`
+}
+
+type ShareInput struct {
+	BucketID *string `json:"bucketId,omitempty"`
+	FileID   *string `json:"fileId,omitempty"`
+}
+
+type ShareUser struct {
+	User       *db.User       `json:"user"`
 	Permission FilePermission `json:"permission"`
 }
 

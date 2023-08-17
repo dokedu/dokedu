@@ -12,6 +12,7 @@ type Bucket {
     shared: Boolean!
     createdAt: Time!
     deletedAt: Time
+    permission: FilePermission
 
     files: [File!]!
 }
@@ -30,6 +31,11 @@ type File {
     parents: [File!]!
 
     files: [File!]!
+}
+
+type ShareUser {
+    user: User!
+    permission: FilePermission!
 }
 
 input UserFileFilterInput {
@@ -54,6 +60,11 @@ input BucketFilterInput {
     shared: Boolean
 }
 
+input ShareInput {
+    bucketId: ID
+    fileId: ID
+}
+
 type BucketConnection {
     edges: [Bucket!]!
     totalCount: Int!
@@ -72,6 +83,8 @@ extend type Query {
 
     file(id: ID!): File!
     files(input: FilesFilterInput, limit: Int, offset: Int): FileConnection!
+
+    shares(input: ShareInput): [ShareUser!]
 }
 
 input FileUploadInput {
@@ -191,6 +204,19 @@ input ShareFileInput {
     permission: FilePermission!
 }
 
+input CreateShareInput {
+    fileId: ID
+    bucketId: ID
+    user: ID!
+    permission: FilePermission!
+}
+
+input DeleteShareInput {
+    fileId: ID
+    bucketId: ID
+    user: ID!
+}
+
 extend type Mutation {
     uploadFile(input: FileUploadInput!): File!
     uploadFiles(input: FileUploadInput!): UploadFilesPayload!
@@ -216,4 +242,8 @@ extend type Mutation {
     removeFileShare(input: ID!): File!
 
     createSharedDrive(name: String!): Bucket!
+
+    createShare(input: CreateShareInput!): ShareUser!
+    editShare(input: CreateShareInput!): ShareUser!
+    deleteShare(input: DeleteShareInput!): ShareUser!
 }

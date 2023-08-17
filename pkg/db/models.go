@@ -322,37 +322,18 @@ type Report struct {
 	DeletedAt      bun.NullTime          `bun:",soft_delete,nullzero"`
 }
 
-type SharedDrive struct {
+type Share struct {
 	bun.BaseModel
 
 	ID             string       `bun:",nullzero,pk" json:"id"`
-	Name           string       `json:"name"`
+	FileID         string       `bun:",nullzero" json:"file_id"`
+	BucketID       string       `bun:",nullzero" json:"bucket_id"`
+	SharedWith     string       `json:"shared_with"`
+	SharedBy       string       `json:"shared_by"`
+	Permission     string       `json:"permission"`
 	OrganisationID string       `json:"organisation_id"`
-	UpdatedAt      bun.NullTime `json:"updated_at"`
 	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
 	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
-}
-
-type SharedDriveFile struct {
-	bun.BaseModel
-
-	ID            string       `bun:",nullzero,pk" json:"id"`
-	SharedDriveID string       `json:"shared_drive_id"`
-	FileID        string       `json:"file_id"`
-	UpdatedAt     bun.NullTime `json:"updated_at"`
-	CreatedAt     time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
-	DeletedAt     bun.NullTime `bun:",soft_delete,nullzero"`
-}
-
-type SharedDriveUser struct {
-	bun.BaseModel
-
-	ID            string       `bun:",nullzero,pk" json:"id"`
-	SharedDriveID string       `json:"shared_drive_id"`
-	UserID        string       `json:"user_id"`
-	UpdatedAt     bun.NullTime `json:"updated_at"`
-	CreatedAt     time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
-	DeletedAt     bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
 type Tag struct {
