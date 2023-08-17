@@ -2,12 +2,13 @@
   <div class="relative" ref="select" v-bind="$attrs" @focusin="open = true">
     <div
       class="flex min-w-[120px] items-center justify-between gap-3 rounded-md border border-stone-200 py-1.5 pl-2 pr-1 focus:!outline-none"
+      :class="{ 'border-transparent py-0.5': type === 'borderless' }"
       tabindex="0"
       ref="toggle"
     >
       <div class="text-sm">{{ displayedLabel }}</div>
       <div class="flex items-center gap-1">
-        <X class="h-4 w-4 shrink-0" v-if="model && model.length" @mousedown.capture="onClear"></X>
+        <X class="h-4 w-4 shrink-0" v-if="removable && model && model.length" @mousedown.capture="onClear"></X>
         <ChevronRight class="h-4 w-4 transition-all ease-in-out" :class="open ? 'rotate-90' : 'rotate-0'" />
       </div>
     </div>
@@ -58,14 +59,16 @@ import { ref, toRef, computed, nextTick } from "vue";
 import { onClickOutside, onKeyStroke } from "@vueuse/core";
 import { Search, X, Check } from "lucide-vue-next";
 
-const emit = defineEmits(["update:modelValue", "update:search"]);
+const emit = defineEmits(["update:modelValue", "update:search", "select"]);
 
 interface Props {
   label?: string;
   multiple?: boolean;
   modelValue?: string | string[];
   search?: string | null;
+  removable?: boolean;
   options?: { label: string; value: string }[];
+  type?: "default" | "borderless";
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -73,6 +76,8 @@ const props = withDefaults(defineProps<Props>(), {
   multiple: false,
   modelValue: "",
   search: null,
+  removable: true,
+  type: "default",
   options: () => [],
 });
 
@@ -115,6 +120,8 @@ const onSelect = async (option: { label: string; value: string }) => {
   emit("update:modelValue", option.value);
   focusedOptionIndex.value = sortedOptions.value.indexOf(option);
   open.value = false;
+
+  emit("select", option.value);
 };
 
 const displayedLabel = computed(() => {

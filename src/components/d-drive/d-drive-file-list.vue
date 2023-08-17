@@ -1,6 +1,12 @@
 <template>
   <PageWrapper>
-    <PageHeaderDrive :title="title" @upload="upload" :bucket-id="bucketId" :folder-id="folderId" />
+    <PageHeaderDrive
+      :title="title"
+      @upload="upload"
+      :bucket-id="bucketId"
+      :folder-id="folderId"
+      :permission="bucket?.bucket.permission"
+    />
     <div class="h-full overflow-auto">
       <DFileDropZone @upload="upload">
         <DFileList @click="clickFile" :bucket-id="bucketId" :folder-id="folderId" />
@@ -16,11 +22,12 @@ import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { ref, toRefs } from "vue";
 import { useRouter } from "vue-router/auto";
-import { File } from "@/gql/graphql";
+import { File, FilePermission } from "@/gql/graphql";
 import DFileList from "@/components/drive/DFileList.vue";
 import DFileDropZone from "@/components/drive/DFileDropZone.vue";
 import PageHeaderDrive from "@/components/drive/PageHeaderDrive.vue";
 import DFilePreview from "@/components/drive/DFilePreview.vue";
+import { useQuery } from "@urql/vue";
 
 export interface Props {
   title: string;
@@ -85,4 +92,19 @@ async function clickFile(file: File) {
     previewFile.value = file;
   }
 }
+
+// Get the bucket, for permission
+const { data: bucket } = useQuery({
+  query: graphql(`
+    query bucketByIdShared($id: ID!) {
+      bucket(id: $id) {
+        id
+        permission
+      }
+    }
+  `),
+  variables: {
+    id: bucketId,
+  },
+});
 </script>

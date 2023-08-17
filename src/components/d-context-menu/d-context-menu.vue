@@ -20,7 +20,7 @@ export enum ContextMenuAlignment {
 </script>
 
 <script lang="ts" setup>
-import { getCurrentInstance, onMounted, reactive, ref, toRef, watch } from "vue";
+import { getCurrentInstance, onMounted, reactive, ref, toRef, watch, nextTick } from "vue";
 import { useParentElement, onClickOutside, onKeyStroke } from "@vueuse/core";
 import { useWindowSize } from "@vueuse/core";
 
@@ -69,7 +69,14 @@ watch(width, () => {
   updatePosition(parentEl.value);
 });
 
-function updatePosition(point: Point | HTMLElement) {
+watch(show, async () => {
+  if (!show.value) return;
+  await nextTick();
+  // @ts-expect-error
+  updatePosition(parentEl.value);
+});
+
+async function updatePosition(point: Point | HTMLElement) {
   const newPosition = point as Point;
   let { alignment } = props;
 
@@ -100,6 +107,7 @@ function updatePosition(point: Point | HTMLElement) {
       case ContextMenuAlignment.BottomRight:
         newPosition.x = bounds.right - instanceBounds.width;
         newPosition.y = bounds.bottom + 4;
+        console.log(instanceBounds);
         break;
       case ContextMenuAlignment.BottomLeft:
         newPosition.x = bounds.left;
