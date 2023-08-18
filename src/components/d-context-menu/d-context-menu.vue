@@ -107,7 +107,6 @@ async function updatePosition(point: Point | HTMLElement) {
       case ContextMenuAlignment.BottomRight:
         newPosition.x = bounds.right - instanceBounds.width;
         newPosition.y = bounds.bottom + 4;
-        console.log(instanceBounds);
         break;
       case ContextMenuAlignment.BottomLeft:
         newPosition.x = bounds.left;

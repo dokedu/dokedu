@@ -36,7 +36,7 @@ export interface Props {
   title: string;
   folderId: string | null;
   bucketId: string | null;
-  permission: string;
+  permission: FilePermission;
 }
 
 const props = withDefaults(defineProps<Props>(), {

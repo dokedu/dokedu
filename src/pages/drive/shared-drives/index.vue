@@ -53,12 +53,7 @@
     </PageContent>
   </PageWrapper>
 
-  <DDialogShareDrive
-    @share="onShare"
-    :open="shareOpen"
-    :item="(currentItem as Bucket)"
-    @close="shareOpen = false"
-  ></DDialogShareDrive>
+  <DDialogShareDrive :open="shareOpen" :item="(currentItem as Bucket)" @close="shareOpen = false"></DDialogShareDrive>
 </template>
 
 <script setup lang="ts">
@@ -78,7 +73,6 @@ import DContextMenu from "@/components/d-context-menu/d-context-menu.vue";
 import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue";
 import DDialogShareDrive from "@/components/drive/DDialogShareDrive.vue";
 import { Bucket } from "@/gql/graphql";
-import { createNotification } from "@/composables/useToast";
 
 const currentItem = ref<Bucket>();
 const shareOpen = ref(false);
@@ -151,6 +145,7 @@ const sharedDrivesQuery = graphql(`
         name
         shared
         createdAt
+        permission
       }
       totalCount
       pageInfo {

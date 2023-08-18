@@ -10,7 +10,7 @@
     </template>
     <template #main>
       <div class="space-y-4">
-        <div class="grow space-y-1 text-sm">
+        <div v-if="permission == FilePermission.Manager" class="grow space-y-1 text-sm">
           <div class="text-subtle">Users</div>
           <DSelect
             v-model="selectedUser"
@@ -30,6 +30,7 @@
               <div>{{ share.user.firstName }} {{ share.user.lastName }}</div>
               <div class="flex items-center gap-4">
                 <DSelect
+                  v-if="permission == FilePermission.Manager"
                   v-model="share.permission"
                   :options="permissionOptions"
                   label="Select permission"
@@ -37,7 +38,9 @@
                   :removable="false"
                   @select="onEditShare(share as ShareUser)"
                 ></DSelect>
+                <div v-else class="text-sm text-subtle">{{ share.permission }}</div>
                 <button
+                  v-if="permission == FilePermission.Manager"
                   class="flex h-8 w-8 items-center justify-center rounded-md p-1 hover:bg-stone-100"
                   @click="removeShare(share as ShareUser)"
                 >
@@ -69,6 +72,7 @@ interface Props {
 const props = defineProps<Props>();
 const emit = defineEmits(["close", "share"]);
 const bucketId = computed(() => props.item?.id);
+const permission = computed(() => props.item?.permission || FilePermission.Viewer);
 
 const permissionOptions = [
   {
@@ -81,9 +85,9 @@ const permissionOptions = [
   },
 ];
 
-const onClose = () => {
+function onClose() {
   emit("close");
-};
+}
 
 const { data: users } = useQuery({
   query: graphql(`
@@ -190,7 +194,7 @@ const { executeMutation: editShare } = useMutation(
   `)
 );
 
-const onCreateShare = async (id: string) => {
+async function onCreateShare(id: string) {
   await createShare({
     input: reactive({
       bucketId,
@@ -200,18 +204,18 @@ const onCreateShare = async (id: string) => {
   });
 
   selectedUser.value = undefined;
-};
+}
 
-const removeShare = async (share: ShareUser) => {
+async function removeShare(share: ShareUser) {
   await deleteShare({
     input: reactive({
       bucketId,
       user: share.user.id,
     }),
   });
-};
+}
 
-const onEditShare = async (share: ShareUser) => {
+async function onEditShare(share: ShareUser) {
   await editShare({
     input: reactive({
       bucketId,
@@ -219,5 +223,5 @@ const onEditShare = async (share: ShareUser) => {
       permission: share.permission,
     }),
   });
-};
+}
 </script>
