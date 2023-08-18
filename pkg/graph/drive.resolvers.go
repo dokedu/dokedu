@@ -480,15 +480,63 @@ func (r *mutationResolver) CreateShare(ctx context.Context, input model.CreateSh
 		SharedWith:     input.User,
 		SharedBy:       currentUser.ID,
 		OrganisationID: currentUser.OrganisationID,
-		Permission:     strings.ToLower(string(input.Permission)),
+		Permission:     enumToPermission(input.Permission),
 	}
 
+	// Check permission
+	// Fetch file if provided
+	var file db.File
 	if input.FileID != nil {
 		share.FileID = *input.FileID
+		err = r.DB.NewSelect().Model(&file).
+			Where("id = ?", input.FileID).
+			Where("organisation_id = ?", currentUser.OrganisationID).
+			Scan(ctx)
 	} else {
 		share.BucketID = *input.BucketID
 	}
 
+	// Fetch bucket either way
+	var bucket db.Bucket
+	query := r.DB.NewSelect().Model(&bucket).
+		Where("organisation_id = ?", currentUser.OrganisationID)
+
+	if input.FileID != nil {
+		query.Where("id = ?", file.BucketID)
+	} else {
+		query.Where("id = ?", input.BucketID)
+	}
+
+	err = query.Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// If he is not owner of bucket, fetch shares
+	if bucket.UserID.Valid && bucket.UserID.String != currentUser.ID {
+		var share db.Share
+		query := r.DB.NewSelect().Model(&share).
+			Where("shared_with = ?", currentUser.ID).
+			Where("organisation_id = ?", currentUser.OrganisationID)
+
+		if input.FileID != nil {
+			query.Where("file_id = ?", input.FileID)
+		} else {
+			query.Where("bucket_id = ?", input.BucketID)
+		}
+
+		err = query.Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		// Check if he has manage permission
+		if permissionToEnum(share.Permission) != model.FilePermissionManager {
+			return nil, errors.New("you don't have permission to share this file")
+		}
+	}
+
+	// Insert share
 	err = r.DB.NewInsert().Model(&share).Returning("*").Scan(ctx)
 	if err != nil {
 		return nil, err
@@ -509,35 +557,92 @@ func (r *mutationResolver) EditShare(ctx context.Context, input model.CreateShar
 
 	// Get share
 	var share db.Share
+	query := r.DB.NewSelect().Model(&share).
+		Where("shared_with= ?", input.User).
+		Where("organisation_id = ?", currentUser.OrganisationID)
+
 	if input.FileID != nil {
-		err = r.DB.NewSelect().Model(&share).
-			Where("shared_with= ?", input.User).
-			Where("organisation_id = ?", currentUser.OrganisationID).
-			Where("file_id = ?", input.FileID).
-			Scan(ctx)
+		query.Where("file_id = ?", input.FileID)
 	} else if input.BucketID != nil {
-		err = r.DB.NewSelect().Model(&share).
-			Where("shared_with= ?", input.User).
-			Where("organisation_id = ?", currentUser.OrganisationID).
-			Where("bucket_id = ?", input.BucketID).
-			Scan(ctx)
+		query.Where("bucket_id = ?", input.BucketID)
 	} else {
 		return nil, errors.New("fileId or bucketId is required")
 	}
+
+	err = query.Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
 
+	// Check permission
+	// Fetch file if provided
+	var file db.File
+	if input.FileID != nil {
+		share.FileID = *input.FileID
+		err = r.DB.NewSelect().Model(&file).
+			Where("id = ?", input.FileID).
+			Where("organisation_id = ?", currentUser.OrganisationID).
+			Scan(ctx)
+	} else {
+		share.BucketID = *input.BucketID
+	}
+
+	// Fetch bucket either way
+	var bucket db.Bucket
+	query = r.DB.NewSelect().Model(&bucket).
+		Where("organisation_id = ?", currentUser.OrganisationID)
+
+	if input.FileID != nil {
+		query.Where("id = ?", file.BucketID)
+	} else {
+		query.Where("id = ?", input.BucketID)
+	}
+
+	err = query.Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// If he is not owner of bucket, fetch shares
+	if bucket.UserID.Valid && bucket.UserID.String != currentUser.ID {
+		var share db.Share
+		query := r.DB.NewSelect().Model(&share).
+			Where("shared_with = ?", currentUser.ID).
+			Where("organisation_id = ?", currentUser.OrganisationID)
+
+		if input.FileID != nil {
+			query.Where("file_id = ?", input.FileID)
+		} else {
+			query.Where("bucket_id = ?", input.BucketID)
+		}
+
+		err = query.Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		// Check if he has manage permission
+		if permissionToEnum(share.Permission) != model.FilePermissionManager {
+			return nil, errors.New("you don't have permission to share this file")
+		}
+	}
+
 	// Update permission
 	share.Permission = strings.ToLower(string(input.Permission))
-	err = r.DB.NewUpdate().Model(&share).WherePK().Scan(ctx)
+	err = r.DB.NewUpdate().Model(&share).
+		WherePK().
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get user
 	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", share.SharedWith).Scan(ctx)
+	err = r.DB.NewSelect().Model(&user).
+		Where("id = ?", share.SharedWith).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -574,22 +679,81 @@ func (r *mutationResolver) DeleteShare(ctx context.Context, input model.DeleteSh
 		return nil, err
 	}
 
+	// Check permission
+	// Fetch file if provided
+	var file db.File
+	if input.FileID != nil {
+		share.FileID = *input.FileID
+		err = r.DB.NewSelect().Model(&file).
+			Where("id = ?", input.FileID).
+			Where("organisation_id = ?", currentUser.OrganisationID).
+			Scan(ctx)
+	} else {
+		share.BucketID = *input.BucketID
+	}
+
+	// Fetch bucket either way
+	var bucket db.Bucket
+	query = r.DB.NewSelect().Model(&bucket).
+		Where("organisation_id = ?", currentUser.OrganisationID)
+
+	if input.FileID != nil {
+		query.Where("id = ?", file.BucketID)
+	} else {
+		query.Where("id = ?", input.BucketID)
+	}
+
+	err = query.Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// If he is not owner of bucket, fetch shares
+	if bucket.UserID.Valid && bucket.UserID.String != currentUser.ID {
+		var share db.Share
+		query := r.DB.NewSelect().Model(&share).
+			Where("shared_with = ?", currentUser.ID).
+			Where("organisation_id = ?", currentUser.OrganisationID)
+
+		if input.FileID != nil {
+			query.Where("file_id = ?", input.FileID)
+		} else {
+			query.Where("bucket_id = ?", input.BucketID)
+		}
+
+		err = query.Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		// Check if he has manage permission
+		if permissionToEnum(share.Permission) != model.FilePermissionManager {
+			return nil, errors.New("you don't have permission to share this file")
+		}
+	}
+
 	// Delete share
-	_, err = r.DB.NewDelete().Model(&share).WherePK().Exec(ctx)
+	_, err = r.DB.NewDelete().Model(&share).
+		WherePK().
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get user
 	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", share.SharedWith).Scan(ctx)
+	err = r.DB.NewSelect().Model(&user).
+		Where("id = ?", share.SharedWith).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return &model.ShareUser{
 		User:       &user,
-		Permission: model.FilePermission(cases.Title(language.Und, cases.NoLower).String(share.Permission)),
+		Permission: permissionToEnum(share.Permission),
 	}, nil
 }
 
@@ -637,6 +801,7 @@ func (r *queryResolver) Buckets(ctx context.Context, input *model.BucketFilterIn
 		err = r.DB.NewSelect().
 			Model(&shares).
 			Where("shared_with = ?", currentUser.ID).
+			Where("organisation_id = ?", currentUser.OrganisationID).
 			Scan(ctx)
 
 		// Get the bucket ids
@@ -649,6 +814,7 @@ func (r *queryResolver) Buckets(ctx context.Context, input *model.BucketFilterIn
 			Model(&sharedBuckets).
 			Where("shared = ?", *input.Shared).
 			Where("id IN (?)", bun.In(bucketIDs)).
+			Where("organisation_id = ?", currentUser.OrganisationID).
 			Scan(ctx)
 		if err != nil {
 			if err != sql.ErrNoRows {
@@ -705,14 +871,21 @@ func (r *queryResolver) Bucket(ctx context.Context, id string) (*db.Bucket, erro
 	if err != nil {
 		if err == sql.ErrNoRows {
 			var share db.Share
-			err = r.DB.NewSelect().Model(&share).Where("bucket_id = ?", id).Where("shared_with = ?", currentUser.ID).Scan(ctx)
+			err = r.DB.NewSelect().Model(&share).
+				Where("bucket_id = ?", id).
+				Where("shared_with = ?", currentUser.ID).
+				Where("organisation_id = ?", currentUser.OrganisationID).
+				Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
 
 			// Fetch the bucket, if share exists
 			if &share != nil {
-				err = r.DB.NewSelect().Model(&bucket).Where("id = ?", share.BucketID).Scan(ctx)
+				err = r.DB.NewSelect().Model(&bucket).
+					Where("id = ?", share.BucketID).
+					Where("organisation_id = ?", currentUser.OrganisationID).
+					Scan(ctx)
 				if err != nil {
 					return nil, err
 				}
@@ -839,21 +1012,24 @@ func (r *queryResolver) Files(ctx context.Context, input *model.FilesFilterInput
 
 // Shares is the resolver for the shares field.
 func (r *queryResolver) Shares(ctx context.Context, input *model.ShareInput) ([]*model.ShareUser, error) {
-	_, err := middleware.GetUser(ctx)
+	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, nil
 	}
 
 	var shares []*db.Share
 
+	query := r.DB.NewSelect().Model(&shares).Where("organisation_id = ?", currentUser.OrganisationID)
+
 	if input.FileID != nil {
-		err = r.DB.NewSelect().Model(&shares).Where("file_id = ?", input.FileID).Scan(ctx)
+		query.Where("file_id = ?", input.FileID)
 	} else if input.BucketID != nil {
-		err = r.DB.NewSelect().Model(&shares).Where("bucket_id = ?", input.BucketID).Scan(ctx)
+		query.Where("bucket_id = ?", input.BucketID)
 	} else {
 		return nil, fmt.Errorf("file_id or bucket_id must be provided")
 	}
 
+	err = query.Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -899,15 +1075,10 @@ func (r *Resolver) File() FileResolver { return &fileResolver{r} }
 type bucketResolver struct{ *Resolver }
 type fileResolver struct{ *Resolver }
 
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//     it when you're done.
-//   - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *bucketResolver) Role(ctx context.Context, obj *db.Bucket) (*model.FilePermission, error) {
-	panic(fmt.Errorf("not implemented: Role - role"))
+func enumToPermission(permission model.FilePermission) string {
+	return strings.ToLower(string(permission))
 }
-func (r *fileResolver) Role(ctx context.Context, obj *db.File) (*model.FilePermission, error) {
-	panic(fmt.Errorf("not implemented: Role - role"))
+
+func permissionToEnum(permission string) model.FilePermission {
+	return model.FilePermission(cases.Title(language.Und, cases.NoLower).String(permission))
 }
