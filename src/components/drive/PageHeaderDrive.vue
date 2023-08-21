@@ -41,6 +41,7 @@ export interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   bucketId: null,
+  permission: FilePermission.Manager,
 });
 
 const { folderId, bucketId } = toRefs(props);

@@ -5,9 +5,9 @@
       @upload="upload"
       :bucket-id="bucketId"
       :folder-id="folderId"
-      :permission="(bucket?.bucket.permission as FilePermission)"
+      :permission="permission"
     />
-    <div class="h-full overflow-auto" v-if="bucket?.bucket.permission == FilePermission.Manager">
+    <div class="h-full overflow-auto">
       <DFileDropZone @upload="upload">
         <DFileList @click="clickFile" :bucket-id="bucketId" :folder-id="folderId" />
       </DFileDropZone>
@@ -20,7 +20,7 @@
 import PageWrapper from "@/components/PageWrapper.vue";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
-import { ref, toRefs, Ref, reactive } from "vue";
+import { ref, toRefs, Ref, reactive, computed } from "vue";
 import { useRouter } from "vue-router/auto";
 import { File, FilePermission } from "@/gql/graphql";
 import DFileList from "@/components/drive/DFileList.vue";
@@ -106,5 +106,14 @@ const { data: bucket } = useQuery({
   variables: reactive({
     id: bucketId as Ref<string>,
   }),
+});
+
+// Make computed permission
+const permission = computed(() => {
+  if (bucket.value?.bucket?.permission) {
+    return bucket.value.bucket.permission;
+  }
+
+  return FilePermission.Manager;
 });
 </script>
