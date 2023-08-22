@@ -67,13 +67,14 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Bucket struct {
-		CreatedAt func(childComplexity int) int
-		DeletedAt func(childComplexity int) int
-		Files     func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Name      func(childComplexity int) int
-		Shared    func(childComplexity int) int
-		User      func(childComplexity int) int
+		CreatedAt  func(childComplexity int) int
+		DeletedAt  func(childComplexity int) int
+		Files      func(childComplexity int) int
+		ID         func(childComplexity int) int
+		Name       func(childComplexity int) int
+		Permission func(childComplexity int) int
+		Shared     func(childComplexity int) int
+		User       func(childComplexity int) int
 	}
 
 	BucketConnection struct {
@@ -316,6 +317,7 @@ type ComplexityRoot struct {
 		CreateEvent             func(childComplexity int, input model.CreateEventInput) int
 		CreateFolder            func(childComplexity int, input model.CreateFolderInput) int
 		CreateReport            func(childComplexity int, input model.CreateReportInput) int
+		CreateShare             func(childComplexity int, input model.CreateShareInput) int
 		CreateSharedDrive       func(childComplexity int, name string) int
 		CreateStudent           func(childComplexity int, input model.CreateStudentInput) int
 		CreateTag               func(childComplexity int, input model.CreateTagInput) int
@@ -329,8 +331,10 @@ type ComplexityRoot struct {
 		DeleteEmailGroupMember  func(childComplexity int, input model.DeleteEmailGroupMemberInput) int
 		DeleteFile              func(childComplexity int, input model.DeleteFileInput) int
 		DeleteFiles             func(childComplexity int, input model.DeleteFilesInput) int
+		DeleteShare             func(childComplexity int, input model.DeleteShareInput) int
 		DownloadFile            func(childComplexity int, input model.DownloadFileInput) int
 		DownloadFiles           func(childComplexity int, input model.DownloadFilesInput) int
+		EditShare               func(childComplexity int, input model.CreateShareInput) int
 		ForgotPassword          func(childComplexity int, input model.ForgotPasswordInput) int
 		MoveFile                func(childComplexity int, input model.MoveFileInput) int
 		MoveFiles               func(childComplexity int, input model.MoveFilesInput) int
@@ -404,6 +408,7 @@ type ComplexityRoot struct {
 		Organisation      func(childComplexity int) int
 		Report            func(childComplexity int, id string) int
 		Reports           func(childComplexity int, limit *int, offset *int) int
+		Shares            func(childComplexity int, input *model.ShareInput) int
 		Tag               func(childComplexity int, id string) int
 		Tags              func(childComplexity int, limit *int, offset *int) int
 		User              func(childComplexity int, id string) int
@@ -437,6 +442,11 @@ type ComplexityRoot struct {
 	ResetPasswordPayload struct {
 		Message func(childComplexity int) int
 		Success func(childComplexity int) int
+	}
+
+	ShareUser struct {
+		Permission func(childComplexity int) int
+		User       func(childComplexity int) int
 	}
 
 	SignInPayload struct {
@@ -526,6 +536,7 @@ type BucketResolver interface {
 	User(ctx context.Context, obj *db.Bucket) (*db.User, error)
 
 	DeletedAt(ctx context.Context, obj *db.Bucket) (*time.Time, error)
+	Permission(ctx context.Context, obj *db.Bucket) (*model.FilePermission, error)
 	Files(ctx context.Context, obj *db.Bucket) ([]*db.File, error)
 }
 type ChatResolver interface {
@@ -608,6 +619,9 @@ type MutationResolver interface {
 	AddFileShare(ctx context.Context, input model.ShareFileInput) (*db.File, error)
 	RemoveFileShare(ctx context.Context, input string) (*db.File, error)
 	CreateSharedDrive(ctx context.Context, name string) (*db.Bucket, error)
+	CreateShare(ctx context.Context, input model.CreateShareInput) (*model.ShareUser, error)
+	EditShare(ctx context.Context, input model.CreateShareInput) (*model.ShareUser, error)
+	DeleteShare(ctx context.Context, input model.DeleteShareInput) (*model.ShareUser, error)
 	CreateEmailAccount(ctx context.Context, input model.CreateEmailAccountInput) (*db.EmailAccount, error)
 	UpdateEmailAccount(ctx context.Context, input model.UpdateEmailAccountInput) (*db.EmailAccount, error)
 	DeleteEmailAccount(ctx context.Context, input model.DeleteEmailAccountInput) (*db.EmailAccount, error)
@@ -661,6 +675,7 @@ type QueryResolver interface {
 	Bucket(ctx context.Context, id string) (*db.Bucket, error)
 	File(ctx context.Context, id string) (*db.File, error)
 	Files(ctx context.Context, input *model.FilesFilterInput, limit *int, offset *int) (*model.FileConnection, error)
+	Shares(ctx context.Context, input *model.ShareInput) ([]*model.ShareUser, error)
 	EmailAccounts(ctx context.Context, filter *model.EmailAccountFilter) (*model.EmailAccountConnection, error)
 	EmailAccount(ctx context.Context, id string) (*db.EmailAccount, error)
 	EmailGroupMembers(ctx context.Context) (*model.EmailGroupMemberConnection, error)
@@ -781,6 +796,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Bucket.Name(childComplexity), true
+
+	case "Bucket.permission":
+		if e.complexity.Bucket.Permission == nil {
+			break
+		}
+
+		return e.complexity.Bucket.Permission(childComplexity), true
 
 	case "Bucket.shared":
 		if e.complexity.Bucket.Shared == nil {
@@ -1923,6 +1945,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateReport(childComplexity, args["input"].(model.CreateReportInput)), true
 
+	case "Mutation.createShare":
+		if e.complexity.Mutation.CreateShare == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createShare_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateShare(childComplexity, args["input"].(model.CreateShareInput)), true
+
 	case "Mutation.createSharedDrive":
 		if e.complexity.Mutation.CreateSharedDrive == nil {
 			break
@@ -2079,6 +2113,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteFiles(childComplexity, args["input"].(model.DeleteFilesInput)), true
 
+	case "Mutation.deleteShare":
+		if e.complexity.Mutation.DeleteShare == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteShare_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteShare(childComplexity, args["input"].(model.DeleteShareInput)), true
+
 	case "Mutation.downloadFile":
 		if e.complexity.Mutation.DownloadFile == nil {
 			break
@@ -2102,6 +2148,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DownloadFiles(childComplexity, args["input"].(model.DownloadFilesInput)), true
+
+	case "Mutation.editShare":
+		if e.complexity.Mutation.EditShare == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_editShare_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.EditShare(childComplexity, args["input"].(model.CreateShareInput)), true
 
 	case "Mutation.forgotPassword":
 		if e.complexity.Mutation.ForgotPassword == nil {
@@ -2750,6 +2808,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Reports(childComplexity, args["limit"].(*int), args["offset"].(*int)), true
 
+	case "Query.shares":
+		if e.complexity.Query.Shares == nil {
+			break
+		}
+
+		args, err := ec.field_Query_shares_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Shares(childComplexity, args["input"].(*model.ShareInput)), true
+
 	case "Query.tag":
 		if e.complexity.Query.Tag == nil {
 			break
@@ -2947,6 +3017,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ResetPasswordPayload.Success(childComplexity), true
+
+	case "ShareUser.permission":
+		if e.complexity.ShareUser.Permission == nil {
+			break
+		}
+
+		return e.complexity.ShareUser.Permission(childComplexity), true
+
+	case "ShareUser.user":
+		if e.complexity.ShareUser.User == nil {
+			break
+		}
+
+		return e.complexity.ShareUser.User(childComplexity), true
 
 	case "SignInPayload.enabled_apps":
 		if e.complexity.SignInPayload.EnabledApps == nil {
@@ -3336,6 +3420,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCreateEventInput,
 		ec.unmarshalInputCreateFolderInput,
 		ec.unmarshalInputCreateReportInput,
+		ec.unmarshalInputCreateShareInput,
 		ec.unmarshalInputCreateStudentInput,
 		ec.unmarshalInputCreateTagInput,
 		ec.unmarshalInputCreateUserCompetenceInput,
@@ -3347,6 +3432,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputDeleteEmailInput,
 		ec.unmarshalInputDeleteFileInput,
 		ec.unmarshalInputDeleteFilesInput,
+		ec.unmarshalInputDeleteShareInput,
 		ec.unmarshalInputDownloadFileInput,
 		ec.unmarshalInputDownloadFilesInput,
 		ec.unmarshalInputEmailAccountFilter,
@@ -3364,6 +3450,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputRenameFileInput,
 		ec.unmarshalInputResetPasswordInput,
 		ec.unmarshalInputShareFileInput,
+		ec.unmarshalInputShareInput,
 		ec.unmarshalInputSharedDriveFilterInput,
 		ec.unmarshalInputSignInInput,
 		ec.unmarshalInputSignUpInput,
@@ -3798,6 +3885,21 @@ func (ec *executionContext) field_Mutation_createReport_args(ctx context.Context
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_createShare_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CreateShareInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNCreateShareInput2exampleᚋpkgᚋgraphᚋmodelᚐCreateShareInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createSharedDrive_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -3993,6 +4095,21 @@ func (ec *executionContext) field_Mutation_deleteFiles_args(ctx context.Context,
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_deleteShare_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.DeleteShareInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNDeleteShareInput2exampleᚋpkgᚋgraphᚋmodelᚐDeleteShareInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_downloadFile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -4015,6 +4132,21 @@ func (ec *executionContext) field_Mutation_downloadFiles_args(ctx context.Contex
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNDownloadFilesInput2exampleᚋpkgᚋgraphᚋmodelᚐDownloadFilesInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_editShare_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CreateShareInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNCreateShareInput2exampleᚋpkgᚋgraphᚋmodelᚐCreateShareInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -4878,6 +5010,21 @@ func (ec *executionContext) field_Query_reports_args(ctx context.Context, rawArg
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_shares_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.ShareInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalOShareInput2ᚖexampleᚋpkgᚋgraphᚋmodelᚐShareInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_tag_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -5336,6 +5483,47 @@ func (ec *executionContext) fieldContext_Bucket_deletedAt(ctx context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _Bucket_permission(ctx context.Context, field graphql.CollectedField, obj *db.Bucket) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Bucket_permission(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Bucket().Permission(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.FilePermission)
+	fc.Result = res
+	return ec.marshalOFilePermission2ᚖexampleᚋpkgᚋgraphᚋmodelᚐFilePermission(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Bucket_permission(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Bucket",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type FilePermission does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Bucket_files(ctx context.Context, field graphql.CollectedField, obj *db.Bucket) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Bucket_files(ctx, field)
 	if err != nil {
@@ -5455,6 +5643,8 @@ func (ec *executionContext) fieldContext_BucketConnection_edges(ctx context.Cont
 				return ec.fieldContext_Bucket_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Bucket_deletedAt(ctx, field)
+			case "permission":
+				return ec.fieldContext_Bucket_permission(ctx, field)
 			case "files":
 				return ec.fieldContext_Bucket_files(ctx, field)
 			}
@@ -11190,6 +11380,8 @@ func (ec *executionContext) fieldContext_File_bucket(ctx context.Context, field 
 				return ec.fieldContext_Bucket_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Bucket_deletedAt(ctx, field)
+			case "permission":
+				return ec.fieldContext_Bucket_permission(ctx, field)
 			case "files":
 				return ec.fieldContext_Bucket_files(ctx, field)
 			}
@@ -12841,6 +13033,8 @@ func (ec *executionContext) fieldContext_Mutation_createSharedDrive(ctx context.
 				return ec.fieldContext_Bucket_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Bucket_deletedAt(ctx, field)
+			case "permission":
+				return ec.fieldContext_Bucket_permission(ctx, field)
 			case "files":
 				return ec.fieldContext_Bucket_files(ctx, field)
 			}
@@ -12855,6 +13049,189 @@ func (ec *executionContext) fieldContext_Mutation_createSharedDrive(ctx context.
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_createSharedDrive_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createShare(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createShare(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateShare(rctx, fc.Args["input"].(model.CreateShareInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ShareUser)
+	fc.Result = res
+	return ec.marshalNShareUser2ᚖexampleᚋpkgᚋgraphᚋmodelᚐShareUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createShare(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "user":
+				return ec.fieldContext_ShareUser_user(ctx, field)
+			case "permission":
+				return ec.fieldContext_ShareUser_permission(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ShareUser", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createShare_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_editShare(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_editShare(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().EditShare(rctx, fc.Args["input"].(model.CreateShareInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ShareUser)
+	fc.Result = res
+	return ec.marshalNShareUser2ᚖexampleᚋpkgᚋgraphᚋmodelᚐShareUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_editShare(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "user":
+				return ec.fieldContext_ShareUser_user(ctx, field)
+			case "permission":
+				return ec.fieldContext_ShareUser_permission(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ShareUser", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_editShare_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteShare(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deleteShare(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteShare(rctx, fc.Args["input"].(model.DeleteShareInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ShareUser)
+	fc.Result = res
+	return ec.marshalNShareUser2ᚖexampleᚋpkgᚋgraphᚋmodelᚐShareUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteShare(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "user":
+				return ec.fieldContext_ShareUser_user(ctx, field)
+			case "permission":
+				return ec.fieldContext_ShareUser_permission(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ShareUser", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteShare_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -16482,6 +16859,8 @@ func (ec *executionContext) fieldContext_Query_bucket(ctx context.Context, field
 				return ec.fieldContext_Bucket_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Bucket_deletedAt(ctx, field)
+			case "permission":
+				return ec.fieldContext_Bucket_permission(ctx, field)
 			case "files":
 				return ec.fieldContext_Bucket_files(ctx, field)
 			}
@@ -16638,6 +17017,64 @@ func (ec *executionContext) fieldContext_Query_files(ctx context.Context, field 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_files_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_shares(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_shares(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Shares(rctx, fc.Args["input"].(*model.ShareInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ShareUser)
+	fc.Result = res
+	return ec.marshalOShareUser2ᚕᚖexampleᚋpkgᚋgraphᚋmodelᚐShareUserᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_shares(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "user":
+				return ec.fieldContext_ShareUser_user(ctx, field)
+			case "permission":
+				return ec.fieldContext_ShareUser_permission(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ShareUser", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_shares_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -19411,6 +19848,118 @@ func (ec *executionContext) fieldContext_ResetPasswordPayload_message(ctx contex
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ShareUser_user(ctx context.Context, field graphql.CollectedField, obj *model.ShareUser) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ShareUser_user(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.User, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖexampleᚋpkgᚋdbᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ShareUser_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ShareUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "student":
+				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "emailAccounts":
+				return ec.fieldContext_User_emailAccounts(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ShareUser_permission(ctx context.Context, field graphql.CollectedField, obj *model.ShareUser) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ShareUser_permission(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Permission, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.FilePermission)
+	fc.Result = res
+	return ec.marshalNFilePermission2exampleᚋpkgᚋgraphᚋmodelᚐFilePermission(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ShareUser_permission(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ShareUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type FilePermission does not have child fields")
 		},
 	}
 	return fc, nil
@@ -24409,6 +24958,58 @@ func (ec *executionContext) unmarshalInputCreateReportInput(ctx context.Context,
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputCreateShareInput(ctx context.Context, obj interface{}) (model.CreateShareInput, error) {
+	var it model.CreateShareInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"fileId", "bucketId", "user", "permission"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "fileId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileId"))
+			it.FileID, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "bucketId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bucketId"))
+			it.BucketID, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "user":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user"))
+			it.User, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "permission":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("permission"))
+			it.Permission, err = ec.unmarshalNFilePermission2exampleᚋpkgᚋgraphᚋmodelᚐFilePermission(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreateStudentInput(ctx context.Context, obj interface{}) (model.CreateStudentInput, error) {
 	var it model.CreateStudentInput
 	asMap := map[string]interface{}{}
@@ -24820,6 +25421,50 @@ func (ec *executionContext) unmarshalInputDeleteFilesInput(ctx context.Context, 
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ids"))
 			it.Ids, err = ec.unmarshalNID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputDeleteShareInput(ctx context.Context, obj interface{}) (model.DeleteShareInput, error) {
+	var it model.DeleteShareInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"fileId", "bucketId", "user"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "fileId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileId"))
+			it.FileID, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "bucketId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bucketId"))
+			it.BucketID, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "user":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user"))
+			it.User, err = ec.unmarshalNID2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -25464,6 +26109,42 @@ func (ec *executionContext) unmarshalInputShareFileInput(ctx context.Context, ob
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("permission"))
 			it.Permission, err = ec.unmarshalNFilePermission2exampleᚋpkgᚋgraphᚋmodelᚐFilePermission(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputShareInput(ctx context.Context, obj interface{}) (model.ShareInput, error) {
+	var it model.ShareInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"bucketId", "fileId"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "bucketId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bucketId"))
+			it.BucketID, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fileId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileId"))
+			it.FileID, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -26333,6 +27014,23 @@ func (ec *executionContext) _Bucket(ctx context.Context, sel ast.SelectionSet, o
 					}
 				}()
 				res = ec._Bucket_deletedAt(ctx, field, obj)
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "permission":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Bucket_permission(ctx, field, obj)
 				return res
 			}
 
@@ -28447,6 +29145,33 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "createShare":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createShare(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "editShare":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_editShare(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteShare":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteShare(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "createEmailAccount":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -29081,6 +29806,26 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "shares":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_shares(ctx, field)
 				return res
 			}
 
@@ -29932,6 +30677,41 @@ func (ec *executionContext) _ResetPasswordPayload(ctx context.Context, sel ast.S
 		case "message":
 
 			out.Values[i] = ec._ResetPasswordPayload_message(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var shareUserImplementors = []string{"ShareUser"}
+
+func (ec *executionContext) _ShareUser(ctx context.Context, sel ast.SelectionSet, obj *model.ShareUser) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, shareUserImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ShareUser")
+		case "user":
+
+			out.Values[i] = ec._ShareUser_user(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "permission":
+
+			out.Values[i] = ec._ShareUser_permission(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -31429,6 +32209,11 @@ func (ec *executionContext) unmarshalNCreateReportInput2exampleᚋpkgᚋgraphᚋ
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNCreateShareInput2exampleᚋpkgᚋgraphᚋmodelᚐCreateShareInput(ctx context.Context, v interface{}) (model.CreateShareInput, error) {
+	res, err := ec.unmarshalInputCreateShareInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNCreateStudentInput2exampleᚋpkgᚋgraphᚋmodelᚐCreateStudentInput(ctx context.Context, v interface{}) (model.CreateStudentInput, error) {
 	res, err := ec.unmarshalInputCreateStudentInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -31515,6 +32300,11 @@ func (ec *executionContext) marshalNDeleteFilesPayload2ᚖexampleᚋpkgᚋgraph�
 		return graphql.Null
 	}
 	return ec._DeleteFilesPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNDeleteShareInput2exampleᚋpkgᚋgraphᚋmodelᚐDeleteShareInput(ctx context.Context, v interface{}) (model.DeleteShareInput, error) {
+	res, err := ec.unmarshalInputDeleteShareInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNDownloadFileInput2exampleᚋpkgᚋgraphᚋmodelᚐDownloadFileInput(ctx context.Context, v interface{}) (model.DownloadFileInput, error) {
@@ -32146,6 +32936,20 @@ func (ec *executionContext) marshalNResetPasswordPayload2ᚖexampleᚋpkgᚋgrap
 func (ec *executionContext) unmarshalNShareFileInput2exampleᚋpkgᚋgraphᚋmodelᚐShareFileInput(ctx context.Context, v interface{}) (model.ShareFileInput, error) {
 	res, err := ec.unmarshalInputShareFileInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNShareUser2exampleᚋpkgᚋgraphᚋmodelᚐShareUser(ctx context.Context, sel ast.SelectionSet, v model.ShareUser) graphql.Marshaler {
+	return ec._ShareUser(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNShareUser2ᚖexampleᚋpkgᚋgraphᚋmodelᚐShareUser(ctx context.Context, sel ast.SelectionSet, v *model.ShareUser) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ShareUser(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNSignInInput2exampleᚋpkgᚋgraphᚋmodelᚐSignInInput(ctx context.Context, v interface{}) (model.SignInInput, error) {
@@ -33595,6 +34399,22 @@ func (ec *executionContext) marshalOFile2ᚖexampleᚋpkgᚋdbᚐFile(ctx contex
 	return ec._File(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalOFilePermission2ᚖexampleᚋpkgᚋgraphᚋmodelᚐFilePermission(ctx context.Context, v interface{}) (*model.FilePermission, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.FilePermission)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOFilePermission2ᚖexampleᚋpkgᚋgraphᚋmodelᚐFilePermission(ctx context.Context, sel ast.SelectionSet, v *model.FilePermission) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
 func (ec *executionContext) unmarshalOFilesFilterInput2ᚖexampleᚋpkgᚋgraphᚋmodelᚐFilesFilterInput(ctx context.Context, v interface{}) (*model.FilesFilterInput, error) {
 	if v == nil {
 		return nil, nil
@@ -33768,6 +34588,61 @@ func (ec *executionContext) marshalOReport2ᚖexampleᚋpkgᚋdbᚐReport(ctx co
 		return graphql.Null
 	}
 	return ec._Report(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOShareInput2ᚖexampleᚋpkgᚋgraphᚋmodelᚐShareInput(ctx context.Context, v interface{}) (*model.ShareInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputShareInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOShareUser2ᚕᚖexampleᚋpkgᚋgraphᚋmodelᚐShareUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ShareUser) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNShareUser2ᚖexampleᚋpkgᚋgraphᚋmodelᚐShareUser(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

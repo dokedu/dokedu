@@ -7,16 +7,21 @@ package graph
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"example/pkg/db"
 	"example/pkg/graph/model"
 	"example/pkg/middleware"
 	"fmt"
 	"mime"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
 	minio "github.com/minio/minio-go/v7"
+	"github.com/uptrace/bun"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // User is the resolver for the user field.
@@ -38,6 +43,34 @@ func (r *bucketResolver) User(ctx context.Context, obj *db.Bucket) (*db.User, er
 // DeletedAt is the resolver for the deletedAt field.
 func (r *bucketResolver) DeletedAt(ctx context.Context, obj *db.Bucket) (*time.Time, error) {
 	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
+}
+
+// Permission is the resolver for the permission field.
+func (r *bucketResolver) Permission(ctx context.Context, obj *db.Bucket) (*model.FilePermission, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	// If the user is the owner of the bucket, they have full access.
+	if obj.UserID.String == currentUser.ID {
+		permission := model.FilePermissionManager
+		return &permission, nil
+	}
+
+	// Get shares for the bucket.
+	var share db.Share
+	err = r.DB.NewSelect().Model(&share).
+		Where("bucket_id = ?", obj.ID).
+		Where("shared_with = ?", currentUser.ID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	permission := model.FilePermission(cases.Title(language.Und).String(share.Permission))
+	return &permission, nil
 }
 
 // Files is the resolver for the files field.
@@ -179,7 +212,11 @@ func (r *mutationResolver) UploadFile(ctx context.Context, input model.FileUploa
 		file.BucketID = *input.BucketID
 		bucket.ID = *input.BucketID
 	} else {
-		err := r.DB.NewSelect().Model(&bucket).Column("id").Where("user_id = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+		err := r.DB.NewSelect().Model(&bucket).Column("id").
+			Where("user_id = ?", currentUser.ID).
+			Where("organisation_id = ?", currentUser.OrganisationID).
+			Where("shared = false").
+			Scan(ctx)
 
 		if err != nil && err.Error() == "sql: no rows in result set" {
 			// create bucket for user
@@ -243,7 +280,11 @@ func (r *mutationResolver) CreateFolder(ctx context.Context, input model.CreateF
 		file.BucketID = *input.BucketID
 	} else {
 		var bucket db.Bucket
-		err := r.DB.NewSelect().Model(&bucket).Column("id").Where("user_id = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+		err := r.DB.NewSelect().Model(&bucket).Column("id").
+			Where("user_id = ?", currentUser.ID).
+			Where("organisation_id = ?", currentUser.OrganisationID).
+			Where("shared = false").
+			Scan(ctx)
 
 		if err != nil && err.Error() == "sql: no rows in result set" {
 			// create bucket for user
@@ -424,6 +465,306 @@ func (r *mutationResolver) CreateSharedDrive(ctx context.Context, name string) (
 	return bucket, nil
 }
 
+// CreateShare is the resolver for the createShare field.
+func (r *mutationResolver) CreateShare(ctx context.Context, input model.CreateShareInput) (*model.ShareUser, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	// Get user
+	var user db.User
+	err = r.DB.NewSelect().Model(&user).Where("id = ?", input.User).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if we have fileId or bucketId
+	if input.FileID == nil && input.BucketID == nil {
+		return nil, errors.New("fileId or bucketId is required")
+	}
+
+	share := db.Share{
+		SharedWith:     input.User,
+		SharedBy:       currentUser.ID,
+		OrganisationID: currentUser.OrganisationID,
+		Permission:     enumToPermission(input.Permission),
+	}
+
+	// Check permission
+	// Fetch file if provided
+	var file db.File
+	if input.FileID != nil {
+		share.FileID = *input.FileID
+		err = r.DB.NewSelect().Model(&file).
+			Where("id = ?", input.FileID).
+			Where("organisation_id = ?", currentUser.OrganisationID).
+			Scan(ctx)
+	} else {
+		share.BucketID = *input.BucketID
+	}
+
+	// Fetch bucket either way
+	var bucket db.Bucket
+	query := r.DB.NewSelect().Model(&bucket).
+		Where("organisation_id = ?", currentUser.OrganisationID)
+
+	if input.FileID != nil {
+		query.Where("id = ?", file.BucketID)
+	} else {
+		query.Where("id = ?", input.BucketID)
+	}
+
+	err = query.Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// If he is not owner of bucket, fetch shares
+	if bucket.UserID.Valid && bucket.UserID.String != currentUser.ID {
+		var share db.Share
+		query := r.DB.NewSelect().Model(&share).
+			Where("shared_with = ?", currentUser.ID).
+			Where("organisation_id = ?", currentUser.OrganisationID)
+
+		if input.FileID != nil {
+			query.Where("file_id = ?", input.FileID)
+		} else {
+			query.Where("bucket_id = ?", input.BucketID)
+		}
+
+		err = query.Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		// Check if he has manage permission
+		if permissionToEnum(share.Permission) != model.FilePermissionManager {
+			return nil, errors.New("you don't have permission to share this file")
+		}
+	}
+
+	// Insert share
+	err = r.DB.NewInsert().Model(&share).Returning("*").Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.ShareUser{
+		User:       &user,
+		Permission: input.Permission,
+	}, nil
+}
+
+// EditShare is the resolver for the editShare field.
+func (r *mutationResolver) EditShare(ctx context.Context, input model.CreateShareInput) (*model.ShareUser, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	// Get share
+	var share db.Share
+	query := r.DB.NewSelect().Model(&share).
+		Where("shared_with= ?", input.User).
+		Where("organisation_id = ?", currentUser.OrganisationID)
+
+	if input.FileID != nil {
+		query.Where("file_id = ?", input.FileID)
+	} else if input.BucketID != nil {
+		query.Where("bucket_id = ?", input.BucketID)
+	} else {
+		return nil, errors.New("fileId or bucketId is required")
+	}
+
+	err = query.Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check permission
+	// Fetch file if provided
+	var file db.File
+	if input.FileID != nil {
+		share.FileID = *input.FileID
+		err = r.DB.NewSelect().Model(&file).
+			Where("id = ?", input.FileID).
+			Where("organisation_id = ?", currentUser.OrganisationID).
+			Scan(ctx)
+	} else {
+		share.BucketID = *input.BucketID
+	}
+
+	// Fetch bucket either way
+	var bucket db.Bucket
+	query = r.DB.NewSelect().Model(&bucket).
+		Where("organisation_id = ?", currentUser.OrganisationID)
+
+	if input.FileID != nil {
+		query.Where("id = ?", file.BucketID)
+	} else {
+		query.Where("id = ?", input.BucketID)
+	}
+
+	err = query.Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// If he is not owner of bucket, fetch shares
+	if bucket.UserID.Valid && bucket.UserID.String != currentUser.ID {
+		var share db.Share
+		query := r.DB.NewSelect().Model(&share).
+			Where("shared_with = ?", currentUser.ID).
+			Where("organisation_id = ?", currentUser.OrganisationID)
+
+		if input.FileID != nil {
+			query.Where("file_id = ?", input.FileID)
+		} else {
+			query.Where("bucket_id = ?", input.BucketID)
+		}
+
+		err = query.Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		// Check if he has manage permission
+		if permissionToEnum(share.Permission) != model.FilePermissionManager {
+			return nil, errors.New("you don't have permission to share this file")
+		}
+	}
+
+	// Update permission
+	share.Permission = strings.ToLower(string(input.Permission))
+	err = r.DB.NewUpdate().Model(&share).
+		WherePK().
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get user
+	var user db.User
+	err = r.DB.NewSelect().Model(&user).
+		Where("id = ?", share.SharedWith).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.ShareUser{
+		User:       &user,
+		Permission: input.Permission,
+	}, nil
+}
+
+// DeleteShare is the resolver for the deleteShare field.
+func (r *mutationResolver) DeleteShare(ctx context.Context, input model.DeleteShareInput) (*model.ShareUser, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	// Get share
+	var share db.Share
+	query := r.DB.NewSelect().Model(&share).
+		Where("shared_with = ?", input.User).
+		Where("organisation_id = ?", currentUser.OrganisationID)
+
+	if input.FileID != nil {
+		query.Where("file_id = ?", input.FileID)
+	} else if input.BucketID != nil {
+		query.Where("bucket_id = ?", input.BucketID)
+	} else {
+		return nil, errors.New("fileId or bucketId is required")
+	}
+
+	err = query.Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check permission
+	// Fetch file if provided
+	var file db.File
+	if input.FileID != nil {
+		share.FileID = *input.FileID
+		err = r.DB.NewSelect().Model(&file).
+			Where("id = ?", input.FileID).
+			Where("organisation_id = ?", currentUser.OrganisationID).
+			Scan(ctx)
+	} else {
+		share.BucketID = *input.BucketID
+	}
+
+	// Fetch bucket either way
+	var bucket db.Bucket
+	query = r.DB.NewSelect().Model(&bucket).
+		Where("organisation_id = ?", currentUser.OrganisationID)
+
+	if input.FileID != nil {
+		query.Where("id = ?", file.BucketID)
+	} else {
+		query.Where("id = ?", input.BucketID)
+	}
+
+	err = query.Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// If he is not owner of bucket, fetch shares
+	if bucket.UserID.Valid && bucket.UserID.String != currentUser.ID {
+		var share db.Share
+		query := r.DB.NewSelect().Model(&share).
+			Where("shared_with = ?", currentUser.ID).
+			Where("organisation_id = ?", currentUser.OrganisationID)
+
+		if input.FileID != nil {
+			query.Where("file_id = ?", input.FileID)
+		} else {
+			query.Where("bucket_id = ?", input.BucketID)
+		}
+
+		err = query.Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		// Check if he has manage permission
+		if permissionToEnum(share.Permission) != model.FilePermissionManager {
+			return nil, errors.New("you don't have permission to share this file")
+		}
+	}
+
+	// Delete share
+	_, err = r.DB.NewDelete().Model(&share).
+		WherePK().
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get user
+	var user db.User
+	err = r.DB.NewSelect().Model(&user).
+		Where("id = ?", share.SharedWith).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.ShareUser{
+		User:       &user,
+		Permission: permissionToEnum(share.Permission),
+	}, nil
+}
+
 // Buckets is the resolver for the buckets field.
 func (r *queryResolver) Buckets(ctx context.Context, input *model.BucketFilterInput, limit *int, offset *int) (*model.BucketConnection, error) {
 	currentUser, err := middleware.GetUser(ctx)
@@ -447,8 +788,8 @@ func (r *queryResolver) Buckets(ctx context.Context, input *model.BucketFilterIn
 	var buckets []*db.Bucket
 	query := r.DB.NewSelect().
 		Model(&buckets).
-		Where("user_id = ?", currentUser.ID).
 		Where("organisation_id = ?", currentUser.OrganisationID).
+		Where("user_id = ?", currentUser.ID).
 		Order("name ASC")
 
 	if input != nil {
@@ -460,6 +801,41 @@ func (r *queryResolver) Buckets(ctx context.Context, input *model.BucketFilterIn
 	count, err := query.ScanAndCount(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	// if filter shared is true, we also need to get the buckets that are shared with the user
+	if input != nil && input.Shared != nil && *input.Shared {
+		var shares []*db.Share
+		err = r.DB.NewSelect().
+			Model(&shares).
+			Where("shared_with = ?", currentUser.ID).
+			Where("organisation_id = ?", currentUser.OrganisationID).
+			Scan(ctx)
+
+		// Get the bucket ids
+		var bucketIDs []string
+		for _, share := range shares {
+			bucketIDs = append(bucketIDs, share.BucketID)
+		}
+		var sharedBuckets []*db.Bucket
+		err = r.DB.NewSelect().
+			Model(&sharedBuckets).
+			Where("shared = ?", *input.Shared).
+			Where("id IN (?)", bun.In(bucketIDs)).
+			Where("organisation_id = ?", currentUser.OrganisationID).
+			Scan(ctx)
+		if err != nil {
+			if err != sql.ErrNoRows {
+				return nil, err
+			}
+		}
+
+		buckets = append(buckets, sharedBuckets...)
+
+		// Order by name
+		sort.Slice(buckets, func(i, j int) bool {
+			return buckets[i].Name < buckets[j].Name
+		})
 	}
 
 	pageInfo := &model.PageInfo{}
@@ -501,7 +877,30 @@ func (r *queryResolver) Bucket(ctx context.Context, id string) (*db.Bucket, erro
 	var bucket db.Bucket
 	err = r.DB.NewSelect().Model(&bucket).Where("id = ?", id).Where("user_id = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			var share db.Share
+			err = r.DB.NewSelect().Model(&share).
+				Where("bucket_id = ?", id).
+				Where("shared_with = ?", currentUser.ID).
+				Where("organisation_id = ?", currentUser.OrganisationID).
+				Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			// Fetch the bucket, if share exists
+			if &share != nil {
+				err = r.DB.NewSelect().Model(&bucket).
+					Where("id = ?", share.BucketID).
+					Where("organisation_id = ?", currentUser.OrganisationID).
+					Scan(ctx)
+				if err != nil {
+					return nil, err
+				}
+			}
+		} else {
+			return nil, err
+		}
 	}
 
 	return &bucket, nil
@@ -574,7 +973,11 @@ func (r *queryResolver) Files(ctx context.Context, input *model.FilesFilterInput
 			query.Where("bucket_id = ?", bucket.ID)
 		} else if input.MyBucket != nil && *input.MyBucket {
 			var bucket db.Bucket
-			err = r.DB.NewSelect().Model(&bucket).Where("user_id = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+			err = r.DB.NewSelect().Model(&bucket).
+				Where("user_id = ?", currentUser.ID).
+				Where("organisation_id = ?", currentUser.OrganisationID).
+				Where("shared = ?", false).
+				Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -619,6 +1022,62 @@ func (r *queryResolver) Files(ctx context.Context, input *model.FilesFilterInput
 	}, nil
 }
 
+// Shares is the resolver for the shares field.
+func (r *queryResolver) Shares(ctx context.Context, input *model.ShareInput) ([]*model.ShareUser, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	var shares []*db.Share
+
+	query := r.DB.NewSelect().Model(&shares).Where("organisation_id = ?", currentUser.OrganisationID)
+
+	if input.FileID != nil {
+		query.Where("file_id = ?", input.FileID)
+	} else if input.BucketID != nil {
+		query.Where("bucket_id = ?", input.BucketID)
+	} else {
+		return nil, fmt.Errorf("file_id or bucket_id must be provided")
+	}
+
+	err = query.Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Make slice of user IDs
+	var userIDs []string
+	for _, share := range shares {
+		userIDs = append(userIDs, share.SharedWith)
+	}
+
+	// Get the users from the shares
+	var users []*db.User
+	err = r.DB.NewSelect().Model(&users).Where("id in (?)", bun.In(userIDs)).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var shareUsers []*model.ShareUser
+	for _, user := range users {
+		var shareUser model.ShareUser
+		shareUser.User = user
+
+		for _, share := range shares {
+			// Make first letter uppercase
+			permission := cases.Title(language.Und, cases.NoLower).String(share.Permission)
+
+			if share.SharedWith == user.ID {
+				shareUser.Permission = model.FilePermission(permission)
+			}
+		}
+		shareUsers = append(shareUsers, &shareUser)
+	}
+
+	return shareUsers, nil
+}
+
 // Bucket returns BucketResolver implementation.
 func (r *Resolver) Bucket() BucketResolver { return &bucketResolver{r} }
 
@@ -627,3 +1086,11 @@ func (r *Resolver) File() FileResolver { return &fileResolver{r} }
 
 type bucketResolver struct{ *Resolver }
 type fileResolver struct{ *Resolver }
+
+func enumToPermission(permission model.FilePermission) string {
+	return strings.ToLower(string(permission))
+}
+
+func permissionToEnum(permission string) model.FilePermission {
+	return model.FilePermission(cases.Title(language.Und, cases.NoLower).String(permission))
+}
