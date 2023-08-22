@@ -30,7 +30,7 @@
             <option value disabled>{{ $t("select_role") }}</option>
             <option value="owner">{{ $t("owner") }}</option>
             <option value="admin">{{ $t("admin") }}</option>
-            <option value="teacher">{{ $t("teacher") }}</option>
+            <option value="teacher">{{ $t("user") }}</option>
           </select>
         </div>
       </div>
