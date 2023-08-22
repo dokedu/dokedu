@@ -26909,7 +26909,7 @@ func (ec *executionContext) unmarshalInputUserFilterInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"role", "orderBy"}
+	fieldsInOrder := [...]string{"role", "orderBy", "showDeleted"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -26929,6 +26929,14 @@ func (ec *executionContext) unmarshalInputUserFilterInput(ctx context.Context, o
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("orderBy"))
 			it.OrderBy, err = ec.unmarshalOUserOrderBy2ᚖexampleᚋpkgᚋgraphᚋmodelᚐUserOrderBy(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "showDeleted":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("showDeleted"))
+			it.ShowDeleted, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
