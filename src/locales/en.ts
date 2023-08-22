@@ -189,4 +189,5 @@ export const en = {
   mobile_not_supported_description: "Please use a desktop browser to use this application",
 
   settings: "Settings",
+  show_deleted: "Show deleted",
 };

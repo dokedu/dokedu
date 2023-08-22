@@ -5,5 +5,6 @@ export type PageVariables = {
   sortBy?: string;
   offset?: number;
   nextPage?: boolean;
-  filter?: {[key: string]: any};
+  filter?: { [key: string]: any };
+  showDeleted?: boolean;
 };

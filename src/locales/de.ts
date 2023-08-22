@@ -187,4 +187,5 @@ export const de = {
   mobile_not_supported_description: "Bitte verwende einen Desktop-Browser, um diese Anwendung zu nutzen",
 
   settings: "Einstellungen",
+  show_deleted: "Gelöschte anzeigen",
 };
