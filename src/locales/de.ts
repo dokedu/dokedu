@@ -24,6 +24,7 @@ export const de = {
   add_label: "Tag hinzufügen",
   add_student: "Schüler hinzufügen",
   search_students: "Schüler suchen",
+  all_entries: "Alle Einträge",
 
   // Drive
   create: "Erstellen",

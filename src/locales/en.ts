@@ -28,6 +28,7 @@ export const en = {
   size: "Size",
   filesize: "Filesize",
   "-": "",
+  all_entries: "All entries",
 
   // Admin
   email: "Email",

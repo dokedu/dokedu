@@ -1170,6 +1170,7 @@ export enum ReportFormat {
 }
 
 export enum ReportKind {
+  AllEntries = 'all_entries',
   Competences = 'competences',
   Entries = 'entries',
   LearnedCompetences = 'learned_competences',
