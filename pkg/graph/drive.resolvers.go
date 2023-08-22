@@ -212,7 +212,11 @@ func (r *mutationResolver) UploadFile(ctx context.Context, input model.FileUploa
 		file.BucketID = *input.BucketID
 		bucket.ID = *input.BucketID
 	} else {
-		err := r.DB.NewSelect().Model(&bucket).Column("id").Where("user_id = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+		err := r.DB.NewSelect().Model(&bucket).Column("id").
+			Where("user_id = ?", currentUser.ID).
+			Where("organisation_id = ?", currentUser.OrganisationID).
+			Where("shared = false").
+			Scan(ctx)
 
 		if err != nil && err.Error() == "sql: no rows in result set" {
 			// create bucket for user
@@ -276,7 +280,11 @@ func (r *mutationResolver) CreateFolder(ctx context.Context, input model.CreateF
 		file.BucketID = *input.BucketID
 	} else {
 		var bucket db.Bucket
-		err := r.DB.NewSelect().Model(&bucket).Column("id").Where("user_id = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+		err := r.DB.NewSelect().Model(&bucket).Column("id").
+			Where("user_id = ?", currentUser.ID).
+			Where("organisation_id = ?", currentUser.OrganisationID).
+			Where("shared = false").
+			Scan(ctx)
 
 		if err != nil && err.Error() == "sql: no rows in result set" {
 			// create bucket for user
@@ -965,7 +973,11 @@ func (r *queryResolver) Files(ctx context.Context, input *model.FilesFilterInput
 			query.Where("bucket_id = ?", bucket.ID)
 		} else if input.MyBucket != nil && *input.MyBucket {
 			var bucket db.Bucket
-			err = r.DB.NewSelect().Model(&bucket).Where("user_id = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+			err = r.DB.NewSelect().Model(&bucket).
+				Where("user_id = ?", currentUser.ID).
+				Where("organisation_id = ?", currentUser.OrganisationID).
+				Where("shared = ?", false).
+				Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
