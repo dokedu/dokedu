@@ -41,19 +41,22 @@ func NewPDFReportsGenerator(cfg config.ReportGenerationConfig) *Generator {
 }
 
 func (g *Generator) GeneratePDF(report db.Report) error {
+	var data any
+
 	switch report.Kind {
 	case db.ReportKindEntries:
-		data, _ := g.EntriesReportData(report)
-		return g.process(report, data)
+		data, _ = g.EntriesReportData(report)
 	case db.ReportKindCompetences:
-		data, _ := g.CompetencesReportData(report)
-		return g.process(report, data)
+		data, _ = g.CompetencesReportData(report)
 	case db.ReportKindLearnedCompetences:
-		data, _ := g.LearnedCompetencesReportData(report)
-		return g.process(report, data)
+		data, _ = g.LearnedCompetencesReportData(report)
+	case db.ReportKindAllEntries:
+		data, _ = g.AllEntriesReportData(report)
 	default:
 		return errors.New("unknown report kind")
 	}
+
+	return g.process(report, data)
 }
 
 func (g *Generator) process(report db.Report, data any) error {
@@ -105,11 +108,20 @@ func (g *Generator) generatePDF(report db.Report, data *CompetencesData) error {
 		reportType = "Kompetenzen"
 	case db.ReportKindLearnedCompetences:
 		reportType = "Gelernte Kompetenzen"
+	case db.ReportKindAllEntries:
+		reportType = "Alle Einträge"
+	}
+
+	var studentName string
+	if data.Student.FirstName != "" && data.Student.LastName != "" {
+		studentName = fmt.Sprintf("%s %s", data.Student.FirstName, data.Student.LastName)
+	} else {
+		studentName = ""
 	}
 
 	headData := HeadData{
 		ReportKind:      reportType,
-		StudentFullName: fmt.Sprintf("%s %s", data.Student.FirstName, data.Student.LastName),
+		StudentFullName: studentName,
 	}
 	head := new(bytes.Buffer)
 	err = t.ExecuteTemplate(head, "_head.gohtml", headData)
@@ -195,7 +207,7 @@ func (g *Generator) pageContextData(report db.Report) (*CompetencesData, error) 
 }
 
 func (g *Generator) generateHTML(report db.Report, data any) error {
-	t, err := template.ParseFS(templateEmbeds, "templates/_header.gohtml", "templates/entries.gohtml", "templates/competences.gohtml", "templates/_footer.gohtml")
+	t, err := template.ParseFS(templateEmbeds, "templates/_header.gohtml", "templates/entries.gohtml", "templates/all_entries.gohtml", "templates/competences.gohtml", "templates/_footer.gohtml")
 	if err != nil {
 		return err
 	}
@@ -222,6 +234,8 @@ func (g *Generator) generateHTML(report db.Report, data any) error {
 		}
 	case db.ReportKindLearnedCompetences:
 		err = t.ExecuteTemplate(reports, "competences.gohtml", data)
+	case db.ReportKindAllEntries:
+		err = t.ExecuteTemplate(reports, "all_entries.gohtml", data)
 	}
 
 	footer := new(bytes.Buffer)

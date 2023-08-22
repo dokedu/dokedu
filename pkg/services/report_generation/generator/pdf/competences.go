@@ -158,7 +158,7 @@ func (g *Generator) populateCompetences(report db.Report, parent db.Competence, 
 	competences := GetCompetenceByParent(competencesData, parent)
 
 	for i := range competences {
-		// if data[i] is nil
+		// if internData[i] is nil
 		if data == nil {
 			data = make([]Competence, len(competences))
 		}

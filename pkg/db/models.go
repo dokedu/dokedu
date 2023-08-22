@@ -47,6 +47,7 @@ const (
 	ReportKindSubjects           ReportKind = "subjects"
 	ReportKindCompetences        ReportKind = "competences"
 	ReportKindLearnedCompetences ReportKind = "learned_competences"
+	ReportKindAllEntries         ReportKind = "all_entries"
 )
 
 type ReportStatus string
