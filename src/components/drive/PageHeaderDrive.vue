@@ -2,11 +2,20 @@
   <PageHeader class="flex min-h-0 select-none justify-between gap-4">
     <d-drive-header-breadcrumbs />
     <div class="flex gap-2">
-      <DButton type="transparent" size="md" :icon-left="FolderPlus" @click="addFolder">Folder</DButton>
+      <DButton
+        v-if="permission == FilePermission.Manager"
+        type="transparent"
+        size="md"
+        :icon-left="FolderPlus"
+        @click="addFolder"
+        >Folder</DButton
+      >
       <DDialog :open="newFolderDialog" @close="newFolderDialog = false">
         <input type="text" placeholder="Folder name" />
       </DDialog>
-      <DButton type="primary" size="md" :icon-left="Plus" @click="open()"> New </DButton>
+      <DButton v-if="permission == FilePermission.Manager" type="primary" size="md" :icon-left="Plus" @click="open()">
+        New
+      </DButton>
     </div>
   </PageHeader>
 </template>
@@ -21,15 +30,18 @@ import { useFileDialog } from "@vueuse/core";
 import { ref, toRefs } from "vue";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
+import { FilePermission } from "@/gql/graphql";
 
 export interface Props {
   title: string;
   folderId: string | null;
   bucketId: string | null;
+  permission: FilePermission;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   bucketId: null,
+  permission: FilePermission.Manager,
 });
 
 const { folderId, bucketId } = toRefs(props);

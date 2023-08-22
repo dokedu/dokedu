@@ -25,8 +25,25 @@
         <template #id-data="{ item }">
           <div>
             <div class="flex w-[80px] justify-end gap-1 pr-4">
-              <div class="group/icon w-fit rounded-lg p-1.5 hover:bg-blue-100" @click.stop="onClickMore(item)">
-                <MoreVertical class="stroke-colors-subtle group-hover/icon:stroke-blue-900" :size="16" />
+              <div>
+                <div class="group/icon w-fit rounded-lg p-1.5 hover:bg-blue-100" @click.stop="item.open = true">
+                  <MoreVertical class="stroke-colors-subtle group-hover/icon:stroke-blue-900" :size="16" />
+                </div>
+                <DContextMenu
+                  :key="item.id"
+                  :show="!!item.open"
+                  :alignment="ContextMenuAlignment.BottomRight"
+                  @close="item.open = false"
+                >
+                  <div class="px-1 py-1">
+                    <button
+                      class="w-full rounded-md px-2 py-1.5 text-left font-medium text-strong transition ease-in-out hover:bg-blue-100 hover:text-blue-900"
+                      @click.stop="toggleShareModal(item)"
+                    >
+                      Share
+                    </button>
+                  </div>
+                </DContextMenu>
               </div>
             </div>
           </div>
@@ -35,6 +52,8 @@
       </DTable>
     </PageContent>
   </PageWrapper>
+
+  <DDialogShareDrive :open="shareOpen" :item="(currentItem as Bucket)" @close="shareOpen = false"></DDialogShareDrive>
 </template>
 
 <script setup lang="ts">
@@ -50,6 +69,19 @@ import { Plus, Folder, MoreVertical } from "lucide-vue-next";
 import { graphql } from "@/gql";
 import { useMutation } from "@urql/vue";
 import router from "@/router";
+import DContextMenu from "@/components/d-context-menu/d-context-menu.vue";
+import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue";
+import DDialogShareDrive from "@/components/drive/DDialogShareDrive.vue";
+import { Bucket } from "@/gql/graphql";
+
+const currentItem = ref<Bucket>();
+const shareOpen = ref(false);
+
+function toggleShareModal(item: any) {
+  item.open = false;
+  currentItem.value = item;
+  shareOpen.value = true;
+}
 
 async function newSharedDrive() {
   const name = prompt("Enter name");
@@ -96,10 +128,6 @@ const columns = [
   },
 ];
 
-function onClickMore(item: any) {
-  alert(item);
-}
-
 interface Variables extends PageVariables {}
 
 const pageVariables = ref<Variables[]>([
@@ -117,6 +145,7 @@ const sharedDrivesQuery = graphql(`
         name
         shared
         createdAt
+        permission
       }
       totalCount
       pageInfo {
