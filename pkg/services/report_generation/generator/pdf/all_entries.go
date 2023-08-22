@@ -149,7 +149,21 @@ func (g *Generator) preloadAllEntriesReportData(ctx context.Context, o db.Organi
 		data.CompetencesMapByEntry[i] = removeDuplicates(data.CompetencesMapByEntry[i])
 	}
 
+	// sort data.Entries by created_at
+	data.Entries = sortEntriesByCreatedAt(data.Entries)
+
 	return &data, nil
+}
+
+func sortEntriesByCreatedAt(entries []db.Entry) []db.Entry {
+	for i := range entries {
+		for j := range entries {
+			if entries[i].CreatedAt.After(entries[j].CreatedAt) {
+				entries[i], entries[j] = entries[j], entries[i]
+			}
+		}
+	}
+	return entries
 }
 
 func removeDuplicates(competences []*db.Competence) []*db.Competence {

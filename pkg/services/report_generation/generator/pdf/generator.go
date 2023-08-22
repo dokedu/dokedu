@@ -113,10 +113,10 @@ func (g *Generator) generatePDF(report db.Report, data *CompetencesData) error {
 	}
 
 	var studentName string
-	if data.Student.FirstName != "" && data.Student.LastName != "" {
-		studentName = fmt.Sprintf("%s %s", data.Student.FirstName, data.Student.LastName)
-	} else {
+	if db.ReportKindAllEntries == report.Kind {
 		studentName = ""
+	} else {
+		studentName = fmt.Sprintf("%s %s", data.Student.FirstName, data.Student.LastName)
 	}
 
 	headData := HeadData{
