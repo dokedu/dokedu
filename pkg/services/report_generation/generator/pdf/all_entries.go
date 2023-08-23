@@ -4,7 +4,6 @@ import (
 	"context"
 	"example/pkg/db"
 	"fmt"
-	"github.com/uptrace/bun"
 	"time"
 )
 
@@ -26,25 +25,21 @@ type AllReportData struct {
 }
 
 type internData struct {
-	Entries                  []db.Entry
-	EntriesMap               map[string]*db.Entry
-	EntryEvents              []db.EntryEvent
-	Events                   []db.Event
-	EventsMap                map[string]*db.Event
-	EventsMapByEntry         map[string]*db.Event
-	EventCompetences         []db.EventCompetence
-	EventCompetencesByEntry  map[string][]*db.EventCompetence
-	UserCompetences          []db.UserCompetence
-	Competences              []db.Competence
-	CompetencesMap           map[string]*db.Competence
-	CompetencesMapByEntry    map[string][]*db.Competence
-	CompetenceParents        map[string][]*db.Competence
-	CompetenceParentsByEntry map[string][]*db.Competence
-}
-
-func loadAndMap[T any](ctx context.Context, db *bun.DB) error {
-
-	return nil
+	Entries                       []db.Entry
+	EntriesMap                    map[string]*db.Entry
+	EntryEvents                   []db.EntryEvent
+	Events                        []db.Event
+	EventsMap                     map[string]*db.Event
+	EventsMapByEntry              map[string]*db.Event
+	EventCompetences              []db.EventCompetence
+	EventCompetencesByEntry       map[string][]*db.EventCompetence
+	UserCompetences               []db.UserCompetence
+	Competences                   []db.Competence
+	CompetencesMap                map[string]*db.Competence
+	CompetencesMapByEntry         map[string][]*db.Competence
+	CompetenceParents             map[string][]*db.Competence
+	CompetenceParentsByEntry      map[string][]*db.Competence
+	CompetenceParentsByCompetence map[string][]*db.Competence
 }
 
 func (g *Generator) preloadAllEntriesReportData(ctx context.Context, o db.Organisation) (*internData, error) {
@@ -123,6 +118,8 @@ func (g *Generator) preloadAllEntriesReportData(ctx context.Context, o db.Organi
 		data.CompetencesMap[data.Competences[i].ID] = &data.Competences[i]
 	}
 
+	data.CompetenceParentsByCompetence = make(map[string][]*db.Competence, len(data.Competences))
+
 	// map
 	for i := range data.UserCompetences {
 		if data.UserCompetences[i].EntryID.Valid {
@@ -130,8 +127,16 @@ func (g *Generator) preloadAllEntriesReportData(ctx context.Context, o db.Organi
 		}
 	}
 
+	for i := range data.Competences {
+		if _, ok := data.CompetencesMap[data.Competences[i].CompetenceID.String]; ok {
+			data.CompetenceParentsByCompetence[data.Competences[i].ID] = competenceParentsWithData(data.Competences[i].CompetenceID.String, data.CompetencesMap)
+
+			// reverse order of data.CompetenceParentsByCompetence[data.Competences[i].ID]
+			data.CompetenceParentsByCompetence[data.Competences[i].ID] = reverseArray(data.CompetenceParentsByCompetence[data.Competences[i].ID])
+		}
+	}
+
 	data.CompetenceParents = make(map[string][]*db.Competence)
-	//TODO: data.CompetenceParentsByEntry = make(map[string][]*db.Competence, len(data.Entries))
 
 	// generate parents map
 	for i := range data.Competences {
@@ -153,6 +158,24 @@ func (g *Generator) preloadAllEntriesReportData(ctx context.Context, o db.Organi
 	data.Entries = sortEntriesByCreatedAt(data.Entries)
 
 	return &data, nil
+}
+
+// recursively get all parents of a competence with the parent_id CompetenceID
+func competenceParentsWithData(id string, competencesMap map[string]*db.Competence) []*db.Competence {
+	var parents []*db.Competence
+	if competencesMap[id] != nil {
+		parents = append(parents, competencesMap[id])
+		parents = append(parents, competenceParentsWithData(competencesMap[id].CompetenceID.String, competencesMap)...)
+	}
+	return parents
+}
+
+func reverseArray[T any](array []T) []T {
+	for i := len(array)/2 - 1; i >= 0; i-- {
+		opp := len(array) - 1 - i
+		array[i], array[opp] = array[opp], array[i]
+	}
+	return array
 }
 
 func sortEntriesByCreatedAt(entries []db.Entry) []db.Entry {
@@ -201,7 +224,7 @@ func (g *Generator) AllEntriesReportData(report db.Report) (*AllReportData, erro
 		ucStructs := make([]CompetenceStruct, len(data.CompetencesMapByEntry[data.Entries[i].ID]))
 		for i, item := range data.CompetencesMapByEntry[data.Entries[i].ID] {
 			grades := formatGrades(item.Grades)
-			parents := data.CompetenceParentsByEntry[item.ID]
+			parents := data.CompetenceParentsByCompetence[item.ID]
 
 			ucStructs[i] = CompetenceStruct{
 				Parents:    parents,
