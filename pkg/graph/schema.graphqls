@@ -199,6 +199,7 @@ enum UserOrderBy {
 input UserFilterInput {
     role: [UserRole]
     orderBy: UserOrderBy
+    showDeleted: Boolean
 }
 
 input CompetenceFilterInput {

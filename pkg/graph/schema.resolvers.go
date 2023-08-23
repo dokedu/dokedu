@@ -868,6 +868,9 @@ func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filt
 				query.OrderExpr("last_name ASC")
 			}
 		}
+		if filter.ShowDeleted != nil && *filter.ShowDeleted == true {
+			query.WhereDeleted()
+		}
 	}
 
 	if search != nil && *search != "" {

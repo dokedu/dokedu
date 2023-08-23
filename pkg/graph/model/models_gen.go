@@ -539,8 +539,9 @@ type UserFileFilterInput struct {
 }
 
 type UserFilterInput struct {
-	Role    []*db.UserRole `json:"role,omitempty"`
-	OrderBy *UserOrderBy   `json:"orderBy,omitempty"`
+	Role        []*db.UserRole `json:"role,omitempty"`
+	OrderBy     *UserOrderBy   `json:"orderBy,omitempty"`
+	ShowDeleted *bool          `json:"showDeleted,omitempty"`
 }
 
 type UserStudentConnection struct {
