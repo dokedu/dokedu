@@ -12,9 +12,20 @@
           class="h-8 rounded-md border border-stone-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-stone-200 focus:shadow-sm focus:ring-0"
         />
       </div>
-      <RouterLink :to="{ name: '/admin/users/new' }">
-        <DButton type="primary" size="md" :icon-left="Plus">{{ $t("add_user") }}</DButton>
-      </RouterLink>
+      <div class="flex items-center gap-8">
+        <div class="flex items-center gap-2">
+          <input
+            class="border-subtle rounded checked:bg-stone-900 checked:text-stone-900 checked:hover:bg-stone-900 focus:ring-0 checked:focus:bg-stone-900"
+            type="checkbox"
+            id="showDeletedAdmin"
+            v-model="showDeleted"
+          />
+          <label for="showDeletedAdmin">{{ $t("show_deleted") }}</label>
+        </div>
+        <RouterLink :to="{ name: '/admin/users/new' }">
+          <DButton type="primary" size="md" :icon-left="Plus">{{ $t("add_user") }}</DButton>
+        </RouterLink>
+      </div>
     </PageHeader>
     <DTable
       v-model:variables="pageVariables"
@@ -40,7 +51,7 @@ import DButton from "@/components/d-button/d-button.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import PageWrapper from "@/components/PageWrapper.vue";
 import { Plus } from "lucide-vue-next";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { UserOrderBy } from "@/gql/graphql";
 import { graphql } from "@/gql";
 import DTable from "@/components/d-table/d-table.vue";
@@ -50,6 +61,7 @@ import type { PageVariables } from "@/types/types";
 
 const router = useRouter();
 const search = ref("");
+const showDeleted = ref(false);
 
 const columns = [
   {
@@ -81,6 +93,7 @@ const pageVariables = ref<PageVariables[]>([
     limit: 50,
     offset: 0,
     nextPage: undefined,
+    showDeleted: undefined,
   },
 ]);
 
@@ -96,15 +109,35 @@ watchDebounced(
         limit: 50,
         offset: 0,
         nextPage: undefined,
+        showDeleted: lastPage.showDeleted,
       },
     ];
   },
   { debounce: 250, maxWait: 500 }
 );
 
+watch(showDeleted, () => {
+  // Get last page and set it as only with the search
+  const lastPage = pageVariables.value[pageVariables.value.length - 1];
+  pageVariables.value = [
+    {
+      search: lastPage.search,
+      order: lastPage.order,
+      limit: 50,
+      offset: 0,
+      nextPage: undefined,
+      showDeleted: showDeleted.value,
+    },
+  ];
+});
+
 const usersQuery = graphql(`
-  query adminUsers($search: String, $order: UserOrderBy, $offset: Int) {
-    users(filter: { role: [owner, admin, teacher], orderBy: $order }, search: $search, offset: $offset) {
+  query adminUsers($search: String, $order: UserOrderBy, $offset: Int, $showDeleted: Boolean) {
+    users(
+      filter: { role: [owner, admin, teacher], orderBy: $order, showDeleted: $showDeleted }
+      search: $search
+      offset: $offset
+    ) {
       pageInfo {
         hasNextPage
         hasPreviousPage
