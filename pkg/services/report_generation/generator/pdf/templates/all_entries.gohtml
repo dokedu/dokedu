@@ -1,7 +1,6 @@
 {{range .Entries}}
     <div id="entry-fgIPqmYFPk" class="border-b-2 border-gray-100 py-4">
-        <div class="mb-4">{{ .Entry.Body}}</div>
-        <div class="text-sm">Erstellt: <span class="font-semibold">{{ .CreatedAt}}</span></div>
+        <div class="mb-4">{{ .Entry.Body}} <span>– <span class="font-semibold">{{ .CreatedAt}}</span></span></div>
         <div class="mt-4 flex flex-col gap-2">
             {{range .Competences}}
                 <div class="rounded-lg border-2 border-gray-100 px-2 pb-2 break-inside-avoid">
@@ -9,7 +8,7 @@
                         <div class="text-sm">{{ .Competence.Name }}</div>
                     </div>
                     <div class="flex flex-wrap items-center text-sm text-gray-700">
-                        <div class="mr-1 flex items-baseline gap-1">
+                        <div class="mr-1 flex items-baseline gap-1 flex-wrap">
                             {{range .Parents}}
                                 <span>/</span>
                                 <div class="m-0 rounded-lg bg-gray-100 px-1 py-0.5 text-xs">{{ .Name }}</div>
