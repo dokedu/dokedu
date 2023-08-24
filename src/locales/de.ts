@@ -184,7 +184,7 @@ export const de = {
   password_reset_successfully: "Passwort erfolgreich zurückgesetzt",
   confirm_password: "Passwort bestätigen",
   mobile_not_supported: "Mobile Geräte werden nicht unterstützt",
-  mobile_not_supported_description: "Bitte verwende einen Desktop-Browser, um diese Anwendung zu nutzen",
+  mobile_not_supported_description: "Bitte verwende einen Desktop-Browser, um diese Anwendung zu nutzen. Eine Mobile-Version ist in Arbeit und wird bald verfügbar sein.",
 
   settings: "Einstellungen",
   show_deleted: "Gelöschte anzeigen",

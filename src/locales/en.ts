@@ -186,7 +186,7 @@ export const en = {
   password_reset_successfully: "Password reset successfully",
   confirm_password: "Confirm password",
   mobile_not_supported: "Mobile devices are not supported",
-  mobile_not_supported_description: "Please use a desktop browser to use this application",
+  mobile_not_supported_description: "Please use a desktop browser to use this application. A mobile version is in the works and will be available soon.",
 
   settings: "Settings",
   show_deleted: "Show deleted",
