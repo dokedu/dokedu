@@ -8,6 +8,7 @@
 import Default from "./layout/default.vue";
 import Auth from "./layout/auth.vue";
 import None from "./layout/none.vue";
+import Mobile from "./layout/mobile.vue";
 import { useRoute } from "vue-router/auto";
 import { computed } from "vue";
 import { publicRoutes } from "./router/publicRoutes";
@@ -17,9 +18,9 @@ const route = useRoute();
 const layout = computed(() => {
   if (route.name === undefined) return None;
 
-  if (publicRoutes.includes(route.name)) {
-    return Auth;
-  }
+  // if (publicRoutes.includes(route.name)) {
+  //   return Auth;
+  // }
 
   switch (route.meta.layout) {
     case "default":
@@ -28,6 +29,8 @@ const layout = computed(() => {
       return Auth;
     case "none":
       return None;
+    case "mobile":
+      return Mobile;
     default:
       return Default;
   }

@@ -12,7 +12,7 @@
       :placeholder="placeholder"
       :required="required"
       :disabled="disabled"
-      class="block w-full rounded-md border-0 py-2 text-stone-900 shadow-sm ring-1 ring-inset ring-stone-300 placeholder:text-stone-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm sm:leading-6"
+      class="block w-full rounded-md border-0 py-2.5 text-sm leading-none text-stone-900 shadow-sm ring-1 ring-inset ring-stone-300 placeholder:text-stone-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm"
       :class="[{ 'bg-stone-50': disabled }]"
     />
   </div>
