@@ -21,6 +21,9 @@ import { graphql } from "@/gql";
 import { useQuery } from "@urql/vue";
 import { computed, reactive } from "vue";
 import { useRoute } from "vue-router/auto";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 type RouteNameMyDrive = "/drive/my-drive/folders/[id]";
 type RouteNameSharedDrive = "/drive/shared-drives/[id]/folders/[folderId]";
@@ -95,7 +98,7 @@ const items = computed<any[]>(() => {
   const rootTo = isMyDriveRoute ? "/drive/my-drive/" : "/drive/shared-drives/";
   const folderTo = isMyDriveRoute ? "/drive/my-drive/folders/[id]" : "/drive/shared-drives/[id]/folders/[folderId]";
   const parents = folder.value?.file.parents || [];
-  const title = isMyDriveRoute ? "My Drive" : "Shared Drives";
+  const title = isMyDriveRoute ? t("my_drive") : t("shared_drives");
 
   const createPath = (title: string, routeName: string, id: string, folderId?: string) => {
     return {

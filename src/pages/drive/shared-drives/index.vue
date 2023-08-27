@@ -3,7 +3,7 @@
     <PageHeader>
       <div class="flex w-full items-center justify-between">
         <d-drive-header-breadcrumbs />
-        <DButton type="primary" size="md" :icon-left="Plus" @click="newSharedDrive">New</DButton>
+        <DButton type="primary" size="md" :icon-left="Plus" @click="newSharedDrive">{{ $t("new") }}</DButton>
       </div>
     </PageHeader>
     <PageContent>
@@ -40,7 +40,7 @@
                       class="w-full rounded-md px-2 py-1.5 text-left font-medium text-strong transition ease-in-out hover:bg-blue-100 hover:text-blue-900"
                       @click.stop="toggleShareModal(item)"
                     >
-                      Share
+                      {{ $t("share") }}
                     </button>
                   </div>
                 </DContextMenu>
@@ -48,7 +48,7 @@
             </div>
           </div>
         </template>
-        <template #empty>No shared drives found.</template>
+        <template #empty>{{ $t("no_shared_drives") }}</template>
       </DTable>
     </PageContent>
   </PageWrapper>

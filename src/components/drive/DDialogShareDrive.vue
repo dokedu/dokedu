@@ -2,7 +2,7 @@
   <DDialog :open="open" @close="onClose()" class="min-w-[450px]">
     <template #header>
       <div class="flex items-center justify-between">
-        <div>Share drive</div>
+        <div>{{ $t("share_drive") }}</div>
         <button @click="onClose">
           <X class="h-4 w-4 text-stone-600"></X>
         </button>
@@ -11,17 +11,17 @@
     <template #main>
       <div class="space-y-4">
         <div v-if="permission == FilePermission.Manager" class="grow space-y-1 text-sm">
-          <div class="text-subtle">Users</div>
+          <div class="text-subtle">{{ $t("user", 2) }}</div>
           <DSelect
             v-model="selectedUser"
             :options="userOptions"
-            label="Select user"
-            placeholder="Select user"
+            :label="$t('select_user')"
+            :placeholder="$t('select_user')"
             @select="onCreateShare"
           ></DSelect>
         </div>
         <div class="space-y-2 text-sm">
-          <div class="text-subtle">Shared with</div>
+          <div class="text-subtle">{{ $t("shared_with") }}</div>
           <div class="h-[200px] space-y-2 overflow-y-auto">
             <div
               v-for="share in shares?.shares"

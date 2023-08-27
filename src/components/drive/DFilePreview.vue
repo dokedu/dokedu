@@ -63,7 +63,7 @@
       ></video>
       <audio @click.stop v-if="isFileOfType(file) === 'audio' && url" :src="url" controls class="mx-auto"></audio>
       <div v-if="!isFileOfType(file)" class="mx-auto text-center text-white">
-        Previewing this file is not supported yet.
+        {{ $t("previewing_not_supported") }}
       </div>
     </div>
   </div>

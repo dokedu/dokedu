@@ -52,8 +52,8 @@
           <div class="mb-4 w-fit rounded-xl bg-strong p-2.5">
             <FileText class="stroke-colors-strong" :size="24" />
           </div>
-          <div class="mb-2 text-center text-sm font-medium text-strong">Drop file here</div>
-          <div class="text-center text-sm text-subtle">or use the "New" button.</div>
+          <div class="mb-2 text-center text-sm font-medium text-strong">{{ $t("drop_file_here") }}</div>
+          <div class="text-center text-sm text-subtle">{{ $t("or_use_new_button") }}</div>
         </div>
       </div>
     </template>

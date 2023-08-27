@@ -184,8 +184,25 @@ export const de = {
   password_reset_successfully: "Passwort erfolgreich zurückgesetzt",
   confirm_password: "Passwort bestätigen",
   mobile_not_supported: "Mobile Geräte werden nicht unterstützt",
-  mobile_not_supported_description: "Bitte verwende einen Desktop-Browser, um diese Anwendung zu nutzen. Eine Mobile-Version ist in Arbeit und wird bald verfügbar sein.",
+  mobile_not_supported_description:
+    "Bitte verwende einen Desktop-Browser, um diese Anwendung zu nutzen. Eine Mobile-Version ist in Arbeit und wird bald verfügbar sein.",
 
   settings: "Einstellungen",
   show_deleted: "Gelöschte anzeigen",
+
+  previewing_not_supported: "Die Vorschau dieser Datei wird noch nicht unterstützt.",
+  drop_file_here: "Datei hier ablegen",
+  or_use_new_button: 'oder verwende die Schaltfläche "Neu".',
+  move_to_trash_q: "Umziehen zum Müll?",
+  will_be_deleted_can_restore: '"{file}" wird gelöscht. Du kannst sie jederzeit wiederherstellen.',
+  rename_file: "Datei umbenennen",
+  share_drive: "Antrieb teilen",
+  select_user: "Benutzer auswählen | Benutzer auswählen",
+  shared_with: "Geteilt mit",
+  shared_drives: "Gemeinsame Laufwerke",
+  my_drive: "Mein Antrieb",
+  share: "Teilen",
+  no_shared_drives: "Keine gemeinsamen Laufwerke gefunden",
+  folder: "Ordner | Verzeichnisse",
+  folder_name: "Name des Ordners",
 };

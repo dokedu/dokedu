@@ -8,13 +8,13 @@
         size="md"
         :icon-left="FolderPlus"
         @click="addFolder"
-        >Folder</DButton
+        >{{ $t("folder") }}</DButton
       >
       <DDialog :open="newFolderDialog" @close="newFolderDialog = false">
-        <input type="text" placeholder="Folder name" />
+        <input type="text" :placeholder="$t('folder_name')" />
       </DDialog>
       <DButton v-if="permission == FilePermission.Manager" type="primary" size="md" :icon-left="Plus" @click="open()">
-        New
+        {{ $t("new") }}
       </DButton>
     </div>
   </PageHeader>

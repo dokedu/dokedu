@@ -1,5 +1,5 @@
 <template>
-  <DDriveFileList title="My Drive" />
+  <DDriveFileList :title="$t('my_drive')" />
 </template>
 
 <script setup lang="ts">
