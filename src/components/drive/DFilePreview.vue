@@ -74,7 +74,7 @@ import { File } from "@/gql/graphql";
 import { ref, watch } from "vue";
 import { onKeyStroke } from "@vueuse/core";
 import useDownloadFile from "@/composables/useDownloadFile";
-import { ArrowLeft, Download, Star, Printer, MoreVertical } from "lucide-vue-next";
+import { ArrowLeft, Download, Printer } from "lucide-vue-next";
 
 export interface Props {
   file: File | null;
