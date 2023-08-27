@@ -1,7 +1,7 @@
 <template>
   <d-dialog :open="open" @close="onClose">
     <template #header>
-      <div class="font-medium text-strong">Rename file</div>
+      <div class="font-medium text-strong">{{ $t("rename_file") }}</div>
     </template>
     <template #main>
       <div class="min-w-[300px]">
@@ -10,8 +10,8 @@
     </template>
     <template #footer>
       <div class="flex justify-between">
-        <d-button size="sm" type="outline" @click="onClose">Cancel</d-button>
-        <d-button size="sm" @click="onSave">Save</d-button>
+        <d-button size="sm" type="outline" @click="onClose">{{ $t("cancel") }}</d-button>
+        <d-button size="sm" @click="onSave">{{ $t("save") }}</d-button>
       </div>
     </template>
   </d-dialog>

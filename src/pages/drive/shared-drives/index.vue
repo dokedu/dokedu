@@ -3,7 +3,7 @@
     <PageHeader>
       <div class="flex w-full items-center justify-between">
         <d-drive-header-breadcrumbs />
-        <DButton type="primary" size="md" :icon-left="Plus" @click="newSharedDrive">New</DButton>
+        <DButton type="primary" size="md" :icon-left="Plus" @click="newSharedDrive">{{ $t("new") }}</DButton>
       </div>
     </PageHeader>
     <PageContent>
@@ -21,6 +21,9 @@
             <Folder :size="18" class="fill-stone-700 stroke-colors-default" />
             <div class="text-default">{{ column }}</div>
           </div>
+        </template>
+        <template #createdAt-data="{ column }">
+          <div class="text-default">{{ formatDate(new Date(Date.parse(column)), "DD.MM.YYYY hh:mm") }} Uhr</div>
         </template>
         <template #id-data="{ item }">
           <div>
@@ -40,7 +43,7 @@
                       class="w-full rounded-md px-2 py-1.5 text-left font-medium text-strong transition ease-in-out hover:bg-blue-100 hover:text-blue-900"
                       @click.stop="toggleShareModal(item)"
                     >
-                      Share
+                      {{ $t("share") }}
                     </button>
                   </div>
                 </DContextMenu>
@@ -48,7 +51,7 @@
             </div>
           </div>
         </template>
-        <template #empty>No shared drives found.</template>
+        <template #empty>{{ $t("no_shared_drives") }}</template>
       </DTable>
     </PageContent>
   </PageWrapper>
@@ -73,6 +76,7 @@ import DContextMenu from "@/components/d-context-menu/d-context-menu.vue";
 import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue";
 import DDialogShareDrive from "@/components/drive/DDialogShareDrive.vue";
 import { Bucket } from "@/gql/graphql";
+import { formatDate } from "@vueuse/core";
 
 const currentItem = ref<Bucket>();
 const shareOpen = ref(false);

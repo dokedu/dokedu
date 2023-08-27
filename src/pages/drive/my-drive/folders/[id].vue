@@ -1,5 +1,5 @@
 <template>
-  <DDriveFileList title="My Drive" :folder-id="route.params.id" />
+  <DDriveFileList :title="$t('my_drive')" :folder-id="route.params.id" />
 </template>
 
 <script setup lang="ts">

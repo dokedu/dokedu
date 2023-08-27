@@ -3,7 +3,14 @@
     <template v-for="(item, index) in items" :key="item.route">
       <span v-if="index !== 0">/</span>
       <router-link
-        v-if="index !== items.length - 1"
+        v-if="index === 0"
+        :to="item.route"
+        class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 font-medium hover:bg-stone-100"
+      >
+        {{ item.title }}
+      </router-link>
+      <router-link
+        v-else-if="index !== items.length - 1"
         :to="item.route"
         class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 hover:bg-stone-100"
       >
@@ -21,6 +28,9 @@ import { graphql } from "@/gql";
 import { useQuery } from "@urql/vue";
 import { computed, reactive } from "vue";
 import { useRoute } from "vue-router/auto";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 type RouteNameMyDrive = "/drive/my-drive/folders/[id]";
 type RouteNameSharedDrive = "/drive/shared-drives/[id]/folders/[folderId]";
@@ -95,7 +105,7 @@ const items = computed<any[]>(() => {
   const rootTo = isMyDriveRoute ? "/drive/my-drive/" : "/drive/shared-drives/";
   const folderTo = isMyDriveRoute ? "/drive/my-drive/folders/[id]" : "/drive/shared-drives/[id]/folders/[folderId]";
   const parents = folder.value?.file.parents || [];
-  const title = isMyDriveRoute ? "My Drive" : "Shared Drives";
+  const title = isMyDriveRoute ? t("my_drive") : t("shared_drives");
 
   const createPath = (title: string, routeName: string, id: string, folderId?: string) => {
     return {

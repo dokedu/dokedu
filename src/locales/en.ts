@@ -186,8 +186,32 @@ export const en = {
   password_reset_successfully: "Password reset successfully",
   confirm_password: "Confirm password",
   mobile_not_supported: "Mobile devices are not supported",
-  mobile_not_supported_description: "Please use a desktop browser to use this application. A mobile version is in the works and will be available soon.",
+  mobile_not_supported_description:
+    "Please use a desktop browser to use this application. A mobile version is in the works and will be available soon.",
 
   settings: "Settings",
   show_deleted: "Show deleted",
+
+  previewing_not_supported: "Previewing this file is not supported yet.",
+  drop_file_here: "Drop file here",
+  or_use_new_button: 'or use the "New" button.',
+  move_to_trash_q: "Move to trash?",
+  will_be_deleted_can_restore: '"{file}" will be deleted. You can restore it anytime.',
+  rename_file: "Rename file",
+  share_drive: "Share drive",
+  select_user: "Select user | Select users",
+  shared_with: "Shared with",
+  shared_drives: "Shared drives",
+  my_drive: "My drive",
+  share: "Share",
+  no_shared_drives: "No shared drives found",
+  folder: "Folder | Folders",
+  folder_name: "Folder name",
+
+  shared_drive: "Shared drive",
+  shared_with_me: "Shared with me",
+  trash: "Trash",
+  trash_work_in_progress: "This page is still a work in progress. It will be used to display the files that have been deleted by you.",
+
+  support: "Support",
 };

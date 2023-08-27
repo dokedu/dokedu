@@ -32,12 +32,12 @@
         >
           <Printer class="stroke-white" :size="18" />
         </div>
-        <div class="rounded-lg p-2 hover:bg-white/10">
+        <!-- <div class="rounded-lg p-2 hover:bg-white/10">
           <Star class="stroke-white" :size="18" />
-        </div>
-        <div class="rounded-lg p-2 hover:bg-white/10">
+        </div> -->
+        <!-- <div class="rounded-lg p-2 hover:bg-white/10">
           <MoreVertical class="stroke-white" :size="18" />
-        </div>
+        </div> -->
       </div>
     </div>
     <div class="flex h-[calc(100%-14rem)] w-full flex-1 items-center p-8">
@@ -63,7 +63,7 @@
       ></video>
       <audio @click.stop v-if="isFileOfType(file) === 'audio' && url" :src="url" controls class="mx-auto"></audio>
       <div v-if="!isFileOfType(file)" class="mx-auto text-center text-white">
-        Previewing this file is not supported yet.
+        {{ $t("previewing_not_supported") }}
       </div>
     </div>
   </div>

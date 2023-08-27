@@ -4,14 +4,19 @@
   >
     <div class="relative flex flex-col">
       <div class="flex items-center justify-between px-3 py-3 pb-1.5">
-        <div class="flex flex-1 justify-between rounded-md p-1 hover:bg-strong" @click="visibleAppSwitcher = true">
+        <div
+          class="group flex flex-1 justify-between rounded-md p-1 transition-colors hover:bg-strong"
+          @click="visibleAppSwitcher = true"
+        >
           <div class="flex items-center gap-3">
-            <div class="rounded-lg border border-stone-100 p-1.5">
-              <component v-if="app" :is="app.icon" class="stroke-stone-500" :size="12" />
+            <div class="rounded-lg bg-stone-200 p-1.5">
+              <component v-if="app" :is="app.icon" class="fill-stone-500 stroke-stone-500" :size="16" />
             </div>
-            <div class="text-sm text-stone-700 transition-all duration-100 hover:text-stone-950">{{ app?.name }}</div>
+            <div class="text-sm text-stone-700 transition-all duration-100 hover:text-stone-950">
+              {{ app?.name }} <span v-if="app?.beta" class="text-xs font-medium uppercase text-blue-700">Beta</span>
+            </div>
           </div>
-          <div class="rounded-md border border-stone-200 p-1.5 transition-all hover:bg-stone-200">
+          <div class="rounded-md p-1.5 transition-all hover:bg-stone-300">
             <grip :size="16" class="stroke-stone-700" />
           </div>
         </div>
@@ -41,18 +46,21 @@
             :class="activeApp === _app.id ? `!border-stone-200 bg-stone-100 hover:!bg-stone-100` : ''"
             @click="switchApp(_app.id)"
           >
-            <component
-              :is="_app.icon"
-              class="stroke-stone-500"
-              :size="20"
-              :class="activeApp === _app.id ? `!stroke-stone-900` : ''"
-            />
+            <component :is="_app.icon" class="fill-stone-500 stroke-stone-500" :size="20" />
             <span class="text-stone-500" :class="activeApp === _app.id ? `!text-stone-900` : ''">{{ _app.name }}</span>
           </div>
         </div>
       </div>
     </div>
     <div class="px-1 py-4">
+      <a
+        href="https://dokedu.org/hilfe"
+        target="_blank"
+        class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
+      >
+        <HelpCircle class="stroke-stone-500" :size="18" />
+        <div class="text-sm">{{ $t("support") }}</div>
+      </a>
       <router-link
         to="/settings/profile"
         class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
@@ -88,7 +96,7 @@
 </template>
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { LogOut, Globe, Grip, Settings } from "lucide-vue-next";
+import { LogOut, Globe, Grip, Settings, HelpCircle } from "lucide-vue-next";
 import { onClickOutside, useStorage } from "@vueuse/core";
 import { useRoute, useRouter } from "vue-router/auto";
 import { useMutation, useQuery } from "@urql/vue";

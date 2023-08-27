@@ -1,5 +1,5 @@
 <template>
-  <DDriveFileList title="Shared Drives" :folder-id="route.params.folderId" :bucket-id="route.params.id" />
+  <DDriveFileList :title="$t('shared_drives')" :folder-id="route.params.folderId" :bucket-id="route.params.id" />
 </template>
 
 <script setup lang="ts">

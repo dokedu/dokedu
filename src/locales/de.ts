@@ -184,8 +184,30 @@ export const de = {
   password_reset_successfully: "Passwort erfolgreich zurückgesetzt",
   confirm_password: "Passwort bestätigen",
   mobile_not_supported: "Mobile Geräte werden nicht unterstützt",
-  mobile_not_supported_description: "Bitte verwende einen Desktop-Browser, um diese Anwendung zu nutzen. Eine Mobile-Version ist in Arbeit und wird bald verfügbar sein.",
+  mobile_not_supported_description:
+    "Bitte verwende einen Desktop-Browser, um diese Anwendung zu nutzen. Eine Mobile-Version ist in Arbeit und wird bald verfügbar sein.",
 
   settings: "Einstellungen",
   show_deleted: "Gelöschte anzeigen",
+
+  previewing_not_supported: "Die Vorschau dieser Datei wird noch nicht unterstützt.",
+  drop_file_here: "Datei hier ablegen",
+  or_use_new_button: 'oder verwende die Schaltfläche "Neu".',
+  move_to_trash_q: "In den Papierkorb verschieben?",
+  will_be_deleted_can_restore: '"{file}" wird in den Papierkorb verschoben. Du kannst es wiederherstellen, wenn du möchtest.',
+  rename_file: "Datei umbenennen",
+  share_drive: "Ablage teilen",
+  select_user: "Benutzer auswählen | Benutzer auswählen",
+  shared_with: "Geteilt mit",
+  shared_drives: "Geteilte Ablagen",
+  my_drive: "Meine Ablage",
+  share: "Teilen",
+  no_shared_drives: "Keine gemeinsamen Ablagen gefunden",
+  folder: "Ordner | Ordner",
+  folder_name: "Name des Ordners",
+  shared_with_me: "Geteilt mit mir",
+  trash: "Papierkorb",
+  trash_work_in_progress: "Diese Seite ist noch in Arbeit. Sie wird verwendet, um die Dateien anzuzeigen, die von Ihnen gelöscht wurden.",
+
+  support: "Support",
 };
