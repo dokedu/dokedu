@@ -3,7 +3,14 @@
     <template v-for="(item, index) in items" :key="item.route">
       <span v-if="index !== 0">/</span>
       <router-link
-        v-if="index !== items.length - 1"
+        v-if="index === 0"
+        :to="item.route"
+        class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 font-medium hover:bg-stone-100"
+      >
+        {{ item.title }}
+      </router-link>
+      <router-link
+        v-else-if="index !== items.length - 1"
         :to="item.route"
         class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 hover:bg-stone-100"
       >

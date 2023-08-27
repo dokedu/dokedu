@@ -16,7 +16,6 @@ import {
     Tag,
     Trash2,
     Users,
-    Users2,
     UserSquare,
     Wrench,
 } from "lucide-vue-next";
@@ -36,6 +35,7 @@ export type UserRole = "owner" | "admin" | "teacher" | "student";
 
 export interface App {
     id: string;
+    beta?: boolean;
     allowedUserRoles: UserRole[];
     icon: FunctionalComponent;
     name: string;
@@ -107,25 +107,26 @@ export const apps = computed<App[]>(() => [
     },
     {
         id: "drive",
+        beta: true,
         icon: Folder,
         allowedUserRoles: ["owner", "admin", "teacher", "student"],
         name: "Drive",
         links: [
             {
                 icon: HardDrive,
-                name: "My Drive",
+                name: i18n.global.t("my_drive"),
                 route: "/drive/my-drive/",
             },
             {
                 icon: HardDrive,
-                name: "Shared Drives",
+                name: i18n.global.t("shared_drives"),
                 route: "/drive/shared-drives/",
             },
-            {
-                icon: Users2,
-                name: "Shared with me",
-                route: "/drive/shared-with-me/",
-            },
+            // {
+            //     icon: Users2,
+            //     name: i18n.global.t("shared_with_me"),
+            //     route: "/drive/shared-with-me/",
+            // },
             // {
             //   icon: Clock,
             //   name: "Recent",
@@ -138,7 +139,7 @@ export const apps = computed<App[]>(() => [
             // },
             {
                 icon: Trash2,
-                name: "Trash",
+                name: i18n.global.t("trash"),
                 route: "/drive/trash/",
             },
         ],

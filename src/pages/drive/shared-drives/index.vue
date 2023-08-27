@@ -22,6 +22,9 @@
             <div class="text-default">{{ column }}</div>
           </div>
         </template>
+        <template #createdAt-data="{ column }">
+          <div class="text-default">{{ formatDate(new Date(Date.parse(column)), "DD.MM.YYYY hh:mm") }} Uhr</div>
+        </template>
         <template #id-data="{ item }">
           <div>
             <div class="flex w-[80px] justify-end gap-1 pr-4">
@@ -73,6 +76,7 @@ import DContextMenu from "@/components/d-context-menu/d-context-menu.vue";
 import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue";
 import DDialogShareDrive from "@/components/drive/DDialogShareDrive.vue";
 import { Bucket } from "@/gql/graphql";
+import { formatDate } from "@vueuse/core";
 
 const currentItem = ref<Bucket>();
 const shareOpen = ref(false);

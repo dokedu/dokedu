@@ -207,4 +207,11 @@ export const en = {
   no_shared_drives: "No shared drives found",
   folder: "Folder | Folders",
   folder_name: "Folder name",
+
+  shared_drive: "Shared drive",
+  shared_with_me: "Shared with me",
+  trash: "Trash",
+  trash_work_in_progress: "This page is still a work in progress. It will be used to display the files that have been deleted by you.",
+
+  support: "Support",
 };
