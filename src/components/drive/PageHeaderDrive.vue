@@ -51,13 +51,14 @@ const newFolderDialog = ref(false);
 
 const emit = defineEmits(["upload"]);
 
-onChange(async (e) => {
-  if (!e) return;
+onChange((files) => {
+  if (!files || !files.length) return;
+  if (!files.length) return;
+
   emit("upload", {
-    input: {
-      file: e[0],
-      parentId: folderId.value,
-    },
+    files: structuredClone(files),
+    parentId: folderId.value,
+    ...(bucketId.value && { bucketId: bucketId.value }),
   });
   reset();
 });
