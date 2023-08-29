@@ -106,6 +106,7 @@ import { AppLink, apps, UserRole } from "./d-sidebar/d-sidebar";
 import i18n from "@/i18n";
 import { useAuth } from "@/composables/auth";
 import useActiveApp from "@/composables/useActiveApp";
+import me from "@/queries/me";
 
 const visibleAppSwitcher = ref<boolean>(false);
 const { activeApp } = useActiveApp();
@@ -114,14 +115,7 @@ const route = useRoute();
 const router = useRouter();
 
 const { data: userData } = useQuery({
-  query: graphql(`
-    query me {
-      me {
-        id
-        role
-      }
-    }
-  `),
+  query: me,
 });
 
 const appSwitcher = ref();

@@ -20,7 +20,6 @@ const documents = {
     "\n    mutation archiveEvent($id: ID!) {\n      archiveEvent(id: $id) {\n        id\n      }\n    }\n  ": types.ArchiveEventDocument,
     "\n    mutation createEvent($input: CreateEventInput!) {\n      createEvent(input: $input) {\n        id\n        title\n        image {\n          id\n        }\n        body\n        startsAt\n        endsAt\n        recurrence\n        createdAt\n      }\n    }\n  ": types.CreateEventDocument,
     "\n    mutation updateEvent($input: UpdateEventInput!) {\n      updateEvent(input: $input) {\n        id\n        title\n        image {\n          id\n        }\n        body\n        startsAt\n        endsAt\n        recurrence\n        createdAt\n      }\n    }\n  ": types.UpdateEventDocument,
-    "\n    query me {\n      me {\n        id\n        role\n      }\n    }\n  ": types.MeDocument,
     "\n    mutation updateUserLanguage($language: UserLanguage!) {\n      updateUserLanguage(language: $language) {\n        id\n        language\n      }\n    }\n  ": types.UpdateUserLanguageDocument,
     "\n    query students {\n      users(filter: { role: [student] }, limit: 1000) {\n        edges {\n          id\n          firstName\n          lastName\n          student {\n            id\n          }\n        }\n      }\n    }\n  ": types.StudentsDocument,
     "\n    query GetTags {\n      tags(limit: 1000) {\n        edges {\n          id\n          name\n          color\n          deletedAt\n          createdAt\n        }\n      }\n    }\n  ": types.GetTagsDocument,
@@ -97,6 +96,7 @@ const documents = {
     "\n  query recordStudents($search: String, $order: UserOrderBy, $offset: Int) {\n    users(filter: { role: [student], orderBy: $order }, search: $search, offset: $offset) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n      edges {\n        id\n        firstName\n        lastName\n        student {\n          id\n          birthday\n          grade\n        }\n      }\n    }\n  }\n": types.RecordStudentsDocument,
     "\n  query getTagWithLimit($limit: Int, $offset: Int) {\n    tags(limit: $limit, offset: $offset) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n      edges {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  }\n": types.GetTagWithLimitDocument,
     "\n  mutation archiveEntry($id: ID!) {\n    archiveEntry(id: $id) {\n      id\n    }\n  }\n": types.ArchiveEntryDocument,
+    "\n    query me {\n        me {\n            id\n            role\n        }\n    }\n": types.MeDocument,
     "\n    mutation resetPassword($input: ResetPasswordInput!) {\n        resetPassword(input: $input) {\n        success\n        }\n    }\n": types.ResetPasswordDocument,
     "\n    mutation signIn($email: String!, $password: String!) {\n        signIn(input: {email: $email, password: $password }) {\n            token\n            enabled_apps\n            language\n            setupComplete\n        }\n    }\n": types.SignInDocument,
 };
@@ -143,10 +143,6 @@ export function graphql(source: "\n    mutation createEvent($input: CreateEventI
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    mutation updateEvent($input: UpdateEventInput!) {\n      updateEvent(input: $input) {\n        id\n        title\n        image {\n          id\n        }\n        body\n        startsAt\n        endsAt\n        recurrence\n        createdAt\n      }\n    }\n  "): (typeof documents)["\n    mutation updateEvent($input: UpdateEventInput!) {\n      updateEvent(input: $input) {\n        id\n        title\n        image {\n          id\n        }\n        body\n        startsAt\n        endsAt\n        recurrence\n        createdAt\n      }\n    }\n  "];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n    query me {\n      me {\n        id\n        role\n      }\n    }\n  "): (typeof documents)["\n    query me {\n      me {\n        id\n        role\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -451,6 +447,10 @@ export function graphql(source: "\n  query getTagWithLimit($limit: Int, $offset:
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation archiveEntry($id: ID!) {\n    archiveEntry(id: $id) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation archiveEntry($id: ID!) {\n    archiveEntry(id: $id) {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    query me {\n        me {\n            id\n            role\n        }\n    }\n"): (typeof documents)["\n    query me {\n        me {\n            id\n            role\n        }\n    }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
