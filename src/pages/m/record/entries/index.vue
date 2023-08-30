@@ -44,7 +44,6 @@ import MPageFooter from "@/components/mobile/m-page-footer.vue";
 import { Plus } from "lucide-vue-next";
 import { graphql } from "@/gql";
 import { useQuery } from "@urql/vue";
-import { reactive } from "vue";
 import { EntrySortBy } from "@/gql/graphql";
 
 const query = graphql(`
