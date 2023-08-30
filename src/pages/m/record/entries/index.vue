@@ -32,7 +32,8 @@
 <route lang="json">
 {
   "meta": {
-    "layout": "mobile"
+    "layout": "mobile",
+    "app": "record"
   }
 }
 </route>

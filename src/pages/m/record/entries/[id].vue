@@ -21,7 +21,8 @@
 <route lang="json">
 {
   "meta": {
-    "layout": "mobile"
+    "layout": "mobile",
+    "app": "record"
   }
 }
 </route>
@@ -32,60 +33,12 @@ import MPageFooter from "@/components/mobile/m-page-footer.vue";
 import MEntryForm from "@/components/MEntryForm.vue";
 import { useRoute } from "vue-router/auto";
 import { useQuery } from "@urql/vue";
-import { graphql } from "@/gql";
+import entryByIdQuery from "@/queries/entryById";
 
 const route = useRoute("/m/record/entries/[id]");
 
-const query = graphql(`
-  query entryById($id: ID!) {
-    entry(id: $id) {
-      id
-      date
-      body
-      deletedAt
-      user {
-        id
-        firstName
-        lastName
-      }
-      createdAt
-      tags {
-        id
-        name
-        color
-      }
-      events {
-        id
-        title
-      }
-      users {
-        id
-        firstName
-        lastName
-      }
-      userCompetences {
-        id
-        level
-        competence {
-          id
-          name
-          color
-          type
-          grades
-          parents {
-            id
-            name
-            grades
-            color
-          }
-        }
-      }
-    }
-  }
-`);
-
 const { data, fetching } = useQuery({
-  query,
+  query: entryByIdQuery,
   variables: {
     id: route.params.id,
   },
