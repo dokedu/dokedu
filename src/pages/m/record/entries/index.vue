@@ -3,18 +3,17 @@
     <MPageHeader />
     <div class="flex-1 divide-y divide-stone-200 overflow-scroll text-sm">
       <router-link
-        v-for="i in 10"
-        :to="{ name: '/m/record/entries/[id]', params: { id: `${i}` } }"
+        v-for="entry in data?.entries.edges"
+        :to="{ name: '/m/record/entries/[id]', params: { id: `${entry?.id}` } }"
         class="flex flex-col gap-2 p-4 text-stone-700"
       >
         <div class="line-clamp-3">
-          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ducimus harum autem magni, eaque numquam aliquid
-          culpa ex quos consequuntur eveniet dolorum cupiditate? Culpa, voluptate magni!
+          {{ entry?.body }}
         </div>
         <div class="flex gap-1 text-xs text-stone-500">
-          <div>Max Mustermann</div>
+          <div>{{ `${entry?.user.firstName} ${entry?.user.lastName}` }}</div>
           <div>⋅</div>
-          <div>Heute um 11 Uhr</div>
+          <div>{{ toLocateDateString(entry?.createdAt) }}</div>
         </div>
       </router-link>
     </div>
@@ -42,4 +41,43 @@
 import MPageHeader from "@/components/mobile/m-page-header.vue";
 import MPageFooter from "@/components/mobile/m-page-footer.vue";
 import { Plus } from "lucide-vue-next";
+import { graphql } from "@/gql";
+import { useQuery } from "@urql/vue";
+
+const query = graphql(`
+  query mGetEntries($filter: EntryFilterInput, $limit: Int, $order: EntrySortBy, $offset: Int) {
+    entries(filter: $filter, limit: $limit, sortBy: $order, offset: $offset) {
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+      }
+      edges {
+        id
+        date
+        body
+        user {
+          id
+          firstName
+          lastName
+        }
+        createdAt
+      }
+    }
+  }
+`);
+
+const { data } = useQuery({
+  query,
+});
+
+function toLocateDateString(date: string) {
+  return new Date(date).toLocaleDateString("de-DE", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+  });
+}
 </script>

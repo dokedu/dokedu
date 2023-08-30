@@ -11,6 +11,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
-const date = ref(new Date().toISOString().substr(0, 10));
+import { useVModel } from "@vueuse/core";
+
+const props = defineProps<{
+  modelValue: string;
+}>();
+const emit = defineEmits(["update:modelValue"]);
+
+const date = useVModel(props, "modelValue", emit);
 </script>
