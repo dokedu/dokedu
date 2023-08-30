@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-screen w-full flex-col">
+  <div class="flex h-screen max-h-screen w-full flex-col" style="height: -webkit-fill-available">
     <MPageHeader />
     <div class="flex-1 divide-y divide-stone-200 overflow-scroll text-sm">
       <router-link
@@ -44,10 +44,12 @@ import MPageFooter from "@/components/mobile/m-page-footer.vue";
 import { Plus } from "lucide-vue-next";
 import { graphql } from "@/gql";
 import { useQuery } from "@urql/vue";
+import { reactive } from "vue";
+import { EntrySortBy } from "@/gql/graphql";
 
 const query = graphql(`
-  query mGetEntries($filter: EntryFilterInput, $limit: Int, $order: EntrySortBy, $offset: Int) {
-    entries(filter: $filter, limit: $limit, sortBy: $order, offset: $offset) {
+  query mGetEntries($limit: Int, $order: EntrySortBy, $offset: Int) {
+    entries(limit: $limit, sortBy: $order, offset: $offset) {
       pageInfo {
         hasNextPage
         hasPreviousPage
@@ -69,6 +71,10 @@ const query = graphql(`
 
 const { data } = useQuery({
   query,
+  variables: {
+    order: EntrySortBy.CreatedAtDesc,
+    limit: 10,
+  },
 });
 
 function toLocateDateString(date: string) {
