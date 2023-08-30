@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-screen w-full flex-col" style="height: -webkit-fill-available">
     <MPageHeader />
-    <MEntryForm />
+    <!-- <MEntryForm /> -->
     <MPageFooter>
       <router-link
         to="/m/record/entries"
@@ -24,5 +24,5 @@
 <script lang="ts" setup>
 import MPageHeader from "@/components/mobile/m-page-header.vue";
 import MPageFooter from "@/components/mobile/m-page-footer.vue";
-import MEntryForm from "./MEntryForm.vue";
+// import MEntryForm from "@/components/MEntryForm.vue";
 </script>

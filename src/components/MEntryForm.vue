@@ -9,9 +9,9 @@
       placeholder="Beschreibung..."
     />
     <MEntryFormCompetences v-model="props.entry.userCompetences" />
-    <MEntryFormProjects />
-    <MEntryFormTags />
-    <MEntryFormStudents />
+    <MEntryFormProjects v-model="props.entry.events" />
+    <MEntryFormTags v-model="props.entry.tags" />
+    <MEntryFormStudents v-model="props.entry.users" />
     <MEntryFormDate v-model="props.entry.date" />
   </div>
 </template>
@@ -23,10 +23,10 @@ import MEntryFormTags from "@/components/mobile/record/m-entry-form-tags.vue";
 import MEntryFormCompetences from "@/components/mobile/record/m-entry-form-competences.vue";
 import MEntryFormDate from "@/components/mobile/record/m-entry-form-date.vue";
 import { useTextareaAutosize } from "@vueuse/core";
-import { CreateEntryInput } from "@/gql/graphql";
 
 const props = defineProps<{
-  entry: CreateEntryInput;
+  // entry: Entry;
+  entry: any;
 }>();
 
 const { textarea, input } = useTextareaAutosize({

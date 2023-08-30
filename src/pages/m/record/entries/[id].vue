@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-screen max-h-screen w-full flex-col" style="height: -webkit-fill-available">
     <MPageHeader />
-    <template v-if="!fetching">
+    <template v-if="!fetching && data?.entry">
       <MEntryForm :entry="data?.entry" />
     </template>
     <div v-else class="flex-1 divide-y divide-stone-200 overflow-scroll text-sm">

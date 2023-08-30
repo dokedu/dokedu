@@ -18,9 +18,9 @@ const route = useRoute();
 const layout = computed(() => {
   if (route.name === undefined) return None;
 
-  // if (publicRoutes.includes(route.name)) {
-  //   return Auth;
-  // }
+  if (publicRoutes.includes(route.name)) {
+    return Auth;
+  }
 
   switch (route.meta.layout) {
     case "default":

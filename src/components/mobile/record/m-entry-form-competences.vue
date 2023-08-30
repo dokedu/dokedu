@@ -41,7 +41,7 @@ function addCompetence() {
 import { useVModel } from "@vueuse/core";
 
 const props = defineProps<{
-  modelValue: string;
+  modelValue: any;
 }>();
 const emit = defineEmits(["update:modelValue"]);
 
@@ -49,17 +49,17 @@ const competences = useVModel(props, "modelValue", emit);
 
 // by competences[0].competence.id
 const uniqueUserCompetences = computed(() => {
-  const ids = competences.value.map((c) => c.competence.id);
-  return competences.value.filter((c, i) => ids.indexOf(c.competence.id) === i);
+  const ids = competences.value.map((c: any) => c.competence.id);
+  return competences.value.filter((c: any, i: any) => ids.indexOf(c.competence.id) === i);
 });
 
 const uniqueCompetences = computed(() => {
   if (uniqueUserCompetences.value.length === 0) return [];
-  return uniqueUserCompetences.value.map((el) => el.competence);
+  return uniqueUserCompetences.value.map((el: any) => el.competence);
 });
 
 function toggleCompetence(competence: any) {
-  const index = competences.value.findIndex((c) => c.competence.id === competence.id);
+  const index = competences.value.findIndex((c: any) => c.competence.id === competence.id);
   if (index === -1) {
     competences.value.push({
       competence,
