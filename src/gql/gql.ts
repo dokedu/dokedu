@@ -46,6 +46,8 @@ const documents = {
     "\n    mutation deleteFile($id: ID!) {\n      deleteFile(input: { id: $id }) {\n        success\n        file {\n          id\n        }\n      }\n    }\n  ": types.DeleteFileDocument,
     "\n  query files($offset: Int, $limit: Int, $filter: FilesFilterInput) {\n    files(input: $filter, limit: $limit, offset: $offset) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n      edges {\n        id\n        name\n        fileType\n        MIMEType\n        size\n        createdAt\n      }\n    }\n  }\n": types.FilesDocument,
     "\n    mutation createFolder($input: CreateFolderInput!) {\n      createFolder(input: $input) {\n        id\n      }\n    }\n  ": types.CreateFolderDocument,
+    "\n    query mEvents($search: String) {\n      events(search: $search) {\n        edges {\n          id\n          title\n        }\n      }\n    }\n  ": types.MEventsDocument,
+    "\n    query tags {\n      tags {\n        edges {\n          id\n          name\n          color\n        }\n      }\n    }\n  ": types.TagsDocument,
     "\n    mutation signOut {\n      signOut\n    }\n  ": types.SignOutDocument,
     "\n    mutation previewFile($id: ID!) {\n      previewFile(input: { id: $id }) {\n        url\n      }\n    }\n  ": types.PreviewFileDocument,
     "\n  query domains {\n    domains {\n      edges {\n        id\n        name\n        createdAt\n      }\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n": types.DomainsDocument,
@@ -70,6 +72,7 @@ const documents = {
     "\n    mutation createSharedDrive($name: String!) {\n      createSharedDrive(name: $name) {\n        id\n        name\n      }\n    }\n  ": types.CreateSharedDriveDocument,
     "\n  query buckets {\n    buckets(input: { shared: true }) {\n      edges {\n        id\n        name\n        shared\n        createdAt\n        permission\n      }\n      totalCount\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n": types.BucketsDocument,
     "\n    mutation resetPassword($input: ResetPasswordInput!) {\n      resetPassword(input: $input) {\n        success\n      }\n    }\n  ": types.ResetPasswordDocument,
+    "\n  query mGetEntries($filter: EntryFilterInput, $limit: Int, $order: EntrySortBy, $offset: Int) {\n    entries(filter: $filter, limit: $limit, sortBy: $order, offset: $offset) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n      edges {\n        id\n        date\n        body\n        user {\n          id\n          firstName\n          lastName\n        }\n        createdAt\n      }\n    }\n  }\n": types.MGetEntriesDocument,
     "\n  query adminStudents($search: String, $order: UserOrderBy, $offset: Int, $showDeleted: Boolean) {\n    users(filter: { role: [student], orderBy: $order, showDeleted: $showDeleted }, search: $search, offset: $offset) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n      edges {\n        id\n        firstName\n        lastName\n        student {\n          id\n          birthday\n          grade\n        }\n      }\n    }\n  }\n": types.AdminStudentsDocument,
     "\n    query adminStudentById($id: ID!) {\n      user(id: $id) {\n        id\n        firstName\n        lastName\n        role\n        student {\n          id\n          grade\n          birthday\n          joinedAt\n          leftAt\n        }\n      }\n    }\n  ": types.AdminStudentByIdDocument,
     "\n    mutation updateStudent($student: UpdateUserInput!) {\n      updateUser(input: $student) {\n        id\n        firstName\n        lastName\n        role\n        student {\n          id\n          birthday\n          grade\n          leftAt\n          joinedAt\n        }\n      }\n    }\n  ": types.UpdateStudentDocument,
@@ -96,6 +99,7 @@ const documents = {
     "\n  query recordStudents($search: String, $order: UserOrderBy, $offset: Int) {\n    users(filter: { role: [student], orderBy: $order }, search: $search, offset: $offset) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n      edges {\n        id\n        firstName\n        lastName\n        student {\n          id\n          birthday\n          grade\n        }\n      }\n    }\n  }\n": types.RecordStudentsDocument,
     "\n  query getTagWithLimit($limit: Int, $offset: Int) {\n    tags(limit: $limit, offset: $offset) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n      edges {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  }\n": types.GetTagWithLimitDocument,
     "\n  mutation archiveEntry($id: ID!) {\n    archiveEntry(id: $id) {\n      id\n    }\n  }\n": types.ArchiveEntryDocument,
+    "\n  query entryById($id: ID!) {\n    entry(id: $id) {\n      id\n      date\n      body\n      deletedAt\n      user {\n        id\n        firstName\n        lastName\n      }\n      createdAt\n      tags {\n        id\n        name\n        color\n      }\n      events {\n        id\n        title\n      }\n      users {\n        id\n        firstName\n        lastName\n      }\n      userCompetences {\n        id\n        level\n        competence {\n          id\n          name\n          color\n          type\n          grades\n          parents {\n            id\n            name\n            grades\n            color\n          }\n        }\n      }\n    }\n  }\n": types.EntryByIdDocument,
     "\n    query me {\n        me {\n            id\n            role\n        }\n    }\n": types.MeDocument,
     "\n    mutation resetPassword($input: ResetPasswordInput!) {\n        resetPassword(input: $input) {\n        success\n        }\n    }\n": types.ResetPasswordDocument,
     "\n    mutation signIn($email: String!, $password: String!) {\n        signIn(input: {email: $email, password: $password }) {\n            token\n            enabled_apps\n            language\n            setupComplete\n        }\n    }\n": types.SignInDocument,
@@ -250,6 +254,14 @@ export function graphql(source: "\n    mutation createFolder($input: CreateFolde
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n    query mEvents($search: String) {\n      events(search: $search) {\n        edges {\n          id\n          title\n        }\n      }\n    }\n  "): (typeof documents)["\n    query mEvents($search: String) {\n      events(search: $search) {\n        edges {\n          id\n          title\n        }\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    query tags {\n      tags {\n        edges {\n          id\n          name\n          color\n        }\n      }\n    }\n  "): (typeof documents)["\n    query tags {\n      tags {\n        edges {\n          id\n          name\n          color\n        }\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n    mutation signOut {\n      signOut\n    }\n  "): (typeof documents)["\n    mutation signOut {\n      signOut\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -343,6 +355,10 @@ export function graphql(source: "\n  query buckets {\n    buckets(input: { share
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    mutation resetPassword($input: ResetPasswordInput!) {\n      resetPassword(input: $input) {\n        success\n      }\n    }\n  "): (typeof documents)["\n    mutation resetPassword($input: ResetPasswordInput!) {\n      resetPassword(input: $input) {\n        success\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query mGetEntries($filter: EntryFilterInput, $limit: Int, $order: EntrySortBy, $offset: Int) {\n    entries(filter: $filter, limit: $limit, sortBy: $order, offset: $offset) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n      edges {\n        id\n        date\n        body\n        user {\n          id\n          firstName\n          lastName\n        }\n        createdAt\n      }\n    }\n  }\n"): (typeof documents)["\n  query mGetEntries($filter: EntryFilterInput, $limit: Int, $order: EntrySortBy, $offset: Int) {\n    entries(filter: $filter, limit: $limit, sortBy: $order, offset: $offset) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n      edges {\n        id\n        date\n        body\n        user {\n          id\n          firstName\n          lastName\n        }\n        createdAt\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -447,6 +463,10 @@ export function graphql(source: "\n  query getTagWithLimit($limit: Int, $offset:
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation archiveEntry($id: ID!) {\n    archiveEntry(id: $id) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation archiveEntry($id: ID!) {\n    archiveEntry(id: $id) {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query entryById($id: ID!) {\n    entry(id: $id) {\n      id\n      date\n      body\n      deletedAt\n      user {\n        id\n        firstName\n        lastName\n      }\n      createdAt\n      tags {\n        id\n        name\n        color\n      }\n      events {\n        id\n        title\n      }\n      users {\n        id\n        firstName\n        lastName\n      }\n      userCompetences {\n        id\n        level\n        competence {\n          id\n          name\n          color\n          type\n          grades\n          parents {\n            id\n            name\n            grades\n            color\n          }\n        }\n      }\n    }\n  }\n"): (typeof documents)["\n  query entryById($id: ID!) {\n    entry(id: $id) {\n      id\n      date\n      body\n      deletedAt\n      user {\n        id\n        firstName\n        lastName\n      }\n      createdAt\n      tags {\n        id\n        name\n        color\n      }\n      events {\n        id\n        title\n      }\n      users {\n        id\n        firstName\n        lastName\n      }\n      userCompetences {\n        id\n        level\n        competence {\n          id\n          name\n          color\n          type\n          grades\n          parents {\n            id\n            name\n            grades\n            color\n          }\n        }\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
