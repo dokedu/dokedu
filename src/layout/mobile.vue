@@ -16,6 +16,7 @@ body {
 #app {
   background-color: white;
   overflow: hidden;
+  height: 100%;
   /* transition: all 0.2s ease-in-out; */
 }
 </style>

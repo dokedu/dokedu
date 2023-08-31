@@ -16,6 +16,12 @@
           <div>{{ toLocateDateString(entry?.createdAt) }}</div>
         </div>
       </router-link>
+      <div class="flex flex-col gap-2 p-4 text-center text-xs text-stone-500">
+        <div class="mx-auto max-w-xs">
+          Im Moment zeigen wir nur die letzten 10 Einträge. Demnächst kannst du alle Einträge auf deinem Smartphone
+          sehen.
+        </div>
+      </div>
     </div>
     <MPageFooter>
       <router-link
