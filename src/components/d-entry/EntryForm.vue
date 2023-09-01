@@ -34,7 +34,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { gql, useMutation } from "@urql/vue";
+import { useMutation } from "@urql/vue";
 import { computed, toRef } from "vue";
 import archiveEntryMutation from "@/queries/archiveEntry.mutation";
 import { formatDate, useTextareaAutosize } from "@vueuse/core";
@@ -47,6 +47,8 @@ import EntryFormStudents from "./EntryFormStudents.vue";
 import { createNotification } from "@/composables/useToast";
 import { Save } from "lucide-vue-next";
 import { useI18n } from "vue-i18n";
+import updateEntryMutation from "@/queries/updateEntry.mutation";
+import createEntryMutation from "@/queries/createEntry.mutation";
 
 const t = useI18n().t;
 
@@ -60,89 +62,9 @@ const entry = toRef(props, "entry");
 // @ts-expect-error
 const { textarea, input: body } = useTextareaAutosize({ input: entry.value.body });
 
+const { executeMutation: createEntry } = useMutation(createEntryMutation);
+const { executeMutation: updateEntry } = useMutation(updateEntryMutation);
 const { executeMutation: archiveEntryMut } = useMutation(archiveEntryMutation);
-
-const { executeMutation: createEntry } = useMutation(gql`
-  mutation createEntry($input: CreateEntryInput!) {
-    createEntry(input: $input) {
-      id
-      date
-      body
-      deletedAt
-      user {
-        id
-        firstName
-        lastName
-      }
-      createdAt
-      tags {
-        id
-        name
-        color
-      }
-      events {
-        id
-        title
-      }
-      users {
-        id
-        firstName
-        lastName
-      }
-      userCompetences {
-        id
-        level
-        competence {
-          id
-          name
-          color
-          type
-        }
-      }
-    }
-  }
-`);
-
-const { executeMutation: updateEntry } = useMutation(gql`
-  mutation updateEntry($input: UpdateEntryInput!) {
-    updateEntry(input: $input) {
-      id
-      date
-      body
-      deletedAt
-      user {
-        id
-        firstName
-        lastName
-      }
-      createdAt
-      tags {
-        id
-        name
-        color
-      }
-      events {
-        id
-        title
-      }
-      users {
-        id
-        firstName
-        lastName
-      }
-      userCompetences {
-        id
-        level
-        competence {
-          id
-          name
-          color
-          type
-        }
-      }
-    }
-  }
-`);
 
 const formattedDate = computed({
   get() {
@@ -214,7 +136,7 @@ async function submit() {
   }
 
   if (error) return;
-  await createNotification({
+  createNotification({
     title: t("entry") + (props.mode === "edit" ? ` ${t("updated")}` : ` ${t("created")}`),
     description: t("saved_successfully"),
     icon: Save,
