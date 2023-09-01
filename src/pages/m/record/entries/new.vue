@@ -58,11 +58,12 @@ async function saveEntry() {
   loading.value = true;
 
   const res = await update(entry.value);
+
+  loading.value = false;
+
   if (res.error) return;
 
   clear();
-
-  loading.value = false;
 
   await router.push({ name: "/m/record/entries/" });
 }

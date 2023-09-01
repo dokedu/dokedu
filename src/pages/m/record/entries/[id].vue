@@ -9,13 +9,13 @@
     </div>
     <MPageFooter>
       <button
+        @click="saveEntry"
         type="button"
-        to="/m/record/entries"
         class="flex w-full items-center justify-center gap-2 rounded-lg bg-black px-8 py-2.5 text-center text-sm text-white"
         :class="{ 'opacity-50': !hasChanged }"
-        @click="saveEntry"
       >
-        <div>Speichern</div>
+        <div v-if="!loading">Speichern</div>
+        <div v-else>Loading</div>
       </button>
     </MPageFooter>
   </div>
@@ -38,7 +38,7 @@ import { useRoute } from "vue-router/auto";
 import entryByIdQuery from "@/queries/entryById";
 import updateEntryMutation from "@/queries/updateEntry.mutation";
 import { useMutation, useQuery } from "@urql/vue";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useRefHistory } from "@vueuse/core";
 
 const route = useRoute("/m/record/entries/[id]");
@@ -56,14 +56,20 @@ const entryData = computed(() => {
 
 const { history, clear } = useRefHistory(entryData, { deep: true, flush: "sync" });
 const hasChanged = computed(() => history.value.length > 2);
+const loading = ref(false);
 
 const { executeMutation: updateEntry } = useMutation(updateEntryMutation);
 
 async function saveEntry() {
   if (!hasChanged.value) return;
+  loading.value = true;
+
   const entry = data.value?.entry;
 
   const res = await update(entry);
+
+  loading.value = false;
+
   if (res.error) return;
 
   clear();

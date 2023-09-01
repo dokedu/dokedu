@@ -12,7 +12,7 @@
         <slot />
       </div>
     </div>
-    <div class="flex gap-1 text-xs">
+    <div class="flex max-w-full gap-1 overflow-hidden text-xs">
       <div v-for="(parent, index) in competence.parents" class="flex items-center py-0.5">
         <div v-if="index !== 0" class="mx-1 text-muted">/</div>
         <div
