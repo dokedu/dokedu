@@ -57,7 +57,7 @@ const tags = useVModel(props, "modelValue", emit);
 const { data } = useQuery({
   query: graphql(`
     query tags {
-      tags {
+      tags(limit: 50) {
         edges {
           id
           name

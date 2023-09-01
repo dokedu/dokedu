@@ -69,7 +69,7 @@ const projects = useVModel(props, "modelValue", emit);
 const { data } = useQuery({
   query: graphql(`
     query mEvents($search: String) {
-      events(search: $search) {
+      events(search: $search, limit: 100) {
         edges {
           id
           title

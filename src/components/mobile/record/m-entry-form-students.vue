@@ -24,7 +24,7 @@
       <MSheet @close="sheetOpen = false">
         <div class="p-2 text-sm">
           <d-input v-model="search" type="text" name="search" id="search" placeholder="Search student" />
-          <div class="mt-3 flex max-h-[calc(100vh-125px)] flex-col gap-2 overflow-scroll pb-4">
+          <div class="mt-3 flex max-h-[500px] flex-col gap-2 overflow-scroll pb-4">
             <div
               v-for="student in data?.users.edges"
               class="flex items-center justify-between rounded-lg border border-stone-200 px-2 py-2"

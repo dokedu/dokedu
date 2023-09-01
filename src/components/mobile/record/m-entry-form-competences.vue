@@ -19,7 +19,9 @@
     <template v-if="sheetOpen">
       <MSheet @close="sheetOpen = false">
         <div class="p-2">
-          <DCompetenceSearch :selected="uCompetence" @add="toggleCompetence" />
+          <div class="max-h-[calc(100vh-72px)] overflow-scroll pb-4">
+            <DCompetenceSearch :selected="uCompetence" @add="toggleCompetence" />
+          </div>
         </div>
       </MSheet>
     </template>

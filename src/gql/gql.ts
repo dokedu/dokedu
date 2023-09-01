@@ -44,8 +44,8 @@ const documents = {
     "\n    mutation deleteFile($id: ID!) {\n      deleteFile(input: { id: $id }) {\n        success\n        file {\n          id\n        }\n      }\n    }\n  ": types.DeleteFileDocument,
     "\n  query files($offset: Int, $limit: Int, $filter: FilesFilterInput) {\n    files(input: $filter, limit: $limit, offset: $offset) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n      edges {\n        id\n        name\n        fileType\n        MIMEType\n        size\n        createdAt\n      }\n    }\n  }\n": types.FilesDocument,
     "\n    mutation createFolder($input: CreateFolderInput!) {\n      createFolder(input: $input) {\n        id\n      }\n    }\n  ": types.CreateFolderDocument,
-    "\n    query mEvents($search: String) {\n      events(search: $search) {\n        edges {\n          id\n          title\n        }\n      }\n    }\n  ": types.MEventsDocument,
-    "\n    query tags {\n      tags {\n        edges {\n          id\n          name\n          color\n        }\n      }\n    }\n  ": types.TagsDocument,
+    "\n    query mEvents($search: String) {\n      events(search: $search, limit: 100) {\n        edges {\n          id\n          title\n        }\n      }\n    }\n  ": types.MEventsDocument,
+    "\n    query tags {\n      tags(limit: 50) {\n        edges {\n          id\n          name\n          color\n        }\n      }\n    }\n  ": types.TagsDocument,
     "\n    mutation signOut {\n      signOut\n    }\n  ": types.SignOutDocument,
     "\n    mutation previewFile($id: ID!) {\n      previewFile(input: { id: $id }) {\n        url\n      }\n    }\n  ": types.PreviewFileDocument,
     "\n  query domains {\n    domains {\n      edges {\n        id\n        name\n        createdAt\n      }\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n": types.DomainsDocument,
@@ -246,11 +246,11 @@ export function graphql(source: "\n    mutation createFolder($input: CreateFolde
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n    query mEvents($search: String) {\n      events(search: $search) {\n        edges {\n          id\n          title\n        }\n      }\n    }\n  "): (typeof documents)["\n    query mEvents($search: String) {\n      events(search: $search) {\n        edges {\n          id\n          title\n        }\n      }\n    }\n  "];
+export function graphql(source: "\n    query mEvents($search: String) {\n      events(search: $search, limit: 100) {\n        edges {\n          id\n          title\n        }\n      }\n    }\n  "): (typeof documents)["\n    query mEvents($search: String) {\n      events(search: $search, limit: 100) {\n        edges {\n          id\n          title\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n    query tags {\n      tags {\n        edges {\n          id\n          name\n          color\n        }\n      }\n    }\n  "): (typeof documents)["\n    query tags {\n      tags {\n        edges {\n          id\n          name\n          color\n        }\n      }\n    }\n  "];
+export function graphql(source: "\n    query tags {\n      tags(limit: 50) {\n        edges {\n          id\n          name\n          color\n        }\n      }\n    }\n  "): (typeof documents)["\n    query tags {\n      tags(limit: 50) {\n        edges {\n          id\n          name\n          color\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
