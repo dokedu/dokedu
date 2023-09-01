@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-screen max-h-screen w-full flex-col" style="height: -webkit-fill-available">
+  <div id="element" class="flex h-screen max-h-screen w-full flex-col">
     <MPageHeader />
     <template v-if="!fetching && data?.entry">
       <MEntryForm v-model="entryData" />
@@ -140,3 +140,12 @@ async function update(entry: any) {
   return res;
 }
 </script>
+
+<style scoped>
+#element {
+  height: 100%;
+  height: -moz-available; /* WebKit-based browsers will ignore this. */
+  height: -webkit-fill-available; /* Mozilla-based browsers will ignore this. */
+  height: fill-available;
+}
+</style>

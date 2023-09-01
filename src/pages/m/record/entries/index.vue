@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-screen max-h-screen w-full flex-col" style="height: -webkit-fill-available">
+  <div id="element" class="flex max-h-screen w-full flex-col">
     <MPageHeader />
     <div class="flex-1 divide-y divide-stone-200 overflow-scroll text-sm">
       <router-link
@@ -93,3 +93,12 @@ function toLocateDateString(date: string) {
   });
 }
 </script>
+
+<style scoped>
+#element {
+  height: 100%;
+  height: -moz-available; /* WebKit-based browsers will ignore this. */
+  height: -webkit-fill-available; /* Mozilla-based browsers will ignore this. */
+  height: fill-available;
+}
+</style>
