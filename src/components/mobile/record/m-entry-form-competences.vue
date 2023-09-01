@@ -18,10 +18,8 @@
     </button>
     <template v-if="sheetOpen">
       <MSheet @close="sheetOpen = false">
-        <div class="p-2">
-          <div class="max-h-[calc(100vh-72px)] overflow-scroll pb-4">
-            <DCompetenceSearch :selected="uCompetence" @add="toggleCompetence" />
-          </div>
+        <div class="p-2" :style="{ height: sheetHeight + 'px' }">
+          <DCompetenceSearch :selected="uCompetence" @add="toggleCompetence" />
         </div>
       </MSheet>
     </template>
@@ -38,11 +36,14 @@ import { computed, ref } from "vue";
 
 const sheetOpen = ref(false);
 
+const { height } = useWindowSize();
+const sheetHeight = computed(() => height.value - 72);
+
 function addCompetence() {
   sheetOpen.value = true;
 }
 
-import { useVModel } from "@vueuse/core";
+import { useVModel, useWindowSize } from "@vueuse/core";
 
 const props = defineProps<{
   modelValue: any;

@@ -15,15 +15,15 @@
 <script lang="ts" setup>
 import { X } from "lucide-vue-next";
 // colors
-// bg-blue-50    text-blue-700    !text-blue-700
-// bg-red-50     text-red-700     !text-red-700
-// bg-orange-50  text-orange-700  !text-orange-700
-// bg-purple-50  text-purple-700  !text-purple-700
-// bg-green-50   text-green-700   !text-green-700
-// bg-yellow-50  text-yellow-700  !text-yellow-700
-// bg-indigo-50  text-indigo-700  !text-indigo-700
-// bg-pink-50    text-pink-700    !text-pink-700
-// bg-gray-50    text-gray-700    !text-gray-700
+// bg-blue-50    text-blue-700    !text-blue-700    border-blue-200    stroke-blue-500
+// bg-red-50     text-red-700     !text-red-700     border-red-200     stroke-red-500
+// bg-orange-50  text-orange-700  !text-orange-700  border-orange-200  stroke-orange-500
+// bg-purple-50  text-purple-700  !text-purple-700  border-purple-200  stroke-purple-500
+// bg-green-50   text-green-700   !text-green-700   border-green-200   stroke-green-500
+// bg-yellow-50  text-yellow-700  !text-yellow-700  border-yellow-200  stroke-yellow-500
+// bg-indigo-50  text-indigo-700  !text-indigo-700  border-indigo-200  stroke-indigo-500
+// bg-pink-50    text-pink-700    !text-pink-700    border-pink-200    stroke-pink-500
+// bg-gray-50    text-gray-700    !text-gray-700    border-gray-200    stroke-gray-500
 
 const props = defineProps({
   color: {

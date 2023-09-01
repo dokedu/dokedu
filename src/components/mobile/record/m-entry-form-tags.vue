@@ -12,17 +12,16 @@
     </button>
     <template v-if="sheetOpen">
       <MSheet @close="sheetOpen = false">
-        <div class="p-2 text-sm">
-          <div class="mt-3 flex max-h-[calc(100vh-125px)] flex-col gap-2 overflow-scroll pb-4">
-            <div
-              v-for="tag in data?.tags.edges"
-              class="flex items-center justify-between rounded-lg border border-stone-200 px-2 py-2"
-              @click="toggleTag(tag)"
-            >
-              <div>{{ tag?.name }}</div>
-              <div class="rounded-md hover:bg-stone-100">
-                <Check v-if="activeTag(tag)" :size="20" class="stroke-stone-500" />
-              </div>
+        <div class="flex flex-col gap-2 overflow-scroll p-2 text-sm" :style="{ maxHeight: sheetHeight + 'px' }">
+          <div
+            v-for="tag in data?.tags.edges"
+            class="flex items-center justify-between rounded-lg border px-2 py-2"
+            :class="`bg-${tag?.color}-50 border-${tag?.color}-200`"
+            @click="toggleTag(tag)"
+          >
+            <div>{{ tag?.name }}</div>
+            <div class="rounded-md hover:bg-stone-100">
+              <Check v-if="activeTag(tag)" :size="20" :class="`stroke-${tag?.color}-500`" />
             </div>
           </div>
         </div>
@@ -34,13 +33,16 @@
 <script lang="ts" setup>
 import MSheet from "@/components/mobile/m-sheet.vue";
 import DTag from "@/components/d-tag/d-tag.vue";
-import { useVModel } from "@vueuse/core";
+import { useVModel, useWindowSize } from "@vueuse/core";
 import { Plus, Check } from "lucide-vue-next";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { graphql } from "@/gql";
 import { useQuery } from "@urql/vue";
 
 const sheetOpen = ref(false);
+
+const { height } = useWindowSize();
+const sheetHeight = computed(() => height.value - 72);
 
 function addTag() {
   sheetOpen.value = true;
