@@ -38,7 +38,7 @@ import { useRouter } from "vue-router/auto";
 const router = useRouter();
 
 const entry = ref({
-  date: "2023-08-31",
+  date: new Date().toISOString().substr(0, 10),
   body: "",
   tags: [],
   events: [],
