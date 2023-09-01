@@ -135,9 +135,9 @@ async function update(entry: any) {
 
 <style scoped>
 #element {
-  height: 100%;
-  height: -moz-available; /* WebKit-based browsers will ignore this. */
-  height: -webkit-fill-available; /* Mozilla-based browsers will ignore this. */
-  height: fill-available;
+  max-height: -webkit-fill-available;
+  max-height: -moz-available;
+  max-height: fill-available;
+  max-height: 100dvh;
 }
 </style>
