@@ -56,16 +56,20 @@
 </route>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import signInMutation from "../queries/signIn.mutation";
 import { useMutation } from "@urql/vue";
 import { useRouter } from "vue-router/auto";
 import i18n from "@/i18n";
+import { useWindowSize } from "@vueuse/core";
 
 const router = useRouter();
 
 const email = ref("");
 const password = ref("");
+
+const { width } = useWindowSize();
+const isMobile = computed(() => width.value <= 900);
 
 const { executeMutation: signIn, error } = useMutation(signInMutation);
 
@@ -94,10 +98,12 @@ async function onSubmit() {
     }
 
     // enabled_apps
-
     if (enabled_apps.includes("record")) {
-      await router.push({ name: "/record/entries/" });
-      return;
+      if (isMobile.value) {
+        await router.push({ name: "/m/record/entries/" });
+      } else {
+        await router.push({ name: "/record/entries/" });
+      }
     } else if (enabled_apps.includes("drive")) {
       await router.push({ name: "/drive/my-drive/" });
       return;

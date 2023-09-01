@@ -1,6 +1,6 @@
 <template>
   <div class="px-2 py-4">
-    <div class="mb-1 px-2 text-stone-500">Schülere</div>
+    <div class="mb-1 px-2 text-stone-500">Schüler</div>
     <div class="mb-2 flex flex-col gap-2 px-2">
       <div
         v-for="student in students"

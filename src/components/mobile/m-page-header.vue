@@ -14,7 +14,13 @@
       <div class="text-lg font-medium">Einträge</div>
     </router-link>
     <div>
-      <div class="h-8 w-8 rounded-full bg-stone-200"></div>
+      <div class="h-8 w-8 rounded-full bg-stone-200" @click="signOut"></div>
     </div>
   </header>
 </template>
+
+<script lang="ts" setup>
+import { useAuth } from "@/composables/auth";
+
+const { signOut } = useAuth();
+</script>
