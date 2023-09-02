@@ -50,6 +50,12 @@ func Auth(bun *bun.DB) echo.MiddlewareFunc {
 			// Get the user
 			var user db.User
 			err = bun.NewSelect().Model(&user).Where("id = ?", session.UserID).Scan(c.Request().Context())
+			if err == sql.ErrNoRows {
+				// Remove all sessions for this user if the user is deleted
+				var sessions []db.Session
+				_, err = bun.NewUpdate().Model(&sessions).Set("deleted_at = ?", time.Now()).Where("user_id = ?", session.UserID).Exec(c.Request().Context())
+				return next(c)
+			}
 
 			userContext := UserContext{
 				user,

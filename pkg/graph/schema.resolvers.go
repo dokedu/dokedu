@@ -465,6 +465,14 @@ func (r *mutationResolver) ArchiveUser(ctx context.Context, id string) (*db.User
 		}
 	}
 
+	// Remove the sessions for the user
+	_, err = r.DB.NewDelete().Model(&db.Session{}).Where("user_id = ?", user.ID).Exec(ctx)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			return nil, err
+		}
+	}
+
 	return user, nil
 }
 
