@@ -8,6 +8,7 @@ import (
 	"github.com/meilisearch/meilisearch-go"
 	"github.com/uptrace/bun"
 	"os"
+	"slices"
 )
 
 type MeiliCompetence struct {
@@ -60,15 +61,13 @@ func (m MeiliClient) GenerateCompetenceIndex(ctx context.Context, conn *bun.DB) 
 			continue
 		}
 
+		competenceMap := make(map[string]db.Competence)
+		for _, c := range competences {
+			competenceMap[c.ID] = c
+		}
+
 		for _, competence := range competences {
-			parentNames, err := getParentNames(conn, ctx, competence.ID)
-			if err != nil {
-				return err
-			}
-			parentIds, err := getParentIds(conn, ctx, competence.ID)
-			if err != nil {
-				return err
-			}
+			parentIds, parentNames := getParentDetails(competence, competenceMap)
 
 			meiliCompetences = append(meiliCompetences, MeiliCompetence{
 				ID:             competence.ID,
@@ -107,34 +106,24 @@ func (m MeiliClient) GenerateCompetenceIndex(ctx context.Context, conn *bun.DB) 
 	return nil
 }
 
-func getParentIds(conn *bun.DB, ctx context.Context, competenceID string) ([]string, error) {
-	var parents []db.Competence
-	err := conn.NewRaw("SELECT * FROM get_competence_tree_reverse(?)", competenceID).Scan(ctx, &parents)
-	if err != nil {
-		return nil, err
+func getParentDetails(competence db.Competence, competenceMap map[string]db.Competence) ([]string, []string) {
+	var parentIds []string
+	var parentNames []string
+
+	for competence.CompetenceID.Valid {
+		if parent, found := competenceMap[competence.CompetenceID.String]; found {
+			parentIds = append(parentIds, parent.ID)
+			parentNames = append(parentNames, parent.Name)
+			competence = parent
+		} else {
+			break
+		}
 	}
 
-	ids := make([]string, len(parents))
-	for i, parent := range parents {
-		ids[i] = parent.ID
-	}
+	slices.Reverse(parentIds)
+	slices.Reverse(parentNames)
 
-	return ids, nil
-}
-
-func getParentNames(conn *bun.DB, ctx context.Context, competenceID string) ([]string, error) {
-	var parents []db.Competence
-	err := conn.NewRaw("SELECT * FROM get_competence_tree_reverse(?)", competenceID).Scan(ctx, &parents)
-	if err != nil {
-		return nil, err
-	}
-
-	ids := make([]string, len(parents))
-	for i, parent := range parents {
-		ids[i] = parent.Name
-	}
-
-	return ids, nil
+	return parentIds, parentNames
 }
 
 func (m MeiliClient) GetCompetenceIndex(organisationId string) string {
