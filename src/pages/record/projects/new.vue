@@ -1,5 +1,5 @@
 <template>
-  <d-project-form :project="(project as Event)" @cancel="cancel" />
+  <d-project-form :project="(project as Event)" @cancel="cancel" @save="saved" />
 </template>
 
 <script lang="ts" setup>
@@ -32,4 +32,8 @@ onClickOutside(sheet, async () => {
 onKeyStroke("Escape", async () => {
   await cancel();
 });
+
+function saved() {
+  router.push({ name: "/record/projects/" });
+}
 </script>
