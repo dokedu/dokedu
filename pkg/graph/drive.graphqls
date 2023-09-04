@@ -217,6 +217,11 @@ input DeleteShareInput {
     user: ID!
 }
 
+input RenameSharedDriveInput {
+    id: ID!
+    name: String!
+}
+
 extend type Mutation {
     uploadFile(input: FileUploadInput!): File!
     uploadFiles(input: FileUploadInput!): UploadFilesPayload!
@@ -242,6 +247,7 @@ extend type Mutation {
     removeFileShare(input: ID!): File!
 
     createSharedDrive(name: String!): Bucket!
+    renameSharedDrive(input: RenameSharedDriveInput!): Bucket!
 
     createShare(input: CreateShareInput!): ShareUser!
     editShare(input: CreateShareInput!): ShareUser!

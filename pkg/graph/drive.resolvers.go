@@ -465,6 +465,43 @@ func (r *mutationResolver) CreateSharedDrive(ctx context.Context, name string) (
 	return bucket, nil
 }
 
+// RenameSharedDrive is the resolver for the renameSharedDrive field.
+func (r *mutationResolver) RenameSharedDrive(ctx context.Context, input model.RenameSharedDriveInput) (*db.Bucket, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	var bucket db.Bucket
+	err = r.DB.NewSelect().Model(&bucket).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if bucket.UserID.String != currentUser.ID {
+		var share db.Share
+		err = r.DB.NewSelect().Model(&share).Where("bucket_id = ?", input.ID).Where("shared_with = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("you don't have permission to rename this bucket")
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		if permissionToEnum(share.Permission) != model.FilePermissionManager {
+			return nil, errors.New("you don't have permission to rename this bucket")
+		}
+	}
+
+	bucket.Name = input.Name
+	err = r.DB.NewUpdate().Model(&bucket).Column("name").WherePK().Returning("*").Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &bucket, nil
+}
+
 // CreateShare is the resolver for the createShare field.
 func (r *mutationResolver) CreateShare(ctx context.Context, input model.CreateShareInput) (*model.ShareUser, error) {
 	currentUser, err := middleware.GetUser(ctx)

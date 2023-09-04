@@ -375,6 +375,11 @@ type RenameFileInput struct {
 	Name string `json:"name"`
 }
 
+type RenameSharedDriveInput struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
 type ReportConnection struct {
 	Edges      []*db.Report `json:"edges,omitempty"`
 	PageInfo   *PageInfo    `json:"pageInfo"`

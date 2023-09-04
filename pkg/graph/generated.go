@@ -341,6 +341,7 @@ type ComplexityRoot struct {
 		PreviewFile             func(childComplexity int, input model.PreviewFileInput) int
 		RemoveFileShare         func(childComplexity int, input string) int
 		RenameFile              func(childComplexity int, input model.RenameFileInput) int
+		RenameSharedDrive       func(childComplexity int, input model.RenameSharedDriveInput) int
 		ResetPassword           func(childComplexity int, input model.ResetPasswordInput) int
 		SendUserInvite          func(childComplexity int, id string) int
 		SignIn                  func(childComplexity int, input model.SignInInput) int
@@ -619,6 +620,7 @@ type MutationResolver interface {
 	AddFileShare(ctx context.Context, input model.ShareFileInput) (*db.File, error)
 	RemoveFileShare(ctx context.Context, input string) (*db.File, error)
 	CreateSharedDrive(ctx context.Context, name string) (*db.Bucket, error)
+	RenameSharedDrive(ctx context.Context, input model.RenameSharedDriveInput) (*db.Bucket, error)
 	CreateShare(ctx context.Context, input model.CreateShareInput) (*model.ShareUser, error)
 	EditShare(ctx context.Context, input model.CreateShareInput) (*model.ShareUser, error)
 	DeleteShare(ctx context.Context, input model.DeleteShareInput) (*model.ShareUser, error)
@@ -2233,6 +2235,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.RenameFile(childComplexity, args["input"].(model.RenameFileInput)), true
 
+	case "Mutation.renameSharedDrive":
+		if e.complexity.Mutation.RenameSharedDrive == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_renameSharedDrive_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RenameSharedDrive(childComplexity, args["input"].(model.RenameSharedDriveInput)), true
+
 	case "Mutation.resetPassword":
 		if e.complexity.Mutation.ResetPassword == nil {
 			break
@@ -3448,6 +3462,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputMyFilesFilterInput,
 		ec.unmarshalInputPreviewFileInput,
 		ec.unmarshalInputRenameFileInput,
+		ec.unmarshalInputRenameSharedDriveInput,
 		ec.unmarshalInputResetPasswordInput,
 		ec.unmarshalInputShareFileInput,
 		ec.unmarshalInputShareInput,
@@ -4237,6 +4252,21 @@ func (ec *executionContext) field_Mutation_renameFile_args(ctx context.Context, 
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNRenameFileInput2exampleᚋpkgᚋgraphᚋmodelᚐRenameFileInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_renameSharedDrive_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.RenameSharedDriveInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNRenameSharedDriveInput2exampleᚋpkgᚋgraphᚋmodelᚐRenameSharedDriveInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -13049,6 +13079,79 @@ func (ec *executionContext) fieldContext_Mutation_createSharedDrive(ctx context.
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_createSharedDrive_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_renameSharedDrive(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_renameSharedDrive(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RenameSharedDrive(rctx, fc.Args["input"].(model.RenameSharedDriveInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.Bucket)
+	fc.Result = res
+	return ec.marshalNBucket2ᚖexampleᚋpkgᚋdbᚐBucket(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_renameSharedDrive(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Bucket_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Bucket_name(ctx, field)
+			case "user":
+				return ec.fieldContext_Bucket_user(ctx, field)
+			case "shared":
+				return ec.fieldContext_Bucket_shared(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Bucket_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Bucket_deletedAt(ctx, field)
+			case "permission":
+				return ec.fieldContext_Bucket_permission(ctx, field)
+			case "files":
+				return ec.fieldContext_Bucket_files(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Bucket", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_renameSharedDrive_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -26030,6 +26133,42 @@ func (ec *executionContext) unmarshalInputRenameFileInput(ctx context.Context, o
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputRenameSharedDriveInput(ctx context.Context, obj interface{}) (model.RenameSharedDriveInput, error) {
+	var it model.RenameSharedDriveInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "name"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputResetPasswordInput(ctx context.Context, obj interface{}) (model.ResetPasswordInput, error) {
 	var it model.ResetPasswordInput
 	asMap := map[string]interface{}{}
@@ -29148,6 +29287,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createSharedDrive(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "renameSharedDrive":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_renameSharedDrive(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -32843,6 +32991,11 @@ func (ec *executionContext) marshalNPreviewFilePayload2ᚖexampleᚋpkgᚋgraph�
 
 func (ec *executionContext) unmarshalNRenameFileInput2exampleᚋpkgᚋgraphᚋmodelᚐRenameFileInput(ctx context.Context, v interface{}) (model.RenameFileInput, error) {
 	res, err := ec.unmarshalInputRenameFileInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNRenameSharedDriveInput2exampleᚋpkgᚋgraphᚋmodelᚐRenameSharedDriveInput(ctx context.Context, v interface{}) (model.RenameSharedDriveInput, error) {
+	res, err := ec.unmarshalInputRenameSharedDriveInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
