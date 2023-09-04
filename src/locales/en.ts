@@ -214,4 +214,7 @@ export const en = {
   trash_work_in_progress: "This page is still a work in progress. It will be used to display the files that have been deleted by you.",
 
   support: "Support",
+
+  rename: "Rename",
+  new_shared_drive_name: "New shared drive name",
 };

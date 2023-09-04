@@ -210,4 +210,7 @@ export const de = {
   trash_work_in_progress: "Diese Seite ist noch in Arbeit. Sie wird verwendet, um die Dateien anzuzeigen, die von Ihnen gelöscht wurden.",
 
   support: "Support",
+
+  rename: "Umbenennen",
+  new_shared_drive_name: "Neuer Name der geteilten Ablage",
 };

@@ -38,7 +38,13 @@
                   :alignment="ContextMenuAlignment.BottomRight"
                   @close="item.open = false"
                 >
-                  <div class="px-1 py-1">
+                  <div class="s p-1">
+                    <button
+                      class="w-full rounded-md px-2 py-1.5 text-left font-medium text-strong transition ease-in-out hover:bg-blue-100 hover:text-blue-900"
+                      @click.stop="toggleRenameModal(item)"
+                    >
+                      {{ $t("rename") }}
+                    </button>
                     <button
                       class="w-full rounded-md px-2 py-1.5 text-left font-medium text-strong transition ease-in-out hover:bg-blue-100 hover:text-blue-900"
                       @click.stop="toggleShareModal(item)"
@@ -57,6 +63,11 @@
   </PageWrapper>
 
   <DDialogShareDrive :open="shareOpen" :item="(currentItem as Bucket)" @close="shareOpen = false"></DDialogShareDrive>
+  <DDialogRenameDrive
+    :open="renameOpen"
+    :item="(currentItem as Bucket)"
+    @close="renameOpen = false"
+  ></DDialogRenameDrive>
 </template>
 
 <script setup lang="ts">
@@ -75,16 +86,24 @@ import router from "@/router";
 import DContextMenu from "@/components/d-context-menu/d-context-menu.vue";
 import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue";
 import DDialogShareDrive from "@/components/drive/DDialogShareDrive.vue";
+import DDialogRenameDrive from "@/components/drive/DDialogRenameDrive.vue";
 import { Bucket } from "@/gql/graphql";
 import { formatDate } from "@vueuse/core";
 
 const currentItem = ref<Bucket>();
 const shareOpen = ref(false);
+const renameOpen = ref(false);
 
 function toggleShareModal(item: any) {
   item.open = false;
   currentItem.value = item;
   shareOpen.value = true;
+}
+
+function toggleRenameModal(item: any) {
+  item.open = false;
+  currentItem.value = item;
+  renameOpen.value = true;
 }
 
 async function newSharedDrive() {

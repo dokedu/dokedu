@@ -32,6 +32,7 @@ const documents = {
     "\n    query bucketByIdShared($id: ID!) {\n      bucket(id: $id) {\n        id\n        permission\n      }\n    }\n  ": types.BucketByIdSharedDocument,
     "\n    query events {\n      events {\n        edges {\n          id\n          title\n        }\n      }\n    }\n  ": types.EventsDocument,
     "\n    query users($search: String) {\n      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  ": types.UsersDocument,
+    "\n    mutation renameSharedDrive($input: RenameSharedDriveInput!) {\n      renameSharedDrive(input: $input) {\n        id\n        name\n      }\n    }\n  ": types.RenameSharedDriveDocument,
     "\n    mutation renameFile($input: RenameFileInput!) {\n      renameFile(input: $input) {\n        id\n        name\n      }\n    }\n  ": types.RenameFileDocument,
     "\n    query shareUsers {\n      users(filter: { role: [owner, admin, teacher] }) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  ": types.ShareUsersDocument,
     "\n  query BucketShares($input: ShareInput!) {\n    shares(input: $input) {\n      user {\n        id\n        firstName\n        lastName\n      }\n      permission\n    }\n  }\n": types.BucketSharesDocument,
@@ -195,6 +196,10 @@ export function graphql(source: "\n    query events {\n      events {\n        e
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    query users($search: String) {\n      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  "): (typeof documents)["\n    query users($search: String) {\n      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation renameSharedDrive($input: RenameSharedDriveInput!) {\n      renameSharedDrive(input: $input) {\n        id\n        name\n      }\n    }\n  "): (typeof documents)["\n    mutation renameSharedDrive($input: RenameSharedDriveInput!) {\n      renameSharedDrive(input: $input) {\n        id\n        name\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
