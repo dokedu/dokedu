@@ -60,6 +60,7 @@ async function onSave() {
       name: name.value,
     },
   });
+  name.value = "";
   emit("close");
 }
 </script>
