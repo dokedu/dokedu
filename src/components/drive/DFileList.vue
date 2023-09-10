@@ -279,6 +279,12 @@ function prettyBytes(bytes: number) {
 }
 
 function optionListWithItem(item: File): Option[][] {
+  const downloadAction = {
+    text: i18n.global.t("download"),
+    icon: Download,
+    func: () => downloadFile(item),
+  };
+
   return [
     [
       {
@@ -286,11 +292,7 @@ function optionListWithItem(item: File): Option[][] {
         icon: Edit2,
         func: () => onRenameFile(item),
       },
-      {
-        text: i18n.global.t("download"),
-        icon: Download,
-        func: () => downloadFile(item),
-      },
+      ...(isBlob(item) ? [downloadAction] : []),
     ],
     [
       {
