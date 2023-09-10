@@ -342,7 +342,86 @@ func (r *mutationResolver) RenameFile(ctx context.Context, input model.RenameFil
 
 // MoveFile is the resolver for the moveFile field.
 func (r *mutationResolver) MoveFile(ctx context.Context, input model.MoveFileInput) (*db.File, error) {
-	panic(fmt.Errorf("not implemented: MoveFile - moveFile"))
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	// input.TargetID is a pointer, so we need to check if it's nil
+	var targetId string
+	if input.TargetID != nil {
+		targetId = *input.TargetID
+	}
+
+	// cannot move file into itself
+	if input.ID == targetId {
+		return nil, errors.New("cannot move file into itself")
+	}
+
+	var file db.File
+	err = r.DB.NewSelect().Model(&file).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if input.TargetID == nil {
+		// move file to root
+		file.ParentID = sql.NullString{String: "", Valid: false}
+		err = r.DB.NewUpdate().Model(&file).Column("parent_id").WherePK().Returning("*").Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		return &file, nil
+	}
+
+	var bucket db.Bucket
+	err = r.DB.NewSelect().Model(&bucket).Where("id = ?", file.BucketID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// does user have permission to move file? check bucket permission
+	if bucket.UserID.String != currentUser.ID {
+		return nil, errors.New("you don't have permission to move this file")
+	}
+
+	var target db.File
+	err = r.DB.NewSelect().Model(&target).Where("id = ?", targetId).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// ensure target is a folder
+	if target.FileType != "folder" {
+		return nil, errors.New("target is not a folder")
+	}
+
+	// ensure file and target are in the same bucket
+	if target.BucketID != file.BucketID {
+		return nil, errors.New("file and target are not in the same bucket")
+	}
+
+	// does user have permission to move file to target? check target permission
+	if target.BucketID != file.BucketID {
+		var targetBucket db.Bucket
+		err = r.DB.NewSelect().Model(&targetBucket).Where("id = ?", target.BucketID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		if targetBucket.UserID.String != currentUser.ID {
+			return nil, errors.New("you don't have permission to move this file")
+		}
+	}
+
+	file.ParentID = sql.NullString{String: targetId, Valid: true}
+	err = r.DB.NewUpdate().Model(&file).Column("parent_id").WherePK().Returning("*").Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &file, nil
 }
 
 // MoveFiles is the resolver for the moveFiles field.
@@ -495,6 +574,31 @@ func (r *mutationResolver) RenameSharedDrive(ctx context.Context, input model.Re
 
 	bucket.Name = input.Name
 	err = r.DB.NewUpdate().Model(&bucket).Column("name").WherePK().Returning("*").Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &bucket, nil
+}
+
+// DeleteSharedDrive is the resolver for the deleteSharedDrive field.
+func (r *mutationResolver) DeleteSharedDrive(ctx context.Context, id string) (*db.Bucket, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	var bucket db.Bucket
+	err = r.DB.NewSelect().Model(&bucket).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if bucket.UserID.String != currentUser.ID {
+		return nil, errors.New("you don't have permission to delete this bucket")
+	}
+
+	_, err = r.DB.NewDelete().Model(&bucket).WherePK().Returning("*").Exec(ctx)
 	if err != nil {
 		return nil, err
 	}

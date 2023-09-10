@@ -339,8 +339,8 @@ type GenerateFileURLInput struct {
 }
 
 type MoveFileInput struct {
-	ID       string `json:"id"`
-	TargetID string `json:"targetId"`
+	ID       string  `json:"id"`
+	TargetID *string `json:"targetId,omitempty"`
 }
 
 type MoveFilesInput struct {

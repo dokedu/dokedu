@@ -149,7 +149,7 @@ input RenameFileInput {
 
 input MoveFileInput {
     id: ID!
-    targetId: ID!
+    targetId: ID
 }
 
 input MoveFilesInput {
@@ -248,6 +248,7 @@ extend type Mutation {
 
     createSharedDrive(name: String!): Bucket!
     renameSharedDrive(input: RenameSharedDriveInput!): Bucket!
+    deleteSharedDrive(id: ID!): Bucket!
 
     createShare(input: CreateShareInput!): ShareUser!
     editShare(input: CreateShareInput!): ShareUser!
