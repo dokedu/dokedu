@@ -5,14 +5,25 @@
       <router-link
         v-if="index === 0"
         :to="item.route"
+        @dragover.prevent="(event: DragEvent) => dragover(event, 0)"
+        @drop="(event: DragEvent) => drop(event, 0)"
         class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 font-medium hover:bg-stone-100"
+        :class="{
+          ' border-blue-500 bg-blue-100': dragoverItem === 0,
+        }"
       >
         {{ item.title }}
       </router-link>
       <router-link
         v-else-if="index !== items.length - 1"
         :to="item.route"
-        class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 hover:bg-stone-100"
+        @dragover.prevent="(event: DragEvent) => dragover(event, item)"
+        @drop="(event: DragEvent) => drop(event, item)"
+        @dragleave="dragoverItem = null"
+        class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 font-medium hover:bg-stone-100"
+        :class="{
+          ' border-blue-500 bg-blue-100': dragoverItem === item.route.params.id,
+        }"
       >
         {{ item.title }}
       </router-link>
@@ -25,8 +36,8 @@
 
 <script lang="ts" setup>
 import { graphql } from "@/gql";
-import { useQuery } from "@urql/vue";
-import { computed, reactive } from "vue";
+import { useMutation, useQuery } from "@urql/vue";
+import { computed, reactive, ref } from "vue";
 import { useRoute } from "vue-router/auto";
 import { useI18n } from "vue-i18n";
 
@@ -43,6 +54,58 @@ type RouteName =
   | "/drive/shared-drives/[id]/";
 
 const route = useRoute<RouteName>();
+
+const dragoverItem = ref<string | number | null>(null);
+
+function dragover(_: DragEvent, item: any) {
+  if (item === 0) {
+    dragoverItem.value = 0;
+    return;
+  }
+  if (item.route.params.id === dragoverItem.value) return;
+  console.log("Dragover", item.route.params.id);
+  dragoverItem.value = item.route.params.id;
+}
+
+async function drop(event: DragEvent, row: any) {
+  const id: string | undefined = event.dataTransfer?.getData("dokedu/vnd.dokedu-drive-file");
+  const targetId =
+    row === 0 ? null : row.route.name === "/drive/shared-drives/[id]/" ? null : row.route.params.folderId;
+
+  if (!id) return;
+  if (id === targetId) return;
+
+  console.log(row);
+
+  console.log({
+    id: id,
+    targetId: targetId,
+  });
+
+  await moveFile({
+    input: {
+      id: id,
+      targetId: targetId,
+    },
+  });
+
+  // prevent
+  event.preventDefault();
+  dragoverItem.value = null;
+}
+
+const { executeMutation: moveFile } = useMutation(
+  graphql(`
+    mutation moveFile($input: MoveFileInput!) {
+      moveFile(input: $input) {
+        id
+        parent {
+          id
+        }
+      }
+    }
+  `)
+);
 
 const folderId = computed(() => {
   if (route.name === routeNameSharedDrive) {
@@ -110,6 +173,7 @@ const items = computed<any[]>(() => {
   const createPath = (title: string, routeName: string, id: string, folderId?: string) => {
     return {
       title,
+      bucketId: null,
       route: {
         name: routeName,
         params: isMyDriveRoute ? { id } : { id, folderId },
@@ -124,11 +188,16 @@ const items = computed<any[]>(() => {
         name: rootTo,
       },
     },
-  ] as { title: string; route: { name: string; params?: { id?: string; folderId?: string } } }[];
+  ] as {
+    title: string;
+    bucketId: string | null;
+    route: { name: string; params?: { id?: string; folderId?: string } };
+  }[];
 
   if (route.name === "/drive/shared-drives/[id]/" || route.name === "/drive/shared-drives/[id]/folders/[folderId]") {
     paths.push({
       title: bucket.value?.bucket.name || "loading",
+      bucketId: route.name === "/drive/shared-drives/[id]/" ? (bucket.value ? bucket.value.bucket.id : null) : null,
       route: {
         name: "/drive/shared-drives/[id]/",
         params: { id: route.params.id },

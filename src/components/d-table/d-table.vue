@@ -34,13 +34,14 @@
         :variables="vars"
         :columns="columns"
         :style="gridColumns"
+        :draggable="draggable"
         :additionalTypenames="additionalTypenames"
-        ref="tableRows"
+        :drag-data-type="dragDataType"
       >
         <template v-slot="{ row }">
           <div
             class="flex items-center border-b border-stone-100 px-2 py-2 text-sm first:pl-8 last:pr-8"
-            :class="[{ 'bg-stone-100': isSelected(row) }, column.dataClass]"
+            :class="[{ 'bg-blue-100': isSelected(row) }, column.dataClass]"
             v-for="(column, subIndex) in columns"
             :key="subIndex"
             @click="onRowClick(row)"
@@ -95,11 +96,15 @@ type Props = {
   defaultSort?: string;
   search?: string;
   additionalTypenames?: ["File" | "Bucket"];
+  draggable?: boolean;
+  // drag-data-type
+  dragDataType?: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {
   watchers: () => [],
   hideHeader: false,
+  draggable: false,
 });
 
 const emit = defineEmits(["update:modelValue", "update:variables", "row-click", "update:selected"]);
@@ -121,12 +126,13 @@ const isSelected = (row: { id: string }) => {
 };
 
 function toggleSelectedRow(row: { id: string }) {
-  const index = selectedRows.value.findIndex((selectedRow) => selectedRow.id === row.id);
-  if (index > -1) {
-    selectedRows.value.splice(index, 1);
-  } else {
-    selectedRows.value.push(row);
-  }
+  selectedRows.value = [row];
+  // const index = selectedRows.value.findIndex((selectedRow) => selectedRow.id === row.id);
+  // if (index > -1) {
+  //   selectedRows.value.splice(index, 1);
+  // } else {
+  //   selectedRows.value.push(row);
+  // }
 }
 
 const onRowClick = (row: { id: string }) => {
@@ -160,7 +166,7 @@ const gridColumns = computed(() => {
   // Build the grid-template-columns property
   let gridTemplateColumns = "";
   columnsData.forEach((column: Column) => {
-    const columnWidth = column.width ? `${column.width * totalWidth}px` : `${calculatedWidth}px`;
+    const columnWidth = column.width ? `${Math.floor(column.width * totalWidth)}px` : `${calculatedWidth}px`;
     gridTemplateColumns += `${columnWidth} `;
   });
 

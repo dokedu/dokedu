@@ -26,35 +26,8 @@
           <div class="text-default">{{ formatDate(new Date(Date.parse(column)), "DD.MM.YYYY hh:mm") }} Uhr</div>
         </template>
         <template #id-data="{ item }">
-          <div>
-            <div class="flex w-[80px] justify-end gap-1 pr-4">
-              <div>
-                <div class="group/icon w-fit rounded-lg p-1.5 hover:bg-blue-100" @click.stop="item.open = true">
-                  <MoreVertical class="stroke-colors-subtle group-hover/icon:stroke-blue-900" :size="16" />
-                </div>
-                <DContextMenu
-                  :key="item.id"
-                  :show="!!item.open"
-                  :alignment="ContextMenuAlignment.BottomRight"
-                  @close="item.open = false"
-                >
-                  <div class="s p-1">
-                    <button
-                      class="w-full rounded-md px-2 py-1.5 text-left font-medium text-strong transition ease-in-out hover:bg-blue-100 hover:text-blue-900"
-                      @click.stop="toggleRenameModal(item)"
-                    >
-                      {{ $t("rename") }}
-                    </button>
-                    <button
-                      class="w-full rounded-md px-2 py-1.5 text-left font-medium text-strong transition ease-in-out hover:bg-blue-100 hover:text-blue-900"
-                      @click.stop="toggleShareModal(item)"
-                    >
-                      {{ $t("share") }}
-                    </button>
-                  </div>
-                </DContextMenu>
-              </div>
-            </div>
+          <div class="flex w-full justify-end">
+            <d-file-list-dropdown :option-list="optionListWithItem(item)" />
           </div>
         </template>
         <template #empty>{{ $t("no_shared_drives") }}</template>
@@ -79,20 +52,40 @@ import DTable from "@/components/d-table/d-table.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { PageVariables } from "@/types/types";
 import { ref } from "vue";
-import { Plus, Folder, MoreVertical } from "lucide-vue-next";
+import { Plus, Folder, Edit2, Trash } from "lucide-vue-next";
 import { graphql } from "@/gql";
 import { useMutation } from "@urql/vue";
 import router from "@/router";
-import DContextMenu from "@/components/d-context-menu/d-context-menu.vue";
-import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue";
 import DDialogShareDrive from "@/components/drive/DDialogShareDrive.vue";
 import DDialogRenameDrive from "@/components/drive/DDialogRenameDrive.vue";
 import { Bucket } from "@/gql/graphql";
 import { formatDate } from "@vueuse/core";
+import i18n from "@/i18n";
+import { Share2 } from "lucide-vue-next";
+
+import DFileListDropdown from "@/components/drive/d-file-list-dropdown.vue";
+import type { Option } from "@/components/drive/d-file-list-dropdown.vue";
 
 const currentItem = ref<Bucket>();
 const shareOpen = ref(false);
 const renameOpen = ref(false);
+
+const { executeMutation } = useMutation(
+  graphql(`
+    mutation deleteSharedDrive($id: ID!) {
+      deleteSharedDrive(id: $id) {
+        id
+      }
+    }
+  `)
+);
+
+async function deleteSharedDrive(item: any) {
+  item.open = false;
+  if (confirm("Are you sure?")) {
+    await executeMutation({ id: item.id });
+  }
+}
 
 function toggleShareModal(item: any) {
   item.open = false;
@@ -178,4 +171,28 @@ const sharedDrivesQuery = graphql(`
     }
   }
 `);
+
+function optionListWithItem(item: File): Option[][] {
+  return [
+    [
+      {
+        text: i18n.global.t("rename"),
+        icon: Edit2,
+        func: () => toggleRenameModal(item),
+      },
+      {
+        text: i18n.global.t("share"),
+        icon: Share2,
+        func: () => toggleShareModal(item),
+      },
+    ],
+    [
+      {
+        text: i18n.global.t("delete"),
+        icon: Trash,
+        func: () => deleteSharedDrive(item),
+      },
+    ],
+  ];
+}
 </script>

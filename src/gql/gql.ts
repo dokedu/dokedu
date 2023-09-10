@@ -23,6 +23,7 @@ const documents = {
     "\n    mutation updateUserLanguage($language: UserLanguage!) {\n      updateUserLanguage(language: $language) {\n        id\n        language\n      }\n    }\n  ": types.UpdateUserLanguageDocument,
     "\n    query students {\n      users(filter: { role: [student] }, limit: 1000) {\n        edges {\n          id\n          firstName\n          lastName\n          student {\n            id\n          }\n        }\n      }\n    }\n  ": types.StudentsDocument,
     "\n    query GetTags {\n      tags(limit: 1000) {\n        edges {\n          id\n          name\n          color\n          deletedAt\n          createdAt\n        }\n      }\n    }\n  ": types.GetTagsDocument,
+    "\n    mutation moveFile($input: MoveFileInput!) {\n      moveFile(input: $input) {\n        id\n        parent {\n          id\n        }\n      }\n    }\n  ": types.MoveFileDocument,
     "\n    mutation CreateTag($input: CreateTagInput!) {\n      createTag(input: $input) {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  ": types.CreateTagDocument,
     "\n    mutation UpdateTag($id: ID!, $input: CreateTagInput!) {\n      updateTag(id: $id, input: $input) {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  ": types.UpdateTagDocument,
     "\n    mutation ArchiveTag($id: ID!) {\n      archiveTag(id: $id) {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  ": types.ArchiveTagDocument,
@@ -68,6 +69,7 @@ const documents = {
     "\n    mutation sendInvite($id: ID!) {\n      sendUserInvite(id: $id)\n    }\n  ": types.SendInviteDocument,
     "\n    mutation createUser($user: CreateUserInput!) {\n      createUser(input: $user) {\n        id\n        firstName\n        lastName\n      }\n    }\n  ": types.CreateUserDocument,
     "\n    query file($id: ID!) {\n      file(id: $id) {\n        id\n        name\n        fileType\n        MIMEType\n        size\n        createdAt\n      }\n    }\n  ": types.FileDocument,
+    "\n    mutation deleteSharedDrive($id: ID!) {\n      deleteSharedDrive(id: $id) {\n        id\n      }\n    }\n  ": types.DeleteSharedDriveDocument,
     "\n    mutation createSharedDrive($name: String!) {\n      createSharedDrive(name: $name) {\n        id\n        name\n      }\n    }\n  ": types.CreateSharedDriveDocument,
     "\n  query buckets {\n    buckets(input: { shared: true }) {\n      edges {\n        id\n        name\n        shared\n        createdAt\n        permission\n      }\n      totalCount\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n": types.BucketsDocument,
     "\n    mutation resetPassword($input: ResetPasswordInput!) {\n      resetPassword(input: $input) {\n        success\n      }\n    }\n  ": types.ResetPasswordDocument,
@@ -160,6 +162,10 @@ export function graphql(source: "\n    query students {\n      users(filter: { r
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    query GetTags {\n      tags(limit: 1000) {\n        edges {\n          id\n          name\n          color\n          deletedAt\n          createdAt\n        }\n      }\n    }\n  "): (typeof documents)["\n    query GetTags {\n      tags(limit: 1000) {\n        edges {\n          id\n          name\n          color\n          deletedAt\n          createdAt\n        }\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation moveFile($input: MoveFileInput!) {\n      moveFile(input: $input) {\n        id\n        parent {\n          id\n        }\n      }\n    }\n  "): (typeof documents)["\n    mutation moveFile($input: MoveFileInput!) {\n      moveFile(input: $input) {\n        id\n        parent {\n          id\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -340,6 +346,10 @@ export function graphql(source: "\n    mutation createUser($user: CreateUserInpu
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    query file($id: ID!) {\n      file(id: $id) {\n        id\n        name\n        fileType\n        MIMEType\n        size\n        createdAt\n      }\n    }\n  "): (typeof documents)["\n    query file($id: ID!) {\n      file(id: $id) {\n        id\n        name\n        fileType\n        MIMEType\n        size\n        createdAt\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation deleteSharedDrive($id: ID!) {\n      deleteSharedDrive(id: $id) {\n        id\n      }\n    }\n  "): (typeof documents)["\n    mutation deleteSharedDrive($id: ID!) {\n      deleteSharedDrive(id: $id) {\n        id\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

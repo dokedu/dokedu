@@ -8,7 +8,10 @@
     :query="filesQuery"
     defaultSort="createdAt"
     :additionalTypenames="['File']"
+    :draggable="true"
+    dragDataType="dokedu/vnd.dokedu-drive-file"
     @row-click="clickFile"
+    ref="dFileList"
   >
     <template #name-data="{ column, item }">
       <div class="flex items-center gap-3">
@@ -28,20 +31,29 @@
       <div class="text-default">{{ isBlob(item) ? prettyBytes(column) : "-" }}</div>
     </template>
     <template #id-data="{ item }">
-      <div>
+      <div class="h-7">
         <div class="flex w-[80px] justify-end gap-1 pr-4">
           <div
             v-if="isBlob(item)"
-            class="group/icon w-fit rounded-lg p-1.5 hover:bg-blue-100"
+            class="group/icon hidden w-fit rounded-lg p-1.5 hover:bg-blue-100 group-hover/row:block"
             @click.stop="downloadFile(item)"
           >
             <Download class="stroke-colors-subtle group-hover/icon:stroke-blue-900" :size="16" />
           </div>
-          <div class="group/icon w-fit rounded-lg p-1.5 hover:bg-blue-100" @click.stop="onRenameFile(item)">
+          <div
+            class="group/icon hidden w-fit rounded-lg p-1.5 hover:bg-blue-100 group-hover/row:block"
+            @click.stop="onRenameFile(item)"
+          >
             <Edit class="stroke-colors-subtle group-hover/icon:stroke-blue-900" :size="16" />
           </div>
-          <div class="group/icon w-fit rounded-lg p-1.5 hover:bg-blue-100" @click.stop="openDeleteFileDialog(item)">
+          <div
+            class="group/icon hidden w-fit rounded-lg p-1.5 hover:bg-blue-100 group-hover/row:block"
+            @click.stop="openDeleteFileDialog(item)"
+          >
             <Trash class="stroke-colors-subtle group-hover/icon:stroke-blue-900" :size="16" />
+          </div>
+          <div>
+            <d-file-list-dropdown :option-list="optionListWithItem(item)" />
           </div>
         </div>
       </div>
@@ -69,19 +81,34 @@
 </template>
 
 <script lang="ts" setup>
-import { FileText, Download, Edit, FileImage, Folder } from "lucide-vue-next";
-import { File } from "@/gql/graphql";
-import { graphql } from "@/gql";
-import { formatDate } from "@vueuse/core";
-import DTable from "@/components/d-table/d-table.vue";
-import { PageVariables } from "@/types/types";
-import { computed, reactive, ref, toRefs } from "vue";
+import {
+  FileText,
+  Download,
+  Edit,
+  FileImage,
+  Folder,
+  Archive,
+  File as FileFile,
+  Trash,
+  FileVideo,
+  Edit2,
+} from "lucide-vue-next";
+import DFileListDropdown from "./d-file-list-dropdown.vue";
+import type { Option } from "./d-file-list-dropdown.vue";
 import useDownloadFile from "@/composables/useDownloadFile";
-import { Archive } from "lucide-vue-next";
-import { File as FileFile, Trash, FileVideo } from "lucide-vue-next";
 import DDialogRenameFile from "./DDialogRenameFile.vue";
 import DDialogDeleteFile from "./DDialogDeleteFile.vue";
+import DTable from "@/components/d-table/d-table.vue";
+import { computed, reactive, ref, toRefs } from "vue";
+import { formatDate } from "@vueuse/core";
+import { PageVariables } from "@/types/types";
+import { File } from "@/gql/graphql";
+import { graphql } from "@/gql";
 import { useMutation } from "@urql/vue";
+import i18n from "@/i18n";
+import { onClickOutside } from "@vueuse/core";
+
+const dFileList = ref<any>(null);
 
 export interface Props {
   folderId: string | null;
@@ -146,6 +173,11 @@ const pageVariables = computed<Variables[]>(() => [
 ]);
 
 const selected = ref<{ id: string }[]>([]);
+
+onClickOutside(dFileList, () => {
+  console.log("click outside", selected.value);
+  selected.value = [];
+});
 
 function isFolder(file: File) {
   return file.fileType === "folder";
@@ -244,5 +276,29 @@ function prettyBytes(bytes: number) {
   const u = Math.min(Math.floor(Math.log10(bytes) / 3), units.length - 1);
   const n = Number((bytes / Math.pow(1000, u)).toFixed(2));
   return `${n} ${units[u]}`;
+}
+
+function optionListWithItem(item: File): Option[][] {
+  return [
+    [
+      {
+        text: i18n.global.t("rename"),
+        icon: Edit2,
+        func: () => onRenameFile(item),
+      },
+      {
+        text: i18n.global.t("download"),
+        icon: Download,
+        func: () => downloadFile(item),
+      },
+    ],
+    [
+      {
+        text: i18n.global.t("delete"),
+        icon: Trash,
+        func: () => openDeleteFileDialog(item),
+      },
+    ],
+  ];
 }
 </script>
