@@ -83,7 +83,10 @@ const { executeMutation } = useMutation(
 async function deleteSharedDrive(item: any) {
   item.open = false;
   if (confirm("Are you sure?")) {
-    await executeMutation({ id: item.id });
+    const { error } = await executeMutation({ id: item.id });
+    if (error) {
+      alert(error.message);
+    }
   }
 }
 
