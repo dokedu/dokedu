@@ -38,14 +38,14 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import PageHeader from "../../../components/PageHeader.vue";
-import PageWrapper from "../../../components/PageWrapper.vue";
+import PageHeader from "../../../components/page-header.vue";
+import PageWrapper from "../../../components/page-wrapper.vue";
 import { formatDate, watchDebounced } from "@vueuse/core";
 import { graphql } from "@/gql";
 import { useRouter } from "vue-router/auto";
 import { UserOrderBy } from "@/gql/graphql";
 import DTable from "@/components/d-table/d-table.vue";
-import type { PageVariables } from "@/types/types";
+import type { PageVariables } from "@/types/types.ts";
 
 const search = ref("");
 const router = useRouter();

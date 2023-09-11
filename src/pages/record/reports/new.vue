@@ -27,20 +27,20 @@
 </template>
 
 <script lang="ts" setup>
-import PageHeader from "@/components/PageHeader.vue";
-import PageWrapper from "@/components/PageWrapper.vue";
-import PageContent from "@/components/PageContent.vue";
+import PageHeader from "@/components/page-header.vue";
+import PageWrapper from "@/components/page-wrapper.vue";
+import PageContent from "@/components/page-content.vue";
 import { Save } from "lucide-vue-next";
 import dButton from "@/components/d-button/d-button.vue";
-import StudentList from "@/components/ReportStudentList.vue";
-import ReportTypeList from "@/components/ReportTypeList.vue";
-import ReportTagList from "@/components/ReportTagList.vue";
+import StudentList from "@/components/d-report/d-report-student-list.vue";
+import ReportTypeList from "@/components/d-report/d-report-type-list.vue";
+import ReportTagList from "@/components/d-report/d-report-tag-list.vue";
 import { User, Tag } from "@/gql/graphql";
 import { ref } from "vue";
 import dInput from "@/components/d-input/d-input.vue";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
-import { ReportType } from "@/components/ReportTypeList.vue";
+import { ReportType } from "@/components/d-report/d-report-type-list.vue";
 import { useRouter } from "vue-router/auto";
 
 const router = useRouter();

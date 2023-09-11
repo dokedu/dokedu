@@ -1,10 +1,10 @@
 import { createApp } from "vue";
-import "./style.css";
+import "./assets/css/style.css";
 import App from "./App.vue";
-import router from "./router";
-import makeClient from "./client";
+import router from "./router/router.ts";
+import makeClient from "./urql/client.ts";
 import urql from "@urql/vue";
-import i18n from "./i18n";
+import i18n from "./i18n.ts";
 
 const app = createApp(App);
 

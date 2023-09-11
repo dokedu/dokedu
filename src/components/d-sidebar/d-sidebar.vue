@@ -6,9 +6,9 @@
     <div class="mb-4 flex flex-wrap justify-between gap-2">
       <slot name="header">
         <div class="select-none text-sm font-medium text-strong">{{ title }}</div>
-        <d-button v-if="delete" type="transparent" size="xs" :icon-left="Trash" @click="onTrash">{{
-          $t("delete")
-        }}</d-button>
+        <d-button v-if="deletable" type="transparent" size="xs" :icon-left="Trash" @click="onTrash">
+          {{ $t("delete") }}
+        </d-button>
       </slot>
     </div>
 
@@ -23,13 +23,13 @@
 
 <script lang="ts" setup>
 import { Trash } from "lucide-vue-next";
-import { ref } from "vue";
+import { ref, toRef } from "vue";
 import { onClickOutside, onKeyStroke } from "@vueuse/core";
 import DButton from "../d-button/d-button.vue";
 
 const sidebar = ref<HTMLElement | null>(null);
 
-defineProps({
+const props = defineProps({
   title: {
     type: String,
     default: "title",
@@ -40,20 +40,17 @@ defineProps({
   },
 });
 
+const deletable = toRef(props, "delete");
+
 const emit = defineEmits(["delete", "cancel"]);
 function cancel() {
   emit("cancel");
 }
 
-onClickOutside(sidebar, async () => {
-  cancel();
-});
-
-onKeyStroke("Escape", async () => {
-  cancel();
-});
-
-const onTrash = () => {
+function onTrash() {
   emit("delete");
-};
+}
+
+onClickOutside(sidebar, () => cancel());
+onKeyStroke("Escape", () => cancel());
 </script>

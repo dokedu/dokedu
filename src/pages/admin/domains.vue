@@ -29,17 +29,18 @@
   </PageWrapper>
   <router-view />
 </template>
+
 <script setup lang="ts">
 import DButton from "@/components/d-button/d-button.vue";
-import PageHeader from "@/components/PageHeader.vue";
-import PageWrapper from "@/components/PageWrapper.vue";
+import PageHeader from "@/components/page-header.vue";
+import PageWrapper from "@/components/page-wrapper.vue";
 import { Plus } from "lucide-vue-next";
 import { ref } from "vue";
 import { graphql } from "@/gql";
 import DTable from "@/components/d-table/d-table.vue";
+import type { PageVariables } from "@/types/types.ts";
 import { useRouter } from "vue-router/auto";
 import { watchDebounced } from "@vueuse/core";
-import type { PageVariables } from "@/types/types";
 
 const router = useRouter();
 const search = ref("");

@@ -15,8 +15,9 @@
     </div>
   </div>
 </template>
+
 <script setup lang="ts">
-import PageSidebar from "../components/PageSidebar.vue";
+import PageSidebar from "../components/page-sidebar.vue";
 import { useWindowSize } from "@vueuse/core";
 import DButton from "@/components/d-button/d-button.vue";
 import { useAuth } from "@/composables/auth";

@@ -30,7 +30,7 @@
 import MSheet from "@/components/mobile/m-sheet.vue";
 import DCompetence from "@/components/d-competence/d-competence.vue";
 import DCompetenceSearch from "@/components/d-competence-search/d-competence-search.vue";
-import DCompetenceLevel from "@/components/d-competence-level.vue";
+import DCompetenceLevel from "@/components/d-competence/d-competence-level.vue";
 import { Plus, X } from "lucide-vue-next";
 import { computed, ref } from "vue";
 

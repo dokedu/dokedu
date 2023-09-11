@@ -3,10 +3,11 @@
     <DFilePreview :file="(data?.file as File)" />
   </div>
 </template>
+
 <script setup lang="ts">
 import { reactive } from "vue";
 import { useRoute } from "vue-router/auto";
-import DFilePreview from "@/components/drive/DFilePreview.vue";
+import DFilePreview from "@/components/_drive/d-file-preview.vue";
 import { graphql } from "@/gql";
 import { useQuery } from "@urql/vue";
 import { File } from "@/gql/graphql";

@@ -131,10 +131,11 @@
     </PageContent>
   </PageWrapper>
 </template>
+
 <script setup lang="ts">
-import PageHeader from "@/components/PageHeader.vue";
-import PageWrapper from "@/components/PageWrapper.vue";
-import PageContent from "@/components/PageContent.vue";
+import PageHeader from "@/components/page-header.vue";
+import PageWrapper from "@/components/page-wrapper.vue";
+import PageContent from "@/components/page-content.vue";
 import { useQuery } from "@urql/vue";
 import { graphql } from "@/gql";
 import { computed, reactive, ref } from "vue";

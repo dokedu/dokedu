@@ -8,7 +8,7 @@
 import { onKeyStroke } from "@vueuse/core";
 import { reactive } from "vue";
 import { useRoute, useRouter } from "vue-router/auto";
-import DProjectForm from "@/components/DProjectForm.vue";
+import DProjectForm from "@/components/d-project-form.vue";
 import { useQuery } from "@urql/vue";
 import { graphql } from "@/gql";
 import { Event } from "@/gql/graphql";

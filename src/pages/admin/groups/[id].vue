@@ -11,13 +11,13 @@
 </template>
 
 <script lang="ts" setup>
-import DGroupForm from "@/components/DGroupForm.vue";
+import DGroupForm from "@/components/d-group-form.vue";
 import { useQuery, useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { computed, reactive } from "vue";
 import { useRoute } from "vue-router/auto";
 import { createNotification } from "@/composables/useToast";
-import router from "@/router";
+import router from "@/router/router.ts";
 import { EmailAccount } from "@/gql/graphql";
 
 const route = useRoute<"/admin/groups/[id]">();
@@ -62,7 +62,7 @@ const { executeMutation: editGroup } = useMutation(
   `)
 );
 
-const onDeleteGroup = async () => {
+async function onDeleteGroup() {
   const { error } = await deleteGroup({ id: data?.value?.emailAccount?.id as string });
 
   if (error) {
@@ -78,10 +78,10 @@ const onDeleteGroup = async () => {
     description: "Group deleted",
   });
 
-  router.push("/admin/groups");
-};
+  await router.push("/admin/groups");
+}
 
-const onEditGroup = async (input: { name: string; domain: string; members: string[] }) => {
+async function onEditGroup(input: { name: string; domain: string; members: string[] }) {
   const { error } = await editGroup({
     input: {
       id: data?.value?.emailAccount?.id as string,
@@ -104,6 +104,6 @@ const onEditGroup = async (input: { name: string; domain: string; members: strin
     description: "Group updated",
   });
 
-  router.push("/admin/groups");
-};
+  await router.push("/admin/groups");
+}
 </script>

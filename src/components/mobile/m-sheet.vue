@@ -28,7 +28,7 @@ import { X } from "lucide-vue-next";
 
 const MIN_HEIGHT = 32;
 const MAX_HEIGHT = window.innerHeight;
-const THREASHOLD = Math.round(MAX_HEIGHT * 0.3);
+const THRESHOLD = Math.round(MAX_HEIGHT * 0.3);
 
 const handle = ref();
 const opening = ref(true);
@@ -66,10 +66,10 @@ async function resize(y: number) {
     if (sheetHeight.value === MIN_HEIGHT) return;
     if (sheetHeight.value === MAX_HEIGHT) return;
 
-    if (y > THREASHOLD) {
-      close();
+    if (y > THRESHOLD) {
+      await close();
     } else {
-      animate(MIN_HEIGHT);
+      await animate(MIN_HEIGHT);
     }
   }
 }

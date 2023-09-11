@@ -60,7 +60,7 @@ import { computed, ref } from "vue";
 import signInMutation from "../queries/signIn.mutation";
 import { useMutation } from "@urql/vue";
 import { useRouter } from "vue-router/auto";
-import i18n from "@/i18n";
+import i18n from "@/i18n.ts";
 import { useWindowSize } from "@vueuse/core";
 
 const router = useRouter();

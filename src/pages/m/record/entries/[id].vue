@@ -33,7 +33,7 @@
 <script lang="ts" setup>
 import MPageHeader from "@/components/mobile/m-page-header.vue";
 import MPageFooter from "@/components/mobile/m-page-footer.vue";
-import MEntryForm from "@/components/MEntryForm.vue";
+import MEntryForm from "@/components/mobile/m-entry-form.vue";
 import { useRoute } from "vue-router/auto";
 import entryByIdQuery from "@/queries/entryById";
 import updateEntryMutation from "@/queries/updateEntry.mutation";
@@ -76,7 +76,7 @@ async function saveEntry() {
 }
 
 function userCompetences(entry: any): { error: boolean; uCs: any[] } {
-  const eacs = [];
+  const eACs = [];
 
   const userCount = entry.users?.length || 0;
   const userCompetenceCount = entry.userCompetences?.length || 0;
@@ -102,7 +102,7 @@ function userCompetences(entry: any): { error: boolean; uCs: any[] } {
 
   for (const competence of unique) {
     for (const user of entry.users) {
-      eacs.push({
+      eACs.push({
         userId: user.id,
         competenceId: competence.id,
         level: competence.level || 0,
@@ -112,7 +112,7 @@ function userCompetences(entry: any): { error: boolean; uCs: any[] } {
 
   return {
     error: false,
-    uCs: eacs,
+    uCs: eACs,
   };
 }
 

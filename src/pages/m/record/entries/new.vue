@@ -28,7 +28,7 @@
 <script lang="ts" setup>
 import MPageHeader from "@/components/mobile/m-page-header.vue";
 import MPageFooter from "@/components/mobile/m-page-footer.vue";
-import MEntryForm from "@/components/MEntryForm.vue";
+import MEntryForm from "@/components/mobile/m-entry-form.vue";
 import { computed, ref } from "vue";
 import { useRefHistory } from "@vueuse/core";
 import createEntryMutation from "@/queries/createEntry.mutation";

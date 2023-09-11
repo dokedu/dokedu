@@ -3,10 +3,11 @@
     <EntryForm :entry="entry" mode="new" @saved="saved" />
   </PageWrapper>
 </template>
+
 <script setup lang="ts">
-import PageWrapper from "@/components/PageWrapper.vue";
+import PageWrapper from "@/components/page-wrapper.vue";
 import { ref } from "vue";
-import EntryForm from "@/components/d-entry/EntryForm.vue";
+import EntryForm from "@/components/d-entry/d-entry-form.vue";
 import { useRouter } from "vue-router/auto";
 
 const router = useRouter();

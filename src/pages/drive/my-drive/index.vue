@@ -3,5 +3,5 @@
 </template>
 
 <script setup lang="ts">
-import DDriveFileList from "@/components/d-drive/d-drive-file-list.vue";
+import DDriveFileList from "@/components/d-drive/d-file-list.vue";
 </script>

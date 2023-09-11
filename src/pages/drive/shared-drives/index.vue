@@ -44,27 +44,27 @@
 </template>
 
 <script setup lang="ts">
-import DDriveHeaderBreadcrumbs from "@/components/drive/DDriveHeaderBreadcrumbs.vue";
-import PageWrapper from "@/components/PageWrapper.vue";
-import PageHeader from "@/components/PageHeader.vue";
-import PageContent from "@/components/PageContent.vue";
+import DDriveHeaderBreadcrumbs from "@/components/_drive/d-drive-header-breadcrumbs.vue";
+import PageWrapper from "@/components/page-wrapper.vue";
+import PageHeader from "@/components/page-header.vue";
+import PageContent from "@/components/page-content.vue";
 import DTable from "@/components/d-table/d-table.vue";
 import DButton from "@/components/d-button/d-button.vue";
-import { PageVariables } from "@/types/types";
+import type { PageVariables } from "@/types/types.ts";
 import { ref } from "vue";
 import { Plus, Folder, Edit2, Trash } from "lucide-vue-next";
 import { graphql } from "@/gql";
 import { useMutation } from "@urql/vue";
-import router from "@/router";
-import DDialogShareDrive from "@/components/drive/DDialogShareDrive.vue";
-import DDialogRenameDrive from "@/components/drive/DDialogRenameDrive.vue";
+import router from "@/router/router.ts";
+import DDialogShareDrive from "@/components/_drive/d-dialog/d-dialog-share-drive.vue";
+import DDialogRenameDrive from "@/components/_drive/d-dialog/d-dialog-rename-drive.vue";
 import { Bucket } from "@/gql/graphql";
 import { formatDate } from "@vueuse/core";
-import i18n from "@/i18n";
+import i18n from "@/i18n.ts";
 import { Share2 } from "lucide-vue-next";
 
-import DFileListDropdown from "@/components/drive/d-file-list-dropdown.vue";
-import type { Option } from "@/components/drive/d-file-list-dropdown.vue";
+import DFileListDropdown from "@/components/_drive/d-file-list-dropdown.vue";
+import type { Option } from "@/components/_drive/d-file-list-dropdown.vue";
 
 const currentItem = ref<Bucket>();
 const shareOpen = ref(false);

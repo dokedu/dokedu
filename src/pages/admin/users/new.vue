@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import DUserForm from "@/components/DUserForm.vue";
+import DUserForm from "@/components/d-user-form.vue";
 import { User, UserRole } from "@/gql/graphql";
 import { reactive } from "vue";
 import { useMutation } from "@urql/vue";

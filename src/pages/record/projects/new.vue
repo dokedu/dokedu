@@ -6,7 +6,7 @@
 import { onClickOutside, onKeyStroke } from "@vueuse/core";
 import { ref } from "vue";
 import { useRouter } from "vue-router/auto";
-import DProjectForm from "@/components/DProjectForm.vue";
+import DProjectForm from "@/components/d-project-form.vue";
 import { Event } from "@/gql/graphql";
 
 const router = useRouter();

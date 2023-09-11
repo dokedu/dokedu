@@ -56,8 +56,9 @@
   </page-wrapper>
   <router-view />
 </template>
+
 <script setup lang="ts">
-import PageHeader from "@/components/PageHeader.vue";
-import PageWrapper from "@/components/PageWrapper.vue";
+import PageHeader from "@/components/page-header.vue";
+import PageWrapper from "@/components/page-wrapper.vue";
 import DButton from "@/components/d-button/d-button.vue";
 </script>

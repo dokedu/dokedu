@@ -3,9 +3,10 @@
     <EntryForm v-if="entry" :entry="(entry.entry as Partial<Entry>)" mode="edit" @archived="archived" @saved="saved" />
   </PageWrapper>
 </template>
+
 <script setup lang="ts">
-import PageWrapper from "@/components/PageWrapper.vue";
-import EntryForm from "@/components/d-entry/EntryForm.vue";
+import PageWrapper from "@/components/page-wrapper.vue";
+import EntryForm from "@/components/d-entry/d-entry-form.vue";
 import { useRoute, useRouter } from "vue-router/auto";
 import { useQuery } from "@urql/vue";
 import { graphql } from "@/gql";

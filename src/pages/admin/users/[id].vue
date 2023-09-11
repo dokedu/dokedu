@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts" setup>
-import DUserForm from "@/components/DUserForm.vue";
+import DUserForm from "@/components/d-user-form.vue";
 import { useQuery, useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { computed, reactive, ref } from "vue";

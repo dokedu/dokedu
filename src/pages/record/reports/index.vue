@@ -57,19 +57,20 @@
     <div>{{ $t("downloading_file") }}</div>
   </div>
 </template>
+
 <script setup lang="ts">
 import { Newspaper } from "lucide-vue-next";
-import PageHeader from "@/components/PageHeader.vue";
-import PageWrapper from "@/components/PageWrapper.vue";
+import PageHeader from "@/components/page-header.vue";
+import PageWrapper from "@/components/page-wrapper.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { Plus, Loader2 } from "lucide-vue-next";
 import { graphql } from "@/gql";
 import { formatDate } from "@vueuse/core";
 import { Report } from "@/gql/graphql";
-import DReportStatus from "@/components/DReportStatus.vue";
+import DReportStatus from "@/components/d-report/d-report-status.vue";
 import { ref } from "vue";
 import DTable from "@/components/d-table/d-table.vue";
-import type { PageVariables } from "@/types/types";
+import type { PageVariables } from "@/types/types.ts";
 import useDownloadFile from "@/composables/useDownloadFile";
 
 const columns = [
@@ -150,7 +151,7 @@ const reportsQuery = graphql(`
 
 const downloadingFilesCount = ref(0);
 
-// TODO: refactor into utilitiy function
+// TODO: refactor into utility function
 async function downloadReport(report: Report) {
   const file = report.file;
   if (!file) return;

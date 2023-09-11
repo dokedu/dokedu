@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    overscroll-behavior: none;
+}
+
+.slide-enter-from, .slide-leave-to {
+    transform: scaleY(0);
+    opacity: 0;
+}

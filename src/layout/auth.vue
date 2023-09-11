@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts" setup>
-import i18n from "@/i18n";
+import i18n from "@/i18n.ts";
 import { useLocalStorage } from "@vueuse/core";
 
 function getPreferredLanguage() {

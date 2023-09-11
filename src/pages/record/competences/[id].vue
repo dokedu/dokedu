@@ -54,15 +54,16 @@
   </PageWrapper>
   <router-view />
 </template>
+
 <script setup lang="ts">
-import PageHeader from "@/components/PageHeader.vue";
-import PageWrapper from "@/components/PageWrapper.vue";
+import PageHeader from "@/components/page-header.vue";
+import PageWrapper from "@/components/page-wrapper.vue";
 import { graphql } from "@/gql";
 import { computed, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router/auto";
 import DTable from "@/components/d-table/d-table.vue";
 import { watchDebounced } from "@vueuse/core";
-import { PageVariables } from "@/types/types";
+import type { PageVariables } from "@/types/types.ts";
 import { Competence } from "@/gql/graphql";
 import { Folder } from "lucide-vue-next";
 import { useQuery } from "@urql/vue";

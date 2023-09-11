@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts" setup>
-import DDomainForm from "@/components/DDomainForm.vue";
+import DDomainForm from "@/components/d-domain-form.vue";
 import { useQuery, useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { computed, reactive } from "vue";

@@ -18,7 +18,7 @@
       class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-stone-500"
     >
       <Plus :size="18" />
-      <div>Schüler hinzufügen</div>
+      Schüler hinzufügen
     </button>
     <template v-if="sheetOpen">
       <MSheet @close="sheetOpen = false">

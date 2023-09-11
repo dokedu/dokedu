@@ -10,8 +10,9 @@
               size="md"
               :icon-left="ListFilter"
               @click="toggleFilters"
-              >{{ $t("filter") }}</DButton
             >
+              {{ $t("filter") }}
+            </DButton>
             <router-link :to="{ name: '/record/entries/new' }">
               <DButton type="primary" size="md" :icon-left="Plus">{{ $t("new") }}</DButton>
             </router-link>
@@ -19,6 +20,7 @@
         </div>
       </div>
     </PageHeader>
+
     <div v-if="filtersOpen" class="flex items-end gap-2 border-b border-stone-100 px-8 py-2">
       <DSelect
         :options="studentOptions"
@@ -100,9 +102,10 @@
     </DTable>
   </PageWrapper>
 </template>
+
 <script setup lang="ts">
-import PageHeader from "@/components/PageHeader.vue";
-import PageWrapper from "@/components/PageWrapper.vue";
+import PageHeader from "@/components/page-header.vue";
+import PageWrapper from "@/components/page-wrapper.vue";
 import { useQuery } from "@urql/vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { Plus } from "lucide-vue-next";

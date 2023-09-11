@@ -44,19 +44,20 @@
     <DCompetenceEditDialog :competence="competence" @close="competence = null" />
   </div>
 </template>
+
 <script setup lang="ts">
-import PageHeader from "@/components/PageHeader.vue";
-import PageWrapper from "@/components/PageWrapper.vue";
+import PageHeader from "@/components/page-header.vue";
+import PageWrapper from "@/components/page-wrapper.vue";
 import { graphql } from "@/gql";
 import { ref } from "vue";
 import { Edit2, Folder } from "lucide-vue-next";
-import DCompetenceEditDialog from "@/components/DCompetenceEditDialog.vue";
+import DCompetenceEditDialog from "@/components/d-competence/d-competence-edit-dialog.vue";
 import { Competence } from "@/gql/graphql";
 import DTag from "@/components/d-tag/d-tag.vue";
 import DTable from "@/components/d-table/d-table.vue";
 import { useRouter } from "vue-router/auto";
 import { watchDebounced } from "@vueuse/core";
-import type { PageVariables } from "@/types/types";
+import type { PageVariables } from "@/types/types.ts";
 
 const search = ref("");
 const competence = ref<Competence | null>(null);

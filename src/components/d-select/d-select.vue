@@ -21,12 +21,11 @@
       >
         <div
           v-if="search != null"
-          class="sticky mb-1 flex w-full items-center gap-1 rounded border border-stone-100 py-0.5 pl-1 text-sm"
+          class="sticky mb-1 flex w-full items-center gap-1 rounded border border-stone-100 pl-1 text-sm"
         >
-          <Search class="h-4 w-4 shrink-0 text-subtle"></Search>
+          <Search class="h-4 w-4 shrink-0 text-subtle" />
           <input
-            class="w-full focus:!outline-none"
-            v-if="search != null"
+            class="w-full border-none py-1.5 text-sm leading-none focus:outline-none focus:ring-0"
             @input="onSearch"
             :placeholder="$t('search')"
             tabindex="0"

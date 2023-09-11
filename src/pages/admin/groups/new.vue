@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import DGroupForm from "@/components/DGroupForm.vue";
+import DGroupForm from "@/components/d-group-form.vue";
 import { CreateEmailGroupInput, EmailAccount } from "@/gql/graphql";
 import { reactive } from "vue";
 import { useMutation } from "@urql/vue";
@@ -38,7 +38,7 @@ const { executeMutation: createEmailAccount } = useMutation(
   `)
 );
 
-const onCreateEmailAccount = async (input: { name: string; domain: string; members: string[] }) => {
+async function onCreateEmailAccount(input: { name: string; domain: string; members: string[] }) {
   const { error } = await createEmailAccount({
     input: {
       name: input.name,
@@ -61,5 +61,5 @@ const onCreateEmailAccount = async (input: { name: string; domain: string; membe
     title: "Group created",
     description: `${emailAccount.name} was created`,
   });
-};
+}
 </script>

@@ -56,8 +56,8 @@ import { graphql } from "../../../../../gql";
 import { useRoute } from "vue-router/auto";
 import { computed, reactive } from "vue";
 import DCompetence from "@/components/d-competence/d-competence.vue";
-import DCompetenceLevel from "@/components/d-competence-level.vue";
-import DCompetenceEntries from "@/components/d-competence-entries.vue";
+import DCompetenceLevel from "@/components/d-competence/d-competence-level.vue";
+import DCompetenceEntries from "@/components/d-competence/d-competence-entries.vue";
 import { Competence, UserCompetence } from "@/gql/graphql";
 
 const route = computed(() => useRoute("/record/students/[id]/competences/[cid]"));

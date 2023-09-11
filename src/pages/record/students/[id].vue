@@ -107,7 +107,7 @@
 </template>
 
 <script setup lang="ts">
-import PageWrapper from "../../../components/PageWrapper.vue";
+import PageWrapper from "../../../components/page-wrapper.vue";
 import { useQuery } from "@urql/vue";
 import { useRoute } from "vue-router/auto";
 import { ChevronRight, X } from "lucide-vue-next";

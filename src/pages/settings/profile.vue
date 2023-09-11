@@ -32,8 +32,8 @@
 </template>
 
 <script lang="ts" setup>
-import PageHeader from "@/components/PageHeader.vue";
-import PageWrapper from "@/components/PageWrapper.vue";
+import PageHeader from "@/components/page-header.vue";
+import PageWrapper from "@/components/page-wrapper.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import DInput from "@/components/d-input/d-input.vue";
 import { ref } from "vue";

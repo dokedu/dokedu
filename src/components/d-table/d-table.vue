@@ -5,7 +5,6 @@
         v-for="(column, index) in columns"
         class="flex h-10 items-center border-b border-stone-100 px-0 text-left text-sm first:pl-6 last:pr-6"
         :key="index"
-        scope="col"
         :class="column.headerClass"
       >
         <slot :name="`${column.key}-header`" :column="column">
@@ -62,13 +61,13 @@
 </template>
 
 <script lang="ts" setup generic="T, K extends PageVariables, U">
-import TableSearchResult from "../TableSearchResult.vue";
+import TableSearchResult from "./d-table-search-result.vue";
 import DButton from "../d-button/d-button.vue";
 import { ref, toRef, watch, computed, toRefs } from "vue";
 import { useInfiniteScroll, useElementSize } from "@vueuse/core";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-vue-next";
-import type { PageVariables } from "@/types/types";
 import { onClickOutside, onKeyStroke } from "@vueuse/core";
+import type { PageVariables } from "@/types/types.ts";
 
 const tableRows = ref();
 

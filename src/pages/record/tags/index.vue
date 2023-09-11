@@ -23,26 +23,27 @@
     <TagEditDialog :open="editOpen" :tag="currentTag" @close="editOpen = false" @updated="onTagUpdate()" />
   </PageWrapper>
 </template>
+
 <script setup lang="ts">
-import PageHeader from "../../../components/PageHeader.vue";
-import PageWrapper from "../../../components/PageWrapper.vue";
+import PageHeader from "../../../components/page-header.vue";
+import PageWrapper from "../../../components/page-wrapper.vue";
 import DButton from "../../../components/d-button/d-button.vue";
 import { Plus } from "lucide-vue-next";
 import DTag from "../../../components/d-tag/d-tag.vue";
-import TagCreateDialog from "@/components/TagCreateDialog.vue";
-import TagEditDialog from "@/components/TagEditDialog.vue";
+import TagCreateDialog from "@/components/d-tag-create-dialog.vue";
+import TagEditDialog from "@/components/d-tag-edit-dialog.vue";
 import { ref } from "vue";
 import { graphql } from "@/gql";
 import DTable from "@/components/d-table/d-table.vue";
-import { PageVariables } from "@/types/types";
+import type { PageVariables } from "@/types/types.ts";
 
 const createOpen = ref(false);
 const editOpen = ref(false);
 const currentTag = ref();
 
-const toggleCreateDialog = () => {
+function toggleCreateDialog() {
   createOpen.value = !createOpen.value;
-};
+}
 
 const toggleEditDialog = <Type>(tag: Type) => {
   currentTag.value = tag;
@@ -81,11 +82,11 @@ const TagsQuery = graphql(`
   }
 `);
 
-const onTagCreate = () => {
+function onTagCreate() {
   createOpen.value = false;
-};
+}
 
-const onTagUpdate = () => {
+function onTagUpdate() {
   editOpen.value = false;
-};
+}
 </script>

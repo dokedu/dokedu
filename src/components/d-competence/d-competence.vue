@@ -36,7 +36,7 @@
 
 <script lang="ts" setup>
 import { toRef } from "vue";
-import { Competence } from "../../gql/graphql";
+import { Competence } from "@/gql/graphql";
 import { Folder } from "lucide-vue-next";
 
 export interface Props {

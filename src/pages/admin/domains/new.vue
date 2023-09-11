@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import DDomainForm from "@/components/DDomainForm.vue";
+import DDomainForm from "@/components/d-domain-form.vue";
 import { Domain } from "@/gql/graphql";
 import { reactive } from "vue";
 import { useMutation } from "@urql/vue";
