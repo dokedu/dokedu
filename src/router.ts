@@ -19,6 +19,14 @@ router.beforeEach(async (to) => {
   const loggedIn = token && token !== "null" && token !== "undefined";
   const outsideAllowedRoutes = !publicRoutes.includes(to.name as RouteRecordName);
 
+  if (to.path === "/") {
+    if (loggedIn) {
+      return { name: "/settings/profile" };
+    } else {
+      return { name: "/login" };
+    }
+  }
+
   // If user is logged in and setup is not complete, always redirect to setup
   if (loggedIn) {
     const setupComplete = localStorage.getItem("setupComplete");
