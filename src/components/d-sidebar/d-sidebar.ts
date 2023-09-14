@@ -181,13 +181,37 @@ export const apps = computed<App[]>(() => [
     id: "school",
     icon: School,
     allowedUserRoles: ["owner", "admin", "teacher"],
-    name: "Schulverwaltung",
+    name: "Schule",
     links: [
       {
         // icon: "👥",
         icon: UserSquare,
         name: i18n.global.t("student", 2),
         route: "/school/students",
+      },
+      {
+        // icon: "👥",
+        icon: UserSquare,
+        name: i18n.global.t("subject", 2),
+        route: "/school/subjects",
+      },
+      {
+        // icon: "👥",
+        icon: UserSquare,
+        name: i18n.global.t("grade", 2),
+        route: "/school/grades",
+      },
+      {
+        // icon: "👥",
+        icon: UserSquare,
+        name: i18n.global.t("school_year", 2),
+        route: "/school/school_years",
+      },
+      {
+        // icon: "👥",
+        icon: UserSquare,
+        name: i18n.global.t("certificate", 2),
+        route: "/school/certificates",
       },
     ],
   },

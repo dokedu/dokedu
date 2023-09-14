@@ -1,13 +1,13 @@
-import {gql} from '@urql/vue';
+import { gql } from "@urql/vue";
 
 export default gql`
-    query {
-        tags(limit:1000) {
-            edges {
-            id
-            name
-            color
-            }
-        }
+  query tagLimited {
+    tags(limit: 1000) {
+      edges {
+        id
+        name
+        color
+      }
     }
-`
+  }
+`;

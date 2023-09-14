@@ -211,10 +211,13 @@ export const en = {
   shared_drive: "Shared drive",
   shared_with_me: "Shared with me",
   trash: "Trash",
-  trash_work_in_progress: "This page is still a work in progress. It will be used to display the files that have been deleted by you.",
+  trash_work_in_progress:
+    "This page is still a work in progress. It will be used to display the files that have been deleted by you.",
 
   support: "Support",
 
   rename: "Rename",
   new_shared_drive_name: "New shared drive name",
+  year: "Year | Years",
+  school_year: "School year | School years",
 };

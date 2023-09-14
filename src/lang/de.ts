@@ -194,7 +194,8 @@ export const de = {
   drop_file_here: "Datei hier ablegen",
   or_use_new_button: 'oder verwende die Schaltfläche "Neu".',
   move_to_trash_q: "In den Papierkorb verschieben?",
-  will_be_deleted_can_restore: '"{file}" wird in den Papierkorb verschoben. Du kannst es wiederherstellen, wenn du möchtest.',
+  will_be_deleted_can_restore:
+    '"{file}" wird in den Papierkorb verschoben. Du kannst es wiederherstellen, wenn du möchtest.',
   rename_file: "Datei umbenennen",
   share_drive: "Ablage teilen",
   select_user: "Benutzer auswählen | Benutzer auswählen",
@@ -207,10 +208,14 @@ export const de = {
   folder_name: "Name des Ordners",
   shared_with_me: "Geteilt mit mir",
   trash: "Papierkorb",
-  trash_work_in_progress: "Diese Seite ist noch in Arbeit. Sie wird verwendet, um die Dateien anzuzeigen, die von Ihnen gelöscht wurden.",
+  trash_work_in_progress:
+    "Diese Seite ist noch in Arbeit. Sie wird verwendet, um die Dateien anzuzeigen, die von Ihnen gelöscht wurden.",
 
   support: "Support",
 
   rename: "Umbenennen",
   new_shared_drive_name: "Neuer Name der geteilten Ablage",
+
+  year: "Jahr | Jahre",
+  school_year: "Schuljahr | Schuljahre",
 };
