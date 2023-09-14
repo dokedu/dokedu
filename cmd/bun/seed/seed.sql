@@ -7,7 +7,7 @@ WITH new_id AS (SELECT 'u2wHWUbnWUaUUjBeNvQ4u' AS id),
      new_org AS (
          INSERT INTO organisations (id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps)
              VALUES ((SELECT id FROM new_id), 'Acme Corp', 'Acme Corporation', 'https://acme.dokedu.org', '555-1234',
-                     (SELECT id FROM new_user), '{"dokedu.org"}', '{"drive","admin","record"}')
+                     (SELECT id FROM new_user), '{"dokedu.org"}', '{"drive","admin","record", "school"}')
              RETURNING id)
 UPDATE users
 SET organisation_id = new_org.id
@@ -98,3 +98,26 @@ VALUES ('0JuXpamtNw8v9t7NukNqw', 'Sailing', 'Sailing with the class', '2021-05-0
 INSERT INTO events (id, title, body, starts_at, ends_at, organisation_id)
 VALUES ('-E2x1-7uEBT7rUXPt86_H', 'Bathing', 'Bathing with the class', '2021-05-01 10:00:00', '2021-05-01 12:00:00',
         'u2wHWUbnWUaUUjBeNvQ4u');
+
+
+INSERT INTO school_years (year, organisation_id) (SELECT generate_series(2010, 2025), 'u2wHWUbnWUaUUjBeNvQ4u');
+
+INSERT INTO subjects (name, organisation_id) VALUES ('Math', 'u2wHWUbnWUaUUjBeNvQ4u');
+INSERT INTO subjects (name, organisation_id) VALUES ('German', 'u2wHWUbnWUaUUjBeNvQ4u');
+INSERT INTO subjects (name, organisation_id) VALUES ('English', 'u2wHWUbnWUaUUjBeNvQ4u');
+INSERT INTO subjects (name, organisation_id) VALUES ('French', 'u2wHWUbnWUaUUjBeNvQ4u');
+INSERT INTO subjects (name, organisation_id) VALUES ('History', 'u2wHWUbnWUaUUjBeNvQ4u');
+INSERT INTO subjects (name, organisation_id) VALUES ('Geography', 'u2wHWUbnWUaUUjBeNvQ4u');
+INSERT INTO subjects (name, organisation_id) VALUES ('Biology', 'u2wHWUbnWUaUUjBeNvQ4u');
+INSERT INTO subjects (name, organisation_id) VALUES ('Chemistry', 'u2wHWUbnWUaUUjBeNvQ4u');
+INSERT INTO subjects (name, organisation_id) VALUES ('Physics', 'u2wHWUbnWUaUUjBeNvQ4u');
+INSERT INTO subjects (name, organisation_id) VALUES ('Music', 'u2wHWUbnWUaUUjBeNvQ4u');
+INSERT INTO subjects (name, organisation_id) VALUES ('Art', 'u2wHWUbnWUaUUjBeNvQ4u');
+INSERT INTO subjects (name, organisation_id) VALUES ('Sports', 'u2wHWUbnWUaUUjBeNvQ4u');
+INSERT INTO subjects (name, organisation_id) VALUES ('Religion', 'u2wHWUbnWUaUUjBeNvQ4u');
+INSERT INTO subjects (name, organisation_id) VALUES ('Ethics', 'u2wHWUbnWUaUUjBeNvQ4u');
+INSERT INTO subjects (name, organisation_id) VALUES ('Computer Science', 'u2wHWUbnWUaUUjBeNvQ4u');
+INSERT INTO subjects (name, organisation_id) VALUES ('Economics', 'u2wHWUbnWUaUUjBeNvQ4u');
+INSERT INTO subjects (name, organisation_id) VALUES ('Politics', 'u2wHWUbnWUaUUjBeNvQ4u');
+
+INSERT INTO user_student_grades (user_student_id, subject_id, grade, school_year_id, organisation_id) (SELECT user_students.id, subjects.id, floor(random() * 10 + 1)::int, school_years.id, 'u2wHWUbnWUaUUjBeNvQ4u' FROM user_students, subjects, school_years);

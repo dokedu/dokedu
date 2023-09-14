@@ -1549,9 +1549,9 @@ func (r *userStudentResolver) DeletedAt(ctx context.Context, obj *db.UserStudent
 
 // EntriesCount is the resolver for the entriesCount field.
 func (r *userStudentResolver) EntriesCount(ctx context.Context, obj *db.UserStudent) (int, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return 0, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return 0, nil
 	}
 
 	count, err := r.DB.NewSelect().Model(&db.EntryUser{}).Where("user_id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Count(ctx)
@@ -1565,9 +1565,9 @@ func (r *userStudentResolver) EntriesCount(ctx context.Context, obj *db.UserStud
 
 // CompetencesCount is the resolver for the competencesCount field.
 func (r *userStudentResolver) CompetencesCount(ctx context.Context, obj *db.UserStudent) (int, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return 0, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return 0, nil
 	}
 
 	count, err := r.DB.NewSelect().Model(&db.UserCompetence{}).Where("user_id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Count(ctx)
@@ -1581,9 +1581,9 @@ func (r *userStudentResolver) CompetencesCount(ctx context.Context, obj *db.User
 
 // EventsCount is the resolver for the eventsCount field.
 func (r *userStudentResolver) EventsCount(ctx context.Context, obj *db.UserStudent) (int, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return 0, errors.New("no user found in the context")
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return 0, nil
 	}
 
 	count, err := r.DB.NewSelect().
@@ -1598,6 +1598,22 @@ func (r *userStudentResolver) EventsCount(ctx context.Context, obj *db.UserStude
 	}
 
 	return count, nil
+}
+
+// User is the resolver for the user field.
+func (r *userStudentResolver) User(ctx context.Context, obj *db.UserStudent) (*db.User, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	var user db.User
+	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 // Competence returns CompetenceResolver implementation.

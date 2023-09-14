@@ -131,6 +131,10 @@ type CreateReportInput struct {
 	StudentUser string          `json:"studentUser"`
 }
 
+type CreateSchoolYearInput struct {
+	Year int `json:"year"`
+}
+
 type CreateShareInput struct {
 	FileID     *string        `json:"fileId,omitempty"`
 	BucketID   *string        `json:"bucketId,omitempty"`
@@ -145,6 +149,10 @@ type CreateStudentInput struct {
 	Birthday  *time.Time `json:"birthday,omitempty"`
 	LeftAt    *time.Time `json:"leftAt,omitempty"`
 	JoinedAt  *time.Time `json:"joinedAt,omitempty"`
+}
+
+type CreateSubjectInput struct {
+	Name string `json:"name"`
 }
 
 type CreateTagInput struct {
@@ -166,6 +174,13 @@ type CreateUserInput struct {
 	Birthday  *time.Time  `json:"birthday,omitempty"`
 	LeftAt    *time.Time  `json:"leftAt,omitempty"`
 	JoinedAt  *time.Time  `json:"joinedAt,omitempty"`
+}
+
+type CreateUserStudentGradesInput struct {
+	Student    string `json:"student"`
+	Subject    string `json:"subject"`
+	Grade      int    `json:"grade"`
+	SchoolYear string `json:"schoolYear"`
 }
 
 type DeleteDomainInput struct {
@@ -396,6 +411,12 @@ type ResetPasswordPayload struct {
 	Message string `json:"message"`
 }
 
+type SchoolYearConnection struct {
+	Edges      []*db.SchoolYear `json:"edges"`
+	TotalCount int              `json:"totalCount"`
+	PageInfo   *PageInfo        `json:"pageInfo"`
+}
+
 type ShareFileInput struct {
 	FileID     string         `json:"fileId"`
 	Users      []string       `json:"users"`
@@ -439,6 +460,12 @@ type SignUpInput struct {
 type SortCompetenceInput struct {
 	ID        string `json:"id"`
 	SortOrder int    `json:"sortOrder"`
+}
+
+type SubjectConnection struct {
+	Edges      []*db.Subject `json:"edges"`
+	TotalCount int           `json:"totalCount"`
+	PageInfo   *PageInfo     `json:"pageInfo"`
 }
 
 type TagConnection struct {
@@ -501,6 +528,16 @@ type UpdateOrganisationInput struct {
 	Phone     *string `json:"phone,omitempty"`
 }
 
+type UpdateSchoolYearInput struct {
+	ID   string `json:"id"`
+	Year int    `json:"year"`
+}
+
+type UpdateSubjectInput struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
 type UpdateUserCompetenceInput struct {
 	Level        int    `json:"level"`
 	UserID       string `json:"userId"`
@@ -516,6 +553,11 @@ type UpdateUserInput struct {
 	Birthday  *time.Time `json:"birthday,omitempty"`
 	LeftAt    *time.Time `json:"leftAt,omitempty"`
 	JoinedAt  *time.Time `json:"joinedAt,omitempty"`
+}
+
+type UpdateUserStudentGradesInput struct {
+	ID    string `json:"id"`
+	Grade int    `json:"grade"`
 }
 
 type UploadFilesPayload struct {
@@ -553,6 +595,12 @@ type UserStudentConnection struct {
 	Edges      []*db.UserStudent `json:"edges,omitempty"`
 	PageInfo   *PageInfo         `json:"pageInfo"`
 	TotalCount int               `json:"totalCount"`
+}
+
+type UserStudentGradesConnection struct {
+	Edges      []*db.UserStudentGrades `json:"edges"`
+	TotalCount int                     `json:"totalCount"`
+	PageInfo   *PageInfo               `json:"pageInfo"`
 }
 
 type CompetenceSortField string

@@ -163,10 +163,12 @@ func (g *Generator) preloadAllEntriesReportData(ctx context.Context, o db.Organi
 // recursively get all parents of a competence with the parent_id CompetenceID
 func competenceParentsWithData(id string, competencesMap map[string]*db.Competence) []*db.Competence {
 	var parents []*db.Competence
-	if competencesMap[id] != nil {
+
+	for competencesMap[id] != nil {
 		parents = append(parents, competencesMap[id])
-		parents = append(parents, competenceParentsWithData(competencesMap[id].CompetenceID.String, competencesMap)...)
+		id = competencesMap[id].CompetenceID.String
 	}
+
 	return parents
 }
 

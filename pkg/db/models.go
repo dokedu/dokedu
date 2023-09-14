@@ -472,3 +472,61 @@ type Domain struct {
 	OrganisationID string    `json:"organisation_id"`
 	CreatedAt      time.Time `bun:",nullzero,notnull,default:now()" json:"created_at"`
 }
+
+type Subject struct {
+	bun.BaseModel
+
+	ID             string       `bun:",nullzero,pk" json:"id"`
+	Name           string       `json:"name"`
+	OrganisationID string       `json:"organisation_id"`
+	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
+}
+
+type SchoolYear struct {
+	bun.BaseModel
+
+	ID             string       `bun:",nullzero,pk" json:"id"`
+	Year           int          `json:"year"`
+	Description    string       `bun:",nullzero" json:"description"`
+	OrganisationID string       `json:"organisation_id"`
+	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
+}
+
+type UserStudentSchoolHistoryAction string
+
+const (
+	UserStudentSchoolHistoryActionEnrolled    UserStudentSchoolHistoryAction = "enrolled"
+	UserStudentSchoolHistoryActionGraduated   UserStudentSchoolHistoryAction = "graduated"
+	UserStudentSchoolHistoryActionTransferred UserStudentSchoolHistoryAction = "transferred"
+	UserStudentSchoolHistoryActionSuspended   UserStudentSchoolHistoryAction = "suspended"
+	UserStudentSchoolHistoryActionExpelled    UserStudentSchoolHistoryAction = "expelled"
+	UserStudentSchoolHistoryActionRepeated    UserStudentSchoolHistoryAction = "repeated"
+)
+
+type UserStudentSchoolHistory struct {
+	bun.BaseModel
+
+	ID             string                         `bun:",nullzero,pk" json:"id"`
+	UserStudentID  string                         `json:"user_student_id"`
+	SchoolID       string                         `json:"school_id"`
+	Action         UserStudentSchoolHistoryAction `json:"action"`
+	SchoolYearID   string                         `json:"school_year_id"`
+	OrganisationID string                         `json:"organisation_id"`
+	CreatedAt      time.Time                      `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	DeletedAt      bun.NullTime                   `bun:",soft_delete,nullzero"`
+}
+
+type UserStudentGrades struct {
+	bun.BaseModel
+
+	ID             string       `bun:",nullzero,pk" json:"id"`
+	UserStudentID  string       `json:"user_student_id"`
+	SubjectID      string       `json:"subject_id"`
+	Grade          int          `json:"grade"`
+	SchoolYearID   string       `json:"school_year_id"`
+	OrganisationID string       `json:"organisation_id"`
+	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
+}
