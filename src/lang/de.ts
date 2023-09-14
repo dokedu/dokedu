@@ -218,4 +218,6 @@ export const de = {
 
   year: "Jahr | Jahre",
   school_year: "Schuljahr | Schuljahre",
+
+  selected: "ausgewählt",
 };

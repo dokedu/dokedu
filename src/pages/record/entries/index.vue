@@ -22,19 +22,14 @@
     </PageHeader>
 
     <div v-if="filtersOpen" class="flex items-end gap-2 border-b border-stone-100 px-8 py-2">
-      <DSelect
-        :options="studentOptions"
-        :label="$t('student')"
-        v-model:search="studentSearch"
-        v-model="student"
-      ></DSelect>
+      <DSelect :options="studentOptions" :label="$t('student')" v-model:search="studentSearch" v-model="student" />
       <DSelect :options="teacherOptions" :label="$t('teacher')" v-model="teacher" v-model:search="teacherSearch" />
-      <DSelect :options="tagOptions" :label="$t('tag', 2)" multiple v-model="tags">
-        <div class="flex flex-wrap gap-2">
-          <DTag v-for="tag in tags" :key="tag" :color="getTagColor(tag)" removable :id="tag" @remove="removeTag">
-            {{ getTagName(tag) }}
-          </DTag>
-        </div>
+      <DSelect :options="tagOptions" :label="$t('tag', 2)" multiple v-model="tags" v-model:search="tagSearch">
+        <template v-slot="{ option }">
+          <d-tag :color="tagData?.tags.edges?.find((el: any) => el.id === option.value)?.color">
+            {{ option.label }}
+          </d-tag>
+        </template>
       </DSelect>
     </div>
 
@@ -121,10 +116,12 @@ import DTable from "@/components/d-table/d-table.vue";
 import { useRouter } from "vue-router/auto";
 import { PageVariables } from "@/types/types";
 import DSelect from "@/components/d-select/d-select.vue";
+import tagQuery from "@/queries/tags";
 
 const i18nLocale = useI18n();
 const router = useRouter();
 
+const tagSearch = ref("");
 const student = ref();
 const teacher = ref();
 const tags = ref<string[]>([]);
@@ -254,7 +251,7 @@ const studentSearch = ref("");
 const { data: studentData } = useQuery({
   query: graphql(`
     query getEntryFilterStudents($search: String) {
-      users(filter: { role: [student] }, limit: 150, search: $search) {
+      users(filter: { role: [student] }, limit: 200, search: $search) {
         edges {
           id
           firstName
@@ -269,17 +266,10 @@ const { data: studentData } = useQuery({
 });
 
 const { data: tagData } = useQuery({
-  query: graphql(`
-    query getEntryFilterTags {
-      tags(limit: 100) {
-        edges {
-          id
-          name
-          color
-        }
-      }
-    }
-  `),
+  query: tagQuery,
+  variables: reactive({
+    search: tagSearch,
+  }),
 });
 
 const teacherOptions = computed(
@@ -305,18 +295,6 @@ const tagOptions = computed(
       value: edge.id,
     })) || []
 );
-
-function getTagColor(id: string) {
-  return tagData?.value?.tags?.edges?.find((e: any) => e.id === id)?.color || "gray";
-}
-
-function getTagName(id: string) {
-  return tagData?.value?.tags?.edges?.find((e: any) => e.id === id)?.name || "gray";
-}
-
-function removeTag(id: string) {
-  tags.value = tags.value.filter((e) => e !== id);
-}
 
 function dateOnly(date: string) {
   const options: Intl.DateTimeFormatOptions = {

@@ -32,7 +32,6 @@ const documents = {
     "\n    mutation updateCompetence($input: UpdateCompetenceInput!) {\n      updateCompetence(input: $input) {\n        id\n        name\n        color\n      }\n    }\n  ": types.UpdateCompetenceDocument,
     "\n    mutation uploadFile($input: FileUploadInput!) {\n      uploadFile(input: $input) {\n        id\n      }\n    }\n  ": types.UploadFileDocument,
     "\n    query bucketByIdShared($id: ID!) {\n      bucket(id: $id) {\n        id\n        permission\n      }\n    }\n  ": types.BucketByIdSharedDocument,
-    "\n    query events {\n      events {\n        edges {\n          id\n          title\n        }\n      }\n    }\n  ": types.EventsDocument,
     "\n    query users($search: String) {\n      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  ": types.UsersDocument,
     "\n    query domains {\n      domains {\n        edges {\n          id\n          name\n          createdAt\n        }\n        pageInfo {\n          hasNextPage\n          hasPreviousPage\n        }\n      }\n    }\n  ": types.DomainsDocument,
     "\n    query groupUsers {\n      emailAccounts(filter: { type: INDIVIDUAL }) {\n        edges {\n          id\n          name\n        }\n      }\n    }\n  ": types.GroupUsersDocument,
@@ -80,8 +79,7 @@ const documents = {
     "\n    query entryById($id: ID!) {\n      entry(id: $id) {\n        id\n        date\n        body\n        deletedAt\n        user {\n          id\n          firstName\n          lastName\n        }\n        createdAt\n        tags {\n          id\n          name\n          color\n        }\n        events {\n          id\n          title\n        }\n        users {\n          id\n          firstName\n          lastName\n        }\n        userCompetences {\n          id\n          level\n          competence {\n            id\n            name\n            color\n            type\n            grades\n            parents {\n              id\n              name\n              grades\n              color\n            }\n          }\n        }\n      }\n    }\n  ": types.EntryByIdDocument,
     "\n  query getEntries($filter: EntryFilterInput, $limit: Int, $order: EntrySortBy, $offset: Int) {\n    entries(filter: $filter, limit: $limit, sortBy: $order, offset: $offset) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n      edges {\n        id\n        date\n        body\n        user {\n          id\n          firstName\n          lastName\n        }\n        createdAt\n        events {\n          id\n          title\n        }\n        tags {\n          id\n          name\n          color\n        }\n      }\n    }\n  }\n": types.GetEntriesDocument,
     "\n    query getEntryFilterTeachers($search: String) {\n      users(filter: { role: [owner, admin, teacher, educator] }, limit: 500, search: $search) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  ": types.GetEntryFilterTeachersDocument,
-    "\n    query getEntryFilterStudents($search: String) {\n      users(filter: { role: [student] }, limit: 150, search: $search) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  ": types.GetEntryFilterStudentsDocument,
-    "\n    query getEntryFilterTags {\n      tags(limit: 100) {\n        edges {\n          id\n          name\n          color\n        }\n      }\n    }\n  ": types.GetEntryFilterTagsDocument,
+    "\n    query getEntryFilterStudents($search: String) {\n      users(filter: { role: [student] }, limit: 200, search: $search) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  ": types.GetEntryFilterStudentsDocument,
     "\n    query event($id: ID!) {\n      event(id: $id) {\n        id\n        title\n        body\n        createdAt\n        startsAt\n        endsAt\n        competences {\n          id\n          name\n          type\n          grades\n          parents {\n            id\n            name\n            type\n            grades\n            color\n          }\n        }\n      }\n    }\n  ": types.EventDocument,
     "\n    query exportEvents($input: ExportEventsInput!) {\n      exportEvents(input: $input) {\n        id\n        title\n        body\n        startsAt\n        endsAt\n        subjects\n      }\n    }\n  ": types.ExportEventsDocument,
     "\n  query eventWithSearch($search: String, $offset: Int, $order: EventOrderBy, $filter: EventFilterInput) {\n    events(search: $search, limit: 50, offset: $offset, order: $order, filter: $filter) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n      edges {\n        id\n        title\n        body\n        createdAt\n        startsAt\n        endsAt\n      }\n    }\n  }\n": types.EventWithSearchDocument,
@@ -104,6 +102,7 @@ const documents = {
     "\n  mutation createSchoolYear($year: Int!) {\n    createSchoolYear(input: { year: $year }) {\n      id\n      year\n      description\n    }\n  }\n": types.CreateSchoolYearDocument,
     "\n  mutation createSubject($name: String!) {\n    createSubject(input: { name: $name }) {\n      id\n      name\n    }\n  }\n": types.CreateSubjectDocument,
     "\n  query entryById($id: ID!) {\n    entry(id: $id) {\n      id\n      date\n      body\n      deletedAt\n      user {\n        id\n        firstName\n        lastName\n      }\n      createdAt\n      tags {\n        id\n        name\n        color\n      }\n      events {\n        id\n        title\n      }\n      users {\n        id\n        firstName\n        lastName\n      }\n      userCompetences {\n        id\n        level\n        competence {\n          id\n          name\n          color\n          type\n          grades\n          parents {\n            id\n            name\n            grades\n            color\n          }\n        }\n      }\n    }\n  }\n": types.EntryByIdDocument,
+    "\n  query events($search: String) {\n    events(limit: 100, search: $search) {\n      edges {\n        id\n        title\n      }\n    }\n  }\n": types.EventsDocument,
     "\n    query me {\n        me {\n            id\n            role\n        }\n    }\n": types.MeDocument,
     "\n    mutation resetPassword($input: ResetPasswordInput!) {\n        resetPassword(input: $input) {\n        success\n        }\n    }\n": types.ResetPasswordDocument,
     "\n  query schoolYear($id: ID!) {\n    schoolYear(id: $id) {\n      id\n      year\n      description\n    }\n  }\n": types.SchoolYearDocument,
@@ -111,7 +110,7 @@ const documents = {
     "\n    mutation signIn($email: String!, $password: String!) {\n        signIn(input: {email: $email, password: $password }) {\n            token\n            enabled_apps\n            language\n            setupComplete\n        }\n    }\n": types.SignInDocument,
     "\n    query subject($id: ID!) {\n      subject(id: $id) {\n        id\n        name\n      }\n    }\n": types.SubjectDocument,
     "\n  query subjects($limit: Int, $offset: Int) {\n    subjects(limit: $limit, offset: $offset) {\n      edges {\n        id\n        name\n      }\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n": types.SubjectsDocument,
-    "\n  query tagLimited {\n    tags(limit: 1000) {\n      edges {\n        id\n        name\n        color\n      }\n    }\n  }\n": types.TagLimitedDocument,
+    "\n  query tagLimited($search: String) {\n    tags(limit: 100, search: $search) {\n      edges {\n        id\n        name\n        color\n      }\n    }\n  }\n": types.TagLimitedDocument,
     "\nmutation updateEntry($input: UpdateEntryInput!) {\n    updateEntry(input: $input) {\n      id\n      date\n      body\n      deletedAt\n      user {\n        id\n        firstName\n        lastName\n      }\n      createdAt\n      tags {\n        id\n        name\n        color\n      }\n      events {\n        id\n        title\n      }\n      users {\n        id\n        firstName\n        lastName\n      }\n      userCompetences {\n        id\n        level\n        competence {\n          id\n          name\n          color\n          type\n        }\n      }\n    }\n  }\n  ": types.UpdateEntryDocument,
     "\n  mutation updateSchoolYear($id: ID!, $year: Int!) {\n    updateSchoolYear(input: { id: $id, year: $year }) {\n      id\n      year\n      description\n    }\n  }\n": types.UpdateSchoolYearDocument,
     "\n    mutation updateSubject($id: ID!, $name: String!) {\n        updateSubject(input: { id: $id, name: $name }) {\n            id\n            name\n        }\n    }\n": types.UpdateSubjectDocument,
@@ -210,10 +209,6 @@ export function graphql(source: "\n    mutation uploadFile($input: FileUploadInp
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    query bucketByIdShared($id: ID!) {\n      bucket(id: $id) {\n        id\n        permission\n      }\n    }\n  "): (typeof documents)["\n    query bucketByIdShared($id: ID!) {\n      bucket(id: $id) {\n        id\n        permission\n      }\n    }\n  "];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n    query events {\n      events {\n        edges {\n          id\n          title\n        }\n      }\n    }\n  "): (typeof documents)["\n    query events {\n      events {\n        edges {\n          id\n          title\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -405,11 +400,7 @@ export function graphql(source: "\n    query getEntryFilterTeachers($search: Str
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n    query getEntryFilterStudents($search: String) {\n      users(filter: { role: [student] }, limit: 150, search: $search) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  "): (typeof documents)["\n    query getEntryFilterStudents($search: String) {\n      users(filter: { role: [student] }, limit: 150, search: $search) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  "];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n    query getEntryFilterTags {\n      tags(limit: 100) {\n        edges {\n          id\n          name\n          color\n        }\n      }\n    }\n  "): (typeof documents)["\n    query getEntryFilterTags {\n      tags(limit: 100) {\n        edges {\n          id\n          name\n          color\n        }\n      }\n    }\n  "];
+export function graphql(source: "\n    query getEntryFilterStudents($search: String) {\n      users(filter: { role: [student] }, limit: 200, search: $search) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  "): (typeof documents)["\n    query getEntryFilterStudents($search: String) {\n      users(filter: { role: [student] }, limit: 200, search: $search) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -501,6 +492,10 @@ export function graphql(source: "\n  query entryById($id: ID!) {\n    entry(id: 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n  query events($search: String) {\n    events(limit: 100, search: $search) {\n      edges {\n        id\n        title\n      }\n    }\n  }\n"): (typeof documents)["\n  query events($search: String) {\n    events(limit: 100, search: $search) {\n      edges {\n        id\n        title\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n    query me {\n        me {\n            id\n            role\n        }\n    }\n"): (typeof documents)["\n    query me {\n        me {\n            id\n            role\n        }\n    }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -529,7 +524,7 @@ export function graphql(source: "\n  query subjects($limit: Int, $offset: Int) {
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query tagLimited {\n    tags(limit: 1000) {\n      edges {\n        id\n        name\n        color\n      }\n    }\n  }\n"): (typeof documents)["\n  query tagLimited {\n    tags(limit: 1000) {\n      edges {\n        id\n        name\n        color\n      }\n    }\n  }\n"];
+export function graphql(source: "\n  query tagLimited($search: String) {\n    tags(limit: 100, search: $search) {\n      edges {\n        id\n        name\n        color\n      }\n    }\n  }\n"): (typeof documents)["\n  query tagLimited($search: String) {\n    tags(limit: 100, search: $search) {\n      edges {\n        id\n        name\n        color\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

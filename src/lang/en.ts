@@ -220,4 +220,6 @@ export const en = {
   new_shared_drive_name: "New shared drive name",
   year: "Year | Years",
   school_year: "School year | School years",
+
+  selected: "selected",
 };

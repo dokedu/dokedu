@@ -19,7 +19,7 @@
         <div class="flex items-center gap-6">
           <p class="w-[100px] text-sm font-semibold text-stone-600">{{ $t("domain") }}</p>
           <div class="flex-1 space-y-1">
-            <d-select :options="domainOptions" :label="$t('domain')" v-model="domain" class="flex-1"></d-select>
+            <d-select :options="domainOptions" :label="$t('domain')" v-model="domain" class="flex-1" />
             <p class="text-sm text-red-500" v-if="errors.domain">{{ errors.domain }}</p>
           </div>
         </div>
@@ -32,7 +32,7 @@
             multiple
             v-model="members"
             class="flex-1"
-          ></d-select>
+          />
         </div>
       </div>
     </template>

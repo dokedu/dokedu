@@ -18,7 +18,7 @@
             :label="$t('select_user')"
             :placeholder="$t('select_user')"
             @select="onCreateShare"
-          ></DSelect>
+          />
         </div>
         <div class="space-y-2 text-sm">
           <div class="text-subtle">{{ $t("shared_with") }}</div>
@@ -37,7 +37,7 @@
                   placeholder="Select permission"
                   :removable="false"
                   @select="onEditShare(share as ShareUser)"
-                ></DSelect>
+                />
                 <div v-else class="text-sm text-subtle">{{ share.permission }}</div>
                 <button
                   v-if="permission == FilePermission.Manager"
