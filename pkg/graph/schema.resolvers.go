@@ -1188,7 +1188,7 @@ func (r *queryResolver) Tag(ctx context.Context, id string) (*db.Tag, error) {
 }
 
 // Tags is the resolver for the tags field.
-func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) (*model.TagConnection, error) {
+func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int, search *string) (*model.TagConnection, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, nil
@@ -1208,13 +1208,18 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) (*mod
 	}
 
 	var tags []*db.Tag
-	count, err := r.DB.NewSelect().
+	query := r.DB.NewSelect().
 		Model(&tags).
 		Where("organisation_id = ?", currentUser.OrganisationID).
 		Limit(pageLimit).
 		Offset(pageOffset).
-		Order("name").
-		ScanAndCount(ctx)
+		Order("name")
+
+	if search != nil && *search != "" {
+		query.Where("name ILIKE ?", "%"+*search+"%")
+	}
+
+	count, err := query.ScanAndCount(ctx)
 	if err != nil {
 		return nil, err
 	}

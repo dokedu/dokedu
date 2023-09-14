@@ -247,7 +247,7 @@ extend type Query {
     reports(limit: Int, offset: Int): ReportConnection!
 
     tag(id: ID!): Tag!
-    tags(limit: Int, offset: Int): TagConnection!
+    tags(limit: Int, offset: Int, search: String): TagConnection!
 
     userStudents(limit: Int, offset: Int): UserStudentConnection!
     userStudent(id: ID!): UserStudent!

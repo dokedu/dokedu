@@ -424,7 +424,7 @@ type ComplexityRoot struct {
 		Subject           func(childComplexity int, id string) int
 		Subjects          func(childComplexity int, limit *int, offset *int) int
 		Tag               func(childComplexity int, id string) int
-		Tags              func(childComplexity int, limit *int, offset *int) int
+		Tags              func(childComplexity int, limit *int, offset *int, search *string) int
 		User              func(childComplexity int, id string) int
 		UserStudent       func(childComplexity int, id string) int
 		UserStudentGrade  func(childComplexity int, id string) int
@@ -763,7 +763,7 @@ type QueryResolver interface {
 	Report(ctx context.Context, id string) (*db.Report, error)
 	Reports(ctx context.Context, limit *int, offset *int) (*model.ReportConnection, error)
 	Tag(ctx context.Context, id string) (*db.Tag, error)
-	Tags(ctx context.Context, limit *int, offset *int) (*model.TagConnection, error)
+	Tags(ctx context.Context, limit *int, offset *int, search *string) (*model.TagConnection, error)
 	UserStudents(ctx context.Context, limit *int, offset *int) (*model.UserStudentConnection, error)
 	UserStudent(ctx context.Context, id string) (*db.UserStudent, error)
 	Subjects(ctx context.Context, limit *int, offset *int) (*model.SubjectConnection, error)
@@ -3074,7 +3074,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Tags(childComplexity, args["limit"].(*int), args["offset"].(*int)), true
+		return e.complexity.Query.Tags(childComplexity, args["limit"].(*int), args["offset"].(*int), args["search"].(*string)), true
 
 	case "Query.user":
 		if e.complexity.Query.User == nil {
@@ -5678,6 +5678,15 @@ func (ec *executionContext) field_Query_tags_args(ctx context.Context, rawArgs m
 		}
 	}
 	args["offset"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["search"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("search"))
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["search"] = arg2
 	return args, nil
 }
 
@@ -19881,7 +19890,7 @@ func (ec *executionContext) _Query_tags(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Tags(rctx, fc.Args["limit"].(*int), fc.Args["offset"].(*int))
+		return ec.resolvers.Query().Tags(rctx, fc.Args["limit"].(*int), fc.Args["offset"].(*int), fc.Args["search"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
