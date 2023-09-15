@@ -3,7 +3,7 @@
     <div class="text-sm font-medium">Entries</div>
     <ChevronDown class="h-5 w-5"></ChevronDown>
   </div>
-  <div v-if="entriesOpen">
+  <div v-if="true">
     <div v-for="competence in competences" class="text-subtle">
       <div v-if="competence.entry">
         <span class="font-medium text-strong">{{ $t("level") }} {{ competence.level }}</span>
@@ -22,7 +22,7 @@
           >{{ $t("entry") }}</RouterLink
         >
       </div>
-      <div v-else-if="competence.entry">
+      <div v-else>
         <span class="font-medium text-strong">{{ $t("level") }} {{ competence.level }}</span>
         {{ $t("was_documented_by") }}
         <span class="font-medium text-strong"
@@ -51,5 +51,8 @@ export interface Props {
 defineProps<Props>();
 
 const entriesOpen = ref(false);
-const toggleEntries = () => (entriesOpen.value = !entriesOpen.value);
+
+function toggleEntries() {
+  entriesOpen.value = !entriesOpen.value;
+}
 </script>
