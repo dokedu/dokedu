@@ -14,31 +14,18 @@
         </div>
         <div class="relative mt-4 flex items-center gap-4">
           <div class="min-w-16 text-sm text-stone-400">{{ $t("color") }}</div>
-          <div class="relative w-full">
-            <DContextMenu
-              :show="contextMenuOpen"
-              @close="contextMenuOpen = false"
-              :alignment="ContextMenuAlignment.Overlay"
-              class="max-h-[150px] w-full overflow-y-auto p-1"
-            >
-              <div class="flex w-full flex-col items-start rounded-md">
-                <div
-                  class="w-full cursor-pointer p-1 hover:bg-stone-100"
-                  v-for="color in colors"
-                  @click="onSelectColor(color)"
-                >
-                  <DTag :color="color">{{ $t(color) }}</DTag>
-                </div>
-              </div>
-            </DContextMenu>
-            <div
-              class="flex w-full flex-wrap items-start gap-2 rounded-md p-2 hover:bg-stone-50"
-              @click="contextMenuOpen = true"
-            >
-              <DTag v-if="tag && tag.color" :color="tag.color" class="w-1/4 p-2">{{ tag.color }}</DTag>
-              <div v-else class="text-stone-400">{{ $t("set_color") }}</div>
-            </div>
-          </div>
+          <DSelect :options="colorOptions" :label="$t('tag', 2)" multiple v-model="tagColor" class="w-full">
+            <template #display="{ displayedLabel }">
+              <d-tag :color="tag?.color">
+                {{ displayedLabel }}
+              </d-tag>
+            </template>
+            <template v-slot="{ option }">
+              <d-tag :color="option.value">
+                {{ option.label }}
+              </d-tag>
+            </template>
+          </DSelect>
         </div>
       </div>
       <div v-if="error" class="text-xs font-semibold text-red-600">{{ error }}</div>
@@ -59,17 +46,25 @@
 import DDialog from "./d-dialog/d-dialog.vue";
 import DButton from "./d-button/d-button.vue";
 import DIconButton from "./d-icon-button/d-icon-button.vue";
+import DSelect from "@/components/d-select/d-select.vue";
 import { X } from "lucide-vue-next";
-import { toRef, ref } from "vue";
+import { toRef, ref, computed } from "vue";
 import DInput from "./d-input/d-input.vue";
-import DContextMenu from "./d-context-menu/d-context-menu.vue";
-import { ContextMenuAlignment } from "./d-context-menu/d-context-menu.vue";
 import DTag from "./d-tag/d-tag.vue";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { Tag } from "../gql/graphql";
 
 const colors = ["red", "orange", "yellow", "green", "blue", "indigo", "purple", "pink", "gray"];
+
+const colorOptions = colors.map((color) => ({
+  label: capitalize(color),
+  value: color,
+}));
+
+function capitalize(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
 
 export interface Props {
   open: boolean;
@@ -80,9 +75,19 @@ const props = defineProps<Props>();
 const emit = defineEmits(["close", "updated"]);
 
 const modalOpen = toRef(props, "open");
-const contextMenuOpen = ref(false);
 const tag = toRef(props, "tag");
 const error = ref("");
+
+const tagColor = computed({
+  get() {
+    return tag.value?.color || "gray";
+  },
+  set(value: string) {
+    if (tag.value) {
+      tag.value.color = value;
+    }
+  },
+});
 
 const { executeMutation: updateTag } = useMutation(
   graphql(`
@@ -112,41 +117,37 @@ const { executeMutation: archiveTag } = useMutation(
   `)
 );
 
-const onSelectColor = (color: string) => {
-  if (tag.value) {
-    tag.value.color = color;
-  }
-  contextMenuOpen.value = false;
-};
-
-const onClose = () => {
+function onClose() {
   emit("close", false);
-};
+}
 
-const onUpdate = async () => {
-  if (!tag.value) {
-    return;
-  }
-  const mutation = await updateTag({
+async function onUpdate() {
+  if (!tag.value) return;
+
+  const res = await updateTag({
     id: tag.value.id,
     input: {
       name: tag.value.name,
       color: tag.value.color,
     },
   });
-  if (mutation.error) {
-    error.value = mutation.error.graphQLErrors[0].message;
-  }
-  emit("updated");
-};
 
-const onArchive = async () => {
-  if (!tag.value) {
-    return;
+  if (res.error) {
+    error.value = res.error.graphQLErrors[0].message;
   }
-  await archiveTag({
-    id: tag.value.id,
-  });
+
   emit("updated");
-};
+}
+
+async function onArchive() {
+  if (!tag.value) return;
+
+  const res = await archiveTag({ id: tag.value.id });
+
+  if (res.error) {
+    error.value = res.error.graphQLErrors[0].message;
+  }
+
+  emit("updated");
+}
 </script>

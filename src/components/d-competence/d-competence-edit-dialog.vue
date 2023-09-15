@@ -1,7 +1,7 @@
 <template>
   <dialog
     ref="dialog"
-    class="w-full max-w-sm rounded-lg text-sm backdrop:bg-stone-900/90"
+    class="w-full max-w-sm rounded-lg p-4 text-sm backdrop:bg-stone-900/90"
     style="overflow: visible"
     @close.prevent="$emit('close')"
   >
@@ -16,31 +16,18 @@
       </div>
       <div class="relative mt-4 flex items-center gap-4">
         <div class="min-w-16 text-stone-400">{{ $t("color") }}</div>
-        <div class="relative w-full">
-          <DContextMenu
-            :show="contextMenuOpen"
-            @close="contextMenuOpen = false"
-            :alignment="ContextMenuAlignment.Overlay"
-            class="max-h-[150px] w-full overflow-y-auto p-1"
-          >
-            <div class="flex w-full flex-col items-start rounded-md">
-              <div
-                class="w-full cursor-pointer p-1 hover:bg-stone-100"
-                v-for="color in colors"
-                @click="onSelectColor(color)"
-              >
-                <DTag :color="color">{{ capitalizeFirstLetter(color) }}</DTag>
-              </div>
-            </div>
-          </DContextMenu>
-          <div
-            class="flex w-full flex-wrap items-start gap-2 rounded-md p-2 hover:bg-stone-50"
-            @click="contextMenuOpen = true"
-          >
-            <DTag v-if="competence.color" :color="competence.color">{{ capitalizeFirstLetter(competence.color) }}</DTag>
-            <div v-else class="text-stone-400">{{ $t("set_color") }}</div>
-          </div>
-        </div>
+        <DSelect :options="colorOptions" :label="$t('tag', 2)" multiple v-model="color" class="w-full">
+          <template #display="{ displayedLabel }">
+            <d-tag :color="color">
+              {{ displayedLabel }}
+            </d-tag>
+          </template>
+          <template v-slot="{ option }">
+            <d-tag :color="option.value">
+              {{ option.label }}
+            </d-tag>
+          </template>
+        </DSelect>
       </div>
     </div>
     <div v-if="error" class="text-xs font-semibold text-red-600">{{ error }}</div>
@@ -55,14 +42,13 @@
 
 <script setup lang="ts">
 import DButton from "@/components/d-button/d-button.vue";
+import DSelect from "@/components/d-select/d-select.vue";
+import DTag from "@/components/d-tag/d-tag.vue";
 import { X } from "lucide-vue-next";
 import { toRef, ref, onMounted } from "vue";
-import DContextMenu from "@/components/d-context-menu/d-context-menu.vue";
-import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { Competence } from "@/gql/graphql.ts";
-import DTag from "@/components/d-tag/d-tag.vue";
 
 const dialog = ref<HTMLDialogElement>();
 const colors = [
@@ -85,6 +71,11 @@ const colors = [
   "rose", // bg-rose-50 text-rose-700
 ];
 
+const colorOptions = colors.map((color) => ({
+  label: capitalize(color),
+  value: color,
+}));
+
 export interface Props {
   competence: Competence;
 }
@@ -96,11 +87,11 @@ onMounted(() => {
 const props = defineProps<Props>();
 const emit = defineEmits(["close", "updated"]);
 
-const contextMenuOpen = ref(false);
 const competence = toRef(props, "competence");
+const color = ref<string>(competence.value?.color as string);
 const error = ref("");
 
-function capitalizeFirstLetter(string: string) {
+function capitalize(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
@@ -116,13 +107,6 @@ const { executeMutation: updateCompetence } = useMutation(
   `)
 );
 
-const onSelectColor = (color: string) => {
-  if (competence.value) {
-    competence.value.color = color.toLowerCase();
-  }
-  contextMenuOpen.value = false;
-};
-
 const onClose = () => {
   emit("close");
 };
@@ -134,7 +118,7 @@ const onUpdate = async () => {
   const mutation = await updateCompetence({
     input: {
       id: competence.value.id,
-      color: competence.value.color as string,
+      color: color.value,
     },
   });
   if (mutation.error) {

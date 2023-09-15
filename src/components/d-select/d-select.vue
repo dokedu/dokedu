@@ -7,7 +7,9 @@
       ref="toggle"
     >
       <div class="flex justify-between gap-3 rounded-md py-1.5 pl-2.5 pr-2 transition-colors hover:bg-stone-100">
-        <div class="text-sm text-default">{{ displayedLabel }}</div>
+        <slot name="display" :displayedLabel="displayedLabel">
+          <div class="text-sm text-default">{{ displayedLabel }}</div>
+        </slot>
         <div class="flex items-center gap-1">
           <XIcon
             class="h-4 w-4 shrink-0"
@@ -25,7 +27,7 @@
         class="absolute top-10 z-20 max-h-[200px] w-full min-w-[240px] divide-y divide-stone-200 overflow-hidden rounded-md border border-stone-200 bg-white shadow transition-all duration-200 ease-in-out"
         style="transform-origin: top"
       >
-        <div v-if="search != null" class="sticky flex w-full items-center gap-1 rounded border-none pl-2.5 text-sm">
+        <div v-if="searchable" class="sticky flex w-full items-center gap-1 rounded border-none pl-2.5 text-sm">
           <SearchIcon :size="18" class="text-subtle" />
           <input
             class="w-full border-none py-2.5 text-sm leading-none text-default placeholder:text-subtle focus:outline-none focus:ring-0"
@@ -44,7 +46,7 @@
             @mouseover="focusedOptionIndex = sortedOptions.indexOf(option)"
             @focusin="focusedOptionIndex = sortedOptions.indexOf(option)"
           >
-            <slot :option="option">
+            <slot name="default" :option="option">
               <div class="px-0.5 py-0.5 text-sm text-default">{{ option.label }}</div>
             </slot>
             <CheckIcon :size="16" class="mr-1 text-strong" v-if="isSelected(option)" />
@@ -70,8 +72,9 @@ const emit = defineEmits(["update:modelValue", "update:search", "select"]);
 interface Props {
   label?: string;
   multiple?: boolean;
-  modelValue?: string | string[];
+  modelValue?: string | string[] | null;
   search?: string | null;
+  searchable?: boolean;
   removable?: boolean;
   options?: { label: string; value: string }[];
   type?: "default" | "borderless";
@@ -94,13 +97,15 @@ const model = toRef(props, "modelValue");
 const toggle = ref();
 const multiple = toRef(props, "multiple");
 
-const onClose = () => {
-  open.value = false;
+function onClose() {
   focusedOptionIndex.value = null;
-  emit("update:search", "");
-};
+  open.value = false;
+  toggle.value.blur();
+  emit("update:search", null);
+}
 
 onClickOutside(select, onClose);
+
 onKeyStroke("Escape", onClose);
 
 const onSearch = (event: Event) => {
@@ -121,14 +126,16 @@ const onSelect = async (option: { label: string; value: string }) => {
 
     await nextTick();
     focusedOptionIndex.value = sortedOptions.value.indexOf(option);
-    return;
+  } else {
+    if (model.value === option.value) {
+      emit("update:modelValue", null);
+    } else {
+      emit("update:modelValue", option.value);
+      focusedOptionIndex.value = sortedOptions.value.indexOf(option);
+      emit("select", option.value);
+    }
+    open.value = false;
   }
-
-  emit("update:modelValue", option.value);
-  focusedOptionIndex.value = sortedOptions.value.indexOf(option);
-  open.value = false;
-
-  emit("select", option.value);
 };
 
 const displayedLabel = computed(() => {

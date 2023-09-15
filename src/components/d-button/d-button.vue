@@ -43,14 +43,15 @@ const buttonClasses = computed(() => {
   ];
 
   const typeClasses = {
-    primary: ["border-transparent", "bg-inverted", "text-white", "hover:bg-blue-900"],
+    primary: ["shadow-sm", "border-transparent", "bg-stone-950", "text-white", "hover:bg-stone-700"],
     outline: [
+      "shadow-sm",
+      "border",
       "border-stone-200",
       "text-stone-700",
       "hover:border-blue-200",
       "hover:bg-blue-50",
       "hover:text-blue-950",
-      "hover:shadow-sm",
     ],
     transparent: ["border-transparent", "text-stone-700", "hover:bg-blue-50", "hover:text-blue-950"],
   };

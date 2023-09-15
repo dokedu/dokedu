@@ -9,6 +9,7 @@
         multiple
         v-model="selected"
         v-model:search="eventSearch"
+        searchable
         class="w-full"
       >
         <template v-slot="{ option }">

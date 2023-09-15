@@ -28,6 +28,7 @@
           <d-select
             v-model:search="userSearch"
             :options="userOptions"
+            searchable
             :label="$t('user', 2)"
             multiple
             v-model="members"

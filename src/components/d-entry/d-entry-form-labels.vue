@@ -10,6 +10,7 @@
         v-model="selected"
         v-model:search="tagSearch"
         class="w-full"
+        searchable
       >
         <template v-slot="{ option }">
           <d-tag :color="tagsData?.tags.edges?.find((el: any) => el.id === option.value)?.color">

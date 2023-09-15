@@ -7,7 +7,7 @@
       </div>
     </PageHeader>
     <DTable
-      :query="TagsQuery"
+      :query="tagsQuery"
       objectName="tags"
       @row-click="toggleEditDialog"
       :columns="columns"
@@ -64,7 +64,7 @@ const pageVariables = ref<PageVariables[]>([
   },
 ]);
 
-const TagsQuery = graphql(`
+const tagsQuery = graphql(`
   query getTagWithLimit($limit: Int, $offset: Int) {
     tags(limit: $limit, offset: $offset) {
       pageInfo {

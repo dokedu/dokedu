@@ -3,35 +3,43 @@
     <PageHeader>
       <div class="w-full">
         <div class="flex items-center justify-between">
-          <div class="font-medium text-strong">{{ $t("entry", 2) }}</div>
-          <div class="flex gap-2">
-            <DButton
-              :type="filtersOpen ? 'outline' : 'transparent'"
-              size="md"
-              :icon-left="ListFilter"
-              @click="toggleFilters"
+          <div class="flex items-center gap-2">
+            <div class="font-medium text-strong">{{ $t("filter", 2) }}</div>
+            <DSelect
+              searchable
+              :options="studentOptions"
+              :label="$t('student')"
+              v-model:search="studentSearch"
+              v-model="student"
+            />
+            <DSelect
+              searchable
+              :options="teacherOptions"
+              :label="$t('teacher')"
+              v-model="teacher"
+              v-model:search="teacherSearch"
+            />
+            <DSelect
+              searchable
+              :options="tagOptions"
+              :label="$t('tag', 2)"
+              multiple
+              v-model="tags"
+              v-model:search="tagSearch"
             >
-              {{ $t("filter") }}
-            </DButton>
-            <router-link :to="{ name: '/record/entries/new' }">
-              <DButton type="primary" size="md" :icon-left="Plus">{{ $t("new") }}</DButton>
-            </router-link>
+              <template v-slot="{ option }">
+                <d-tag :color="tagData?.tags.edges?.find((el: any) => el.id === option.value)?.color">
+                  {{ option.label }}
+                </d-tag>
+              </template>
+            </DSelect>
           </div>
+          <router-link :to="{ name: '/record/entries/new' }">
+            <DButton type="primary" size="md" :icon-left="Plus">{{ $t("new") }}</DButton>
+          </router-link>
         </div>
       </div>
     </PageHeader>
-
-    <div v-if="filtersOpen" class="flex items-end gap-2 border-b border-stone-100 px-8 py-2">
-      <DSelect :options="studentOptions" :label="$t('student')" v-model:search="studentSearch" v-model="student" />
-      <DSelect :options="teacherOptions" :label="$t('teacher')" v-model="teacher" v-model:search="teacherSearch" />
-      <DSelect :options="tagOptions" :label="$t('tag', 2)" multiple v-model="tags" v-model:search="tagSearch">
-        <template v-slot="{ option }">
-          <d-tag :color="tagData?.tags.edges?.find((el: any) => el.id === option.value)?.color">
-            {{ option.label }}
-          </d-tag>
-        </template>
-      </DSelect>
-    </div>
 
     <DTable
       v-model:variables="pageVariables"
@@ -104,7 +112,6 @@ import PageWrapper from "@/components/page-wrapper.vue";
 import { useQuery } from "@urql/vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { Plus } from "lucide-vue-next";
-import { ListFilter } from "lucide-vue-next";
 import { ref, computed, reactive } from "vue";
 import { graphql } from "@/gql";
 import DTag from "@/components/d-tag/d-tag.vue";
@@ -117,14 +124,16 @@ import { useRouter } from "vue-router/auto";
 import { PageVariables } from "@/types/types";
 import DSelect from "@/components/d-select/d-select.vue";
 import tagQuery from "@/queries/tags";
+import { useSessionStorage } from "@vueuse/core";
 
 const i18nLocale = useI18n();
 const router = useRouter();
 
 const tagSearch = ref("");
-const student = ref();
-const teacher = ref();
-const tags = ref<string[]>([]);
+
+const student = useSessionStorage("filter/record/entries/index#student", null);
+const teacher = useSessionStorage("filter/record/entries/index#teacher", null);
+const tags = useSessionStorage<string[]>(`filter/record/entries/index#tags`, []);
 
 interface Variables extends PageVariables {
   filter: {
@@ -169,8 +178,8 @@ const goToProject = (id: string) => {
 const pageVariables = ref<Variables[]>([
   {
     filter: {
-      users: student.value,
-      authors: teacher.value,
+      users: student.value || undefined,
+      authors: teacher.value || undefined,
       tags: tags.value,
     },
     limit: 30,
@@ -186,8 +195,8 @@ watch([student, teacher, tags], () => {
   pageVariables.value = [
     {
       filter: {
-        users: student.value,
-        authors: teacher.value,
+        users: student.value || undefined,
+        authors: teacher.value || undefined,
         tags: tags.value,
       },
       limit: 30,
@@ -303,10 +312,5 @@ function dateOnly(date: string) {
     day: "2-digit",
   };
   return new Date(date).toLocaleDateString(i18nLocale.locale.value, options);
-}
-
-const filtersOpen = ref(false);
-function toggleFilters() {
-  filtersOpen.value = !filtersOpen.value;
 }
 </script>

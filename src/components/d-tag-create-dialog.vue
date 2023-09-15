@@ -14,31 +14,18 @@
         </div>
         <div class="relative mt-4 flex items-center gap-4">
           <div class="min-w-16 text-sm text-stone-400">{{ $t("color") }}</div>
-          <div class="relative w-full">
-            <DContextMenu
-              :show="contextMenuOpen"
-              @close="contextMenuOpen = false"
-              :alignment="ContextMenuAlignment.Overlay"
-              class="max-h-[150px] w-full overflow-y-auto p-1"
-            >
-              <div class="flex w-full flex-col items-start rounded-md">
-                <div
-                  class="w-full cursor-pointer p-1 hover:bg-stone-100"
-                  v-for="color in colors"
-                  @click="onSelectColor(color)"
-                >
-                  <DTag :color="color">{{ $t(color) }}</DTag>
-                </div>
-              </div>
-            </DContextMenu>
-            <div
-              class="flex w-full flex-wrap items-start gap-2 rounded-md p-2 hover:bg-stone-50"
-              @click="contextMenuOpen = true"
-            >
-              <DTag v-if="tagColor" :color="tagColor" class="w-1/4 p-2">{{ tagColor }}</DTag>
-              <div v-else class="text-stone-400">{{ $t("set_tag") }}</div>
-            </div>
-          </div>
+          <DSelect :options="colorOptions" :label="$t('tag', 2)" multiple v-model="tagColor" class="w-full">
+            <template #display="{ displayedLabel }">
+              <d-tag :color="tagColor">
+                {{ displayedLabel }}
+              </d-tag>
+            </template>
+            <template v-slot="{ option }">
+              <d-tag :color="option.value">
+                {{ option.label }}
+              </d-tag>
+            </template>
+          </DSelect>
         </div>
       </div>
       <div v-if="error" class="text-xs font-semibold text-red-600">{{ error }}</div>
@@ -53,19 +40,27 @@
 </template>
 
 <script setup lang="ts">
+import DIconButton from "@/components/d-icon-button/d-icon-button.vue";
 import DDialog from "@/components/d-dialog/d-dialog.vue";
 import DButton from "@/components/d-button/d-button.vue";
-import DIconButton from "@/components/d-icon-button/d-icon-button.vue";
-import { X } from "lucide-vue-next";
-import { toRef, ref } from "vue";
 import DInput from "@/components/d-input/d-input.vue";
-import DContextMenu from "@/components/d-context-menu/d-context-menu.vue";
-import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue";
+import DSelect from "@/components/d-select/d-select.vue";
 import DTag from "@/components/d-tag/d-tag.vue";
 import { useMutation } from "@urql/vue";
+import { X } from "lucide-vue-next";
+import { toRef, ref } from "vue";
 import { graphql } from "@/gql";
 
 const colors = ["red", "orange", "yellow", "green", "blue", "indigo", "purple", "pink", "gray"];
+
+const colorOptions = colors.map((c) => ({
+  label: capitalize(c),
+  value: c,
+}));
+
+function capitalize(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
 
 const props = defineProps({
   open: Boolean,
@@ -74,8 +69,7 @@ const emit = defineEmits(["close", "created"]);
 
 const modalOpen = toRef(props, "open");
 const name = ref("");
-const tagColor = ref("");
-const contextMenuOpen = ref(false);
+const tagColor = ref("gray");
 const error = ref("");
 
 const { executeMutation: createTag } = useMutation(
@@ -91,11 +85,6 @@ const { executeMutation: createTag } = useMutation(
     }
   `)
 );
-
-const onSelectColor = (color: string) => {
-  tagColor.value = color;
-  contextMenuOpen.value = false;
-};
 
 const onClose = () => {
   emit("close", false);
