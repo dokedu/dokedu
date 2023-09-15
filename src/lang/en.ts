@@ -222,4 +222,7 @@ export const en = {
   school_year: "School year | School years",
 
   selected: "selected",
+
+  enter_password: "Enter password",
+  password_incorrect_try_again: "Password incorrect. Please try again.",
 };

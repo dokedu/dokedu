@@ -75,6 +75,9 @@ import { ref, watch } from "vue";
 import { onKeyStroke } from "@vueuse/core";
 import useDownloadFile from "@/composables/useDownloadFile";
 import { ArrowLeft, Download, Printer } from "lucide-vue-next";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 export interface Props {
   file: File | null;
@@ -189,6 +192,24 @@ async function renderPDF(url) {
   pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdfjs-3.7.107-dist/build/pdf.worker.js";
 
   const loadingTask = pdfjsLib.getDocument(url);
+
+  loadingTask.onPassword = (callback: Function, reason: number) => {
+    if (reason == 1) {
+      const enteredPassword = prompt(t('enter_password'));
+      if (enteredPassword !== null) {
+        callback(enteredPassword);
+      } else {
+        emit("close")
+      }
+    } else {
+      const enteredPassword = prompt(t('password_incorrect_try_again'));
+      if (enteredPassword !== null) {
+        callback(enteredPassword);
+      } else {
+        emit("close")
+      }
+    }
+  }
 
   // @ts-expect-error
   await loadingTask.promise.then(async (pdf) => {
