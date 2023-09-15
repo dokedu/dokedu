@@ -2,8 +2,7 @@
   <PageWrapper>
     <div class="h-full p-3">
       <div
-        class="flex h-full min-h-full w-full divide-x divide-stone-100 rounded-xl border border-stone-50 bg-white shadow"
-      >
+        class="flex h-full overflow-auto min-h-full w-full divide-x divide-stone-100 rounded-xl border border-stone-50 bg-white shadow">
         <div class="flex w-full flex-col px-6 py-4">
           <div class="border-b border-stone-100 pb-4">
             <div class="flex items-center gap-1 text-strong">
@@ -17,34 +16,22 @@
               <span class="text-sm text-stone-950">{{ data?.user?.firstName }} {{ data?.user?.lastName }}</span>
             </div>
           </div>
-          <div class="flex flex-col overflow-scroll pt-4">
+          <div class="flex flex-col pt-4 grow overflow-auto">
             <div class="flex h-fit gap-1">
               <RouterLink :to="{ name: '/record/students/[id]/competences/' }">
-                <DButton
-                  :type="
-                    $route.matched.some(({ path }) => path.includes('/record/students/:id/competences'))
-                      ? 'primary'
-                      : 'transparent'
-                  "
-                  size="sm"
-                  :icon-left="CopyCheck"
-                  >{{ $t("competence", 2) }}</DButton
-                >
+                <DButton :type="$route.matched.some(({ path }) => path.includes('/record/students/:id/competences'))
+                  ? 'primary'
+                  : 'transparent'
+                  " size="sm" :icon-left="CopyCheck">{{ $t("competence", 2) }}</DButton>
               </RouterLink>
               <RouterLink :to="{ name: '/record/students/[id]/entries' }">
-                <DButton
-                  :type="
-                    $route.matched.some(({ path }) => path.includes('/record/students/:id/entries'))
-                      ? 'primary'
-                      : 'transparent'
-                  "
-                  size="sm"
-                  :icon-left="FileCheck"
-                  >{{ $t("entry", 2) }}</DButton
-                >
+                <DButton :type="$route.matched.some(({ path }) => path.includes('/record/students/:id/entries'))
+                  ? 'primary'
+                  : 'transparent'
+                  " size="sm" :icon-left="FileCheck">{{ $t("entry", 2) }}</DButton>
               </RouterLink>
             </div>
-            <div class="mt-4 h-full flex-grow overflow-scroll">
+            <div class="mt-4 flex-1 overflow-hidden">
               <RouterView />
               <!-- <div v-for="i in 50" class="mb-4 h-8 bg-purple-100"></div> -->
             </div>
