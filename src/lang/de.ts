@@ -220,4 +220,7 @@ export const de = {
   school_year: "Schuljahr | Schuljahre",
 
   selected: "ausgewählt",
+
+  enter_password: "Passwort eingeben",
+  password_incorrect_try_again: "Passwort falsch. Bitte versuche es erneut.",
 };
