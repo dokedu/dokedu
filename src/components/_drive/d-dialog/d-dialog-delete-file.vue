@@ -1,14 +1,10 @@
 <template>
-  <d-dialog :open="open" @close="onClose" class="p-4">
-    <template #header>
-      <div class="mb-2 text-base font-medium text-strong">{{ $t("move_to_trash_q") }}</div>
+  <d-dialog :title="$t('move_to_trash_q')" :open="open" @close="onClose" class="p-4">
+    <template #main>
       <div class="max-w-[300px] font-normal text-subtle">
         {{ $t("will_be_deleted_can_restore", { file: file?.name }) }}
       </div>
-    </template>
-    <template #footer>
-      <div class="flex justify-between">
-        <d-button size="sm" type="outline" @click="onClose">{{ $t("cancel") }}</d-button>
+      <div class="flex justify-end mt-6">
         <d-button size="sm" @click="onSave">{{ $t("delete") }}</d-button>
       </div>
     </template>

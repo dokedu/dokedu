@@ -1,16 +1,14 @@
 <template>
-  <DDialog :open="modalOpen" @close="onClose" class="p-4">
-    <template #header>
-      <div class="flex items-center justify-between">
-        <div class="font-medium text-strong">{{ $t("create_tag") }}</div>
-        <DIconButton :icon="X" size="md" @click="onClose"></DIconButton>
-      </div>
+  <DDialog :open="modalOpen" @close="onClose" :title="$t('create_tag')" class="p-4">
+    <template #trigger>
+      <slot name="trigger"></slot>
+
     </template>
     <template #main>
       <div class="pb-4">
         <div class="flex items-center gap-4">
           <div class="min-w-16 text-sm text-stone-400">{{ $t("name") }}</div>
-          <DInput name="name" v-model="name" />
+          <DInput name="name" v-model="name" class="flex-1" />
         </div>
         <div class="relative mt-4 flex items-center gap-4">
           <div class="min-w-16 text-sm text-stone-400">{{ $t("color") }}</div>
@@ -29,10 +27,7 @@
         </div>
       </div>
       <div v-if="error" class="text-xs font-semibold text-red-600">{{ error }}</div>
-    </template>
-    <template #footer>
-      <div class="flex justify-between">
-        <DButton type="outline" size="md" @click="onClose">{{ $t("cancel") }}</DButton>
+      <div class="flex justify-end">
         <DButton type="primary" size="md" @click="onCreate">{{ $t("create") }}</DButton>
       </div>
     </template>
@@ -40,14 +35,12 @@
 </template>
 
 <script setup lang="ts">
-import DIconButton from "@/components/d-icon-button/d-icon-button.vue";
 import DDialog from "@/components/d-dialog/d-dialog.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import DInput from "@/components/d-input/d-input.vue";
 import DSelect from "@/components/d-select/d-select.vue";
 import DTag from "@/components/d-tag/d-tag.vue";
 import { useMutation } from "@urql/vue";
-import { X } from "lucide-vue-next";
 import { toRef, ref } from "vue";
 import { graphql } from "@/gql";
 

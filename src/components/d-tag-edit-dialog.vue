@@ -1,16 +1,10 @@
 <template>
-  <DDialog :open="modalOpen" @close="onClose" class="p-4">
-    <template #header>
-      <div class="flex items-center justify-between">
-        <div class="font-medium text-strong">{{ $t("edit_tag") }}</div>
-        <DIconButton :icon="X" size="md" @click="onClose"></DIconButton>
-      </div>
-    </template>
+  <DDialog :open="modalOpen" @close="onClose" class="p-4" :title="$t('edit_tag')">
     <template #main>
       <div class="pb-4">
         <div class="flex items-center gap-4">
           <div class="min-w-16 text-sm text-stone-400">{{ $t("name") }}</div>
-          <DInput v-if="tag" name="name" v-model="tag.name" />
+          <DInput v-if="tag" name="name" v-model="tag.name" class="flex-1" />
         </div>
         <div class="relative mt-4 flex items-center gap-4">
           <div class="min-w-16 text-sm text-stone-400">{{ $t("color") }}</div>
@@ -29,14 +23,9 @@
         </div>
       </div>
       <div v-if="error" class="text-xs font-semibold text-red-600">{{ error }}</div>
-    </template>
-    <template #footer>
       <div class="flex justify-between gap-2">
-        <DButton type="outline" size="md" @click="onClose">{{ $t("cancel") }}</DButton>
-        <div class="flex gap-2">
-          <DButton type="outline" size="md" @click="onArchive">{{ $t("archive") }}</DButton>
-          <DButton type="primary" size="md" @click="onUpdate">{{ $t("update") }}</DButton>
-        </div>
+        <DButton type="outline" size="md" @click="onArchive">{{ $t("archive") }}</DButton>
+        <DButton type="primary" size="md" @click="onUpdate">{{ $t("update") }}</DButton>
       </div>
     </template>
   </DDialog>
@@ -45,9 +34,7 @@
 <script setup lang="ts">
 import DDialog from "./d-dialog/d-dialog.vue";
 import DButton from "./d-button/d-button.vue";
-import DIconButton from "./d-icon-button/d-icon-button.vue";
 import DSelect from "@/components/d-select/d-select.vue";
-import { X } from "lucide-vue-next";
 import { toRef, ref, computed } from "vue";
 import DInput from "./d-input/d-input.vue";
 import DTag from "./d-tag/d-tag.vue";

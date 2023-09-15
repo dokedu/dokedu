@@ -6,14 +6,8 @@
         <DButton @click="toggleCreateDialog()" type="primary" size="md" :icon-left="Plus">{{ $t("new") }}</DButton>
       </div>
     </PageHeader>
-    <DTable
-      :query="tagsQuery"
-      objectName="tags"
-      @row-click="toggleEditDialog"
-      :columns="columns"
-      v-model:variables="pageVariables"
-      hideHeader
-    >
+    <DTable :query="tagsQuery" objectName="tags" @row-click="toggleEditDialog" :columns="columns"
+      v-model:variables="pageVariables" hideHeader>
       <template #name-data="{ item }">
         <DTag :color="item.color">{{ item.name }}</DTag>
       </template>

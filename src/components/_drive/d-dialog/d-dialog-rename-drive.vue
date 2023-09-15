@@ -1,16 +1,10 @@
 <template>
-  <d-dialog :open="open" @close="onClose" class="p-4">
-    <template #header>
-      <div class="font-medium text-strong">{{ $t("rename_file") }}</div>
-    </template>
+  <d-dialog :title="$t('rename')" :open="open" @close="onClose" class="p-4">
     <template #main>
       <div class="min-w-[300px]">
         <d-input v-model="name" :placeholder="$t('new_shared_drive_name')" name="name" />
       </div>
-    </template>
-    <template #footer>
-      <div class="flex justify-between">
-        <d-button size="sm" type="outline" @click="onClose">{{ $t("cancel") }}</d-button>
+      <div class="flex justify-end mt-6">
         <d-button size="sm" @click="onSave">{{ $t("save") }}</d-button>
       </div>
     </template>
