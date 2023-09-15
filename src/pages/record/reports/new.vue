@@ -19,7 +19,7 @@
           <div class="w-20 text-sm font-medium text-strong">{{ $t("to") }}</div>
           <d-input class="w-full" type="date" name="to" v-model="to" />
         </div>
-        <ReportTypeList @update="(selectedType) => (type = selectedType)"></ReportTypeList>
+        <ReportTypeList v-model="type" />
         <ReportTagList @update="(selectedTags) => (tags = selectedTags)"></ReportTagList>
       </div>
     </PageContent>
@@ -40,7 +40,6 @@ import { ref } from "vue";
 import dInput from "@/components/d-input/d-input.vue";
 import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
-import { ReportType } from "@/components/d-report/d-report-type-list.vue";
 import { useRouter } from "vue-router/auto";
 
 const router = useRouter();
@@ -48,7 +47,7 @@ const router = useRouter();
 const student = ref<User>();
 const from = ref<string>("");
 const to = ref<string>("");
-const type = ref<ReportType>();
+const type = ref();
 const tags = ref<Tag[]>();
 
 const { executeMutation: createReportMutation } = useMutation(
@@ -66,8 +65,8 @@ async function createReport() {
     studentUser: student.value?.id,
     from: new Date(from.value).toISOString(),
     to: new Date(to.value).toISOString(),
-    kind: type.value?.kind,
-    format: type.value?.format,
+    kind: type.value,
+    format: "pdf",
     filterTags: tags.value?.map((tag) => tag.id) || [],
   };
 
