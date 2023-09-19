@@ -353,6 +353,16 @@ type GenerateFileURLInput struct {
 	ID string `json:"id"`
 }
 
+type ImportStudentsInput struct {
+	File graphql.Upload `json:"file"`
+}
+
+type ImportStudentsPayload struct {
+	UsersCreated int                   `json:"usersCreated"`
+	UsersExisted int                   `json:"usersExisted"`
+	Errors       []ImportStudentsError `json:"errors"`
+}
+
 type MoveFileInput struct {
 	ID       string  `json:"id"`
 	TargetID *string `json:"targetId,omitempty"`
@@ -774,6 +784,53 @@ func (e *FilePermission) UnmarshalGQL(v interface{}) error {
 }
 
 func (e FilePermission) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ImportStudentsError string
+
+const (
+	ImportStudentsErrorHeaderWrong      ImportStudentsError = "HEADER_WRONG"
+	ImportStudentsErrorFormatWrong      ImportStudentsError = "FORMAT_WRONG"
+	ImportStudentsErrorDataWrong        ImportStudentsError = "DATA_WRONG"
+	ImportStudentsErrorGradeWrong       ImportStudentsError = "GRADE_WRONG"
+	ImportStudentsErrorPermissionDenied ImportStudentsError = "PERMISSION_DENIED"
+)
+
+var AllImportStudentsError = []ImportStudentsError{
+	ImportStudentsErrorHeaderWrong,
+	ImportStudentsErrorFormatWrong,
+	ImportStudentsErrorDataWrong,
+	ImportStudentsErrorGradeWrong,
+	ImportStudentsErrorPermissionDenied,
+}
+
+func (e ImportStudentsError) IsValid() bool {
+	switch e {
+	case ImportStudentsErrorHeaderWrong, ImportStudentsErrorFormatWrong, ImportStudentsErrorDataWrong, ImportStudentsErrorGradeWrong, ImportStudentsErrorPermissionDenied:
+		return true
+	}
+	return false
+}
+
+func (e ImportStudentsError) String() string {
+	return string(e)
+}
+
+func (e *ImportStudentsError) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ImportStudentsError(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ImportStudentsError", str)
+	}
+	return nil
+}
+
+func (e ImportStudentsError) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

@@ -294,6 +294,12 @@ type ComplexityRoot struct {
 		Success func(childComplexity int) int
 	}
 
+	ImportStudentsPayload struct {
+		Errors       func(childComplexity int) int
+		UsersCreated func(childComplexity int) int
+		UsersExisted func(childComplexity int) int
+	}
+
 	MoveFilesPayload struct {
 		Files func(childComplexity int) int
 	}
@@ -342,6 +348,7 @@ type ComplexityRoot struct {
 		DownloadFiles           func(childComplexity int, input model.DownloadFilesInput) int
 		EditShare               func(childComplexity int, input model.CreateShareInput) int
 		ForgotPassword          func(childComplexity int, input model.ForgotPasswordInput) int
+		ImportStudents          func(childComplexity int, input model.ImportStudentsInput) int
 		MoveFile                func(childComplexity int, input model.MoveFileInput) int
 		MoveFiles               func(childComplexity int, input model.MoveFilesInput) int
 		PreviewFile             func(childComplexity int, input model.PreviewFileInput) int
@@ -727,6 +734,7 @@ type MutationResolver interface {
 	UpdateSchoolYear(ctx context.Context, input model.UpdateSchoolYearInput) (*db.SchoolYear, error)
 	DeleteSchoolYear(ctx context.Context, id string) (*db.SchoolYear, error)
 	UpdateUserStudentGrade(ctx context.Context, input model.UpdateUserStudentGradesInput) (*db.UserStudentGrades, error)
+	ImportStudents(ctx context.Context, input model.ImportStudentsInput) (*model.ImportStudentsPayload, error)
 }
 type OrganisationResolver interface {
 	Owner(ctx context.Context, obj *db.Organisation) (*db.User, error)
@@ -1786,6 +1794,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ForgotPasswordPayload.Success(childComplexity), true
 
+	case "ImportStudentsPayload.errors":
+		if e.complexity.ImportStudentsPayload.Errors == nil {
+			break
+		}
+
+		return e.complexity.ImportStudentsPayload.Errors(childComplexity), true
+
+	case "ImportStudentsPayload.usersCreated":
+		if e.complexity.ImportStudentsPayload.UsersCreated == nil {
+			break
+		}
+
+		return e.complexity.ImportStudentsPayload.UsersCreated(childComplexity), true
+
+	case "ImportStudentsPayload.usersExisted":
+		if e.complexity.ImportStudentsPayload.UsersExisted == nil {
+			break
+		}
+
+		return e.complexity.ImportStudentsPayload.UsersExisted(childComplexity), true
+
 	case "MoveFilesPayload.files":
 		if e.complexity.MoveFilesPayload.Files == nil {
 			break
@@ -2308,6 +2337,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.ForgotPassword(childComplexity, args["input"].(model.ForgotPasswordInput)), true
+
+	case "Mutation.importStudents":
+		if e.complexity.Mutation.ImportStudents == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_importStudents_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ImportStudents(childComplexity, args["input"].(model.ImportStudentsInput)), true
 
 	case "Mutation.moveFile":
 		if e.complexity.Mutation.MoveFile == nil {
@@ -3842,6 +3883,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputFilesFilterInput,
 		ec.unmarshalInputForgotPasswordInput,
 		ec.unmarshalInputGenerateFileURLInput,
+		ec.unmarshalInputImportStudentsInput,
 		ec.unmarshalInputMoveFileInput,
 		ec.unmarshalInputMoveFilesInput,
 		ec.unmarshalInputMyFilesFilterInput,
@@ -4641,6 +4683,21 @@ func (ec *executionContext) field_Mutation_forgotPassword_args(ctx context.Conte
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNForgotPasswordInput2exampleᚋpkgᚋgraphᚋmodelᚐForgotPasswordInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_importStudents_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.ImportStudentsInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNImportStudentsInput2exampleᚋpkgᚋgraphᚋmodelᚐImportStudentsInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -12550,6 +12607,138 @@ func (ec *executionContext) fieldContext_ForgotPasswordPayload_success(ctx conte
 	return fc, nil
 }
 
+func (ec *executionContext) _ImportStudentsPayload_usersCreated(ctx context.Context, field graphql.CollectedField, obj *model.ImportStudentsPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ImportStudentsPayload_usersCreated(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UsersCreated, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ImportStudentsPayload_usersCreated(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ImportStudentsPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ImportStudentsPayload_usersExisted(ctx context.Context, field graphql.CollectedField, obj *model.ImportStudentsPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ImportStudentsPayload_usersExisted(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UsersExisted, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ImportStudentsPayload_usersExisted(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ImportStudentsPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ImportStudentsPayload_errors(ctx context.Context, field graphql.CollectedField, obj *model.ImportStudentsPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ImportStudentsPayload_errors(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Errors, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]model.ImportStudentsError)
+	fc.Result = res
+	return ec.marshalNImportStudentsError2ᚕexampleᚋpkgᚋgraphᚋmodelᚐImportStudentsErrorᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ImportStudentsPayload_errors(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ImportStudentsPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ImportStudentsError does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _MoveFilesPayload_files(ctx context.Context, field graphql.CollectedField, obj *model.MoveFilesPayload) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_MoveFilesPayload_files(ctx, field)
 	if err != nil {
@@ -17403,6 +17592,69 @@ func (ec *executionContext) fieldContext_Mutation_updateUserStudentGrade(ctx con
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updateUserStudentGrade_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_importStudents(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_importStudents(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ImportStudents(rctx, fc.Args["input"].(model.ImportStudentsInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ImportStudentsPayload)
+	fc.Result = res
+	return ec.marshalNImportStudentsPayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐImportStudentsPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_importStudents(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "usersCreated":
+				return ec.fieldContext_ImportStudentsPayload_usersCreated(ctx, field)
+			case "usersExisted":
+				return ec.fieldContext_ImportStudentsPayload_usersExisted(ctx, field)
+			case "errors":
+				return ec.fieldContext_ImportStudentsPayload_errors(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ImportStudentsPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_importStudents_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -28606,6 +28858,34 @@ func (ec *executionContext) unmarshalInputGenerateFileURLInput(ctx context.Conte
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputImportStudentsInput(ctx context.Context, obj interface{}) (model.ImportStudentsInput, error) {
+	var it model.ImportStudentsInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"file"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "file":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
+			it.File, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputMoveFileInput(ctx context.Context, obj interface{}) (model.MoveFileInput, error) {
 	var it model.MoveFileInput
 	asMap := map[string]interface{}{}
@@ -31846,6 +32126,48 @@ func (ec *executionContext) _ForgotPasswordPayload(ctx context.Context, sel ast.
 	return out
 }
 
+var importStudentsPayloadImplementors = []string{"ImportStudentsPayload"}
+
+func (ec *executionContext) _ImportStudentsPayload(ctx context.Context, sel ast.SelectionSet, obj *model.ImportStudentsPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, importStudentsPayloadImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ImportStudentsPayload")
+		case "usersCreated":
+
+			out.Values[i] = ec._ImportStudentsPayload_usersCreated(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "usersExisted":
+
+			out.Values[i] = ec._ImportStudentsPayload_usersExisted(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "errors":
+
+			out.Values[i] = ec._ImportStudentsPayload_errors(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var moveFilesPayloadImplementors = []string{"MoveFilesPayload"}
 
 func (ec *executionContext) _MoveFilesPayload(ctx context.Context, sel ast.SelectionSet, obj *model.MoveFilesPayload) graphql.Marshaler {
@@ -32476,6 +32798,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateUserStudentGrade(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "importStudents":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_importStudents(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -36126,6 +36457,96 @@ func (ec *executionContext) marshalNID2ᚕstringᚄ(ctx context.Context, sel ast
 	}
 
 	return ret
+}
+
+func (ec *executionContext) unmarshalNImportStudentsError2exampleᚋpkgᚋgraphᚋmodelᚐImportStudentsError(ctx context.Context, v interface{}) (model.ImportStudentsError, error) {
+	var res model.ImportStudentsError
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNImportStudentsError2exampleᚋpkgᚋgraphᚋmodelᚐImportStudentsError(ctx context.Context, sel ast.SelectionSet, v model.ImportStudentsError) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNImportStudentsError2ᚕexampleᚋpkgᚋgraphᚋmodelᚐImportStudentsErrorᚄ(ctx context.Context, v interface{}) ([]model.ImportStudentsError, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]model.ImportStudentsError, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNImportStudentsError2exampleᚋpkgᚋgraphᚋmodelᚐImportStudentsError(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNImportStudentsError2ᚕexampleᚋpkgᚋgraphᚋmodelᚐImportStudentsErrorᚄ(ctx context.Context, sel ast.SelectionSet, v []model.ImportStudentsError) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNImportStudentsError2exampleᚋpkgᚋgraphᚋmodelᚐImportStudentsError(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalNImportStudentsInput2exampleᚋpkgᚋgraphᚋmodelᚐImportStudentsInput(ctx context.Context, v interface{}) (model.ImportStudentsInput, error) {
+	res, err := ec.unmarshalInputImportStudentsInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNImportStudentsPayload2exampleᚋpkgᚋgraphᚋmodelᚐImportStudentsPayload(ctx context.Context, sel ast.SelectionSet, v model.ImportStudentsPayload) graphql.Marshaler {
+	return ec._ImportStudentsPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNImportStudentsPayload2ᚖexampleᚋpkgᚋgraphᚋmodelᚐImportStudentsPayload(ctx context.Context, sel ast.SelectionSet, v *model.ImportStudentsPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ImportStudentsPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {

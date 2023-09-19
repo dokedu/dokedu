@@ -99,3 +99,27 @@ extend type Query {
 extend type Mutation {
     updateUserStudentGrade(input: UpdateUserStudentGradesInput!): UserStudentGrades!
 }
+
+###
+
+enum ImportStudentsError {
+    HEADER_WRONG
+    FORMAT_WRONG
+    DATA_WRONG
+    GRADE_WRONG
+    PERMISSION_DENIED
+}
+
+type ImportStudentsPayload {
+    usersCreated: Int!
+    usersExisted: Int!
+    errors: [ImportStudentsError!]!
+}
+
+input ImportStudentsInput {
+    file: Upload!
+}
+
+extend type Mutation {
+    importStudents(input: ImportStudentsInput!): ImportStudentsPayload!
+}

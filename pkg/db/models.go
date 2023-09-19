@@ -352,12 +352,13 @@ type User struct {
 	bun.BaseModel
 
 	ID             string         `bun:",nullzero,pk" json:"id"`
+	Sex            string         `json:"sex"`
 	Role           UserRole       `json:"role"`
-	OrganisationID string         `json:"organisation_id"`
-	FirstName      string         `json:"first_name"`
-	LastName       string         `json:"last_name"`
 	Email          sql.NullString `bun:",nullzero" json:"email"`
 	Password       sql.NullString `json:"password"`
+	FirstName      string         `json:"first_name"`
+	LastName       string         `json:"last_name"`
+	OrganisationID string         `json:"organisation_id"`
 	RecoveryToken  sql.NullString `json:"recovery_token"`
 	RecoverySentAt bun.NullTime   `json:"recovery_sent_at"`
 	AvatarFileID   sql.NullString `json:"avatar_file_id"`
