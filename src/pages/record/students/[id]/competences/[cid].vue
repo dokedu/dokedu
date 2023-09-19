@@ -1,51 +1,39 @@
 <template>
-  <div class="flex min-h-full flex-col">
+  <div class="flex h-full flex-col">
     <div class="mb-4 flex h-fit gap-2 text-sm text-subtle">
       <router-link :to="{ name: '/record/students/[id]/competences/' }">{{ $t("subject", 2) }}</router-link>
       <template v-for="parent in data?.competence.parents">
         <span>{{ ">" }}</span>
         <router-link
-          :to="{ name: '/record/students/[id]/competences/[cid]', params: { id: route.params.id, cid: parent?.id } }"
-        >
+          :to="{ name: '/record/students/[id]/competences/[cid]', params: { id: route.params.id, cid: parent?.id } }">
           {{ parent.name }}
         </router-link>
       </template>
       <span>{{ ">" }}</span>
-      <router-link
-        :to="{
-          name: '/record/students/[id]/competences/[cid]',
-          params: { id: route.params.id, cid: data?.competence?.id as string },
-        }"
-      >
+      <router-link :to="{
+        name: '/record/students/[id]/competences/[cid]',
+        params: { id: route.params.id, cid: data?.competence?.id as string },
+      }">
         {{ data?.competence.name }}
       </router-link>
     </div>
-    <div class="h-full max-h-full overflow-auto">
-      <div class="flex h-full min-h-fit flex-1 flex-col gap-2 overflow-auto">
-        <component
-          v-for="competence in (data?.competence?.competences as Competence[])"
-          :is="competence?.type !== 'competence' ? 'router-link' : 'div'"
-          :to="{
-            name: '/record/students/[id]/competences/[cid]',
-            params: { id: route.params.id, cid: competence?.id },
-          }"
-        >
-          <DCompetence v-if="competence" :competence="competence">
-            <DCompetenceLevel
-              :id="competence.userCompetences[0]?.id as string"
-              :level="getLevel(competence)"
-              :editable="competence.type == 'subject' ? false : true"
-              @update="(val) => createUserCompetence({ level: val.level, id: competence.id })"
-              class="z-10"
-            />
-            <template #footer>
-              <div v-if="competence.userCompetences.length > 0">
-                <DCompetenceEntries :competences="(competence.userCompetences as UserCompetence[])" />
-              </div>
-            </template>
-          </DCompetence>
-        </component>
-      </div>
+    <div class="flex flex-1 flex-col gap-2 overflow-y-auto">
+      <component v-for="competence in (data?.competence?.competences as Competence[])"
+        :is="competence?.type !== 'competence' ? 'router-link' : 'div'" :to="{
+          name: '/record/students/[id]/competences/[cid]',
+          params: { id: route.params.id, cid: competence?.id },
+        }">
+        <DCompetence v-if="competence" :competence="competence">
+          <DCompetenceLevel :id="competence.userCompetences[0]?.id as string" :level="getLevel(competence)"
+            :editable="competence.type == 'subject' ? false : true"
+            @update="(val) => createUserCompetence({ level: val.level, id: competence.id })" class="z-10" />
+          <template #footer>
+            <div v-if="competence.userCompetences.length > 0">
+              <DCompetenceEntries :competences="(competence.userCompetences as UserCompetence[])" />
+            </div>
+          </template>
+        </DCompetence>
+      </component>
     </div>
   </div>
 </template>

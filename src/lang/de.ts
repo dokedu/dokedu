@@ -223,4 +223,7 @@ export const de = {
   import_students: "Schüler importieren",
   click_to_upload: "Klicken, um hochzuladen",
   or_drag_and_drop: "oder ziehen und ablegen",
+
+  enter_password: "Passwort eingeben",
+  password_incorrect_try_again: "Passwort falsch. Bitte versuche es erneut.",
 };

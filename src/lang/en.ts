@@ -225,4 +225,7 @@ export const en = {
   import_students: "Import students",
   click_to_upload: "Click to upload",
   or_drag_and_drop: "or drag and drop",
+
+  enter_password: "Enter password",
+  password_incorrect_try_again: "Password incorrect. Please try again.",
 };
