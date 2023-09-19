@@ -94,7 +94,7 @@ type Props = {
   hideHeader?: boolean;
   defaultSort?: string;
   search?: string;
-  additionalTypenames?: ["File" | "Bucket"];
+  additionalTypenames?: string[];
   draggable?: boolean;
   // drag-data-type
   dragDataType?: string;

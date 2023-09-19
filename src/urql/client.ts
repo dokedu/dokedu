@@ -1,29 +1,20 @@
-import { fetchExchange } from "@urql/vue";
+import { cacheExchange, fetchExchange } from "@urql/vue";
 import { authExchange } from "@urql/exchange-auth";
 import { createClient } from "@urql/vue";
 import router from "../router/router.ts";
 import { publicRoutes } from "../router/publicRoutes.ts";
-import { cacheExchange } from "@urql/exchange-graphcache";
-import { makeDefaultStorage } from "@urql/exchange-graphcache/default-storage";
 
 const url = import.meta.env.VITE_API_URL as string;
 const getToken = () => {
   return localStorage.getItem("authorization");
 };
 
-const storage = makeDefaultStorage({
-  idbName: "graphcache-v3", // The name of the IndexedDB database
-  maxAge: 7, // The maximum age of the persisted data in days
-});
-
 function makeClient() {
   return createClient({
     url,
     requestPolicy: "cache-and-network",
     exchanges: [
-      cacheExchange({
-        storage,
-      }),
+      cacheExchange,
       authExchange(async (utils) => {
         return {
           addAuthToOperation(operation) {

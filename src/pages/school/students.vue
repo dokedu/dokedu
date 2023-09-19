@@ -41,6 +41,7 @@
       :query="studentsQuery"
       @row-click="goToStudent"
       defaultSort="lastName"
+      :additionalTypenames="['ImportStudentsPayload', 'User', 'UserStudent']"
     >
       <template #birthday-data="{ item }">
         {{
