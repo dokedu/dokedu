@@ -12,8 +12,8 @@
           class="h-8 rounded-md border border-stone-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-stone-200 focus:shadow-sm focus:ring-0"
         />
       </div>
-      <div class="flex items-center gap-8">
-        <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 px-2.5">
           <input
             class="border-subtle rounded checked:bg-stone-900 checked:text-stone-900 checked:hover:bg-stone-900 focus:ring-0 checked:focus:bg-stone-900"
             type="checkbox"
@@ -22,6 +22,12 @@
           />
           <label for="showDeletedRecord">{{ $t("show_deleted") }}</label>
         </div>
+        <DUploadStudentsDialog>
+          <template #trigger>
+            <UploadCloudIcon :size="16" />
+            {{ $t("import_students") }}
+          </template>
+        </DUploadStudentsDialog>
         <RouterLink :to="{ name: '/school/students/new' }">
           <DButton type="primary" size="md" :icon-left="Plus">{{ $t("add_student") }}</DButton>
         </RouterLink>
@@ -55,7 +61,7 @@
 import DButton from "@/components/d-button/d-button.vue";
 import PageHeader from "@/components/page-header.vue";
 import PageWrapper from "@/components/page-wrapper.vue";
-import { Plus } from "lucide-vue-next";
+import { Plus, UploadCloudIcon } from "lucide-vue-next";
 import { ref, watch } from "vue";
 import { UserOrderBy } from "@/gql/graphql";
 import { graphql } from "@/gql";
@@ -63,6 +69,7 @@ import DTable from "@/components/d-table/d-table.vue";
 import { useRouter } from "vue-router/auto";
 import { formatDate, watchDebounced } from "@vueuse/core";
 import type { PageVariables } from "@/types/types.ts";
+import DUploadStudentsDialog from "@/components/_admin/d-upload-students-dialog.vue";
 
 const router = useRouter();
 const search = ref("");

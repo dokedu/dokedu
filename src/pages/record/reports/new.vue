@@ -10,7 +10,14 @@
     </PageHeader>
     <PageContent>
       <div class="mt-4 max-w-sm space-y-4 px-8">
-        <StudentList @update="(selectedStudent) => (student = selectedStudent)" />
+        <DSelect
+          searchable
+          :options="studentOptions"
+          :label="$t('student')"
+          v-model:search="studentSearch"
+          v-model="student"
+        />
+
         <div class="flex items-center gap-2">
           <div class="w-20 text-sm font-medium text-strong">{{ $t("from") }}</div>
           <d-input class="w-full" type="date" name="from" v-model="from" />
@@ -32,22 +39,24 @@ import PageWrapper from "@/components/page-wrapper.vue";
 import PageContent from "@/components/page-content.vue";
 import { Save } from "lucide-vue-next";
 import dButton from "@/components/d-button/d-button.vue";
-import StudentList from "@/components/d-report/d-report-student-list.vue";
 import ReportTypeList from "@/components/d-report/d-report-type-list.vue";
 import ReportTagList from "@/components/d-report/d-report-tag-list.vue";
-import { User, Tag } from "@/gql/graphql";
-import { ref } from "vue";
+import { Tag } from "@/gql/graphql";
+import { computed, reactive, ref } from "vue";
 import dInput from "@/components/d-input/d-input.vue";
-import { useMutation } from "@urql/vue";
+import { useMutation, useQuery } from "@urql/vue";
 import { graphql } from "@/gql";
 import { useRouter } from "vue-router/auto";
+import DSelect from "@/components/d-select/d-select.vue";
+import { createNotification } from "@/composables/useToast.ts";
+import { array, date, object, string } from "yup";
 
 const router = useRouter();
 
-const student = ref<User>();
+const student = ref<string>();
 const from = ref<string>("");
 const to = ref<string>("");
-const type = ref();
+const type = ref("entries");
 const tags = ref<Tag[]>();
 
 const { executeMutation: createReportMutation } = useMutation(
@@ -60,18 +69,70 @@ const { executeMutation: createReportMutation } = useMutation(
   `)
 );
 
+const studentSearch = ref("");
+const { data: studentData } = useQuery({
+  query: graphql(`
+    query getEntryFilterStudents($search: String) {
+      users(filter: { role: [student] }, limit: 200, search: $search) {
+        edges {
+          id
+          firstName
+          lastName
+        }
+      }
+    }
+  `),
+  variables: reactive({
+    search: studentSearch,
+  }),
+});
+
+const studentOptions = computed(
+  () =>
+    studentData?.value?.users?.edges?.map((edge: any) => ({
+      label: `${edge.firstName} ${edge.lastName}`,
+      value: edge.id,
+    })) || []
+);
+
+const createReportInput = object({
+  studentUser: string().required(),
+  from: date().required(),
+  to: date().required(),
+  kind: string().required(),
+  format: string().required(),
+  filterTags: array().ensure(),
+});
+
 async function createReport() {
-  const input = {
-    studentUser: student.value?.id,
-    from: new Date(from.value).toISOString(),
-    to: new Date(to.value).toISOString(),
+  const value = {
+    studentUser: student.value,
+    from: from.value,
+    to: to.value,
     kind: type.value,
     format: "pdf",
     filterTags: tags.value?.map((tag) => tag.id) || [],
   };
 
+  if (!(await createReportInput.isValid(value))) {
+    return createNotification({
+      title: "Formular ungültig",
+      description: "Bitte überprüfe deine Eingaben",
+    });
+  }
+
+  const input = createReportInput.cast(value);
+
   // @ts-expect-error
-  await createReportMutation({ input });
-  router.push({ name: "/record/reports/" });
+  const { error } = await createReportMutation({ input });
+
+  if (error) {
+    return createNotification({
+      title: "Beim Erstellen des Berichts ist ein Fehler aufgetreten",
+      description: error.message,
+    });
+  }
+
+  await router.push({ name: "/record/reports/" });
 }
 </script>

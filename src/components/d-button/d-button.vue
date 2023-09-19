@@ -1,5 +1,5 @@
 <template>
-  <div tabindex="0" :class="buttonClasses">
+  <div tabindex="1" :class="buttonClasses">
     <component v-if="iconLeft" :is="iconLeft" :size="16" :class="iconLeftClasses" />
     <slot />
     <component v-if="iconRight" :is="iconRight" :size="16" />
@@ -44,15 +44,7 @@ const buttonClasses = computed(() => {
 
   const typeClasses = {
     primary: ["shadow-sm", "border-transparent", "bg-stone-950", "text-white", "hover:bg-stone-700"],
-    outline: [
-      "shadow-sm",
-      "border",
-      "border-stone-200",
-      "text-stone-700",
-      "hover:border-blue-200",
-      "hover:bg-blue-50",
-      "hover:text-blue-950",
-    ],
+    outline: ["shadow-sm", "border", "border-stone-200", "text-stone-700", "hover:bg-stone-100"],
     transparent: ["border-transparent", "text-stone-700", "hover:bg-blue-50", "hover:text-blue-950"],
   };
 

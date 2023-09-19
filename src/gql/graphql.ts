@@ -9,7 +9,7 @@ export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> =
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: { input: string; output: string; }
+  ID: { input: string | number; output: string; }
   String: { input: string; output: string; }
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
@@ -574,6 +574,25 @@ export type GenerateFileUrlInput = {
   id: Scalars['ID']['input'];
 };
 
+export enum ImportStudentsError {
+  DataWrong = 'DATA_WRONG',
+  FormatWrong = 'FORMAT_WRONG',
+  GradeWrong = 'GRADE_WRONG',
+  HeaderWrong = 'HEADER_WRONG',
+  PermissionDenied = 'PERMISSION_DENIED'
+}
+
+export type ImportStudentsInput = {
+  file: Scalars['Upload']['input'];
+};
+
+export type ImportStudentsPayload = {
+  __typename?: 'ImportStudentsPayload';
+  errors: Array<ImportStudentsError>;
+  usersCreated: Scalars['Int']['output'];
+  usersExisted: Scalars['Int']['output'];
+};
+
 export type MoveFileInput = {
   id: Scalars['ID']['input'];
   targetId?: InputMaybe<Scalars['ID']['input']>;
@@ -634,6 +653,7 @@ export type Mutation = {
   downloadFiles: DownloadFilesPayload;
   editShare: ShareUser;
   forgotPassword: ForgotPasswordPayload;
+  importStudents: ImportStudentsPayload;
   moveFile: File;
   moveFiles: MoveFilesPayload;
   previewFile: PreviewFilePayload;
@@ -877,6 +897,11 @@ export type MutationEditShareArgs = {
 
 export type MutationForgotPasswordArgs = {
   input: ForgotPasswordInput;
+};
+
+
+export type MutationImportStudentsArgs = {
+  input: ImportStudentsInput;
 };
 
 
@@ -1649,6 +1674,13 @@ export type UserStudentGradesConnection = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type ImportStudentsMutationVariables = Exact<{
+  input: ImportStudentsInput;
+}>;
+
+
+export type ImportStudentsMutation = { __typename?: 'Mutation', importStudents: { __typename?: 'ImportStudentsPayload', usersCreated: number, usersExisted: number, errors: Array<ImportStudentsError> } };
+
 export type RenameSharedDriveMutationVariables = Exact<{
   input: RenameSharedDriveInput;
 }>;
@@ -2364,6 +2396,7 @@ export type UserStudentGradesQueryVariables = Exact<{
 export type UserStudentGradesQuery = { __typename?: 'Query', userStudentGrades: { __typename?: 'UserStudentGradesConnection', edges: Array<{ __typename?: 'UserStudentGrades', id: string, grade: number, student: { __typename?: 'UserStudent', id: string, user: { __typename?: 'User', id: string, firstName: string, lastName: string } }, subject: { __typename?: 'Subject', id: string, name: string }, schoolYear: { __typename?: 'SchoolYear', id: string, year: number, description: string } }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean } } };
 
 
+export const ImportStudentsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"importStudents"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ImportStudentsInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"importStudents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"usersCreated"}},{"kind":"Field","name":{"kind":"Name","value":"usersExisted"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}}]}}]}}]} as unknown as DocumentNode<ImportStudentsMutation, ImportStudentsMutationVariables>;
 export const RenameSharedDriveDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"renameSharedDrive"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RenameSharedDriveInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"renameSharedDrive"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]} as unknown as DocumentNode<RenameSharedDriveMutation, RenameSharedDriveMutationVariables>;
 export const RenameFileDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"renameFile"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RenameFileInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"renameFile"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]} as unknown as DocumentNode<RenameFileMutation, RenameFileMutationVariables>;
 export const ShareUsersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"shareUsers"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"users"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filter"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"role"},"value":{"kind":"ListValue","values":[{"kind":"EnumValue","value":"owner"},{"kind":"EnumValue","value":"admin"},{"kind":"EnumValue","value":"teacher"}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}}]}}]}}]}}]} as unknown as DocumentNode<ShareUsersQuery, ShareUsersQueryVariables>;

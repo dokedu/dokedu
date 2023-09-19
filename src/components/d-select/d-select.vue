@@ -24,8 +24,9 @@
       <div
         v-if="open"
         ref="container"
-        class="absolute top-10 z-20 max-h-[200px] w-full min-w-[240px] divide-y divide-stone-200 overflow-hidden rounded-md border border-stone-200 bg-white shadow transition-all duration-200 ease-in-out"
+        class="absolute z-20 max-h-[200px] w-full min-w-[240px] divide-y divide-stone-200 overflow-hidden rounded-md border border-stone-200 bg-white shadow transition-all duration-200 ease-in-out"
         style="transform-origin: top"
+        :style="{ top: toggle.offsetHeight + 4 + 'px' }"
       >
         <div v-if="searchable" class="sticky flex w-full items-center gap-1 rounded border-none pl-2.5 text-sm">
           <SearchIcon :size="18" class="text-subtle" />

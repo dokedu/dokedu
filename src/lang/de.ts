@@ -220,4 +220,7 @@ export const de = {
   school_year: "Schuljahr | Schuljahre",
 
   selected: "ausgewählt",
+  import_students: "Schüler importieren",
+  click_to_upload: "Klicken, um hochzuladen",
+  or_drag_and_drop: "oder ziehen und ablegen",
 };

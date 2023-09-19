@@ -222,4 +222,7 @@ export const en = {
   school_year: "School year | School years",
 
   selected: "selected",
+  import_students: "Import students",
+  click_to_upload: "Click to upload",
+  or_drag_and_drop: "or drag and drop",
 };
