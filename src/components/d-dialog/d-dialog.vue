@@ -1,5 +1,5 @@
 <template>
-  <DialogRoot v-model:open="modalOpen">
+  <DialogRoot v-model:open="modalOpen" @update:open="onUpdate">
     <slot name="trigger" />
     <DialogPortal>
       <DialogOverlay class="fixed inset-0 z-20 bg-stone-950/50" />
@@ -49,6 +49,12 @@ watch(
     modalOpen.value = props.open;
   }
 );
+
+const onUpdate = () => {
+  if (!modalOpen.value) {
+    emit("close");
+  }
+}
 
 const onClose = () => {
   modalOpen.value = false;
