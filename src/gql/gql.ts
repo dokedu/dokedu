@@ -33,7 +33,7 @@ const documents = {
     "\n    mutation updateCompetence($input: UpdateCompetenceInput!) {\n      updateCompetence(input: $input) {\n        id\n        name\n        color\n      }\n    }\n  ": types.UpdateCompetenceDocument,
     "\n    mutation uploadFile($input: FileUploadInput!) {\n      uploadFile(input: $input) {\n        id\n      }\n    }\n  ": types.UploadFileDocument,
     "\n    query bucketByIdShared($id: ID!) {\n      bucket(id: $id) {\n        id\n        permission\n      }\n    }\n  ": types.BucketByIdSharedDocument,
-    "\n    query users($search: String) {\n      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  ": types.UsersDocument,
+    "\n    query userss($search: String) {\n      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {\n        edges {\n          id\n          firstName\n          lastName\n          student {\n            id\n            grade\n          }\n        }\n      }\n    }\n  ": types.UserssDocument,
     "\n    query domains {\n      domains {\n        edges {\n          id\n          name\n          createdAt\n        }\n        pageInfo {\n          hasNextPage\n          hasPreviousPage\n        }\n      }\n    }\n  ": types.DomainsDocument,
     "\n    query groupUsers {\n      emailAccounts(filter: { type: INDIVIDUAL }) {\n        edges {\n          id\n          name\n        }\n      }\n    }\n  ": types.GroupUsersDocument,
     "\n    mutation toggleEventCompetence($input: AddEventCompetenceInput!) {\n      toggleEventCompetence(input: $input) {\n        id\n      }\n    }\n  ": types.ToggleEventCompetenceDocument,
@@ -46,6 +46,7 @@ const documents = {
     "\n    mutation UpdateTag($id: ID!, $input: CreateTagInput!) {\n      updateTag(id: $id, input: $input) {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  ": types.UpdateTagDocument,
     "\n    mutation ArchiveTag($id: ID!) {\n      archiveTag(id: $id) {\n        id\n        name\n        color\n        deletedAt\n        createdAt\n      }\n    }\n  ": types.ArchiveTagDocument,
     "\n    query mEvents($search: String) {\n      events(search: $search, limit: 100) {\n        edges {\n          id\n          title\n        }\n      }\n    }\n  ": types.MEventsDocument,
+    "\n    query users($search: String) {\n      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  ": types.UsersDocument,
     "\n    query tags {\n      tags(limit: 50) {\n        edges {\n          id\n          name\n          color\n        }\n      }\n    }\n  ": types.TagsDocument,
     "\n    mutation updateUserLanguage($language: UserLanguage!) {\n      updateUserLanguage(language: $language) {\n        id\n        language\n      }\n    }\n  ": types.UpdateUserLanguageDocument,
     "\n      mutation signOut {\n        signOut\n      }\n    ": types.SignOutDocument,
@@ -217,7 +218,7 @@ export function graphql(source: "\n    query bucketByIdShared($id: ID!) {\n     
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n    query users($search: String) {\n      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  "): (typeof documents)["\n    query users($search: String) {\n      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  "];
+export function graphql(source: "\n    query userss($search: String) {\n      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {\n        edges {\n          id\n          firstName\n          lastName\n          student {\n            id\n            grade\n          }\n        }\n      }\n    }\n  "): (typeof documents)["\n    query userss($search: String) {\n      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {\n        edges {\n          id\n          firstName\n          lastName\n          student {\n            id\n            grade\n          }\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -266,6 +267,10 @@ export function graphql(source: "\n    mutation ArchiveTag($id: ID!) {\n      ar
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    query mEvents($search: String) {\n      events(search: $search, limit: 100) {\n        edges {\n          id\n          title\n        }\n      }\n    }\n  "): (typeof documents)["\n    query mEvents($search: String) {\n      events(search: $search, limit: 100) {\n        edges {\n          id\n          title\n        }\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    query users($search: String) {\n      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  "): (typeof documents)["\n    query users($search: String) {\n      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {\n        edges {\n          id\n          firstName\n          lastName\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
