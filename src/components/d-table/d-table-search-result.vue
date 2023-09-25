@@ -6,8 +6,8 @@
     :key="i"
     class="animate-pulse"
   >
-    <div v-for="column in columns" :key="column.key" class="border-b border-stone-100 px-8 py-3">
-      <div class="h-3 rounded-full bg-stone-100"></div>
+    <div v-for="column in columns" :key="column.key" class="border-b border-neutral-100 px-8 py-3">
+      <div class="h-3 rounded-full bg-neutral-100"></div>
     </div>
   </div>
   <div
@@ -17,7 +17,7 @@
     :key="row.id"
     ref="items"
     :draggable="draggable"
-    class="group/row grid border border-transparent transition-colors hover:bg-stone-50"
+    class="group/row grid border border-transparent transition-colors hover:bg-neutral-50"
     :class="{
       ' border-blue-500 bg-blue-100': dragoverItem === row.id && draggingItem !== row.id,
     }"

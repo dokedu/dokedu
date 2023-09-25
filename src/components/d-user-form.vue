@@ -18,12 +18,12 @@
         <d-input name="lastName" :label="$t('last_name')" v-model="user.lastName"></d-input>
         <d-input name="email" :label="$t('email')" v-model="(user.email as string)"></d-input>
         <div class="flex flex-col">
-          <label class="mb-1 text-sm text-stone-500" for="role">{{ $t("role") }}</label>
+          <label class="mb-1 text-sm text-neutral-500" for="role">{{ $t("role") }}</label>
           <select
             v-model="(user.role as string)"
             name="role"
             id="role"
-            class="rounded-md border border-stone-200 text-sm shadow"
+            class="rounded-md border border-neutral-200 text-sm shadow"
             :disabled="!!user.id"
             :class="{ '!cursor-not-allowed': !!user.id }"
           >

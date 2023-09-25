@@ -2,9 +2,9 @@
   <div class="px-8 text-sm">
     <div>
       <header class="mb-2 flex items-center justify-between">
-        <div class="text-stone-500">{{ $t("competence", 2) }}</div>
-        <div class="rounded-md p-1 hover:bg-stone-100" @click="dialogOpen = true">
-          <Plus :size="20" class="stroke-stone-500" />
+        <div class="text-neutral-500">{{ $t("competence", 2) }}</div>
+        <div class="rounded-md p-1 hover:bg-neutral-100" @click="dialogOpen = true">
+          <Plus :size="20" class="stroke-neutral-500" />
         </div>
       </header>
       <div class="mb-2 flex flex-col gap-2">
@@ -15,19 +15,19 @@
             :editable="true"
             @update="updateCompetenceLevel"
           />
-          <div class="rounded-md p-1 hover:bg-stone-100" @click="toggleCompetence(competence)">
-            <X :size="20" class="stroke-stone-500" />
+          <div class="rounded-md p-1 hover:bg-neutral-100" @click="toggleCompetence(competence)">
+            <X :size="20" class="stroke-neutral-500" />
           </div>
         </d-competence>
       </div>
       <div
-        class="flex w-fit select-none items-center gap-2 rounded-md p-1 hover:bg-stone-100"
+        class="flex w-fit select-none items-center gap-2 rounded-md p-1 hover:bg-neutral-100"
         @click="dialogOpen = true"
       >
         <div class="rounded-md">
-          <Plus :size="20" class="stroke-stone-500" />
+          <Plus :size="20" class="stroke-neutral-500" />
         </div>
-        <span class="pr-2 text-stone-500">{{ $t("add_competence") }}</span>
+        <span class="pr-2 text-neutral-500">{{ $t("add_competence") }}</span>
       </div>
     </div>
   </div>
@@ -35,7 +35,7 @@
     <div
       v-if="dialogOpen"
       ref="dialog"
-      class="absolute right-0 top-0 h-screen w-full max-w-xl bg-white shadow-lg backdrop:bg-stone-950/20"
+      class="absolute right-0 top-0 h-screen w-full max-w-xl bg-white shadow-lg backdrop:bg-neutral-950/20"
     >
       <div class="flex h-full flex-col p-4">
         <d-competence-search :selected="competences" @add="toggleCompetence" />

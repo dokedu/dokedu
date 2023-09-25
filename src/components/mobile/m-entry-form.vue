@@ -1,11 +1,11 @@
 <template>
-  <div class="flex-1 divide-y divide-stone-200 overflow-scroll text-sm">
+  <div class="flex-1 divide-y divide-neutral-200 overflow-scroll text-sm">
     <textarea
       ref="textarea"
       v-model="input"
       name="description"
       id="description"
-      class="min-h-[10em] w-full resize-none border-none p-4 text-stone-950 placeholder:text-stone-400 focus:ring-0"
+      class="min-h-[10em] w-full resize-none border-none p-4 text-neutral-950 placeholder:text-neutral-400 focus:ring-0"
       placeholder="Beschreibung..."
     />
     <MEntryFormCompetences v-model="entry" />

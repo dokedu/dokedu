@@ -2,20 +2,20 @@
   <PageWrapper>
     <PageHeader class="justify-between">
       <div class="flex items-center gap-4">
-        <div class="font-medium text-stone-950">{{ $t("user", 2) }}</div>
+        <div class="font-medium text-neutral-950">{{ $t("user", 2) }}</div>
         <input
           v-model="search"
           type="text"
           name="search"
           id="search"
           :placeholder="$t('search')"
-          class="h-8 rounded-md border border-stone-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-stone-200 focus:shadow-sm focus:ring-0"
+          class="h-8 rounded-md border border-neutral-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-neutral-200 focus:shadow-sm focus:ring-0"
         />
       </div>
       <div class="flex items-center gap-8">
         <div class="flex items-center gap-2">
           <input
-            class="border-subtle rounded checked:bg-stone-900 checked:text-stone-900 checked:hover:bg-stone-900 focus:ring-0 checked:focus:bg-stone-900"
+            class="border-subtle rounded checked:bg-neutral-900 checked:text-neutral-900 checked:hover:bg-neutral-900 focus:ring-0 checked:focus:bg-neutral-900"
             type="checkbox"
             id="showDeletedAdmin"
             v-model="showDeleted"

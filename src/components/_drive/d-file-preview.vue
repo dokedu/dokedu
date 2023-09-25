@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="file"
-    class="absolute left-0 top-0 z-40 flex h-screen max-h-screen w-full select-none flex-col bg-stone-900/90"
+    class="absolute left-0 top-0 z-40 flex h-screen max-h-screen w-full select-none flex-col bg-neutral-900/90"
     @click="emit('close')"
   >
     <div class="flex h-14 w-full items-center justify-between px-2 text-sm" @click.stop>
@@ -46,7 +46,7 @@
         v-if="isFileOfType(file) === 'image' && url"
         :src="url"
         alt=""
-        class="mx-auto block h-fit max-h-full w-fit max-w-full bg-stone-900 object-contain"
+        class="mx-auto block h-fit max-h-full w-fit max-w-full bg-neutral-900 object-contain"
       />
       <canvas
         @click.stop

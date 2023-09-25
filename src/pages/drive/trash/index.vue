@@ -8,7 +8,7 @@
       </div>
     </PageHeader>
     <div class="select-none px-8 py-4">
-      <p class="text-sm text-stone-700">{{ $t("trash_work_in_progress") }}</p>
+      <p class="text-sm text-neutral-700">{{ $t("trash_work_in_progress") }}</p>
     </div>
   </PageWrapper>
 </template>

@@ -13,7 +13,7 @@
             @click="toggleTag(tag)"
             v-for="tag in (data?.tags.edges as Tag[])"
             :key="tag.id"
-            class="flex w-full cursor-pointer items-center justify-between p-1 hover:bg-stone-100"
+            class="flex w-full cursor-pointer items-center justify-between p-1 hover:bg-neutral-100"
           >
             <DTag :color="tag.color">{{ tag.name }}</DTag>
             <Check
@@ -24,7 +24,7 @@
         </div>
       </DContextMenu>
       <div
-        class="flex w-full flex-wrap items-start gap-2 rounded-md p-2 hover:bg-stone-50"
+        class="flex w-full flex-wrap items-start gap-2 rounded-md p-2 hover:bg-neutral-50"
         @click="contextMenuOpen = true"
       >
         <div v-if="selectedTags?.length > 0" class="flex flex-wrap gap-2 text-sm text-strong">

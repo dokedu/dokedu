@@ -3,7 +3,7 @@
     <router-link
       v-for="entry in data?.entries.edges"
       :to="{ name: '/record/entries/[id]', params: { id: entry?.id as string } }"
-      class="flex flex-col justify-between space-y-4 rounded-lg border border-stone-200 p-4"
+      class="flex flex-col justify-between space-y-4 rounded-lg border border-neutral-200 p-4"
     >
       <div class="space-y-4">
         <div class="text-sm text-subtle">

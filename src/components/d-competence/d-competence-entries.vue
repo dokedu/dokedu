@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-2 flex items-center justify-between border-t border-stone-200 py-2" @click.prevent="toggleEntries">
+  <div class="mt-2 flex items-center justify-between border-t border-neutral-200 py-2" @click.prevent="toggleEntries">
     <div class="text-sm font-medium">Entries</div>
     <ChevronDown class="h-5 w-5"></ChevronDown>
   </div>

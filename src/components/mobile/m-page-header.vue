@@ -1,6 +1,6 @@
 <template>
   <header
-    class="flex w-full items-center justify-between border-b border-stone-200 bg-stone-50 px-4 py-3 shadow-sm shadow-stone-100"
+    class="flex w-full items-center justify-between border-b border-neutral-200 bg-neutral-50 px-4 py-3 shadow-sm shadow-neutral-100"
   >
     <router-link to="/m/record/entries" class="flex items-center gap-4">
       <div class="h-6 w-6">
@@ -14,8 +14,8 @@
       <div class="text-lg font-medium">Einträge</div>
     </router-link>
     <div>
-      <div class="h-8 w-8 flex justify-center items-center rounded-full bg-stone-100 border border-neutral-200" @click="signOut">
-        <LogOutIcon :size="16" class="stroke-stone-600" />
+      <div class="h-8 w-8 flex justify-center items-center rounded-full bg-neutral-100 border border-neutral-200" @click="signOut">
+        <LogOutIcon :size="16" class="stroke-neutral-600" />
       </div>
     </div>
   </header>

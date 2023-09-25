@@ -3,7 +3,7 @@
     <div v-if="!hideHeader" class="grid h-10" :style="gridColumns">
       <div
         v-for="(column, index) in columns"
-        class="flex h-10 items-center border-b border-stone-100 px-0 text-left text-sm first:pl-6 last:pr-6"
+        class="flex h-10 items-center border-b border-neutral-100 px-0 text-left text-sm first:pl-6 last:pr-6"
         :key="index"
         :class="column.headerClass"
       >
@@ -39,7 +39,7 @@
       >
         <template v-slot="{ row }">
           <div
-            class="flex items-center border-b border-stone-100 px-2 py-2 text-sm first:pl-8 last:pr-8"
+            class="flex items-center border-b border-neutral-100 px-2 py-2 text-sm first:pl-8 last:pr-8"
             :class="[{ 'bg-blue-100': isSelected(row) }, column.dataClass]"
             v-for="(column, subIndex) in columns"
             :key="subIndex"

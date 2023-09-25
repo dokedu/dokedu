@@ -2,7 +2,7 @@
   <PageWrapper>
     <PageHeader>
       <div class="flex w-full items-center justify-between">
-        <div class="font-medium text-stone-950">{{ $t("create_report") }}</div>
+        <div class="font-medium text-neutral-950">{{ $t("create_report") }}</div>
         <div class="flex gap-2">
           <d-button type="primary" :icon-left="Save" @click="createReport">{{ $t("save") }}</d-button>
         </div>

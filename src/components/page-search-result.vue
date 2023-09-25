@@ -5,10 +5,10 @@
       v-if="fetching"
       v-for="i in variables.limit"
       :key="i"
-      class="flex h-9 min-h-[36px] animate-pulse items-center gap-4 border-b border-stone-100 px-8"
+      class="flex h-9 min-h-[36px] animate-pulse items-center gap-4 border-b border-neutral-100 px-8"
     >
-      <div class="h-2.5 w-20 rounded-full bg-stone-200"></div>
-      <div class="h-2.5 w-20 rounded-full bg-stone-200"></div>
+      <div class="h-2.5 w-20 rounded-full bg-neutral-200"></div>
+      <div class="h-2.5 w-20 rounded-full bg-neutral-200"></div>
     </div>
     <div v-if="data && data[objectName]?.edges" v-for="row in data[objectName]?.edges">
       <slot :row="row"></slot>

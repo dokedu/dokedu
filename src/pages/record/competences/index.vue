@@ -2,14 +2,14 @@
   <PageWrapper>
     <PageHeader class="flex justify-between">
       <div class="flex items-center gap-4">
-        <div class="font-medium text-stone-950">{{ $t("competence", 2) }}</div>
+        <div class="font-medium text-neutral-950">{{ $t("competence", 2) }}</div>
         <input
           v-model="search"
           type="text"
           name="search"
           id="search"
           :placeholder="$t('search')"
-          class="h-8 rounded-md border border-stone-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-stone-200 focus:shadow-sm focus:ring-0"
+          class="h-8 rounded-md border border-neutral-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-neutral-200 focus:shadow-sm focus:ring-0"
         />
       </div>
     </PageHeader>
@@ -24,13 +24,13 @@
       @row-click="goToCompetence"
     >
       <template #name-data="{ item }">
-        <Folder v-if="item.type !== 'competence'" :size="16" class="fill-stone-700 stroke-stone-700" />
+        <Folder v-if="item.type !== 'competence'" :size="16" class="fill-neutral-700 stroke-neutral-700" />
         <DTag :color="item.color">{{ item.name }}</DTag>
       </template>
       <template #grade-data="{ item }">
         <div class="flex w-full items-center justify-end gap-2 text-right">
-          <div class="rounded-lg p-1 hover:bg-stone-200" @click.stop="editCompetence(item)">
-            <Edit2 :size="16" class="stroke-stone-700" />
+          <div class="rounded-lg p-1 hover:bg-neutral-200" @click.stop="editCompetence(item)">
+            <Edit2 :size="16" class="stroke-neutral-700" />
           </div>
           <div>
             {{ grades(item) }}

@@ -8,23 +8,23 @@
             ref="textarea"
             v-model="body"
             :placeholder="$t('entry_create_placeholder')"
-            class="block w-full resize-none border-none border-transparent p-8 text-base text-stone-900 placeholder:text-stone-400 focus:ring-0"
+            class="block w-full resize-none border-none border-transparent p-8 text-base text-neutral-900 placeholder:text-neutral-400 focus:ring-0"
           />
         </div>
         <EntryFormCompetences :entry="entry" />
       </div>
     </div>
     <div
-      class="flex min-h-full w-[400px] min-w-[400px] flex-col gap-4 overflow-auto border-l border-stone-100 px-8 py-4"
+      class="flex min-h-full w-[400px] min-w-[400px] flex-col gap-4 overflow-auto border-l border-neutral-100 px-8 py-4"
     >
       <div class="flex items-center gap-4">
-        <label for="date" class="min-w-[64px] text-sm text-stone-500">{{ $t("date") }}</label>
+        <label for="date" class="min-w-[64px] text-sm text-neutral-500">{{ $t("date") }}</label>
         <input
           v-model="formattedDate"
           type="date"
           name="date"
           id="date"
-          class="w-full rounded-md border-none text-sm transition-all hover:bg-stone-50 focus:bg-stone-100 focus:ring-2 focus:ring-black"
+          class="w-full rounded-md border-none text-sm transition-all hover:bg-neutral-50 focus:bg-neutral-100 focus:ring-2 focus:ring-neutral-950"
         />
       </div>
       <EntryFormProjects :entry="entry" />

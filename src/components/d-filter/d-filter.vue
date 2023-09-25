@@ -7,10 +7,10 @@
     >
     <label
       ref="dropdownInput"
-      class="relative cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-1.5 text-left align-middle sm:text-sm"
+      class="relative cursor-pointer rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-left align-middle sm:text-sm"
       :class="{
-        'border-stone-500 outline-none ring-1 ring-stone-500 ': state.isOpen,
-        'border-stone-600 pr-7 text-strong': modelValue && (modelValue as string).length,
+        'border-neutral-500 outline-none ring-1 ring-neutral-500 ': state.isOpen,
+        'border-neutral-600 pr-7 text-strong': modelValue && (modelValue as string).length,
       }"
     >
       <input
@@ -42,7 +42,7 @@
       <span class="absolute inset-y-0 right-0 z-20 flex items-center pr-2">
         <X
           v-if="modelValue && (modelValue as string).length"
-          class="h-4 w-4 stroke-black"
+          class="h-4 w-4 stroke-neutral-950"
           @click.prevent="onClearValue"
         />
       </span>
@@ -56,7 +56,7 @@
       >
         <ul
           v-if="state.isOpen"
-          class="absolute top-0 z-10 mt-1 max-h-60 w-full min-w-[250px] overflow-auto rounded-md bg-white px-1 py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+          class="absolute top-0 z-10 mt-1 max-h-60 w-full min-w-[250px] overflow-auto rounded-md bg-white px-1 py-1 text-base shadow-lg ring-1 ring-neutral-950 ring-opacity-5 focus:outline-none sm:text-sm"
           :class="{ '-top-12 -translate-y-full': openOnTop }"
         >
           <li class="mb-1 flex flex-wrap gap-2 px-2">
@@ -66,8 +66,8 @@
           <li
             v-for="(option, index) in filteredOptions"
             :key="option.value"
-            class="relative cursor-pointer select-none rounded-md py-2 pl-4 pr-4 text-sm text-strong hover:bg-stone-50"
-            :class="{ 'bg-stone-100 text-white': index === focusedOptionIndex }"
+            class="relative cursor-pointer select-none rounded-md py-2 pl-4 pr-4 text-sm text-strong hover:bg-neutral-50"
+            :class="{ 'bg-neutral-100 text-white': index === focusedOptionIndex }"
             @click="selectedOptions = option"
           >
             <span :class="[selectedOptionIndexes.includes(index) ? 'font-semibold' : 'font-normal', 'block truncate']">

@@ -18,7 +18,7 @@
       >
         <template #name-data="{ column }">
           <div class="flex items-center gap-3">
-            <Folder :size="18" class="fill-stone-700 stroke-colors-default" />
+            <Folder :size="18" class="fill-neutral-700 stroke-colors-default" />
             <div class="text-default">{{ column }}</div>
           </div>
         </template>

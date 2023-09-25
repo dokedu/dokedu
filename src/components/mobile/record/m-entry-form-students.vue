@@ -1,21 +1,21 @@
 <template>
   <div class="px-2 py-4">
-    <div class="mb-1 px-2 text-stone-500">Schüler</div>
+    <div class="mb-1 px-2 text-neutral-500">Schüler</div>
     <div class="mb-2 flex flex-col gap-2 px-2">
       <div
         v-for="student in students"
-        class="flex items-center justify-between rounded-lg border border-stone-200 px-2 py-1"
+        class="flex items-center justify-between rounded-lg border border-neutral-200 px-2 py-1"
       >
         <div>{{ fullName(student) }}</div>
-        <div class="rounded-md p-1 hover:bg-stone-100" @click="toggleStudent(student)">
-          <X :size="20" class="stroke-stone-500" />
+        <div class="rounded-md p-1 hover:bg-neutral-100" @click="toggleStudent(student)">
+          <X :size="20" class="stroke-neutral-500" />
         </div>
       </div>
     </div>
     <button
       type="button"
       @click="addStudent"
-      class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-stone-500"
+      class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-neutral-500"
     >
       <Plus :size="18" />
       Schüler hinzufügen
@@ -27,12 +27,12 @@
           <div class="mt-3 flex flex-col gap-2 overflow-scroll pb-4" :style="{ maxHeight: sheetHeight + 'px' }">
             <div
               v-for="student in data?.users.edges"
-              class="flex items-center justify-between rounded-lg border border-stone-200 px-2 py-2"
+              class="flex items-center justify-between rounded-lg border border-neutral-200 px-2 py-2"
               @click="toggleStudent(student)"
             >
               <div>{{ fullName(student) }}</div>
-              <div class="rounded-md hover:bg-stone-100">
-                <Check v-if="activeStudent(student)" :size="20" class="stroke-stone-500" />
+              <div class="rounded-md hover:bg-neutral-100">
+                <Check v-if="activeStudent(student)" :size="20" class="stroke-neutral-500" />
               </div>
             </div>
           </div>

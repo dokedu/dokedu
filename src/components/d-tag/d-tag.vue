@@ -13,7 +13,7 @@
         :class="`hover:bg-${color}-100`"
         v-if="removable"
         @click="remove"
-      ></X>
+      />
     </div>
   </div>
 </template>

@@ -34,7 +34,7 @@ const optionList = toRef(props, "optionList");
 <template>
   <DropdownMenuRoot v-model:open="toggleState">
     <DropdownMenuTrigger
-      class="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-500 shadow-none outline-none hover:bg-blue-200 hover:text-blue-900 focus:bg-blue-200"
+      class="inline-flex h-7 w-7 items-center justify-center rounded-full text-neutral-500 shadow-none outline-none hover:bg-blue-200 hover:text-blue-900 focus:bg-blue-200"
       aria-label="Customise options"
     >
       <MoreVertical :size="16" />
@@ -51,17 +51,17 @@ const optionList = toRef(props, "optionList");
           <DropdownMenuItem
             v-for="option in options"
             :value="option.text"
-            class="group relative flex h-7 select-none items-center rounded-md px-1 pl-8 text-sm leading-none text-stone-500 outline-none data-[disabled]:pointer-events-none data-[highlighted]:bg-blue-500 data-[disabled]:text-stone-500 data-[highlighted]:text-white"
+            class="group relative flex h-7 select-none items-center rounded-md px-1 pl-8 text-sm leading-none text-neutral-500 outline-none data-[disabled]:pointer-events-none data-[highlighted]:bg-blue-500 data-[disabled]:text-neutral-500 data-[highlighted]:text-white"
             @click="option.func(option.text)"
           >
             <DropdownMenuItemIndicator
-              class="absolute left-0 inline-flex items-center justify-start stroke-stone-500 px-1.5 data-[highlighted]:stroke-white"
+              class="absolute left-0 inline-flex items-center justify-start stroke-neutral-500 px-1.5 data-[highlighted]:stroke-white"
             >
               <Component :is="option.icon" :size="16" />
             </DropdownMenuItemIndicator>
             {{ option.text }}
           </DropdownMenuItem>
-          <DropdownMenuSeparator v-if="i < optionList.length - 1" class="m-[5px] h-[1px] bg-stone-200" />
+          <DropdownMenuSeparator v-if="i < optionList.length - 1" class="m-[5px] h-[1px] bg-neutral-200" />
         </template>
       </DropdownMenuContent>
     </DropdownMenuPortal>

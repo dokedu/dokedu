@@ -2,7 +2,7 @@
   <PageWrapper>
     <PageHeader class="justify-between">
       <div class="flex items-center gap-4">
-        <div class="font-medium text-stone-950">{{ $t("subject", 2) }}</div>
+        <div class="font-medium text-neutral-950">{{ $t("subject", 2) }}</div>
       </div>
       <div>
         <DButton type="primary" @click="onCreate">{{ $t("create") }}</DButton>

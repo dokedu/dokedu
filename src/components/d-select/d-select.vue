@@ -1,12 +1,12 @@
 <template>
   <div class="relative select-none" ref="select" v-bind="$attrs" @focusin="open = true">
     <div
-      class="min-w-[120px] items-center rounded-lg border border-stone-200 shadow-sm focus:!outline-none"
+      class="min-w-[120px] items-center rounded-lg border border-neutral-200 shadow-sm focus:!outline-none"
       :class="{ 'border-transparent py-0.5': type === 'borderless' }"
       tabindex="0"
       ref="toggle"
     >
-      <div class="flex justify-between gap-3 rounded-md py-1.5 pl-2.5 pr-2 transition-colors hover:bg-stone-100">
+      <div class="flex justify-between gap-3 rounded-md py-1.5 pl-2.5 pr-2 transition-colors hover:bg-neutral-100">
         <slot name="display" :displayedLabel="displayedLabel">
           <div class="text-sm text-default">{{ displayedLabel }}</div>
         </slot>
@@ -24,7 +24,7 @@
       <div
         v-if="open"
         ref="container"
-        class="absolute z-20 max-h-[200px] w-full min-w-[240px] divide-y divide-stone-200 overflow-hidden rounded-md border border-stone-200 bg-white shadow transition-all duration-200 ease-in-out"
+        class="absolute z-20 max-h-[200px] w-full min-w-[240px] divide-y divide-neutral-200 overflow-hidden rounded-md border border-neutral-200 bg-white shadow transition-all duration-200 ease-in-out"
         style="transform-origin: top"
         :style="{ top: toggle.offsetHeight + 4 + 'px' }"
       >
@@ -43,7 +43,7 @@
             @click="onSelect(option)"
             class="grid grid-cols-2 items-center justify-center gap-2 rounded-md px-1.5 py-1"
             style="grid-template-columns: 1fr 24px"
-            :class="option === sortedOptions[focusedOptionIndex as number] ? 'bg-stone-100' : 'bg-white'"
+            :class="option === sortedOptions[focusedOptionIndex as number] ? 'bg-neutral-100' : 'bg-white'"
             @mouseover="focusedOptionIndex = sortedOptions.indexOf(option)"
             @focusin="focusedOptionIndex = sortedOptions.indexOf(option)"
           >

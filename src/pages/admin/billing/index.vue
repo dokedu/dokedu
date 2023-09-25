@@ -2,17 +2,17 @@
   <page-wrapper class="relative">
     <page-header class="select-none justify-between">
       <div class="flex items-center gap-4">
-        <div class="font-medium text-stone-950">{{ $t("billing") }}</div>
+        <div class="font-medium text-neutral-950">{{ $t("billing") }}</div>
       </div>
     </page-header>
     <div
-      class="absolute left-0 top-0 z-10 flex h-full w-full select-none items-center justify-center bg-stone-500/10 font-semibold text-stone-500 backdrop-blur-sm"
+      class="absolute left-0 top-0 z-10 flex h-full w-full select-none items-center justify-center bg-neutral-500/10 font-semibold text-neutral-500 backdrop-blur-sm"
     >
       <div>This is still a work in progress. Please contact us if you want to change your plan.</div>
     </div>
     <div class="flex select-none gap-4 px-8 py-4 text-sm text-subtle">
       <div class="w-full max-w-xl">
-        <div class="flex w-full items-center justify-between gap-8 rounded-lg bg-stone-100 p-4">
+        <div class="flex w-full items-center justify-between gap-8 rounded-lg bg-neutral-100 p-4">
           <div class="flex flex-col gap-1">
             <div class="font-medium text-default">Standard</div>
             <div class="text-lg text-default">5 €</div>
@@ -24,7 +24,7 @@
         </div>
         <div class="mt-8">
           <div class="text-default">{{ $t("billing") }}</div>
-          <div class="mt-2 divide-y divide-stone-200">
+          <div class="mt-2 divide-y divide-neutral-200">
             <div class="py-2">
               <div class="grid grid-cols-3">
                 <div class="text-default">{{ $t("payment_method") }}</div>

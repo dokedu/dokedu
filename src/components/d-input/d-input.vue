@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col">
-    <label v-if="label" class="mb-1 text-sm text-stone-500" :for="name">{{ label }}</label>
+    <label v-if="label" class="mb-1 text-sm text-neutral-500" :for="name">{{ label }}</label>
     <input
       :value="modelValue"
       :type="type"
@@ -12,8 +12,8 @@
       :placeholder="placeholder"
       :required="required"
       :disabled="disabled"
-      class="block w-full rounded-md border-0 py-2.5 text-sm leading-none text-stone-900 shadow-sm ring-1 ring-inset ring-stone-300 placeholder:text-stone-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm"
-      :class="[{ '!cursor-not-allowed bg-stone-50 opacity-75': disabled }]"
+      class="block w-full rounded-md border-0 py-2.5 text-sm leading-none text-neutral-900 shadow-sm ring-1 ring-inset ring-neutral-300 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-neutral-950 sm:text-sm"
+      :class="[{ '!cursor-not-allowed bg-neutral-50 opacity-75': disabled }]"
     />
   </div>
 </template>

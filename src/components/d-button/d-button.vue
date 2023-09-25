@@ -27,7 +27,7 @@ const buttonClasses = computed(() => {
     "focus-visible:outline",
     "focus-visible:outline-2",
     "focus-visible:outline-offset-2",
-    "focus-visible:outline-stone-950",
+    "focus-visible:outline-neutral-950",
     "transition-color",
     "group",
     "relative",
@@ -43,9 +43,9 @@ const buttonClasses = computed(() => {
   ];
 
   const typeClasses = {
-    primary: ["shadow-sm", "border-transparent", "bg-stone-950", "text-white", "hover:bg-stone-700"],
-    outline: ["shadow-sm", "border", "border-stone-200", "text-stone-700", "hover:bg-stone-100"],
-    transparent: ["border-transparent", "text-stone-700", "hover:bg-blue-50", "hover:text-blue-950"],
+    primary: ["shadow-sm", "border-transparent", "bg-neutral-950", "text-white", "hover:bg-neutral-700"],
+    outline: ["shadow-sm", "border", "border-neutral-200", "text-neutral-700", "hover:bg-neutral-100"],
+    transparent: ["border-transparent", "text-neutral-700", "hover:bg-neutral-100", "hover:text-neutral-950"],
   };
 
   const sizeClasses = {
@@ -59,8 +59,8 @@ const buttonClasses = computed(() => {
 
 const iconLeftClasses = computed(() => {
   if (props.type === "primary") {
-    return ["stroke-stone-100"];
+    return ["stroke-neutral-100"];
   }
-  return ["stroke-stone-600", "group-hover:stroke-blue-950"];
+  return ["stroke-neutral-600", "group-hover:stroke-neutral-950"];
 });
 </script>

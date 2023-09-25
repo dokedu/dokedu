@@ -2,12 +2,12 @@
   <page-wrapper>
     <page-header class="select-none justify-between">
       <div class="flex items-center gap-4">
-        <div class="font-medium text-stone-950">Profil</div>
+        <div class="font-medium text-neutral-950">Profil</div>
       </div>
     </page-header>
     <div class="flex select-none gap-4 px-8 py-4 text-sm text-subtle">
-      <div class="flex w-full max-w-xl flex-col gap-4 rounded-lg bg-stone-100 p-6">
-        <div class="font-medium text-stone-950">{{ $t("password") }}</div>
+      <div class="flex w-full max-w-xl flex-col gap-4 rounded-lg bg-neutral-100 p-6">
+        <div class="font-medium text-neutral-950">{{ $t("password") }}</div>
 
         <d-input
           v-model="password"

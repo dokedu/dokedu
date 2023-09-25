@@ -4,7 +4,7 @@
       <div class="flex items-center justify-between">
         <div>{{ $t("share_drive") }}</div>
         <button @click="onClose">
-          <X class="h-4 w-4 text-stone-600"></X>
+          <X class="h-4 w-4 text-neutral-600"></X>
         </button>
       </div>
     </template>
@@ -25,7 +25,7 @@
           <div class="h-[200px] space-y-2 overflow-y-auto">
             <div
               v-for="share in shares?.shares"
-              class="flex items-center justify-between gap-2 rounded-md bg-stone-50 px-3 py-2"
+              class="flex items-center justify-between gap-2 rounded-md bg-neutral-50 px-3 py-2"
             >
               <div>{{ share.user.firstName }} {{ share.user.lastName }}</div>
               <div class="flex items-center gap-4">
@@ -41,10 +41,10 @@
                 <div v-else class="text-sm text-subtle">{{ share.permission }}</div>
                 <button
                   v-if="permission == FilePermission.Manager"
-                  class="flex h-8 w-8 items-center justify-center rounded-md p-1 hover:bg-stone-100"
+                  class="flex h-8 w-8 items-center justify-center rounded-md p-1 hover:bg-neutral-100"
                   @click="removeShare(share as ShareUser)"
                 >
-                  <Trash class="h-4 w-4 text-stone-600"></Trash>
+                  <Trash class="h-4 w-4 text-neutral-600"></Trash>
                 </button>
               </div>
             </div>

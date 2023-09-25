@@ -2,14 +2,14 @@
   <PageWrapper>
     <PageHeader class="flex justify-between">
       <div class="flex items-center gap-4">
-        <div class="font-medium text-stone-950">{{ $t("project", 2) }}</div>
+        <div class="font-medium text-neutral-950">{{ $t("project", 2) }}</div>
         <input
           v-model="search"
           type="text"
           name="search"
           id="search"
           :placeholder="$t('search')"
-          class="h-8 rounded-md border border-stone-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-stone-200 focus:shadow-sm focus:ring-0"
+          class="h-8 rounded-md border border-neutral-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-neutral-200 focus:shadow-sm focus:ring-0"
         />
       </div>
       <div class="flex gap-2">
@@ -28,24 +28,24 @@
         </router-link>
       </div>
     </PageHeader>
-    <div v-if="filtersOpen" class="flex items-end gap-2 border-b border-stone-100 px-8 py-2">
+    <div v-if="filtersOpen" class="flex items-end gap-2 border-b border-neutral-100 px-8 py-2">
       <div>
-        <label for="starts" class="mb-1 block text-xs font-medium leading-6 text-stone-900">{{
+        <label for="starts" class="mb-1 block text-xs font-medium leading-6 text-neutral-900">{{
           $t("starts_at")
         }}</label>
         <input
           v-model="startsAt"
-          class="block w-full select-none rounded-md border-0 py-2 text-sm text-stone-900 shadow-sm ring-1 ring-inset ring-stone-200 placeholder:text-stone-400 focus:ring-2 focus:ring-inset focus:ring-black"
+          class="block w-full select-none rounded-md border-0 py-2 text-sm text-neutral-900 shadow-sm ring-1 ring-inset ring-neutral-200 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-neutral-950"
           type="datetime-local"
           name="starts"
           id="starts"
         />
       </div>
       <div>
-        <label for="ends" class="mb-1 block text-xs font-medium leading-6 text-stone-900">{{ $t("ends_at") }}</label>
+        <label for="ends" class="mb-1 block text-xs font-medium leading-6 text-neutral-900">{{ $t("ends_at") }}</label>
         <input
           v-model="endsAt"
-          class="block w-full select-none rounded-md border-0 py-2 text-sm text-stone-900 shadow-sm ring-1 ring-inset ring-stone-200 placeholder:text-stone-400 focus:ring-2 focus:ring-inset focus:ring-black"
+          class="block w-full select-none rounded-md border-0 py-2 text-sm text-neutral-900 shadow-sm ring-1 ring-inset ring-neutral-200 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-neutral-950"
           type="datetime-local"
           name="ends"
           id="ends"

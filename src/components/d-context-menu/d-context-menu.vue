@@ -2,7 +2,7 @@
   <div
     ref="target"
     v-show="show"
-    class="absolute z-10 max-h-[100vh] w-[225px] rounded-md bg-stone-50 shadow"
+    class="absolute z-10 max-h-[100vh] w-[225px] rounded-md bg-neutral-50 shadow"
     :style="{ left: `${position.x}px`, top: `${position.y}px` }"
   >
     <slot />

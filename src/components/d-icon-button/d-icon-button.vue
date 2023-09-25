@@ -18,7 +18,7 @@ const icon = toRef(props, "icon");
 
 const classNames = computed(() => {
   const classes = [
-    "inline-flex text-sm items-center gap-2 select-none justify-center border h-fit relative transition-all rounded-lg overflow-hidden hover:bg-stone-50",
+    "inline-flex text-sm items-center gap-2 select-none justify-center border h-fit relative transition-all rounded-lg overflow-hidden hover:bg-neutral-50",
   ];
 
   switch (props.size) {

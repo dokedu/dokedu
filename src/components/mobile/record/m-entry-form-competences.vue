@@ -3,15 +3,15 @@
     <div class="mb-2 flex flex-col gap-2">
       <DCompetence v-for="c in uniqueCompetences" :key="c.competence.id" :competence="c.competence">
         <d-competence-level :id="c.competence.id" :level="c.level" :editable="true" @update="updateCompetenceLevel" />
-        <div class="rounded-md p-1 hover:bg-stone-100" @click="toggleCompetence(c.competence)">
-          <X :size="20" class="stroke-stone-500" />
+        <div class="rounded-md p-1 hover:bg-neutral-100" @click="toggleCompetence(c.competence)">
+          <X :size="20" class="stroke-neutral-500" />
         </div>
       </DCompetence>
     </div>
     <button
       @click="addCompetence"
       type="button"
-      class="flex w-full items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white px-8 py-2.5 text-center text-sm text-stone-500"
+      class="flex w-full items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white px-8 py-2.5 text-center text-sm text-neutral-500"
     >
       <Plus :size="18" />
       <div>Kompetenz hinzufügen</div>

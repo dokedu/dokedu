@@ -3,7 +3,7 @@
     <header class="flex min-h-0 w-full flex-col gap-1">
       <input
         v-model="search"
-        class="w-full rounded-md border border-stone-200 px-3 py-1.5 text-sm text-strong placeholder:text-subtle"
+        class="w-full rounded-md border border-neutral-200 px-3 py-1.5 text-sm text-strong placeholder:text-subtle"
         type="text"
         autocomplete="off"
         :placeholder="$t('search_competences')"
@@ -27,7 +27,7 @@
         }"
       />
       <div v-if="competences.length === 0">
-        <div class="flex h-full items-center justify-center text-stone-500">No competences found</div>
+        <div class="flex h-full items-center justify-center text-neutral-500">No competences found</div>
       </div>
     </div>
   </div>

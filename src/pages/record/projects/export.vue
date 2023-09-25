@@ -2,7 +2,7 @@
   <PageWrapper>
     <PageHeader class="flex justify-between">
       <div class="flex w-full items-center justify-between gap-4">
-        <div class="font-medium text-stone-950">
+        <div class="font-medium text-neutral-950">
           <router-link :to="{ name: '/record/projects/' }">{{ $t("project", 2) }}</router-link>
           / {{ $t("export") }}
         </div>
@@ -18,18 +18,18 @@
               <input
                 v-model="filter.from"
                 type="date"
-                class="rounded-md border border-stone-200 px-2 py-1 text-sm shadow-sm"
+                class="rounded-md border border-neutral-200 px-2 py-1 text-sm shadow-sm"
               />
               <input
                 v-model="filter.to"
                 type="date"
-                class="rounded-md border border-stone-200 px-2 py-1 text-sm shadow-sm"
+                class="rounded-md border border-neutral-200 px-2 py-1 text-sm shadow-sm"
               />
               <select
                 name="deleted"
                 id="deleted"
                 v-model="filter.deleted"
-                class="w-[140px] rounded-md border border-stone-200 px-2 py-1 text-sm shadow-sm"
+                class="w-[140px] rounded-md border border-neutral-200 px-2 py-1 text-sm shadow-sm"
               >
                 <option :value="false" :selected="!filter.deleted">{{ $t("active") }}</option>
                 <option :value="true" :selected="filter.deleted">{{ $t("with_deleted") }}</option>
@@ -41,7 +41,7 @@
 
           <div
             v-if="events.length > 0"
-            class="flex-1 overflow-scroll text-sm ring-black ring-opacity-5 print:rounded-none print:p-0 print:shadow-none print:ring-opacity-0"
+            class="flex-1 overflow-scroll text-sm ring-neutral-950 ring-opacity-5 print:rounded-none print:p-0 print:shadow-none print:ring-opacity-0"
           >
             <table class="min-w-full divide-y divide-neutral-300">
               <thead class="bg-neutral-50">

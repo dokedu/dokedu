@@ -2,7 +2,7 @@
   <PageWrapper>
     <PageHeader class="justify-between">
       <div class="flex items-center gap-4">
-        <div class="font-medium text-stone-950">{{ $t("group", 2) }}</div>
+        <div class="font-medium text-neutral-950">{{ $t("group", 2) }}</div>
         <input
           v-if="false"
           v-model="search"
@@ -10,7 +10,7 @@
           name="search"
           id="search"
           :placeholder="$t('search')"
-          class="h-8 rounded-md border border-stone-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-stone-200 focus:shadow-sm focus:ring-0"
+          class="h-8 rounded-md border border-neutral-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-neutral-200 focus:shadow-sm focus:ring-0"
         />
       </div>
       <RouterLink :to="{ name: '/admin/groups/new' }">

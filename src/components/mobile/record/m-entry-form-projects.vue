@@ -1,21 +1,21 @@
 <template>
   <div class="px-2 py-4">
-    <div class="mb-1 px-2 text-stone-500">Projekte</div>
+    <div class="mb-1 px-2 text-neutral-500">Projekte</div>
     <div class="mb-2 flex flex-col gap-2 px-2">
       <div
         v-for="project in projects"
-        class="flex items-center justify-between rounded-lg border border-stone-200 px-2 py-1"
+        class="flex items-center justify-between rounded-lg border border-neutral-200 px-2 py-1"
       >
         <div>{{ project.title }}</div>
-        <div class="rounded-md p-1 hover:bg-stone-100" @click="toggleProject(project)">
-          <X :size="20" class="stroke-stone-500" />
+        <div class="rounded-md p-1 hover:bg-neutral-100" @click="toggleProject(project)">
+          <X :size="20" class="stroke-neutral-500" />
         </div>
       </div>
     </div>
     <button
       type="button"
       @click="addProject"
-      class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-stone-500"
+      class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-neutral-500"
     >
       <Plus :size="18" />
       <div>Projekt hinzufügen</div>
@@ -27,12 +27,12 @@
           <div class="mt-3 flex flex-col gap-2 overflow-scroll pb-4" :style="{ maxHeight: sheetHeight + 'px' }">
             <div
               v-for="project in data?.events.edges"
-              class="flex items-center justify-between rounded-lg border border-stone-200 px-2 py-2"
+              class="flex items-center justify-between rounded-lg border border-neutral-200 px-2 py-2"
               @click="toggleProject(project)"
             >
               <div>{{ project?.title }}</div>
-              <div class="rounded-md hover:bg-stone-100">
-                <Check v-if="activeProject(project)" :size="20" class="stroke-stone-500" />
+              <div class="rounded-md hover:bg-neutral-100">
+                <Check v-if="activeProject(project)" :size="20" class="stroke-neutral-500" />
               </div>
             </div>
           </div>

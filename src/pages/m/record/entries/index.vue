@@ -1,22 +1,22 @@
 <template>
   <div id="element" class="flex w-full flex-col">
     <MPageHeader />
-    <div class="flex-1 divide-y divide-stone-200 overflow-scroll text-sm">
+    <div class="flex-1 divide-y divide-neutral-200 overflow-scroll text-sm">
       <router-link
         v-for="entry in data?.entries.edges"
         :to="{ name: '/m/record/entries/[id]', params: { id: `${entry?.id}` } }"
-        class="flex flex-col gap-2 p-4 text-stone-700"
+        class="flex flex-col gap-2 p-4 text-neutral-700"
       >
         <div class="line-clamp-3">
           {{ entry?.body }}
         </div>
-        <div class="flex gap-1 text-xs text-stone-500">
+        <div class="flex gap-1 text-xs text-neutral-500">
           <div>{{ `${entry?.user.firstName} ${entry?.user.lastName}` }}</div>
           <div>⋅</div>
           <div>{{ toLocateDateString(entry?.createdAt) }}</div>
         </div>
       </router-link>
-      <div class="flex flex-col gap-2 p-4 text-center text-xs text-stone-500">
+      <div class="flex flex-col gap-2 p-4 text-center text-xs text-neutral-500">
         <div class="mx-auto max-w-xs">
           Im Moment zeigen wir nur die letzten 10 Einträge. Demnächst kannst du alle Einträge auf deinem Smartphone
           sehen.
@@ -26,7 +26,7 @@
     <MPageFooter>
       <router-link
         to="/m/record/entries/new"
-        class="flex w-full items-center justify-center gap-2 rounded-lg bg-black px-8 py-2.5 text-center text-sm text-white"
+        class="flex w-full items-center justify-center gap-2 rounded-lg bg-neutral-950 px-8 py-2.5 text-center text-sm text-white"
       >
         <Plus :size="18" />
         <div>Eintrag erstellen</div>

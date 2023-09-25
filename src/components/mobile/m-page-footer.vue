@@ -1,5 +1,5 @@
 <template>
-  <footer class="w-full border-t border-stone-200 bg-stone-50 p-4">
+  <footer class="w-full border-t border-neutral-200 bg-neutral-50 p-4">
     <slot />
   </footer>
 </template>

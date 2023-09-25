@@ -1,12 +1,12 @@
 <template>
   <div class="px-2 py-4">
-    <div class="mb-1 px-2 text-stone-500">Tags</div>
+    <div class="mb-1 px-2 text-neutral-500">Tags</div>
     <div class="mb-2 flex flex-wrap gap-2 px-2">
       <DTag v-for="tag in tags" :color="tag.color" @remove="toggleTag(tag)" :key="tag.id" removable>
         {{ tag.name }}
       </DTag>
     </div>
-    <button type="button" @click="addTag" class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-stone-500">
+    <button type="button" @click="addTag" class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-neutral-500">
       <Plus :size="18" />
       <div>Tag hinzufügen</div>
     </button>
@@ -20,7 +20,7 @@
             @click="toggleTag(tag)"
           >
             <div>{{ tag?.name }}</div>
-            <div class="rounded-md hover:bg-stone-100">
+            <div class="rounded-md hover:bg-neutral-100">
               <Check v-if="activeTag(tag)" :size="20" :class="`stroke-${tag?.color}-500`" />
             </div>
           </div>

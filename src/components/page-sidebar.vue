@@ -1,6 +1,6 @@
 <template>
   <header
-    class="flex h-screen w-full max-w-[230px] select-none flex-col justify-between border-r border-stone-100 bg-stone-50 print:hidden"
+    class="flex h-screen w-full max-w-[230px] select-none flex-col justify-between border-r border-neutral-100 bg-neutral-50 print:hidden"
   >
     <div class="relative flex flex-col">
       <div class="flex items-center justify-between px-3 py-3 pb-1">
@@ -9,15 +9,15 @@
           @click="visibleAppSwitcher = true"
         >
           <div class="flex items-center gap-3">
-            <div class="rounded-lg bg-stone-200 p-1.5">
-              <component v-if="app" :is="app.icon" class="fill-stone-500 stroke-stone-500" :size="16" />
+            <div class="rounded-lg bg-neutral-200 p-1.5">
+              <component v-if="app" :is="app.icon" class="fill-neutral-500 stroke-neutral-500" :size="16" />
             </div>
-            <div class="text-sm text-stone-700 transition-all duration-100 hover:text-stone-950">
+            <div class="text-sm text-neutral-700 transition-all duration-100 hover:text-neutral-950">
               {{ app?.name }} <span v-if="app?.beta" class="text-xs font-medium uppercase text-blue-700">Beta</span>
             </div>
           </div>
-          <div class="rounded-md p-1.5 transition-all hover:bg-stone-300">
-            <grip :size="16" class="stroke-stone-700" />
+          <div class="rounded-md p-1.5 transition-all hover:bg-neutral-300">
+            <grip :size="16" class="stroke-neutral-700" />
           </div>
         </div>
       </div>
@@ -25,15 +25,15 @@
         <router-link
           v-for="link in app?.links"
           :to="link.route"
-          class="flex items-center gap-3 rounded-md px-3 py-1.5 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
+          class="flex items-center gap-3 rounded-md px-3 py-1.5 text-neutral-500 transition-all duration-100 hover:bg-neutral-100 hover:text-neutral-950"
           active-class=""
-          :class="{ '!bg-stone-200 text-stone-900': isLinkActive(link) }"
+          :class="{ '!bg-neutral-200 text-neutral-900': isLinkActive(link) }"
         >
           <component
             :is="link.icon"
-            class="stroke-stone-500"
+            class="stroke-neutral-500"
             :size="18"
-            :class="{ '!stroke-stone-900': isLinkActive(link) }"
+            :class="{ '!stroke-neutral-900': isLinkActive(link) }"
           />
           <div class="text-sm">{{ link.name }}</div>
         </router-link>
@@ -42,12 +42,12 @@
         <div class="flex w-full flex-col gap-1 rounded-lg bg-white p-1 shadow-md">
           <div
             v-for="_app in enabledApps"
-            class="flex items-center gap-3 rounded-lg border border-white p-2 text-sm hover:bg-stone-100"
-            :class="activeApp === _app.id ? `!border-stone-200 bg-stone-100 hover:!bg-stone-100` : ''"
+            class="flex items-center gap-3 rounded-lg border border-white p-2 text-sm hover:bg-neutral-100"
+            :class="activeApp === _app.id ? `!border-neutral-200 bg-neutral-100 hover:!bg-neutral-100` : ''"
             @click="switchApp(_app.id)"
           >
-            <component :is="_app.icon" class="fill-stone-500 stroke-stone-500" :size="20" />
-            <span class="text-stone-500" :class="activeApp === _app.id ? `!text-stone-900` : ''">{{ _app.name }}</span>
+            <component :is="_app.icon" class="fill-neutral-500 stroke-neutral-500" :size="20" />
+            <span class="text-neutral-500" :class="activeApp === _app.id ? `!text-neutral-900` : ''">{{ _app.name }}</span>
           </div>
         </div>
       </div>
@@ -56,27 +56,27 @@
       <a
         href="https://dokedu.org/hilfe"
         target="_blank"
-        class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
+        class="flex items-center gap-3 rounded-md p-1 px-3 text-neutral-500 transition-all duration-100 hover:bg-neutral-100 hover:text-neutral-950"
       >
-        <HelpCircle class="stroke-stone-500" :size="18" />
+        <HelpCircle class="stroke-neutral-500" :size="18" />
         <div class="text-sm">{{ $t("support") }}</div>
       </a>
       <router-link
         to="/settings/profile"
-        class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
+        class="flex items-center gap-3 rounded-md p-1 px-3 text-neutral-500 transition-all duration-100 hover:bg-neutral-100 hover:text-neutral-950"
       >
-        <Settings class="stroke-stone-500" :size="18" />
+        <Settings class="stroke-neutral-500" :size="18" />
         <div class="text-sm">{{ $t("settings") }}</div>
       </router-link>
 
       <div
-        class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
+        class="flex items-center gap-3 rounded-md p-1 px-3 text-neutral-500 transition-all duration-100 hover:bg-neutral-100 hover:text-neutral-950"
       >
-        <globe class="stroke-stone-500" :size="18" />
+        <globe class="stroke-neutral-500" :size="18" />
         <select
           name="language"
           id="lang"
-          class="block w-full rounded-lg border border-stone-200 bg-stone-50 px-2 py-1 text-sm"
+          class="block w-full rounded-lg border border-neutral-200 bg-neutral-50 px-2 py-1 text-sm"
           v-model="language"
         >
           <option value="en">English</option>
@@ -85,10 +85,10 @@
       </div>
 
       <div
-        class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
+        class="flex items-center gap-3 rounded-md p-1 px-3 text-neutral-500 transition-all duration-100 hover:bg-neutral-100 hover:text-neutral-950"
         @click="loggingOut"
       >
-        <log-out class="stroke-stone-500" :size="18" />
+        <log-out class="stroke-neutral-500" :size="18" />
         <div class="text-sm">{{ $t("log_out") }}</div>
       </div>
     </div>

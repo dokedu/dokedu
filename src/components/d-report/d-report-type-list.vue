@@ -6,7 +6,7 @@
         <template #display>
           <div v-if="type">
             <div class="mb-1 text-sm font-medium">{{ types.find((t) => t.kind === type)?.label }}</div>
-            <div class="text-xs text-stone-500">
+            <div class="text-xs text-neutral-500">
               {{ types.find((t) => t.kind === type)?.description }}
             </div>
           </div>
@@ -17,7 +17,7 @@
         <template v-slot="{ option }">
           <div>
             <div class="mb-1 font-medium">{{ option.label }}</div>
-            <div class="text-xs text-stone-500">
+            <div class="text-xs text-neutral-500">
               {{ types.find((t) => t.kind === option.value)?.description }}
             </div>
           </div>

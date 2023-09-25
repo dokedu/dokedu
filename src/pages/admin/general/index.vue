@@ -2,7 +2,7 @@
   <page-wrapper>
     <page-header class="select-none justify-between">
       <div class="flex items-center gap-4">
-        <div class="font-medium text-stone-950">General</div>
+        <div class="font-medium text-neutral-950">General</div>
       </div>
     </page-header>
     <div class="flex select-none gap-4 px-8 py-4 text-sm text-subtle">

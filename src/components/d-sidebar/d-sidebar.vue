@@ -1,7 +1,7 @@
 <template>
   <div
     ref="sidebar"
-    class="absolute right-0 top-0 h-screen w-full max-w-xl overflow-scroll bg-white p-4 shadow-md shadow-stone-300"
+    class="absolute right-0 top-0 h-screen w-full max-w-xl overflow-scroll bg-white p-4 shadow-md shadow-neutral-300"
   >
     <div class="mb-4 flex flex-wrap justify-between gap-2">
       <slot name="header">

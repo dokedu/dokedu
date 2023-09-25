@@ -2,7 +2,7 @@
   <div data-name="d-file-drop-zone" class="relative flex h-full flex-col transition-all" ref="dropzone">
     <slot />
     <div v-show="hasDragover" class="absolute left-0 top-0 h-full w-full rounded-xl p-1">
-      <div class="h-full w-full rounded-xl border-2 border-black bg-stone-950/10"></div>
+      <div class="h-full w-full rounded-xl border-2 border-neutral-950 bg-neutral-950/10"></div>
     </div>
   </div>
 </template>

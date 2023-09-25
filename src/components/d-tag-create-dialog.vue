@@ -9,11 +9,11 @@
     <template #main>
       <div class="pb-4">
         <div class="flex items-center gap-4">
-          <div class="min-w-16 text-sm text-stone-400">{{ $t("name") }}</div>
+          <div class="min-w-16 text-sm text-neutral-400">{{ $t("name") }}</div>
           <DInput name="name" v-model="name" />
         </div>
         <div class="relative mt-4 flex items-center gap-4">
-          <div class="min-w-16 text-sm text-stone-400">{{ $t("color") }}</div>
+          <div class="min-w-16 text-sm text-neutral-400">{{ $t("color") }}</div>
           <DSelect :options="colorOptions" :label="$t('tag', 2)" multiple v-model="tagColor" class="w-full">
             <template #display="{ displayedLabel }">
               <d-tag :color="tagColor">

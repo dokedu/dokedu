@@ -3,7 +3,7 @@
     <div
       @mouseover="onMouseover"
       @mouseleave="onMouseleave"
-      class="absolute bottom-6 right-6 min-w-[300px] overflow-hidden rounded-lg border border-stone-100 bg-white shadow-md"
+      class="absolute bottom-6 right-6 min-w-[300px] overflow-hidden rounded-lg border border-neutral-100 bg-white shadow-md"
     >
       <div>
         <div class="p-4">

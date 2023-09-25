@@ -3,28 +3,28 @@
     <template #main>
       <div class="flex flex-col gap-4">
         <div class="flex items-center gap-6">
-          <p class="w-[100px] text-sm font-semibold text-stone-600">{{ $t("description") }}</p>
+          <p class="w-[100px] text-sm font-semibold text-neutral-600">{{ $t("description") }}</p>
           <div class="flex-1 space-y-1">
             <d-input name="name" :placeholder="$t('description')" v-model="account.description as string"></d-input>
             <p class="text-sm text-red-500" v-if="errors.description">{{ errors.description }}</p>
           </div>
         </div>
         <div class="flex items-center gap-6">
-          <p class="w-[100px] text-sm font-semibold text-stone-600">{{ $t("name") }}</p>
+          <p class="w-[100px] text-sm font-semibold text-neutral-600">{{ $t("name") }}</p>
           <div class="flex-1 space-y-1">
             <d-input name="name" :placeholder="$t('name')" v-model="name" class="flex-1"></d-input>
             <p class="text-sm text-red-500" v-if="errors.name">{{ errors.name }}</p>
           </div>
         </div>
         <div class="flex items-center gap-6">
-          <p class="w-[100px] text-sm font-semibold text-stone-600">{{ $t("domain") }}</p>
+          <p class="w-[100px] text-sm font-semibold text-neutral-600">{{ $t("domain") }}</p>
           <div class="flex-1 space-y-1">
             <d-select :options="domainOptions" :label="$t('domain')" v-model="domain" class="flex-1" />
             <p class="text-sm text-red-500" v-if="errors.domain">{{ errors.domain }}</p>
           </div>
         </div>
         <div class="flex items-center gap-6">
-          <p class="w-[100px] text-sm font-semibold text-stone-600">{{ $t("user", 2) }}</p>
+          <p class="w-[100px] text-sm font-semibold text-neutral-600">{{ $t("user", 2) }}</p>
           <d-select
             v-model:search="userSearch"
             :options="userOptions"

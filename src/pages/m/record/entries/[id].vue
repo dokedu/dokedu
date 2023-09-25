@@ -4,14 +4,14 @@
     <template v-if="!fetching && data?.entry">
       <MEntryForm v-model="entryData" />
     </template>
-    <div v-else class="flex-1 divide-y divide-stone-200 overflow-scroll text-sm">
+    <div v-else class="flex-1 divide-y divide-neutral-200 overflow-scroll text-sm">
       <div class="h-screen" />
     </div>
     <MPageFooter>
       <button
         @click="saveEntry"
         type="button"
-        class="flex w-full items-center justify-center gap-2 rounded-lg bg-black px-8 py-2.5 text-center text-sm text-white"
+        class="flex w-full items-center justify-center gap-2 rounded-lg bg-neutral-950 px-8 py-2.5 text-center text-sm text-white"
         :class="{ 'opacity-50': !hasChanged }"
       >
         <div v-if="!loading">Speichern</div>

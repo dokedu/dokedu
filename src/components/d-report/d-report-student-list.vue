@@ -12,7 +12,7 @@
           <div
             @click="selectStudent(student as User)"
             v-for="student in data?.users?.edges"
-            class="flex w-full cursor-pointer items-center justify-between p-1 hover:bg-stone-100"
+            class="flex w-full cursor-pointer items-center justify-between p-1 hover:bg-neutral-100"
           >
             <div class="text-sm">{{ student?.firstName }} {{ student?.lastName }}</div>
             <Check v-show="selectedStudent?.id === student?.id" class="h-4 w-4"></Check>
@@ -20,7 +20,7 @@
         </div>
       </DContextMenu>
       <div
-        class="flex w-full flex-wrap items-start gap-2 rounded-md p-2 hover:bg-stone-50"
+        class="flex w-full flex-wrap items-start gap-2 rounded-md p-2 hover:bg-neutral-50"
         @click="contextMenuOpen = true"
       >
         <div v-if="selectedStudent" class="text-sm text-strong">

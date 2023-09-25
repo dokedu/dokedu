@@ -2,7 +2,7 @@
   <PageWrapper>
     <PageHeader class="justify-between">
       <div class="flex items-center gap-4">
-        <div class="font-medium text-stone-950">{{ $t("grade", 2) }}</div>
+        <div class="font-medium text-neutral-950">{{ $t("grade", 2) }}</div>
 
         <select v-model="schoolYearFilter" name="school_year" id="school_year" class="px-1.5 py-0.5 pr-8 text-sm">
           <option :value="null">Alle Schuljahre</option>

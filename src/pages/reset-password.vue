@@ -4,7 +4,7 @@
       <div class="flex flex-col gap-4">
         <img height="67" width="100" class="mx-auto mb-4 w-2/5" src="/dokedu-logo.svg" alt="dokedu logo" />
         <div class="flex flex-col">
-          <label class="mb-1 text-xs text-stone-500" for="password">{{ $t("password") }}</label>
+          <label class="mb-1 text-xs text-neutral-500" for="password">{{ $t("password") }}</label>
           <input
             v-model="password"
             type="password"
@@ -12,12 +12,12 @@
             id="password"
             required
             min="8"
-            class="block w-full rounded-md border-0 py-2 text-stone-900 shadow-sm ring-1 ring-inset ring-stone-300 placeholder:text-stone-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm sm:leading-6"
+            class="block w-full rounded-md border-0 py-2 text-neutral-900 shadow-sm ring-1 ring-inset ring-neutral-300 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-neutral-950 sm:text-sm sm:leading-6"
             :placeholder="$t('your_new_password')"
           />
         </div>
         <div class="flex flex-col">
-          <label class="mb-1 text-xs text-stone-500" for="password">{{ $t("confirm_password") }}</label>
+          <label class="mb-1 text-xs text-neutral-500" for="password">{{ $t("confirm_password") }}</label>
           <input
             v-model="passwordConfirm"
             type="password"
@@ -25,19 +25,19 @@
             id="confirm-password"
             required
             min="8"
-            class="block w-full rounded-md border-0 py-2 text-stone-900 shadow-sm ring-1 ring-inset ring-stone-300 placeholder:text-stone-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm sm:leading-6"
+            class="block w-full rounded-md border-0 py-2 text-neutral-900 shadow-sm ring-1 ring-inset ring-neutral-300 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-neutral-950 sm:text-sm sm:leading-6"
             :placeholder="$t('confirm_your_new_password')"
           />
         </div>
       </div>
       <button
-        class="block rounded-md bg-black px-2.5 py-2.5 text-sm font-medium leading-none text-white shadow-sm hover:bg-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+        class="block rounded-md bg-neutral-950 px-2.5 py-2.5 text-sm font-medium leading-none text-white shadow-sm hover:bg-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950"
         type="submit"
       >
         {{ $t("reset_password") }}
       </button>
       <router-link
-        class="mx-auto mt-2 block w-fit rounded-md text-center text-xs font-medium leading-none text-muted hover:text-default focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+        class="mx-auto mt-2 block w-fit rounded-md text-center text-xs font-medium leading-none text-muted hover:text-default focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950"
         to="/login"
       >
         {{ $t("back_to_login") }}

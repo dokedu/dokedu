@@ -7,7 +7,7 @@
         :to="item.route"
         @dragover.prevent="(event: DragEvent) => dragover(event, 0)"
         @drop="(event: DragEvent) => drop(event, 0)"
-        class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 font-medium hover:bg-stone-100"
+        class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 font-medium hover:bg-neutral-100"
         :class="{
           ' border-blue-500 bg-blue-100': dragoverItem === 0,
         }"
@@ -20,7 +20,7 @@
         @dragover.prevent="(event: DragEvent) => dragover(event, item)"
         @drop="(event: DragEvent) => drop(event, item)"
         @dragleave="dragoverItem = null"
-        class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 font-medium hover:bg-stone-100"
+        class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 font-medium hover:bg-neutral-100"
         :class="{
           ' border-blue-500 bg-blue-100': dragoverItem === item.route.params.id,
         }"

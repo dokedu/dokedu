@@ -1,7 +1,7 @@
 <template>
   <dialog
     ref="dialog"
-    class="w-full max-w-sm rounded-lg p-4 text-sm backdrop:bg-stone-900/90"
+    class="w-full max-w-sm rounded-lg p-4 text-sm backdrop:bg-neutral-900/90"
     style="overflow: visible"
     @close.prevent="$emit('close')"
   >
@@ -11,11 +11,11 @@
     </div>
     <div class="pb-4">
       <div class="flex items-center gap-4">
-        <div class="min-w-16 text-stone-400">{{ $t("name") }}</div>
+        <div class="min-w-16 text-neutral-400">{{ $t("name") }}</div>
         <div class="px-1">{{ competence.name }}</div>
       </div>
       <div class="relative mt-4 flex items-center gap-4">
-        <div class="min-w-16 text-stone-400">{{ $t("color") }}</div>
+        <div class="min-w-16 text-neutral-400">{{ $t("color") }}</div>
         <DSelect :options="colorOptions" :label="$t('tag', 2)" multiple v-model="color" class="w-full">
           <template #display="{ displayedLabel }">
             <d-tag :color="color">

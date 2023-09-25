@@ -1,8 +1,8 @@
 <template>
-  <div class="rounded-lg border border-gray-200 px-2 py-1 text-sm">
+  <div class="rounded-lg border border-neutral-200 px-2 py-1 text-sm">
     <div class="flex items-baseline justify-between">
       <div class="flex items-center gap-1.5 p-1 text-strong">
-        <Folder v-if="competence.type !== 'competence'" :size="12" class="fill-stone-700 stroke-stone-700" />
+        <Folder v-if="competence.type !== 'competence'" :size="12" class="fill-neutral-700 stroke-neutral-700" />
         {{ competence.name }}
       </div>
       <div class="flex items-center gap-2">
@@ -22,7 +22,7 @@
             parent.color && parent.color.length > 0
               ? `bg-${parent.color}-50 !text-${parent.color}-700`
               : index === 0
-              ? 'border border-stone-200'
+              ? 'border border-neutral-200'
               : '',
           ]"
         >

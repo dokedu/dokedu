@@ -19,7 +19,7 @@
           :is="useFileIcon(item)"
           :size="18"
           class="stroke-colors-default"
-          :class="{ 'fill-stone-700': isFolder(item) }"
+          :class="{ 'fill-neutral-700': isFolder(item) }"
         />
         <div class="text-default">{{ column }}</div>
       </div>

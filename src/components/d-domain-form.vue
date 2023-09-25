@@ -6,7 +6,7 @@
         <div v-if="domain.id" class="select-none">
           <div class="mb-1 mt-2 text-sm text-subtle">Your DNS records</div>
 
-          <div class="rounded-md border border-stone-300 p-1 text-subtle shadow-sm">
+          <div class="rounded-md border border-neutral-300 p-1 text-subtle shadow-sm">
             <div class="grid gap-4 p-2 text-sm" style="grid-template-columns: 1fr 1fr 1fr 2fr">
               <div class="text-strong">Host name</div>
               <div class="text-strong">Type</div>

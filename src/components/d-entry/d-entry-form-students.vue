@@ -1,42 +1,42 @@
 <template>
   <div class="text-sm">
     <header class="mb-2 flex items-center justify-between">
-      <div class="text-stone-500">{{ $t("student", 2) }}</div>
-      <div class="rounded-md p-1 hover:bg-stone-100" @click="dialogStudents.showModal()">
-        <Plus :size="20" class="stroke-stone-500" />
+      <div class="text-neutral-500">{{ $t("student", 2) }}</div>
+      <div class="rounded-md p-1 hover:bg-neutral-100" @click="dialogStudents.showModal()">
+        <Plus :size="20" class="stroke-neutral-500" />
       </div>
     </header>
     <div class="mb-2">
       <div
         v-for="student in entry?.users"
-        class="flex w-full select-none items-center justify-between gap-2 rounded-lg px-1 py-1 text-stone-700 hover:bg-stone-50"
+        class="flex w-full select-none items-center justify-between gap-2 rounded-lg px-1 py-1 text-neutral-700 hover:bg-neutral-50"
       >
         <div class="flex items-center gap-2">
           <div
-            class="flex h-8 w-8 items-center justify-center rounded-full bg-stone-100 p-1 text-xs uppercase text-stone-500"
+            class="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-100 p-1 text-xs uppercase text-neutral-500"
           >
             {{ `${student.firstName[0]}${student.lastName[0]}` }}
           </div>
           <span>{{ `${student.firstName} ${student.lastName}` }}</span>
         </div>
-        <div class="rounded-md p-1 hover:bg-stone-100" @click="toggleStudent(student)">
-          <X :size="20" class="stroke-stone-500" />
+        <div class="rounded-md p-1 hover:bg-neutral-100" @click="toggleStudent(student)">
+          <X :size="20" class="stroke-neutral-500" />
         </div>
       </div>
     </div>
     <div
-      class="flex w-fit select-none items-center gap-2 rounded-md p-1 hover:bg-stone-100"
+      class="flex w-fit select-none items-center gap-2 rounded-md p-1 hover:bg-neutral-100"
       @click="dialogStudents.showModal()"
     >
       <div class="rounded-md">
-        <Plus :size="20" class="stroke-stone-500" />
+        <Plus :size="20" class="stroke-neutral-500" />
       </div>
-      <span class="pr-2 text-stone-500">{{ $t("add_student") }}</span>
+      <span class="pr-2 text-neutral-500">{{ $t("add_student") }}</span>
     </div>
   </div>
   <dialog
     ref="dialogStudents"
-    class="mt-32 h-1/2 w-full max-w-xl rounded-lg p-0 text-sm shadow-lg backdrop:bg-stone-950/20"
+    class="mt-32 h-1/2 w-full max-w-xl rounded-lg p-0 text-sm shadow-lg backdrop:bg-neutral-950/20"
   >
     <div class="flex h-full flex-col">
       <div class="flex items-center justify-between gap-2 p-4">
@@ -46,18 +46,18 @@
           name="student-search"
           id="student-search"
           :placeholder="$t('search_students')"
-          class="w-full rounded-md border border-stone-200 px-3 py-1.5 text-sm shadow-sm outline-none placeholder:text-stone-400 focus:border-stone-200 focus:ring-0"
+          class="w-full rounded-md border border-neutral-200 px-3 py-1.5 text-sm shadow-sm outline-none placeholder:text-neutral-400 focus:border-neutral-200 focus:ring-0"
         />
-        <div class="rounded-md p-1 hover:bg-stone-100" @click="dialogStudents.close()">
-          <X class="stroke-stone-500" />
+        <div class="rounded-md p-1 hover:bg-neutral-100" @click="dialogStudents.close()">
+          <X class="stroke-neutral-500" />
         </div>
       </div>
       <div class="flex flex-1 flex-col overflow-auto">
-        <div class="mb-2 px-4 text-xs uppercase text-stone-500">{{ $t("student", 2) }}</div>
+        <div class="mb-2 px-4 text-xs uppercase text-neutral-500">{{ $t("student", 2) }}</div>
         <div class="flex h-full flex-1 flex-col gap-1 overflow-auto px-4 pb-4">
           <div
             v-for="student in students?.users?.edges"
-            class="flex w-full select-none items-center justify-between rounded-lg px-2 py-1 text-stone-700 hover:bg-stone-50"
+            class="flex w-full select-none items-center justify-between rounded-lg px-2 py-1 text-neutral-700 hover:bg-neutral-50"
             @click="toggleStudent(student as User)"
           >
             {{ `${student?.firstName} ${student?.lastName}` }}

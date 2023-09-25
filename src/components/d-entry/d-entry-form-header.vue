@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-14 items-center justify-between border-b border-stone-100 px-8 py-3">
+  <div class="flex h-14 items-center justify-between border-b border-neutral-100 px-8 py-3">
     <div class="flex items-center">
       <router-link :to="{ name: '/record/entries/' }">
         <d-icon-button size="md" :icon="X"> </d-icon-button>

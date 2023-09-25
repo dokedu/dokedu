@@ -1,6 +1,6 @@
 <template>
   <div class="flex gap-4 text-sm">
-    <label for="date" class="mt-2 min-w-[64px] text-stone-500">{{ $t("label", 2) }}</label>
+    <label for="date" class="mt-2 min-w-[64px] text-neutral-500">{{ $t("label", 2) }}</label>
 
     <div class="flex w-full flex-col gap-4">
       <DSelect
