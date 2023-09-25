@@ -6,7 +6,7 @@
     >
       <div id="sheet" class="absolute left-0 flex h-screen w-full flex-col overflow-hidden rounded-t-lg bg-white">
         <div class="flex w-full justify-center">
-          <div ref="handle" class="p-4">
+          <div ref="handle" class="p-4 w-full flex justify-center">
             <div class="h-1 w-36 rounded-lg bg-stone-900/50"></div>
           </div>
         </div>

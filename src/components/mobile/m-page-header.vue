@@ -14,13 +14,16 @@
       <div class="text-lg font-medium">Einträge</div>
     </router-link>
     <div>
-      <div class="h-8 w-8 rounded-full bg-stone-200" @click="signOut"></div>
+      <div class="h-8 w-8 flex justify-center items-center rounded-full bg-stone-100 border border-neutral-200" @click="signOut">
+        <LogOutIcon :size="16" class="stroke-stone-600" />
+      </div>
     </div>
   </header>
 </template>
 
 <script lang="ts" setup>
 import { useAuth } from "@/composables/auth";
+import { LogOutIcon } from "lucide-vue-next";
 
 const { signOut } = useAuth();
 </script>

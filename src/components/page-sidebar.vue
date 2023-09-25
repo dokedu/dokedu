@@ -3,7 +3,7 @@
     class="flex h-screen w-full max-w-[230px] select-none flex-col justify-between border-r border-stone-100 bg-stone-50 print:hidden"
   >
     <div class="relative flex flex-col">
-      <div class="flex items-center justify-between px-3 py-3 pb-1.5">
+      <div class="flex items-center justify-between px-3 py-3 pb-1">
         <div
           class="group flex flex-1 justify-between rounded-md p-1 transition-colors hover:bg-strong"
           @click="visibleAppSwitcher = true"
@@ -21,11 +21,11 @@
           </div>
         </div>
       </div>
-      <div class="flex flex-col gap-1 p-3">
+      <div class="flex flex-col gap-0.5 p-3 pt-2.5">
         <router-link
           v-for="link in app?.links"
           :to="link.route"
-          class="flex items-center gap-3 rounded-md p-1 px-3 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
+          class="flex items-center gap-3 rounded-md px-3 py-1.5 text-stone-500 transition-all duration-100 hover:bg-stone-100 hover:text-stone-950"
           active-class=""
           :class="{ '!bg-stone-200 text-stone-900': isLinkActive(link) }"
         >
