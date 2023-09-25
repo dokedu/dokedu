@@ -31,7 +31,7 @@
   </div>
   <dialog ref="dialogStudents"
     class="mt-32 h-fit w-[36rem] max-h-[36rem] max-w-xl rounded-lg p-0 text-sm shadow-sm drop-shadow-lg backdrop:bg-neutral-950/20 border border-neutral-200">
-    <div class="flex flex-col h-full max-h-[36rem]">
+    <div ref="innerDialog" class="flex flex-col h-full max-h-[36rem]">
       <div>
         <div class="flex border-b border-neutral-200 items-center justify-between gap-2">
           <input type="text" v-model="search" name="student-search" id="student-search"
@@ -43,14 +43,13 @@
         <div>
           <div class="flex h-full flex-1 flex-col gap-1">
             <div class="divide-y divide-neutral-100">
-              <div v-for="(student, index) in students?.users?.edges" :key="student.id"
-                @click="toggleStudent(student as User)"
+              <div v-for="student in students?.users?.edges" :key="student?.id" @click="toggleStudent(student as User)"
                 class="text-neutral-700 hover:bg-neutral-100 transition-all grid grid-cols-4 px-4 py-2" :class="{
                   'bg-neutral-100 hover:bg-neutral-200': entry.users?.some((el) => el.id === student?.id),
                 }" :style="{ gridTemplateColumns: '2fr 2fr 1fr 2rem' }">
                 <div class="text-neutral-900">{{ student?.firstName }}</div>
                 <div class="text-neutral-900">{{ student?.lastName }}</div>
-                <div class="text-neutral-900">{{ student?.student.grade }}</div>
+                <div class="text-neutral-900">{{ student?.student?.grade }}</div>
                 <div class="text-neutral-900 pr-3 text-right flex justify-end items-center">
                   <Check v-if="entry.users?.some((el) => el.id === student?.id)" :size="16" />
                 </div>
@@ -74,20 +73,20 @@ import { graphql } from "@/gql";
 import { Entry, User } from "@/gql/graphql";
 import { onClickOutside, onKeyStroke } from "@vueuse/core";
 
-const dialogStudents = ref<HTMLDialogElement>();
+const dialogStudents = ref();
+const innerDialog = ref();
 const search = ref();
 
 const props = defineProps<{
   entry: Partial<Entry>;
 }>();
 
-onClickOutside(dialogStudents, () => {
+onClickOutside(innerDialog, () => {
   if (!dialogStudents.value) return;
   dialogStudents.value.close()
 });
 
 onKeyStroke("Escape", () => {
-  console.log("escape");
   if (!dialogStudents.value) return;
   dialogStudents.value.close();
 });
