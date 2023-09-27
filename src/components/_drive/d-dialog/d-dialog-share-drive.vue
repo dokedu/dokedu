@@ -1,50 +1,27 @@
 <template>
-  <DDialog :open="open" @close="onClose()" class="min-w-[450px] p-4">
-    <template #header>
-      <div class="flex items-center justify-between">
-        <div>{{ $t("share_drive") }}</div>
-        <button @click="onClose">
-          <X class="h-4 w-4 text-neutral-600"></X>
-        </button>
-      </div>
-    </template>
+  <DDialog :title="$t('share_drive')" :open="open" @close="onClose()" class="min-w-[450px] p-4">
     <template #main>
       <div class="space-y-4">
         <div v-if="permission == FilePermission.Manager" class="grow space-y-1 text-sm">
           <div class="text-subtle">{{ $t("user", 2) }}</div>
-          <DSelect
-            v-model="selectedUser"
-            :options="userOptions"
-            :label="$t('select_user')"
-            :placeholder="$t('select_user')"
-            @select="onCreateShare"
-          />
+          <DSelect v-model="selectedUser" :options="userOptions" :label="$t('select_user')"
+            :placeholder="$t('select_user')" @select="onCreateShare" />
         </div>
         <div class="space-y-2 text-sm">
           <div class="text-subtle">{{ $t("shared_with") }}</div>
           <div class="h-[200px] space-y-2 overflow-y-auto">
-            <div
-              v-for="share in shares?.shares"
-              class="flex items-center justify-between gap-2 rounded-md bg-neutral-50 px-3 py-2"
-            >
+            <div v-for="share in shares?.shares"
+              class="flex items-center justify-between gap-2 rounded-md bg-stone-50 px-3 py-2">
               <div>{{ share.user.firstName }} {{ share.user.lastName }}</div>
               <div class="flex items-center gap-4">
-                <DSelect
-                  v-if="permission == FilePermission.Manager"
-                  v-model="share.permission"
-                  :options="permissionOptions"
-                  label="Select permission"
-                  placeholder="Select permission"
-                  :removable="false"
-                  @select="onEditShare(share as ShareUser)"
-                />
+                <DSelect v-if="permission == FilePermission.Manager" v-model="share.permission"
+                  :options="permissionOptions" label="Select permission" placeholder="Select permission"
+                  :removable="false" @select="onEditShare(share as ShareUser)" />
                 <div v-else class="text-sm text-subtle">{{ share.permission }}</div>
-                <button
-                  v-if="permission == FilePermission.Manager"
-                  class="flex h-8 w-8 items-center justify-center rounded-md p-1 hover:bg-neutral-100"
-                  @click="removeShare(share as ShareUser)"
-                >
-                  <Trash class="h-4 w-4 text-neutral-600"></Trash>
+                <button v-if="permission == FilePermission.Manager"
+                  class="flex h-8 w-8 items-center justify-center rounded-md p-1 hover:bg-stone-100"
+                  @click="removeShare(share as ShareUser)">
+                  <Trash class="h-4 w-4 text-stone-600"></Trash>
                 </button>
               </div>
             </div>

@@ -2,17 +2,8 @@
   <PageHeader class="flex min-h-0 select-none justify-between gap-4">
     <d-drive-header-breadcrumbs />
     <div class="flex gap-2">
-      <DButton
-        v-if="permission == FilePermission.Manager"
-        type="transparent"
-        size="md"
-        :icon-left="FolderPlus"
-        @click="addFolder"
-        >{{ $t("folder") }}</DButton
-      >
-      <DDialog :open="newFolderDialog" @close="newFolderDialog = false">
-        <input type="text" :placeholder="$t('folder_name')" />
-      </DDialog>
+      <DButton v-if="permission == FilePermission.Manager" type="transparent" size="md" :icon-left="FolderPlus"
+        @click="addFolder">{{ $t("folder") }}</DButton>
       <DButton v-if="permission == FilePermission.Manager" type="primary" size="md" :icon-left="Plus" @click="open()">
         {{ $t("new") }}
       </DButton>
@@ -25,7 +16,6 @@ import DDriveHeaderBreadcrumbs from "./d-drive-header-breadcrumbs.vue";
 import PageHeader from "@/components/page-header.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { FolderPlus, Plus } from "lucide-vue-next";
-import DDialog from "@/components/d-dialog/d-dialog.vue";
 import { useFileDialog } from "@vueuse/core";
 import { ref, toRefs } from "vue";
 import { useMutation } from "@urql/vue";
