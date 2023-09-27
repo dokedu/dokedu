@@ -52,7 +52,7 @@ import { Competence } from "@/gql/graphql.ts";
 
 const dialog = ref<HTMLDialogElement>();
 const colors = [
-  "stone", // bg-stone-50 text-stone-700
+  "stone", // bg-neutral-50 text-neutral-700
   "red", // bg-red-50 text-red-700
   "orange", // bg-orange-50 text-orange-700
   "yellow", // bg-yellow-50 text-yellow-700

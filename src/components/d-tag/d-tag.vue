@@ -30,7 +30,7 @@ import { X } from "lucide-vue-next";
 // bg-indigo-50  text-indigo-700  !text-indigo-700  border-indigo-200  stroke-indigo-500   hover:bg-indigo-100
 // bg-pink-50    text-pink-700    !text-pink-700    border-pink-200    stroke-pink-500     hover:bg-pink-100
 // bg-gray-50    text-gray-700    !text-gray-700    border-gray-200    stroke-gray-500     hover:bg-gray-100
-// bg-stone-50    text-stone-700    !text-stone-700    border-stone-200    stroke-stone-500     hover:bg-stone-100
+// bg-neutral-50    text-neutral-700    !text-neutral-700    border-neutral-200    stroke-neutral-500     hover:bg-neutral-100
 
 const props = defineProps({
   color: {

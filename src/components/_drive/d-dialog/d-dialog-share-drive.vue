@@ -4,24 +4,39 @@
       <div class="space-y-4">
         <div v-if="permission == FilePermission.Manager" class="grow space-y-1 text-sm">
           <div class="text-subtle">{{ $t("user", 2) }}</div>
-          <DSelect v-model="selectedUser" :options="userOptions" :label="$t('select_user')"
-            :placeholder="$t('select_user')" @select="onCreateShare" />
+          <DSelect
+            v-model="selectedUser"
+            :options="userOptions"
+            :label="$t('select_user')"
+            :placeholder="$t('select_user')"
+            @select="onCreateShare"
+          />
         </div>
         <div class="space-y-2 text-sm">
           <div class="text-subtle">{{ $t("shared_with") }}</div>
           <div class="h-[200px] space-y-2 overflow-y-auto">
-            <div v-for="share in shares?.shares"
-              class="flex items-center justify-between gap-2 rounded-md bg-stone-50 px-3 py-2">
+            <div
+              v-for="share in shares?.shares"
+              class="flex items-center justify-between gap-2 rounded-md bg-neutral-50 px-3 py-2"
+            >
               <div>{{ share.user.firstName }} {{ share.user.lastName }}</div>
               <div class="flex items-center gap-4">
-                <DSelect v-if="permission == FilePermission.Manager" v-model="share.permission"
-                  :options="permissionOptions" label="Select permission" placeholder="Select permission"
-                  :removable="false" @select="onEditShare(share as ShareUser)" />
+                <DSelect
+                  v-if="permission == FilePermission.Manager"
+                  v-model="share.permission"
+                  :options="permissionOptions"
+                  label="Select permission"
+                  placeholder="Select permission"
+                  :removable="false"
+                  @select="onEditShare(share as ShareUser)"
+                />
                 <div v-else class="text-sm text-subtle">{{ share.permission }}</div>
-                <button v-if="permission == FilePermission.Manager"
-                  class="flex h-8 w-8 items-center justify-center rounded-md p-1 hover:bg-stone-100"
-                  @click="removeShare(share as ShareUser)">
-                  <Trash class="h-4 w-4 text-stone-600"></Trash>
+                <button
+                  v-if="permission == FilePermission.Manager"
+                  class="flex h-8 w-8 items-center justify-center rounded-md p-1 hover:bg-neutral-100"
+                  @click="removeShare(share as ShareUser)"
+                >
+                  <Trash class="h-4 w-4 text-neutral-600"></Trash>
                 </button>
               </div>
             </div>
@@ -37,7 +52,7 @@ import { graphql } from "@/gql";
 import DDialog from "@/components/d-dialog/d-dialog.vue";
 import { ShareUser, type Bucket } from "@/gql/graphql.ts";
 import { useQuery, useMutation } from "@urql/vue";
-import { X, Trash } from "lucide-vue-next";
+import { Trash } from "lucide-vue-next";
 import { computed, reactive, ref } from "vue";
 import DSelect from "@/components/d-select/d-select.vue";
 import { FilePermission } from "@/gql/graphql.ts";
