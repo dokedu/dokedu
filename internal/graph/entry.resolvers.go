@@ -478,8 +478,8 @@ func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, fi
 
 	var entries []*db.Entry
 	query := r.DB.NewSelect().
-		Model(&entries).
 		Distinct().
+		Model(&entries).
 		Join("LEFT JOIN entry_users eu ON \"entry\".id = eu.entry_id").
 		Where("eu.deleted_at IS NULL").
 		Join("LEFT JOIN entry_tags et ON \"entry\".id = et.entry_id").
@@ -503,15 +503,15 @@ func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, fi
 	if sortBy != nil {
 		switch *sortBy {
 		case model.EntrySortByCreatedAtAsc:
-			query.Order("\"entry\".created_at ASC")
+			query.Order("entry.created_at ASC")
 		case model.EntrySortByCreatedAtDesc:
-			query.Order("\"entry\".created_at DESC")
+			query.Order("entry.created_at DESC")
 		case model.EntrySortByDateAsc:
-			query.Order("\"entry\".date ASC")
+			query.Order("entry.date ASC")
 		case model.EntrySortByDateDesc:
-			query.Order("\"entry\".date DESC")
+			query.Order("entry.date DESC")
 		default:
-			query.Order("\"entry\".created_at DESC")
+			query.Order("entry.created_at DESC")
 		}
 	}
 
