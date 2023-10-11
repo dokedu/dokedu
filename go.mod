@@ -5,7 +5,6 @@ go 1.20
 require (
 	github.com/99designs/gqlgen v0.17.29
 	github.com/go-rod/rod v0.113.3
-	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/graph-gophers/dataloader v5.0.0+incompatible
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.10.2
@@ -14,6 +13,7 @@ require (
 	github.com/matoous/go-nanoid/v2 v2.0.0
 	github.com/meilisearch/meilisearch-go v0.25.0
 	github.com/minio/minio-go/v7 v7.0.56
+	github.com/sqlc-dev/pqtype v0.3.0
 	github.com/tabbed/pqtype v0.1.1
 	github.com/uptrace/bun v1.1.14
 	github.com/uptrace/bun/dialect/pgdialect v1.1.14
@@ -32,6 +32,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fatih/color v1.15.0 // indirect
+	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect

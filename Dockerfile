@@ -19,7 +19,7 @@ ADD go.sum .
 RUN go mod download
 
 ADD . .
-RUN go build -o app
+RUN go build -o app cmd/app/app.go
 RUN go build -o bun cmd/bun/main.go
 
 FROM base as prod

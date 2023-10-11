@@ -3,8 +3,7 @@ name: dokedu
 
 services:
   db:
-    container_name: postgres
-    build: ./docker/postgres/.
+    image: postgres:16-alpine
     restart: always
     environment:
       POSTGRES_PASSWORD: postgres
