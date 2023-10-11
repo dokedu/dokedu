@@ -29,7 +29,7 @@ type MeiliClient struct {
 	Client *meilisearch.Client
 }
 
-func NewMeiliClient() (*MeiliClient, error) {
+func NewMeiliClient() *MeiliClient {
 	host := os.Getenv("MEILI_HOST") + ":" + os.Getenv("MEILI_PORT")
 	apiKey := os.Getenv("MEILI_API_KEY")
 
@@ -38,7 +38,7 @@ func NewMeiliClient() (*MeiliClient, error) {
 		APIKey: apiKey,
 	})
 
-	return &MeiliClient{Client: client}, nil
+	return &MeiliClient{Client: client}
 }
 
 func (m MeiliClient) GenerateCompetenceIndex(ctx context.Context, conn *bun.DB) error {

@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"database/sql"
+	"example/internal/database"
 	"example/internal/dataloaders"
 	"example/internal/graph"
 	"example/internal/mail"
@@ -11,7 +11,6 @@ import (
 	"example/internal/modules/minio"
 	"example/internal/services/report_generation"
 	"example/internal/services/report_generation/config"
-	"fmt"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
@@ -21,16 +20,10 @@ import (
 	mware "github.com/labstack/echo/v4/middleware"
 	"log"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	"github.com/uptrace/bun"
-	"github.com/uptrace/bun/dialect/pgdialect"
-	"github.com/uptrace/bun/driver/pgdriver"
-	"github.com/uptrace/bun/extra/bundebug"
 )
 
 const defaultPort = "1323"
@@ -46,41 +39,15 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	var mailPort int
-	mailPort, err = strconv.Atoi(os.Getenv("SMTP_PORT"))
-
-	mailer, err := mail.New(mail.Config{
-		Host:     os.Getenv("SMTP_HOST"),
-		Port:     mailPort,
-		Username: os.Getenv("SMTP_USERNAME"),
-		Password: os.Getenv("SMTP_PASSWORD"),
-	})
-	if err != nil {
-		log.Fatal(err, "Error loading .env file")
-	}
-
-	//dsn := "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
-	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", os.Getenv("DB_USER"),
-		os.Getenv("DB_PASS"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
-	// dsn := "unix://user:pass@dbname/var/run/postgresql/.s.PGSQL.5432"
-	dbConn := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(dsn)))
-
-	dbClient := bun.NewDB(dbConn, pgdialect.New())
-
-	// Print all queries to stdout.
-	dbClient.AddQueryHook(bundebug.NewQueryHook(bundebug.WithVerbose(true)))
-
+	mailer := mail.NewClient()
+	dbClient := database.NewClient()
 	minioClient := minio.NewClient()
-	repGen := report_generation.
-		NewReportGenerationService(config.ReportGenerationConfig{
-			DB:    dbClient,
-			MinIO: minioClient,
-		}, ctx, 3)
+	meili := meilisearch.NewMeiliClient()
 
-	meili, err := meilisearch.NewMeiliClient()
-	if err != nil {
-		log.Fatal(err)
-	}
+	repGen := report_generation.NewReportGenerationService(config.ReportGenerationConfig{
+		DB:    dbClient,
+		MinIO: minioClient,
+	}, ctx, 3)
 
 	go func() {
 		bgCtx := context.Background()

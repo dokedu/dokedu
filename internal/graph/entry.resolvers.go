@@ -53,11 +53,11 @@ func (r *entryResolver) Users(ctx context.Context, obj *db.Entry) ([]*db.User, e
 
 	err = r.DB.NewSelect().
 		Model(&users).
-		Join("JOIN entry_users eu on user.id = eu.user_id").
+		Join("JOIN entry_users eu on \"user\".id = eu.user_id").
 		Join("JOIN entries e on eu.entry_id = e.id").
 		Where("eu.deleted_at is NULL").
 		Where("e.id = ?", obj.ID).
-		Where("user.organisation_id = ?", currentUser.OrganisationID).
+		Where("\"user\".organisation_id = ?", currentUser.OrganisationID).
 		Scan(ctx)
 
 	if err != nil {
@@ -480,11 +480,11 @@ func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, fi
 	query := r.DB.NewSelect().
 		Model(&entries).
 		Distinct().
-		Join("LEFT JOIN entry_users eu ON entry.id = eu.entry_id").
+		Join("LEFT JOIN entry_users eu ON \"entry\".id = eu.entry_id").
 		Where("eu.deleted_at IS NULL").
-		Join("LEFT JOIN entry_tags et ON entry.id = et.entry_id").
+		Join("LEFT JOIN entry_tags et ON \"entry\".id = et.entry_id").
 		Where("et.deleted_at IS NULL").
-		Where("entry.organisation_id = ?", currentUser.OrganisationID).
+		Where("\"entry\".organisation_id = ?", currentUser.OrganisationID).
 		Limit(pageLimit).Offset(pageOffset)
 
 	if filter != nil {
@@ -492,26 +492,26 @@ func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, fi
 			query.Where("eu.user_id IN (?)", bun.In(filter.Users))
 		}
 		if filter.Authors != nil && len(filter.Authors) > 0 {
-			query.Where("entry.user_id IN (?)", bun.In(filter.Authors))
+			query.Where("\"entry\".user_id IN (?)", bun.In(filter.Authors))
 		}
 		if filter.Tags != nil && len(filter.Tags) > 0 {
 			query.Where("et.tag_id IN (?)", bun.In(filter.Tags))
-			query.Where("(SELECT COUNT(DISTINCT et2.tag_id) FROM entry_tags et2 WHERE et2.entry_id = entry.id) >= ?", len(filter.Tags))
+			query.Where("(SELECT COUNT(DISTINCT et2.tag_id) FROM entry_tags et2 WHERE et2.entry_id = \"entry\".id) >= ?", len(filter.Tags))
 		}
 	}
 
 	if sortBy != nil {
 		switch *sortBy {
 		case model.EntrySortByCreatedAtAsc:
-			query.Order("entry.created_at ASC")
+			query.Order("\"entry\".created_at ASC")
 		case model.EntrySortByCreatedAtDesc:
-			query.Order("entry.created_at DESC")
+			query.Order("\"entry\".created_at DESC")
 		case model.EntrySortByDateAsc:
-			query.Order("entry.date ASC")
+			query.Order("\"entry\".date ASC")
 		case model.EntrySortByDateDesc:
-			query.Order("entry.date DESC")
+			query.Order("\"entry\".date DESC")
 		default:
-			query.Order("entry.created_at DESC")
+			query.Order("\"entry\".created_at DESC")
 		}
 	}
 
@@ -521,7 +521,7 @@ func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, fi
 	}
 
 	// Page info
-	page, err := helper.CreatePageInfo(*limit, *offset, count)
+	page, err := helper.CreatePageInfo(pageLimit, pageOffset, count)
 	if err != nil {
 		return nil, err
 	}

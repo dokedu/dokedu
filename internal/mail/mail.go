@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/gommon/log"
 	"net/smtp"
 	"os"
+	"strconv"
 )
 
 type Mailer struct {
@@ -20,9 +21,18 @@ type Config struct {
 	Password string
 }
 
-func New(cfg Config) (Mailer, error) {
+func NewClient() Mailer {
+	mailPort, _ := strconv.Atoi(os.Getenv("SMTP_PORT"))
+
+	cfg := Config{
+		Host:     os.Getenv("SMTP_HOST"),
+		Port:     mailPort,
+		Username: os.Getenv("SMTP_USERNAME"),
+		Password: os.Getenv("SMTP_PASSWORD"),
+	}
+
 	auth := smtp.PlainAuth("", cfg.Username, cfg.Password, cfg.Host)
-	return Mailer{auth: auth, cfg: cfg}, nil
+	return Mailer{auth: auth, cfg: cfg}
 }
 
 func (m Mailer) Send(to []string, subject string, message string) error {
