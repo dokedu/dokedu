@@ -2,9 +2,14 @@ package helper
 
 import "example/internal/graph/model"
 
+var (
+	defaultLimit  = 50
+	defaultOffset = 0
+)
+
 func CreatePageInfo(limit int, offset int, count int) (*model.PageInfo, error) {
 	if limit == 0 {
-		limit = 50
+		limit = defaultLimit
 	}
 
 	pageInfo := model.PageInfo{
@@ -17,8 +22,8 @@ func CreatePageInfo(limit int, offset int, count int) (*model.PageInfo, error) {
 }
 
 func SetPageLimits(limit *int, offset *int) (int, int) {
-	pageLimit := 10
-	pageOffset := 0
+	pageLimit := defaultLimit
+	pageOffset := defaultOffset
 
 	if limit != nil {
 		pageLimit = *limit
