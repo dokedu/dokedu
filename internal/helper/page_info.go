@@ -4,7 +4,7 @@ import "example/internal/graph/model"
 
 func CreatePageInfo(limit int, offset int, count int) (*model.PageInfo, error) {
 	if limit == 0 {
-		limit = 20
+		limit = 50
 	}
 
 	pageInfo := model.PageInfo{

@@ -3,7 +3,7 @@
 
 # Dokedu / Backend
 
-The productivity suite for innovative schools
+The open source productivity suite
 
 **[Learn more about Dokedu](https://dokedu.org)**
 
