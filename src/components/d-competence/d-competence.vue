@@ -4,30 +4,30 @@
       <div class="flex items-center gap-1.5 p-1 text-strong">
         <Folder v-if="competence.type !== 'competence'" :size="12" class="fill-neutral-700 stroke-neutral-700" />
         {{ competence.name }}
-
-        <div v-if="competence.tendency" class="ml-4 flex items-center gap-2 text-sm">
-          <div
-            class="h-2 w-[50px] overflow-clip rounded-md bg-neutral-200"
-            :title="`${competence.tendency?.countLearnedCompetences} von ${competence.tendency?.countChildCompetences} Kompetenzen gelernt`"
-          >
-            <div
-              class="h-full bg-neutral-700"
-              :style="`width: ${Math.round(
-                (competence.tendency.countLearnedCompetences / competence.tendency.countChildCompetences) * 100
-              )}%;`"
-            />
-          </div>
-          <div>{{ competence.tendency?.countLearnedCompetences }}/{{ competence.tendency?.countChildCompetences }}</div>
-          <div
-            :style="{
-              transform: `rotate(${Math.floor(competence.tendency.tendency * 10) * -1 * 3.6}deg)`,
-            }"
-          >
-            <ArrowRight />
-          </div>
-        </div>
       </div>
       <div class="flex items-center gap-2">
+        <div
+          v-if="competence.tendency"
+          class="flex items-center gap-2 text-sm"
+          :title="`${competence.tendency?.countLearnedCompetences} von ${competence.tendency?.countChildCompetences} Kompetenzen gelernt`"
+        >
+          <div class="h-2 w-[75px] overflow-clip rounded-md bg-neutral-200">
+            <div
+              class="h-full bg-neutral-700"
+              :style="`width: ${
+                (competence.tendency?.countLearnedCompetences / competence.tendency?.countChildCompetences) * 100
+              }%;`"
+            />
+          </div>
+          <!--          <div>{{ competence.tendency?.countLearnedCompetences }}/{{ competence.tendency?.countChildCompetences }}</div>-->
+          <!--          <div-->
+          <!--            :style="{-->
+          <!--              transform: `rotate(${Math.floor(competence.tendency.tendency * 10) * -1 * 3.6}deg)`,-->
+          <!--            }"-->
+          <!--          >-->
+          <!--            <ArrowRight />-->
+          <!--          </div>-->
+        </div>
         <div class="w-[50px] px-1 text-right text-default">
           {{ grades(competence) }}
         </div>
