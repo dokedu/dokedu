@@ -19,14 +19,6 @@
               }%;`"
             />
           </div>
-          <!--          <div>{{ competence.tendency?.countLearnedCompetences }}/{{ competence.tendency?.countChildCompetences }}</div>-->
-          <!--          <div-->
-          <!--            :style="{-->
-          <!--              transform: `rotate(${Math.floor(competence.tendency.tendency * 10) * -1 * 3.6}deg)`,-->
-          <!--            }"-->
-          <!--          >-->
-          <!--            <ArrowRight />-->
-          <!--          </div>-->
         </div>
         <div class="w-[50px] px-1 text-right text-default">
           {{ grades(competence) }}
@@ -60,7 +52,7 @@
 <script lang="ts" setup>
 import { toRef } from "vue";
 import { Competence } from "@/gql/graphql";
-import { Folder, ArrowRight } from "lucide-vue-next";
+import { Folder } from "lucide-vue-next";
 
 export interface Props {
   competence: Pick<Competence, "grades" | "name" | "parents" | "type" | "tendency">;
