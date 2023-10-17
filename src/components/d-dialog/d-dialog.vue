@@ -4,11 +4,11 @@
     <DialogPortal>
       <DialogOverlay class="fixed inset-0 z-20 bg-neutral-950/50" />
       <DialogContent
-        class="fixed left-1/2 top-[20vh] z-20 flex max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] flex-col gap-4 rounded-md bg-white shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none"
-        :class="{ 'p-6': padding }"
+        class="fixed left-1/2 top-[20vh] z-20 flex max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] select-none flex-col gap-4 rounded-md border border-neutral-300 bg-white shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none"
+        :class="{ 'p-4': padding }"
       >
         <div v-if="header" class="flex w-full items-center justify-between">
-          <DialogTitle class="w-fit text-sm"> {{ title }} </DialogTitle>
+          <DialogTitle class="w-fit font-medium">{{ title }}</DialogTitle>
           <DialogClose
             @click="onClose"
             class="rounded-md p-1 hover:bg-neutral-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950"

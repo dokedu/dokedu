@@ -1,10 +1,10 @@
 <template>
-  <d-dialog :title="$t('rename_file')" :open="open" @close="onClose" class="p-4">
+  <d-dialog :title="$t('rename_file')" :open="open" @close="onClose">
     <template #main>
       <div class="min-w-[300px]">
         <d-input v-if="file" v-model="file.name" name="name"></d-input>
       </div>
-      <div class="flex justify-end mt-6">
+      <div class="mt-6 flex justify-end">
         <d-button size="sm" @click="onSave">{{ $t("save") }}</d-button>
       </div>
     </template>
