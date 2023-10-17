@@ -101,7 +101,6 @@ import {
   Edit2,
 } from "lucide-vue-next";
 import DFileListDropdown from "./d-file-list-dropdown.vue";
-import type { Option } from "./d-file-list-dropdown.vue";
 import useDownloadFile from "@/composables/useDownloadFile";
 import DDialogRenameFile from "./d-dialog/d-dialog-rename-file.vue";
 import DDialogDeleteFile from "./d-dialog/d-dialog-delete-file.vue";
@@ -114,6 +113,7 @@ import { graphql } from "@/gql";
 import { useMutation } from "@urql/vue";
 import i18n from "@/i18n.ts";
 import { onClickOutside } from "@vueuse/core";
+import { Option } from "@/components/_drive/d-file-list-dropdown.vue";
 
 const dFileList = ref<any>(null);
 
