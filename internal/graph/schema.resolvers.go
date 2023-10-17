@@ -16,11 +16,11 @@ import (
 	"example/internal/middleware"
 	meili "example/internal/modules/meilisearch"
 	"fmt"
-	"github.com/meilisearch/meilisearch-go"
 	"strings"
 	"time"
 
 	nanoid "github.com/matoous/go-nanoid/v2"
+	meilisearch "github.com/meilisearch/meilisearch-go"
 	"github.com/uptrace/bun"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -114,6 +114,40 @@ func (r *competenceResolver) UserCompetences(ctx context.Context, obj *db.Compet
 	}
 
 	return userCompetences, nil
+}
+
+// Tendency is the resolver for the tendency field.
+func (r *competenceResolver) Tendency(ctx context.Context, obj *db.Competence, userID string) (*model.CompetenceTendency, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	if obj.CompetenceType == db.CompetenceTypeCompetence {
+		return nil, nil
+	}
+
+	var user db.User
+	err = r.DB.NewSelect().Model(&user).Where("id = ?", userID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if currentUser.OrganisationID != user.OrganisationID {
+		return nil, errors.New("user does not belong to the same organisation")
+	}
+
+	var tendency model.CompetenceTendency
+
+	childCountQuery := `WITH RECURSIVE child_competences AS ( SELECT id, competence_type FROM competences WHERE competence_id = ? UNION ALL SELECT c.id, c.competence_type FROM competences c INNER JOIN child_competences cc ON c.competence_id = cc.id ) SELECT COUNT(id) FROM child_competences WHERE competence_type = 'competence'`
+	err = r.DB.NewRaw(childCountQuery, obj.ID).Scan(ctx, &tendency.CountChildCompetences)
+
+	learnedCountQuery := `SELECT COUNT(DISTINCT user_competences.competence_id) FROM user_competences WHERE organisation_id = ? AND user_id = ? AND competence_id IN ( WITH RECURSIVE child_competences AS ( SELECT id, competence_type FROM competences WHERE competence_id = ? UNION ALL SELECT c.id, c.competence_type FROM competences c INNER JOIN child_competences cc ON c.competence_id = cc.id ) SELECT id FROM child_competences WHERE competence_type = 'competence' );`
+	err = r.DB.NewRaw(learnedCountQuery, currentUser.OrganisationID, userID, obj.ID).Scan(ctx, &tendency.CountLearnedCompetences)
+
+	tendency.Tendency = float64(tendency.CountLearnedCompetences) / float64(tendency.CountChildCompetences)
+
+	return &tendency, nil
 }
 
 // SignIn is the resolver for the signIn field.

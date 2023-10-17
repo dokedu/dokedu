@@ -13,7 +13,6 @@ require (
 	github.com/matoous/go-nanoid/v2 v2.0.0
 	github.com/meilisearch/meilisearch-go v0.25.0
 	github.com/minio/minio-go/v7 v7.0.56
-	github.com/sqlc-dev/pqtype v0.3.0
 	github.com/tabbed/pqtype v0.1.1
 	github.com/uptrace/bun v1.1.14
 	github.com/uptrace/bun/dialect/pgdialect v1.1.14

@@ -51,6 +51,13 @@ type Competence {
     sortOrder: Int!
     competences(search: String, sort: CompetenceSort): [Competence]!
     userCompetences(userId: ID): [UserCompetence]!
+    tendency(userId: ID!): CompetenceTendency
+}
+
+type CompetenceTendency {
+    countChildCompetences: Int!
+    countLearnedCompetences: Int!
+    tendency: Float! # -1.0 to 1.0
 }
 
 type UserCompetence {

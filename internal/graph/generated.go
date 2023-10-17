@@ -120,6 +120,7 @@ type ComplexityRoot struct {
 		Name            func(childComplexity int) int
 		Parents         func(childComplexity int) int
 		SortOrder       func(childComplexity int) int
+		Tendency        func(childComplexity int, userID string) int
 		Type            func(childComplexity int) int
 		UserCompetences func(childComplexity int, userID *string) int
 	}
@@ -128,6 +129,12 @@ type ComplexityRoot struct {
 		Edges      func(childComplexity int) int
 		PageInfo   func(childComplexity int) int
 		TotalCount func(childComplexity int) int
+	}
+
+	CompetenceTendency struct {
+		CountChildCompetences   func(childComplexity int) int
+		CountLearnedCompetences func(childComplexity int) int
+		Tendency                func(childComplexity int) int
 	}
 
 	CopyFilesPayload struct {
@@ -625,6 +632,7 @@ type CompetenceResolver interface {
 
 	Competences(ctx context.Context, obj *db.Competence, search *string, sort *model.CompetenceSort) ([]*db.Competence, error)
 	UserCompetences(ctx context.Context, obj *db.Competence, userID *string) ([]*db.UserCompetence, error)
+	Tendency(ctx context.Context, obj *db.Competence, userID string) (*model.CompetenceTendency, error)
 }
 type DomainResolver interface {
 	CreatedAt(ctx context.Context, obj *db.Domain) (string, error)
@@ -1092,6 +1100,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Competence.SortOrder(childComplexity), true
 
+	case "Competence.tendency":
+		if e.complexity.Competence.Tendency == nil {
+			break
+		}
+
+		args, err := ec.field_Competence_tendency_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Competence.Tendency(childComplexity, args["userId"].(string)), true
+
 	case "Competence.type":
 		if e.complexity.Competence.Type == nil {
 			break
@@ -1131,6 +1151,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CompetenceConnection.TotalCount(childComplexity), true
+
+	case "CompetenceTendency.countChildCompetences":
+		if e.complexity.CompetenceTendency.CountChildCompetences == nil {
+			break
+		}
+
+		return e.complexity.CompetenceTendency.CountChildCompetences(childComplexity), true
+
+	case "CompetenceTendency.countLearnedCompetences":
+		if e.complexity.CompetenceTendency.CountLearnedCompetences == nil {
+			break
+		}
+
+		return e.complexity.CompetenceTendency.CountLearnedCompetences(childComplexity), true
+
+	case "CompetenceTendency.tendency":
+		if e.complexity.CompetenceTendency.Tendency == nil {
+			break
+		}
+
+		return e.complexity.CompetenceTendency.Tendency(childComplexity), true
 
 	case "CopyFilesPayload.files":
 		if e.complexity.CopyFilesPayload.Files == nil {
@@ -4043,6 +4084,21 @@ func (ec *executionContext) field_Competence_competences_args(ctx context.Contex
 		}
 	}
 	args["sort"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Competence_tendency_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["userId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userId"] = arg0
 	return args, nil
 }
 
@@ -7595,6 +7651,8 @@ func (ec *executionContext) fieldContext_Competence_parents(ctx context.Context,
 				return ec.fieldContext_Competence_competences(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Competence_userCompetences(ctx, field)
+			case "tendency":
+				return ec.fieldContext_Competence_tendency(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
 		},
@@ -7705,6 +7763,8 @@ func (ec *executionContext) fieldContext_Competence_competences(ctx context.Cont
 				return ec.fieldContext_Competence_competences(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Competence_userCompetences(ctx, field)
+			case "tendency":
+				return ec.fieldContext_Competence_tendency(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
 		},
@@ -7794,6 +7854,66 @@ func (ec *executionContext) fieldContext_Competence_userCompetences(ctx context.
 	return fc, nil
 }
 
+func (ec *executionContext) _Competence_tendency(ctx context.Context, field graphql.CollectedField, obj *db.Competence) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Competence_tendency(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Competence().Tendency(rctx, obj, fc.Args["userId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.CompetenceTendency)
+	fc.Result = res
+	return ec.marshalOCompetenceTendency2ᚖexampleᚋinternalᚋgraphᚋmodelᚐCompetenceTendency(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Competence_tendency(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Competence",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "countChildCompetences":
+				return ec.fieldContext_CompetenceTendency_countChildCompetences(ctx, field)
+			case "countLearnedCompetences":
+				return ec.fieldContext_CompetenceTendency_countLearnedCompetences(ctx, field)
+			case "tendency":
+				return ec.fieldContext_CompetenceTendency_tendency(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CompetenceTendency", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Competence_tendency_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _CompetenceConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.CompetenceConnection) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_CompetenceConnection_edges(ctx, field)
 	if err != nil {
@@ -7850,6 +7970,8 @@ func (ec *executionContext) fieldContext_CompetenceConnection_edges(ctx context.
 				return ec.fieldContext_Competence_competences(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Competence_userCompetences(ctx, field)
+			case "tendency":
+				return ec.fieldContext_Competence_tendency(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
 		},
@@ -7948,6 +8070,138 @@ func (ec *executionContext) fieldContext_CompetenceConnection_totalCount(ctx con
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CompetenceTendency_countChildCompetences(ctx context.Context, field graphql.CollectedField, obj *model.CompetenceTendency) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CompetenceTendency_countChildCompetences(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CountChildCompetences, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CompetenceTendency_countChildCompetences(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CompetenceTendency",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CompetenceTendency_countLearnedCompetences(ctx context.Context, field graphql.CollectedField, obj *model.CompetenceTendency) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CompetenceTendency_countLearnedCompetences(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CountLearnedCompetences, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CompetenceTendency_countLearnedCompetences(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CompetenceTendency",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CompetenceTendency_tendency(ctx context.Context, field graphql.CollectedField, obj *model.CompetenceTendency) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CompetenceTendency_tendency(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Tendency, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CompetenceTendency_tendency(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CompetenceTendency",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
 		},
 	}
 	return fc, nil
@@ -11425,6 +11679,8 @@ func (ec *executionContext) fieldContext_Event_competences(ctx context.Context, 
 				return ec.fieldContext_Competence_competences(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Competence_userCompetences(ctx, field)
+			case "tendency":
+				return ec.fieldContext_Competence_tendency(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
 		},
@@ -17094,6 +17350,8 @@ func (ec *executionContext) fieldContext_Mutation_updateCompetence(ctx context.C
 				return ec.fieldContext_Competence_competences(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Competence_userCompetences(ctx, field)
+			case "tendency":
+				return ec.fieldContext_Competence_tendency(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
 		},
@@ -17171,6 +17429,8 @@ func (ec *executionContext) fieldContext_Mutation_updateCompetenceSorting(ctx co
 				return ec.fieldContext_Competence_competences(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Competence_userCompetences(ctx, field)
+			case "tendency":
+				return ec.fieldContext_Competence_tendency(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
 		},
@@ -19864,6 +20124,8 @@ func (ec *executionContext) fieldContext_Query_competence(ctx context.Context, f
 				return ec.fieldContext_Competence_competences(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Competence_userCompetences(ctx, field)
+			case "tendency":
+				return ec.fieldContext_Competence_tendency(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
 		},
@@ -23799,6 +24061,8 @@ func (ec *executionContext) fieldContext_UserCompetence_competence(ctx context.C
 				return ec.fieldContext_Competence_competences(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Competence_userCompetences(ctx, field)
+			case "tendency":
+				return ec.fieldContext_Competence_tendency(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
 		},
@@ -30864,6 +31128,23 @@ func (ec *executionContext) _Competence(ctx context.Context, sel ast.SelectionSe
 				return innerFunc(ctx)
 
 			})
+		case "tendency":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Competence_tendency(ctx, field, obj)
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -30899,6 +31180,48 @@ func (ec *executionContext) _CompetenceConnection(ctx context.Context, sel ast.S
 		case "totalCount":
 
 			out.Values[i] = ec._CompetenceConnection_totalCount(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var competenceTendencyImplementors = []string{"CompetenceTendency"}
+
+func (ec *executionContext) _CompetenceTendency(ctx context.Context, sel ast.SelectionSet, obj *model.CompetenceTendency) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, competenceTendencyImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CompetenceTendency")
+		case "countChildCompetences":
+
+			out.Values[i] = ec._CompetenceTendency_countChildCompetences(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "countLearnedCompetences":
+
+			out.Values[i] = ec._CompetenceTendency_countLearnedCompetences(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "tendency":
+
+			out.Values[i] = ec._CompetenceTendency_tendency(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -36576,6 +36899,21 @@ func (ec *executionContext) unmarshalNFileUploadInput2exampleᚋinternalᚋgraph
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	res := graphql.MarshalFloatContext(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return graphql.WrapContextMarshaler(ctx, res)
+}
+
 func (ec *executionContext) unmarshalNForgotPasswordInput2exampleᚋinternalᚋgraphᚋmodelᚐForgotPasswordInput(ctx context.Context, v interface{}) (model.ForgotPasswordInput, error) {
 	res, err := ec.unmarshalInputForgotPasswordInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -38120,6 +38458,13 @@ func (ec *executionContext) unmarshalOCompetenceSort2ᚖexampleᚋinternalᚋgra
 	}
 	res, err := ec.unmarshalInputCompetenceSort(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOCompetenceTendency2ᚖexampleᚋinternalᚋgraphᚋmodelᚐCompetenceTendency(ctx context.Context, sel ast.SelectionSet, v *model.CompetenceTendency) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._CompetenceTendency(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOCompetenceType2ᚕᚖexampleᚋinternalᚋdbᚐCompetenceType(ctx context.Context, v interface{}) ([]*db.CompetenceType, error) {

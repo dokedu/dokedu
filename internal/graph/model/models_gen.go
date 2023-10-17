@@ -50,6 +50,12 @@ type CompetenceSort struct {
 	Order SortDirection       `json:"order"`
 }
 
+type CompetenceTendency struct {
+	CountChildCompetences   int     `json:"countChildCompetences"`
+	CountLearnedCompetences int     `json:"countLearnedCompetences"`
+	Tendency                float64 `json:"tendency"`
+}
+
 type CopyFileInput struct {
 	ID       string `json:"id"`
 	TargetID string `json:"targetId"`
