@@ -5,28 +5,38 @@
       <template v-for="parent in data?.competence.parents">
         <span>{{ ">" }}</span>
         <router-link
-          :to="{ name: '/record/students/[id]/competences/[cid]', params: { id: route.params.id, cid: parent?.id } }">
+          :to="{ name: '/record/students/[id]/competences/[cid]', params: { id: route.params.id, cid: parent?.id } }"
+        >
           {{ parent.name }}
         </router-link>
       </template>
       <span>{{ ">" }}</span>
-      <router-link :to="{
+      <router-link
+        :to="{
         name: '/record/students/[id]/competences/[cid]',
         params: { id: route.params.id, cid: data?.competence?.id as string },
-      }">
+      }"
+      >
         {{ data?.competence.name }}
       </router-link>
     </div>
     <div class="flex flex-1 flex-col gap-2 overflow-y-auto">
-      <component v-for="competence in (data?.competence?.competences as Competence[])"
-        :is="competence?.type !== 'competence' ? 'router-link' : 'div'" :to="{
+      <component
+        v-for="competence in (data?.competence?.competences as Competence[])"
+        :is="competence?.type !== 'competence' ? 'router-link' : 'div'"
+        :to="{
           name: '/record/students/[id]/competences/[cid]',
           params: { id: route.params.id, cid: competence?.id },
-        }">
+        }"
+      >
         <DCompetence v-if="competence" :competence="competence">
-          <DCompetenceLevel :id="competence.userCompetences[0]?.id as string" :level="getLevel(competence)"
+          <DCompetenceLevel
+            :id="competence.userCompetences[0]?.id as string"
+            :level="getLevel(competence)"
             :editable="competence.type == 'subject' ? false : true"
-            @update="(val) => createUserCompetence({ level: val.level, id: competence.id })" class="z-10" />
+            @update="(val) => createUserCompetence({ level: val.level, id: competence.id })"
+            class="z-10"
+          />
           <template #footer>
             <div v-if="competence.userCompetences.length > 0">
               <DCompetenceEntries :competences="(competence.userCompetences as UserCompetence[])" />
@@ -79,6 +89,11 @@ const { data, executeQuery: fetchCompetence } = useQuery({
           parents {
             id
             name
+          }
+          tendency(userId: $user) {
+            tendency
+            countChildCompetences
+            countLearnedCompetences
           }
           userCompetences(userId: $user) {
             id

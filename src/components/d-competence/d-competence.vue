@@ -4,6 +4,28 @@
       <div class="flex items-center gap-1.5 p-1 text-strong">
         <Folder v-if="competence.type !== 'competence'" :size="12" class="fill-neutral-700 stroke-neutral-700" />
         {{ competence.name }}
+
+        <div v-if="competence.tendency" class="ml-4 flex items-center gap-2 text-sm">
+          <div
+            class="h-2 w-[50px] overflow-clip rounded-md bg-neutral-200"
+            :title="`${competence.tendency?.countLearnedCompetences} von ${competence.tendency?.countChildCompetences} Kompetenzen gelernt`"
+          >
+            <div
+              class="h-full bg-neutral-700"
+              :style="`width: ${Math.round(
+                (competence.tendency.countLearnedCompetences / competence.tendency.countChildCompetences) * 100
+              )}%;`"
+            />
+          </div>
+          <div>{{ competence.tendency?.countLearnedCompetences }}/{{ competence.tendency?.countChildCompetences }}</div>
+          <div
+            :style="{
+              transform: `rotate(${Math.floor(competence.tendency.tendency * 10) * -1 * 3.6}deg)`,
+            }"
+          >
+            <ArrowRight />
+          </div>
+        </div>
       </div>
       <div class="flex items-center gap-2">
         <div class="w-[50px] px-1 text-right text-default">
@@ -12,6 +34,7 @@
         <slot />
       </div>
     </div>
+
     <div class="flex max-w-full gap-1 overflow-hidden text-xs">
       <div v-for="(parent, index) in competence.parents" class="flex items-center py-0.5">
         <div v-if="index !== 0" class="mx-1 text-muted">/</div>
@@ -37,10 +60,10 @@
 <script lang="ts" setup>
 import { toRef } from "vue";
 import { Competence } from "@/gql/graphql";
-import { Folder } from "lucide-vue-next";
+import { Folder, ArrowRight } from "lucide-vue-next";
 
 export interface Props {
-  competence: Pick<Competence, "grades" | "name" | "parents" | "type">;
+  competence: Pick<Competence, "grades" | "name" | "parents" | "type" | "tendency">;
 }
 
 const props = defineProps<Props>();

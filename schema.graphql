@@ -58,6 +58,7 @@ type Competence {
     name: String!
     parents: [Competence!]!
     sortOrder: Int!
+    tendency(userId: ID!): CompetenceTendency
     type: CompetenceType!
     userCompetences(userId: ID): [UserCompetence]!
 }
@@ -66,6 +67,12 @@ type CompetenceConnection {
     edges: [Competence]
     pageInfo: PageInfo!
     totalCount: Int!
+}
+
+type CompetenceTendency {
+    countChildCompetences: Int!
+    countLearnedCompetences: Int!
+    tendency: Float!
 }
 
 type CopyFilesPayload {
