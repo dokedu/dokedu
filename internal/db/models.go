@@ -2,10 +2,9 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"github.com/uptrace/bun"
 	"time"
-
-	"github.com/tabbed/pqtype"
 )
 
 type CompetenceType string
@@ -147,6 +146,7 @@ type Competence struct {
 	Color          sql.NullString `json:"color"`
 	SortOrder      int            `json:"sort_order"`
 	CurriculumID   sql.NullString `json:"curriculum_id"`
+	CreatedBy      sql.NullString `json:"created_by"`
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
 	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
 }
@@ -307,20 +307,20 @@ type Organisation struct {
 type Report struct {
 	bun.BaseModel
 
-	ID             string                `bun:",nullzero,pk" json:"id"`
-	Status         ReportStatus          `json:"status"`
-	Format         ReportFormat          `json:"format"`
-	Kind           ReportKind            `json:"kind"`
-	From           time.Time             `json:"from"`
-	To             time.Time             `json:"to"`
-	Meta           pqtype.NullRawMessage `json:"meta"`
-	FilterTags     []string              `bun:",array" json:"filter_tags"`
-	FileID         sql.NullString        `json:"file_id"`
-	UserID         string                `json:"user_id"`
-	StudentUserID  string                `json:"student_user_id"`
-	OrganisationID string                `json:"organisation_id"`
-	CreatedAt      time.Time             `bun:",nullzero,notnull,default:now()" json:"created_at"`
-	DeletedAt      bun.NullTime          `bun:",soft_delete,nullzero"`
+	ID             string          `bun:",nullzero,pk" json:"id"`
+	Status         ReportStatus    `json:"status"`
+	Format         ReportFormat    `json:"format"`
+	Kind           ReportKind      `json:"kind"`
+	From           time.Time       `json:"from"`
+	To             time.Time       `json:"to"`
+	Meta           json.RawMessage `json:"meta"`
+	FilterTags     []string        `bun:",array" json:"filter_tags"`
+	FileID         sql.NullString  `json:"file_id"`
+	UserID         string          `json:"user_id"`
+	StudentUserID  string          `json:"student_user_id"`
+	OrganisationID string          `json:"organisation_id"`
+	CreatedAt      time.Time       `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	DeletedAt      bun.NullTime    `bun:",soft_delete,nullzero"`
 }
 
 type Share struct {

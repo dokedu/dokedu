@@ -70,6 +70,11 @@ type CopyFilesPayload struct {
 	Files []*db.File `json:"files"`
 }
 
+type CreateCompetenceInput struct {
+	Name     string `json:"name"`
+	ParentID string `json:"parentId"`
+}
+
 type CreateDomainInput struct {
 	Name string `json:"name"`
 }
@@ -103,14 +108,29 @@ type CreateEmailInput struct {
 	Type    db.EmailType `json:"type"`
 }
 
-type CreateEntryInput struct {
-	Date            string                       `json:"date"`
-	Body            string                       `json:"body"`
-	TagIds          []string                     `json:"tagIds,omitempty"`
-	FileIds         []string                     `json:"fileIds,omitempty"`
-	UserIds         []string                     `json:"userIds,omitempty"`
-	EventIds        []string                     `json:"eventIds,omitempty"`
-	UserCompetences []*CreateUserCompetenceInput `json:"userCompetences,omitempty"`
+type CreateEntryCompetenceInput struct {
+	EntryID      string `json:"entryId"`
+	CompetenceID string `json:"competenceId"`
+}
+
+type CreateEntryEventInput struct {
+	EntryID string `json:"entryId"`
+	EventID string `json:"eventId"`
+}
+
+type CreateEntryFileInput struct {
+	EntryID string `json:"entryId"`
+	FileID  string `json:"fileId"`
+}
+
+type CreateEntryTagInput struct {
+	EntryID string `json:"entryId"`
+	TagID   string `json:"tagId"`
+}
+
+type CreateEntryUserInput struct {
+	EntryID string `json:"entryId"`
+	UserID  string `json:"userId"`
 }
 
 type CreateEventInput struct {
@@ -209,6 +229,31 @@ type DeleteEmailInput struct {
 	ID string `json:"id"`
 }
 
+type DeleteEntryCompetenceInput struct {
+	EntryID      string `json:"entryId"`
+	CompetenceID string `json:"competenceId"`
+}
+
+type DeleteEntryEventInput struct {
+	EntryID string `json:"entryId"`
+	EventID string `json:"eventId"`
+}
+
+type DeleteEntryFileInput struct {
+	EntryID string `json:"entryId"`
+	FileID  string `json:"fileId"`
+}
+
+type DeleteEntryTagInput struct {
+	EntryID string `json:"entryId"`
+	TagID   string `json:"tagId"`
+}
+
+type DeleteEntryUserInput struct {
+	EntryID string `json:"entryId"`
+	UserID  string `json:"userId"`
+}
+
 type DeleteFileInput struct {
 	ID string `json:"id"`
 }
@@ -285,7 +330,7 @@ type EmailGroupMemberConnection struct {
 }
 
 type EntryConnection struct {
-	Edges      []*db.Entry `json:"edges,omitempty"`
+	Edges      []*db.Entry `json:"edges"`
 	PageInfo   *PageInfo   `json:"pageInfo"`
 	TotalCount int         `json:"totalCount"`
 }
@@ -519,14 +564,15 @@ type UpdateEmailGroupInput struct {
 }
 
 type UpdateEntryInput struct {
-	ID              string                       `json:"id"`
-	Date            *string                      `json:"date,omitempty"`
-	Body            *string                      `json:"body,omitempty"`
-	TagIds          []string                     `json:"tagIds,omitempty"`
-	FileIds         []string                     `json:"fileIds,omitempty"`
-	UserIds         []string                     `json:"userIds,omitempty"`
-	EventIds        []string                     `json:"eventIds,omitempty"`
-	UserCompetences []*UpdateUserCompetenceInput `json:"userCompetences,omitempty"`
+	ID   string  `json:"id"`
+	Date *string `json:"date,omitempty"`
+	Body *string `json:"body,omitempty"`
+}
+
+type UpdateEntryUserCompetenceLevel struct {
+	EntryID      string `json:"entryId"`
+	CompetenceID string `json:"competenceId"`
+	Level        int    `json:"level"`
 }
 
 type UpdateEventInput struct {

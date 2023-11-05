@@ -14,7 +14,7 @@ type Entry {
 }
 
 type EntryConnection {
-    edges: [Entry]
+    edges: [Entry!]!
     pageInfo: PageInfo!
     totalCount: Int!
 }
@@ -47,25 +47,10 @@ input CreateUserCompetenceInput {
     competenceId: ID!
 }
 
-input CreateEntryInput {
-    date: String!
-    body: String!
-    tagIds: [ID!]
-    fileIds: [ID!]
-    userIds: [ID!]
-    eventIds: [ID!]
-    userCompetences: [CreateUserCompetenceInput!]
-}
-
 input UpdateEntryInput {
     id: ID!
     date: String
     body: String
-    tagIds: [ID!]
-    fileIds: [ID!]
-    userIds: [ID!]
-    eventIds: [ID!]
-    userCompetences: [UpdateUserCompetenceInput!]
 }
 
 input UpdateUserCompetenceInput {
@@ -74,8 +59,78 @@ input UpdateUserCompetenceInput {
     competenceId: ID!
 }
 
+input CreateEntryTagInput {
+    entryId: ID!
+    tagId: ID!
+}
+
+input CreateEntryFileInput {
+    entryId: ID!
+    fileId: ID!
+}
+
+input CreateEntryUserInput {
+    entryId: ID!
+    userId: ID!
+}
+
+input CreateEntryEventInput {
+    entryId: ID!
+    eventId: ID!
+}
+
+input CreateEntryCompetenceInput {
+    entryId: ID!
+    competenceId: ID!
+}
+
+input DeleteEntryTagInput {
+    entryId: ID!
+    tagId: ID!
+}
+
+input DeleteEntryFileInput {
+    entryId: ID!
+    fileId: ID!
+}
+
+input DeleteEntryUserInput {
+    entryId: ID!
+    userId: ID!
+}
+
+input DeleteEntryEventInput {
+    entryId: ID!
+    eventId: ID!
+}
+
+input DeleteEntryCompetenceInput {
+    entryId: ID!
+    competenceId: ID!
+}
+
+input UpdateEntryUserCompetenceLevel {
+    entryId: ID!
+    competenceId: ID!
+    level: Int!
+}
+
 extend type Mutation {
-    createEntry(input: CreateEntryInput!): Entry!
+    createEntry: Entry!
     updateEntry(input: UpdateEntryInput!): Entry!
     archiveEntry(id: ID!): Entry!
+
+    createEntryTag(input: CreateEntryTagInput!): Entry!
+    createEntryFile(input: CreateEntryFileInput!): Entry!
+    createEntryUser(input: CreateEntryUserInput!): Entry!
+    createEntryEvent(input: CreateEntryEventInput!): Entry!
+    createEntryCompetence(input: CreateEntryCompetenceInput!): Entry!
+
+    deleteEntryTag(input: DeleteEntryTagInput!): Entry!
+    deleteEntryFile(input: DeleteEntryFileInput!): Entry!
+    deleteEntryUser(input: DeleteEntryUserInput!): Entry!
+    deleteEntryEvent(input: DeleteEntryEventInput!): Entry!
+    deleteEntryCompetence(input: DeleteEntryCompetenceInput!): Entry!
+
+    updateEntryUserCompetenceLevel(input: UpdateEntryUserCompetenceLevel!): Entry!
 }
