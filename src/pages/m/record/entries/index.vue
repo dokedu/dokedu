@@ -24,13 +24,13 @@
       </div>
     </div>
     <MPageFooter>
-      <router-link
-        to="/m/record/entries/new"
+      <div
+        @click="createEntry"
         class="flex w-full items-center justify-center gap-2 rounded-lg bg-neutral-950 px-8 py-2.5 text-center text-sm text-white"
       >
         <Plus :size="18" />
         <div>Eintrag erstellen</div>
-      </router-link>
+      </div>
     </MPageFooter>
   </div>
 </template>
@@ -49,8 +49,12 @@ import MPageHeader from "@/components/mobile/m-page-header.vue";
 import MPageFooter from "@/components/mobile/m-page-footer.vue";
 import { Plus } from "lucide-vue-next";
 import { graphql } from "@/gql";
-import { useQuery } from "@urql/vue";
+import { useMutation, useQuery } from "@urql/vue";
 import { EntrySortBy } from "@/gql/graphql";
+import createEntryDraftMutation from "@/queries/createEntryDraft.mutation.ts";
+import { useRouter } from "vue-router/auto";
+
+const { executeMutation: createEntryDraft } = useMutation(createEntryDraftMutation);
 
 const query = graphql(`
   query mGetEntries($limit: Int, $order: EntrySortBy, $offset: Int) {
@@ -73,6 +77,14 @@ const query = graphql(`
     }
   }
 `);
+
+const router = useRouter();
+
+async function createEntry() {
+  const { data } = await createEntryDraft({});
+
+  await router.push({ name: "/m/record/entries/[id]", params: { id: data?.createEntry?.id as string } });
+}
 
 const { data } = useQuery({
   query,

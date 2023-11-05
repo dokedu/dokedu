@@ -49,7 +49,12 @@ import { useVModel, useWindowSize } from "@vueuse/core";
 import { Plus, X, Check } from "lucide-vue-next";
 import { computed, reactive, ref } from "vue";
 import { graphql } from "@/gql";
-import { useQuery } from "@urql/vue";
+import { useMutation, useQuery } from "@urql/vue";
+import deleteEntryEventMutation from "@/queries/deleteEntryEvent.mutation.ts";
+import createEntryEventMutation from "@/queries/createEntryEvent.mutation.ts";
+
+const { executeMutation: deleteEntryEvent } = useMutation(deleteEntryEventMutation);
+const { executeMutation: createEntryEvent } = useMutation(createEntryEventMutation);
 
 const search = ref("");
 const sheetOpen = ref(false);
@@ -62,7 +67,7 @@ function addProject() {
 }
 
 const props = defineProps<{
-  // modelValue: Event[];
+  entry: any;
   modelValue: any;
 }>();
 const emit = defineEmits(["update:modelValue"]);
@@ -83,11 +88,11 @@ const { data } = useQuery({
   variables: reactive({ search }),
 });
 
-function toggleProject(project: any) {
+async function toggleProject(project: any) {
   if (projects.value.find((p: any) => p.id === project.id)) {
-    projects.value = projects.value.filter((p: any) => p.id !== project.id);
+    await deleteEntryEvent({ input: { entryId: props.entry.id, eventId: project.id } });
   } else {
-    projects.value = [...projects.value, project];
+    await createEntryEvent({ input: { entryId: props.entry.id, eventId: project.id } });
   }
 }
 

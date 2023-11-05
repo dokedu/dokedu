@@ -27,12 +27,21 @@
 </template>
 
 <script lang="ts" setup>
+import { Plus, X } from "lucide-vue-next";
+import { computed, ref } from "vue";
+import { useVModel, useWindowSize } from "@vueuse/core";
+import { useMutation } from "@urql/vue";
 import MSheet from "@/components/mobile/m-sheet.vue";
 import DCompetence from "@/components/d-competence/d-competence.vue";
 import DCompetenceSearch from "@/components/d-competence-search/d-competence-search.vue";
 import DCompetenceLevel from "@/components/d-competence/d-competence-level.vue";
-import { Plus, X } from "lucide-vue-next";
-import { computed, ref } from "vue";
+import deleteEntryCompetenceMutation from "@/queries/deleteEntryCompetence.mutation.ts";
+import updateEntryUserCompetenceMutation from "@/queries/updateEntryUserCompetence.mutation.ts";
+import createEntryCompetenceMutation from "@/queries/createEntryCompetence.mutation.ts";
+
+const { executeMutation: deleteEntryCompetence } = useMutation(deleteEntryCompetenceMutation);
+const { executeMutation: createEntryCompetence } = useMutation(createEntryCompetenceMutation);
+const { executeMutation: updateEntryUserCompetenceLevel } = useMutation(updateEntryUserCompetenceMutation);
 
 const sheetOpen = ref(false);
 
@@ -43,9 +52,8 @@ function addCompetence() {
   sheetOpen.value = true;
 }
 
-import { useVModel, useWindowSize } from "@vueuse/core";
-
 const props = defineProps<{
+  entry: any;
   modelValue: any;
 }>();
 const emit = defineEmits(["update:modelValue"]);
@@ -76,22 +84,23 @@ const uCompetence = computed(() => {
   return uniqueCompetences.value.map((el: any) => el.competence);
 });
 
-function toggleCompetence(competence: any) {
+async function toggleCompetence(competence: any) {
   const eac = competences.value.find((eac: any) => eac.competence.id === competence.id);
   if (eac) {
-    competences.value = competences.value.filter((eac: any) => eac.competence.id !== competence.id);
+    await deleteEntryCompetence({ input: { entryId: entry.value.id, competenceId: competence.id } });
   } else {
-    competences.value.push({
-      competence,
-      level: 0,
-    });
+    // if entry.users does not have any users, alert user to add users first
+    if (entry.value.users.length === 0) {
+      alert("Bitte füge zuerst Schüler*innen hinzu.");
+      return;
+    }
+    await createEntryCompetence({ input: { entryId: entry.value.id, competenceId: competence.id } });
   }
 }
 
-function updateCompetenceLevel(data: { id: string; level: number }) {
-  const eacs = entry.value.userCompetences?.filter((eac: any) => eac.competence.id === data.id);
-  for (const eac of eacs) {
-    eac.level = data.level;
-  }
+async function updateCompetenceLevel(data: { id: string; level: number }) {
+  await updateEntryUserCompetenceLevel({
+    input: { entryId: entry.value.id as string, competenceId: data.id, level: data.level },
+  });
 }
 </script>

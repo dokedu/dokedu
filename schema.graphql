@@ -5,6 +5,9 @@ schema {
     mutation: Mutation
 }
 
+"The @defer directive may be specified on a fragment spread to imply de-prioritization, that causes the fragment to be omitted in the initial response, and delivered as a subsequent response afterward. A query with @defer directive will cause the request to potentially return multiple responses, where non-deferred data is delivered in the initial response and data deferred delivered in a subsequent response. @include and @skip take precedence over @defer."
+directive @defer(if: Boolean = true, label: String) on FRAGMENT_SPREAD | INLINE_FRAGMENT
+
 type Bucket {
     createdAt: Time!
     deletedAt: Time
@@ -183,7 +186,7 @@ type Entry {
 }
 
 type EntryConnection {
-    edges: [Entry]
+    edges: [Entry!]!
     pageInfo: PageInfo!
     totalCount: Int!
 }
@@ -260,13 +263,19 @@ type Mutation {
     archiveUserCompetence(id: ID!): UserCompetence!
     copyFile(input: CopyFileInput!): File!
     copyFiles(input: CopyFilesInput!): CopyFilesPayload!
+    createCompetence(input: CreateCompetenceInput!): Competence!
     createDomain(input: CreateDomainInput!): Domain
     createEmail(input: CreateEmailInput!): Email
     createEmailAccount(input: CreateEmailAccountInput!): EmailAccount
     createEmailForwarding(input: CreateEmailForwardingInput!): EmailForwarding
     createEmailGroup(input: CreateEmailGroupInput!): EmailAccount
     createEmailGroupMember(input: CreateEmailGroupMemberInput!): EmailGroupMember
-    createEntry(input: CreateEntryInput!): Entry!
+    createEntry: Entry!
+    createEntryCompetence(input: CreateEntryCompetenceInput!): Entry!
+    createEntryEvent(input: CreateEntryEventInput!): Entry!
+    createEntryFile(input: CreateEntryFileInput!): Entry!
+    createEntryTag(input: CreateEntryTagInput!): Entry!
+    createEntryUser(input: CreateEntryUserInput!): Entry!
     createEvent(input: CreateEventInput!): Event!
     createFolder(input: CreateFolderInput!): File!
     createReport(input: CreateReportInput!): Report!
@@ -284,6 +293,11 @@ type Mutation {
     deleteEmailForwarding(input: DeleteEmailForwardingInput!): EmailForwarding
     deleteEmailGroup(id: ID!): EmailAccount
     deleteEmailGroupMember(input: DeleteEmailGroupMemberInput!): EmailGroupMember
+    deleteEntryCompetence(input: DeleteEntryCompetenceInput!): Entry!
+    deleteEntryEvent(input: DeleteEntryEventInput!): Entry!
+    deleteEntryFile(input: DeleteEntryFileInput!): Entry!
+    deleteEntryTag(input: DeleteEntryTagInput!): Entry!
+    deleteEntryUser(input: DeleteEntryUserInput!): Entry!
     deleteFile(input: DeleteFileInput!): DeleteFilePayload!
     deleteFiles(input: DeleteFilesInput!): DeleteFilesPayload!
     deleteSchoolYear(id: ID!): SchoolYear!
@@ -311,6 +325,7 @@ type Mutation {
     updateEmailAccount(input: UpdateEmailAccountInput!): EmailAccount
     updateEmailGroup(input: UpdateEmailGroupInput!): EmailAccount
     updateEntry(input: UpdateEntryInput!): Entry!
+    updateEntryUserCompetenceLevel(input: UpdateEntryUserCompetenceLevel!): Entry!
     updateEvent(input: UpdateEventInput!): Event!
     updateOrganisation(input: UpdateOrganisationInput!): Organisation!
     updatePassword(newPassword: String!, oldPassword: String!): Boolean!
@@ -676,6 +691,11 @@ input CopyFilesInput {
     targetId: ID!
 }
 
+input CreateCompetenceInput {
+    name: String!
+    parentId: ID!
+}
+
 input CreateDomainInput {
     name: String!
 }
@@ -709,14 +729,29 @@ input CreateEmailInput {
     type: EmailType!
 }
 
-input CreateEntryInput {
-    body: String!
-    date: String!
-    eventIds: [ID!]
-    fileIds: [ID!]
-    tagIds: [ID!]
-    userCompetences: [CreateUserCompetenceInput!]
-    userIds: [ID!]
+input CreateEntryCompetenceInput {
+    competenceId: ID!
+    entryId: ID!
+}
+
+input CreateEntryEventInput {
+    entryId: ID!
+    eventId: ID!
+}
+
+input CreateEntryFileInput {
+    entryId: ID!
+    fileId: ID!
+}
+
+input CreateEntryTagInput {
+    entryId: ID!
+    tagId: ID!
+}
+
+input CreateEntryUserInput {
+    entryId: ID!
+    userId: ID!
 }
 
 input CreateEventInput {
@@ -813,6 +848,31 @@ input DeleteEmailGroupMemberInput {
 
 input DeleteEmailInput {
     id: ID!
+}
+
+input DeleteEntryCompetenceInput {
+    competenceId: ID!
+    entryId: ID!
+}
+
+input DeleteEntryEventInput {
+    entryId: ID!
+    eventId: ID!
+}
+
+input DeleteEntryFileInput {
+    entryId: ID!
+    fileId: ID!
+}
+
+input DeleteEntryTagInput {
+    entryId: ID!
+    tagId: ID!
+}
+
+input DeleteEntryUserInput {
+    entryId: ID!
+    userId: ID!
 }
 
 input DeleteFileInput {
@@ -983,12 +1043,13 @@ input UpdateEmailGroupInput {
 input UpdateEntryInput {
     body: String
     date: String
-    eventIds: [ID!]
-    fileIds: [ID!]
     id: ID!
-    tagIds: [ID!]
-    userCompetences: [UpdateUserCompetenceInput!]
-    userIds: [ID!]
+}
+
+input UpdateEntryUserCompetenceLevel {
+    competenceId: ID!
+    entryId: ID!
+    level: Int!
 }
 
 input UpdateEventInput {

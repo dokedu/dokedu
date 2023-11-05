@@ -1,6 +1,6 @@
 <template>
   <PageWrapper>
-    <EntryForm v-if="entry" :entry="(entry.entry as Partial<Entry>)" mode="edit" @archived="archived" @saved="saved" />
+    <EntryForm v-if="entry" :entry="entry.entry as Partial<Entry>" @archived="archived" />
   </PageWrapper>
 </template>
 
@@ -18,8 +18,6 @@ const router = useRouter();
 async function archived() {
   await router.push({ name: "/record/entries/" });
 }
-
-function saved() {}
 
 const { data: entry } = useQuery({
   query: graphql(`

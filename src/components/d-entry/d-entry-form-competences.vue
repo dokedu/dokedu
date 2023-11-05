@@ -53,6 +53,14 @@ import DCompetenceLevel from "@/components/d-competence/d-competence-level.vue";
 import { Entry, Competence } from "@/gql/graphql";
 import DCompetence from "@/components/d-competence/d-competence.vue";
 import DCompetenceSearch from "@/components/d-competence-search/d-competence-search.vue";
+import { useMutation } from "@urql/vue";
+import deleteEntryCompetenceMutation from "@/queries/deleteEntryCompetence.mutation.ts";
+import updateEntryUserCompetenceMutation from "@/queries/updateEntryUserCompetence.mutation.ts";
+import createEntryCompetenceMutation from "@/queries/createEntryCompetence.mutation.ts";
+
+const { executeMutation: deleteEntryCompetence } = useMutation(deleteEntryCompetenceMutation);
+const { executeMutation: createEntryCompetence } = useMutation(createEntryCompetenceMutation);
+const { executeMutation: updateEntryUserCompetenceLevel } = useMutation(updateEntryUserCompetenceMutation);
 
 const dialog = ref(null);
 const dialogOpen = ref(false);
@@ -71,14 +79,10 @@ const props = defineProps<{ entry: Partial<Entry> }>();
 
 const entry = toRef(props, "entry");
 
-function updateCompetenceLevel(data: { id: string; level: number }) {
-  // find all eacs with eac.competence.id = data.id
-  const eacs = entry.value.userCompetences?.filter((eac) => eac.competence.id === data.id);
-  // update all eacs with new level
-  // @ts-expect-error
-  for (const eac of eacs) {
-    eac.level = data.level;
-  }
+async function updateCompetenceLevel(data: { id: string; level: number }) {
+  await updateEntryUserCompetenceLevel({
+    input: { entryId: entry.value.id as string, competenceId: data.id, level: data.level },
+  });
 }
 
 const competences = computed(() => {
@@ -99,21 +103,19 @@ function toggleCompetence(competence: { id: string; type: string }) {
   emitToggleCompetence(competence);
 }
 
-function emitToggleCompetence(competence: Competence) {
+async function emitToggleCompetence(competence: Competence) {
   if (competence.type !== "competence") return;
 
-  // if entry.userCompetences is undefined, create empty array
-  if (!entry.value.userCompetences) {
-    entry.value.userCompetences = [];
-  }
-
   // create new competence and add it to entry.userCompetences if it doesn't exist
-  if (!entry.value.userCompetences.map((el) => el.competence.id).includes(competence.id)) {
-    // @ts-expect-error
-    entry.value.userCompetences.push({ competence: competence, level: competence.level });
+  if (!entry.value.userCompetences?.map((el) => el.competence.id).includes(competence.id)) {
+    // if entry.users does not have any users, alert user to add users first
+    if (entry.value.users?.length === 0) {
+      alert("Bitte füge zuerst Schüler*innen hinzu.");
+      return;
+    }
+    await createEntryCompetence({ input: { entryId: entry.value.id as string, competenceId: competence.id } });
   } else {
-    // remove competence from entry.userCompetences if it exists
-    entry.value.userCompetences = entry.value.userCompetences.filter((el) => el.competence.id !== competence.id);
+    await deleteEntryCompetence({ input: { entryId: entry.value.id as string, competenceId: competence.id } });
   }
 }
 </script>

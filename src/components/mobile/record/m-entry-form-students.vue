@@ -49,7 +49,12 @@ import { useVModel, useWindowSize } from "@vueuse/core";
 import { Plus, X, Check } from "lucide-vue-next";
 import { computed, reactive, ref } from "vue";
 import { graphql } from "@/gql";
-import { useQuery } from "@urql/vue";
+import { useMutation, useQuery } from "@urql/vue";
+import deleteEntryUserMutation from "@/queries/deleteEntryUser.mutation.ts";
+import createEntryUserMutation from "@/queries/createEntryUser.mutation.ts";
+
+const { executeMutation: deleteEntryUser } = useMutation(deleteEntryUserMutation);
+const { executeMutation: createEntryUser } = useMutation(createEntryUserMutation);
 
 const search = ref("");
 const sheetOpen = ref(false);
@@ -62,6 +67,7 @@ function addStudent() {
 }
 
 const props = defineProps<{
+  entry: any;
   modelValue: any;
 }>();
 const emit = defineEmits(["update:modelValue"]);
@@ -83,11 +89,11 @@ const { data } = useQuery({
   variables: reactive({ search }),
 });
 
-function toggleStudent(student: any) {
+async function toggleStudent(student: any) {
   if (students.value.find((p: any) => p.id === student.id)) {
-    students.value = students.value.filter((p: any) => p.id !== student.id);
+    await deleteEntryUser({ input: { entryId: props.entry.id, userId: student.id } });
   } else {
-    students.value = [...students.value, student];
+    await createEntryUser({ input: { entryId: props.entry.id, userId: student.id } });
   }
 }
 

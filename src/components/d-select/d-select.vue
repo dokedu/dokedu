@@ -6,7 +6,7 @@
       tabindex="0"
       ref="toggle"
     >
-      <div class="flex justify-between gap-3 rounded-md py-1.5 pl-2.5 pr-2 transition-colors hover:bg-neutral-100">
+      <div class="flex justify-between gap-3 rounded-md py-2 pl-2.5 pr-2 transition-colors hover:bg-neutral-100">
         <slot name="display" :displayedLabel="displayedLabel">
           <div class="text-sm text-default">{{ displayedLabel }}</div>
         </slot>
@@ -119,7 +119,7 @@ const onSelect = async (option: { label: string; value: string }) => {
     if (model.value.includes(option.value)) {
       emit(
         "update:modelValue",
-        model.value.filter((id: string) => id !== option.value)
+        model.value.filter((id: string) => id !== option.value),
       );
     } else {
       emit("update:modelValue", [...model.value, option.value]);

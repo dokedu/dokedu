@@ -34,9 +34,7 @@
               </template>
             </DSelect>
           </div>
-          <router-link :to="{ name: '/record/entries/new' }">
-            <DButton type="primary" size="md" :icon-left="Plus">{{ $t("new") }}</DButton>
-          </router-link>
+          <DButton @click="createEntry" type="primary" size="md" :icon-left="Plus">{{ $t("new") }}</DButton>
         </div>
       </div>
     </PageHeader>
@@ -109,7 +107,7 @@
 <script setup lang="ts">
 import PageHeader from "@/components/page-header.vue";
 import PageWrapper from "@/components/page-wrapper.vue";
-import { useQuery } from "@urql/vue";
+import { useMutation, useQuery } from "@urql/vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { Plus } from "lucide-vue-next";
 import { ref, computed, reactive } from "vue";
@@ -125,6 +123,7 @@ import { PageVariables } from "@/types/types";
 import DSelect from "@/components/d-select/d-select.vue";
 import tagQuery from "@/queries/tags";
 import { useSessionStorage } from "@vueuse/core";
+import createEntryDraftMutation from "@/queries/createEntryDraft.mutation.ts";
 
 const i18nLocale = useI18n();
 const router = useRouter();
@@ -286,7 +285,7 @@ const teacherOptions = computed(
     teacherData?.value?.users?.edges?.map((edge: any) => ({
       label: `${edge.firstName} ${edge.lastName}`,
       value: edge.id,
-    })) || []
+    })) || [],
 );
 
 const studentOptions = computed(
@@ -294,7 +293,7 @@ const studentOptions = computed(
     studentData?.value?.users?.edges?.map((edge: any) => ({
       label: `${edge.firstName} ${edge.lastName}`,
       value: edge.id,
-    })) || []
+    })) || [],
 );
 
 const tagOptions = computed(
@@ -302,7 +301,7 @@ const tagOptions = computed(
     tagData?.value?.tags?.edges?.map((edge: any) => ({
       label: edge.name,
       value: edge.id,
-    })) || []
+    })) || [],
 );
 
 function dateOnly(date: string) {
@@ -312,5 +311,16 @@ function dateOnly(date: string) {
     day: "2-digit",
   };
   return new Date(date).toLocaleDateString(i18nLocale.locale.value, options);
+}
+
+const { executeMutation: createEntryDraft } = useMutation(createEntryDraftMutation);
+
+async function createEntry() {
+  const { data, error } = await createEntryDraft({});
+  if (error) {
+    alert(error.message);
+    return;
+  }
+  router.push({ name: "/record/entries/[id]", params: { id: data?.createEntry.id as string } });
 }
 </script>

@@ -6,11 +6,8 @@
       </router-link>
     </div>
     <div class="flex gap-2">
-      <d-button v-if="mode !== 'new'" size="md" :icon-left="Trash2" type="outline" @click="$emit('archive')">
+      <d-button size="md" :icon-left="Trash2" type="outline" @click="$emit('archive')">
         {{ $t("archive") }}
-      </d-button>
-      <d-button type="primary" size="md" :icon-left="Save" @click="$emit('submit')">
-        {{ mode === "new" ? $t("create") : $t("save") }}
       </d-button>
     </div>
   </div>
@@ -19,8 +16,7 @@
 <script lang="ts" setup>
 import DButton from "../d-button/d-button.vue";
 import DIconButton from "../d-icon-button/d-icon-button.vue";
-import { Save, X, Trash2 } from "lucide-vue-next";
+import { X, Trash2 } from "lucide-vue-next";
 
-defineProps<{ mode: "new" | "edit" }>();
 defineEmits(["submit", "archive"]);
 </script>

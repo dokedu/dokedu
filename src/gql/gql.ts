@@ -30,6 +30,8 @@ const documents = {
     "\n    mutation createFolder($input: CreateFolderInput!) {\n      createFolder(input: $input) {\n        id\n      }\n    }\n  ": types.CreateFolderDocument,
     "\n    query competenceSearch($search: String, $filter: CompetenceFilterInput) {\n      competences(search: $search, filter: $filter, sort: { field: sort_order, order: asc }) {\n        edges {\n          id\n          name\n          type\n          color\n          grades\n          parents {\n            id\n            name\n            type\n            grades\n            color\n          }\n        }\n      }\n    }\n  ": types.CompetenceSearchDocument,
     "\n    query competencePath($id: ID!) {\n      competence(id: $id) {\n        id\n        name\n        type\n        color\n        grades\n        parents {\n          id\n          name\n          type\n          grades\n          color\n        }\n      }\n    }\n  ": types.CompetencePathDocument,
+    "\n    query subjectsData($search: String) {\n      competences(filter: { type: [subject] }, search: $search) {\n        edges {\n          id\n          name\n          type\n          color\n          grades\n        }\n      }\n    }\n  ": types.SubjectsDataDocument,
+    "\n    mutation createCompetence($input: CreateCompetenceInput!) {\n      createCompetence(input: $input) {\n        id\n        name\n        type\n        grades\n        color\n        parents {\n          id\n          name\n          type\n          grades\n          color\n        }\n      }\n    }\n  ": types.CreateCompetenceDocument,
     "\n    mutation updateCompetence($input: UpdateCompetenceInput!) {\n      updateCompetence(input: $input) {\n        id\n        name\n        color\n      }\n    }\n  ": types.UpdateCompetenceDocument,
     "\n    mutation uploadFile($input: FileUploadInput!) {\n      uploadFile(input: $input) {\n        id\n      }\n    }\n  ": types.UploadFileDocument,
     "\n    query bucketByIdShared($id: ID!) {\n      bucket(id: $id) {\n        id\n        permission\n      }\n    }\n  ": types.BucketByIdSharedDocument,
@@ -100,9 +102,17 @@ const documents = {
     "\n    mutation archiveStudent($id: ID!) {\n      archiveUser(id: $id) {\n        id\n        firstName\n        lastName\n        role\n        student {\n          birthday\n          grade\n          leftAt\n          joinedAt\n        }\n      }\n    }\n  ": types.ArchiveStudentDocument,
     "\n    mutation createStudent($student: CreateStudentInput!) {\n      createStudent(input: $student) {\n        id\n        firstName\n        lastName\n        student {\n          id\n          birthday\n          grade\n          leftAt\n          joinedAt\n        }\n      }\n    }\n  ": types.CreateStudentDocument,
     "\n  mutation archiveEntry($id: ID!) {\n    archiveEntry(id: $id) {\n      id\n    }\n  }\n": types.ArchiveEntryDocument,
-    "\nmutation createEntry($input: CreateEntryInput!) {\n    createEntry(input: $input) {\n      id\n      date\n      body\n      deletedAt\n      user {\n        id\n        firstName\n        lastName\n      }\n      createdAt\n      tags {\n        id\n        name\n        color\n      }\n      events {\n        id\n        title\n      }\n      users {\n        id\n        firstName\n        lastName\n      }\n      userCompetences {\n        id\n        level\n        competence {\n          id\n          name\n          color\n          type\n        }\n      }\n    }\n  }\n": types.CreateEntryDocument,
+    "\n  mutation createEntryCompetence($input: CreateEntryCompetenceInput!) {\n    createEntryCompetence(input: $input) {\n      id\n    }\n  }\n": types.CreateEntryCompetenceDocument,
+    "\n  mutation createEntryDraft {\n    createEntry {\n      id\n    }\n  }\n": types.CreateEntryDraftDocument,
+    "\n  mutation createEntryEvent($input: CreateEntryEventInput!) {\n    createEntryEvent(input: $input) {\n      id\n    }\n  }\n": types.CreateEntryEventDocument,
+    "\n  mutation createEntryTag($input: CreateEntryTagInput!) {\n    createEntryTag(input: $input) {\n      id\n    }\n  }\n": types.CreateEntryTagDocument,
+    "\n  mutation createEntryUser($input: CreateEntryUserInput!) {\n    createEntryUser(input: $input) {\n      id\n    }\n  }\n": types.CreateEntryUserDocument,
     "\n  mutation createSchoolYear($year: Int!) {\n    createSchoolYear(input: { year: $year }) {\n      id\n      year\n      description\n    }\n  }\n": types.CreateSchoolYearDocument,
     "\n  mutation createSubject($name: String!) {\n    createSubject(input: { name: $name }) {\n      id\n      name\n    }\n  }\n": types.CreateSubjectDocument,
+    "\n  mutation deleteEntryCompetenceInput($input: DeleteEntryCompetenceInput!) {\n    deleteEntryCompetence(input: $input) {\n      id\n    }\n  }\n": types.DeleteEntryCompetenceInputDocument,
+    "\n  mutation deleteEntryEventInput($input: DeleteEntryEventInput!) {\n    deleteEntryEvent(input: $input) {\n      id\n    }\n  }\n": types.DeleteEntryEventInputDocument,
+    "\n  mutation deleteEntryTagInput($input: DeleteEntryTagInput!) {\n    deleteEntryTag(input: $input) {\n      id\n    }\n  }\n": types.DeleteEntryTagInputDocument,
+    "\n  mutation deleteEntryUserInput($input: DeleteEntryUserInput!) {\n    deleteEntryUser(input: $input) {\n      id\n    }\n  }\n": types.DeleteEntryUserInputDocument,
     "\n  query entryById($id: ID!) {\n    entry(id: $id) {\n      id\n      date\n      body\n      deletedAt\n      user {\n        id\n        firstName\n        lastName\n      }\n      createdAt\n      tags {\n        id\n        name\n        color\n      }\n      events {\n        id\n        title\n      }\n      users {\n        id\n        firstName\n        lastName\n      }\n      userCompetences {\n        id\n        level\n        competence {\n          id\n          name\n          color\n          type\n          grades\n          parents {\n            id\n            name\n            grades\n            color\n          }\n        }\n      }\n    }\n  }\n": types.EntryByIdDocument,
     "\n  query events($search: String) {\n    events(limit: 100, search: $search) {\n      edges {\n        id\n        title\n      }\n    }\n  }\n": types.EventsDocument,
     "\n    query me {\n        me {\n            id\n            role\n        }\n    }\n": types.MeDocument,
@@ -113,7 +123,8 @@ const documents = {
     "\n    query subject($id: ID!) {\n      subject(id: $id) {\n        id\n        name\n      }\n    }\n": types.SubjectDocument,
     "\n  query subjects($limit: Int, $offset: Int) {\n    subjects(limit: $limit, offset: $offset) {\n      edges {\n        id\n        name\n      }\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n": types.SubjectsDocument,
     "\n  query tagLimited($search: String) {\n    tags(limit: 100, search: $search) {\n      edges {\n        id\n        name\n        color\n      }\n    }\n  }\n": types.TagLimitedDocument,
-    "\nmutation updateEntry($input: UpdateEntryInput!) {\n    updateEntry(input: $input) {\n      id\n      date\n      body\n      deletedAt\n      user {\n        id\n        firstName\n        lastName\n      }\n      createdAt\n      tags {\n        id\n        name\n        color\n      }\n      events {\n        id\n        title\n      }\n      users {\n        id\n        firstName\n        lastName\n      }\n      userCompetences {\n        id\n        level\n        competence {\n          id\n          name\n          color\n          type\n        }\n      }\n    }\n  }\n  ": types.UpdateEntryDocument,
+    "\n  mutation updateEntry($input: UpdateEntryInput!) {\n    updateEntry(input: $input) {\n      id\n    }\n  }\n": types.UpdateEntryDocument,
+    "\n  mutation updateEntryUserCompetenceLevel($input: UpdateEntryUserCompetenceLevel!) {\n    updateEntryUserCompetenceLevel(input: $input) {\n      id\n    }\n  }\n": types.UpdateEntryUserCompetenceLevelDocument,
     "\n  mutation updateSchoolYear($id: ID!, $year: Int!) {\n    updateSchoolYear(input: { id: $id, year: $year }) {\n      id\n      year\n      description\n    }\n  }\n": types.UpdateSchoolYearDocument,
     "\n    mutation updateSubject($id: ID!, $name: String!) {\n        updateSubject(input: { id: $id, name: $name }) {\n            id\n            name\n        }\n    }\n": types.UpdateSubjectDocument,
     "\n  mutation updateUserStudentGrade($id: ID!, $grade: Int!) {\n    updateUserStudentGrade(input: { id: $id, grade: $grade }) {\n      id\n      grade\n    }\n  }\n": types.UpdateUserStudentGradeDocument,
@@ -203,6 +214,14 @@ export function graphql(source: "\n    query competenceSearch($search: String, $
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    query competencePath($id: ID!) {\n      competence(id: $id) {\n        id\n        name\n        type\n        color\n        grades\n        parents {\n          id\n          name\n          type\n          grades\n          color\n        }\n      }\n    }\n  "): (typeof documents)["\n    query competencePath($id: ID!) {\n      competence(id: $id) {\n        id\n        name\n        type\n        color\n        grades\n        parents {\n          id\n          name\n          type\n          grades\n          color\n        }\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    query subjectsData($search: String) {\n      competences(filter: { type: [subject] }, search: $search) {\n        edges {\n          id\n          name\n          type\n          color\n          grades\n        }\n      }\n    }\n  "): (typeof documents)["\n    query subjectsData($search: String) {\n      competences(filter: { type: [subject] }, search: $search) {\n        edges {\n          id\n          name\n          type\n          color\n          grades\n        }\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation createCompetence($input: CreateCompetenceInput!) {\n      createCompetence(input: $input) {\n        id\n        name\n        type\n        grades\n        color\n        parents {\n          id\n          name\n          type\n          grades\n          color\n        }\n      }\n    }\n  "): (typeof documents)["\n    mutation createCompetence($input: CreateCompetenceInput!) {\n      createCompetence(input: $input) {\n        id\n        name\n        type\n        grades\n        color\n        parents {\n          id\n          name\n          type\n          grades\n          color\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -486,7 +505,23 @@ export function graphql(source: "\n  mutation archiveEntry($id: ID!) {\n    arch
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\nmutation createEntry($input: CreateEntryInput!) {\n    createEntry(input: $input) {\n      id\n      date\n      body\n      deletedAt\n      user {\n        id\n        firstName\n        lastName\n      }\n      createdAt\n      tags {\n        id\n        name\n        color\n      }\n      events {\n        id\n        title\n      }\n      users {\n        id\n        firstName\n        lastName\n      }\n      userCompetences {\n        id\n        level\n        competence {\n          id\n          name\n          color\n          type\n        }\n      }\n    }\n  }\n"): (typeof documents)["\nmutation createEntry($input: CreateEntryInput!) {\n    createEntry(input: $input) {\n      id\n      date\n      body\n      deletedAt\n      user {\n        id\n        firstName\n        lastName\n      }\n      createdAt\n      tags {\n        id\n        name\n        color\n      }\n      events {\n        id\n        title\n      }\n      users {\n        id\n        firstName\n        lastName\n      }\n      userCompetences {\n        id\n        level\n        competence {\n          id\n          name\n          color\n          type\n        }\n      }\n    }\n  }\n"];
+export function graphql(source: "\n  mutation createEntryCompetence($input: CreateEntryCompetenceInput!) {\n    createEntryCompetence(input: $input) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation createEntryCompetence($input: CreateEntryCompetenceInput!) {\n    createEntryCompetence(input: $input) {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation createEntryDraft {\n    createEntry {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation createEntryDraft {\n    createEntry {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation createEntryEvent($input: CreateEntryEventInput!) {\n    createEntryEvent(input: $input) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation createEntryEvent($input: CreateEntryEventInput!) {\n    createEntryEvent(input: $input) {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation createEntryTag($input: CreateEntryTagInput!) {\n    createEntryTag(input: $input) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation createEntryTag($input: CreateEntryTagInput!) {\n    createEntryTag(input: $input) {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation createEntryUser($input: CreateEntryUserInput!) {\n    createEntryUser(input: $input) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation createEntryUser($input: CreateEntryUserInput!) {\n    createEntryUser(input: $input) {\n      id\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -495,6 +530,22 @@ export function graphql(source: "\n  mutation createSchoolYear($year: Int!) {\n 
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation createSubject($name: String!) {\n    createSubject(input: { name: $name }) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation createSubject($name: String!) {\n    createSubject(input: { name: $name }) {\n      id\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation deleteEntryCompetenceInput($input: DeleteEntryCompetenceInput!) {\n    deleteEntryCompetence(input: $input) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation deleteEntryCompetenceInput($input: DeleteEntryCompetenceInput!) {\n    deleteEntryCompetence(input: $input) {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation deleteEntryEventInput($input: DeleteEntryEventInput!) {\n    deleteEntryEvent(input: $input) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation deleteEntryEventInput($input: DeleteEntryEventInput!) {\n    deleteEntryEvent(input: $input) {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation deleteEntryTagInput($input: DeleteEntryTagInput!) {\n    deleteEntryTag(input: $input) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation deleteEntryTagInput($input: DeleteEntryTagInput!) {\n    deleteEntryTag(input: $input) {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation deleteEntryUserInput($input: DeleteEntryUserInput!) {\n    deleteEntryUser(input: $input) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation deleteEntryUserInput($input: DeleteEntryUserInput!) {\n    deleteEntryUser(input: $input) {\n      id\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -538,7 +589,11 @@ export function graphql(source: "\n  query tagLimited($search: String) {\n    ta
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\nmutation updateEntry($input: UpdateEntryInput!) {\n    updateEntry(input: $input) {\n      id\n      date\n      body\n      deletedAt\n      user {\n        id\n        firstName\n        lastName\n      }\n      createdAt\n      tags {\n        id\n        name\n        color\n      }\n      events {\n        id\n        title\n      }\n      users {\n        id\n        firstName\n        lastName\n      }\n      userCompetences {\n        id\n        level\n        competence {\n          id\n          name\n          color\n          type\n        }\n      }\n    }\n  }\n  "): (typeof documents)["\nmutation updateEntry($input: UpdateEntryInput!) {\n    updateEntry(input: $input) {\n      id\n      date\n      body\n      deletedAt\n      user {\n        id\n        firstName\n        lastName\n      }\n      createdAt\n      tags {\n        id\n        name\n        color\n      }\n      events {\n        id\n        title\n      }\n      users {\n        id\n        firstName\n        lastName\n      }\n      userCompetences {\n        id\n        level\n        competence {\n          id\n          name\n          color\n          type\n        }\n      }\n    }\n  }\n  "];
+export function graphql(source: "\n  mutation updateEntry($input: UpdateEntryInput!) {\n    updateEntry(input: $input) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation updateEntry($input: UpdateEntryInput!) {\n    updateEntry(input: $input) {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation updateEntryUserCompetenceLevel($input: UpdateEntryUserCompetenceLevel!) {\n    updateEntryUserCompetenceLevel(input: $input) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation updateEntryUserCompetenceLevel($input: UpdateEntryUserCompetenceLevel!) {\n    updateEntryUserCompetenceLevel(input: $input) {\n      id\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

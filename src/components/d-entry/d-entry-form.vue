@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-full justify-between">
     <div class="flex h-full max-h-full w-full flex-col">
-      <EntryFormHeader :mode="mode" @submit="submit" @archive="archive" />
+      <EntryFormHeader @archive="archive" />
       <div class="mx-auto h-full w-full max-w-4xl overflow-scroll pb-8">
         <div>
           <textarea
@@ -38,146 +38,48 @@
 import { useMutation } from "@urql/vue";
 import { computed, toRef } from "vue";
 import archiveEntryMutation from "@/queries/archiveEntry.mutation";
-import { formatDate, useTextareaAutosize } from "@vueuse/core";
+import { formatDate, useTextareaAutosize, watchDebounced } from "@vueuse/core";
 import EntryFormHeader from "./d-entry-form-header.vue";
 import EntryFormCompetences from "./d-entry-form-competences.vue";
 import { Entry } from "@/gql/graphql";
 import EntryFormProjects from "./d-entry-form-projects.vue";
 import EntryFormLabels from "./d-entry-form-labels.vue";
 import EntryFormStudents from "./d-entry-form-students.vue";
-import { createNotification } from "@/composables/useToast";
-import { Save } from "lucide-vue-next";
-import { useI18n } from "vue-i18n";
-import updateEntryMutation from "@/queries/updateEntry.mutation";
-import createEntryMutation from "@/queries/createEntry.mutation";
+import updateEntryMutation from "@/queries/updateEntry.mutation.ts";
 
-const t = useI18n().t;
+const { executeMutation: archiveEntryMut } = useMutation(archiveEntryMutation);
+const { executeMutation: updateEntry } = useMutation(updateEntryMutation);
 
 const props = defineProps<{
   entry: Partial<Entry>;
-  mode: "new" | "edit";
 }>();
+
+const emit = defineEmits(["archived"]);
 
 const entry = toRef(props, "entry");
 
-// @ts-expect-error
-const { textarea, input: body } = useTextareaAutosize({ input: entry.value.body });
+const { textarea, input: body } = useTextareaAutosize({ input: entry.value.body as string });
 
-const { executeMutation: createEntry } = useMutation(createEntryMutation);
-const { executeMutation: updateEntry } = useMutation(updateEntryMutation);
-const { executeMutation: archiveEntryMut } = useMutation(archiveEntryMutation);
+watchDebounced(
+  body,
+  async (value) => {
+    await updateEntry({ input: { id: entry.value.id as string, body: value } });
+  },
+  { debounce: 250, maxWait: 1000 },
+);
 
 const formattedDate = computed({
   get() {
-    // @ts-expect-error
-    const date = new Date(entry.value.date);
+    const date = new Date(entry.value.date as string);
     return formatDate(date, "YYYY-MM-DD");
   },
-  set(value: string) {
-    entry.value.date = value;
+  async set(value: string) {
+    await updateEntry({ input: { id: entry.value.id as string, date: value } });
   },
 });
 
 async function archive() {
   await archiveEntryMut({ id: entry.value.id });
   emit("archived");
-}
-
-// emits
-const emit = defineEmits(["saved", "archived"]);
-
-function userCompetences(): { error: boolean; eacs: any[] } {
-  const eacs = [];
-
-  const userCount = entry.value.users?.length || 0;
-  const userCompetenceCount = entry.value.userCompetences?.length || 0;
-
-  if (userCompetenceCount === 0) {
-    return { error: false, eacs: [] };
-  }
-
-  if (userCount === 0 && userCompetenceCount > 0) {
-    alert("You must select at least one student.");
-    return { error: true, eacs: [] };
-  }
-
-  const uniqueCompetences: { id: string; level: number }[] = [];
-  for (const userCompetence of entry.value.userCompetences || []) {
-    if (!uniqueCompetences.map((el) => el.id).includes(userCompetence.competence.id)) {
-      uniqueCompetences.push({
-        id: userCompetence.competence.id,
-        level: userCompetence.level || 0,
-      });
-    }
-  }
-
-  for (const competence of uniqueCompetences) {
-    // @ts-expect-error
-    for (const user of entry.value.users) {
-      eacs.push({
-        userId: user.id,
-        competenceId: competence.id,
-        level: competence.level || 0,
-      });
-    }
-  }
-
-  return {
-    error: false,
-    eacs,
-  };
-}
-
-async function submit() {
-  let error: boolean;
-  if (props.mode === "edit") {
-    error = await update();
-  } else {
-    error = await create();
-  }
-
-  if (error) return;
-  createNotification({
-    title: t("entry") + (props.mode === "edit" ? ` ${t("updated")}` : ` ${t("created")}`),
-    description: t("saved_successfully"),
-    icon: Save,
-  });
-}
-
-async function update() {
-  const { error, eacs } = userCompetences();
-  if (error) return true;
-
-  const input: any = {
-    date: entry.value.date,
-    body: body.value,
-    tagIds: entry.value.tags?.map((el) => el.id),
-    eventIds: entry.value.events?.map((el) => el.id),
-    userIds: entry.value.users?.map((el) => el.id),
-    userCompetences: eacs,
-  };
-
-  input["id"] = entry.value.id;
-  await updateEntry({ input });
-  emit("saved");
-  return false;
-}
-
-async function create() {
-  const { error, eacs } = userCompetences();
-  if (error) return true;
-
-  const input: any = {
-    date: entry.value.date,
-    body: body.value,
-    tagIds: entry.value.tags?.map((el) => el.id),
-    eventIds: entry.value.events?.map((el) => el.id),
-    userIds: entry.value.users?.map((el) => el.id),
-    userCompetences: eacs,
-  };
-
-  const { data } = await createEntry({ input });
-  emit("saved", data?.createEntry);
-  return false;
 }
 </script>

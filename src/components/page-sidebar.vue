@@ -47,7 +47,9 @@
             @click="switchApp(_app.id)"
           >
             <component :is="_app.icon" class="fill-neutral-500 stroke-neutral-500" :size="20" />
-            <span class="text-neutral-500" :class="activeApp === _app.id ? `!text-neutral-900` : ''">{{ _app.name }}</span>
+            <span class="text-neutral-500" :class="activeApp === _app.id ? `!text-neutral-900` : ''">{{
+              _app.name
+            }}</span>
           </div>
         </div>
       </div>
@@ -169,7 +171,7 @@ const { executeMutation: updateLanguage } = useMutation(
         language
       }
     }
-  `)
+  `),
 );
 
 function getPreferredLanguage() {

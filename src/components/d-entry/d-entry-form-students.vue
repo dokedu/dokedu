@@ -78,20 +78,25 @@
 </template>
 
 <script lang="ts" setup>
-import { useQuery } from "@urql/vue";
+import { useMutation, useQuery } from "@urql/vue";
 import { Plus, X, Check } from "lucide-vue-next";
 import { reactive, ref, toRef } from "vue";
 import { graphql } from "@/gql";
 import { Entry, User } from "@/gql/graphql";
 import DDialog from "@/components/d-dialog/d-dialog.vue";
+import createEntryUserMutation from "@/queries/createEntryUser.mutation.ts";
+import deleteEntryUserMutation from "@/queries/deleteEntryUser.mutation.ts";
 
-const open = ref(false);
-const innerDialog = ref();
-const search = ref();
+const { executeMutation: deleteEntryUser } = useMutation(deleteEntryUserMutation);
+const { executeMutation: createEntryUser } = useMutation(createEntryUserMutation);
 
 const props = defineProps<{
   entry: Partial<Entry>;
 }>();
+
+const open = ref(false);
+const innerDialog = ref();
+const search = ref();
 
 function openModal() {
   open.value = true;
@@ -123,18 +128,11 @@ const { data: students } = useQuery({
 
 const entry = toRef(props, "entry");
 
-function toggleStudent(student: User) {
-  // if entry.users is undefined, create empty array
-  if (!entry.value.users) {
-    entry.value.users = [];
-  }
-
-  // create new student and add it to entry.users if it doesn't exist
-  if (!entry.value.users.map((el) => el.id).includes(student.id)) {
-    entry.value.users.push(student);
+async function toggleStudent(student: User) {
+  if (!entry.value.users?.map((el) => el.id).includes(student.id)) {
+    await createEntryUser({ input: { entryId: entry.value.id as string, userId: student.id } });
   } else {
-    // remove student from entry.users if it exists
-    entry.value.users = entry.value.users.filter((el) => el.id !== student.id);
+    await deleteEntryUser({ input: { entryId: entry.value.id as string, userId: student.id } });
   }
 }
 </script>

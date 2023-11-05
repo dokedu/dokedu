@@ -13,16 +13,17 @@
       <span>{{ ">" }}</span>
       <router-link
         :to="{
-        name: '/record/students/[id]/competences/[cid]',
-        params: { id: route.params.id, cid: data?.competence?.id as string },
-      }"
+          name: '/record/students/[id]/competences/[cid]',
+          params: { id: route.params.id, cid: data?.competence?.id as string },
+        }"
       >
         {{ data?.competence.name }}
       </router-link>
     </div>
+
     <div class="flex flex-1 flex-col gap-2 overflow-y-auto">
       <component
-        v-for="competence in (data?.competence?.competences as Competence[])"
+        v-for="competence in data?.competence?.competences as Competence[]"
         :is="competence?.type !== 'competence' ? 'router-link' : 'div'"
         :to="{
           name: '/record/students/[id]/competences/[cid]',
@@ -39,7 +40,7 @@
           />
           <template #footer>
             <div v-if="competence.userCompetences.length > 0">
-              <DCompetenceEntries :competences="(competence.userCompetences as UserCompetence[])" />
+              <DCompetenceEntries :competences="competence.userCompetences as UserCompetence[]" />
             </div>
           </template>
         </DCompetence>
@@ -122,7 +123,7 @@ const { executeMutation: createUserCompetenceMutation } = useMutation(
         level
       }
     }
-  `)
+  `),
 );
 
 async function createUserCompetence(input: { id: string; level: number }) {
