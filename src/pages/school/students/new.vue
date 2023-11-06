@@ -71,6 +71,7 @@ const onCreateStudent = async () => {
       birthday: student.student?.birthday,
       leftAt: student.student?.leftAt,
       joinedAt: student.student?.joinedAt,
+      emoji: student.student?.emoji,
     },
   });
 

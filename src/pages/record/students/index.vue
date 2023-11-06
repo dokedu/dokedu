@@ -10,7 +10,7 @@
     <DTable v-model:variables="pageVariables" :search="search" :columns="columns" objectName="users"
       :query="studentsQuery" @row-click="goToStudent" defaultSort="lastName">
       <template #firstName-data="{ item }">
-        {{ item.student.emoji ? (item.student.emoji + ' ' + item.firstName) : item.firstName }}
+        {{ item.student?.emoji }} {{ item.firstName }}
       </template>
       <template #birthday-data="{ item }">
         {{
