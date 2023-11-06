@@ -3,30 +3,20 @@
     <PageHeader class="flex justify-between">
       <div class="flex items-center gap-4">
         <div class="font-medium text-neutral-950">{{ $t("student", 2) }}</div>
-        <input
-          v-model="search"
-          type="text"
-          name="search"
-          id="search"
-          :placeholder="$t('search')"
-          class="h-8 rounded-md border border-neutral-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-neutral-200 focus:shadow-sm focus:ring-0"
-        />
+        <input v-model="search" type="text" name="search" id="search" :placeholder="$t('search')"
+          class="h-8 rounded-md border border-neutral-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-neutral-200 focus:shadow-sm focus:ring-0" />
       </div>
     </PageHeader>
-    <DTable
-      v-model:variables="pageVariables"
-      :search="search"
-      :columns="columns"
-      objectName="users"
-      :query="studentsQuery"
-      @row-click="goToStudent"
-      defaultSort="lastName"
-    >
+    <DTable v-model:variables="pageVariables" :search="search" :columns="columns" objectName="users"
+      :query="studentsQuery" @row-click="goToStudent" defaultSort="lastName">
+      <template #firstName-data="{ item }">
+        {{ item.student.emoji ? (item.student.emoji + ' ' + item.firstName) : item.firstName }}
+      </template>
       <template #birthday-data="{ item }">
         {{
           item.student?.birthday
-            ? formatDate(new Date(Date.parse(item?.student.birthday as string)), "DD.MM.YYYY")
-            : "-"
+          ? formatDate(new Date(Date.parse(item?.student.birthday as string)), "DD.MM.YYYY")
+          : "-"
         }}
       </template>
       <template #grade-data="{ item }">
@@ -124,6 +114,7 @@ const studentsQuery = graphql(`
           id
           birthday
           grade
+          emoji
         }
       }
     }

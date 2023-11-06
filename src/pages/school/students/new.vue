@@ -22,6 +22,7 @@ const student = reactive<User>({
     birthday: null,
     leftAt: null,
     joinedAt: null,
+    emoji: null,
   },
 });
 

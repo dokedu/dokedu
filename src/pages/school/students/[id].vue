@@ -1,12 +1,7 @@
 <template>
   <div v-if="data?.user">
-    <DStudentForm
-      :student="(data.user as User)"
-      :title="$t('edit_student')"
-      deletable
-      @save="onEditStudent"
-      @delete="onDeleteStudent"
-    ></DStudentForm>
+    <DStudentForm :student="(data.user as User)" :title="$t('edit_student')" deletable @save="onEditStudent"
+      @delete="onDeleteStudent"></DStudentForm>
   </div>
 </template>
 
@@ -37,6 +32,7 @@ const { data } = useQuery({
           birthday
           joinedAt
           leftAt
+          emoji
         }
       }
     }
@@ -57,6 +53,7 @@ const { executeMutation: updateStudent } = useMutation(
           grade
           leftAt
           joinedAt
+          emoji
         }
       }
     }
@@ -111,6 +108,7 @@ const onEditStudent = async () => {
       birthday: student.value.student?.birthday,
       leftAt: student.value.student?.leftAt,
       joinedAt: student.value.student?.joinedAt,
+      emoji: student.value.student?.emoji,
     },
   });
 
