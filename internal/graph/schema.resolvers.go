@@ -430,6 +430,9 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 		if input.LeftAt != nil {
 			student.LeftAt = bun.NullTime{Time: *input.LeftAt}
 		}
+		if input.Emoji != nil {
+			student.Emoji = sql.NullString{String: *input.Emoji, Valid: true}
+		}
 
 		_, err = r.DB.NewUpdate().
 			Model(&student).
@@ -603,6 +606,9 @@ func (r *mutationResolver) CreateStudent(ctx context.Context, input model.Create
 	}
 	if input.LeftAt != nil {
 		student.LeftAt = bun.NullTime{Time: *input.LeftAt}
+	}
+	if input.Emoji != nil {
+		student.Emoji = sql.NullString{String: *input.Emoji, Valid: true}
 	}
 
 	// Insert the user_student
@@ -1595,6 +1601,19 @@ func (r *userStudentResolver) EventsCount(ctx context.Context, obj *db.UserStude
 	}
 
 	return count, nil
+}
+
+// Emoji is the resolver for the emoji field.
+func (r *userStudentResolver) Emoji(ctx context.Context, obj *db.UserStudent) (*string, error) {
+	_, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	if obj.Emoji.Valid {
+		return &obj.Emoji.String, nil
+	}
+	return nil, nil
 }
 
 // User is the resolver for the user field.

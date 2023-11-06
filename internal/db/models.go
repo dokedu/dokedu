@@ -392,6 +392,8 @@ type UserStudent struct {
 	JoinedAt       bun.NullTime   `bun:",nullzero" json:"joined_at"`
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
 	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
+	Birthplace     sql.NullString `json:"birthplace"`
+	Emoji          sql.NullString `json:"emoji"`
 }
 
 type Session struct {

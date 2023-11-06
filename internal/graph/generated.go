@@ -586,6 +586,7 @@ type ComplexityRoot struct {
 		CompetencesCount func(childComplexity int) int
 		CreatedAt        func(childComplexity int) int
 		DeletedAt        func(childComplexity int) int
+		Emoji            func(childComplexity int) int
 		EntriesCount     func(childComplexity int) int
 		EventsCount      func(childComplexity int) int
 		Grade            func(childComplexity int) int
@@ -859,6 +860,7 @@ type UserStudentResolver interface {
 	EntriesCount(ctx context.Context, obj *db.UserStudent) (int, error)
 	CompetencesCount(ctx context.Context, obj *db.UserStudent) (int, error)
 	EventsCount(ctx context.Context, obj *db.UserStudent) (int, error)
+	Emoji(ctx context.Context, obj *db.UserStudent) (*string, error)
 	User(ctx context.Context, obj *db.UserStudent) (*db.User, error)
 }
 type UserStudentGradesResolver interface {
@@ -3933,6 +3935,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.UserStudent.DeletedAt(childComplexity), true
+
+	case "UserStudent.emoji":
+		if e.complexity.UserStudent.Emoji == nil {
+			break
+		}
+
+		return e.complexity.UserStudent.Emoji(childComplexity), true
 
 	case "UserStudent.entriesCount":
 		if e.complexity.UserStudent.EntriesCount == nil {
@@ -21931,6 +21940,8 @@ func (ec *executionContext) fieldContext_Query_userStudent(ctx context.Context, 
 				return ec.fieldContext_UserStudent_competencesCount(ctx, field)
 			case "eventsCount":
 				return ec.fieldContext_UserStudent_eventsCount(ctx, field)
+			case "emoji":
+				return ec.fieldContext_UserStudent_emoji(ctx, field)
 			case "user":
 				return ec.fieldContext_UserStudent_user(ctx, field)
 			}
@@ -24996,6 +25007,8 @@ func (ec *executionContext) fieldContext_User_student(ctx context.Context, field
 				return ec.fieldContext_UserStudent_competencesCount(ctx, field)
 			case "eventsCount":
 				return ec.fieldContext_UserStudent_eventsCount(ctx, field)
+			case "emoji":
+				return ec.fieldContext_UserStudent_emoji(ctx, field)
 			case "user":
 				return ec.fieldContext_UserStudent_user(ctx, field)
 			}
@@ -26458,6 +26471,47 @@ func (ec *executionContext) fieldContext_UserStudent_eventsCount(ctx context.Con
 	return fc, nil
 }
 
+func (ec *executionContext) _UserStudent_emoji(ctx context.Context, field graphql.CollectedField, obj *db.UserStudent) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserStudent_emoji(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.UserStudent().Emoji(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserStudent_emoji(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserStudent",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _UserStudent_user(ctx context.Context, field graphql.CollectedField, obj *db.UserStudent) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UserStudent_user(ctx, field)
 	if err != nil {
@@ -26586,6 +26640,8 @@ func (ec *executionContext) fieldContext_UserStudentConnection_edges(ctx context
 				return ec.fieldContext_UserStudent_competencesCount(ctx, field)
 			case "eventsCount":
 				return ec.fieldContext_UserStudent_eventsCount(ctx, field)
+			case "emoji":
+				return ec.fieldContext_UserStudent_emoji(ctx, field)
 			case "user":
 				return ec.fieldContext_UserStudent_user(ctx, field)
 			}
@@ -26798,6 +26854,8 @@ func (ec *executionContext) fieldContext_UserStudentGrades_student(ctx context.C
 				return ec.fieldContext_UserStudent_competencesCount(ctx, field)
 			case "eventsCount":
 				return ec.fieldContext_UserStudent_eventsCount(ctx, field)
+			case "emoji":
+				return ec.fieldContext_UserStudent_emoji(ctx, field)
 			case "user":
 				return ec.fieldContext_UserStudent_user(ctx, field)
 			}
@@ -29876,7 +29934,7 @@ func (ec *executionContext) unmarshalInputCreateStudentInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"firstName", "lastName", "grade", "birthday", "leftAt", "joinedAt"}
+	fieldsInOrder := [...]string{"firstName", "lastName", "grade", "birthday", "leftAt", "joinedAt", "emoji"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -29937,6 +29995,15 @@ func (ec *executionContext) unmarshalInputCreateStudentInput(ctx context.Context
 				return it, err
 			}
 			it.JoinedAt = data
+		case "emoji":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("emoji"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Emoji = data
 		}
 	}
 
@@ -32153,7 +32220,7 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "firstName", "lastName", "email", "grade", "birthday", "leftAt", "joinedAt"}
+	fieldsInOrder := [...]string{"id", "firstName", "lastName", "email", "grade", "birthday", "leftAt", "joinedAt", "emoji"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -32232,6 +32299,15 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 				return it, err
 			}
 			it.JoinedAt = data
+		case "emoji":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("emoji"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Emoji = data
 		}
 	}
 
@@ -38712,6 +38788,39 @@ func (ec *executionContext) _UserStudent(ctx context.Context, sel ast.SelectionS
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "emoji":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UserStudent_emoji(ctx, field, obj)
 				return res
 			}
 
