@@ -1,4 +1,4 @@
-> **Warning**
+> [!WARNING]  
 > This is an early beta version of the Dokedu frontend. It is not ready for production use.
 
 # Dokedu / Frontend

@@ -10,6 +10,7 @@
           name="email"
           id="email"
           required
+          autocomplete="email"
           class="block text-sm w-full rounded-md border-0 py-2 text-neutral-900 shadow-sm ring-1 ring-inset ring-neutral-300 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-neutral-950 sm:text-sm sm:leading-6"
           :placeholder="$t('your_email')"
         />
@@ -23,6 +24,7 @@
           id="password"
           required
           min="8"
+          autocomplete="current-password"
           class="block text-sm w-full rounded-md border-0 py-2 text-neutral-900 shadow-sm ring-1 ring-inset ring-neutral-300 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-neutral-950 sm:text-sm sm:leading-6"
           :placeholder="$t('your_password')"
         />

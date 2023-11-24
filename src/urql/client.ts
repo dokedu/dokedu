@@ -45,8 +45,6 @@ function makeClient() {
             return error.graphQLErrors.some((e) => e.extensions?.code === "UNAUTHENTICATED");
           },
           async refreshAuth() {
-            console.log("refreshAuth");
-            // current path
             const route = router.currentRoute.value;
             if (!route) return;
             if (!publicRoutes.includes(route.name as string)) {
