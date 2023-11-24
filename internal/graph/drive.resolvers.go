@@ -382,8 +382,20 @@ func (r *mutationResolver) MoveFile(ctx context.Context, input model.MoveFileInp
 		return nil, err
 	}
 
-	// does user have permission to move file? check bucket permission
-	if bucket.UserID.String != currentUser.ID {
+	var shares []db.Share
+	err = r.DB.NewSelect().
+		Model(&shares).
+		Where("bucket_id = ?", bucket.ID).
+		Where("permission = ?", "manager").
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Where("shared_with = ?", currentUser.ID).
+		Scan(ctx)
+
+	// does user have permission to move file?
+	// 1. check if user is owner of bucket
+	// 2. check if user has manager permission on bucket
+	// if not, return error
+	if bucket.UserID.String != currentUser.ID && len(shares) == 0 {
 		return nil, errors.New("you don't have permission to move this file")
 	}
 
@@ -411,8 +423,18 @@ func (r *mutationResolver) MoveFile(ctx context.Context, input model.MoveFileInp
 			return nil, err
 		}
 
-		if targetBucket.UserID.String != currentUser.ID {
-			return nil, errors.New("you don't have permission to move this file")
+		var targetShares []db.Share
+		err = r.DB.NewSelect().
+			Model(&targetShares).
+			Where("bucket_id = ?", targetBucket.ID).
+			Where("permission = ?", "manager").
+			Where("organisation_id = ?", currentUser.OrganisationID).
+			Where("shared_with = ?", currentUser.ID).
+			Scan(ctx)
+
+		// check if user is owner of target bucket or has manager permission
+		if targetBucket.UserID.String != currentUser.ID && len(targetShares) == 0 {
+			return nil, errors.New("you don't have permission to move this file to target")
 		}
 	}
 
