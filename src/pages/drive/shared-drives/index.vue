@@ -9,12 +9,14 @@
     <PageContent>
       <DTable
         v-model:variables="pageVariables"
+        v-model:selected="selected"
         :columns="columns"
         objectName="buckets"
         :query="sharedDrivesQuery"
         defaultSort="createdAt"
         :additionalTypenames="['Bucket']"
         @row-click="clickRow"
+        ref="dFileList"
       >
         <template #name-data="{ column }">
           <div class="flex items-center gap-3">
@@ -55,12 +57,14 @@ import router from "@/router/router.ts";
 import DDialogShareDrive from "@/components/_drive/d-dialog/d-dialog-share-drive.vue";
 import DDialogRenameDrive from "@/components/_drive/d-dialog/d-dialog-rename-drive.vue";
 import { Bucket } from "@/gql/graphql";
-import { formatDate } from "@vueuse/core";
+import { formatDate, onClickOutside } from "@vueuse/core";
 import i18n from "@/i18n.ts";
 import { Share2 } from "lucide-vue-next";
 
 import DFileListDropdown from "@/components/_drive/d-file-list-dropdown.vue";
 import type { Option } from "@/components/_drive/d-file-list-dropdown.vue";
+
+const dFileList = ref<any>(null);
 
 const currentItem = ref<Bucket>();
 const shareOpen = ref(false);
@@ -106,8 +110,16 @@ async function newSharedDrive() {
   }
 }
 
+const selected = ref<{ id: string }[]>([]);
+
+onClickOutside(dFileList, () => {
+  console.log("click outside", selected.value);
+  selected.value = [];
+});
+
 async function clickRow(item: any) {
-  const isSelected = selected.value.find((f) => f.id === file.id);
+  console.log("click row", item);
+  const isSelected = selected.value.find((f) => f.id === item.id);
   if (!isSelected) return;
 
   await router.push({
