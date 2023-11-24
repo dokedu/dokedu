@@ -36,12 +36,14 @@
       <button
         class="block rounded-md bg-neutral-950 px-2.5 py-2.5 text-sm font-medium leading-none text-white shadow-sm hover:bg-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950"
         type="submit"
+        data-umami-event="login"
       >
         {{ $t("log_in") }}
       </button>
       <router-link
         class="mx-auto block w-fit rounded-md text-center text-xs font-medium leading-none text-muted hover:text-default focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950"
         to="/forgot-password"
+        data-umami-event="forgot-password"
       >
         {{ $t("forgot_password") }}
       </router-link>
