@@ -35,12 +35,8 @@
     </PageContent>
   </PageWrapper>
 
-  <DDialogShareDrive :open="shareOpen" :item="(currentItem as Bucket)" @close="shareOpen = false"></DDialogShareDrive>
-  <DDialogRenameDrive
-    :open="renameOpen"
-    :item="(currentItem as Bucket)"
-    @close="renameOpen = false"
-  ></DDialogRenameDrive>
+  <DDialogShareDrive :open="shareOpen" :item="currentItem as Bucket" @close="shareOpen = false"></DDialogShareDrive>
+  <DDialogRenameDrive :open="renameOpen" :item="currentItem as Bucket" @close="renameOpen = false"></DDialogRenameDrive>
 </template>
 
 <script setup lang="ts">
@@ -77,7 +73,7 @@ const { executeMutation } = useMutation(
         id
       }
     }
-  `)
+  `),
 );
 
 async function deleteSharedDrive(item: any) {
@@ -111,6 +107,9 @@ async function newSharedDrive() {
 }
 
 async function clickRow(item: any) {
+  const isSelected = selected.value.find((f) => f.id === file.id);
+  if (!isSelected) return;
+
   await router.push({
     name: "/drive/shared-drives/[id]/",
     params: {
@@ -127,7 +126,7 @@ const { executeMutation: createSharedDrive } = useMutation(
         name
       }
     }
-  `)
+  `),
 );
 
 const columns = [
