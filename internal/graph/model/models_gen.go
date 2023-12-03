@@ -175,6 +175,7 @@ type CreateStudentInput struct {
 	Birthday  *time.Time `json:"birthday,omitempty"`
 	LeftAt    *time.Time `json:"leftAt,omitempty"`
 	JoinedAt  *time.Time `json:"joinedAt,omitempty"`
+	Emoji     *string    `json:"emoji,omitempty"`
 }
 
 type CreateSubjectInput struct {
@@ -618,6 +619,7 @@ type UpdateUserInput struct {
 	Birthday  *time.Time `json:"birthday,omitempty"`
 	LeftAt    *time.Time `json:"leftAt,omitempty"`
 	JoinedAt  *time.Time `json:"joinedAt,omitempty"`
+	Emoji     *string    `json:"emoji,omitempty"`
 }
 
 type UpdateUserStudentGradesInput struct {
