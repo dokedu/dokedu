@@ -1484,13 +1484,7 @@ func (r *userCompetenceResolver) User(ctx context.Context, obj *db.UserCompetenc
 		return nil, nil
 	}
 
-	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
+	return dataloaders.GetUser(ctx, obj.UserID, currentUser)
 }
 
 // CreatedBy is the resolver for the createdBy field.
@@ -1623,13 +1617,7 @@ func (r *userStudentResolver) User(ctx context.Context, obj *db.UserStudent) (*d
 		return nil, nil
 	}
 
-	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
+	return dataloaders.GetUser(ctx, obj.UserID, currentUser)
 }
 
 // Competence returns CompetenceResolver implementation.

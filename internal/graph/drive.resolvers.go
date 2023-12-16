@@ -8,6 +8,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"example/internal/dataloaders"
 	"example/internal/db"
 	"example/internal/graph/model"
 	"example/internal/helper"
@@ -32,13 +33,12 @@ func (r *bucketResolver) User(ctx context.Context, obj *db.Bucket) (*db.User, er
 		return nil, nil
 	}
 
-	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
+	// If the bucket is not owned by a user, return nil.
+	if !obj.UserID.Valid {
+		return nil, nil
 	}
 
-	return &user, nil
+	return dataloaders.GetUser(ctx, obj.UserID.String, currentUser)
 }
 
 // DeletedAt is the resolver for the deletedAt field.

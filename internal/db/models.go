@@ -533,3 +533,26 @@ type UserStudentGrades struct {
 	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
 	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
+
+type UserAttendanceState string
+
+const (
+	UserAttendanceStateUnknown UserAttendanceState = "UNKNOWN"
+	UserAttendanceStatePresent UserAttendanceState = "PRESENT"
+	UserAttendanceStateAbsent  UserAttendanceState = "ABSENT"
+	UserAttendanceStateLate    UserAttendanceState = "LATE"
+	UserAttendanceStateSick    UserAttendanceState = "SICK"
+)
+
+type UserAttendance struct {
+	bun.BaseModel
+
+	ID             string              `bun:",nullzero,pk" json:"id"`
+	UserID         string              `json:"user_id"`
+	Date           time.Time           `json:"date"`
+	State          UserAttendanceState `json:"state"`
+	CreatedBy      string              `json:"created_by"`
+	OrganisationID string              `json:"organisation_id"`
+	CreatedAt      time.Time           `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	DeletedAt      bun.NullTime        `bun:",soft_delete,nullzero"`
+}

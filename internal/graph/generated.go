@@ -60,6 +60,7 @@ type ResolverRoot interface {
 	Report() ReportResolver
 	Tag() TagResolver
 	User() UserResolver
+	UserAttendance() UserAttendanceResolver
 	UserCompetence() UserCompetenceResolver
 	UserStudent() UserStudentResolver
 	UserStudentGrades() UserStudentGradesResolver
@@ -377,11 +378,13 @@ type ComplexityRoot struct {
 		RenameSharedDrive              func(childComplexity int, input model.RenameSharedDriveInput) int
 		ResetPassword                  func(childComplexity int, input model.ResetPasswordInput) int
 		SendUserInvite                 func(childComplexity int, id string) int
+		SetUserAttendanceState         func(childComplexity int, userID string, date time.Time, state db.UserAttendanceState) int
 		SignIn                         func(childComplexity int, input model.SignInInput) int
 		SignOut                        func(childComplexity int) int
 		ToggleEventCompetence          func(childComplexity int, input model.AddEventCompetenceInput) int
 		UpdateCompetence               func(childComplexity int, input model.UpdateCompetenceInput) int
 		UpdateCompetenceSorting        func(childComplexity int, input model.UpdateCompetenceSortingInput) int
+		UpdateDailyAttendance          func(childComplexity int, date time.Time, state db.UserAttendanceState) int
 		UpdateEmailAccount             func(childComplexity int, input model.UpdateEmailAccountInput) int
 		UpdateEmailGroup               func(childComplexity int, input model.UpdateEmailGroupInput) int
 		UpdateEntry                    func(childComplexity int, input model.UpdateEntryInput) int
@@ -419,46 +422,47 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Bucket            func(childComplexity int, id string) int
-		Buckets           func(childComplexity int, input *model.BucketFilterInput, limit *int, offset *int) int
-		Chat              func(childComplexity int, id string) int
-		Chats             func(childComplexity int, limit *int, offset *int) int
-		Competence        func(childComplexity int, id string) int
-		Competences       func(childComplexity int, limit *int, offset *int, filter *model.CompetenceFilterInput, search *string, sort *model.CompetenceSort) int
-		Domain            func(childComplexity int, id string) int
-		Domains           func(childComplexity int) int
-		Email             func(childComplexity int, id string) int
-		EmailAccount      func(childComplexity int, id string) int
-		EmailAccounts     func(childComplexity int, filter *model.EmailAccountFilter) int
-		EmailForwarding   func(childComplexity int, id string) int
-		EmailForwardings  func(childComplexity int) int
-		EmailGroupMember  func(childComplexity int, id string) int
-		EmailGroupMembers func(childComplexity int) int
-		Emails            func(childComplexity int) int
-		Entries           func(childComplexity int, limit *int, offset *int, filter *model.EntryFilterInput, sortBy *model.EntrySortBy, search *string) int
-		Entry             func(childComplexity int, id string) int
-		Event             func(childComplexity int, id string) int
-		Events            func(childComplexity int, limit *int, offset *int, filter *model.EventFilterInput, order *model.EventOrderBy, search *string) int
-		ExportEvents      func(childComplexity int, input model.ExportEventsInput) int
-		File              func(childComplexity int, id string) int
-		Files             func(childComplexity int, input *model.FilesFilterInput, limit *int, offset *int) int
-		Me                func(childComplexity int) int
-		Organisation      func(childComplexity int) int
-		Report            func(childComplexity int, id string) int
-		Reports           func(childComplexity int, limit *int, offset *int) int
-		SchoolYear        func(childComplexity int, id string) int
-		SchoolYears       func(childComplexity int, limit *int, offset *int) int
-		Shares            func(childComplexity int, input *model.ShareInput) int
-		Subject           func(childComplexity int, id string) int
-		Subjects          func(childComplexity int, limit *int, offset *int) int
-		Tag               func(childComplexity int, id string) int
-		Tags              func(childComplexity int, limit *int, offset *int, search *string) int
-		User              func(childComplexity int, id string) int
-		UserStudent       func(childComplexity int, id string) int
-		UserStudentGrade  func(childComplexity int, id string) int
-		UserStudentGrades func(childComplexity int, limit *int, offset *int) int
-		UserStudents      func(childComplexity int, limit *int, offset *int) int
-		Users             func(childComplexity int, limit *int, offset *int, filter *model.UserFilterInput, search *string) int
+		Bucket                 func(childComplexity int, id string) int
+		Buckets                func(childComplexity int, input *model.BucketFilterInput, limit *int, offset *int) int
+		Chat                   func(childComplexity int, id string) int
+		Chats                  func(childComplexity int, limit *int, offset *int) int
+		Competence             func(childComplexity int, id string) int
+		Competences            func(childComplexity int, limit *int, offset *int, filter *model.CompetenceFilterInput, search *string, sort *model.CompetenceSort) int
+		Domain                 func(childComplexity int, id string) int
+		Domains                func(childComplexity int) int
+		Email                  func(childComplexity int, id string) int
+		EmailAccount           func(childComplexity int, id string) int
+		EmailAccounts          func(childComplexity int, filter *model.EmailAccountFilter) int
+		EmailForwarding        func(childComplexity int, id string) int
+		EmailForwardings       func(childComplexity int) int
+		EmailGroupMember       func(childComplexity int, id string) int
+		EmailGroupMembers      func(childComplexity int) int
+		Emails                 func(childComplexity int) int
+		Entries                func(childComplexity int, limit *int, offset *int, filter *model.EntryFilterInput, sortBy *model.EntrySortBy, search *string) int
+		Entry                  func(childComplexity int, id string) int
+		Event                  func(childComplexity int, id string) int
+		Events                 func(childComplexity int, limit *int, offset *int, filter *model.EventFilterInput, order *model.EventOrderBy, search *string) int
+		ExportEvents           func(childComplexity int, input model.ExportEventsInput) int
+		File                   func(childComplexity int, id string) int
+		Files                  func(childComplexity int, input *model.FilesFilterInput, limit *int, offset *int) int
+		Me                     func(childComplexity int) int
+		Organisation           func(childComplexity int) int
+		Report                 func(childComplexity int, id string) int
+		Reports                func(childComplexity int, limit *int, offset *int) int
+		SchoolYear             func(childComplexity int, id string) int
+		SchoolYears            func(childComplexity int, limit *int, offset *int) int
+		Shares                 func(childComplexity int, input *model.ShareInput) int
+		Subject                func(childComplexity int, id string) int
+		Subjects               func(childComplexity int, limit *int, offset *int) int
+		Tag                    func(childComplexity int, id string) int
+		Tags                   func(childComplexity int, limit *int, offset *int, search *string) int
+		User                   func(childComplexity int, id string) int
+		UserAttendanceOverview func(childComplexity int, date time.Time) int
+		UserStudent            func(childComplexity int, id string) int
+		UserStudentGrade       func(childComplexity int, id string) int
+		UserStudentGrades      func(childComplexity int, limit *int, offset *int) int
+		UserStudents           func(childComplexity int, limit *int, offset *int) int
+		Users                  func(childComplexity int, limit *int, offset *int, filter *model.UserFilterInput, search *string) int
 	}
 
 	Report struct {
@@ -556,6 +560,13 @@ type ComplexityRoot struct {
 		LastName       func(childComplexity int) int
 		Role           func(childComplexity int) int
 		Student        func(childComplexity int) int
+	}
+
+	UserAttendance struct {
+		Date  func(childComplexity int) int
+		ID    func(childComplexity int) int
+		State func(childComplexity int) int
+		User  func(childComplexity int) int
 	}
 
 	UserCompetence struct {
@@ -690,6 +701,8 @@ type FileResolver interface {
 	Files(ctx context.Context, obj *db.File) ([]*db.File, error)
 }
 type MutationResolver interface {
+	SetUserAttendanceState(ctx context.Context, userID string, date time.Time, state db.UserAttendanceState) (*db.UserAttendance, error)
+	UpdateDailyAttendance(ctx context.Context, date time.Time, state db.UserAttendanceState) ([]*db.UserAttendance, error)
 	UploadFile(ctx context.Context, input model.FileUploadInput) (*db.File, error)
 	UploadFiles(ctx context.Context, input model.FileUploadInput) (*model.UploadFilesPayload, error)
 	CreateFolder(ctx context.Context, input model.CreateFolderInput) (*db.File, error)
@@ -778,6 +791,7 @@ type OrganisationResolver interface {
 	Owner(ctx context.Context, obj *db.Organisation) (*db.User, error)
 }
 type QueryResolver interface {
+	UserAttendanceOverview(ctx context.Context, date time.Time) ([]*db.UserAttendance, error)
 	Chat(ctx context.Context, id string) (*db.Chat, error)
 	Chats(ctx context.Context, limit *int, offset *int) (*model.ChatConnection, error)
 	Buckets(ctx context.Context, input *model.BucketFilterInput, limit *int, offset *int) (*model.BucketConnection, error)
@@ -841,6 +855,9 @@ type UserResolver interface {
 	DeletedAt(ctx context.Context, obj *db.User) (*time.Time, error)
 	InviteAccepted(ctx context.Context, obj *db.User) (bool, error)
 	EmailAccounts(ctx context.Context, obj *db.User) ([]*db.EmailAccount, error)
+}
+type UserAttendanceResolver interface {
+	User(ctx context.Context, obj *db.UserAttendance) (*db.User, error)
 }
 type UserCompetenceResolver interface {
 	Competence(ctx context.Context, obj *db.UserCompetence) (*db.Competence, error)
@@ -2649,6 +2666,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.SendUserInvite(childComplexity, args["id"].(string)), true
 
+	case "Mutation.setUserAttendanceState":
+		if e.complexity.Mutation.SetUserAttendanceState == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_setUserAttendanceState_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SetUserAttendanceState(childComplexity, args["userId"].(string), args["date"].(time.Time), args["state"].(db.UserAttendanceState)), true
+
 	case "Mutation.signIn":
 		if e.complexity.Mutation.SignIn == nil {
 			break
@@ -2703,6 +2732,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateCompetenceSorting(childComplexity, args["input"].(model.UpdateCompetenceSortingInput)), true
+
+	case "Mutation.updateDailyAttendance":
+		if e.complexity.Mutation.UpdateDailyAttendance == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateDailyAttendance_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateDailyAttendance(childComplexity, args["date"].(time.Time), args["state"].(db.UserAttendanceState)), true
 
 	case "Mutation.updateEmailAccount":
 		if e.complexity.Mutation.UpdateEmailAccount == nil {
@@ -3344,6 +3385,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.User(childComplexity, args["id"].(string)), true
 
+	case "Query.userAttendanceOverview":
+		if e.complexity.Query.UserAttendanceOverview == nil {
+			break
+		}
+
+		args, err := ec.field_Query_userAttendanceOverview_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.UserAttendanceOverview(childComplexity, args["date"].(time.Time)), true
+
 	case "Query.userStudent":
 		if e.complexity.Query.UserStudent == nil {
 			break
@@ -3810,6 +3863,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Student(childComplexity), true
 
+	case "UserAttendance.date":
+		if e.complexity.UserAttendance.Date == nil {
+			break
+		}
+
+		return e.complexity.UserAttendance.Date(childComplexity), true
+
+	case "UserAttendance.id":
+		if e.complexity.UserAttendance.ID == nil {
+			break
+		}
+
+		return e.complexity.UserAttendance.ID(childComplexity), true
+
+	case "UserAttendance.state":
+		if e.complexity.UserAttendance.State == nil {
+			break
+		}
+
+		return e.complexity.UserAttendance.State(childComplexity), true
+
+	case "UserAttendance.user":
+		if e.complexity.UserAttendance.User == nil {
+			break
+		}
+
+		return e.complexity.UserAttendance.User(childComplexity), true
+
 	case "UserCompetence.competence":
 		if e.complexity.UserCompetence.Competence == nil {
 			break
@@ -4262,7 +4343,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
-//go:embed "chat.graphqls" "drive.graphqls" "email.graphqls" "entry.graphqls" "event.graphqls" "organisation.graphqls" "schema.graphqls" "school.graphqls"
+//go:embed "attendance.graphqls" "chat.graphqls" "drive.graphqls" "email.graphqls" "entry.graphqls" "event.graphqls" "organisation.graphqls" "schema.graphqls" "school.graphqls"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -4274,6 +4355,7 @@ func sourceData(filename string) string {
 }
 
 var sources = []*ast.Source{
+	{Name: "attendance.graphqls", Input: sourceData("attendance.graphqls"), BuiltIn: false},
 	{Name: "chat.graphqls", Input: sourceData("chat.graphqls"), BuiltIn: false},
 	{Name: "drive.graphqls", Input: sourceData("drive.graphqls"), BuiltIn: false},
 	{Name: "email.graphqls", Input: sourceData("email.graphqls"), BuiltIn: false},
@@ -5282,6 +5364,39 @@ func (ec *executionContext) field_Mutation_sendUserInvite_args(ctx context.Conte
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_setUserAttendanceState_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["userId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userId"] = arg0
+	var arg1 time.Time
+	if tmp, ok := rawArgs["date"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("date"))
+		arg1, err = ec.unmarshalNTime2timeᚐTime(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["date"] = arg1
+	var arg2 db.UserAttendanceState
+	if tmp, ok := rawArgs["state"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("state"))
+		arg2, err = ec.unmarshalNUserAttendanceState2exampleᚋinternalᚋdbᚐUserAttendanceState(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["state"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_signIn_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -5339,6 +5454,30 @@ func (ec *executionContext) field_Mutation_updateCompetence_args(ctx context.Con
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateDailyAttendance_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 time.Time
+	if tmp, ok := rawArgs["date"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("date"))
+		arg0, err = ec.unmarshalNTime2timeᚐTime(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["date"] = arg0
+	var arg1 db.UserAttendanceState
+	if tmp, ok := rawArgs["state"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("state"))
+		arg1, err = ec.unmarshalNUserAttendanceState2exampleᚋinternalᚋdbᚐUserAttendanceState(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["state"] = arg1
 	return args, nil
 }
 
@@ -6215,6 +6354,21 @@ func (ec *executionContext) field_Query_tags_args(ctx context.Context, rawArgs m
 		}
 	}
 	args["search"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_userAttendanceOverview_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 time.Time
+	if tmp, ok := rawArgs["date"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("date"))
+		arg0, err = ec.unmarshalNTime2timeᚐTime(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["date"] = arg0
 	return args, nil
 }
 
@@ -13481,6 +13635,136 @@ func (ec *executionContext) fieldContext_MoveFilesPayload_files(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_setUserAttendanceState(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_setUserAttendanceState(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SetUserAttendanceState(rctx, fc.Args["userId"].(string), fc.Args["date"].(time.Time), fc.Args["state"].(db.UserAttendanceState))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.UserAttendance)
+	fc.Result = res
+	return ec.marshalNUserAttendance2ᚖexampleᚋinternalᚋdbᚐUserAttendance(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_setUserAttendanceState(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UserAttendance_id(ctx, field)
+			case "user":
+				return ec.fieldContext_UserAttendance_user(ctx, field)
+			case "state":
+				return ec.fieldContext_UserAttendance_state(ctx, field)
+			case "date":
+				return ec.fieldContext_UserAttendance_date(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserAttendance", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_setUserAttendanceState_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateDailyAttendance(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateDailyAttendance(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateDailyAttendance(rctx, fc.Args["date"].(time.Time), fc.Args["state"].(db.UserAttendanceState))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*db.UserAttendance)
+	fc.Result = res
+	return ec.marshalNUserAttendance2ᚕᚖexampleᚋinternalᚋdbᚐUserAttendanceᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateDailyAttendance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UserAttendance_id(ctx, field)
+			case "user":
+				return ec.fieldContext_UserAttendance_user(ctx, field)
+			case "state":
+				return ec.fieldContext_UserAttendance_state(ctx, field)
+			case "date":
+				return ec.fieldContext_UserAttendance_date(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserAttendance", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateDailyAttendance_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_uploadFile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_uploadFile(ctx, field)
 	if err != nil {
@@ -19740,6 +20024,71 @@ func (ec *executionContext) fieldContext_PreviewFilePayload_url(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_userAttendanceOverview(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_userAttendanceOverview(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().UserAttendanceOverview(rctx, fc.Args["date"].(time.Time))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*db.UserAttendance)
+	fc.Result = res
+	return ec.marshalNUserAttendance2ᚕᚖexampleᚋinternalᚋdbᚐUserAttendanceᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_userAttendanceOverview(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UserAttendance_id(ctx, field)
+			case "user":
+				return ec.fieldContext_UserAttendance_user(ctx, field)
+			case "state":
+				return ec.fieldContext_UserAttendance_state(ctx, field)
+			case "date":
+				return ec.fieldContext_UserAttendance_date(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserAttendance", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_userAttendanceOverview_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_chat(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_chat(ctx, field)
 	if err != nil {
@@ -25244,6 +25593,206 @@ func (ec *executionContext) fieldContext_User_emailAccounts(ctx context.Context,
 				return ec.fieldContext_EmailAccount_members(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type EmailAccount", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserAttendance_id(ctx context.Context, field graphql.CollectedField, obj *db.UserAttendance) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserAttendance_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserAttendance_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserAttendance",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserAttendance_user(ctx context.Context, field graphql.CollectedField, obj *db.UserAttendance) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserAttendance_user(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.UserAttendance().User(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖexampleᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserAttendance_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserAttendance",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "student":
+				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "emailAccounts":
+				return ec.fieldContext_User_emailAccounts(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserAttendance_state(ctx context.Context, field graphql.CollectedField, obj *db.UserAttendance) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserAttendance_state(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.State, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(db.UserAttendanceState)
+	fc.Result = res
+	return ec.marshalNUserAttendanceState2exampleᚋinternalᚋdbᚐUserAttendanceState(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserAttendance_state(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserAttendance",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type UserAttendanceState does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserAttendance_date(ctx context.Context, field graphql.CollectedField, obj *db.UserAttendance) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserAttendance_date(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Date, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserAttendance_date(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserAttendance",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
 		},
 	}
 	return fc, nil
@@ -35493,6 +36042,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
+		case "setUserAttendanceState":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_setUserAttendanceState(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updateDailyAttendance":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateDailyAttendance(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "uploadFile":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_uploadFile(ctx, field)
@@ -36251,6 +36814,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
+		case "userAttendanceOverview":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_userAttendanceOverview(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "chat":
 			field := field
 
@@ -38177,6 +38762,91 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var userAttendanceImplementors = []string{"UserAttendance"}
+
+func (ec *executionContext) _UserAttendance(ctx context.Context, sel ast.SelectionSet, obj *db.UserAttendance) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, userAttendanceImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UserAttendance")
+		case "id":
+			out.Values[i] = ec._UserAttendance_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "user":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UserAttendance_user(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "state":
+			out.Values[i] = ec._UserAttendance_state(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "date":
+			out.Values[i] = ec._UserAttendance_date(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -41291,6 +41961,80 @@ func (ec *executionContext) marshalNUser2ᚖexampleᚋinternalᚋdbᚐUser(ctx c
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNUserAttendance2exampleᚋinternalᚋdbᚐUserAttendance(ctx context.Context, sel ast.SelectionSet, v db.UserAttendance) graphql.Marshaler {
+	return ec._UserAttendance(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUserAttendance2ᚕᚖexampleᚋinternalᚋdbᚐUserAttendanceᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.UserAttendance) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNUserAttendance2ᚖexampleᚋinternalᚋdbᚐUserAttendance(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNUserAttendance2ᚖexampleᚋinternalᚋdbᚐUserAttendance(ctx context.Context, sel ast.SelectionSet, v *db.UserAttendance) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._UserAttendance(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNUserAttendanceState2exampleᚋinternalᚋdbᚐUserAttendanceState(ctx context.Context, v interface{}) (db.UserAttendanceState, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	res := db.UserAttendanceState(tmp)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUserAttendanceState2exampleᚋinternalᚋdbᚐUserAttendanceState(ctx context.Context, sel ast.SelectionSet, v db.UserAttendanceState) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) marshalNUserCompetence2exampleᚋinternalᚋdbᚐUserCompetence(ctx context.Context, sel ast.SelectionSet, v db.UserCompetence) graphql.Marshaler {

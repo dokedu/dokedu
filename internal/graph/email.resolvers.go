@@ -8,6 +8,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"example/internal/dataloaders"
 	"example/internal/db"
 	"example/internal/graph/model"
 	"example/internal/middleware"
@@ -44,14 +45,7 @@ func (r *emailAccountResolver) User(ctx context.Context, obj *db.EmailAccount) (
 		return nil, errors.New("no permission")
 	}
 
-	// BEFORE
-	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
+	return dataloaders.GetUser(ctx, obj.UserID.String, currentUser)
 }
 
 // CreatedAt is the resolver for the createdAt field.

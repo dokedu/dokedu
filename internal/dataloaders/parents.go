@@ -8,22 +8,11 @@ import (
 	"example/internal/middleware"
 	"fmt"
 	"github.com/graph-gophers/dataloader"
-	"github.com/labstack/echo/v4"
 	"github.com/uptrace/bun"
 	"log"
 	"strings"
 	"time"
 )
-
-type ctxKey string
-
-const (
-	loadersKey = ctxKey("dataloaders")
-)
-
-type CompetenceParentReader struct {
-	conn *bun.DB
-}
 
 type CompetenceParents struct {
 	bun.BaseModel
@@ -33,7 +22,7 @@ type CompetenceParents struct {
 }
 
 // TODO: refactor this to optimise code readability and maintainability
-func (u *CompetenceParentReader) GetCompetenceParents(ctx context.Context, keys dataloader.Keys) []*dataloader.Result {
+func (u *Reader) GetCompetenceParents(ctx context.Context, keys dataloader.Keys) []*dataloader.Result {
 	// read all requested competences in a single query
 	competenceIDs := make([]string, len(keys))
 	for ix, key := range keys {
@@ -102,38 +91,6 @@ func (u *CompetenceParentReader) GetCompetenceParents(ctx context.Context, keys 
 		}
 	}
 	return output
-}
-
-// Loaders wrap your data loaders to inject via middleware
-type Loaders struct {
-	CompetenceLoader *dataloader.Loader
-}
-
-// NewLoaders instantiates data loaders for the middleware
-func NewLoaders(conn *bun.DB) *Loaders {
-	// define the data loader
-	competenceReader := &CompetenceParentReader{conn: conn}
-	loaders := &Loaders{
-		CompetenceLoader: dataloader.NewBatchedLoader(competenceReader.GetCompetenceParents),
-	}
-	return loaders
-}
-
-func Middleware(loaders *Loaders) func(echo.HandlerFunc) echo.HandlerFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-
-			ctx := context.WithValue(c.Request().Context(), loadersKey, loaders)
-			c.SetRequest(c.Request().WithContext(ctx))
-
-			return next(c)
-		}
-	}
-}
-
-// For returns the dataloader for a given context
-func For(ctx context.Context) *Loaders {
-	return ctx.Value(loadersKey).(*Loaders)
 }
 
 func GetCompetenceParents(ctx context.Context, competenceID string, currentUser *middleware.UserContext) ([]*db.Competence, error) {
