@@ -73,7 +73,7 @@ const { executeMutation: passwordReset } = useMutation(
         success
       }
     }
-  `)
+  `),
 );
 
 const password = ref("");

@@ -1,9 +1,9 @@
 import { graphql } from "@/gql";
 
 export default graphql(`
-    mutation resetPassword($input: ResetPasswordInput!) {
-        resetPassword(input: $input) {
-        success
-        }
+  mutation resetPassword($input: ResetPasswordInput!) {
+    resetPassword(input: $input) {
+      success
     }
-`)
+  }
+`);

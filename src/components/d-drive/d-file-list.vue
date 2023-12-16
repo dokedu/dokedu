@@ -68,7 +68,7 @@ const { executeMutation: uploadFile } = useMutation(
         id
       }
     }
-  `)
+  `),
 );
 
 async function clickFile(file: File) {

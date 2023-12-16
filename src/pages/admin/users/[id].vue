@@ -1,7 +1,7 @@
 <template>
   <div v-if="data?.user">
     <d-user-form
-      :user="(data.user as User)"
+      :user="data.user as User"
       :title="$t('edit_user')"
       deletable
       @save="onEditUser"
@@ -54,7 +54,7 @@ const { executeMutation: updateUser } = useMutation(
         role
       }
     }
-  `)
+  `),
 );
 
 const { executeMutation: archiveUser } = useMutation(
@@ -68,7 +68,7 @@ const { executeMutation: archiveUser } = useMutation(
         role
       }
     }
-  `)
+  `),
 );
 
 const onEditUser = async () => {
@@ -113,7 +113,7 @@ const { executeMutation: forgotPassword } = useMutation(
         success
       }
     }
-  `)
+  `),
 );
 
 const { executeMutation: inviteUser } = useMutation(
@@ -121,7 +121,7 @@ const { executeMutation: inviteUser } = useMutation(
     mutation sendInvite($id: ID!) {
       sendUserInvite(id: $id)
     }
-  `)
+  `),
 );
 
 const onInviteUser = async () => {

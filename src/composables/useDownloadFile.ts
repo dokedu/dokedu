@@ -11,7 +11,7 @@ function forceDownload(url: string, fileName: string) {
       const percentComplete = e.loaded / e.total;
       console.info(percentComplete);
     }
-  })
+  });
 
   xhr.open("GET", url, true);
   xhr.responseType = "blob";
@@ -30,21 +30,21 @@ function forceDownload(url: string, fileName: string) {
 
 const getFileURL = (variables: { id: string }) => {
   return urqlClient.mutation(
-
     graphql(`
-    mutation previewFile($id: ID!) {
-      previewFile(input: { id: $id }) {
-        url
+      mutation previewFile($id: ID!) {
+        previewFile(input: { id: $id }) {
+          url
+        }
       }
-    }
-  `), variables
-  )
-}
+    `),
+    variables,
+  );
+};
 
 async function downloadFile(file: File, fileName: string | null = null) {
   const res = await getFileURL({ id: file.id });
   if (res.error) return console.error(res.error);
-  const url = res.data?.previewFile.url as string
+  const url = res.data?.previewFile.url as string;
   if (!fileName) fileName = file.name;
   forceDownload(url, fileName);
 }

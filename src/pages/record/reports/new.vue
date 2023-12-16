@@ -66,7 +66,7 @@ const { executeMutation: createReportMutation } = useMutation(
         id
       }
     }
-  `)
+  `),
 );
 
 const studentSearch = ref("");
@@ -92,7 +92,7 @@ const studentOptions = computed(
     studentData?.value?.users?.edges?.map((edge: any) => ({
       label: `${edge.firstName} ${edge.lastName}`,
       value: edge.id,
-    })) || []
+    })) || [],
 );
 
 const createReportInput = object({

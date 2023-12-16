@@ -69,6 +69,6 @@ const typeOptions = computed(() =>
   types.value.map((t) => ({
     label: t.label,
     value: t.kind,
-  }))
+  })),
 );
 </script>

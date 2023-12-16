@@ -87,7 +87,7 @@ const { executeMutation: updateTag } = useMutation(
         createdAt
       }
     }
-  `)
+  `),
 );
 
 const { executeMutation: archiveTag } = useMutation(
@@ -101,7 +101,7 @@ const { executeMutation: archiveTag } = useMutation(
         createdAt
       }
     }
-  `)
+  `),
 );
 
 function onClose() {

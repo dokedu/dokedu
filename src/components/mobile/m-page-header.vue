@@ -14,7 +14,10 @@
       <div class="text-lg font-medium">Einträge</div>
     </router-link>
     <div>
-      <div class="h-8 w-8 flex justify-center items-center rounded-full bg-neutral-100 border border-neutral-200" @click="signOut">
+      <div
+        class="h-8 w-8 flex justify-center items-center rounded-full bg-neutral-100 border border-neutral-200"
+        @click="signOut"
+      >
         <LogOutIcon :size="16" class="stroke-neutral-600" />
       </div>
     </div>

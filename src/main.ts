@@ -5,6 +5,7 @@ import router from "./router/router.ts";
 import makeClient from "./urql/client.ts";
 import urql from "@urql/vue";
 import i18n from "./i18n.ts";
+import "emoji-mart-vue-fast/css/emoji-mart.css";
 
 const app = createApp(App);
 

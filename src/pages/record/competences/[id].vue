@@ -100,7 +100,7 @@ watchDebounced(
       },
     ];
   },
-  { debounce: 250, maxWait: 500 }
+  { debounce: 250, maxWait: 500 },
 );
 
 // To ensure the router view updates

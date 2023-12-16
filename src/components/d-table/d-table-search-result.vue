@@ -118,7 +118,7 @@ const { executeMutation: moveFile } = useMutation(
         }
       }
     }
-  `)
+  `),
 );
 
 watch(data, () => {

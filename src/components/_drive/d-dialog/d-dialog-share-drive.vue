@@ -156,7 +156,7 @@ const { executeMutation: createShare } = useMutation(
         }
       }
     }
-  `)
+  `),
 );
 
 const { executeMutation: deleteShare } = useMutation(
@@ -168,7 +168,7 @@ const { executeMutation: deleteShare } = useMutation(
         }
       }
     }
-  `)
+  `),
 );
 
 const { executeMutation: editShare } = useMutation(
@@ -183,7 +183,7 @@ const { executeMutation: editShare } = useMutation(
         }
       }
     }
-  `)
+  `),
 );
 
 async function onCreateShare(id: string) {

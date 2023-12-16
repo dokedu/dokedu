@@ -17,7 +17,7 @@
           >
             {{ `${student.firstName[0]}${student.lastName[0]}` }}
           </div>
-          <span>{{ `${student.firstName} ${student.lastName}` }}</span>
+          <span>{{ formattedStudentName(student) }}</span>
         </div>
         <div class="rounded-md p-1 hover:bg-neutral-100" @click="toggleStudent(student)">
           <X :size="20" class="stroke-neutral-500" />
@@ -61,7 +61,7 @@
                   :style="{ gridTemplateColumns: '2fr 2fr 1fr 2rem' }"
                 >
                   <div class="text-neutral-900">{{ student?.firstName }}</div>
-                  <div class="text-neutral-900">{{ student?.lastName }}</div>
+                  <div class="text-neutral-900">{{ student?.lastName }} {{ student?.student?.emoji }}</div>
                   <div class="text-neutral-900">{{ student?.student?.grade }}</div>
                   <div class="flex items-center justify-end pr-3 text-right text-neutral-900">
                     <Check v-if="entry.users?.some((el) => el.id === student?.id)" :size="16" />
@@ -105,9 +105,17 @@ function showModal() {
   open.value = true;
 }
 
+function formattedStudentName(student: User) {
+  if (student.student?.emoji) {
+    return `${student.firstName} ${student.lastName} ${student.student?.emoji}`;
+  } else {
+    return `${student.firstName} ${student.lastName}`;
+  }
+}
+
 const { data: students } = useQuery({
   query: graphql(`
-    query userss($search: String) {
+    query studentList($search: String) {
       users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {
         edges {
           id
@@ -116,6 +124,7 @@ const { data: students } = useQuery({
           student {
             id
             grade
+            emoji
           }
         }
       }

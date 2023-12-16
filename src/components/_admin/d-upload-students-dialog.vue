@@ -76,7 +76,7 @@ const { executeMutation: importStudents } = useMutation(
         errors
       }
     }
-  `)
+  `),
 );
 </script>
 

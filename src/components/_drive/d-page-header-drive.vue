@@ -80,6 +80,6 @@ const { executeMutation: createFolder } = useMutation(
         id
       }
     }
-  `)
+  `),
 );
 </script>

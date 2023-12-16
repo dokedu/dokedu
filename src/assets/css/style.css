@@ -3,14 +3,15 @@
 @tailwind utilities;
 
 body {
-    overscroll-behavior: none;
+  overscroll-behavior: none;
 }
 
 * {
-    @apply !cursor-default
+  @apply !cursor-default;
 }
 
-.slide-enter-from, .slide-leave-to {
-    transform: scaleY(0);
-    opacity: 0;
+.slide-enter-from,
+.slide-leave-to {
+  transform: scaleY(0);
+  opacity: 0;
 }

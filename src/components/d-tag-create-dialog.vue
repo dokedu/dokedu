@@ -2,7 +2,6 @@
   <DDialog :open="modalOpen" @close="onClose" :title="$t('create_tag')" class="p-4">
     <template #trigger>
       <slot name="trigger"></slot>
-
     </template>
     <template #main>
       <div class="pb-4">
@@ -76,7 +75,7 @@ const { executeMutation: createTag } = useMutation(
         createdAt
       }
     }
-  `)
+  `),
 );
 
 const onClose = () => {

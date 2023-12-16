@@ -85,6 +85,6 @@ const { executeMutation: updateOrganisation } = useMutation(
         legalName
       }
     }
-  `)
+  `),
 );
 </script>

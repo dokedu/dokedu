@@ -1,7 +1,7 @@
 <template>
   <div v-if="data?.emailAccount">
     <d-group-form
-      :email-account="(data.emailAccount as EmailAccount)"
+      :email-account="data.emailAccount as EmailAccount"
       :title="$t('edit_group')"
       deletable
       @delete="onDeleteGroup"
@@ -47,7 +47,7 @@ const { executeMutation: deleteGroup } = useMutation(
         name
       }
     }
-  `)
+  `),
 );
 
 const { executeMutation: editGroup } = useMutation(
@@ -59,7 +59,7 @@ const { executeMutation: editGroup } = useMutation(
         description
       }
     }
-  `)
+  `),
 );
 
 async function onDeleteGroup() {

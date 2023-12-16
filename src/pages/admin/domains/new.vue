@@ -1,5 +1,5 @@
 <template>
-  <DDomainForm :domain="(domain as Domain)" :title="$t('add_domain')" @save="onCreateDomain"></DDomainForm>
+  <DDomainForm :domain="domain as Domain" :title="$t('add_domain')" @save="onCreateDomain"></DDomainForm>
 </template>
 
 <script lang="ts" setup>
@@ -27,7 +27,7 @@ const { executeMutation: createDomain } = useMutation(
         createdAt
       }
     }
-  `)
+  `),
 );
 
 const onCreateDomain = async () => {

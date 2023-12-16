@@ -41,7 +41,7 @@ const { executeMutation: updateBucket } = useMutation(
         name
       }
     }
-  `)
+  `),
 );
 
 async function onSave() {

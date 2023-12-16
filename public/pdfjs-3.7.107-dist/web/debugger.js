@@ -32,18 +32,13 @@ const FontInspector = (function FontInspectorClosure() {
     }
   }
   function selectFont(fontName, show) {
-    const divs = document.querySelectorAll(
-      `span[${fontAttribute}=${fontName}]`
-    );
+    const divs = document.querySelectorAll(`span[${fontAttribute}=${fontName}]`);
     for (const div of divs) {
       div.className = show ? "debuggerShowText" : "debuggerHideText";
     }
   }
   function textLayerClick(e) {
-    if (
-      !e.target.dataset.fontName ||
-      e.target.tagName.toUpperCase() !== "SPAN"
-    ) {
+    if (!e.target.dataset.fontName || e.target.tagName.toUpperCase() !== "SPAN") {
       return;
     }
     const fontName = e.target.dataset.fontName;
@@ -116,9 +111,7 @@ const FontInspector = (function FontInspectorClosure() {
         url = /url\(['"]?([^)"']+)/.exec(url);
         download.href = url[1];
       } else if (fontObj.data) {
-        download.href = URL.createObjectURL(
-          new Blob([fontObj.data], { type: fontObj.mimetype })
-        );
+        download.href = URL.createObjectURL(new Blob([fontObj.data], { type: fontObj.mimetype }));
       }
       download.textContent = "Download";
       const logIt = document.createElement("a");
@@ -238,9 +231,7 @@ const Stepper = (function StepperClosure() {
   function simplifyArgs(args) {
     if (typeof args === "string") {
       const MAX_STRING_LENGTH = 75;
-      return args.length <= MAX_STRING_LENGTH
-        ? args
-        : args.substring(0, MAX_STRING_LENGTH) + "...";
+      return args.length <= MAX_STRING_LENGTH ? args : args.substring(0, MAX_STRING_LENGTH) + "...";
     }
     if (typeof args !== "object" || args === null) {
       return args;
@@ -286,12 +277,7 @@ const Stepper = (function StepperClosure() {
       table.cellSpacing = 0;
       const headerRow = c("tr");
       table.append(headerRow);
-      headerRow.append(
-        c("th", "Break"),
-        c("th", "Idx"),
-        c("th", "fn"),
-        c("th", "args")
-      );
+      headerRow.append(c("th", "Break"), c("th", "Idx"), c("th", "fn"), c("th", "args"));
       panel.append(content);
       this.table = table;
       this.updateOperatorList(operatorList);
@@ -316,10 +302,7 @@ const Stepper = (function StepperClosure() {
       }
 
       const chunk = document.createDocumentFragment();
-      const operatorsToDisplay = Math.min(
-        MAX_OPERATORS_COUNT,
-        operatorList.fnArray.length
-      );
+      const operatorsToDisplay = Math.min(MAX_OPERATORS_COUNT, operatorList.fnArray.length);
       for (let i = this.operatorListIdx; i < operatorsToDisplay; i++) {
         const line = c("tr");
         line.className = "line";
@@ -403,7 +386,7 @@ const Stepper = (function StepperClosure() {
       StepperManager.selectStepper(this.pageIndex, true);
       this.currentIdx = idx;
 
-      const listener = evt => {
+      const listener = (evt) => {
         switch (evt.keyCode) {
           case 83: // step
             document.removeEventListener("keydown", listener);
@@ -552,7 +535,7 @@ const PDFBug = (function PDFBugClosure() {
         const panel = document.createElement("div");
         const panelButton = document.createElement("button");
         panelButton.textContent = tool.name;
-        panelButton.addEventListener("click", event => {
+        panelButton.addEventListener("click", (event) => {
           event.preventDefault();
           this.selectPanel(tool);
         });

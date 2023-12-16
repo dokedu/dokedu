@@ -4,9 +4,14 @@
       <div>{{ $t("subject", 2) }}</div>
     </div>
     <div class="flex flex-col gap-2">
-      <RouterLink v-for="competence in data?.competences?.edges"
-        :to="{ name: '/record/students/[id]/competences/[cid]', params: { id: route.params.id, cid: competence?.id as string } }">
-        <DCompetence v-if="competence" :competence="(competence as Competence)"></DCompetence>
+      <RouterLink
+        v-for="competence in data?.competences?.edges"
+        :to="{
+          name: '/record/students/[id]/competences/[cid]',
+          params: { id: route.params.id, cid: competence?.id as string },
+        }"
+      >
+        <DCompetence v-if="competence" :competence="competence as Competence"></DCompetence>
       </RouterLink>
     </div>
   </div>

@@ -159,7 +159,7 @@ const { executeMutation: deleteFile } = useMutation(
         }
       }
     }
-  `)
+  `),
 );
 
 const pageVariables = computed<Variables[]>(() => [

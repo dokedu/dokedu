@@ -22,6 +22,7 @@ const student = reactive<User>({
     birthday: null,
     leftAt: null,
     joinedAt: null,
+    emoji: null,
   },
 });
 
@@ -41,7 +42,7 @@ const { executeMutation: createStudent } = useMutation(
         }
       }
     }
-  `)
+  `),
 );
 
 const onCreateStudent = async () => {
@@ -70,6 +71,7 @@ const onCreateStudent = async () => {
       birthday: student.student?.birthday,
       leftAt: student.student?.leftAt,
       joinedAt: student.student?.joinedAt,
+      emoji: student.student?.emoji,
     },
   });
 

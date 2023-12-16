@@ -104,7 +104,7 @@ const { executeMutation: moveFile } = useMutation(
         }
       }
     }
-  `)
+  `),
 );
 
 const folderId = computed(() => {

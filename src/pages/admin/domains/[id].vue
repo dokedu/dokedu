@@ -1,7 +1,7 @@
 <template>
   <div v-if="data?.domain">
     <d-domain-form
-      :domain="(data.domain as Domain)"
+      :domain="data.domain as Domain"
       :title="$t('edit_domain')"
       deletable
       @delete="onDeleteDomain"
@@ -43,7 +43,7 @@ const { executeMutation: deleteDomain } = useMutation(
         createdAt
       }
     }
-  `)
+  `),
 );
 
 const onDeleteDomain = async () => {

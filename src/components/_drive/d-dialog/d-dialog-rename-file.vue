@@ -43,7 +43,7 @@ const { executeMutation: renameFile } = useMutation(
         name
       }
     }
-  `)
+  `),
 );
 
 function onSave() {

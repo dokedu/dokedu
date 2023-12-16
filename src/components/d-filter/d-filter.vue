@@ -155,7 +155,7 @@ export default defineComponent({
       () => props.modelValue,
       (value) => {
         state.selected = Array.isArray(value) ? value : [value];
-      }
+      },
     );
 
     /**
@@ -196,7 +196,7 @@ export default defineComponent({
 
     const selectedOptionIndexes = computed(() => {
       return state.selected.map((selected: unknown) =>
-        filteredOptions.value.findIndex((option: DropdownOption) => option.value === selected)
+        filteredOptions.value.findIndex((option: DropdownOption) => option.value === selected),
       );
     }) as ComputedRef<number[]>;
 
@@ -282,7 +282,7 @@ export default defineComponent({
           // @ts-expect-error
           document.body.removeEventListener("mousedown", onFocusOut);
         }
-      }
+      },
     );
 
     const onEnter = () => {

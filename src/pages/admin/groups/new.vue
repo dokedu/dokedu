@@ -1,6 +1,6 @@
 <template>
   <DGroupForm
-    :emailAccount="(emailAccount as EmailAccount)"
+    :emailAccount="emailAccount as EmailAccount"
     :title="$t('add_group')"
     @save="onCreateEmailAccount"
   ></DGroupForm>
@@ -35,7 +35,7 @@ const { executeMutation: createEmailAccount } = useMutation(
         }
       }
     }
-  `)
+  `),
 );
 
 async function onCreateEmailAccount(input: { name: string; domain: string; members: string[] }) {

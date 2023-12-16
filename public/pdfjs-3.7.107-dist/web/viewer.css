@@ -33,8 +33,8 @@
   opacity: 0.25;
   line-height: 1;
   -webkit-text-size-adjust: none;
-     -moz-text-size-adjust: none;
-          text-size-adjust: none;
+  -moz-text-size-adjust: none;
+  text-size-adjust: none;
   forced-color-adjust: none;
   transform-origin: 0 0;
   z-index: 2;
@@ -107,14 +107,13 @@
   z-index: -1;
   cursor: default;
   -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  -moz-user-select: none;
+  user-select: none;
 }
 
 .textLayer .endOfContent.active {
   top: 0;
 }
-
 
 :root {
   --annotation-unfocused-field-background: url("data:image/svg+xml;charset=UTF-8,<svg width='1px' height='1px' xmlns='http://www.w3.org/2000/svg'><rect width='100%' height='100%' style='fill:rgba(0, 54, 255, 0.13);'/></svg>");
@@ -136,15 +135,13 @@
   }
   .annotationLayer .textWidgetAnnotation :is(input, textarea):required,
   .annotationLayer .choiceWidgetAnnotation select:required,
-  .annotationLayer
-    .buttonWidgetAnnotation:is(.checkBox, .radioButton)
-    input:required {
+  .annotationLayer .buttonWidgetAnnotation:is(.checkBox, .radioButton) input:required {
     outline: 1.5px solid selectedItem;
   }
 
   .annotationLayer .linkAnnotation:hover {
     -webkit-backdrop-filter: invert(100%);
-            backdrop-filter: invert(100%);
+    backdrop-filter: invert(100%);
   }
 }
 
@@ -194,9 +191,7 @@
   height: 100%;
 }
 
-.annotationLayer
-  :is(.linkAnnotation, .buttonWidgetAnnotation.pushButton)
-  > a:hover {
+.annotationLayer :is(.linkAnnotation, .buttonWidgetAnnotation.pushButton) > a:hover {
   opacity: 0.2;
   background: rgba(255, 255, 0, 1);
   box-shadow: 0 2px 10px rgba(255, 255, 0, 1);
@@ -226,9 +221,7 @@
 
 .annotationLayer .textWidgetAnnotation :is(input, textarea):required,
 .annotationLayer .choiceWidgetAnnotation select:required,
-.annotationLayer
-  .buttonWidgetAnnotation:is(.checkBox, .radioButton)
-  input:required {
+.annotationLayer .buttonWidgetAnnotation:is(.checkBox, .radioButton) input:required {
   outline: 1.5px solid red;
 }
 
@@ -246,9 +239,7 @@
 
 .annotationLayer .textWidgetAnnotation :is(input, textarea)[disabled],
 .annotationLayer .choiceWidgetAnnotation select[disabled],
-.annotationLayer
-  .buttonWidgetAnnotation:is(.checkBox, .radioButton)
-  input[disabled] {
+.annotationLayer .buttonWidgetAnnotation:is(.checkBox, .radioButton) input[disabled] {
   background: none;
   border: 2px solid var(--input-disabled-border-color);
   cursor: not-allowed;
@@ -256,9 +247,7 @@
 
 .annotationLayer .textWidgetAnnotation :is(input, textarea):hover,
 .annotationLayer .choiceWidgetAnnotation select:hover,
-.annotationLayer
-  .buttonWidgetAnnotation:is(.checkBox, .radioButton)
-  input:hover {
+.annotationLayer .buttonWidgetAnnotation:is(.checkBox, .radioButton) input:hover {
   border: 2px solid var(--input-hover-border-color);
 }
 .annotationLayer .textWidgetAnnotation :is(input, textarea):hover,
@@ -341,8 +330,8 @@
 
 .annotationLayer .buttonWidgetAnnotation:is(.checkBox, .radioButton) input {
   -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }
 
 .annotationLayer .popupTriggerArea {
@@ -366,8 +355,7 @@
   position: absolute;
   max-width: calc(180px * var(--scale-factor));
   background-color: rgba(255, 255, 153, 1);
-  box-shadow: 0 calc(2px * var(--scale-factor)) calc(5px * var(--scale-factor))
-    rgba(136, 136, 136, 1);
+  box-shadow: 0 calc(2px * var(--scale-factor)) calc(5px * var(--scale-factor)) rgba(136, 136, 136, 1);
   border-radius: calc(2px * var(--scale-factor));
   padding: calc(6px * var(--scale-factor));
   margin-left: calc(5px * var(--scale-factor));
@@ -434,8 +422,8 @@
   opacity: 0;
   color: transparent;
   -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  -moz-user-select: none;
+  user-select: none;
   pointer-events: none;
 }
 
@@ -443,7 +431,6 @@
   width: 100%;
   display: inline-block;
 }
-
 
 :root {
   --xfa-unfocused-field-background: url("data:image/svg+xml;charset=UTF-8,<svg width='1px' height='1px' xmlns='http://www.w3.org/2000/svg'><rect width='100%' height='100%' style='fill:rgba(0, 54, 255, 0.13);'/></svg>");
@@ -677,9 +664,9 @@
 
 .xfaImage {
   -o-object-position: left top;
-     object-position: left top;
+  object-position: left top;
   -o-object-fit: contain;
-     object-fit: contain;
+  object-fit: contain;
   width: 100%;
   height: 100%;
 }
@@ -756,13 +743,12 @@
 
   .xfaSelect {
     -webkit-appearance: none;
-       -moz-appearance: none;
-            appearance: none;
+    -moz-appearance: none;
+    appearance: none;
     text-indent: 1px;
     text-overflow: "";
   }
 }
-
 
 :root {
   --focus-outline: solid 2px blue;
@@ -775,8 +761,7 @@
 
 @media (-webkit-min-device-pixel-ratio: 1.1), (min-resolution: 1.1dppx) {
   :root {
-    --editorFreeText-editing-cursor: url(images/cursor-editorFreeText.svg) 0 16,
-      text;
+    --editorFreeText-editing-cursor: url(images/cursor-editorFreeText.svg) 0 16, text;
   }
 }
 
@@ -882,8 +867,7 @@
   resize: horizontal;
 }
 
-.annotationEditorLayer
-  :is(.freeTextEditor, .inkEditor):hover:not(.selectedEditor) {
+.annotationEditorLayer :is(.freeTextEditor, .inkEditor):hover:not(.selectedEditor) {
   outline: var(--hover-outline);
 }
 
@@ -1105,9 +1089,8 @@
   --toolbar-border-color: rgba(184, 184, 184, 1);
   --toolbar-box-shadow: 0 1px 0 var(--toolbar-border-color);
   --toolbar-border-bottom: none;
-  --toolbarSidebar-box-shadow: inset calc(-1px * var(--dir-factor)) 0 0
-      rgba(0, 0, 0, 0.25),
-    0 1px 0 rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.1);
+  --toolbarSidebar-box-shadow: inset calc(-1px * var(--dir-factor)) 0 0 rgba(0, 0, 0, 0.25), 0 1px 0 rgba(0, 0, 0, 0.15),
+    0 0 1px rgba(0, 0, 0, 0.1);
   --toolbarSidebar-border-bottom: none;
   --button-hover-color: rgba(221, 222, 223, 1);
   --toggled-btn-color: rgba(0, 0, 0, 1);
@@ -1292,7 +1275,7 @@ body {
   overflow: hidden;
   cursor: none;
   -webkit-user-select: none;
-          user-select: none;
+  user-select: none;
 }
 
 #viewerContainer.pdfPresentationMode:fullscreen {
@@ -1303,8 +1286,8 @@ body {
   overflow: hidden;
   cursor: none;
   -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  -moz-user-select: none;
+  user-select: none;
 }
 
 .pdfPresentationMode:-webkit-full-screen section:not([data-internal-link]) {
@@ -1344,7 +1327,7 @@ body {
   font: message-box;
   border-top: 1px solid rgba(51, 51, 51, 1);
   -webkit-border-end: var(--doorhanger-border-color-whcm);
-          border-inline-end: var(--doorhanger-border-color-whcm);
+  border-inline-end: var(--doorhanger-border-color-whcm);
   transition-property: inset-inline-start;
   transition-duration: var(--sidebar-transition-duration);
   transition-timing-function: var(--sidebar-transition-timing-function);
@@ -1396,8 +1379,7 @@ body {
   font: message-box;
 }
 
-:is(.toolbar, .editorParamsToolbar, .findbar, #sidebarContainer)
-  :is(input, button, select),
+:is(.toolbar, .editorParamsToolbar, .findbar, #sidebarContainer) :is(input, button, select),
 .secondaryToolbar :is(input, button, a, select) {
   outline: none;
   font: message-box;
@@ -1505,8 +1487,7 @@ body {
   animation: progressIndeterminate 1s linear infinite;
 }
 
-#outerContainer.sidebarResizing
-  :is(#sidebarContainer, #viewerContainer, #loadingBar) {
+#outerContainer.sidebarResizing :is(#sidebarContainer, #viewerContainer, #loadingBar) {
   /* Improve responsiveness and avoid visual glitches when the sidebar is resized. */
   transition-duration: 0s;
 }
@@ -1537,7 +1518,7 @@ body {
 }
 .findbar > div#findbarInputContainer {
   -webkit-margin-end: 4px;
-          margin-inline-end: 4px;
+  margin-inline-end: 4px;
 }
 .findbar.wrapContainers > div,
 .findbar.wrapContainers > div#findbarMessageContainer > * {
@@ -1553,8 +1534,8 @@ body {
 
 .findbar label {
   -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  -moz-user-select: none;
+  user-select: none;
 }
 
 .findbar label:hover,
@@ -1609,7 +1590,7 @@ body {
 
 .editorParamsToolbarContainer .editorParamsLabel {
   -webkit-padding-end: 10px;
-          padding-inline-end: 10px;
+  padding-inline-end: 10px;
   flex: none;
   color: var(--main-color);
 }
@@ -1661,7 +1642,8 @@ body {
 .doorHanger,
 .doorHangerRight {
   border-radius: 2px;
-  box-shadow: 0 1px 5px var(--doorhanger-border-color),
+  box-shadow:
+    0 1px 5px var(--doorhanger-border-color),
     0 0 0 1px var(--doorhanger-border-color);
   border: var(--doorhanger-border-color-whcm);
 }
@@ -1679,13 +1661,13 @@ body {
 .doorHanger::after {
   inset-inline-start: 10px;
   -webkit-margin-start: -8px;
-          margin-inline-start: -8px;
+  margin-inline-start: -8px;
   border-bottom-color: var(--toolbar-bg-color);
 }
 .doorHangerRight::after {
   inset-inline-end: 10px;
   -webkit-margin-end: -8px;
-          margin-inline-end: -8px;
+  margin-inline-end: -8px;
   border-bottom-color: var(--doorhanger-bg-color);
 }
 :is(.doorHanger, .doorHangerRight)::before {
@@ -1695,12 +1677,12 @@ body {
 .doorHanger::before {
   inset-inline-start: 10px;
   -webkit-margin-start: -9px;
-          margin-inline-start: -9px;
+  margin-inline-start: -9px;
 }
 .doorHangerRight::before {
   inset-inline-end: 10px;
   -webkit-margin-end: -9px;
-          margin-inline-end: -9px;
+  margin-inline-end: -9px;
 }
 
 #findResultsCount {
@@ -1746,15 +1728,15 @@ body {
 
 #toolbarViewerLeft {
   -webkit-padding-start: 1px;
-          padding-inline-start: 1px;
+  padding-inline-start: 1px;
 }
 #toolbarViewerRight {
   -webkit-padding-end: 1px;
-          padding-inline-end: 1px;
+  padding-inline-end: 1px;
 }
 #toolbarSidebarRight {
   -webkit-padding-end: 2px;
-          padding-inline-end: 2px;
+  padding-inline-end: 2px;
 }
 
 .splitToolbarButton {
@@ -1804,7 +1786,7 @@ body {
 }
 #toolbarSidebar .splitToolbarButton > .toolbarButton {
   -webkit-margin-end: 2px;
-          margin-inline-end: 2px;
+  margin-inline-end: 2px;
 }
 
 .splitToolbarButtonSeparator {
@@ -1828,8 +1810,8 @@ body {
   font-size: 12px;
   line-height: 14px;
   -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  -moz-user-select: none;
+  user-select: none;
   cursor: default;
   box-sizing: border-box;
 }
@@ -1872,13 +1854,13 @@ body {
   inset-inline-end: 6px;
   pointer-events: none;
   -webkit-mask-image: var(--toolbarButton-menuArrow-icon);
-          mask-image: var(--toolbarButton-menuArrow-icon);
+  mask-image: var(--toolbarButton-menuArrow-icon);
 }
 
 .dropdownToolbarButton > select {
   -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   width: inherit;
   height: 28px;
   font-size: 12px;
@@ -1886,7 +1868,7 @@ body {
   margin: 0;
   padding: 1px 0 2px;
   -webkit-padding-start: 6px;
-          padding-inline-start: 6px;
+  padding-inline-start: 6px;
   border: none;
   background-color: var(--dropdown-btn-bg-color);
 }
@@ -1917,7 +1899,7 @@ body {
   content: "";
   background-color: var(--toolbar-icon-bg-color);
   -webkit-mask-size: cover;
-          mask-size: cover;
+  mask-size: cover;
 }
 
 .dropdownToolbarButton:is(:hover, :focus-visible, :active)::after {
@@ -1943,75 +1925,75 @@ body {
 
 #sidebarToggle::before {
   -webkit-mask-image: var(--toolbarButton-sidebarToggle-icon);
-          mask-image: var(--toolbarButton-sidebarToggle-icon);
+  mask-image: var(--toolbarButton-sidebarToggle-icon);
   transform: scaleX(var(--dir-factor));
 }
 
 #secondaryToolbarToggle::before {
   -webkit-mask-image: var(--toolbarButton-secondaryToolbarToggle-icon);
-          mask-image: var(--toolbarButton-secondaryToolbarToggle-icon);
+  mask-image: var(--toolbarButton-secondaryToolbarToggle-icon);
   transform: scaleX(var(--dir-factor));
 }
 
 #findPrevious::before {
   -webkit-mask-image: var(--findbarButton-previous-icon);
-          mask-image: var(--findbarButton-previous-icon);
+  mask-image: var(--findbarButton-previous-icon);
 }
 
 #findNext::before {
   -webkit-mask-image: var(--findbarButton-next-icon);
-          mask-image: var(--findbarButton-next-icon);
+  mask-image: var(--findbarButton-next-icon);
 }
 
 #previous::before {
   -webkit-mask-image: var(--toolbarButton-pageUp-icon);
-          mask-image: var(--toolbarButton-pageUp-icon);
+  mask-image: var(--toolbarButton-pageUp-icon);
 }
 
 #next::before {
   -webkit-mask-image: var(--toolbarButton-pageDown-icon);
-          mask-image: var(--toolbarButton-pageDown-icon);
+  mask-image: var(--toolbarButton-pageDown-icon);
 }
 
 #zoomOut::before {
   -webkit-mask-image: var(--toolbarButton-zoomOut-icon);
-          mask-image: var(--toolbarButton-zoomOut-icon);
+  mask-image: var(--toolbarButton-zoomOut-icon);
 }
 
 #zoomIn::before {
   -webkit-mask-image: var(--toolbarButton-zoomIn-icon);
-          mask-image: var(--toolbarButton-zoomIn-icon);
+  mask-image: var(--toolbarButton-zoomIn-icon);
 }
 
 #presentationMode::before {
   -webkit-mask-image: var(--toolbarButton-presentationMode-icon);
-          mask-image: var(--toolbarButton-presentationMode-icon);
+  mask-image: var(--toolbarButton-presentationMode-icon);
 }
 
 #editorFreeText::before {
   -webkit-mask-image: var(--toolbarButton-editorFreeText-icon);
-          mask-image: var(--toolbarButton-editorFreeText-icon);
+  mask-image: var(--toolbarButton-editorFreeText-icon);
 }
 
 #editorInk::before {
   -webkit-mask-image: var(--toolbarButton-editorInk-icon);
-          mask-image: var(--toolbarButton-editorInk-icon);
+  mask-image: var(--toolbarButton-editorInk-icon);
 }
 
 #print::before,
 #secondaryPrint::before {
   -webkit-mask-image: var(--toolbarButton-print-icon);
-          mask-image: var(--toolbarButton-print-icon);
+  mask-image: var(--toolbarButton-print-icon);
 }
 
 :is(#openFile, #secondaryOpenFile)::before {
   -webkit-mask-image: var(--toolbarButton-openFile-icon);
-          mask-image: var(--toolbarButton-openFile-icon);
+  mask-image: var(--toolbarButton-openFile-icon);
 }
 
 :is(#download, #secondaryDownload)::before {
   -webkit-mask-image: var(--toolbarButton-download-icon);
-          mask-image: var(--toolbarButton-download-icon);
+  mask-image: var(--toolbarButton-download-icon);
 }
 
 a.secondaryToolbarButton {
@@ -2025,39 +2007,39 @@ a:is(.toolbarButton, .secondaryToolbarButton)[href="#"] {
 
 #viewBookmark::before {
   -webkit-mask-image: var(--toolbarButton-bookmark-icon);
-          mask-image: var(--toolbarButton-bookmark-icon);
+  mask-image: var(--toolbarButton-bookmark-icon);
 }
 
 #viewThumbnail::before {
   -webkit-mask-image: var(--toolbarButton-viewThumbnail-icon);
-          mask-image: var(--toolbarButton-viewThumbnail-icon);
+  mask-image: var(--toolbarButton-viewThumbnail-icon);
 }
 
 #viewOutline::before {
   -webkit-mask-image: var(--toolbarButton-viewOutline-icon);
-          mask-image: var(--toolbarButton-viewOutline-icon);
+  mask-image: var(--toolbarButton-viewOutline-icon);
   transform: scaleX(var(--dir-factor));
 }
 
 #viewAttachments::before {
   -webkit-mask-image: var(--toolbarButton-viewAttachments-icon);
-          mask-image: var(--toolbarButton-viewAttachments-icon);
+  mask-image: var(--toolbarButton-viewAttachments-icon);
 }
 
 #viewLayers::before {
   -webkit-mask-image: var(--toolbarButton-viewLayers-icon);
-          mask-image: var(--toolbarButton-viewLayers-icon);
+  mask-image: var(--toolbarButton-viewLayers-icon);
 }
 
 #currentOutlineItem::before {
   -webkit-mask-image: var(--toolbarButton-currentOutlineItem-icon);
-          mask-image: var(--toolbarButton-currentOutlineItem-icon);
+  mask-image: var(--toolbarButton-currentOutlineItem-icon);
   transform: scaleX(var(--dir-factor));
 }
 
 #viewFind::before {
   -webkit-mask-image: var(--toolbarButton-search-icon);
-          mask-image: var(--toolbarButton-search-icon);
+  mask-image: var(--toolbarButton-search-icon);
 }
 
 .pdfSidebarNotification::after {
@@ -2078,7 +2060,7 @@ a:is(.toolbarButton, .secondaryToolbarButton)[href="#"] {
   margin: 0;
   padding: 0 0 1px;
   -webkit-padding-start: 36px;
-          padding-inline-start: 36px;
+  padding-inline-start: 36px;
   height: auto;
   min-height: 26px;
   width: auto;
@@ -2091,77 +2073,77 @@ a:is(.toolbarButton, .secondaryToolbarButton)[href="#"] {
 }
 .secondaryToolbarButton > span {
   -webkit-padding-end: 4px;
-          padding-inline-end: 4px;
+  padding-inline-end: 4px;
 }
 
 #firstPage::before {
   -webkit-mask-image: var(--secondaryToolbarButton-firstPage-icon);
-          mask-image: var(--secondaryToolbarButton-firstPage-icon);
+  mask-image: var(--secondaryToolbarButton-firstPage-icon);
 }
 
 #lastPage::before {
   -webkit-mask-image: var(--secondaryToolbarButton-lastPage-icon);
-          mask-image: var(--secondaryToolbarButton-lastPage-icon);
+  mask-image: var(--secondaryToolbarButton-lastPage-icon);
 }
 
 #pageRotateCcw::before {
   -webkit-mask-image: var(--secondaryToolbarButton-rotateCcw-icon);
-          mask-image: var(--secondaryToolbarButton-rotateCcw-icon);
+  mask-image: var(--secondaryToolbarButton-rotateCcw-icon);
 }
 
 #pageRotateCw::before {
   -webkit-mask-image: var(--secondaryToolbarButton-rotateCw-icon);
-          mask-image: var(--secondaryToolbarButton-rotateCw-icon);
+  mask-image: var(--secondaryToolbarButton-rotateCw-icon);
 }
 
 #cursorSelectTool::before {
   -webkit-mask-image: var(--secondaryToolbarButton-selectTool-icon);
-          mask-image: var(--secondaryToolbarButton-selectTool-icon);
+  mask-image: var(--secondaryToolbarButton-selectTool-icon);
 }
 
 #cursorHandTool::before {
   -webkit-mask-image: var(--secondaryToolbarButton-handTool-icon);
-          mask-image: var(--secondaryToolbarButton-handTool-icon);
+  mask-image: var(--secondaryToolbarButton-handTool-icon);
 }
 
 #scrollPage::before {
   -webkit-mask-image: var(--secondaryToolbarButton-scrollPage-icon);
-          mask-image: var(--secondaryToolbarButton-scrollPage-icon);
+  mask-image: var(--secondaryToolbarButton-scrollPage-icon);
 }
 
 #scrollVertical::before {
   -webkit-mask-image: var(--secondaryToolbarButton-scrollVertical-icon);
-          mask-image: var(--secondaryToolbarButton-scrollVertical-icon);
+  mask-image: var(--secondaryToolbarButton-scrollVertical-icon);
 }
 
 #scrollHorizontal::before {
   -webkit-mask-image: var(--secondaryToolbarButton-scrollHorizontal-icon);
-          mask-image: var(--secondaryToolbarButton-scrollHorizontal-icon);
+  mask-image: var(--secondaryToolbarButton-scrollHorizontal-icon);
 }
 
 #scrollWrapped::before {
   -webkit-mask-image: var(--secondaryToolbarButton-scrollWrapped-icon);
-          mask-image: var(--secondaryToolbarButton-scrollWrapped-icon);
+  mask-image: var(--secondaryToolbarButton-scrollWrapped-icon);
 }
 
 #spreadNone::before {
   -webkit-mask-image: var(--secondaryToolbarButton-spreadNone-icon);
-          mask-image: var(--secondaryToolbarButton-spreadNone-icon);
+  mask-image: var(--secondaryToolbarButton-spreadNone-icon);
 }
 
 #spreadOdd::before {
   -webkit-mask-image: var(--secondaryToolbarButton-spreadOdd-icon);
-          mask-image: var(--secondaryToolbarButton-spreadOdd-icon);
+  mask-image: var(--secondaryToolbarButton-spreadOdd-icon);
 }
 
 #spreadEven::before {
   -webkit-mask-image: var(--secondaryToolbarButton-spreadEven-icon);
-          mask-image: var(--secondaryToolbarButton-spreadEven-icon);
+  mask-image: var(--secondaryToolbarButton-spreadEven-icon);
 }
 
 #documentProperties::before {
   -webkit-mask-image: var(--secondaryToolbarButton-documentProperties-icon);
-          mask-image: var(--secondaryToolbarButton-documentProperties-icon);
+  mask-image: var(--secondaryToolbarButton-documentProperties-icon);
 }
 
 .verticalToolbarSeparator {
@@ -2199,7 +2181,7 @@ a:is(.toolbarButton, .secondaryToolbarButton)[href="#"] {
   left: 0;
   margin: 10px 0 3px;
   -webkit-margin-start: 7px;
-          margin-inline-start: 7px;
+  margin-inline-start: 7px;
 }
 
 #pageNumber {
@@ -2237,14 +2219,14 @@ a:is(.toolbarButton, .secondaryToolbarButton)[href="#"] {
   line-height: 14px;
   text-align: left;
   -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  -moz-user-select: none;
+  user-select: none;
   cursor: default;
 }
 
 #numPages.toolbarLabel {
   -webkit-padding-start: 3px;
-          padding-inline-start: 3px;
+  padding-inline-start: 3px;
 }
 
 #thumbnailView,
@@ -2257,8 +2239,8 @@ a:is(.toolbarButton, .secondaryToolbarButton)[href="#"] {
   padding: 4px 4px 0;
   overflow: auto;
   -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  -moz-user-select: none;
+  user-select: none;
 }
 #thumbnailView {
   width: calc(100% - 60px);
@@ -2318,7 +2300,7 @@ a:focus > .thumbnail > .thumbnailImage,
 .treeWithDeepNesting > .treeItem,
 .treeItem > .treeItems {
   -webkit-margin-start: 20px;
-          margin-inline-start: 20px;
+  margin-inline-start: 20px;
 }
 
 .treeItem > a {
@@ -2330,14 +2312,14 @@ a:focus > .thumbnail > .thumbnailImage,
   margin-bottom: 1px;
   padding: 2px 0 5px;
   -webkit-padding-start: 4px;
-          padding-inline-start: 4px;
+  padding-inline-start: 4px;
   border-radius: 2px;
   color: var(--treeitem-color);
   font-size: 13px;
   line-height: 15px;
   -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  -moz-user-select: none;
+  user-select: none;
   white-space: normal;
   cursor: pointer;
 }
@@ -2347,7 +2329,7 @@ a:focus > .thumbnail > .thumbnailImage,
 }
 #layersView .treeItem > a > label {
   -webkit-padding-start: 4px;
-          padding-inline-start: 4px;
+  padding-inline-start: 4px;
 }
 #layersView .treeItem > a > label > input {
   float: var(--inline-start);
@@ -2364,11 +2346,11 @@ a:focus > .thumbnail > .thumbnailImage,
 .treeItemToggler::before {
   inset-inline-end: 4px;
   -webkit-mask-image: var(--treeitem-expanded-icon);
-          mask-image: var(--treeitem-expanded-icon);
+  mask-image: var(--treeitem-expanded-icon);
 }
 .treeItemToggler.treeItemsHidden::before {
   -webkit-mask-image: var(--treeitem-collapsed-icon);
-          mask-image: var(--treeitem-collapsed-icon);
+  mask-image: var(--treeitem-collapsed-icon);
   transform: scaleX(var(--dir-factor));
 }
 .treeItemToggler.treeItemsHidden ~ .treeItems {
@@ -2474,8 +2456,7 @@ dialog :link {
 .grab-to-pan-grab {
   cursor: grab !important;
 }
-.grab-to-pan-grab
-  *:not(input):not(textarea):not(button):not(select):not(:link) {
+.grab-to-pan-grab *:not(input):not(textarea):not(button):not(select):not(:link) {
   cursor: inherit !important;
 }
 .grab-to-pan-grab:active,

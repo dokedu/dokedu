@@ -1,6 +1,6 @@
 <template>
   <PageWrapper>
-    <EntryForm v-if="entry" :entry="entry.entry as Partial<Entry>" @archived="archived" />
+    <EntryForm v-if="entry" :entry="entry.entry as any" @archived="archived" />
   </PageWrapper>
 </template>
 
@@ -10,7 +10,6 @@ import EntryForm from "@/components/d-entry/d-entry-form.vue";
 import { useRoute, useRouter } from "vue-router/auto";
 import { useQuery } from "@urql/vue";
 import { graphql } from "@/gql";
-import { Entry } from "@/gql/graphql";
 
 const route = useRoute<"/record/entries/[id]">();
 const router = useRouter();
@@ -21,7 +20,7 @@ async function archived() {
 
 const { data: entry } = useQuery({
   query: graphql(`
-    query entryById($id: ID!) {
+    query entryById2($id: ID!) {
       entry(id: $id) {
         id
         date
@@ -46,6 +45,10 @@ const { data: entry } = useQuery({
           id
           firstName
           lastName
+          student {
+            id
+            emoji
+          }
         }
         userCompetences {
           id
@@ -67,6 +70,6 @@ const { data: entry } = useQuery({
       }
     }
   `),
-  variables: { id: route.params.id as string },
+  variables: { id: route.params.id },
 });
 </script>

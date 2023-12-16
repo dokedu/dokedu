@@ -66,7 +66,7 @@ const domainOptions = computed(
     domainData?.value?.domains?.edges?.map((edge: any) => ({
       label: edge.name,
       value: edge.name,
-    })) || []
+    })) || [],
 );
 
 export interface Props {
@@ -85,7 +85,7 @@ const members = ref(
   account.value.members?.map((member) => {
     if (!member) return;
     return member.name;
-  }) as string[]
+  }) as string[],
 );
 
 const { data: domainData } = useQuery({
@@ -133,7 +133,7 @@ watch(
     if (!newValue) return;
     if (name.value != oldValue?.toLowerCase().replace(/\s/g, ".")) return;
     name.value = newValue.toLowerCase().replace(/\s/g, ".");
-  }
+  },
 );
 
 const onCancel = () => {

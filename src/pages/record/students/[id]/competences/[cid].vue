@@ -34,7 +34,7 @@
           <DCompetenceLevel
             :id="competence.userCompetences[0]?.id as string"
             :level="getLevel(competence)"
-            :editable="competence.type == 'subject' ? false : true"
+            :editable="competence.type != 'subject'"
             @update="(val) => createUserCompetence({ level: val.level, id: competence.id })"
             class="z-10"
           />

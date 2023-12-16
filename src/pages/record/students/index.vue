@@ -22,6 +22,10 @@
       @row-click="goToStudent"
       defaultSort="lastName"
     >
+      <template #lastName-data="{ item }">
+        {{ item.lastName }}
+        {{ item.student?.emoji }}
+      </template>
       <template #birthday-data="{ item }">
         {{
           item.student?.birthday
@@ -106,7 +110,7 @@ watchDebounced(
       },
     ];
   },
-  { debounce: 250, maxWait: 500 }
+  { debounce: 250, maxWait: 500 },
 );
 
 const studentsQuery = graphql(`
@@ -124,6 +128,7 @@ const studentsQuery = graphql(`
           id
           birthday
           grade
+          emoji
         }
       }
     }

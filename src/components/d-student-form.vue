@@ -15,6 +15,20 @@
         <DInput type="date" :label="$t('birthday')" name="birthday" v-model="birthday"></DInput>
         <DInput type="date" :label="$t('joined_at')" name="birthday" v-model="joinedAt"></DInput>
         <DInput type="date" :label="$t('left_at')" name="birthday" v-model="leftAt"></DInput>
+        <div class="flex gap-2"></div>
+        <div class="flex items-end gap-2">
+          <DInput type="text" class="flex-1" disabled :label="$t('emoji')" name="emoji" v-model="emoji"></DInput>
+          <div class="relative">
+            <DButton size="md" type="outline" class="!h-10" :icon-left="Smile" @click="onToggleEmojiPicker"
+              >Select emoji
+            </DButton>
+            <div v-if="emojiPickerOpen" ref="emojiPickerContainer" class="absolute z-10 top-12 right-0">
+              <Picker color="black" :data="emojiIndex" set="apple" @select="showEmoji"></Picker>
+            </div>
+          </div>
+        </div>
+
+        <div>{{ emojiOutput }}</div>
       </div>
     </template>
     <template #footer>
@@ -33,7 +47,34 @@ import { User } from "@/gql/graphql";
 import { useRouter } from "vue-router/auto";
 import DInput from "@/components/d-input/d-input.vue";
 import DButton from "@/components/d-button/d-button.vue";
-import { computed, toRef } from "vue";
+import { computed, toRef, ref } from "vue";
+import { onClickOutside } from "@vueuse/core";
+import { Smile } from "lucide-vue-next";
+
+// @ts-ignore
+import { Picker, EmojiIndex } from "emoji-mart-vue-fast/src";
+import data from "emoji-mart-vue-fast/data/apple.json";
+
+let emojiIndex = new EmojiIndex(data);
+let emojiOutput = ref("");
+let emojiPickerOpen = ref(false);
+
+let emojiPickerContainer = ref(null);
+onClickOutside(emojiPickerContainer, () => {
+  emojiPickerOpen.value = false;
+});
+
+const onToggleEmojiPicker = () => {
+  emojiPickerOpen.value = !emojiPickerOpen.value;
+};
+
+const showEmoji = (emoji: any) => {
+  if (!student.value.student) {
+    return;
+  }
+  student.value.student.emoji = emoji.native;
+  emojiPickerOpen.value = false;
+};
 
 const router = useRouter();
 
@@ -42,6 +83,7 @@ export interface Props {
   title: string;
   deletable?: boolean;
 }
+
 const props = defineProps<Props>();
 const emit = defineEmits(["save", "delete"]);
 const student = toRef(props, "student");
@@ -84,6 +126,20 @@ const leftAt = computed({
   set: (value) => {
     if (student.value.student) {
       student.value.student.leftAt = new Date(value).toISOString();
+    }
+  },
+});
+
+const emoji = computed({
+  get: () => {
+    if (student.value.student?.emoji) {
+      return student.value.student.emoji;
+    }
+    return "";
+  },
+  set: (value) => {
+    if (student.value.student) {
+      student.value.student.emoji = value;
     }
   },
 });

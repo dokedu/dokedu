@@ -88,7 +88,9 @@
                           </thead>
                           <tbody class="divide-y divide-neutral-200 bg-white">
                             <tr
-                              v-for="competence in subject.competences.sort((a: any, b: any) => a.name.localeCompare(b.name))"
+                              v-for="competence in subject.competences.sort((a: any, b: any) =>
+                                a.name.localeCompare(b.name),
+                              )"
                               :key="competence.id"
                               class="divide-x divide-neutral-200"
                             >

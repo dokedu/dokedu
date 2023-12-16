@@ -61,7 +61,7 @@ const { executeMutation: forgotPassword } = useMutation(
         success
       }
     }
-  `)
+  `),
 );
 
 async function onSubmit() {

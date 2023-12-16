@@ -78,7 +78,6 @@ declare module 'vue-router/auto/routes' {
     '/record/students/[id]': RouteRecordInfo<'/record/students/[id]', '/record/students/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/record/students/[id]/competences/': RouteRecordInfo<'/record/students/[id]/competences/', '/record/students/:id/competences', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/record/students/[id]/competences/[cid]': RouteRecordInfo<'/record/students/[id]/competences/[cid]', '/record/students/:id/competences/:cid', { id: ParamValue<true>, cid: ParamValue<true> }, { id: ParamValue<false>, cid: ParamValue<false> }>,
-    '/record/students/[id]/entries': RouteRecordInfo<'/record/students/[id]/entries', '/record/students/:id/entries', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/record/tags/': RouteRecordInfo<'/record/tags/', '/record/tags', Record<never, never>, Record<never, never>>,
     '/reset-password': RouteRecordInfo<'/reset-password', '/reset-password', Record<never, never>, Record<never, never>>,
     '/school/certificates': RouteRecordInfo<'/school/certificates', '/school/certificates', Record<never, never>, Record<never, never>>,

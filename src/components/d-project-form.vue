@@ -152,7 +152,7 @@ const { executeMutation: toggleEventCompetence } = useMutation(
         id
       }
     }
-  `)
+  `),
 );
 
 export interface Props {
@@ -205,7 +205,7 @@ const { executeMutation: archiveEvent } = useMutation(
         id
       }
     }
-  `)
+  `),
 );
 
 const { executeMutation: createEvent } = useMutation(
@@ -224,7 +224,7 @@ const { executeMutation: createEvent } = useMutation(
         createdAt
       }
     }
-  `)
+  `),
 );
 
 const { executeMutation: updateEvent } = useMutation(
@@ -243,7 +243,7 @@ const { executeMutation: updateEvent } = useMutation(
         createdAt
       }
     }
-  `)
+  `),
 );
 
 async function update() {

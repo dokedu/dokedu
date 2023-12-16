@@ -16,11 +16,11 @@
       <div class="flex flex-col gap-2">
         <d-input name="firstName" :label="$t('first_name')" v-model="user.firstName"></d-input>
         <d-input name="lastName" :label="$t('last_name')" v-model="user.lastName"></d-input>
-        <d-input name="email" :label="$t('email')" v-model="(user.email as string)"></d-input>
+        <d-input name="email" :label="$t('email')" v-model="user.email as string"></d-input>
         <div class="flex flex-col">
           <label class="mb-1 text-sm text-neutral-500" for="role">{{ $t("role") }}</label>
           <select
-            v-model="(user.role as string)"
+            v-model="user.role as string"
             name="role"
             id="role"
             class="rounded-md border border-neutral-200 text-sm shadow"

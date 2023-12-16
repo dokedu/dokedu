@@ -59,7 +59,7 @@ watch(
   () => props.open,
   () => {
     modalOpen.value = props.open;
-  }
+  },
 );
 
 const onUpdate = () => {

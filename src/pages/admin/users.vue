@@ -114,7 +114,7 @@ watchDebounced(
       },
     ];
   },
-  { debounce: 250, maxWait: 500 }
+  { debounce: 250, maxWait: 500 },
 );
 
 watch(showDeleted, () => {

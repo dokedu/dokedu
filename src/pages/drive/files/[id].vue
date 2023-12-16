@@ -1,6 +1,6 @@
 <template>
   <div v-i="data && data.file && data.file">
-    <DFilePreview :file="(data?.file as File)" />
+    <DFilePreview :file="data?.file as File" />
   </div>
 </template>
 

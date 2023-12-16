@@ -11,7 +11,7 @@
         <div class="flex w-full flex-col items-start rounded-md">
           <div
             @click="toggleTag(tag)"
-            v-for="tag in (data?.tags.edges as Tag[])"
+            v-for="tag in data?.tags.edges as Tag[]"
             :key="tag.id"
             class="flex w-full cursor-pointer items-center justify-between p-1 hover:bg-neutral-100"
           >

@@ -203,7 +203,7 @@ useInfiniteScroll(
 
     pageVariables.value.push(nextPageVariables);
   },
-  { distance: 500 }
+  { distance: 500 },
 );
 
 function sortBy(column: Column) {
@@ -230,6 +230,6 @@ watch(
     if (JSON.stringify(newValue) === JSON.stringify(oldValue)) return;
     table.value?.scrollTo({ top: 0, behavior: "smooth" });
   },
-  { flush: "post" }
+  { flush: "post" },
 );
 </script>

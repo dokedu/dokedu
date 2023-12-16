@@ -1,5 +1,5 @@
 <template>
-  <d-project-form :project="(project as Event)" @cancel="cancel" @save="saved" />
+  <d-project-form :project="project as Event" @cancel="cancel" @save="saved" />
 </template>
 
 <script lang="ts" setup>

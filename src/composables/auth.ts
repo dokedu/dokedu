@@ -9,7 +9,7 @@ function signOutMutation() {
         signOut
       }
     `),
-    {}
+    {},
   );
 }
 

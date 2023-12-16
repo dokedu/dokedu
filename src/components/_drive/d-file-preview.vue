@@ -182,7 +182,7 @@ watch(
         renderPDF(url.value);
       }
     }
-  }
+  },
 );
 
 // @ts-expect-error
@@ -195,21 +195,21 @@ async function renderPDF(url) {
 
   loadingTask.onPassword = (callback: Function, reason: number) => {
     if (reason == 1) {
-      const enteredPassword = prompt(t('enter_password'));
+      const enteredPassword = prompt(t("enter_password"));
       if (enteredPassword !== null) {
         callback(enteredPassword);
       } else {
-        emit("close")
+        emit("close");
       }
     } else {
-      const enteredPassword = prompt(t('password_incorrect_try_again'));
+      const enteredPassword = prompt(t("password_incorrect_try_again"));
       if (enteredPassword !== null) {
         callback(enteredPassword);
       } else {
-        emit("close")
+        emit("close");
       }
     }
-  }
+  };
 
   // @ts-expect-error
   await loadingTask.promise.then(async (pdf) => {

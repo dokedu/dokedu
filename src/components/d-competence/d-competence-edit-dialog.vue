@@ -104,7 +104,7 @@ const { executeMutation: updateCompetence } = useMutation(
         color
       }
     }
-  `)
+  `),
 );
 
 const onClose = () => {

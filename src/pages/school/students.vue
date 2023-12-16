@@ -43,6 +43,10 @@
       defaultSort="lastName"
       :additionalTypenames="['ImportStudentsPayload', 'User', 'UserStudent']"
     >
+      <template #lastName-data="{ item }">
+        {{ item.lastName }}
+        {{ item.student?.emoji }}
+      </template>
       <template #birthday-data="{ item }">
         {{
           item.student?.birthday
@@ -130,7 +134,7 @@ watchDebounced(
       },
     ];
   },
-  { debounce: 250, maxWait: 500 }
+  { debounce: 250, maxWait: 500 },
 );
 
 watch(showDeleted, () => {
@@ -164,6 +168,7 @@ const studentsQuery = graphql(`
           id
           birthday
           grade
+          emoji
         }
       }
     }
