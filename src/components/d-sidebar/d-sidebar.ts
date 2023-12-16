@@ -17,6 +17,7 @@ import {
   Users,
   UserSquare,
   Wrench,
+  TimerIcon,
 } from "lucide-vue-next";
 
 import type { RouteNamedMap } from "vue-router/auto/routes";
@@ -99,6 +100,11 @@ export const apps = computed<App[]>(() => [
         icon: Tag,
         name: i18n.global.t("tag", 2),
         route: "/record/tags/",
+      },
+      {
+        icon: TimerIcon,
+        name: i18n.global.t("attendance", 2),
+        route: "/record/attendances/",
       },
     ],
   },

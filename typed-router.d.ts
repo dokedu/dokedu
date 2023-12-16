@@ -64,6 +64,7 @@ declare module 'vue-router/auto/routes' {
     '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
     '/m/record/entries/': RouteRecordInfo<'/m/record/entries/', '/m/record/entries', Record<never, never>, Record<never, never>>,
     '/m/record/entries/[id]': RouteRecordInfo<'/m/record/entries/[id]', '/m/record/entries/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
+    '/record/attendances/': RouteRecordInfo<'/record/attendances/', '/record/attendances', Record<never, never>, Record<never, never>>,
     '/record/competences/': RouteRecordInfo<'/record/competences/', '/record/competences', Record<never, never>, Record<never, never>>,
     '/record/competences/[id]': RouteRecordInfo<'/record/competences/[id]', '/record/competences/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/record/entries/': RouteRecordInfo<'/record/entries/', '/record/entries', Record<never, never>, Record<never, never>>,
