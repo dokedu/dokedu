@@ -1,6 +1,6 @@
 <template>
   <div class="flex h-full flex-col">
-    <div class="mb-4 flex h-fit gap-2 text-sm text-subtle">
+    <div class="mb-4 flex h-fit gap-2 text-sm text-subtle px-6 pt-4">
       <router-link :to="{ name: '/record/students/[id]/competences/' }">{{ $t("subject", 2) }}</router-link>
       <template v-for="parent in data?.competence.parents">
         <span>{{ ">" }}</span>
@@ -21,7 +21,7 @@
       </router-link>
     </div>
 
-    <div class="flex flex-1 flex-col gap-2 overflow-y-auto">
+    <div class="flex flex-1 flex-col gap-2 overflow-auto px-6 pb-4">
       <component
         v-for="competence in data?.competence?.competences as Competence[]"
         :is="competence?.type !== 'competence' ? 'router-link' : 'div'"

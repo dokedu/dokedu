@@ -1,9 +1,9 @@
 <template>
-  <div>
-    <div class="mb-4 flex gap-2 text-sm text-subtle">
+  <div class="flex flex-col h-full">
+    <div class="mb-4 flex gap-2 min-h-0 text-sm text-subtle px-6 pt-4">
       <div>{{ $t("subject", 2) }}</div>
     </div>
-    <div class="flex flex-col gap-2">
+    <div class="flex flex-col flex-1 gap-2 overflow-auto px-6 pb-4">
       <RouterLink
         v-for="competence in data?.competences?.edges"
         :to="{

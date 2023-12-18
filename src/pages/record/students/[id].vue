@@ -16,7 +16,7 @@
             </span>
           </div>
         </div>
-        <div class="flex flex-col py-4 grow overflow-auto px-6">
+        <div class="flex flex-col grow min-h-0 flex-1">
           <RouterView />
         </div>
       </div>
