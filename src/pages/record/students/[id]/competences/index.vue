@@ -11,7 +11,7 @@
           params: { id: route.params.id, cid: competence?.id as string },
         }"
       >
-        <DCompetence v-if="competence" :competence="competence as Competence"></DCompetence>
+        <DCompetence v-if="competence" :competence="competence as Competence" />
       </RouterLink>
     </div>
   </div>

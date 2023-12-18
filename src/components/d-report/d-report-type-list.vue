@@ -62,7 +62,7 @@ const types = computed(() => [
     format: "pdf",
     description: "Alle gelernten Kompetenzen von dem ausgewählten Schüler",
   },
-  { label: t("all_entries", 2), kind: "all_entries", format: "pdf", description: "Alle Einträge von allen Schülern" },
+  // { label: t("all_entries", 2), kind: "all_entries", format: "pdf", description: "Alle Einträge von allen Schülern" },
 ]);
 
 const typeOptions = computed(() =>

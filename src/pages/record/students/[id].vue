@@ -1,8 +1,8 @@
 <template>
   <PageWrapper>
-    <div class="flex h-full overflow-auto min-h-full w-full divide-x divide-neutral-100 rounded-xl bg-white">
-      <div class="flex w-full flex-col px-6 py-4">
-        <div class="border-b border-neutral-100 pb-4">
+    <div class="flex h-full min-h-full w-full divide-x divide-neutral-100 rounded-xl bg-white">
+      <div class="flex w-full flex-col">
+        <div class="border-b border-neutral-100 py-4 px-6">
           <div class="flex items-center gap-1 text-strong">
             <router-link :to="{ name: '/record/students/' }" class="mr-2">
               <DIconButton :icon="X" size="md"></DIconButton>
@@ -16,29 +16,11 @@
             </span>
           </div>
         </div>
-        <div class="flex flex-col pt-4 grow overflow-auto">
-          <div class="flex h-fit gap-1">
-            <RouterLink :to="{ name: '/record/students/[id]/competences/' }">
-              <DButton
-                :type="
-                  $route.matched.some(({ path }) => path.includes('/record/students/:id/competences'))
-                    ? 'primary'
-                    : 'transparent'
-                "
-                size="sm"
-                :icon-left="CopyCheck"
-              >
-                {{ $t("competence", 2) }}
-              </DButton>
-            </RouterLink>
-          </div>
-          <div class="mt-4 flex-1 overflow-hidden">
-            <RouterView />
-          </div>
+        <div class="flex flex-col py-4 grow overflow-auto px-6">
+          <RouterView />
         </div>
       </div>
-      <div class="w-full max-w-xs pb-4 pt-5">
-        <div class="border-b border-neutral-100 px-6 pb-6 text-sm font-medium">{{ $t("profile") }}</div>
+      <div class="w-full max-w-xs pb-4">
         <div class="flex flex-col items-center border-b border-neutral-100 py-6">
           <div class="h-24 w-24 rounded-full" :class="`bg-${color}-500`">
             <div class="flex h-full w-full items-center justify-center">
@@ -100,9 +82,7 @@ import { useRoute } from "vue-router/auto";
 import { ChevronRight, X } from "lucide-vue-next";
 import { graphql } from "@/gql";
 import { computed, reactive, ref } from "vue";
-import DButton from "../../../components/d-button/d-button.vue";
 import DIconButton from "@/components/d-icon-button/d-icon-button.vue";
-import { CopyCheck } from "lucide-vue-next";
 import { definePage } from "vue-router/auto";
 
 definePage({

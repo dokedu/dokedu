@@ -107,8 +107,8 @@ const createReportInput = object({
 async function createReport() {
   const value = {
     studentUser: student.value,
-    from: from.value,
-    to: to.value,
+    from: from.value.slice(0, 10),
+    to: to.value.slice(0, 10),
     kind: type.value,
     format: "pdf",
     filterTags: tags.value?.map((tag) => tag.id) || [],

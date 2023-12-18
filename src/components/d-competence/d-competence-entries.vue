@@ -1,6 +1,6 @@
 <template>
   <div class="mt-2 flex items-center justify-between border-t border-neutral-200 py-2" @click.prevent="toggleEntries">
-    <div class="text-sm font-medium">Entries</div>
+    <div class="text-sm font-medium">{{ $t("entry", 2) }}</div>
     <ChevronDown class="h-5 w-5"></ChevronDown>
   </div>
   <div v-if="entriesOpen">
