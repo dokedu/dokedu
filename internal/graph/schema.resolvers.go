@@ -762,12 +762,15 @@ func (r *mutationResolver) CreateReport(ctx context.Context, input model.CreateR
 		return nil, nil
 	}
 
+	fromStartTime := input.From.AddDate(0, 0, 1).Truncate(24 * time.Hour)
+	toEndTime := input.To.AddDate(0, 0, 2).Truncate(24 * time.Hour).Add(-time.Nanosecond)
+
 	report := db.Report{
 		OrganisationID: currentUser.OrganisationID,
 		UserID:         currentUser.ID,
 		StudentUserID:  input.StudentUser,
-		From:           input.From,
-		To:             input.To,
+		From:           fromStartTime,
+		To:             toEndTime,
 		Format:         input.Format,
 		FilterTags:     input.FilterTags,
 		Kind:           input.Kind,
@@ -779,7 +782,7 @@ func (r *mutationResolver) CreateReport(ctx context.Context, input model.CreateR
 		return nil, err
 	}
 
-	// Call the report generation service
+	// Add the report to the queue for processing
 	err = r.ReportService.AddToQueue(report.ID)
 	if err != nil {
 		return nil, err
