@@ -17,6 +17,11 @@ type AddEventCompetenceInput struct {
 	CompetenceID string `json:"competenceId"`
 }
 
+type AddUserToChatInput struct {
+	ChatID string `json:"chatId"`
+	UserID string `json:"userId"`
+}
+
 type BucketConnection struct {
 	Edges      []*db.Bucket `json:"edges"`
 	TotalCount int          `json:"totalCount"`
@@ -68,6 +73,10 @@ type CopyFilesInput struct {
 
 type CopyFilesPayload struct {
 	Files []*db.File `json:"files"`
+}
+
+type CreateChatInput struct {
+	Name *string `json:"name,omitempty"`
 }
 
 type CreateCompetenceInput struct {
@@ -208,6 +217,10 @@ type CreateUserStudentGradesInput struct {
 	Subject    string `json:"subject"`
 	Grade      int    `json:"grade"`
 	SchoolYear string `json:"schoolYear"`
+}
+
+type DeleteChatInput struct {
+	ID string `json:"id"`
 }
 
 type DeleteDomainInput struct {
@@ -447,6 +460,11 @@ type PreviewFilePayload struct {
 	URL string `json:"url"`
 }
 
+type RemoveUserFromChatInput struct {
+	ChatID string `json:"chatId"`
+	UserID string `json:"userId"`
+}
+
 type RenameFileInput struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
@@ -480,6 +498,11 @@ type SchoolYearConnection struct {
 	Edges      []*db.SchoolYear `json:"edges"`
 	TotalCount int              `json:"totalCount"`
 	PageInfo   *PageInfo        `json:"pageInfo"`
+}
+
+type SendMessageInput struct {
+	ChatID  string `json:"chatId"`
+	Message string `json:"message"`
 }
 
 type ShareFileInput struct {

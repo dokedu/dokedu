@@ -6,6 +6,7 @@ import (
 	"errors"
 	"example/internal/db"
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/labstack/echo/v4"
 	"github.com/uptrace/bun"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -65,6 +66,51 @@ func Auth(bun *bun.DB) echo.MiddlewareFunc {
 
 			return next(c)
 		}
+	}
+}
+
+func WebsocketInitFunc(bun *bun.DB) transport.WebsocketInitFunc {
+	return func(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
+		// read the authorization header from the init payload
+		authorization := initPayload.Authorization()
+
+		// if there is no authorization header, we can't authenticate the user
+		if authorization == "" {
+			return ctx, nil, nil
+		}
+
+		// check if the token is valid
+		var session db.Session
+		err := bun.NewSelect().Model(&session).Where("token = ?", authorization).Scan(ctx)
+		if errors.Is(err, sql.ErrNoRows) {
+			return ctx, nil, nil
+		}
+
+		// check if the session is expired
+		if session.CreatedAt.Add(12 * time.Hour).Before(time.Now()) {
+			// Delete the session
+			_, err = bun.NewUpdate().Model(&session).Set("deleted_at = ?", time.Now()).Where("id = ?", session.ID).Exec(ctx)
+			return ctx, nil, nil
+		}
+
+		// Get the user
+		var user db.User
+		err = bun.NewSelect().Model(&user).Where("id = ?", session.UserID).Scan(ctx)
+		if errors.Is(err, sql.ErrNoRows) {
+			// Remove all sessions for this user if the user is deleted
+			var sessions []db.Session
+			_, err = bun.NewUpdate().Model(&sessions).Set("deleted_at = ?", time.Now()).Where("user_id = ?", session.UserID).Exec(ctx)
+			return ctx, nil, nil
+		}
+
+		userContext := UserContext{
+			user,
+			session.Token,
+		}
+
+		ctx = context.WithValue(ctx, userCtxKey, &userContext)
+
+		return ctx, &initPayload, nil
 	}
 }
 

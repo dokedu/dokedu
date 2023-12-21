@@ -62,6 +62,7 @@ type UserRole string
 
 const (
 	UserRoleOwner    UserRole = "owner"
+	UserRoleBot      UserRole = "bot"
 	UserRoleAdmin    UserRole = "admin"
 	UserRoleTeacher  UserRole = "teacher"
 	UserRoleEducator UserRole = "educator"
@@ -76,11 +77,20 @@ const (
 	UserLangDe UserLanguage = "de"
 )
 
+type ChatType string
+
+const (
+	ChatTypePrivate ChatType = "private"
+	ChatTypeGroup   ChatType = "group"
+	ChatTypeChannel ChatType = "channel"
+)
+
 type Chat struct {
 	bun.BaseModel
 
 	ID             string         `bun:",nullzero,pk" json:"id"`
 	Name           sql.NullString `json:"name"`
+	Type           ChatType       `json:"type"`
 	OrganisationID string         `json:"organisation_id"`
 	UpdatedAt      bun.NullTime   `json:"updated_at"`
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`

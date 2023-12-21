@@ -3,12 +3,17 @@ type Chat {
     name: String
     users: [User!]!
     messages: [ChatMessage!]!
+    lastMessage: ChatMessage
+    createdAt: Time!
+    deletedAt: Time
 }
 
 type ChatUser {
     id: ID!
     chat: Chat!
     user: User!
+    createdAt: Time!
+    deletedAt: Time
 }
 
 type ChatMessage {
@@ -28,4 +33,39 @@ type ChatConnection {
 extend type Query {
     chat(id: ID!): Chat!
     chats(limit: Int, offset: Int): ChatConnection!
+}
+
+input CreateChatInput {
+    name: String
+}
+
+input DeleteChatInput {
+    id: ID!
+}
+
+input AddUserToChatInput {
+    chatId: ID!
+    userId: ID!
+}
+
+input RemoveUserFromChatInput {
+    chatId: ID!
+    userId: ID!
+}
+
+input SendMessageInput {
+    chatId: ID!
+    message: String!
+}
+
+extend type Mutation {
+    createChat(input: CreateChatInput!): Chat!
+    deleteChat(input: DeleteChatInput!): Chat!
+    addUserToChat(input: AddUserToChatInput!): ChatUser!
+    removeUserFromChat(input: RemoveUserFromChatInput!): ChatUser!
+    sendMessage(input: SendMessageInput!): ChatMessage!
+}
+
+type Subscription {
+    messageAdded(chatId: ID!): ChatMessage!
 }

@@ -7,7 +7,7 @@ WITH new_id AS (SELECT 'u2wHWUbnWUaUUjBeNvQ4u' AS id),
      new_org AS (
          INSERT INTO organisations (id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps)
              VALUES ((SELECT id FROM new_id), 'Acme Corp', 'Acme Corporation', 'https://acme.dokedu.org', '555-1234',
-                     (SELECT id FROM new_user), '{"dokedu.org"}', '{"drive","admin","record", "school"}')
+                     (SELECT id FROM new_user), '{"dokedu.org"}', '{"drive","admin","record","school","chat"}')
              RETURNING id)
 UPDATE users
 SET organisation_id = new_org.id
@@ -54,6 +54,19 @@ $$
     END
 $$;
 
+-- Dokedu AI
+
+INSERT INTO users (id, role, first_name, last_name, organisation_id)
+VALUES ('FryR3qHm3jZkfzfmwheis', 'bot', 'Dokedu AI', '', 'u2wHWUbnWUaUUjBeNvQ4u');
+
+INSERT INTO chats (id, organisation_id)
+VALUES ('kBcB3_bLMXIvmXC8xzqMo', 'u2wHWUbnWUaUUjBeNvQ4u');
+
+INSERT INTO chat_users (chat_id, user_id, organisation_id)
+VALUES ('kBcB3_bLMXIvmXC8xzqMo', 'FryR3qHm3jZkfzfmwheis', 'u2wHWUbnWUaUUjBeNvQ4u');
+
+INSERT INTO chat_users (chat_id, user_id, organisation_id)
+VALUES ('kBcB3_bLMXIvmXC8xzqMo', 'u2wHWUbnWUaUUjBeNvQ4u', 'u2wHWUbnWUaUUjBeNvQ4u');
 
 -- Student users
 DO
