@@ -7,12 +7,14 @@ import { createClient as createWSClient } from "graphql-ws";
 
 const url = import.meta.env.VITE_API_URL as string;
 
+const ssl = url.startsWith("https") ? "s" : "";
+
 const getToken = () => {
   return localStorage.getItem("authorization");
 };
 
 const wsClient = createWSClient({
-  url: `ws://localhost:1323/query`,
+  url: `ws${ssl}://${url.replace("http://", "").replace("https://", "")}`,
   connectionParams: async () => {
     const token = getToken();
 
