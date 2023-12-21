@@ -18,6 +18,7 @@ import {
   UserSquare,
   Wrench,
   TimerIcon,
+  MessageCircle,
 } from "lucide-vue-next";
 
 import type { RouteNamedMap } from "vue-router/auto/routes";
@@ -112,7 +113,7 @@ export const apps = computed<App[]>(() => [
     id: "drive",
     beta: true,
     icon: Folder,
-    allowedUserRoles: ["owner", "admin", "teacher", "student"],
+    allowedUserRoles: ["owner", "admin", "teacher"],
     name: "Drive",
     links: [
       {
@@ -219,6 +220,20 @@ export const apps = computed<App[]>(() => [
       //   name: i18n.global.t("certificate", 2),
       //   route: "/school/certificates",
       // },
+    ],
+  },
+  {
+    id: "chat",
+    icon: MessageCircle,
+    beta: true,
+    allowedUserRoles: ["owner", "admin", "teacher", "student"],
+    name: "Chat",
+    links: [
+      {
+        icon: MessageCircle,
+        name: i18n.global.t("chat"),
+        route: "/chat/chats",
+      },
     ],
   },
 ]);

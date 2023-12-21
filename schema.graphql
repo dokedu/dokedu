@@ -3,6 +3,7 @@
 schema {
   query: Query
   mutation: Mutation
+  subscription: Subscription
 }
 
 "The @defer directive may be specified on a fragment spread to imply de-prioritization, that causes the fragment to be omitted in the initial response, and delivered as a subsequent response afterward. A query with @defer directive will cause the request to potentially return multiple responses, where non-deferred data is delivered in the initial response and data deferred delivered in a subsequent response. @include and @skip take precedence over @defer."
@@ -26,7 +27,10 @@ type BucketConnection {
 }
 
 type Chat {
+  createdAt: Time!
+  deletedAt: Time
   id: ID!
+  lastMessage: ChatMessage
   messages: [ChatMessage!]!
   name: String
   users: [User!]!
@@ -48,6 +52,8 @@ type ChatMessage {
 
 type ChatUser {
   chat: Chat!
+  createdAt: Time!
+  deletedAt: Time
   id: ID!
   user: User!
 }
@@ -256,6 +262,7 @@ type MoveFilesPayload {
 type Mutation {
   acceptInvite(input: SignUpInput!, token: String!): SignInPayload!
   addFileShare(input: ShareFileInput!): File!
+  addUserToChat(input: AddUserToChatInput!): ChatUser!
   archiveEntry(id: ID!): Entry!
   archiveEvent(id: ID!): Event!
   archiveTag(id: ID!): Tag!
@@ -263,6 +270,7 @@ type Mutation {
   archiveUserCompetence(id: ID!): UserCompetence!
   copyFile(input: CopyFileInput!): File!
   copyFiles(input: CopyFilesInput!): CopyFilesPayload!
+  createChat(input: CreateChatInput!): Chat!
   createCompetence(input: CreateCompetenceInput!): Competence!
   createDomain(input: CreateDomainInput!): Domain
   createEmail(input: CreateEmailInput!): Email
@@ -287,6 +295,7 @@ type Mutation {
   createTag(input: CreateTagInput!): Tag!
   createUser(input: CreateUserInput!): User!
   createUserCompetence(input: CreateUserCompetenceInput!): UserCompetence!
+  deleteChat(input: DeleteChatInput!): Chat!
   deleteDomain(input: DeleteDomainInput!): Domain
   deleteEmail(input: DeleteEmailInput!): Email
   deleteEmailAccount(input: DeleteEmailAccountInput!): EmailAccount
@@ -313,9 +322,11 @@ type Mutation {
   moveFiles(input: MoveFilesInput!): MoveFilesPayload!
   previewFile(input: PreviewFileInput!): PreviewFilePayload!
   removeFileShare(input: ID!): File!
+  removeUserFromChat(input: RemoveUserFromChatInput!): ChatUser!
   renameFile(input: RenameFileInput!): File!
   renameSharedDrive(input: RenameSharedDriveInput!): Bucket!
   resetPassword(input: ResetPasswordInput!): ResetPasswordPayload!
+  sendMessage(input: SendMessageInput!): ChatMessage!
   sendUserInvite(id: ID!): Boolean!
   setUserAttendanceState(date: Time!, state: UserAttendanceState!, userId: ID!): UserAttendance!
   signIn(input: SignInInput!): SignInPayload!
@@ -473,6 +484,10 @@ type SubjectConnection {
   edges: [Subject!]!
   pageInfo: PageInfo!
   totalCount: Int!
+}
+
+type Subscription {
+  messageAdded(chatId: ID!): ChatMessage!
 }
 
 type Tag {
@@ -691,6 +706,11 @@ input AddEventCompetenceInput {
   eventId: ID!
 }
 
+input AddUserToChatInput {
+  chatId: ID!
+  userId: ID!
+}
+
 input BucketFilterInput {
   shared: Boolean
 }
@@ -714,6 +734,10 @@ input CopyFileInput {
 input CopyFilesInput {
   ids: [ID!]!
   targetId: ID!
+}
+
+input CreateChatInput {
+  name: String
 }
 
 input CreateCompetenceInput {
@@ -856,6 +880,10 @@ input CreateUserStudentGradesInput {
   subject: ID!
 }
 
+input DeleteChatInput {
+  id: ID!
+}
+
 input DeleteDomainInput {
   id: ID!
 }
@@ -993,6 +1021,11 @@ input PreviewFileInput {
   id: ID!
 }
 
+input RemoveUserFromChatInput {
+  chatId: ID!
+  userId: ID!
+}
+
 input RenameFileInput {
   id: ID!
   name: String!
@@ -1006,6 +1039,11 @@ input RenameSharedDriveInput {
 input ResetPasswordInput {
   password: String!
   token: String
+}
+
+input SendMessageInput {
+  chatId: ID!
+  message: String!
 }
 
 input ShareFileInput {

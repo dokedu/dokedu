@@ -23,6 +23,11 @@ export type AddEventCompetenceInput = {
   eventId: Scalars["ID"]["input"];
 };
 
+export type AddUserToChatInput = {
+  chatId: Scalars["ID"]["input"];
+  userId: Scalars["ID"]["input"];
+};
+
 export type Bucket = {
   __typename?: "Bucket";
   createdAt: Scalars["Time"]["output"];
@@ -48,7 +53,10 @@ export type BucketFilterInput = {
 
 export type Chat = {
   __typename?: "Chat";
+  createdAt: Scalars["Time"]["output"];
+  deletedAt?: Maybe<Scalars["Time"]["output"]>;
   id: Scalars["ID"]["output"];
+  lastMessage?: Maybe<ChatMessage>;
   messages: Array<ChatMessage>;
   name?: Maybe<Scalars["String"]["output"]>;
   users: Array<User>;
@@ -73,6 +81,8 @@ export type ChatMessage = {
 export type ChatUser = {
   __typename?: "ChatUser";
   chat: Chat;
+  createdAt: Scalars["Time"]["output"];
+  deletedAt?: Maybe<Scalars["Time"]["output"]>;
   id: Scalars["ID"]["output"];
   user: User;
 };
@@ -155,6 +165,10 @@ export type CopyFilesInput = {
 export type CopyFilesPayload = {
   __typename?: "CopyFilesPayload";
   files: Array<File>;
+};
+
+export type CreateChatInput = {
+  name?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type CreateCompetenceInput = {
@@ -295,6 +309,10 @@ export type CreateUserStudentGradesInput = {
   schoolYear: Scalars["ID"]["input"];
   student: Scalars["ID"]["input"];
   subject: Scalars["ID"]["input"];
+};
+
+export type DeleteChatInput = {
+  id: Scalars["ID"]["input"];
 };
 
 export type DeleteDomainInput = {
@@ -668,6 +686,7 @@ export type Mutation = {
   __typename?: "Mutation";
   acceptInvite: SignInPayload;
   addFileShare: File;
+  addUserToChat: ChatUser;
   archiveEntry: Entry;
   archiveEvent: Event;
   archiveTag: Tag;
@@ -675,6 +694,7 @@ export type Mutation = {
   archiveUserCompetence: UserCompetence;
   copyFile: File;
   copyFiles: CopyFilesPayload;
+  createChat: Chat;
   createCompetence: Competence;
   createDomain?: Maybe<Domain>;
   createEmail?: Maybe<Email>;
@@ -699,6 +719,7 @@ export type Mutation = {
   createTag: Tag;
   createUser: User;
   createUserCompetence: UserCompetence;
+  deleteChat: Chat;
   deleteDomain?: Maybe<Domain>;
   deleteEmail?: Maybe<Email>;
   deleteEmailAccount?: Maybe<EmailAccount>;
@@ -725,9 +746,11 @@ export type Mutation = {
   moveFiles: MoveFilesPayload;
   previewFile: PreviewFilePayload;
   removeFileShare: File;
+  removeUserFromChat: ChatUser;
   renameFile: File;
   renameSharedDrive: Bucket;
   resetPassword: ResetPasswordPayload;
+  sendMessage: ChatMessage;
   sendUserInvite: Scalars["Boolean"]["output"];
   setUserAttendanceState: UserAttendance;
   signIn: SignInPayload;
@@ -762,6 +785,10 @@ export type MutationAddFileShareArgs = {
   input: ShareFileInput;
 };
 
+export type MutationAddUserToChatArgs = {
+  input: AddUserToChatInput;
+};
+
 export type MutationArchiveEntryArgs = {
   id: Scalars["ID"]["input"];
 };
@@ -788,6 +815,10 @@ export type MutationCopyFileArgs = {
 
 export type MutationCopyFilesArgs = {
   input: CopyFilesInput;
+};
+
+export type MutationCreateChatArgs = {
+  input: CreateChatInput;
 };
 
 export type MutationCreateCompetenceArgs = {
@@ -880,6 +911,10 @@ export type MutationCreateUserArgs = {
 
 export type MutationCreateUserCompetenceArgs = {
   input: CreateUserCompetenceInput;
+};
+
+export type MutationDeleteChatArgs = {
+  input: DeleteChatInput;
 };
 
 export type MutationDeleteDomainArgs = {
@@ -986,6 +1021,10 @@ export type MutationRemoveFileShareArgs = {
   input: Scalars["ID"]["input"];
 };
 
+export type MutationRemoveUserFromChatArgs = {
+  input: RemoveUserFromChatInput;
+};
+
 export type MutationRenameFileArgs = {
   input: RenameFileInput;
 };
@@ -996,6 +1035,10 @@ export type MutationRenameSharedDriveArgs = {
 
 export type MutationResetPasswordArgs = {
   input: ResetPasswordInput;
+};
+
+export type MutationSendMessageArgs = {
+  input: SendMessageInput;
 };
 
 export type MutationSendUserInviteArgs = {
@@ -1333,6 +1376,11 @@ export type QueryUsersArgs = {
   search?: InputMaybe<Scalars["String"]["input"]>;
 };
 
+export type RemoveUserFromChatInput = {
+  chatId: Scalars["ID"]["input"];
+  userId: Scalars["ID"]["input"];
+};
+
 export type RenameFileInput = {
   id: Scalars["ID"]["input"];
   name: Scalars["String"]["input"];
@@ -1415,6 +1463,11 @@ export type SchoolYearConnection = {
   totalCount: Scalars["Int"]["output"];
 };
 
+export type SendMessageInput = {
+  chatId: Scalars["ID"]["input"];
+  message: Scalars["String"]["input"];
+};
+
 export type ShareFileInput = {
   emails: Array<Scalars["String"]["input"]>;
   fileId: Scalars["ID"]["input"];
@@ -1478,6 +1531,15 @@ export type SubjectConnection = {
   edges: Array<Subject>;
   pageInfo: PageInfo;
   totalCount: Scalars["Int"]["output"];
+};
+
+export type Subscription = {
+  __typename?: "Subscription";
+  messageAdded: ChatMessage;
+};
+
+export type SubscriptionMessageAddedArgs = {
+  chatId: Scalars["ID"]["input"];
 };
 
 export type Tag = {
@@ -2407,6 +2469,78 @@ export type CreateUserMutationVariables = Exact<{
 export type CreateUserMutation = {
   __typename?: "Mutation";
   createUser: { __typename?: "User"; id: string; firstName: string; lastName: string };
+};
+
+export type ChatsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type ChatsQuery = {
+  __typename?: "Query";
+  chats: {
+    __typename?: "ChatConnection";
+    edges?: Array<{
+      __typename?: "Chat";
+      id: string;
+      name?: string | null;
+      lastMessage?: { __typename?: "ChatMessage"; id: string; message: string } | null;
+    } | null> | null;
+  };
+};
+
+export type CreateChatMutationVariables = Exact<{
+  input: CreateChatInput;
+}>;
+
+export type CreateChatMutation = {
+  __typename?: "Mutation";
+  createChat: { __typename?: "Chat"; id: string; name?: string | null; createdAt: any };
+};
+
+export type ChatQueryVariables = Exact<{
+  id: Scalars["ID"]["input"];
+}>;
+
+export type ChatQuery = {
+  __typename?: "Query";
+  chat: {
+    __typename?: "Chat";
+    id: string;
+    name?: string | null;
+    messages: Array<{
+      __typename?: "ChatMessage";
+      id: string;
+      message: string;
+      createdAt: any;
+      user: { __typename?: "User"; id: string; firstName: string; lastName: string };
+    }>;
+  };
+};
+
+export type SendMessageMutationVariables = Exact<{
+  input: SendMessageInput;
+}>;
+
+export type SendMessageMutation = {
+  __typename?: "Mutation";
+  sendMessage: { __typename?: "ChatMessage"; id: string; chat: { __typename?: "Chat"; id: string } };
+};
+
+export type MessageAddedSubscriptionVariables = Exact<{
+  chatId: Scalars["ID"]["input"];
+}>;
+
+export type MessageAddedSubscription = {
+  __typename?: "Subscription";
+  messageAdded: {
+    __typename?: "ChatMessage";
+    id: string;
+    message: string;
+    chat: {
+      __typename?: "Chat";
+      id: string;
+      lastMessage?: { __typename?: "ChatMessage"; id: string; message: string } | null;
+    };
+    user: { __typename?: "User"; id: string; firstName: string; lastName: string };
+  };
 };
 
 export type FileQueryVariables = Exact<{
@@ -6177,6 +6311,277 @@ export const CreateUserDocument = {
     },
   ],
 } as unknown as DocumentNode<CreateUserMutation, CreateUserMutationVariables>;
+export const ChatsDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "chats" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "chats" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "edges" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "id" } },
+                      { kind: "Field", name: { kind: "Name", value: "name" } },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "lastMessage" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            { kind: "Field", name: { kind: "Name", value: "id" } },
+                            { kind: "Field", name: { kind: "Name", value: "message" } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ChatsQuery, ChatsQueryVariables>;
+export const CreateChatDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createChat" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "CreateChatInput" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "createChat" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "id" } },
+                { kind: "Field", name: { kind: "Name", value: "name" } },
+                { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CreateChatMutation, CreateChatMutationVariables>;
+export const ChatDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "chat" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "ID" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "chat" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "id" } },
+                { kind: "Field", name: { kind: "Name", value: "name" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "messages" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "id" } },
+                      { kind: "Field", name: { kind: "Name", value: "message" } },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "user" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            { kind: "Field", name: { kind: "Name", value: "id" } },
+                            { kind: "Field", name: { kind: "Name", value: "firstName" } },
+                            { kind: "Field", name: { kind: "Name", value: "lastName" } },
+                          ],
+                        },
+                      },
+                      { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ChatQuery, ChatQueryVariables>;
+export const SendMessageDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "sendMessage" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "SendMessageInput" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "sendMessage" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "id" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "chat" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<SendMessageMutation, SendMessageMutationVariables>;
+export const MessageAddedDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "subscription",
+      name: { kind: "Name", value: "messageAdded" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "chatId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "ID" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "messageAdded" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "chatId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "chatId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "id" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "chat" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "id" } },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "lastMessage" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            { kind: "Field", name: { kind: "Name", value: "id" } },
+                            { kind: "Field", name: { kind: "Name", value: "message" } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "user" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "id" } },
+                      { kind: "Field", name: { kind: "Name", value: "firstName" } },
+                      { kind: "Field", name: { kind: "Name", value: "lastName" } },
+                    ],
+                  },
+                },
+                { kind: "Field", name: { kind: "Name", value: "message" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<MessageAddedSubscription, MessageAddedSubscriptionVariables>;
 export const FileDocument = {
   kind: "Document",
   definitions: [

@@ -1,13 +1,26 @@
 import { cacheExchange, fetchExchange } from "@urql/vue";
 import { authExchange } from "@urql/exchange-auth";
-import { createClient } from "@urql/vue";
+import { createClient, subscriptionExchange } from "@urql/vue";
 import router from "../router/router.ts";
 import { publicRoutes } from "../router/publicRoutes.ts";
+import { createClient as createWSClient } from "graphql-ws";
 
 const url = import.meta.env.VITE_API_URL as string;
+
 const getToken = () => {
   return localStorage.getItem("authorization");
 };
+
+const wsClient = createWSClient({
+  url: `ws://localhost:1323/query`,
+  connectionParams: async () => {
+    const token = getToken();
+
+    return {
+      ...(token ? { Authorization: token } : {}),
+    };
+  },
+});
 
 function makeClient() {
   return createClient({
@@ -60,6 +73,17 @@ function makeClient() {
         };
       }),
       fetchExchange,
+      subscriptionExchange({
+        forwardSubscription(request) {
+          const input = { ...request, query: request.query || "" };
+          return {
+            subscribe(sink) {
+              const unsubscribe = wsClient.subscribe(input, sink);
+              return { unsubscribe };
+            },
+          };
+        },
+      }),
     ],
   });
 }
