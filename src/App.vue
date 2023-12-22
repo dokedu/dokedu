@@ -1,7 +1,12 @@
 <template>
-  <component :is="layout">
-    <RouterView />
-  </component>
+  <template v-if="layout">
+    <component :is="layout">
+      <RouterView />
+    </component>
+  </template>
+  <template>
+    <div>loading...</div>
+  </template>
 </template>
 
 <script setup lang="ts">
@@ -16,7 +21,7 @@ import { publicRoutes } from "./router/publicRoutes";
 const route = useRoute();
 
 const layout = computed(() => {
-  if (route.name === undefined) return None;
+  if (route.name === undefined) return null;
 
   if (publicRoutes.includes(route.name)) {
     return Auth;

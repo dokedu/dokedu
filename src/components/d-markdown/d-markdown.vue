@@ -42,11 +42,11 @@ const renderMarkdown = () => {
     if (!language) return;
     if (language == "hljs") language = "code";
     language = language[0].toUpperCase() + language.slice(1);
-    const headerHtml = `<div class="px-4 py-2 flex mt-2 justify-between items-center bg-black/10 text-xs"><span class="uppercase">${language}</span><button class="copy-button rounded px-2 py-0.5 bg-black/10">Copy</button></div>`;
+    const headerHtml = `<div class="px-4 py-2 flex mt-1 justify-between items-center bg-black/10 text-xs"><span class="uppercase">${language}</span><button class="copy-button rounded px-2 py-0.5 bg-black/10">Copy</button></div>`;
     codeBlock.insertAdjacentHTML("beforebegin", headerHtml);
 
     // add margin class to the codeblock y-2
-    codeBlock.classList.add("mb-3");
+    codeBlock.classList.add("mb-2");
   });
 
   md.value = tempElement.innerHTML;
@@ -80,7 +80,22 @@ onMounted(async () => {
   });
 });
 
-onUpdated(() => {
+onUpdated(async () => {
   renderMarkdown();
+
+  await nextTick();
+  // Get all the code buttons and add a click event listener
+  const copyButtons: NodeListOf<HTMLElement> = document.querySelectorAll(".copy-button");
+  copyButtons.forEach((copyButton) => {
+    copyButton.addEventListener("click", () => {
+      if (!copyButton.parentElement || !copyButton.parentElement.nextElementSibling) return;
+      const code = (copyButton.parentElement.nextElementSibling as HTMLElement).innerText;
+      copyCode(code);
+      copyButton.innerText = "Copied!";
+      setTimeout(() => {
+        copyButton.innerText = "Copy";
+      }, 2000);
+    });
+  });
 });
 </script>

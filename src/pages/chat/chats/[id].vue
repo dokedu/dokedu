@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col h-screen w-full">
-    <header class="p-4 border-b font-semibold h-16 flex justify-center items-center">
+    <header class="p-4 border-b font-semibold shadow-sm h-16 flex justify-center items-center">
       <div>{{ data?.chat.name }}</div>
     </header>
     <div ref="messageContainer" class="h-full flex-1 overflow-auto">
@@ -10,23 +10,15 @@
             class="flex items-start space-x-2 max-w-[80%]"
             :class="message.user.id === userData?.me?.id ? `justify-end ml-auto` : `justify-start`"
           >
-            <div
-              v-if="message.user.id !== userData?.me?.id"
-              class="relative bg-neutral-200 flex h-10 w-10 shrink-0 overflow-hidden rounded-full"
-            />
             <div class="flex flex-col">
               <div class="text-sm text-neutral-500">{{ fullName(message.user) }}</div>
               <div
-                class="bg-neutral-200 rounded-lg p-2 w-fit whitespace-pre-wrap"
-                :class="message.user.id === userData?.me?.id ? `self-end` : `bg-neutral-200`"
+                class="bg-neutral-100 rounded-lg p-2 w-fit whitespace-pre-wrap"
+                :class="message.user.id === userData?.me?.id ? `self-end` : `bg-neutral-100`"
               >
                 <d-markdown :source="message.message"></d-markdown>
               </div>
             </div>
-            <div
-              v-if="message.user.id === userData?.me?.id"
-              class="relative bg-neutral-200 flex h-10 w-10 shrink-0 overflow-hidden rounded-full"
-            />
           </div>
         </div>
       </div>
@@ -36,19 +28,27 @@
         </div>
       </div>
     </div>
-    <footer class="w-full border-t">
+    <footer class="w-full px-2 pb-2">
       <textarea
         ref="textarea"
         v-model="input"
         type="text"
-        placeholder="Type your message here..."
-        class="w-full border-0 text-sm p-4 placeholder:text-neutral-500 ring-0 focus:ring-0"
+        placeholder="Write a message..."
+        class="w-full resize-none block rounded-md border-0 py-2 px-3 text-neutral-900 shadow-sm ring-1 ring-inset ring-neutral-200 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-neutral-950 text-sm leading-6"
         @keydown.enter.exact.prevent="onSubmit"
         @keydown.enter.shift.prevent="input += '\n'"
       />
     </footer>
   </div>
 </template>
+
+<route lang="json">
+{
+  "meta": {
+    "layout": "chat"
+  }
+}
+</route>
 
 <script setup lang="ts">
 import { useMutation, useQuery, useSubscription } from "@urql/vue";
@@ -112,7 +112,7 @@ const { executeMutation: sendMessageMutation } = useMutation(
 );
 
 async function onSubmit() {
-  await sendMessage(input.value);
+  await sendMessage(input.value.replace(/^\s+|\s+$/g, ""));
   input.value = "";
 }
 
@@ -125,6 +125,9 @@ async function sendMessage(message: string) {
       message: message,
     },
   });
+  if (messageContainer.value) {
+    messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
+  }
 }
 
 async function handleSubscription() {
@@ -162,7 +165,31 @@ useSubscription(
 );
 
 watch(
-  data,
+  [data],
+  () => {
+    nextTick(() => {
+      scrollToBottomConditionally();
+    });
+  },
+  {
+    flush: "post",
+  },
+);
+
+function scrollToBottomConditionally() {
+  if (messageContainer.value) {
+    // only scroll if the user is close to the bottom of the chat
+    if (
+      messageContainer.value.scrollTop + messageContainer.value.clientHeight + 100 >=
+      messageContainer.value.scrollHeight
+    ) {
+      messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
+    }
+  }
+}
+
+watch(
+  [id],
   () => {
     nextTick(() => {
       if (messageContainer.value) {

@@ -1,9 +1,6 @@
 <template>
   <div id="page" class="flex" v-if="width > 900">
-    <PageSidebar />
-    <main class="flex w-[calc(100vw-230px)] print:w-full">
-      <router-view />
-    </main>
+    <router-view />
   </div>
   <div v-else class="flex min-h-screen items-center justify-center p-4">
     <div class="flex flex-col items-center gap-4">
@@ -17,7 +14,6 @@
 </template>
 
 <script setup lang="ts">
-import PageSidebar from "../components/page-sidebar.vue";
 import { useWindowSize } from "@vueuse/core";
 import DButton from "@/components/d-button/d-button.vue";
 import { useAuth } from "@/composables/auth";
@@ -27,9 +23,9 @@ import { onMounted } from "vue";
 
 const { width } = useWindowSize();
 
-async function onLogOut() {
+const onLogOut = async () => {
   await useAuth().signOut();
-}
+};
 
 const { executeQuery: refresh } = useQuery({ query: me, requestPolicy: "network-only" });
 
