@@ -1,5 +1,5 @@
 > [!WARNING]  
-> This is an early beta version of the Dokedu frontend. It is not ready for production use.
+> This is an early beta version of the Dokedu backend. It is not ready for production use.
 
 # Dokedu / Backend
 
