@@ -25,21 +25,23 @@
         <div class="text-neutral-500 hover:bg-neutral-200 rounded-t-md text-xs px-4 py-2 font-medium">Family</div>
         <div class="text-neutral-500 hover:bg-neutral-200 rounded-t-md text-xs px-4 py-2 font-medium">University</div>
       </div>
-      <router-link
-        :to="`/chat/chats/` + chat?.id"
-        class="px-4 py-2.5 flex gap-4 items-center border-b border-neutral-900/5"
-        v-for="chat in chatList?.chats?.edges"
-        :key="chat?.id"
-        :class="chat?.id === route.params.id ? `bg-neutral-900/10` : `hover:bg-neutral-900/5`"
-      >
-        <div class="h-12 w-12 rounded-full bg-neutral-900/10"></div>
-        <div class="flex-1 w-full">
-          <div class="font-semibold mb-1">{{ chat?.name }}</div>
-          <div class="text-neutral-500 text-xs line-clamp-2">
-            {{ chat?.lastMessage ? chat?.lastMessage : `No messages yet` }}
+      <div class="flex flex-col overflow-scroll flex-1">
+        <router-link
+          :to="`/chat/chats/` + chat?.id"
+          class="px-4 py-2.5 flex gap-4 items-center border-b border-neutral-900/5"
+          v-for="chat in chatList?.chats?.edges"
+          :key="chat?.id"
+          :class="chat?.id === route.params.id ? `bg-neutral-900/10` : `hover:bg-neutral-900/5`"
+        >
+          <div class="h-12 w-12 rounded-full bg-neutral-900/10"></div>
+          <div class="flex-1 w-full">
+            <div class="font-semibold mb-1">{{ chat?.name }}</div>
+            <div class="text-neutral-500 text-xs line-clamp-2">
+              {{ chat?.lastMessage ? chat?.lastMessage : `No messages yet` }}
+            </div>
           </div>
-        </div>
-      </router-link>
+        </router-link>
+      </div>
     </div>
     <div class="w-full flex-1">
       <router-view></router-view>
