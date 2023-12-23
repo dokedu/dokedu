@@ -1,8 +1,13 @@
 <template>
   <div class="flex flex-col h-screen w-full">
-    <header class="p-4 border-b font-semibold shadow-sm h-16 flex justify-center items-center">
-      <div>{{ data?.chat.name }}</div>
-    </header>
+    <router-link
+      :to="`/chat/chats/${route.params.id}/edit`"
+      class="px-4 border-b shadow-sm w-full grid grid-cols-3 h-16 justify-between items-center"
+    >
+      <div></div>
+      <div class="font-semibold text-center">{{ data?.chat.name ? data?.chat.name : `Unnamed chat` }}</div>
+      <div></div>
+    </router-link>
     <div ref="messageContainer" class="h-full flex-1 overflow-auto">
       <div v-for="message in data?.chat.messages" class="p-4 w-full rounded-[inherit]" style="overflow: hidden scroll">
         <div class="space-y-4">
@@ -59,7 +64,7 @@ import { computed, nextTick, reactive, ref, watch } from "vue";
 import DMarkdown from "@/components/d-markdown/d-markdown.vue";
 import { useTextareaAutosize } from "@vueuse/core";
 
-const route = useRoute("/chat/chats/[id]");
+const route = useRoute("/chat/chats/[id]/");
 
 const id = computed(() => route.params.id);
 const messageContainer = ref<HTMLElement>();
@@ -142,10 +147,7 @@ useSubscription(
           id
           chat {
             id
-            lastMessage {
-              id
-              message
-            }
+            lastMessage
           }
           user {
             id

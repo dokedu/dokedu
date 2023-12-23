@@ -30,7 +30,7 @@ type Chat {
   createdAt: Time!
   deletedAt: Time
   id: ID!
-  lastMessage: ChatMessage
+  lastMessage: String
   messages: [ChatMessage!]!
   name: String
   users: [User!]!

@@ -37,8 +37,8 @@
             parent.color && parent.color.length > 0
               ? `bg-${parent.color}-50 !text-${parent.color}-700`
               : index === 0
-              ? 'border border-neutral-200'
-              : '',
+                ? 'border border-neutral-200'
+                : '',
           ]"
         >
           {{ parent.name }}

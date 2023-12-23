@@ -15,6 +15,12 @@ import type { TypedDocumentNode as DocumentNode } from "@graphql-typed-document-
 const documents = {
   "\n    mutation importStudents($input: ImportStudentsInput!) {\n      importStudents(input: $input) {\n        usersCreated\n        usersExisted\n        errors\n      }\n    }\n  ":
     types.ImportStudentsDocument,
+  "\n    query userList($search: String) {\n      users(search: $search) {\n        edges {\n          id\n          firstName\n          lastName\n          email\n        }\n      }\n    }\n  ":
+    types.UserListDocument,
+  "\n    mutation addUserToChat($input: AddUserToChatInput!) {\n      addUserToChat(input: $input) {\n        id\n        chat {\n          id\n          users {\n            id\n            firstName\n            firstName\n            email\n          }\n        }\n      }\n    }\n  ":
+    types.AddUserToChatDocument,
+  "\n    mutation createChat($input: CreateChatInput!) {\n      createChat(input: $input) {\n        id\n        name\n        createdAt\n      }\n    }\n  ":
+    types.CreateChatDocument,
   "\n    mutation renameSharedDrive($input: RenameSharedDriveInput!) {\n      renameSharedDrive(input: $input) {\n        id\n        name\n      }\n    }\n  ":
     types.RenameSharedDriveDocument,
   "\n    mutation renameFile($input: RenameFileInput!) {\n      renameFile(input: $input) {\n        id\n        name\n      }\n    }\n  ":
@@ -126,15 +132,15 @@ const documents = {
   "\n    mutation sendInvite($id: ID!) {\n      sendUserInvite(id: $id)\n    }\n  ": types.SendInviteDocument,
   "\n    mutation createUser($user: CreateUserInput!) {\n      createUser(input: $user) {\n        id\n        firstName\n        lastName\n      }\n    }\n  ":
     types.CreateUserDocument,
-  "\n    query chats {\n      chats {\n        edges {\n          id\n          name\n          lastMessage {\n            id\n            message\n          }\n        }\n      }\n    }\n  ":
+  "\n    query chats {\n      chats {\n        edges {\n          id\n          name\n          lastMessage\n        }\n      }\n    }\n  ":
     types.ChatsDocument,
-  "\n    mutation createChat($input: CreateChatInput!) {\n      createChat(input: $input) {\n        id\n        name\n        createdAt\n      }\n    }\n  ":
-    types.CreateChatDocument,
+  "\n    query chatWithMembers($id: ID!) {\n      chat(id: $id) {\n        id\n        name\n        users {\n          id\n          firstName\n          lastName\n          email\n        }\n      }\n    }\n  ":
+    types.ChatWithMembersDocument,
   "\n    query chat($id: ID!) {\n      chat(id: $id) {\n        id\n        name\n        messages {\n          id\n          message\n          user {\n            id\n            firstName\n            lastName\n          }\n          createdAt\n        }\n      }\n    }\n  ":
     types.ChatDocument,
   "\n    mutation sendMessage($input: SendMessageInput!) {\n      sendMessage(input: $input) {\n        id\n        chat {\n          id\n        }\n      }\n    }\n  ":
     types.SendMessageDocument,
-  "\n      subscription messageAdded($chatId: ID!) {\n        messageAdded(chatId: $chatId) {\n          id\n          chat {\n            id\n            lastMessage {\n              id\n              message\n            }\n          }\n          user {\n            id\n            firstName\n            lastName\n          }\n          message\n        }\n      }\n    ":
+  "\n      subscription messageAdded($chatId: ID!) {\n        messageAdded(chatId: $chatId) {\n          id\n          chat {\n            id\n            lastMessage\n          }\n          user {\n            id\n            firstName\n            lastName\n          }\n          message\n        }\n      }\n    ":
     types.MessageAddedDocument,
   "\n    query file($id: ID!) {\n      file(id: $id) {\n        id\n        name\n        fileType\n        MIMEType\n        size\n        createdAt\n      }\n    }\n  ":
     types.FileDocument,
@@ -277,6 +283,24 @@ export function graphql(source: string): unknown;
 export function graphql(
   source: "\n    mutation importStudents($input: ImportStudentsInput!) {\n      importStudents(input: $input) {\n        usersCreated\n        usersExisted\n        errors\n      }\n    }\n  ",
 ): (typeof documents)["\n    mutation importStudents($input: ImportStudentsInput!) {\n      importStudents(input: $input) {\n        usersCreated\n        usersExisted\n        errors\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(
+  source: "\n    query userList($search: String) {\n      users(search: $search) {\n        edges {\n          id\n          firstName\n          lastName\n          email\n        }\n      }\n    }\n  ",
+): (typeof documents)["\n    query userList($search: String) {\n      users(search: $search) {\n        edges {\n          id\n          firstName\n          lastName\n          email\n        }\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(
+  source: "\n    mutation addUserToChat($input: AddUserToChatInput!) {\n      addUserToChat(input: $input) {\n        id\n        chat {\n          id\n          users {\n            id\n            firstName\n            firstName\n            email\n          }\n        }\n      }\n    }\n  ",
+): (typeof documents)["\n    mutation addUserToChat($input: AddUserToChatInput!) {\n      addUserToChat(input: $input) {\n        id\n        chat {\n          id\n          users {\n            id\n            firstName\n            firstName\n            email\n          }\n        }\n      }\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(
+  source: "\n    mutation createChat($input: CreateChatInput!) {\n      createChat(input: $input) {\n        id\n        name\n        createdAt\n      }\n    }\n  ",
+): (typeof documents)["\n    mutation createChat($input: CreateChatInput!) {\n      createChat(input: $input) {\n        id\n        name\n        createdAt\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -623,14 +647,14 @@ export function graphql(
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
-  source: "\n    query chats {\n      chats {\n        edges {\n          id\n          name\n          lastMessage {\n            id\n            message\n          }\n        }\n      }\n    }\n  ",
-): (typeof documents)["\n    query chats {\n      chats {\n        edges {\n          id\n          name\n          lastMessage {\n            id\n            message\n          }\n        }\n      }\n    }\n  "];
+  source: "\n    query chats {\n      chats {\n        edges {\n          id\n          name\n          lastMessage\n        }\n      }\n    }\n  ",
+): (typeof documents)["\n    query chats {\n      chats {\n        edges {\n          id\n          name\n          lastMessage\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
-  source: "\n    mutation createChat($input: CreateChatInput!) {\n      createChat(input: $input) {\n        id\n        name\n        createdAt\n      }\n    }\n  ",
-): (typeof documents)["\n    mutation createChat($input: CreateChatInput!) {\n      createChat(input: $input) {\n        id\n        name\n        createdAt\n      }\n    }\n  "];
+  source: "\n    query chatWithMembers($id: ID!) {\n      chat(id: $id) {\n        id\n        name\n        users {\n          id\n          firstName\n          lastName\n          email\n        }\n      }\n    }\n  ",
+): (typeof documents)["\n    query chatWithMembers($id: ID!) {\n      chat(id: $id) {\n        id\n        name\n        users {\n          id\n          firstName\n          lastName\n          email\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -647,8 +671,8 @@ export function graphql(
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
-  source: "\n      subscription messageAdded($chatId: ID!) {\n        messageAdded(chatId: $chatId) {\n          id\n          chat {\n            id\n            lastMessage {\n              id\n              message\n            }\n          }\n          user {\n            id\n            firstName\n            lastName\n          }\n          message\n        }\n      }\n    ",
-): (typeof documents)["\n      subscription messageAdded($chatId: ID!) {\n        messageAdded(chatId: $chatId) {\n          id\n          chat {\n            id\n            lastMessage {\n              id\n              message\n            }\n          }\n          user {\n            id\n            firstName\n            lastName\n          }\n          message\n        }\n      }\n    "];
+  source: "\n      subscription messageAdded($chatId: ID!) {\n        messageAdded(chatId: $chatId) {\n          id\n          chat {\n            id\n            lastMessage\n          }\n          user {\n            id\n            firstName\n            lastName\n          }\n          message\n        }\n      }\n    ",
+): (typeof documents)["\n      subscription messageAdded($chatId: ID!) {\n        messageAdded(chatId: $chatId) {\n          id\n          chat {\n            id\n            lastMessage\n          }\n          user {\n            id\n            firstName\n            lastName\n          }\n          message\n        }\n      }\n    "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

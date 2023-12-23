@@ -4,22 +4,7 @@
   >
     <div class="relative flex flex-col">
       <div class="flex items-center justify-between px-3 py-3 pb-1">
-        <div
-          class="group flex flex-1 justify-between rounded-md p-1 transition-colors hover:bg-strong"
-          @click="visibleAppSwitcher = true"
-        >
-          <div class="flex items-center gap-3">
-            <div class="rounded-lg bg-neutral-200 p-1.5">
-              <component v-if="app" :is="app.icon" class="fill-neutral-500 stroke-neutral-500" :size="16" />
-            </div>
-            <div class="text-sm text-neutral-700 transition-all duration-100 hover:text-neutral-950">
-              {{ app?.name }} <span v-if="app?.beta" class="text-xs font-medium uppercase text-blue-700">Beta</span>
-            </div>
-          </div>
-          <div class="rounded-md p-1.5 transition-all hover:bg-neutral-300">
-            <grip :size="16" class="stroke-neutral-700" />
-          </div>
-        </div>
+        <app-switcher2 />
       </div>
       <div class="flex flex-col gap-0.5 p-3 pt-2.5">
         <router-link
@@ -37,21 +22,6 @@
           />
           <div class="text-sm">{{ link.name }}</div>
         </router-link>
-      </div>
-      <div ref="appSwitcher" v-show="visibleAppSwitcher" class="absolute w-full p-1">
-        <div class="flex w-full flex-col gap-1 rounded-lg bg-white p-1 shadow-md">
-          <div
-            v-for="_app in enabledApps"
-            class="flex items-center gap-3 rounded-lg border border-white p-2 text-sm hover:bg-neutral-100"
-            :class="activeApp === _app.id ? `!border-neutral-200 bg-neutral-100 hover:!bg-neutral-100` : ''"
-            @click="switchApp(_app.id)"
-          >
-            <component :is="_app.icon" class="fill-neutral-500 stroke-neutral-500" :size="20" />
-            <span class="text-neutral-500" :class="activeApp === _app.id ? `!text-neutral-900` : ''">{{
-              _app.name
-            }}</span>
-          </div>
-        </div>
       </div>
     </div>
     <div class="px-1 py-4">
@@ -99,27 +69,23 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { LogOut, Globe, Grip, Settings, HelpCircle } from "lucide-vue-next";
+import { Globe, HelpCircle, LogOut, Settings } from "lucide-vue-next";
 import { onClickOutside, useStorage } from "@vueuse/core";
-import { useRoute, useRouter } from "vue-router/auto";
-import { useMutation, useQuery } from "@urql/vue";
+import { useRoute } from "vue-router/auto";
+import { useMutation } from "@urql/vue";
 import { graphql } from "@/gql";
 import { UserLanguage } from "@/gql/graphql";
-import { AppLink, apps, UserRole } from "./d-sidebar/d-sidebar";
+import { AppLink, apps } from "./d-sidebar/d-sidebar";
 import i18n from "@/i18n.ts";
 import { useAuth } from "@/composables/auth";
 import useActiveApp from "@/composables/useActiveApp";
-import me from "@/queries/me";
+import AppSwitcher2 from "@/components/AppSwitcher2.vue";
 
 const visibleAppSwitcher = ref<boolean>(false);
+
 const { activeApp } = useActiveApp();
 
 const route = useRoute();
-const router = useRouter();
-
-const { data: userData } = useQuery({
-  query: me,
-});
 
 const appSwitcher = ref();
 
@@ -132,32 +98,7 @@ function isLinkActive(link: AppLink) {
   return name.startsWith(link.route);
 }
 
-const enabledAppList = useStorage<string[]>("enabled_apps", []);
-
 const app = computed(() => apps.value.find((el) => el.id === activeApp.value) || null);
-
-const enabledApps = computed(() => {
-  const enabled = apps.value.filter((el: { id: string }) => enabledAppList.value.includes(el.id));
-  const role = userData.value?.me?.role;
-  return enabled.filter((el: { allowedUserRoles: UserRole[] }) => el.allowedUserRoles.includes(role as UserRole));
-});
-
-function switchApp(appId: string | null = null) {
-  if (appId) {
-    activeApp.value = appId;
-    visibleAppSwitcher.value = false;
-
-    // Reroute to first link of app
-    const app = apps.value.find((el) => el.id === appId);
-    if (app) {
-      router.push({ name: app.links[0].route });
-    }
-    return;
-  }
-  // start at first app of index is out of bounds
-  const nextIndex = (enabledApps.value.findIndex((el) => el.id === activeApp.value) + 1) % enabledApps.value.length;
-  activeApp.value = enabledApps.value[nextIndex].id;
-}
 
 async function loggingOut() {
   await useAuth().signOut();
