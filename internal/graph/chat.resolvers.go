@@ -56,9 +56,9 @@ func (r *chatResolver) Users(ctx context.Context, obj *db.Chat) ([]*db.User, err
 	var users []*db.User
 	err = r.DB.NewSelect().
 		Model(&users).
-		Join("JOIN chat_users ON chat_users.user_id = users.id").
-		Where("chats.id = ?", obj.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
+		Join("JOIN chat_users ON chat_users.user_id = \"user\".id").
+		Where("chat_users.chat_id = ?", obj.ID).
+		Where("\"user\".organisation_id = ?", currentUser.OrganisationID).
 		Scan(ctx)
 	if err != nil {
 		return nil, err
@@ -89,7 +89,7 @@ func (r *chatResolver) Messages(ctx context.Context, obj *db.Chat) ([]*db.ChatMe
 }
 
 // LastMessage is the resolver for the lastMessage field.
-func (r *chatResolver) LastMessage(ctx context.Context, obj *db.Chat) (*db.ChatMessage, error) {
+func (r *chatResolver) LastMessage(ctx context.Context, obj *db.Chat) (*string, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, nil
@@ -110,7 +110,17 @@ func (r *chatResolver) LastMessage(ctx context.Context, obj *db.Chat) (*db.ChatM
 		return nil, err
 	}
 
-	return &chatMessage, nil
+	// chatMessage.Message is the last message
+	var msgPreview string
+
+	// only return the first 50 chars of the message
+	if len(chatMessage.Message) > 100 {
+		msgPreview = chatMessage.Message[:100] + "..."
+	} else {
+		msgPreview = chatMessage.Message
+	}
+
+	return &msgPreview, nil
 }
 
 // DeletedAt is the resolver for the deletedAt field.
@@ -201,7 +211,7 @@ func (r *mutationResolver) CreateChat(ctx context.Context, input model.CreateCha
 		Valid:  true,
 	}
 
-	chat.Type = db.ChatTypeGroup
+	chat.Type = db.ChatTypePrivate
 	chat.OrganisationID = currentUser.OrganisationID
 
 	err = r.DB.NewInsert().
@@ -236,7 +246,60 @@ func (r *mutationResolver) DeleteChat(ctx context.Context, input model.DeleteCha
 
 // AddUserToChat is the resolver for the addUserToChat field.
 func (r *mutationResolver) AddUserToChat(ctx context.Context, input model.AddUserToChatInput) (*db.ChatUser, error) {
-	panic(fmt.Errorf("not implemented: AddUserToChat - addUserToChat"))
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	var chat db.Chat
+	err = r.DB.NewSelect().
+		Model(&chat).
+		Where("id = ?", input.ChatID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// is user participant of chat
+	var chatUser db.ChatUser
+	err = r.DB.NewSelect().
+		Model(&chatUser).
+		Where("chat_id = ?", input.ChatID).
+		Where("user_id = ?", currentUser.ID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var user db.User
+	err = r.DB.NewSelect().
+		Model(&user).
+		Where("id = ?", input.UserID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, errors.New("user not found")
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var chatUser3 db.ChatUser
+	chatUser3.ChatID = input.ChatID
+	chatUser3.UserID = input.UserID
+	chatUser3.OrganisationID = currentUser.OrganisationID
+
+	err = r.DB.NewInsert().
+		Model(&chatUser3).
+		Returning("*").
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &chatUser3, nil
 }
 
 // RemoveUserFromChat is the resolver for the removeUserFromChat field.

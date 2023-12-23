@@ -656,7 +656,7 @@ type ChatResolver interface {
 	Name(ctx context.Context, obj *db.Chat) (*string, error)
 	Users(ctx context.Context, obj *db.Chat) ([]*db.User, error)
 	Messages(ctx context.Context, obj *db.Chat) ([]*db.ChatMessage, error)
-	LastMessage(ctx context.Context, obj *db.Chat) (*db.ChatMessage, error)
+	LastMessage(ctx context.Context, obj *db.Chat) (*string, error)
 
 	DeletedAt(ctx context.Context, obj *db.Chat) (*time.Time, error)
 }
@@ -7577,9 +7577,9 @@ func (ec *executionContext) _Chat_lastMessage(ctx context.Context, field graphql
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*db.ChatMessage)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOChatMessage2ᚖexampleᚋinternalᚋdbᚐChatMessage(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Chat_lastMessage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7589,19 +7589,7 @@ func (ec *executionContext) fieldContext_Chat_lastMessage(ctx context.Context, f
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_ChatMessage_id(ctx, field)
-			case "chat":
-				return ec.fieldContext_ChatMessage_chat(ctx, field)
-			case "user":
-				return ec.fieldContext_ChatMessage_user(ctx, field)
-			case "message":
-				return ec.fieldContext_ChatMessage_message(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_ChatMessage_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ChatMessage", field.Name)
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -43962,13 +43950,6 @@ func (ec *executionContext) marshalOChat2ᚖexampleᚋinternalᚋdbᚐChat(ctx c
 		return graphql.Null
 	}
 	return ec._Chat(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOChatMessage2ᚖexampleᚋinternalᚋdbᚐChatMessage(ctx context.Context, sel ast.SelectionSet, v *db.ChatMessage) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._ChatMessage(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOCompetence2ᚕᚖexampleᚋinternalᚋdbᚐCompetence(ctx context.Context, sel ast.SelectionSet, v []*db.Competence) graphql.Marshaler {
