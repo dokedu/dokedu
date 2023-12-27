@@ -14,6 +14,7 @@ import (
 	"example/internal/helper"
 	"example/internal/middleware"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -65,6 +66,13 @@ func (r *chatResolver) Users(ctx context.Context, obj *db.Chat) ([]*db.User, err
 	}
 
 	return users, nil
+}
+
+// Type is the resolver for the type field.
+func (r *chatResolver) Type(ctx context.Context, obj *db.Chat) (db.ChatType, error) {
+	//return obj.Type, nil
+	// return as uppercase
+	return db.ChatType(strings.ToUpper(string(obj.Type))), nil
 }
 
 // Messages is the resolver for the messages field.
@@ -211,7 +219,7 @@ func (r *mutationResolver) CreateChat(ctx context.Context, input model.CreateCha
 		Valid:  true,
 	}
 
-	chat.Type = db.ChatTypePrivate
+	chat.Type = db.ChatTypeGroup
 	chat.OrganisationID = currentUser.OrganisationID
 
 	err = r.DB.NewInsert().
@@ -304,7 +312,49 @@ func (r *mutationResolver) AddUserToChat(ctx context.Context, input model.AddUse
 
 // RemoveUserFromChat is the resolver for the removeUserFromChat field.
 func (r *mutationResolver) RemoveUserFromChat(ctx context.Context, input model.RemoveUserFromChatInput) (*db.ChatUser, error) {
-	panic(fmt.Errorf("not implemented: RemoveUserFromChat - removeUserFromChat"))
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	var chat db.Chat
+	err = r.DB.NewSelect().
+		Model(&chat).
+		Where("id = ?", input.ChatID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// is user participant of chat
+	var chatUser db.ChatUser
+	err = r.DB.NewSelect().
+		Model(&chatUser).
+		Where("chat_id = ?", input.ChatID).
+		Where("user_id = ?", currentUser.ID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, errors.New("you are not authorised to remove users from this chat")
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var chatUser2 db.ChatUser
+	err = r.DB.NewDelete().
+		Model(&chatUser2).
+		Where("chat_id = ?", input.ChatID).
+		Where("user_id = ?", input.UserID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Returning("*").
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &chatUser2, nil
 }
 
 // SendMessage is the resolver for the sendMessage field.
@@ -312,6 +362,11 @@ func (r *mutationResolver) SendMessage(ctx context.Context, input model.SendMess
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, nil
+	}
+
+	// check that the message is less than 4096 characters
+	if len(input.Message) > 4096 {
+		return nil, errors.New("message too long, max 4096 characters")
 	}
 
 	var chat db.Chat
@@ -358,6 +413,56 @@ func (r *mutationResolver) SendMessage(ctx context.Context, input model.SendMess
 	return &chatMessage, nil
 }
 
+// UpdateChat is the resolver for the updateChat field.
+func (r *mutationResolver) UpdateChat(ctx context.Context, input model.UpdateChatInput) (*db.Chat, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	var chat db.Chat
+	err = r.DB.NewSelect().
+		Model(&chat).
+		Where("id = ?", input.ID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// is user participant of chat
+	var chatUser db.ChatUser
+	err = r.DB.NewSelect().
+		Model(&chatUser).
+		Where("chat_id = ?", input.ID).
+		Where("user_id = ?", currentUser.ID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, errors.New("you are not authorised to update this chat")
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	chat.Name = sql.NullString{
+		String: *input.Name,
+		Valid:  true,
+	}
+
+	err = r.DB.NewUpdate().
+		Model(&chat).
+		Where("id = ?", input.ID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Returning("*").
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &chat, nil
+}
+
 // Chat is the resolver for the chat field.
 func (r *queryResolver) Chat(ctx context.Context, id string) (*db.Chat, error) {
 	currentUser, err := middleware.GetUser(ctx)
@@ -396,6 +501,7 @@ func (r *queryResolver) Chats(ctx context.Context, limit *int, offset *int) (*mo
 		Where("chat.organisation_id = ?", currentUser.OrganisationID).
 		Limit(pageLimit).
 		Offset(pageOffset).
+		Order("created_at DESC").
 		ScanAndCount(ctx)
 	if errors.Is(err, sql.ErrNoRows) {
 		return &model.ChatConnection{}, nil

@@ -184,19 +184,29 @@ func (a *ChatMessageProcessor) GenerateMessages(message db.ChatMessage) ([]opena
 		userMap[user.ID] = user
 	}
 
+	systemMessage := openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleSystem,
+		Content: "Your name is Dokedu AI. You are a bot created by Dokedu. Dokedu is developed by Tom Härter. Dokedu is an open source productivity suite. You are a general assistant that helps with everything.",
+	}
+
 	for _, msg := range msgHistory {
 		var role string
 
 		if userMap[msg.UserID].Role == db.UserRoleBot {
 			role = openai.ChatMessageRoleAssistant
+			messages = append(messages, openai.ChatCompletionMessage{
+				Role:    role,
+				Content: msg.Message,
+			})
 		} else {
+			userFullName := userMap[msg.UserID].FirstName + " " + userMap[msg.UserID].LastName
 			role = openai.ChatMessageRoleUser
+			messages = append(messages, openai.ChatCompletionMessage{
+				Role:    role,
+				Content: userFullName + ": " + msg.Message,
+			})
 		}
 
-		messages = append(messages, openai.ChatCompletionMessage{
-			Role:    role,
-			Content: msg.Message,
-		})
 	}
 
 	if len(messages) == 0 {
@@ -210,7 +220,5 @@ func (a *ChatMessageProcessor) GenerateMessages(message db.ChatMessage) ([]opena
 		},
 	}
 
-	// add last message to messages
-	messages = append(messages, lastMessages...)
-	return messages, nil
+	return append(append([]openai.ChatCompletionMessage{systemMessage}, messages...), lastMessages...), nil
 }

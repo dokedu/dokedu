@@ -562,6 +562,11 @@ type TagConnection struct {
 	TotalCount int       `json:"totalCount"`
 }
 
+type UpdateChatInput struct {
+	ID   string  `json:"id"`
+	Name *string `json:"name,omitempty"`
+}
+
 type UpdateCompetenceInput struct {
 	ID    string  `json:"id"`
 	Color *string `json:"color,omitempty"`

@@ -66,3 +66,5 @@ models:
     fields:
       name:
         resolver: true
+      type:
+        resolver: true

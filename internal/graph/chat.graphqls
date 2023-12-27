@@ -1,7 +1,14 @@
+enum ChatType {
+    PRIVATE
+    GROUP
+    CHANNEL
+}
+
 type Chat {
     id: ID!
     name: String
     users: [User!]!
+    type: ChatType!
     messages: [ChatMessage!]!
     lastMessage: String
     createdAt: Time!
@@ -58,12 +65,18 @@ input SendMessageInput {
     message: String!
 }
 
+input UpdateChatInput {
+    id: ID!
+    name: String
+}
+
 extend type Mutation {
     createChat(input: CreateChatInput!): Chat!
     deleteChat(input: DeleteChatInput!): Chat!
     addUserToChat(input: AddUserToChatInput!): ChatUser!
     removeUserFromChat(input: RemoveUserFromChatInput!): ChatUser!
     sendMessage(input: SendMessageInput!): ChatMessage!
+    updateChat(input: UpdateChatInput!): Chat!
 }
 
 type Subscription {
