@@ -32,7 +32,6 @@ const buttonClasses = computed(() => {
     "group",
     "relative",
     "inline-flex",
-    "h-fit",
     "select-none",
     "items-center",
     "justify-center",

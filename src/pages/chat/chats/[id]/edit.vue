@@ -4,24 +4,42 @@
       <router-link :to="`/chat/chats/${route.params.id}/`">
         <d-button type="transparent" :icon-left="ChevronLeft">Back</d-button>
       </router-link>
-      <router-link :to="`/chat/chats/${route.params.id}/edit`" class="font-semibold text-center flex-1">
-        {{ data?.chat.name ? data?.chat.name : `Unnamed chat` }}
-      </router-link>
-      <div></div>
+      <template v-if="data?.chat.type !== ChatType['Group']">
+        <router-link :to="`/chat/chats/${route.params.id}/edit`" class="font-semibold text-center flex-1">
+          {{ data?.chat.name ? data?.chat.name : `Unnamed chat` }}
+        </router-link>
+        <div></div>
+      </template>
+      <template v-else>
+        <d-input
+          v-model="chatName"
+          type="text"
+          name="name"
+          placeholder="Chat name"
+          class="w-full border-none bg-transparent"
+        />
+        <div class="flex justify-end">
+          <d-button @click="updateChat" size="md">Save</d-button>
+        </div>
+      </template>
     </div>
-    <div class="max-w-lg mx-auto w-full">
-      <div class="p-4 flex justify-center gap-4">
+    <div class="max-w-lg pt-4 flex flex-col gap-4 mx-auto w-full">
+      <div class="px-4 flex justify-center gap-4">
         <d-button-add-chat-user :chat-id="route.params.id" />
         <d-button type="outline" @click="soon">Leave</d-button>
         <d-button type="outline" @click="soon">Delete</d-button>
       </div>
-      <div class="p-4 divide-y">
+      <div class="px-4 divide-y">
         <div class="group p-2 flex justify-between items-center" v-for="user in data?.chat.users" :key="user.id">
           <div>
             <div class="mb-1">{{ user.firstName }} {{ user.lastName }}</div>
             <div class="text-neutral-500 text-xs min-h-[1rem]">{{ user.email ? user.email : user.id }}</div>
           </div>
-          <d-button @click="soon" type="transparent" class="hidden group-hover:block text-red-500 hover:text-red-500">
+          <d-button
+            @click="removeUserFromChat(user.id)"
+            type="transparent"
+            class="hidden group-hover:block text-red-500 hover:text-red-500"
+          >
             Remove
           </d-button>
         </div>
@@ -32,11 +50,13 @@
 <script setup lang="ts">
 import { useRoute } from "vue-router/auto";
 import { computed, reactive } from "vue";
-import { useQuery } from "@urql/vue";
+import { useMutation, useQuery } from "@urql/vue";
 import { graphql } from "@/gql";
 import DButton from "@/components/d-button/d-button.vue";
 import { ChevronLeft } from "lucide-vue-next";
 import DButtonAddChatUser from "@/components/_chat/d-button-add-chat-user.vue";
+import DInput from "@/components/d-input/d-input.vue";
+import { ChatType } from "@/gql/graphql.ts";
 
 const route = useRoute("/chat/chats/[id]/edit");
 
@@ -48,6 +68,7 @@ const { data } = useQuery({
       chat(id: $id) {
         id
         name
+        type
         users {
           id
           firstName
@@ -61,6 +82,63 @@ const { data } = useQuery({
     id: id,
   }),
 });
+
+const { executeMutation } = useMutation(
+  graphql(`
+    mutation updateChat($input: UpdateChatInput!) {
+      updateChat(input: $input) {
+        id
+        name
+      }
+    }
+  `),
+);
+
+async function updateChat() {
+  await executeMutation({
+    input: {
+      id: id.value,
+      name: chatName.value,
+    },
+  });
+}
+
+const chatName = computed({
+  get: () => data?.value?.chat.name || "",
+  set: (value: string) => {
+    if (data.value) {
+      data.value.chat.name = value;
+    }
+  },
+});
+
+const { executeMutation: removeUserFromChatMut } = useMutation(
+  graphql(`
+    mutation removeUserFromChat($input: RemoveUserFromChatInput!) {
+      removeUserFromChat(input: $input) {
+        id
+        chat {
+          id
+          users {
+            id
+            firstName
+            lastName
+            email
+          }
+        }
+      }
+    }
+  `),
+);
+
+async function removeUserFromChat(userId: string) {
+  await removeUserFromChatMut({
+    input: {
+      chatId: id.value,
+      userId: userId,
+    },
+  });
+}
 
 function soon() {
   alert("This feature is coming soon!");

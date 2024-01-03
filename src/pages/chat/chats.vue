@@ -20,10 +20,9 @@
         >
           All
         </div>
-        <div class="text-neutral-500 hover:bg-neutral-200 rounded-t-md text-xs px-4 py-2 font-medium">Bots</div>
         <div class="text-neutral-500 hover:bg-neutral-200 rounded-t-md text-xs px-4 py-2 font-medium">Friends</div>
         <div class="text-neutral-500 hover:bg-neutral-200 rounded-t-md text-xs px-4 py-2 font-medium">Family</div>
-        <div class="text-neutral-500 hover:bg-neutral-200 rounded-t-md text-xs px-4 py-2 font-medium">University</div>
+        <div class="text-neutral-500 hover:bg-neutral-200 rounded-t-md text-xs px-4 py-2 font-medium">Work</div>
       </div>
       <div class="flex flex-col overflow-scroll flex-1">
         <router-link
@@ -36,7 +35,7 @@
           <div class="h-12 w-12 rounded-full bg-neutral-900/10"></div>
           <div class="flex-1 w-full">
             <div class="font-semibold mb-1">{{ chat?.name }}</div>
-            <div class="text-neutral-500 text-xs line-clamp-2">
+            <div class="text-neutral-500 text-xs line-clamp-2 h-[2rem]">
               {{ chat?.lastMessage ? chat?.lastMessage : `No messages yet` }}
             </div>
           </div>

@@ -69,7 +69,7 @@ const { data } = useQuery({
 
 const users = computed(() => data?.value?.users.edges ?? []);
 
-const { executeMutation } = useMutation(
+const { executeMutation: addUserToChatMut } = useMutation(
   graphql(`
     mutation addUserToChat($input: AddUserToChatInput!) {
       addUserToChat(input: $input) {
@@ -89,7 +89,7 @@ const { executeMutation } = useMutation(
 );
 
 async function addUserToChat(userId: string) {
-  await executeMutation({
+  await addUserToChatMut({
     input: {
       chatId: props.chatId,
       userId: userId,
