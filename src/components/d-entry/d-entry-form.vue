@@ -24,7 +24,7 @@
           type="date"
           name="date"
           id="date"
-          class="w-full rounded-md border-none text-sm transition-all hover:bg-neutral-50 focus:bg-neutral-100 focus:ring-2 focus:ring-neutral-950"
+          class="rounded-lg border border-neutral-200 shadow-sm focus:!outline-none w-full text-sm transition-all hover:bg-neutral-100 focus:bg-neutral-100 focus:ring-2 focus:ring-neutral-950"
         />
       </div>
       <EntryFormProjects :entry="entry" />

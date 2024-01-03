@@ -66,6 +66,9 @@
                 </div>
               </div>
             </div>
+            <div v-for="parent in item.subjects" class="flex gap-2">
+              <DTag :color="parent.color" class="w-1/4 p-2">{{ parent.name }}</DTag>
+            </div>
             <div v-if="item.tags.length > 5">
               <DTag color="neutral" class="w-1/4 p-2">{{ item.tags.length }} {{ $t("label", 2) }}</DTag>
             </div>
@@ -78,6 +81,13 @@
       <template #date-data="{ column }">
         <div class="flex h-full items-center">
           {{ dateOnly(column) }}
+        </div>
+      </template>
+      <template #subjects-data="{ column }">
+        <div class="flex h-full items-center">
+          <div v-for="parent in column" class="flex gap-2">
+            <DTag color="neutral" class="w-1/4 p-2">{{ parent.name }}</DTag>
+          </div>
         </div>
       </template>
       <template #createdAt-data="{ column, item }">
@@ -130,8 +140,8 @@ const router = useRouter();
 
 const tagSearch = ref("");
 
-const student = useSessionStorage("filter/record/entries/index#student", null);
-const teacher = useSessionStorage("filter/record/entries/index#teacher", null);
+const student = useSessionStorage<string>("filter/record/entries/index#student", null);
+const teacher = useSessionStorage<string>("filter/record/entries/index#teacher", null);
 const tags = useSessionStorage<string[]>(`filter/record/entries/index#tags`, []);
 
 interface Variables extends PageVariables {
@@ -232,6 +242,11 @@ const entriesQuery = graphql(`
           name
           color
         }
+        subjects {
+          id
+          name
+          color
+        }
       }
     }
   }
@@ -321,6 +336,6 @@ async function createEntry() {
     alert(error.message);
     return;
   }
-  router.push({ name: "/record/entries/[id]", params: { id: data?.createEntry.id as string } });
+  await router.push({ name: "/record/entries/[id]", params: { id: data?.createEntry.id as string } });
 }
 </script>

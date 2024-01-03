@@ -186,6 +186,7 @@ type Entry {
     events: [Event!]!
     files: [File!]!
     id: ID!
+    subjects: [Competence!]!
     tags: [Tag!]!
     user: User!
     userCompetences: [UserCompetence!]!
