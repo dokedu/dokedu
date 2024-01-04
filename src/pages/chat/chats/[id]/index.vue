@@ -56,13 +56,14 @@
 </route>
 
 <script setup lang="ts">
-import { useMutation, useQuery, useSubscription } from "@urql/vue";
-import { graphql } from "@/gql";
 import { useRoute } from "vue-router/auto";
-import me from "@/queries/me.ts";
 import { computed, nextTick, reactive, ref, watch } from "vue";
 import DMarkdown from "@/components/d-markdown/d-markdown.vue";
 import { useTextareaAutosize } from "@vueuse/core";
+import { useChatQuery } from "@/gql/queries/chats/chat.ts";
+import { useMeQuery } from "@/gql/queries/auth/me.ts";
+import { useSendMessageMutation } from "@/gql/mutations/chats/sendMessage.ts";
+import { useMessageAddedSubscription } from "@/gql/subscriptions/messageAdded.ts";
 
 const route = useRoute("/chat/chats/[id]/");
 
@@ -71,50 +72,19 @@ const messageContainer = ref<HTMLElement>();
 
 const { textarea, input } = useTextareaAutosize();
 
-const { data, executeQuery: refresh } = useQuery({
-  query: graphql(`
-    query chat($id: ID!) {
-      chat(id: $id) {
-        id
-        name
-        messages {
-          id
-          message
-          user {
-            id
-            firstName
-            lastName
-          }
-          createdAt
-        }
-      }
-    }
-  `),
+const { data, executeQuery: refresh } = useChatQuery({
   variables: reactive({
     id: id,
   }),
 });
 
-const { data: userData } = useQuery({
-  query: me,
-});
+const { data: userData } = useMeQuery({});
 
 function fullName(user: { firstName: string; lastName: string }) {
   return `${user.firstName} ${user.lastName}`;
 }
 
-const { executeMutation: sendMessageMutation } = useMutation(
-  graphql(`
-    mutation sendMessage($input: SendMessageInput!) {
-      sendMessage(input: $input) {
-        id
-        chat {
-          id
-        }
-      }
-    }
-  `),
-);
+const { executeMutation: sendMessageMutation } = useSendMessageMutation();
 
 async function onSubmit() {
   await sendMessage(input.value.replace(/^\s+|\s+$/g, ""));
@@ -139,29 +109,11 @@ async function handleSubscription() {
   await refresh();
 }
 
-useSubscription(
+useMessageAddedSubscription(
   {
-    query: graphql(`
-      subscription messageAdded($chatId: ID!) {
-        messageAdded(chatId: $chatId) {
-          id
-          chat {
-            id
-            lastMessage
-          }
-          user {
-            id
-            firstName
-            lastName
-          }
-          message
-        }
-      }
-    `),
     variables: reactive({
       chatId: id,
     }),
-    // pause: !id.value,
   },
   handleSubscription,
 );

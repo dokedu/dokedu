@@ -43,7 +43,7 @@
       v-model:variables="pageVariables"
       :columns="columns"
       objectName="entries"
-      :query="entriesQuery"
+      :query="GetEntriesDocument"
       defaultSort="createdAt"
       @row-click="goToEntry"
       :watchers="[student, teacher, tags]"
@@ -117,23 +117,24 @@
 <script setup lang="ts">
 import PageHeader from "@/components/page-header.vue";
 import PageWrapper from "@/components/page-wrapper.vue";
-import { useMutation, useQuery } from "@urql/vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { Plus } from "lucide-vue-next";
 import { ref, computed, reactive } from "vue";
-import { graphql } from "@/gql";
 import DTag from "@/components/d-tag/d-tag.vue";
 import { useI18n } from "vue-i18n";
 import { watch } from "vue";
 import { LayoutGrid } from "lucide-vue-next";
-import { EntrySortBy } from "@/gql/graphql";
 import DTable from "@/components/d-table/d-table.vue";
 import { useRouter } from "vue-router/auto";
 import { PageVariables } from "@/types/types";
 import DSelect from "@/components/d-select/d-select.vue";
-import tagQuery from "@/queries/tags";
 import { useSessionStorage } from "@vueuse/core";
-import createEntryDraftMutation from "@/queries/createEntryDraft.mutation.ts";
+import { GetEntriesDocument } from "@/gql/queries/entries/getEntries.ts";
+import { useGetEntryFilterTeachersQuery } from "@/gql/queries/users/getEntryFilterTeachers.ts";
+import { useTagLimitedQuery } from "@/gql/queries/tags/tags.ts";
+import { useGetEntryFilterStudentsQuery } from "@/gql/queries/users/getEntryFilterStudents.ts";
+import { useCreateEntryDraftMutation } from "@/gql/mutations/entries/createEntryDraft.ts";
+import { EntrySortBy } from "@/gql/schema.ts";
 
 const i18nLocale = useI18n();
 const router = useRouter();
@@ -216,80 +217,21 @@ watch([student, teacher, tags], () => {
   ];
 });
 
-const entriesQuery = graphql(`
-  query getEntries($filter: EntryFilterInput, $limit: Int, $order: EntrySortBy, $offset: Int) {
-    entries(filter: $filter, limit: $limit, sortBy: $order, offset: $offset) {
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-      }
-      edges {
-        id
-        date
-        body
-        user {
-          id
-          firstName
-          lastName
-        }
-        createdAt
-        events {
-          id
-          title
-        }
-        tags {
-          id
-          name
-          color
-        }
-        subjects {
-          id
-          name
-          color
-        }
-      }
-    }
-  }
-`);
-
 const teacherSearch = ref("");
-const { data: teacherData } = useQuery({
-  query: graphql(`
-    query getEntryFilterTeachers($search: String) {
-      users(filter: { role: [owner, admin, teacher, educator] }, limit: 500, search: $search) {
-        edges {
-          id
-          firstName
-          lastName
-        }
-      }
-    }
-  `),
+const { data: teacherData } = useGetEntryFilterTeachersQuery({
   variables: reactive({
     search: teacherSearch,
   }),
 });
 
 const studentSearch = ref("");
-const { data: studentData } = useQuery({
-  query: graphql(`
-    query getEntryFilterStudents($search: String) {
-      users(filter: { role: [student] }, limit: 200, search: $search) {
-        edges {
-          id
-          firstName
-          lastName
-        }
-      }
-    }
-  `),
+const { data: studentData } = useGetEntryFilterStudentsQuery({
   variables: reactive({
     search: studentSearch,
   }),
 });
 
-const { data: tagData } = useQuery({
-  query: tagQuery,
+const { data: tagData } = useTagLimitedQuery({
   variables: reactive({
     search: tagSearch,
   }),
@@ -328,7 +270,7 @@ function dateOnly(date: string) {
   return new Date(date).toLocaleDateString(i18nLocale.locale.value, options);
 }
 
-const { executeMutation: createEntryDraft } = useMutation(createEntryDraftMutation);
+const { executeMutation: createEntryDraft } = useCreateEntryDraftMutation();
 
 async function createEntry() {
   const { data, error } = await createEntryDraft({});

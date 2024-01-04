@@ -48,13 +48,12 @@ import DInput from "@/components/d-input/d-input.vue";
 import { useVModel, useWindowSize } from "@vueuse/core";
 import { Plus, X, Check } from "lucide-vue-next";
 import { computed, reactive, ref } from "vue";
-import { graphql } from "@/gql";
-import { useMutation, useQuery } from "@urql/vue";
-import deleteEntryEventMutation from "@/queries/deleteEntryEvent.mutation.ts";
-import createEntryEventMutation from "@/queries/createEntryEvent.mutation.ts";
+import { useDeleteEntryEventInputMutation } from "@/gql/mutations/entries/deleteEntryEvent.ts";
+import { useCreateEntryEventMutation } from "@/gql/mutations/entries/createEntryEvent.ts";
+import { useMEventsQuery } from "@/gql/queries/events/mEvents.ts";
 
-const { executeMutation: deleteEntryEvent } = useMutation(deleteEntryEventMutation);
-const { executeMutation: createEntryEvent } = useMutation(createEntryEventMutation);
+const { executeMutation: deleteEntryEvent } = useDeleteEntryEventInputMutation();
+const { executeMutation: createEntryEvent } = useCreateEntryEventMutation();
 
 const search = ref("");
 const sheetOpen = ref(false);
@@ -74,17 +73,7 @@ const emit = defineEmits(["update:modelValue"]);
 
 const projects = useVModel(props, "modelValue", emit);
 
-const { data } = useQuery({
-  query: graphql(`
-    query mEvents($search: String) {
-      events(search: $search, limit: 100) {
-        edges {
-          id
-          title
-        }
-      }
-    }
-  `),
+const { data } = useMEventsQuery({
   variables: reactive({ search }),
 });
 

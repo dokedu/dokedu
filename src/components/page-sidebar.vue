@@ -72,14 +72,13 @@ import { computed, ref, watch } from "vue";
 import { Globe, HelpCircle, LogOut, Settings } from "lucide-vue-next";
 import { onClickOutside, useStorage } from "@vueuse/core";
 import { useRoute } from "vue-router/auto";
-import { useMutation } from "@urql/vue";
-import { graphql } from "@/gql";
-import { UserLanguage } from "@/gql/graphql";
 import { AppLink, apps } from "./d-sidebar/d-sidebar";
 import i18n from "@/i18n.ts";
 import { useAuth } from "@/composables/auth";
 import useActiveApp from "@/composables/useActiveApp";
 import AppSwitcher2 from "@/components/AppSwitcher2.vue";
+import { useUpdateUserLanguageMutation } from "@/gql/mutations/general/updateUserLanguage.ts";
+import { UserLanguage } from "@/gql/schema.ts";
 
 const visibleAppSwitcher = ref<boolean>(false);
 
@@ -104,16 +103,7 @@ async function loggingOut() {
   await useAuth().signOut();
 }
 
-const { executeMutation: updateLanguage } = useMutation(
-  graphql(`
-    mutation updateUserLanguage($language: UserLanguage!) {
-      updateUserLanguage(language: $language) {
-        id
-        language
-      }
-    }
-  `),
-);
+const { executeMutation: updateLanguage } = useUpdateUserLanguageMutation();
 
 function getPreferredLanguage() {
   const languages = navigator.languages;

@@ -1,0 +1,6 @@
+query bucketByIdShared($id: ID!) {
+    bucket(id: $id) {
+        id
+        permission
+    }
+}

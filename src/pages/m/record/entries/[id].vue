@@ -23,14 +23,12 @@
 import MPageHeader from "@/components/mobile/m-page-header.vue";
 import MEntryForm from "@/components/mobile/m-entry-form.vue";
 import { useRoute } from "vue-router/auto";
-import entryByIdQuery from "@/queries/entryById";
-import { useQuery } from "@urql/vue";
 import { computed } from "vue";
+import { useEntryByIdQuery } from "@/gql/queries/entries/entryById.ts";
 
 const route = useRoute("/m/record/entries/[id]");
 
-const { data, fetching } = useQuery({
-  query: entryByIdQuery,
+const { data, fetching } = useEntryByIdQuery({
   variables: {
     id: route.params.id,
   },

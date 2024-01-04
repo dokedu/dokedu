@@ -77,13 +77,12 @@
 
 <script setup lang="ts">
 import PageWrapper from "../../../components/page-wrapper.vue";
-import { useQuery } from "@urql/vue";
 import { useRoute } from "vue-router/auto";
 import { ChevronRight, X } from "lucide-vue-next";
-import { graphql } from "@/gql";
 import { computed, reactive, ref } from "vue";
 import DIconButton from "@/components/d-icon-button/d-icon-button.vue";
 import { definePage } from "vue-router/auto";
+import { useUserByIdQuery } from "@/gql/queries/users/userById.ts";
 
 definePage({
   redirect: () => ({ name: "/record/students/[id]/competences/" }),
@@ -114,26 +113,7 @@ const toNormalisedDate = (date: string) => {
   return `${day}.${month}.${year}`;
 };
 
-const { data } = useQuery({
-  query: graphql(`
-    query userById($id: ID!) {
-      user(id: $id) {
-        id
-        firstName
-        lastName
-        student {
-          id
-          grade
-          joinedAt
-          leftAt
-          entriesCount
-          competencesCount
-          eventsCount
-          emoji
-        }
-      }
-    }
-  `),
+const { data } = useUserByIdQuery({
   variables: reactive({ id }),
 });
 </script>

@@ -37,35 +37,20 @@
 </template>
 
 <script lang="ts" setup>
-import { useQuery } from "@urql/vue";
-import { graphql } from "@/gql";
 import DContextMenu from "@/components/d-context-menu/d-context-menu.vue";
 import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue";
 import { ref } from "vue";
 import { Check } from "lucide-vue-next";
-import { Tag } from "@/gql/graphql.ts";
 import DTag from "@/components/d-tag/d-tag.vue";
+import { useGetTagsQuery } from "@/gql/queries/tags/getTags.ts";
+import { Tag } from "@/gql/schema.ts";
 
 const emit = defineEmits(["update"]);
 
 const contextMenuOpen = ref(false);
 const selectedTags = ref<Tag[]>([]);
 
-const { data } = useQuery({
-  query: graphql(`
-    query GetTags {
-      tags(limit: 1000) {
-        edges {
-          id
-          name
-          color
-          deletedAt
-          createdAt
-        }
-      }
-    }
-  `),
-});
+const { data } = useGetTagsQuery({});
 
 const toggleTag = (tag: Tag) => {
   if (selectedTags.value?.find((t) => t.id === tag.id)) {

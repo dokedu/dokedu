@@ -5,7 +5,7 @@
     v-model:selected="selected"
     :columns="columns"
     objectName="files"
-    :query="filesQuery"
+    :query="FilesDocument"
     defaultSort="createdAt"
     :additionalTypenames="['File']"
     :draggable="true"
@@ -108,12 +108,12 @@ import DTable from "@/components/d-table/d-table.vue";
 import type { PageVariables } from "@/types/types.ts";
 import { computed, reactive, ref, toRefs } from "vue";
 import { formatDate } from "@vueuse/core";
-import { File } from "@/gql/graphql";
-import { graphql } from "@/gql";
-import { useMutation } from "@urql/vue";
 import i18n from "@/i18n.ts";
 import { onClickOutside } from "@vueuse/core";
 import { Option } from "@/components/_drive/d-file-list-dropdown.vue";
+import { FilesDocument } from "@/gql/queries/files/files.ts";
+import { useDeleteFileMutation } from "@/gql/mutations/files/deleteFile.ts";
+import type { File } from "@/gql/schema.ts";
 
 const dFileList = ref<any>(null);
 
@@ -146,21 +146,10 @@ function openDeleteFileDialog(file: File) {
   showDeleteDialog.value = true;
 }
 async function onDeleteFile(file: File) {
-  deleteFile({ id: file.id });
+  await deleteFile({ id: file.id });
 }
 
-const { executeMutation: deleteFile } = useMutation(
-  graphql(`
-    mutation deleteFile($id: ID!) {
-      deleteFile(input: { id: $id }) {
-        success
-        file {
-          id
-        }
-      }
-    }
-  `),
-);
+const { executeMutation: deleteFile } = useDeleteFileMutation();
 
 const pageVariables = computed<Variables[]>(() => [
   {
@@ -241,25 +230,6 @@ const columns = [
     width: 0.1,
   },
 ];
-
-const filesQuery = graphql(`
-  query files($offset: Int, $limit: Int, $filter: FilesFilterInput) {
-    files(input: $filter, limit: $limit, offset: $offset) {
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-      }
-      edges {
-        id
-        name
-        fileType
-        MIMEType
-        size
-        createdAt
-      }
-    }
-  }
-`);
 
 function clickFile(file: any) {
   const isSelected = selected.value.find((f) => f.id === file.id);

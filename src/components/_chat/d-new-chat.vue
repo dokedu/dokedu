@@ -5,21 +5,10 @@
 </template>
 
 <script lang="ts" setup>
-import { useMutation } from "@urql/vue";
-import { graphql } from "@/gql";
 import { PenSquare } from "lucide-vue-next";
+import { useCreateChatMutation } from "@/gql/mutations/chats/createChat.ts";
 
-const { executeMutation: createChat } = useMutation(
-  graphql(`
-    mutation createChat($input: CreateChatInput!) {
-      createChat(input: $input) {
-        id
-        name
-        createdAt
-      }
-    }
-  `),
-);
+const { executeMutation: createChat } = useCreateChatMutation();
 
 async function createNewChat() {
   await createChat({

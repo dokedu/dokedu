@@ -16,7 +16,7 @@
           <div class="text-subtle">{{ $t("shared_with") }}</div>
           <div class="h-[200px] space-y-2 overflow-y-auto">
             <div
-              v-for="share in shares?.shares"
+              v-for="share in shares?.value?.shares"
               class="flex items-center justify-between gap-2 rounded-md bg-neutral-50 px-3 py-2"
             >
               <div>{{ share.user.firstName }} {{ share.user.lastName }}</div>
@@ -48,14 +48,17 @@
 </template>
 
 <script lang="ts" setup>
-import { graphql } from "@/gql";
 import DDialog from "@/components/d-dialog/d-dialog.vue";
-import { ShareUser, type Bucket } from "@/gql/graphql.ts";
-import { useQuery, useMutation } from "@urql/vue";
 import { Trash } from "lucide-vue-next";
 import { computed, reactive, ref } from "vue";
 import DSelect from "@/components/d-select/d-select.vue";
-import { FilePermission } from "@/gql/graphql.ts";
+import { useShareUsersQuery } from "@/gql/queries/users/shareUsers.ts";
+import { useBucketSharesQuery } from "@/gql/queries/shares/bucketShares.ts";
+import { Bucket, FilePermission, ShareUser } from "@/gql/schema.ts";
+import { useMeBucketShareQuery } from "@/gql/queries/shares/meBucketShare.ts";
+import { useCreateShareMutation } from "@/gql/mutations/shares/createShare.ts";
+import { useDeleteShareMutation } from "@/gql/mutations/shares/deleteShare.ts";
+import { useEditShareMutation } from "@/gql/mutations/shares/editShare.ts";
 
 interface Props {
   open: boolean;
@@ -81,36 +84,10 @@ function onClose() {
   emit("close");
 }
 
-const { data: users } = useQuery({
-  query: graphql(`
-    query shareUsers {
-      users(filter: { role: [owner, admin, teacher] }) {
-        edges {
-          id
-          firstName
-          lastName
-        }
-      }
-    }
-  `),
-});
-const sharesQuery = graphql(`
-  query BucketShares($input: ShareInput!) {
-    shares(input: $input) {
-      user {
-        id
-        firstName
-        lastName
-      }
-      permission
-    }
-  }
-`);
+const { data: users } = useShareUsersQuery({});
 
-const shareContext = { additionalTypenames: ["ShareUser"] };
-const { data: shares } = useQuery({
-  query: sharesQuery,
-  context: shareContext,
+const { data: shares } = useBucketSharesQuery({
+  context: { additionalTypenames: ["ShareUser"] },
   variables: {
     input: reactive({
       bucketId,
@@ -118,15 +95,7 @@ const { data: shares } = useQuery({
   },
 });
 
-const { data: me } = useQuery({
-  query: graphql(`
-    query meBucketShare {
-      me {
-        id
-      }
-    }
-  `),
-});
+const { data: me } = useMeBucketShareQuery({});
 
 const selectedUser = ref<string>();
 const userOptions = computed(() => {
@@ -144,47 +113,9 @@ const userOptions = computed(() => {
   }));
 });
 
-const { executeMutation: createShare } = useMutation(
-  graphql(`
-    mutation createShare($input: CreateShareInput!) {
-      createShare(input: $input) {
-        permission
-        user {
-          id
-          firstName
-          lastName
-        }
-      }
-    }
-  `),
-);
-
-const { executeMutation: deleteShare } = useMutation(
-  graphql(`
-    mutation deleteShare($input: DeleteShareInput!) {
-      deleteShare(input: $input) {
-        user {
-          id
-        }
-      }
-    }
-  `),
-);
-
-const { executeMutation: editShare } = useMutation(
-  graphql(`
-    mutation editShare($input: CreateShareInput!) {
-      editShare(input: $input) {
-        permission
-        user {
-          id
-          firstName
-          lastName
-        }
-      }
-    }
-  `),
-);
+const { executeMutation: createShare } = useCreateShareMutation();
+const { executeMutation: deleteShare } = useDeleteShareMutation();
+const { executeMutation: editShare } = useEditShareMutation();
 
 async function onCreateShare(id: string) {
   await createShare({

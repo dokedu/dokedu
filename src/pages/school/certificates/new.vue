@@ -16,14 +16,13 @@ import DInput from "@/components/d-input/d-input.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { useRouter } from "vue-router/auto";
 import { ref } from "vue";
-import { useMutation } from "@urql/vue";
-import createSubjectMutation from "@/queries/createSubject.mutation.ts";
+import { useCreateSubjectMutation } from "@/gql/mutations/subjects/createSubject.ts";
 
 const router = useRouter();
 
 const name = ref("");
 
-const { executeMutation: createSubject } = useMutation(createSubjectMutation);
+const { executeMutation: createSubject } = useCreateSubjectMutation();
 
 function onClose() {
   router.push({ name: "/school/subjects" });

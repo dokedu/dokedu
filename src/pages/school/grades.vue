@@ -27,7 +27,7 @@
       :columns="columns"
       objectName="userStudentGrades"
       @row-click="goToUserStudentGrade"
-      :query="userStudentGradesQuery"
+      :query="UserStudentGradesDocument"
     >
       <template #student-data="{ column }">{{ column.user.firstName }} {{ column.user.lastName }}</template>
       <template #subject-data="{ column }">{{ column.name }}</template>
@@ -47,24 +47,19 @@ import DTable from "@/components/d-table/d-table.vue";
 import { PageVariables } from "@/types/types.ts";
 import { ref } from "vue";
 import { useRouter } from "vue-router/auto";
-import { useQuery } from "@urql/vue";
-import userStudentGradesQuery from "@/queries/userStudentGrades.query.ts";
-import subjectsQuery from "@/queries/subjects.query";
-import schoolYearsQuery from "@/queries/schoolYears.query";
+import { useSchoolYearsQuery } from "@/gql/queries/schoolYears/schoolYears.ts";
+import { useSubjectsQuery } from "@/gql/queries/subjects/subjects.ts";
+import { UserStudentGradesDocument } from "@/gql/queries/userStudentGrades/userStudentGrades.ts";
 
 const search = ref("");
 
 const router = useRouter();
 
 const subjectFilter = ref<null | string>(null);
-const { data: subjectData } = useQuery({
-  query: subjectsQuery,
-});
+const { data: subjectData } = useSubjectsQuery({});
 
 const schoolYearFilter = ref<null | string>(null);
-const { data: schoolYearsData } = useQuery({
-  query: schoolYearsQuery,
-});
+const { data: schoolYearsData } = useSchoolYearsQuery({});
 
 const columns = [
   {

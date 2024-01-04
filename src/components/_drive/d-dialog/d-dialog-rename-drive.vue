@@ -15,9 +15,8 @@
 import DDialog from "@/components/d-dialog/d-dialog.vue";
 import DInput from "@/components/d-input/d-input.vue";
 import DButton from "@/components/d-button/d-button.vue";
-import { useMutation } from "@urql/vue";
-import { graphql } from "@/gql";
 import { ref, toRefs } from "vue";
+import { useRenameSharedDriveMutation } from "@/gql/mutations/sharedDrives/renameSharedDrive.ts";
 
 const props = defineProps<{
   open: boolean;
@@ -33,16 +32,7 @@ function onClose() {
   emit("close");
 }
 
-const { executeMutation: updateBucket } = useMutation(
-  graphql(`
-    mutation renameSharedDrive($input: RenameSharedDriveInput!) {
-      renameSharedDrive(input: $input) {
-        id
-        name
-      }
-    }
-  `),
-);
+const { executeMutation: updateBucket } = useRenameSharedDriveMutation();
 
 async function onSave() {
   if (!drive.value) return;

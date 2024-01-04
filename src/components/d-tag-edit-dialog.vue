@@ -38,9 +38,9 @@ import DSelect from "@/components/d-select/d-select.vue";
 import { toRef, ref, computed } from "vue";
 import DInput from "./d-input/d-input.vue";
 import DTag from "./d-tag/d-tag.vue";
-import { useMutation } from "@urql/vue";
-import { graphql } from "@/gql";
-import { Tag } from "../gql/graphql";
+import { useUpdateTagMutation } from "@/gql/mutations/tags/updateTag.ts";
+import { useArchiveTagMutation } from "@/gql/mutations/tags/archiveTag.ts";
+import { Tag } from "@/gql/schema.ts";
 
 const colors = ["red", "orange", "yellow", "green", "blue", "indigo", "purple", "pink", "gray"];
 
@@ -76,33 +76,8 @@ const tagColor = computed({
   },
 });
 
-const { executeMutation: updateTag } = useMutation(
-  graphql(`
-    mutation UpdateTag($id: ID!, $input: CreateTagInput!) {
-      updateTag(id: $id, input: $input) {
-        id
-        name
-        color
-        deletedAt
-        createdAt
-      }
-    }
-  `),
-);
-
-const { executeMutation: archiveTag } = useMutation(
-  graphql(`
-    mutation ArchiveTag($id: ID!) {
-      archiveTag(id: $id) {
-        id
-        name
-        color
-        deletedAt
-        createdAt
-      }
-    }
-  `),
-);
+const { executeMutation: updateTag } = useUpdateTagMutation();
+const { executeMutation: archiveTag } = useArchiveTagMutation();
 
 function onClose() {
   emit("close", false);

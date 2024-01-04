@@ -21,10 +21,10 @@ import PageHeader from "@/components/page-header.vue";
 import PageWrapper from "@/components/page-wrapper.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import DInput from "@/components/d-input/d-input.vue";
-import { graphql } from "@/gql";
-import { useMutation, useQuery } from "@urql/vue";
 import { computed } from "vue";
 import { createNotification } from "@/composables/useToast";
+import { useOrganisationQuery } from "@/gql/queries/organisation/organisation.ts";
+import { useUpdateOrganisationMutation } from "@/gql/mutations/organisation/updateOrganisation.ts";
 
 async function onSave() {
   if (!data?.value?.organisation) return;
@@ -43,17 +43,7 @@ async function onSave() {
   });
 }
 
-const { data } = useQuery({
-  query: graphql(`
-    query organisation {
-      organisation {
-        id
-        name
-        legalName
-      }
-    }
-  `),
-});
+const { data } = useOrganisationQuery({});
 
 const name = computed({
   get: () => {
@@ -76,15 +66,5 @@ const legalName = computed({
   },
 });
 
-const { executeMutation: updateOrganisation } = useMutation(
-  graphql(`
-    mutation updateOrganisation($input: UpdateOrganisationInput!) {
-      updateOrganisation(input: $input) {
-        id
-        name
-        legalName
-      }
-    }
-  `),
-);
+const { executeMutation: updateOrganisation } = useUpdateOrganisationMutation();
 </script>

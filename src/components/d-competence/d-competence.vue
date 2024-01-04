@@ -51,8 +51,8 @@
 
 <script lang="ts" setup>
 import { toRef } from "vue";
-import { Competence } from "@/gql/graphql";
 import { Folder } from "lucide-vue-next";
+import { Competence } from "@/gql/schema.ts";
 
 export interface Props {
   competence: Pick<Competence, "grades" | "name" | "parents" | "type" | "tendency">;

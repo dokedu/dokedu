@@ -58,24 +58,11 @@
 
 <script setup lang="ts">
 import { useRoute } from "vue-router/auto";
-import { useQuery } from "@urql/vue";
-import { graphql } from "@/gql";
 import AppSwitcher2 from "@/components/AppSwitcher2.vue";
 import DNewChat from "@/components/_chat/d-new-chat.vue";
+import { useChatsQuery } from "@/gql/queries/chats/chats.ts";
 
 const route = useRoute("/chat/chats/[id]/");
 
-const { data: chatList } = useQuery({
-  query: graphql(`
-    query chats {
-      chats {
-        edges {
-          id
-          name
-          lastMessage
-        }
-      }
-    }
-  `),
-});
+const { data: chatList } = useChatsQuery({});
 </script>

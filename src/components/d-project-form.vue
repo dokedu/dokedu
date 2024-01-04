@@ -108,17 +108,19 @@
 <script lang="ts" setup>
 import dButton from "@/components/d-button/d-button.vue";
 import { Plus, Image, ChevronRight } from "lucide-vue-next";
-import { graphql } from "@/gql";
 import { computed, ref, toRef } from "vue";
-import { useMutation } from "@urql/vue";
 import { onClickOutside, onKeyStroke, useTextareaAutosize } from "@vueuse/core";
-import { Competence, Event } from "@/gql/graphql";
 import { Save } from "lucide-vue-next";
 import DCompetence from "@/components/d-competence/d-competence.vue";
 import { Trash, X } from "lucide-vue-next";
 import DInput from "@/components/d-input/d-input.vue";
 import DCompetenceSearch from "@/components/d-competence-search/d-competence-search.vue";
 import { useRoute } from "vue-router/auto";
+import { useToggleEventCompetenceMutation } from "@/gql/mutations/events/toggleEventCompetence.ts";
+import { Competence } from "@/gql/schema.ts";
+import { useArchiveEventMutation } from "@/gql/mutations/events/archiveEvent.ts";
+import { useCreateEventMutation } from "@/gql/mutations/events/createEvent.ts";
+import { useUpdateEventMutation } from "@/gql/mutations/events/updateEvent.ts";
 
 const route = useRoute();
 const editCompetences = ref(false);
@@ -145,15 +147,7 @@ async function toggleCompetence(competence: Competence) {
   });
 }
 
-const { executeMutation: toggleEventCompetence } = useMutation(
-  graphql(`
-    mutation toggleEventCompetence($input: AddEventCompetenceInput!) {
-      toggleEventCompetence(input: $input) {
-        id
-      }
-    }
-  `),
-);
+const { executeMutation: toggleEventCompetence } = useToggleEventCompetenceMutation();
 
 export interface Props {
   project: Event;
@@ -198,53 +192,11 @@ async function trash() {
 }
 
 // archiveEvent(id: ID!): Event!
-const { executeMutation: archiveEvent } = useMutation(
-  graphql(`
-    mutation archiveEvent($id: ID!) {
-      archiveEvent(id: $id) {
-        id
-      }
-    }
-  `),
-);
+const { executeMutation: archiveEvent } = useArchiveEventMutation();
 
-const { executeMutation: createEvent } = useMutation(
-  graphql(`
-    mutation createEvent($input: CreateEventInput!) {
-      createEvent(input: $input) {
-        id
-        title
-        image {
-          id
-        }
-        body
-        startsAt
-        endsAt
-        recurrence
-        createdAt
-      }
-    }
-  `),
-);
+const { executeMutation: createEvent } = useCreateEventMutation();
 
-const { executeMutation: updateEvent } = useMutation(
-  graphql(`
-    mutation updateEvent($input: UpdateEventInput!) {
-      updateEvent(input: $input) {
-        id
-        title
-        image {
-          id
-        }
-        body
-        startsAt
-        endsAt
-        recurrence
-        createdAt
-      }
-    }
-  `),
-);
+const { executeMutation: updateEvent } = useUpdateEventMutation();
 
 async function update() {
   if (!project.value.title) {

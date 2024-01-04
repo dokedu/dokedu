@@ -50,49 +50,25 @@
 <script setup lang="ts">
 import { useRoute } from "vue-router/auto";
 import { computed, reactive } from "vue";
-import { useMutation, useQuery } from "@urql/vue";
-import { graphql } from "@/gql";
 import DButton from "@/components/d-button/d-button.vue";
 import { ChevronLeft } from "lucide-vue-next";
 import DButtonAddChatUser from "@/components/_chat/d-button-add-chat-user.vue";
 import DInput from "@/components/d-input/d-input.vue";
-import { ChatType } from "@/gql/graphql.ts";
+import { useChatWithMembersQuery } from "@/gql/queries/chats/chatWithMembers.ts";
+import { useUpdateChatMutation } from "@/gql/mutations/chats/updateChat.ts";
+import { useRemoveUserFromChatMutation } from "@/gql/mutations/chats/removeUserFromChat.ts";
 
 const route = useRoute("/chat/chats/[id]/edit");
 
 const id = computed(() => route.params.id);
 
-const { data } = useQuery({
-  query: graphql(`
-    query chatWithMembers($id: ID!) {
-      chat(id: $id) {
-        id
-        name
-        type
-        users {
-          id
-          firstName
-          lastName
-          email
-        }
-      }
-    }
-  `),
+const { data } = useChatWithMembersQuery({
   variables: reactive({
     id: id,
   }),
 });
 
-const { executeMutation } = useMutation(
-  graphql(`
-    mutation updateChat($input: UpdateChatInput!) {
-      updateChat(input: $input) {
-        id
-        name
-      }
-    }
-  `),
-);
+const { executeMutation } = useUpdateChatMutation();
 
 async function updateChat() {
   await executeMutation({
@@ -112,24 +88,7 @@ const chatName = computed({
   },
 });
 
-const { executeMutation: removeUserFromChatMut } = useMutation(
-  graphql(`
-    mutation removeUserFromChat($input: RemoveUserFromChatInput!) {
-      removeUserFromChat(input: $input) {
-        id
-        chat {
-          id
-          users {
-            id
-            firstName
-            lastName
-            email
-          }
-        }
-      }
-    }
-  `),
-);
+const { executeMutation: removeUserFromChatMut } = useRemoveUserFromChatMutation();
 
 async function removeUserFromChat(userId: string) {
   await removeUserFromChatMut({

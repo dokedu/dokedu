@@ -17,9 +17,8 @@
 import { useWindowSize } from "@vueuse/core";
 import DButton from "@/components/d-button/d-button.vue";
 import { useAuth } from "@/composables/auth";
-import { useQuery } from "@urql/vue";
-import me from "@/queries/me";
 import { onMounted } from "vue";
+import { useMeQuery } from "@/gql/queries/auth/me.ts";
 
 const { width } = useWindowSize();
 
@@ -27,7 +26,9 @@ const onLogOut = async () => {
   await useAuth().signOut();
 };
 
-const { executeQuery: refresh } = useQuery({ query: me, requestPolicy: "network-only" });
+const { executeQuery: refresh } = useMeQuery({
+  requestPolicy: "network-only",
+});
 
 onMounted(() => {
   refresh();

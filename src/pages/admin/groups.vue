@@ -36,11 +36,11 @@ import PageHeader from "@/components/page-header.vue";
 import PageWrapper from "@/components/page-wrapper.vue";
 import { Plus } from "lucide-vue-next";
 import { ref } from "vue";
-import { graphql } from "@/gql";
 import DTable from "@/components/d-table/d-table.vue";
 import { useRouter } from "vue-router/auto";
 import { watchDebounced } from "@vueuse/core";
 import type { PageVariables } from "@/types/types.ts";
+import { useEmailAccountsQuery } from "@/gql/queries/emailAccounts/emailAccounts.ts";
 
 const router = useRouter();
 const search = ref("");
@@ -84,22 +84,7 @@ watchDebounced(
   { debounce: 250, maxWait: 500 },
 );
 
-const emailAccountsQuery = graphql(`
-  query groups {
-    emailAccounts(filter: { type: GROUP }) {
-      edges {
-        id
-        name
-        description
-      }
-      totalCount
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-      }
-    }
-  }
-`);
+const emailAccountsQuery = useEmailAccountsQuery({});
 
 const goToEmailAccount = <Type extends { id: string }>(row: Type) => {
   router.push({ name: "/admin/groups/[id]", params: { id: row.id } });

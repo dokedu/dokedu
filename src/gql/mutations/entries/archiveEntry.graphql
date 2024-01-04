@@ -1,0 +1,5 @@
+mutation archiveEntry($id: ID!) {
+  archiveEntry(id: $id) {
+    id
+  }
+}

@@ -16,7 +16,6 @@ import DDialog from "@/components/d-dialog/d-dialog.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { toRef } from "vue";
 import { useVModel } from "@vueuse/core";
-import { File } from "@/gql/graphql.ts";
 
 const props = defineProps<{
   modelValue: File | null;

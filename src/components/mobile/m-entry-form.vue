@@ -23,10 +23,9 @@ import MEntryFormTags from "@/components/mobile/record/m-entry-form-tags.vue";
 import MEntryFormCompetences from "@/components/mobile/record/m-entry-form-competences.vue";
 import MEntryFormDate from "@/components/mobile/record/m-entry-form-date.vue";
 import { useTextareaAutosize, useVModel, watchDebounced } from "@vueuse/core";
-import { useMutation } from "@urql/vue";
-import updateEntryMutation from "@/queries/updateEntry.mutation.ts";
+import { useUpdateEntryMutation } from "@/gql/mutations/entries/updateEntry.ts";
 
-const { executeMutation: updateEntry } = useMutation(updateEntryMutation);
+const { executeMutation: updateEntry } = useUpdateEntryMutation();
 
 const props = defineProps<{
   modelValue: any;

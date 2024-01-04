@@ -35,20 +35,19 @@
 </template>
 
 <script setup lang="ts">
-import { useMutation } from "@urql/vue";
 import { computed, toRef } from "vue";
-import archiveEntryMutation from "@/queries/archiveEntry.mutation";
 import { formatDate, useTextareaAutosize, watchDebounced } from "@vueuse/core";
 import EntryFormHeader from "./d-entry-form-header.vue";
 import EntryFormCompetences from "./d-entry-form-competences.vue";
-import { Entry } from "@/gql/graphql";
 import EntryFormProjects from "./d-entry-form-projects.vue";
 import EntryFormLabels from "./d-entry-form-labels.vue";
 import EntryFormStudents from "./d-entry-form-students.vue";
-import updateEntryMutation from "@/queries/updateEntry.mutation.ts";
+import { useArchiveEntryMutation } from "@/gql/mutations/entries/archiveEntry.ts";
+import { useUpdateEntryMutation } from "@/gql/mutations/entries/updateEntry.ts";
+import { Entry } from "@/gql/schema.ts";
 
-const { executeMutation: archiveEntryMut } = useMutation(archiveEntryMutation);
-const { executeMutation: updateEntry } = useMutation(updateEntryMutation);
+const { executeMutation: archiveEntryMut } = useArchiveEntryMutation();
+const { executeMutation: updateEntry } = useUpdateEntryMutation();
 
 const props = defineProps<{
   entry: Partial<Entry>;

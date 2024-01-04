@@ -35,11 +35,11 @@
 
 <script lang="ts" setup>
 import DSidebar from "@/components/d-sidebar/d-sidebar.vue";
-import { Domain } from "@/gql/graphql";
 import DInput from "@/components/d-input/d-input.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { computed, toRef } from "vue";
 import { useRouter } from "vue-router/auto";
+import { Domain } from "@/gql/schema.ts";
 
 const router = useRouter();
 

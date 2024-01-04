@@ -31,9 +31,9 @@
 <script lang="ts" setup>
 import DButton from "@/components/d-button/d-button.vue";
 import DDialog from "@/components/d-dialog/d-dialog.vue";
-import { useMutation, useQuery } from "@urql/vue";
-import { graphql } from "@/gql";
 import { computed, ref } from "vue";
+import { useAddUserToChatMutation } from "@/gql/mutations/chats/addUserToChat.ts";
+import { useUserListQuery } from "@/gql/queries/users/userList.ts";
 
 interface User {
   id: string;
@@ -49,44 +49,15 @@ const props = defineProps<{
 const modalOpen = ref(false);
 const search = ref("");
 
-const { data } = useQuery({
-  query: graphql(`
-    query userList($search: String) {
-      users(search: $search) {
-        edges {
-          id
-          firstName
-          lastName
-          email
-        }
-      }
-    }
-  `),
-  variables: computed(() => ({
+const { data } = useUserListQuery({
+  variables: {
     search: search.value,
-  })),
+  },
 });
 
 const users = computed(() => data?.value?.users.edges ?? []);
 
-const { executeMutation: addUserToChatMut } = useMutation(
-  graphql(`
-    mutation addUserToChat($input: AddUserToChatInput!) {
-      addUserToChat(input: $input) {
-        id
-        chat {
-          id
-          users {
-            id
-            firstName
-            firstName
-            email
-          }
-        }
-      }
-    }
-  `),
-);
+const { executeMutation: addUserToChatMut } = useAddUserToChatMutation();
 
 async function addUserToChat(userId: string) {
   await addUserToChatMut({

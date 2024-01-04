@@ -1,16 +1,9 @@
-import { graphql } from "@/gql";
 import { urqlClient } from "@/main";
 import router from "@/router/router.ts";
+import { SignOutDocument } from "@/gql/mutations/auth/signOut.ts";
 
 function signOutMutation() {
-  return urqlClient.mutation(
-    graphql(`
-      mutation signOut {
-        signOut
-      }
-    `),
-    {},
-  );
+  return urqlClient.mutation(SignOutDocument, {});
 }
 
 async function signOut() {

@@ -14,7 +14,7 @@
       :columns="columns"
       objectName="subjects"
       @row-click="goToSubject"
-      :query="subjectsQuery"
+      :query="SubjectsDocument"
     >
     </DTable>
   </PageWrapper>
@@ -29,7 +29,7 @@ import DButton from "@/components/d-button/d-button.vue";
 import { PageVariables } from "@/types/types.ts";
 import { ref } from "vue";
 import { useRouter } from "vue-router/auto";
-import subjectsQuery from "@/queries/subjects.query.ts";
+import { SubjectsDocument } from "@/gql/queries/subjects/subjects.ts";
 
 const search = ref("");
 

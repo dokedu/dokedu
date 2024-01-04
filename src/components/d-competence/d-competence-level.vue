@@ -68,7 +68,7 @@ const props = defineProps<{ id: string; level: number; editable: boolean }>();
 const emit = defineEmits(["update"]);
 
 const open = ref(false);
-const menu = ref();
+const menu = ref<HTMLElement | null>(null);
 
 onClickOutside(menu, () => (open.value = false));
 

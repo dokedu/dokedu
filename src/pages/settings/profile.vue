@@ -37,16 +37,15 @@ import PageWrapper from "@/components/page-wrapper.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import DInput from "@/components/d-input/d-input.vue";
 import { ref } from "vue";
-import { useMutation } from "@urql/vue";
-import resetPasswordMutation from "@/queries/resetPasswordMutation";
 import { useI18n } from "vue-i18n";
+import { useResetPasswordMutation } from "@/gql/queries/auth/resetPasswordMutation.ts";
 
 const { t } = useI18n();
 
 const password = ref("");
 const passwordConfirm = ref("");
 
-const { executeMutation: passwordReset } = useMutation(resetPasswordMutation);
+const { executeMutation: passwordReset } = useResetPasswordMutation();
 
 async function onSave() {
   if (password.value !== passwordConfirm.value) {

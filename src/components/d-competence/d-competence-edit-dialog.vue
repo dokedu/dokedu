@@ -46,9 +46,8 @@ import DSelect from "@/components/d-select/d-select.vue";
 import DTag from "@/components/d-tag/d-tag.vue";
 import { X } from "lucide-vue-next";
 import { toRef, ref, onMounted } from "vue";
-import { useMutation } from "@urql/vue";
-import { graphql } from "@/gql";
-import { Competence } from "@/gql/graphql.ts";
+import { Competence } from "@/gql/schema.ts";
+import { useUpdateCompetenceMutation } from "@/gql/mutations/competences/updateCompetence.ts";
 
 const dialog = ref<HTMLDialogElement>();
 const colors = [
@@ -95,17 +94,7 @@ function capitalize(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-const { executeMutation: updateCompetence } = useMutation(
-  graphql(`
-    mutation updateCompetence($input: UpdateCompetenceInput!) {
-      updateCompetence(input: $input) {
-        id
-        name
-        color
-      }
-    }
-  `),
-);
+const { executeMutation: updateCompetence } = useUpdateCompetenceMutation();
 
 const onClose = () => {
   emit("close");

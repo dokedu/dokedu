@@ -1,0 +1,12 @@
+mutation setUserAttendanceState($state: UserAttendanceState!, $date: Time!, $userId: ID!) {
+    setUserAttendanceState(state: $state, date: $date, userId: $userId) {
+        id
+        date
+        state
+        user {
+            id
+            firstName
+            lastName
+        }
+    }
+}

@@ -7,7 +7,7 @@
       </div>
     </PageHeader>
     <DTable
-      :query="tagsQuery"
+      :query="GetTagWithLimitDocument"
       objectName="tags"
       @row-click="toggleEditDialog"
       :columns="columns"
@@ -33,9 +33,9 @@ import DTag from "../../../components/d-tag/d-tag.vue";
 import TagCreateDialog from "@/components/d-tag-create-dialog.vue";
 import TagEditDialog from "@/components/d-tag-edit-dialog.vue";
 import { ref } from "vue";
-import { graphql } from "@/gql";
 import DTable from "@/components/d-table/d-table.vue";
 import type { PageVariables } from "@/types/types.ts";
+import { GetTagWithLimitDocument } from "@/gql/queries/tags/getTagWithLimit.ts";
 
 const createOpen = ref(false);
 const editOpen = ref(false);
@@ -63,24 +63,6 @@ const pageVariables = ref<PageVariables[]>([
     offset: 0,
   },
 ]);
-
-const tagsQuery = graphql(`
-  query getTagWithLimit($limit: Int, $offset: Int) {
-    tags(limit: $limit, offset: $offset) {
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-      }
-      edges {
-        id
-        name
-        color
-        deletedAt
-        createdAt
-      }
-    }
-  }
-`);
 
 function onTagCreate() {
   createOpen.value = false;

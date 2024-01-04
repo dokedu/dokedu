@@ -8,25 +8,12 @@
 import { reactive } from "vue";
 import { useRoute } from "vue-router/auto";
 import DFilePreview from "@/components/_drive/d-file-preview.vue";
-import { graphql } from "@/gql";
-import { useQuery } from "@urql/vue";
-import { File } from "@/gql/graphql";
+import { File } from "@/gql/schema.ts";
+import { useFileQuery } from "@/gql/queries/files/file.ts";
 
 const route = useRoute<"/drive/files/[id]">();
 
-const { data } = useQuery({
-  query: graphql(`
-    query file($id: ID!) {
-      file(id: $id) {
-        id
-        name
-        fileType
-        MIMEType
-        size
-        createdAt
-      }
-    }
-  `),
+const { data } = useFileQuery({
   variables: reactive({
     id: route.params.id as string,
   }),

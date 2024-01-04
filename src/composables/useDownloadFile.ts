@@ -1,6 +1,6 @@
-import { graphql } from "@/gql";
-import { File } from "@/gql/graphql";
 import { urqlClient } from "@/main";
+import { PreviewFileDocument } from "@/gql/mutations/files/previewFile.ts";
+import { File } from "@/gql/schema.ts";
 
 function forceDownload(url: string, fileName: string) {
   const xhr = new XMLHttpRequest();
@@ -29,16 +29,7 @@ function forceDownload(url: string, fileName: string) {
 }
 
 const getFileURL = (variables: { id: string }) => {
-  return urqlClient.mutation(
-    graphql(`
-      mutation previewFile($id: ID!) {
-        previewFile(input: { id: $id }) {
-          url
-        }
-      }
-    `),
-    variables,
-  );
+  return urqlClient.mutation(PreviewFileDocument, variables);
 };
 
 async function downloadFile(file: File, fileName: string | null = null) {

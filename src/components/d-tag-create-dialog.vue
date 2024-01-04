@@ -39,9 +39,8 @@ import DButton from "@/components/d-button/d-button.vue";
 import DInput from "@/components/d-input/d-input.vue";
 import DSelect from "@/components/d-select/d-select.vue";
 import DTag from "@/components/d-tag/d-tag.vue";
-import { useMutation } from "@urql/vue";
 import { toRef, ref } from "vue";
-import { graphql } from "@/gql";
+import { useCreateTagMutation } from "@/gql/mutations/tags/createTag.ts";
 
 const colors = ["red", "orange", "yellow", "green", "blue", "indigo", "purple", "pink", "gray"];
 
@@ -64,19 +63,7 @@ const name = ref("");
 const tagColor = ref("gray");
 const error = ref("");
 
-const { executeMutation: createTag } = useMutation(
-  graphql(`
-    mutation CreateTag($input: CreateTagInput!) {
-      createTag(input: $input) {
-        id
-        name
-        color
-        deletedAt
-        createdAt
-      }
-    }
-  `),
-);
+const { executeMutation: createTag } = useCreateTagMutation();
 
 const onClose = () => {
   emit("close", false);

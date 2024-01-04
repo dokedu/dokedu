@@ -4,13 +4,11 @@
 
 <script lang="ts" setup>
 import DDomainForm from "@/components/d-domain-form.vue";
-import { Domain } from "@/gql/graphql";
 import { reactive } from "vue";
-import { useMutation } from "@urql/vue";
-import { graphql } from "@/gql";
 import { createNotification } from "@/composables/useToast";
 import { useRouter } from "vue-router/auto";
-import { CreateDomainInput } from "@/gql/graphql";
+import { useCreateDomainMutation } from "@/gql/mutations/domains/createDomain.ts";
+import { CreateDomainInput, Domain } from "@/gql/schema.ts";
 
 const router = useRouter();
 
@@ -18,17 +16,7 @@ const domain = reactive<CreateDomainInput>({
   name: "",
 });
 
-const { executeMutation: createDomain } = useMutation(
-  graphql(`
-    mutation createDomain($input: CreateDomainInput!) {
-      createDomain(input: $input) {
-        id
-        name
-        createdAt
-      }
-    }
-  `),
-);
+const { executeMutation: createDomain } = useCreateDomainMutation();
 
 const onCreateDomain = async () => {
   if (!domain.name) {

@@ -18,16 +18,15 @@
 
 <script setup lang="ts">
 import PageWrapper from "@/components/page-wrapper.vue";
-import { useMutation } from "@urql/vue";
-import { graphql } from "@/gql";
 import { ref, toRefs, Ref, reactive, computed } from "vue";
 import { useRouter } from "vue-router/auto";
-import { File, FilePermission } from "@/gql/graphql";
 import DFileList from "@/components/_drive/d-file-list.vue";
 import DFileDropZone from "@/components/_drive/d-file-drop-zone.vue";
 import PageHeaderDrive from "@/components/_drive/d-page-header-drive.vue";
 import DFilePreview from "@/components/_drive/d-file-preview.vue";
-import { useQuery } from "@urql/vue";
+import { useUploadFileMutation } from "@/gql/mutations/files/uploadFile.ts";
+import { useBucketByIdSharedQuery } from "@/gql/queries/buckets/bucketByIdShared.ts";
+import { FilePermission, File } from "@/gql/schema.ts";
 
 export interface Props {
   title: string;
@@ -50,7 +49,7 @@ async function upload({ files, parentId = folderId.value }: { files: any[]; pare
   for (const file of files) {
     await uploadFile({
       input: {
-        file,
+        file: file as unknown as any as never,
         parentId,
         ...(props.bucketId ? { bucketId: props.bucketId } : {}),
       },
@@ -61,15 +60,7 @@ async function upload({ files, parentId = folderId.value }: { files: any[]; pare
   }
 }
 
-const { executeMutation: uploadFile } = useMutation(
-  graphql(`
-    mutation uploadFile($input: FileUploadInput!) {
-      uploadFile(input: $input) {
-        id
-      }
-    }
-  `),
-);
+const { executeMutation: uploadFile } = useUploadFileMutation();
 
 async function clickFile(file: File) {
   if (file.fileType === "folder") {
@@ -93,16 +84,8 @@ async function clickFile(file: File) {
   }
 }
 
-// Get the bucket, for permission
-const { data: bucket } = useQuery({
-  query: graphql(`
-    query bucketByIdShared($id: ID!) {
-      bucket(id: $id) {
-        id
-        permission
-      }
-    }
-  `),
+const { data: bucket } = useBucketByIdSharedQuery({
+  pause: !bucketId.value,
   variables: reactive({
     id: bucketId as Ref<string>,
   }),

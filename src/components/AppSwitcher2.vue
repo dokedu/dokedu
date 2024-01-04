@@ -40,9 +40,8 @@ import { computed, ref } from "vue";
 import useActiveApp from "@/composables/useActiveApp.ts";
 import { apps, UserRole } from "@/components/d-sidebar/d-sidebar.ts";
 import { onClickOutside, useStorage } from "@vueuse/core";
-import { useQuery } from "@urql/vue";
-import me from "@/queries/me.ts";
 import { useRouter } from "vue-router/auto";
+import { useMeQuery } from "@/gql/queries/auth/me.ts";
 
 const visibleAppSwitcher = ref<boolean>(false);
 const app = computed(() => apps.value.find((el) => el.id === activeApp.value) || null);
@@ -57,9 +56,8 @@ onClickOutside(appSwitcher, () => {
 });
 
 const enabledAppList = useStorage<string[]>("enabled_apps", []);
-const { data: userData } = useQuery({
-  query: me,
-});
+const { data: userData } = useMeQuery({});
+
 function switchApp(appId: string | null = null) {
   if (appId) {
     activeApp.value = appId;

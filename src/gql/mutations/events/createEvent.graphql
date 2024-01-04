@@ -1,0 +1,14 @@
+mutation createEvent($input: CreateEventInput!) {
+    createEvent(input: $input) {
+        id
+        title
+        image {
+            id
+        }
+        body
+        startsAt
+        endsAt
+        recurrence
+        createdAt
+    }
+}

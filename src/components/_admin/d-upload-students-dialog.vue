@@ -11,11 +11,10 @@ import {
 } from "radix-vue";
 
 import { X } from "lucide-vue-next";
-import { useMutation } from "@urql/vue";
-import { graphql } from "@/gql";
 import { ref } from "vue";
 import { useDropZone } from "@vueuse/core";
 import { createNotification } from "@/composables/useToast";
+import { useImportStudentsMutation } from "@/gql/mutations/general/importStudents.ts";
 
 const open = ref(false);
 const dropZoneRef = ref<HTMLDivElement>();
@@ -58,7 +57,7 @@ async function onChange(event: any) {
 async function processFile(file: File) {
   const res = await importStudents({
     input: {
-      file,
+      file: file as unknown as never,
     },
   });
 
@@ -67,17 +66,7 @@ async function processFile(file: File) {
   return res;
 }
 
-const { executeMutation: importStudents } = useMutation(
-  graphql(`
-    mutation importStudents($input: ImportStudentsInput!) {
-      importStudents(input: $input) {
-        usersCreated
-        usersExisted
-        errors
-      }
-    }
-  `),
-);
+const { executeMutation: importStudents } = useImportStudentsMutation();
 </script>
 
 <template>

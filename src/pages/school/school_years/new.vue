@@ -16,14 +16,13 @@ import DInput from "@/components/d-input/d-input.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { useRouter } from "vue-router/auto";
 import { ref } from "vue";
-import { useMutation } from "@urql/vue";
-import createSchoolYearMutation from "@/queries/createSchoolYear.mutation.ts";
+import { useCreateSchoolYearMutation } from "@/gql/mutations/schoolYears/createSchoolYear.ts";
 
 const router = useRouter();
 
 const year = ref("");
 
-const { executeMutation: createSchoolYear } = useMutation(createSchoolYearMutation);
+const { executeMutation: createSchoolYear } = useCreateSchoolYearMutation();
 
 function onClose() {
   router.push({ name: "/school/school_years" });

@@ -5,11 +5,12 @@
 </template>
 
 <script lang="ts" setup>
-import me from "@/queries/me";
-import { useQuery } from "@urql/vue";
 import { onMounted } from "vue";
+import { useMeQuery } from "@/gql/queries/auth/me.ts";
 
-const { executeQuery: refresh } = useQuery({ query: me, requestPolicy: "network-only" });
+const { executeQuery: refresh } = useMeQuery({
+  requestPolicy: "network-only",
+});
 
 onMounted(() => {
   refresh();

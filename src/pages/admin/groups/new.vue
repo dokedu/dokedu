@@ -8,12 +8,11 @@
 
 <script lang="ts" setup>
 import DGroupForm from "@/components/d-group-form.vue";
-import { CreateEmailGroupInput, EmailAccount } from "@/gql/graphql";
 import { reactive } from "vue";
-import { useMutation } from "@urql/vue";
-import { graphql } from "@/gql";
 import { createNotification } from "@/composables/useToast";
 import { useRouter } from "vue-router/auto";
+import { useCreateEmailGroupMutation } from "@/gql/queries/emailAccounts/createEmailGroup.ts";
+import { CreateEmailGroupInput, EmailAccount } from "@/gql/schema.ts";
 
 const router = useRouter();
 
@@ -23,20 +22,7 @@ const emailAccount = reactive<CreateEmailGroupInput>({
   members: [],
 });
 
-const { executeMutation: createEmailAccount } = useMutation(
-  graphql(`
-    mutation createEmailGroup($input: CreateEmailGroupInput!) {
-      createEmailGroup(input: $input) {
-        id
-        name
-        description
-        members {
-          name
-        }
-      }
-    }
-  `),
-);
+const { executeMutation: createEmailAccount } = useCreateEmailGroupMutation();
 
 async function onCreateEmailAccount(input: { name: string; domain: string; members: string[] }) {
   const { error } = await createEmailAccount({

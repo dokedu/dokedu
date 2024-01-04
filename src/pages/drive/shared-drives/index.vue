@@ -12,7 +12,7 @@
         v-model:selected="selected"
         :columns="columns"
         objectName="buckets"
-        :query="sharedDrivesQuery"
+        :query="BucketsDocument"
         defaultSort="createdAt"
         :additionalTypenames="['Bucket']"
         @row-click="clickRow"
@@ -51,18 +51,18 @@ import DButton from "@/components/d-button/d-button.vue";
 import type { PageVariables } from "@/types/types.ts";
 import { ref } from "vue";
 import { Plus, Folder, Edit2, Trash } from "lucide-vue-next";
-import { graphql } from "@/gql";
-import { useMutation } from "@urql/vue";
 import router from "@/router/router.ts";
 import DDialogShareDrive from "@/components/_drive/d-dialog/d-dialog-share-drive.vue";
 import DDialogRenameDrive from "@/components/_drive/d-dialog/d-dialog-rename-drive.vue";
-import { Bucket } from "@/gql/graphql";
 import { formatDate, onClickOutside } from "@vueuse/core";
 import i18n from "@/i18n.ts";
 import { Share2 } from "lucide-vue-next";
-
 import DFileListDropdown from "@/components/_drive/d-file-list-dropdown.vue";
 import type { Option } from "@/components/_drive/d-file-list-dropdown.vue";
+import { useDeleteSharedDriveMutation } from "@/gql/mutations/sharedDrives/deleteSharedDrive.ts";
+import { Bucket } from "@/gql/schema.ts";
+import { useCreateSharedDriveMutation } from "@/gql/mutations/sharedDrives/createSharedDrive.ts";
+import { BucketsDocument } from "@/gql/mutations/sharedDrives/buckets.ts";
 
 const dFileList = ref<any>(null);
 
@@ -70,15 +70,7 @@ const currentItem = ref<Bucket>();
 const shareOpen = ref(false);
 const renameOpen = ref(false);
 
-const { executeMutation } = useMutation(
-  graphql(`
-    mutation deleteSharedDrive($id: ID!) {
-      deleteSharedDrive(id: $id) {
-        id
-      }
-    }
-  `),
-);
+const { executeMutation } = useDeleteSharedDriveMutation();
 
 async function deleteSharedDrive(item: any) {
   item.open = false;
@@ -130,16 +122,7 @@ async function clickRow(item: any) {
   });
 }
 
-const { executeMutation: createSharedDrive } = useMutation(
-  graphql(`
-    mutation createSharedDrive($name: String!) {
-      createSharedDrive(name: $name) {
-        id
-        name
-      }
-    }
-  `),
-);
+const { executeMutation: createSharedDrive } = useCreateSharedDriveMutation();
 
 const columns = [
   {
@@ -166,25 +149,6 @@ const pageVariables = ref<Variables[]>([
     offset: 0,
   },
 ]);
-
-const sharedDrivesQuery = graphql(`
-  query buckets {
-    buckets(input: { shared: true }) {
-      edges {
-        id
-        name
-        shared
-        createdAt
-        permission
-      }
-      totalCount
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-      }
-    }
-  }
-`);
 
 function optionListWithItem(item: File): Option[][] {
   return [

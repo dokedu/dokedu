@@ -7,7 +7,7 @@ import { onClickOutside, onKeyStroke } from "@vueuse/core";
 import { ref } from "vue";
 import { useRouter } from "vue-router/auto";
 import DProjectForm from "@/components/d-project-form.vue";
-import { Event } from "@/gql/graphql";
+import { Event } from "@/gql/schema.ts";
 
 const router = useRouter();
 const sheet = ref<HTMLElement | null>(null);

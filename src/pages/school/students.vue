@@ -38,7 +38,7 @@
       :search="search"
       :columns="columns"
       objectName="users"
-      :query="studentsQuery"
+      :query="AdminStudentsDocument"
       @row-click="goToStudent"
       defaultSort="lastName"
       :additionalTypenames="['ImportStudentsPayload', 'User', 'UserStudent']"
@@ -68,13 +68,13 @@ import PageHeader from "@/components/page-header.vue";
 import PageWrapper from "@/components/page-wrapper.vue";
 import { Plus, UploadCloudIcon } from "lucide-vue-next";
 import { ref, watch } from "vue";
-import { UserOrderBy } from "@/gql/graphql";
-import { graphql } from "@/gql";
+import { UserOrderBy } from "@/gql/schema.ts";
 import DTable from "@/components/d-table/d-table.vue";
 import { useRouter } from "vue-router/auto";
 import { formatDate, watchDebounced } from "@vueuse/core";
 import type { PageVariables } from "@/types/types.ts";
 import DUploadStudentsDialog from "@/components/_admin/d-upload-students-dialog.vue";
+import { AdminStudentsDocument } from "@/gql/queries/users/adminStudents.ts";
 
 const router = useRouter();
 const search = ref("");
@@ -152,28 +152,6 @@ watch(showDeleted, () => {
     },
   ];
 });
-
-const studentsQuery = graphql(`
-  query adminStudents($search: String, $order: UserOrderBy, $offset: Int, $showDeleted: Boolean) {
-    users(filter: { role: [student], orderBy: $order, showDeleted: $showDeleted }, search: $search, offset: $offset) {
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-      }
-      edges {
-        id
-        firstName
-        lastName
-        student {
-          id
-          birthday
-          grade
-          emoji
-        }
-      }
-    }
-  }
-`);
 
 const goToStudent = <Type extends { id: string }>(row: Type) => {
   router.push({ name: "/school/students/[id]", params: { id: row.id } });

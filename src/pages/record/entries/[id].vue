@@ -8,8 +8,7 @@
 import PageWrapper from "@/components/page-wrapper.vue";
 import EntryForm from "@/components/d-entry/d-entry-form.vue";
 import { useRoute, useRouter } from "vue-router/auto";
-import { useQuery } from "@urql/vue";
-import { graphql } from "@/gql";
+import { useEntryById2Query } from "@/gql/queries/entries/entryById2.ts";
 
 const route = useRoute<"/record/entries/[id]">();
 const router = useRouter();
@@ -18,58 +17,7 @@ async function archived() {
   await router.push({ name: "/record/entries/" });
 }
 
-const { data: entry } = useQuery({
-  query: graphql(`
-    query entryById2($id: ID!) {
-      entry(id: $id) {
-        id
-        date
-        body
-        deletedAt
-        user {
-          id
-          firstName
-          lastName
-        }
-        createdAt
-        tags {
-          id
-          name
-          color
-        }
-        events {
-          id
-          title
-        }
-        users {
-          id
-          firstName
-          lastName
-          student {
-            id
-            emoji
-          }
-        }
-        userCompetences {
-          id
-          level
-          competence {
-            id
-            name
-            color
-            type
-            grades
-            parents {
-              id
-              name
-              grades
-              color
-            }
-          }
-        }
-      }
-    }
-  `),
+const { data: entry } = useEntryById2Query({
   variables: { id: route.params.id },
 });
 </script>

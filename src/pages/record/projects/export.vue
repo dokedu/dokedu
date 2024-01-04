@@ -138,12 +138,11 @@
 import PageHeader from "@/components/page-header.vue";
 import PageWrapper from "@/components/page-wrapper.vue";
 import PageContent from "@/components/page-content.vue";
-import { useQuery } from "@urql/vue";
-import { graphql } from "@/gql";
 import { computed, reactive, ref } from "vue";
-import dButton from "../../../components/d-button/d-button.vue";
+import DButton from "../../../components/d-button/d-button.vue";
 import { Printer } from "lucide-vue-next";
 import { formatDate } from "@vueuse/core";
+import { useExportEventsQuery } from "@/gql/queries/events/exportEvents.ts";
 
 function gradeToText(grades: number[]): string {
   if (grades.length > 1) {
@@ -204,19 +203,7 @@ const events = computed<Event[] | []>(() => {
   });
 });
 
-const { data, fetching } = useQuery({
-  query: graphql(`
-    query exportEvents($input: ExportEventsInput!) {
-      exportEvents(input: $input) {
-        id
-        title
-        body
-        startsAt
-        endsAt
-        subjects
-      }
-    }
-  `),
+const { data, fetching } = useExportEventsQuery({
   variables: reactive({
     input: filter,
   }),

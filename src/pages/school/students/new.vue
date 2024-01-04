@@ -4,12 +4,11 @@
 
 <script lang="ts" setup>
 import DStudentForm from "@/components/d-student-form.vue";
-import { User } from "@/gql/graphql";
+import { User } from "@/gql/schema.ts";
 import { reactive } from "vue";
-import { useMutation } from "@urql/vue";
-import { graphql } from "@/gql";
 import { createNotification } from "@/composables/useToast";
 import { useRouter } from "vue-router/auto";
+import { useCreateStudentMutation } from "@/gql/mutations/users/createStudent.ts";
 
 const router = useRouter();
 
@@ -26,24 +25,7 @@ const student = reactive<User>({
   },
 });
 
-const { executeMutation: createStudent } = useMutation(
-  graphql(`
-    mutation createStudent($student: CreateStudentInput!) {
-      createStudent(input: $student) {
-        id
-        firstName
-        lastName
-        student {
-          id
-          birthday
-          grade
-          leftAt
-          joinedAt
-        }
-      }
-    }
-  `),
-);
+const { executeMutation: createStudent } = useCreateStudentMutation();
 
 const onCreateStudent = async () => {
   if (!student.firstName) {

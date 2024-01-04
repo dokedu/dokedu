@@ -19,21 +19,19 @@ import DInput from "@/components/d-input/d-input.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { useRouter, useRoute } from "vue-router/auto";
 import { computed } from "vue";
-import { useMutation, useQuery } from "@urql/vue";
-import userStudentGrade from "@/queries/userStudentGrade.query.ts";
-import updateUserStudentGradeMutation from "@/queries/updateUserStudentGrade.mutation.ts";
+import { useUpdateUserStudentGradeMutation } from "@/gql/mutations/userStudentGrades/updateUserStudentGrade.ts";
+import { useUserStudentGradeQuery } from "@/gql/queries/userStudentGrades/userStudentGrade.ts";
 
 const router = useRouter();
 const route = useRoute("/school/grades/[id]");
 
-const { data } = useQuery({
-  query: userStudentGrade,
+const { data } = useUserStudentGradeQuery({
   variables: {
     id: route.params.id,
   },
 });
 
-const { executeMutation: updateGrade } = useMutation(updateUserStudentGradeMutation);
+const { executeMutation: updateGrade } = useUpdateUserStudentGradeMutation();
 
 const grade = computed({
   get() {

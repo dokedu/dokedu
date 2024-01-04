@@ -1,0 +1,10 @@
+mutation createShare($input: CreateShareInput!) {
+    createShare(input: $input) {
+        permission
+        user {
+            id
+            firstName
+            lastName
+        }
+    }
+}

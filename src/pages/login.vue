@@ -61,11 +61,10 @@
 
 <script lang="ts" setup>
 import { computed, ref } from "vue";
-import signInMutation from "../queries/signIn.mutation";
-import { useMutation } from "@urql/vue";
 import { useRouter } from "vue-router/auto";
 import i18n from "@/i18n.ts";
 import { useWindowSize } from "@vueuse/core";
+import { useSignInMutation } from "@/gql/mutations/auth/signIn.ts";
 
 const router = useRouter();
 
@@ -75,46 +74,47 @@ const password = ref("");
 const { width } = useWindowSize();
 const isMobile = computed(() => width.value <= 900);
 
-const { executeMutation: signIn, error } = useMutation(signInMutation);
+const { executeMutation: signIn, error } = useSignInMutation();
 
 async function onSubmit() {
-  const {
-    data: {
-      signIn: { token, enabled_apps, language, setupComplete },
-    },
-  } = await signIn({
+  const { data } = await signIn({
     email: email.value,
     password: password.value,
   });
 
-  if (token) {
-    localStorage.setItem("enabled_apps", JSON.stringify(enabled_apps));
-    localStorage.setItem("authorization", token);
-    localStorage.setItem("language", language);
-    localStorage.setItem("setupComplete", setupComplete);
+  if (!data?.signIn.token) {
+    alert("Invalid credentials");
+    return;
+  }
 
-    // Set the i18n locale to the user's language
-    i18n.global.locale.value = language;
+  const { enabled_apps, token, setupComplete, language } = data.signIn;
 
-    if (setupComplete === false) {
-      await router.push({ name: "/setup/" });
-      return;
-    }
+  localStorage.setItem("enabled_apps", JSON.stringify(enabled_apps));
+  localStorage.setItem("authorization", token);
+  localStorage.setItem("language", language);
+  localStorage.setItem("setupComplete", setupComplete.toString());
 
-    // enabled_apps
-    if (enabled_apps.includes("record")) {
-      if (isMobile.value) {
-        await router.push({ name: "/m/record/entries/" });
-      } else {
-        await router.push({ name: "/record/entries/" });
-      }
-    } else if (enabled_apps.includes("drive")) {
-      await router.push({ name: "/drive/my-drive/" });
-      return;
+  // Set the i18n locale to the user's language
+  i18n.global.locale.value = language as unknown as any;
+
+  if (setupComplete === false) {
+    await router.push({ name: "/setup/" });
+    return;
+  }
+
+  // enabled_apps
+  if (enabled_apps.includes("record")) {
+    if (isMobile.value) {
+      await router.push({ name: "/m/record/entries/" });
     } else {
-      await router.push({ name: "/settings/profile" });
-      return;
+      await router.push({ name: "/record/entries/" });
     }
+  } else if (enabled_apps.includes("drive")) {
+    await router.push({ name: "/drive/my-drive/" });
+    return;
+  } else {
+    await router.push({ name: "/settings/profile" });
+    return;
   }
 }
 </script>

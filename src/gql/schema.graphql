@@ -1,0 +1,1197 @@
+# This file was generated. Do not edit manually.
+
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+"The @defer directive may be specified on a fragment spread to imply de-prioritization, that causes the fragment to be omitted in the initial response, and delivered as a subsequent response afterward. A query with @defer directive will cause the request to potentially return multiple responses, where non-deferred data is delivered in the initial response and data deferred delivered in a subsequent response. @include and @skip take precedence over @defer."
+directive @defer(if: Boolean = true, label: String) on FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+type Bucket {
+  createdAt: Time!
+  deletedAt: Time
+  files: [File!]!
+  id: ID!
+  name: String!
+  permission: FilePermission
+  shared: Boolean!
+  user: User!
+}
+
+type BucketConnection {
+  edges: [Bucket!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type Chat {
+  createdAt: Time!
+  deletedAt: Time
+  id: ID!
+  lastMessage: String
+  messages: [ChatMessage!]!
+  name: String
+  type: ChatType!
+  users: [User!]!
+}
+
+type ChatConnection {
+  edges: [Chat]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ChatMessage {
+  chat: Chat!
+  createdAt: Time!
+  id: ID!
+  message: String!
+  user: User!
+}
+
+type ChatUser {
+  chat: Chat!
+  createdAt: Time!
+  deletedAt: Time
+  id: ID!
+  user: User!
+}
+
+type Competence {
+  color: String!
+  competences(search: String, sort: CompetenceSort): [Competence]!
+  createdAt: Time!
+  grades: [Int!]!
+  id: ID!
+  name: String!
+  parents: [Competence!]!
+  sortOrder: Int!
+  tendency(userId: ID!): CompetenceTendency
+  type: CompetenceType!
+  userCompetences(userId: ID): [UserCompetence]!
+}
+
+type CompetenceConnection {
+  edges: [Competence]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type CompetenceTendency {
+  countChildCompetences: Int!
+  countLearnedCompetences: Int!
+  tendency: Float!
+}
+
+type CopyFilesPayload {
+  files: [File!]!
+}
+
+type DeleteFilePayload {
+  file: File!
+  success: Boolean!
+}
+
+type DeleteFilesPayload {
+  files: [File!]!
+  success: Boolean!
+}
+
+type Domain {
+  createdAt: String!
+  id: ID!
+  name: String!
+}
+
+type DomainConnection {
+  edges: [Domain]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DownloadFilePayload {
+  url: String!
+}
+
+type DownloadFilesPayload {
+  "The url to download a zip file containing all the files."
+  url: String!
+}
+
+type Email {
+  address: String!
+  createdAt: String!
+  id: ID!
+  name: String!
+  type: EmailType!
+}
+
+type EmailAccount {
+  active: Boolean
+  createdAt: String!
+  description: String
+  id: ID!
+  members: [EmailGroupMember]
+  name: String!
+  quota: Int
+  type: EmailAccountType!
+  user: User
+}
+
+type EmailAccountConnection {
+  edges: [EmailAccount]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type EmailConnection {
+  edges: [Email]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type EmailForwarding {
+  createdAt: String!
+  id: ID!
+  origin: String!
+  target: String!
+}
+
+type EmailForwardingConnection {
+  edges: [EmailForwarding]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type EmailGroupMember {
+  createdAt: String!
+  id: ID!
+  memberOf: String!
+  name: String!
+}
+
+type EmailGroupMemberConnection {
+  edges: [EmailGroupMember]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type Entry {
+  body: String
+  createdAt: Time!
+  date: String!
+  deletedAt: Time
+  events: [Event!]!
+  files: [File!]!
+  id: ID!
+  subjects: [Competence!]!
+  tags: [Tag!]!
+  user: User!
+  userCompetences: [UserCompetence!]!
+  users: [User!]!
+}
+
+type EntryConnection {
+  edges: [Entry!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type Event {
+  body: String
+  competences: [Competence!]!
+  createdAt: Time!
+  deletedAt: Time
+  endsAt: Time!
+  id: ID!
+  image: File
+  recurrence: [String]
+  startsAt: Time!
+  title: String!
+}
+
+type EventConnection {
+  edges: [Event]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ExportEventsPayload {
+  body: String!
+  endsAt: String!
+  id: ID!
+  startsAt: String!
+  subjects: String!
+  title: String!
+}
+
+type File {
+  MIMEType: String!
+  bucket: Bucket!
+  createdAt: Time!
+  deletedAt: Time
+  fileType: FileType!
+  files: [File!]!
+  id: ID!
+  name: String!
+  parent: File
+  parents: [File!]!
+  size: Int!
+}
+
+type FileConnection {
+  edges: [File!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ForgotPasswordPayload {
+  success: Boolean!
+}
+
+type ImportStudentsPayload {
+  errors: [ImportStudentsError!]!
+  usersCreated: Int!
+  usersExisted: Int!
+}
+
+type MoveFilesPayload {
+  files: [File!]!
+}
+
+type Mutation {
+  acceptInvite(input: SignUpInput!, token: String!): SignInPayload!
+  addFileShare(input: ShareFileInput!): File!
+  addUserToChat(input: AddUserToChatInput!): ChatUser!
+  archiveEntry(id: ID!): Entry!
+  archiveEvent(id: ID!): Event!
+  archiveTag(id: ID!): Tag!
+  archiveUser(id: ID!): User!
+  archiveUserCompetence(id: ID!): UserCompetence!
+  copyFile(input: CopyFileInput!): File!
+  copyFiles(input: CopyFilesInput!): CopyFilesPayload!
+  createChat(input: CreateChatInput!): Chat!
+  createCompetence(input: CreateCompetenceInput!): Competence!
+  createDomain(input: CreateDomainInput!): Domain
+  createEmail(input: CreateEmailInput!): Email
+  createEmailAccount(input: CreateEmailAccountInput!): EmailAccount
+  createEmailForwarding(input: CreateEmailForwardingInput!): EmailForwarding
+  createEmailGroup(input: CreateEmailGroupInput!): EmailAccount
+  createEmailGroupMember(input: CreateEmailGroupMemberInput!): EmailGroupMember
+  createEntry: Entry!
+  createEntryCompetence(input: CreateEntryCompetenceInput!): Entry!
+  createEntryEvent(input: CreateEntryEventInput!): Entry!
+  createEntryFile(input: CreateEntryFileInput!): Entry!
+  createEntryTag(input: CreateEntryTagInput!): Entry!
+  createEntryUser(input: CreateEntryUserInput!): Entry!
+  createEvent(input: CreateEventInput!): Event!
+  createFolder(input: CreateFolderInput!): File!
+  createReport(input: CreateReportInput!): Report!
+  createSchoolYear(input: CreateSchoolYearInput!): SchoolYear!
+  createShare(input: CreateShareInput!): ShareUser!
+  createSharedDrive(name: String!): Bucket!
+  createStudent(input: CreateStudentInput!): User!
+  createSubject(input: CreateSubjectInput!): Subject!
+  createTag(input: CreateTagInput!): Tag!
+  createUser(input: CreateUserInput!): User!
+  createUserCompetence(input: CreateUserCompetenceInput!): UserCompetence!
+  deleteChat(input: DeleteChatInput!): Chat!
+  deleteDomain(input: DeleteDomainInput!): Domain
+  deleteEmail(input: DeleteEmailInput!): Email
+  deleteEmailAccount(input: DeleteEmailAccountInput!): EmailAccount
+  deleteEmailForwarding(input: DeleteEmailForwardingInput!): EmailForwarding
+  deleteEmailGroup(id: ID!): EmailAccount
+  deleteEmailGroupMember(input: DeleteEmailGroupMemberInput!): EmailGroupMember
+  deleteEntryCompetence(input: DeleteEntryCompetenceInput!): Entry!
+  deleteEntryEvent(input: DeleteEntryEventInput!): Entry!
+  deleteEntryFile(input: DeleteEntryFileInput!): Entry!
+  deleteEntryTag(input: DeleteEntryTagInput!): Entry!
+  deleteEntryUser(input: DeleteEntryUserInput!): Entry!
+  deleteFile(input: DeleteFileInput!): DeleteFilePayload!
+  deleteFiles(input: DeleteFilesInput!): DeleteFilesPayload!
+  deleteSchoolYear(id: ID!): SchoolYear!
+  deleteShare(input: DeleteShareInput!): ShareUser!
+  deleteSharedDrive(id: ID!): Bucket!
+  deleteSubject(id: ID!): Subject!
+  downloadFile(input: DownloadFileInput!): DownloadFilePayload!
+  downloadFiles(input: DownloadFilesInput!): DownloadFilesPayload!
+  editShare(input: CreateShareInput!): ShareUser!
+  forgotPassword(input: ForgotPasswordInput!): ForgotPasswordPayload!
+  importStudents(input: ImportStudentsInput!): ImportStudentsPayload!
+  moveFile(input: MoveFileInput!): File!
+  moveFiles(input: MoveFilesInput!): MoveFilesPayload!
+  previewFile(input: PreviewFileInput!): PreviewFilePayload!
+  removeFileShare(input: ID!): File!
+  removeUserFromChat(input: RemoveUserFromChatInput!): ChatUser!
+  renameFile(input: RenameFileInput!): File!
+  renameSharedDrive(input: RenameSharedDriveInput!): Bucket!
+  resetPassword(input: ResetPasswordInput!): ResetPasswordPayload!
+  sendMessage(input: SendMessageInput!): ChatMessage!
+  sendUserInvite(id: ID!): Boolean!
+  setUserAttendanceState(date: Time!, state: UserAttendanceState!, userId: ID!): UserAttendance!
+  signIn(input: SignInInput!): SignInPayload!
+  signOut: Boolean!
+  toggleEventCompetence(input: AddEventCompetenceInput!): Event!
+  updateChat(input: UpdateChatInput!): Chat!
+  updateCompetence(input: UpdateCompetenceInput!): Competence!
+  updateCompetenceSorting(input: UpdateCompetenceSortingInput!): [Competence]!
+  updateDailyAttendance(date: Time!, state: UserAttendanceState!): [UserAttendance!]!
+  updateEmailAccount(input: UpdateEmailAccountInput!): EmailAccount
+  updateEmailGroup(input: UpdateEmailGroupInput!): EmailAccount
+  updateEntry(input: UpdateEntryInput!): Entry!
+  updateEntryUserCompetenceLevel(input: UpdateEntryUserCompetenceLevel!): Entry!
+  updateEvent(input: UpdateEventInput!): Event!
+  updateOrganisation(input: UpdateOrganisationInput!): Organisation!
+  updatePassword(newPassword: String!, oldPassword: String!): Boolean!
+  updateSchoolYear(input: UpdateSchoolYearInput!): SchoolYear!
+  updateSubject(input: UpdateSubjectInput!): Subject!
+  updateTag(id: ID!, input: CreateTagInput!): Tag!
+  updateUser(input: UpdateUserInput!): User!
+  updateUserLanguage(language: UserLanguage!): User!
+  updateUserStudentGrade(input: UpdateUserStudentGradesInput!): UserStudentGrades!
+  uploadFile(input: FileUploadInput!): File!
+  uploadFiles(input: FileUploadInput!): UploadFilesPayload!
+}
+
+type Organisation {
+  id: ID!
+  legalName: String!
+  name: String!
+  owner: User!
+  phone: String
+  website: String
+}
+
+type PageInfo {
+  currentPage: Int!
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
+
+type PreviewFilePayload {
+  url: String!
+}
+
+type Query {
+  EmailGroupMember(id: ID!): EmailGroupMember
+  EmailGroupMembers: EmailGroupMemberConnection
+  bucket(id: ID!): Bucket!
+  buckets(input: BucketFilterInput, limit: Int, offset: Int): BucketConnection!
+  chat(id: ID!): Chat!
+  chats(limit: Int, offset: Int): ChatConnection!
+  competence(id: ID!): Competence!
+  competences(
+    filter: CompetenceFilterInput
+    limit: Int
+    offset: Int
+    search: String
+    sort: CompetenceSort
+  ): CompetenceConnection!
+  domain(id: ID!): Domain
+  domains: DomainConnection
+  email(id: ID!): Email
+  emailAccount(id: ID!): EmailAccount
+  emailAccounts(filter: EmailAccountFilter): EmailAccountConnection
+  emailForwarding(id: ID!): EmailForwarding
+  emailForwardings: EmailForwardingConnection
+  emails: EmailConnection
+  entries(filter: EntryFilterInput, limit: Int, offset: Int, search: String, sortBy: EntrySortBy): EntryConnection!
+  entry(id: ID!): Entry!
+  event(id: ID!): Event!
+  events(filter: EventFilterInput, limit: Int, offset: Int, order: EventOrderBy, search: String): EventConnection!
+  exportEvents(input: ExportEventsInput!): [ExportEventsPayload]!
+  file(id: ID!): File!
+  files(input: FilesFilterInput, limit: Int, offset: Int): FileConnection!
+  me: User!
+  organisation: Organisation
+  report(id: ID!): Report!
+  reports(limit: Int, offset: Int): ReportConnection!
+  schoolYear(id: ID!): SchoolYear!
+  schoolYears(limit: Int, offset: Int): SchoolYearConnection!
+  shares(input: ShareInput): [ShareUser!]
+  subject(id: ID!): Subject!
+  subjects(limit: Int, offset: Int): SubjectConnection!
+  tag(id: ID!): Tag!
+  tags(limit: Int, offset: Int, search: String): TagConnection!
+  user(id: ID!): User!
+  userAttendanceOverview(date: Time!): [UserAttendance!]!
+  userStudent(id: ID!): UserStudent!
+  userStudentGrade(id: ID!): UserStudentGrades!
+  userStudentGrades(limit: Int, offset: Int): UserStudentGradesConnection!
+  userStudents(limit: Int, offset: Int): UserStudentConnection!
+  users(filter: UserFilterInput, limit: Int, offset: Int, search: String): UserConnection!
+}
+
+type Report {
+  createdAt: Time!
+  deletedAt: Time
+  file: File
+  filterTags: [ID!]!
+  format: ReportFormat!
+  from: Time!
+  id: ID!
+  kind: ReportKind!
+  meta: String!
+  status: ReportStatus!
+  studentUser: User!
+  to: Time!
+  user: User!
+}
+
+type ReportConnection {
+  edges: [Report]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ResetPasswordPayload {
+  invalidToken: Boolean!
+  success: Boolean!
+  tokenExpired: Boolean!
+  unableToReset: Boolean!
+  unauthorized: Boolean!
+}
+
+type SchoolYear {
+  description: String!
+  id: ID!
+  year: Int!
+}
+
+type SchoolYearConnection {
+  edges: [SchoolYear!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ShareUser {
+  permission: FilePermission!
+  user: User!
+}
+
+type SignInPayload {
+  enabled_apps: [String!]!
+  language: String!
+  setupComplete: Boolean!
+  token: String!
+}
+
+type Subject {
+  id: ID!
+  name: String!
+}
+
+type SubjectConnection {
+  edges: [Subject!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type Subscription {
+  messageAdded(chatId: ID!): ChatMessage!
+}
+
+type Tag {
+  color: String!
+  createdAt: Time!
+  deletedAt: Time
+  id: ID!
+  name: String!
+}
+
+type TagConnection {
+  edges: [Tag]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type UploadFilesPayload {
+  files: [File!]!
+}
+
+type User {
+  createdAt: Time!
+  deletedAt: Time
+  email: String
+  emailAccounts: [EmailAccount]
+  firstName: String!
+  id: ID!
+  inviteAccepted: Boolean!
+  language: UserLanguage
+  lastName: String!
+  role: UserRole!
+  student: UserStudent
+}
+
+type UserAttendance {
+  date: Time!
+  id: ID!
+  state: UserAttendanceState!
+  user: User!
+}
+
+type UserCompetence {
+  competence: Competence!
+  createdAt: Time!
+  createdBy: User
+  entry: Entry
+  id: ID!
+  level: Int!
+  user: User!
+}
+
+type UserCompetenceConnection {
+  edges: [UserCompetence]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type UserConnection {
+  edges: [User]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type UserStudent {
+  birthday: Time
+  comments: String
+  competencesCount: Int!
+  createdAt: Time!
+  deletedAt: Time
+  emoji: String
+  entriesCount: Int!
+  eventsCount: Int!
+  grade: Int!
+  id: ID!
+  joinedAt: Time
+  leftAt: Time
+  nationality: String
+  user: User!
+}
+
+type UserStudentConnection {
+  edges: [UserStudent]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type UserStudentGrades {
+  grade: Int!
+  id: ID!
+  schoolYear: SchoolYear!
+  student: UserStudent!
+  subject: Subject!
+}
+
+type UserStudentGradesConnection {
+  edges: [UserStudentGrades!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+enum ChatType {
+  CHANNEL
+  GROUP
+  PRIVATE
+}
+
+enum CompetenceSortField {
+  created_at
+  name
+  sort_order
+}
+
+enum CompetenceType {
+  competence
+  group
+  subject
+}
+
+enum EmailAccountType {
+  GROUP
+  INDIVIDUAL
+}
+
+enum EmailType {
+  ALIAS
+  LIST
+  PRIMARY
+}
+
+enum EntrySortBy {
+  createdAt_ASC
+  createdAt_DESC
+  date_ASC
+  date_DESC
+}
+
+enum EventOrderBy {
+  endsAt_ASC
+  endsAt_DESC
+  startsAt_ASC
+  startsAt_DESC
+}
+
+enum FilePermission {
+  Manager
+  Viewer
+}
+
+enum FileType {
+  blob
+  folder
+}
+
+enum ImportStudentsError {
+  DATA_WRONG
+  FORMAT_WRONG
+  GRADE_WRONG
+  HEADER_WRONG
+  PERMISSION_DENIED
+}
+
+enum ReportFormat {
+  docx
+  pdf
+}
+
+enum ReportKind {
+  all_entries
+  competences
+  entries
+  learned_competences
+  subjects
+}
+
+enum ReportStatus {
+  done
+  error
+  pending
+  processing
+}
+
+enum SortDirection {
+  asc
+  desc
+}
+
+enum UserAttendanceState {
+  ABSENT
+  LATE
+  PRESENT
+  SICK
+  UNKNOWN
+}
+
+enum UserLanguage {
+  de
+  en
+}
+
+enum UserOrderBy {
+  firstNameAsc
+  firstNameDesc
+  lastNameAsc
+  lastNameDesc
+}
+
+enum UserRole {
+  admin
+  educator
+  owner
+  parent
+  student
+  teacher
+}
+
+scalar Time
+
+scalar Upload
+
+input AddEventCompetenceInput {
+  competenceId: ID!
+  eventId: ID!
+}
+
+input AddUserToChatInput {
+  chatId: ID!
+  userId: ID!
+}
+
+input BucketFilterInput {
+  shared: Boolean
+}
+
+input CompetenceFilterInput {
+  parents: [ID]
+  type: [CompetenceType]
+  userId: ID
+}
+
+input CompetenceSort {
+  field: CompetenceSortField!
+  order: SortDirection!
+}
+
+input CopyFileInput {
+  id: ID!
+  targetId: ID!
+}
+
+input CopyFilesInput {
+  ids: [ID!]!
+  targetId: ID!
+}
+
+input CreateChatInput {
+  name: String
+}
+
+input CreateCompetenceInput {
+  name: String!
+  parentId: ID!
+}
+
+input CreateDomainInput {
+  name: String!
+}
+
+input CreateEmailAccountInput {
+  description: String
+  name: String!
+  quota: Int
+  type: EmailAccountType!
+}
+
+input CreateEmailForwardingInput {
+  origin: String!
+  target: String!
+}
+
+input CreateEmailGroupInput {
+  description: String
+  members: [String]
+  name: String!
+}
+
+input CreateEmailGroupMemberInput {
+  memberOf: String!
+  name: String!
+}
+
+input CreateEmailInput {
+  address: String!
+  name: String!
+  type: EmailType!
+}
+
+input CreateEntryCompetenceInput {
+  competenceId: ID!
+  entryId: ID!
+}
+
+input CreateEntryEventInput {
+  entryId: ID!
+  eventId: ID!
+}
+
+input CreateEntryFileInput {
+  entryId: ID!
+  fileId: ID!
+}
+
+input CreateEntryTagInput {
+  entryId: ID!
+  tagId: ID!
+}
+
+input CreateEntryUserInput {
+  entryId: ID!
+  userId: ID!
+}
+
+input CreateEventInput {
+  body: String
+  endsAt: String
+  image: Upload
+  recurrence: [String]
+  startsAt: String
+  title: String!
+}
+
+input CreateFolderInput {
+  bucketId: ID
+  name: String!
+  parentId: ID
+}
+
+input CreateReportInput {
+  filterTags: [ID!]!
+  format: ReportFormat!
+  from: Time!
+  kind: ReportKind!
+  studentUser: ID!
+  to: Time!
+}
+
+input CreateSchoolYearInput {
+  year: Int!
+}
+
+input CreateShareInput {
+  bucketId: ID
+  fileId: ID
+  permission: FilePermission!
+  user: ID!
+}
+
+input CreateStudentInput {
+  birthday: Time
+  emoji: String
+  firstName: String!
+  grade: Int!
+  joinedAt: Time
+  lastName: String!
+  leftAt: Time
+}
+
+input CreateSubjectInput {
+  name: String!
+}
+
+input CreateTagInput {
+  color: String!
+  name: String!
+}
+
+input CreateUserCompetenceInput {
+  competenceId: ID!
+  level: Int!
+  userId: ID!
+}
+
+input CreateUserInput {
+  birthday: Time
+  email: String!
+  firstName: String!
+  joinedAt: Time
+  lastName: String!
+  leftAt: Time
+  role: UserRole!
+}
+
+input CreateUserStudentGradesInput {
+  grade: Int!
+  schoolYear: ID!
+  student: ID!
+  subject: ID!
+}
+
+input DeleteChatInput {
+  id: ID!
+}
+
+input DeleteDomainInput {
+  id: ID!
+}
+
+input DeleteEmailAccountInput {
+  id: ID!
+}
+
+input DeleteEmailForwardingInput {
+  id: ID!
+}
+
+input DeleteEmailGroupMemberInput {
+  id: ID!
+}
+
+input DeleteEmailInput {
+  id: ID!
+}
+
+input DeleteEntryCompetenceInput {
+  competenceId: ID!
+  entryId: ID!
+}
+
+input DeleteEntryEventInput {
+  entryId: ID!
+  eventId: ID!
+}
+
+input DeleteEntryFileInput {
+  entryId: ID!
+  fileId: ID!
+}
+
+input DeleteEntryTagInput {
+  entryId: ID!
+  tagId: ID!
+}
+
+input DeleteEntryUserInput {
+  entryId: ID!
+  userId: ID!
+}
+
+input DeleteFileInput {
+  id: ID!
+}
+
+input DeleteFilesInput {
+  ids: [ID!]!
+}
+
+input DeleteShareInput {
+  bucketId: ID
+  fileId: ID
+  user: ID!
+}
+
+input DownloadFileInput {
+  id: ID!
+}
+
+input DownloadFilesInput {
+  ids: [ID!]!
+}
+
+input EmailAccountFilter {
+  type: EmailAccountType
+}
+
+input EntryFilterInput {
+  authors: [ID]
+  competences: [ID]
+  deleted: Boolean
+  from: Time
+  tags: [ID]
+  to: Time
+  users: [ID]
+}
+
+input EventFilterInput {
+  deleted: Boolean
+  from: Time
+  to: Time
+}
+
+input ExportEventsInput {
+  deleted: Boolean!
+  from: String!
+  to: String!
+}
+
+input FileUploadInput {
+  "The shared drive to upload the file to if empty the file will be uploaded to the root folder of the user."
+  bucketId: ID
+  file: Upload!
+  "The folder to upload the file to if empty the file will be uploaded to the root folder of the user."
+  parentId: ID
+}
+
+input FilesFilterInput {
+  bucketId: String
+  myBucket: Boolean
+  parentId: String
+}
+
+input ForgotPasswordInput {
+  email: String!
+}
+
+input GenerateFileURLInput {
+  id: ID!
+}
+
+input ImportStudentsInput {
+  file: Upload!
+}
+
+input MoveFileInput {
+  id: ID!
+  targetId: ID
+}
+
+input MoveFilesInput {
+  ids: [ID!]!
+  targetId: ID!
+}
+
+input MyFilesFilterInput {
+  parentId: String
+}
+
+input PreviewFileInput {
+  id: ID!
+}
+
+input RemoveUserFromChatInput {
+  chatId: ID!
+  userId: ID!
+}
+
+input RenameFileInput {
+  id: ID!
+  name: String!
+}
+
+input RenameSharedDriveInput {
+  id: ID!
+  name: String!
+}
+
+input ResetPasswordInput {
+  password: String!
+  token: String
+}
+
+input SendMessageInput {
+  chatId: ID!
+  message: String!
+}
+
+input ShareFileInput {
+  emails: [String!]!
+  fileId: ID!
+  permission: FilePermission!
+  users: [ID!]!
+}
+
+input ShareInput {
+  bucketId: ID
+  fileId: ID
+}
+
+input SharedDriveFilterInput {
+  folder: String
+}
+
+input SignInInput {
+  email: String!
+  password: String!
+}
+
+input SignUpInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+}
+
+input SortCompetenceInput {
+  id: ID!
+  sortOrder: Int!
+}
+
+input UpdateChatInput {
+  id: ID!
+  name: String
+}
+
+input UpdateCompetenceInput {
+  color: String
+  id: ID!
+}
+
+input UpdateCompetenceSortingInput {
+  competences: [SortCompetenceInput!]!
+}
+
+input UpdateEmailAccountInput {
+  active: Boolean
+  description: String
+  id: ID!
+  name: String
+  quota: Int
+  type: EmailAccountType
+}
+
+input UpdateEmailGroupInput {
+  description: String
+  id: ID!
+  members: [String]
+  name: String
+}
+
+input UpdateEntryInput {
+  body: String
+  date: String
+  id: ID!
+}
+
+input UpdateEntryUserCompetenceLevel {
+  competenceId: ID!
+  entryId: ID!
+  level: Int!
+}
+
+input UpdateEventInput {
+  body: String
+  endsAt: String
+  id: ID!
+  image: Upload
+  recurrence: [String]
+  startsAt: String
+  title: String
+}
+
+input UpdateOrganisationInput {
+  id: ID!
+  legalName: String
+  name: String
+  phone: String
+  website: String
+}
+
+input UpdateSchoolYearInput {
+  id: ID!
+  year: Int!
+}
+
+input UpdateSubjectInput {
+  id: ID!
+  name: String!
+}
+
+input UpdateUserCompetenceInput {
+  competenceId: ID!
+  level: Int!
+  userId: ID!
+}
+
+input UpdateUserInput {
+  birthday: Time
+  email: String
+  emoji: String
+  firstName: String!
+  grade: Int
+  id: ID!
+  joinedAt: Time
+  lastName: String!
+  leftAt: Time
+}
+
+input UpdateUserStudentGradesInput {
+  grade: Int!
+  id: ID!
+}
+
+input UserCompetenceFilterInput {
+  competenceID: ID
+  userID: ID
+}
+
+input UserFileFilterInput {
+  folderId: String
+}
+
+input UserFilterInput {
+  orderBy: UserOrderBy
+  role: [UserRole]
+  showDeleted: Boolean
+}

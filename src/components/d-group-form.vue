@@ -49,14 +49,14 @@
 <script lang="ts" setup>
 import DSidebar from "@/components/d-sidebar/d-sidebar.vue";
 import DSelect from "@/components/d-select/d-select.vue";
-import { graphql } from "@/gql";
 import DInput from "@/components/d-input/d-input.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { computed, ref, toRef, watch } from "vue";
 import { useRouter } from "vue-router/auto";
-import { useQuery } from "@urql/vue";
-import { EmailAccount } from "@/gql/graphql";
 import { useI18n } from "vue-i18n";
+import { useDomainsQuery } from "@/gql/queries/domains/domains.ts";
+import { useGroupUsersQuery } from "@/gql/queries/emailAccounts/groupUsers.ts";
+import { EmailAccount } from "@/gql/schema.ts";
 
 const router = useRouter();
 const t = useI18n().t;
@@ -88,37 +88,10 @@ const members = ref(
   }) as string[],
 );
 
-const { data: domainData } = useQuery({
-  query: graphql(`
-    query domains {
-      domains {
-        edges {
-          id
-          name
-          createdAt
-        }
-        pageInfo {
-          hasNextPage
-          hasPreviousPage
-        }
-      }
-    }
-  `),
-});
+const { data: domainData } = useDomainsQuery({});
 
 const userSearch = ref("");
-const { data: userData } = useQuery({
-  query: graphql(`
-    query groupUsers {
-      emailAccounts(filter: { type: INDIVIDUAL }) {
-        edges {
-          id
-          name
-        }
-      }
-    }
-  `),
-});
+const { data: userData } = useGroupUsersQuery({});
 
 const userOptions = computed(() => {
   return userData?.value?.emailAccounts?.edges?.map((edge: any) => ({

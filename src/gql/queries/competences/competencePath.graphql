@@ -1,0 +1,16 @@
+query competencePath($id: ID!) {
+    competence(id: $id) {
+        id
+        name
+        type
+        color
+        grades
+        parents {
+            id
+            name
+            type
+            grades
+            color
+        }
+    }
+}

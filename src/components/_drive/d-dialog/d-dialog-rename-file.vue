@@ -17,9 +17,7 @@ import DInput from "@/components/d-input/d-input.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { toRef } from "vue";
 import { useVModel } from "@vueuse/core";
-import { useMutation } from "@urql/vue";
-import { graphql } from "@/gql";
-import { File } from "@/gql/graphql.ts";
+import { useRenameFileMutation } from "@/gql/mutations/files/renameFile.ts";
 
 const props = defineProps<{
   modelValue: File | null;
@@ -35,19 +33,11 @@ function onClose() {
   emit("close");
 }
 
-const { executeMutation: renameFile } = useMutation(
-  graphql(`
-    mutation renameFile($input: RenameFileInput!) {
-      renameFile(input: $input) {
-        id
-        name
-      }
-    }
-  `),
-);
+const { executeMutation: renameFile } = useRenameFileMutation();
 
 function onSave() {
   if (!file.value) return;
+
   renameFile({
     input: {
       id: file.value.id,

@@ -78,17 +78,16 @@
 </template>
 
 <script lang="ts" setup>
-import { useMutation, useQuery } from "@urql/vue";
 import { Plus, X, Check } from "lucide-vue-next";
 import { reactive, ref, toRef } from "vue";
-import { graphql } from "@/gql";
-import { Entry, User } from "@/gql/graphql";
 import DDialog from "@/components/d-dialog/d-dialog.vue";
-import createEntryUserMutation from "@/queries/createEntryUser.mutation.ts";
-import deleteEntryUserMutation from "@/queries/deleteEntryUser.mutation.ts";
+import { useDeleteEntryUserInputMutation } from "@/gql/mutations/entries/deleteEntryUser.ts";
+import { useCreateEntryUserMutation } from "@/gql/mutations/entries/createEntryUser.ts";
+import { useStudentListQuery } from "@/gql/queries/users/studentList.ts";
+import { Entry, User } from "@/gql/schema.ts";
 
-const { executeMutation: deleteEntryUser } = useMutation(deleteEntryUserMutation);
-const { executeMutation: createEntryUser } = useMutation(createEntryUserMutation);
+const { executeMutation: deleteEntryUser } = useDeleteEntryUserInputMutation();
+const { executeMutation: createEntryUser } = useCreateEntryUserMutation();
 
 const props = defineProps<{
   entry: Partial<Entry>;
@@ -113,27 +112,7 @@ function formattedStudentName(student: User) {
   }
 }
 
-const { data: students } = useQuery({
-  query: graphql(`
-    query studentList($search: String) {
-      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {
-        edges {
-          id
-          firstName
-          lastName
-          student {
-            id
-            grade
-            emoji
-          }
-        }
-      }
-    }
-  `),
-  variables: reactive({
-    search: search,
-  }),
-});
+const { data: students } = useStudentListQuery({ variables: reactive({ search: search }) });
 
 const entry = toRef(props, "entry");
 

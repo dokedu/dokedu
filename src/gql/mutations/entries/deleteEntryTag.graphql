@@ -1,0 +1,5 @@
+mutation deleteEntryTagInput($input: DeleteEntryTagInput!) {
+  deleteEntryTag(input: $input) {
+    id
+  }
+}

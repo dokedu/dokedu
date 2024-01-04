@@ -48,13 +48,12 @@ import DInput from "@/components/d-input/d-input.vue";
 import { useVModel, useWindowSize } from "@vueuse/core";
 import { Plus, X, Check } from "lucide-vue-next";
 import { computed, reactive, ref } from "vue";
-import { graphql } from "@/gql";
-import { useMutation, useQuery } from "@urql/vue";
-import deleteEntryUserMutation from "@/queries/deleteEntryUser.mutation.ts";
-import createEntryUserMutation from "@/queries/createEntryUser.mutation.ts";
+import { useDeleteEntryUserInputMutation } from "@/gql/mutations/entries/deleteEntryUser.ts";
+import { useCreateEntryUserMutation } from "@/gql/mutations/entries/createEntryUser.ts";
+import { useUsersQuery } from "@/gql/queries/users/users.ts";
 
-const { executeMutation: deleteEntryUser } = useMutation(deleteEntryUserMutation);
-const { executeMutation: createEntryUser } = useMutation(createEntryUserMutation);
+const { executeMutation: deleteEntryUser } = useDeleteEntryUserInputMutation();
+const { executeMutation: createEntryUser } = useCreateEntryUserMutation();
 
 const search = ref("");
 const sheetOpen = ref(false);
@@ -74,18 +73,7 @@ const emit = defineEmits(["update:modelValue"]);
 
 const students = useVModel(props, "modelValue", emit);
 
-const { data } = useQuery({
-  query: graphql(`
-    query users($search: String) {
-      users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {
-        edges {
-          id
-          firstName
-          lastName
-        }
-      }
-    }
-  `),
+const { data } = useUsersQuery({
   variables: reactive({ search }),
 });
 

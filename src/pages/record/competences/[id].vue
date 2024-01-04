@@ -33,7 +33,7 @@
       </template>
     </div>
     <DTable
-      :query="competenceQuery"
+      :query="CompetenceDocument"
       :columns="columns"
       hideHeader
       objectName="competences"
@@ -58,15 +58,15 @@
 <script setup lang="ts">
 import PageHeader from "@/components/page-header.vue";
 import PageWrapper from "@/components/page-wrapper.vue";
-import { graphql } from "@/gql";
 import { computed, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router/auto";
 import DTable from "@/components/d-table/d-table.vue";
 import { watchDebounced } from "@vueuse/core";
 import type { PageVariables } from "@/types/types.ts";
-import { Competence } from "@/gql/graphql";
 import { Folder } from "lucide-vue-next";
-import { useQuery } from "@urql/vue";
+import { CompetenceDocument } from "@/gql/queries/competences/competence.ts";
+import { useZeCompetenceParentsQuery } from "@/gql/queries/competences/zeCompetenceParents.ts";
+import { Competence } from "@/gql/schema.ts";
 
 const route = useRoute<"/record/competences/[id]">();
 const router = useRouter();
@@ -144,54 +144,7 @@ function goToCompetence<Type extends { id: string; type: string }>(row: Type) {
   router.push({ name: "/record/competences/[id]", params: { id: row.id } });
 }
 
-const competenceQuery = graphql(`
-  query competence($search: String, $limit: Int, $offset: Int, $filter: CompetenceFilterInput) {
-    competences(
-      filter: $filter
-      search: $search
-      limit: $limit
-      offset: $offset
-      sort: { field: sort_order, order: asc }
-    ) {
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-      }
-      edges {
-        id
-        name
-        type
-        grades
-        color
-        sortOrder
-        parents {
-          id
-          name
-          type
-          grades
-        }
-      }
-    }
-  }
-`);
-
-const { data: parents } = useQuery({
-  query: graphql(`
-    query zeCompetenceParents($id: ID!) {
-      competence(id: $id) {
-        id
-        name
-        type
-        grades
-        parents {
-          id
-          name
-          type
-          grades
-        }
-      }
-    }
-  `),
+const { data: parents } = useZeCompetenceParentsQuery({
   variables: reactive({ id: id }),
 });
 

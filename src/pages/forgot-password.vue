@@ -45,24 +45,15 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
-import { useMutation } from "@urql/vue";
-import { graphql } from "@/gql";
 import { useI18n } from "vue-i18n";
+import { useForgotPasswordMutation } from "@/gql/mutations/auth/forgotPassword.ts";
 
 const { t } = useI18n();
 
 const email = ref("");
 const successBanner = ref(false);
 
-const { executeMutation: forgotPassword } = useMutation(
-  graphql(`
-    mutation forgotPassword($input: ForgotPasswordInput!) {
-      forgotPassword(input: $input) {
-        success
-      }
-    }
-  `),
-);
+const { executeMutation: forgotPassword } = useForgotPasswordMutation();
 
 async function onSubmit() {
   const { data } = await forgotPassword({
