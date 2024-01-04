@@ -22,7 +22,7 @@
       :search="search"
       :columns="columns"
       objectName="emailAccounts"
-      :query="emailAccountsQuery"
+      :query="EmailAccountsDocument"
       @row-click="goToEmailAccount"
     >
     </DTable>
@@ -40,7 +40,7 @@ import DTable from "@/components/d-table/d-table.vue";
 import { useRouter } from "vue-router/auto";
 import { watchDebounced } from "@vueuse/core";
 import type { PageVariables } from "@/types/types.ts";
-import { useEmailAccountsQuery } from "@/gql/queries/emailAccounts/emailAccounts.ts";
+import { EmailAccountsDocument } from "@/gql/queries/emailAccounts/emailAccounts.ts";
 
 const router = useRouter();
 const search = ref("");
@@ -83,8 +83,6 @@ watchDebounced(
   },
   { debounce: 250, maxWait: 500 },
 );
-
-const emailAccountsQuery = useEmailAccountsQuery({});
 
 const goToEmailAccount = <Type extends { id: string }>(row: Type) => {
   router.push({ name: "/admin/groups/[id]", params: { id: row.id } });

@@ -47,6 +47,7 @@
     </div>
   </div>
 </template>
+
 <script setup lang="ts">
 import { useRoute } from "vue-router/auto";
 import { computed, reactive } from "vue";
@@ -57,6 +58,7 @@ import DInput from "@/components/d-input/d-input.vue";
 import { useChatWithMembersQuery } from "@/gql/queries/chats/chatWithMembers.ts";
 import { useUpdateChatMutation } from "@/gql/mutations/chats/updateChat.ts";
 import { useRemoveUserFromChatMutation } from "@/gql/mutations/chats/removeUserFromChat.ts";
+import { ChatType } from "@/gql/schema.ts";
 
 const route = useRoute("/chat/chats/[id]/edit");
 

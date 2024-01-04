@@ -22,11 +22,11 @@ import DCompetence from "@/components/d-competence/d-competence.vue";
 import { Competence } from "@/gql/schema.ts";
 import { useRoute } from "vue-router/auto";
 import { reactive } from "vue";
-import { useStudentCompetenceQuery } from "@/gql/queries/competences/studentCompetence.ts";
+import { useStudentCompetencesQuery } from "@/gql/queries/competences/studentCompetences.ts";
 
 const route = useRoute("/record/students/[id]/competences/");
 
-const { data } = useStudentCompetenceQuery({
+const { data } = useStudentCompetencesQuery({
   variables: reactive({
     userId: route.params.id as unknown as string,
   }),
