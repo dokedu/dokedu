@@ -59,15 +59,7 @@
       </div>
     </template>
     <template #empty>
-      <div class="flex h-[75vh] w-full flex-1 items-center justify-center gap-3 px-8 py-3">
-        <div class="flex select-none flex-col items-center justify-center rounded-xl bg-muted p-8">
-          <div class="mb-4 w-fit rounded-xl bg-strong p-2.5">
-            <FileText class="stroke-colors-strong" :size="24" />
-          </div>
-          <div class="mb-2 text-center text-sm font-medium text-strong">{{ $t("drop_file_here") }}</div>
-          <div class="text-center text-sm text-subtle">{{ $t("or_use_new_button") }}</div>
-        </div>
-      </div>
+      <d-empty :icon="FileText" :title="$t('drop_file_here')" :text="$t('or_use_new_button')"></d-empty>
     </template>
   </d-table>
 
@@ -105,6 +97,7 @@ import useDownloadFile from "@/composables/useDownloadFile";
 import DDialogRenameFile from "./d-dialog/d-dialog-rename-file.vue";
 import DDialogDeleteFile from "./d-dialog/d-dialog-delete-file.vue";
 import DTable from "@/components/d-table/d-table.vue";
+import DEmpty from "@/components/d-empty/d-empty.vue";
 import type { PageVariables } from "@/types/types.ts";
 import { computed, reactive, ref, toRefs } from "vue";
 import { formatDate } from "@vueuse/core";
