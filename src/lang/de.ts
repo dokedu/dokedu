@@ -203,7 +203,7 @@ export const de = {
   shared_drives: "Geteilte Ablagen",
   my_drive: "Meine Ablage",
   share: "Teilen",
-  no_shared_drives_title: "Sieht so aus, als hättest du keine Geteilten Ablagen",
+  no_shared_drives_title: "Sieht so aus, als hättest du keine geteilten Ablagen",
   no_shared_drives_text: "Wenn andere Personen ihre Ablage mit dir teilen, wird diese hier erscheinen",
   folder: "Ordner | Ordner",
   folder_name: "Name des Ordners",
