@@ -17,10 +17,12 @@
     :key="row.id"
     ref="items"
     :draggable="draggable"
-    class="group/row grid border border-transparent transition-colors hover:bg-neutral-50"
-    :class="{
-      ' border-blue-500 bg-blue-100': dragoverItem === row.id && draggingItem !== row.id
-    }"
+    class="group/row grid border transition-colors hover:bg-neutral-50"
+    :class="
+      dragoverItem === row.id && draggingItem !== row.id
+        ? 'border-blue-500 bg-blue-100'
+        : 'border-b-neutral-100 border-transparent'
+    "
     @dragstart="(event) => dragStart(event, row)"
     @dragend="dragend"
     @drop="(event) => drop(event, row)"

@@ -7,13 +7,17 @@
         </div>
       </div>
     </PageHeader>
-    <div class="select-none px-8 py-4">
-      <p class="text-sm text-neutral-700">{{ $t("trash_work_in_progress") }}</p>
-    </div>
+    <d-empty
+      :icon="Trash"
+      :title="$t('trash_work_in_progress_title')"
+      :text="$t('trash_work_in_progress_text')"
+    ></d-empty>
   </PageWrapper>
 </template>
 
 <script lang="ts" setup>
 import PageHeader from "@/components/page-header.vue"
 import PageWrapper from "@/components/page-wrapper.vue"
+import DEmpty from "@/components/d-empty/d-empty.vue"
+import { Trash } from "lucide-vue-next"
 </script>

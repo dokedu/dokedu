@@ -32,7 +32,13 @@
             <d-file-list-dropdown :option-list="optionListWithItem(item)" />
           </div>
         </template>
-        <template #empty>{{ $t("no_shared_drives") }}</template>
+        <template #empty>
+          <d-empty
+            :icon="HardDrive"
+            :title="$t('no_shared_drives_title')"
+            :text="$t('no_shared_drives_text')"
+          ></d-empty>
+        </template>
       </DTable>
     </PageContent>
   </PageWrapper>
@@ -48,9 +54,10 @@ import PageHeader from "@/components/page-header.vue"
 import PageContent from "@/components/page-content.vue"
 import DTable from "@/components/d-table/d-table.vue"
 import DButton from "@/components/d-button/d-button.vue"
+import DEmpty from "@/components/d-empty/d-empty.vue"
 import type { PageVariables } from "@/types/types"
 import { ref } from "vue"
-import { Plus, Folder, Edit2, Trash } from "lucide-vue-next"
+import { Plus, Folder, Edit2, Trash, HardDrive } from "lucide-vue-next"
 import router from "@/router/router"
 import DDialogShareDrive from "@/components/_drive/d-dialog/d-dialog-share-drive.vue"
 import DDialogRenameDrive from "@/components/_drive/d-dialog/d-dialog-rename-drive.vue"

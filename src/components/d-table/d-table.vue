@@ -39,7 +39,7 @@
       >
         <template v-slot="{ row }">
           <div
-            class="flex items-center border-b border-neutral-100 px-2 py-2 text-sm first:pl-8 last:pr-8"
+            class="flex items-center px-2 py-2 text-sm first:pl-8 last:pr-8"
             :class="[{ 'bg-blue-100': isSelected(row) }, column.dataClass]"
             v-for="(column, subIndex) in columns"
             :key="subIndex"

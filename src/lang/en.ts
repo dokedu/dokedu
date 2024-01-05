@@ -204,15 +204,16 @@ export const en = {
   shared_drives: "Shared drives",
   my_drive: "My drive",
   share: "Share",
-  no_shared_drives: "No shared drives found",
+  no_shared_drives_title: "Looks like you don't have any shared drives yet",
+  no_shared_drives_text: "If other people share their drive with you it will appear here",
   folder: "Folder | Folders",
   folder_name: "Folder name",
 
   shared_drive: "Shared drive",
   shared_with_me: "Shared with me",
   trash: "Trash",
-  trash_work_in_progress:
-    "This page is still a work in progress. It will be used to display the files that have been deleted by you.",
+  trash_work_in_progress_title: "This page is still a work in progress.",
+  trash_work_in_progress_text: "It will be used to display the files that have been deleted by you.",
 
   support: "Support",
 
