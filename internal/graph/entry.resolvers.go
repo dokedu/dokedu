@@ -142,6 +142,53 @@ func (r *entryResolver) UserCompetences(ctx context.Context, obj *db.Entry) ([]*
 	return userCompetences, nil
 }
 
+// Subjects is the resolver for the subjects field.
+func (r *entryResolver) Subjects(ctx context.Context, obj *db.Entry) ([]*db.Competence, error) {
+	entryID := obj.ID
+
+	var userCompetences []*db.UserCompetence
+	err := r.DB.NewSelect().
+		Model(&userCompetences).
+		Where("entry_id = ?", entryID).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var competenceIDs []string
+	for _, uc := range userCompetences {
+		competenceIDs = append(competenceIDs, uc.CompetenceID)
+	}
+
+	var subjects []*db.Competence
+
+	for _, id := range competenceIDs {
+		var competences []*db.Competence
+		err := r.DB.NewRaw(`SELECT * FROM get_competence_tree(?)`, id).Scan(ctx, &competences)
+		if err != nil {
+			return nil, err
+		}
+
+		subjects = append(subjects, competences[len(competences)-1])
+	}
+
+	var ids []string
+	for _, subject := range subjects {
+		ids = append(ids, subject.ID)
+	}
+
+	var subjects2 []*db.Competence
+	err = r.DB.NewSelect().
+		Model(&subjects2).
+		Where("id IN (?)", bun.In(ids)).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return subjects2, nil
+}
+
 // CreateEntry is the resolver for the createEntry field.
 func (r *mutationResolver) CreateEntry(ctx context.Context) (*db.Entry, error) {
 	currentUser, err := middleware.GetUser(ctx)
@@ -161,95 +208,6 @@ func (r *mutationResolver) CreateEntry(ctx context.Context) (*db.Entry, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	//if len(input.UserIds) > 0 {
-	//	var entryUsers []*db.EntryUser
-	//
-	//	for _, userId := range input.UserIds {
-	//		entryUsers = append(entryUsers, &db.EntryUser{
-	//			EntryID:        entry.ID,
-	//			UserID:         userId,
-	//			OrganisationID: currentUser.OrganisationID,
-	//		})
-	//	}
-	//
-	//	err = r.DB.NewInsert().Model(&entryUsers).Returning("*").Scan(ctx)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//
-	//	// user competences
-	//	if len(input.UserCompetences) > 0 {
-	//		var userCompetences []*db.UserCompetence
-	//		for _, userCompetence := range input.UserCompetences {
-	//			userCompetences = append(userCompetences, &db.UserCompetence{
-	//				UserID:         userCompetence.UserID,
-	//				CompetenceID:   userCompetence.CompetenceID,
-	//				EntryID:        sql.NullString{String: entry.ID, Valid: true},
-	//				Level:          userCompetence.Level,
-	//				OrganisationID: currentUser.OrganisationID,
-	//				CreatedBy:      sql.NullString{String: currentUser.ID, Valid: true},
-	//			})
-	//		}
-	//
-	//		err = r.DB.NewInsert().Model(&userCompetences).On("CONFLICT (user_id, competence_id, entry_id) DO UPDATE SET deleted_at = null").Returning("*").Scan(ctx)
-	//		if err != nil {
-	//			return nil, err
-	//		}
-	//	}
-	//
-	//}
-	//
-	//if len(input.TagIds) > 0 {
-	//	var entryTags []*db.EntryTag
-	//
-	//	for _, tagId := range input.TagIds {
-	//		entryTags = append(entryTags, &db.EntryTag{
-	//			EntryID:        entry.ID,
-	//			TagID:          tagId,
-	//			OrganisationID: currentUser.OrganisationID,
-	//		})
-	//	}
-	//
-	//	err = r.DB.NewInsert().Model(&entryTags).Returning("*").Scan(ctx)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//}
-	//
-	//if len(input.FileIds) > 0 {
-	//	var entryFiles []*db.EntryFile
-	//
-	//	for _, fileId := range input.FileIds {
-	//		entryFiles = append(entryFiles, &db.EntryFile{
-	//			EntryID:        entry.ID,
-	//			FileID:         fileId,
-	//			OrganisationID: currentUser.OrganisationID,
-	//		})
-	//	}
-	//
-	//	err = r.DB.NewInsert().Model(&entryFiles).Returning("*").Scan(ctx)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//}
-	//
-	//if len(input.EventIds) > 0 {
-	//	var entryEvents []*db.EntryEvent
-	//
-	//	for _, eventId := range input.EventIds {
-	//		entryEvents = append(entryEvents, &db.EntryEvent{
-	//			EntryID:        entry.ID,
-	//			EventID:        eventId,
-	//			OrganisationID: currentUser.OrganisationID,
-	//		})
-	//	}
-	//
-	//	err = r.DB.NewInsert().Model(&entryEvents).Scan(ctx)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//}
 
 	return &entry, nil
 }
@@ -284,121 +242,6 @@ func (r *mutationResolver) UpdateEntry(ctx context.Context, input model.UpdateEn
 	if err != nil {
 		return nil, err
 	}
-
-	//if len(input.TagIds) >= 0 {
-	//	var entryTags []*db.EntryTag
-	//	err = r.DB.NewDelete().Model(&entryTags).Where("entry_id = ?", entry.ID).Where("organisation_id = ?", currentUser.OrganisationID).Returning("*").Scan(ctx)
-	//	if err != nil && err.Error() != "sql: no rows in result set" {
-	//		return nil, err
-	//	}
-	//}
-	//
-	//if len(input.TagIds) > 0 {
-	//	var entryTags []*db.EntryTag
-	//
-	//	if input.TagIds != nil {
-	//		for _, tagId := range input.TagIds {
-	//			entryTags = append(entryTags, &db.EntryTag{
-	//				EntryID:        entry.ID,
-	//				TagID:          tagId,
-	//				OrganisationID: currentUser.OrganisationID,
-	//			})
-	//		}
-	//	}
-	//
-	//	err = r.DB.NewInsert().
-	//		Model(&entryTags).
-	//		On("CONFLICT (entry_id, tag_id) DO UPDATE").
-	//		Set("deleted_at = null").
-	//		Returning("*").
-	//		Scan(ctx)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//}
-	//
-	//if len(input.EventIds) >= 0 {
-	//	err = r.DB.NewDelete().Model(&db.EntryEvent{}).Where("entry_id = ?", entry.ID).Where("organisation_id = ?", currentUser.OrganisationID).Returning("*").Scan(ctx)
-	//	if err != nil && err.Error() != "sql: no rows in result set" {
-	//		return nil, err
-	//	}
-	//}
-	//
-	//if len(input.EventIds) > 0 {
-	//	var entryEvents []*db.EntryEvent
-	//
-	//	for _, eventId := range input.EventIds {
-	//		entryEvents = append(entryEvents, &db.EntryEvent{
-	//			EntryID:        entry.ID,
-	//			EventID:        eventId,
-	//			OrganisationID: currentUser.OrganisationID,
-	//		})
-	//	}
-	//
-	//	err = r.DB.NewInsert().Model(&entryEvents).On("CONFLICT (entry_id, event_id) DO UPDATE").Set("deleted_at = null").Returning("*").Scan(ctx)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//}
-	//
-	//if len(input.UserIds) >= 0 {
-	//	err = r.DB.NewDelete().Model(&db.EntryUser{}).Where("entry_id = ?", entry.ID).Where("organisation_id = ?", currentUser.OrganisationID).Returning("*").Scan(ctx)
-	//	if err != nil && err.Error() != "sql: no rows in result set" {
-	//		return nil, err
-	//	}
-	//}
-	//
-	//if len(input.UserIds) > 0 {
-	//	var entryUsers []*db.EntryUser
-	//
-	//	for _, userId := range input.UserIds {
-	//		entryUsers = append(entryUsers, &db.EntryUser{
-	//			EntryID:        entry.ID,
-	//			UserID:         userId,
-	//			OrganisationID: currentUser.OrganisationID,
-	//		})
-	//	}
-	//
-	//	err = r.DB.NewInsert().Model(&entryUsers).On("CONFLICT (entry_id, user_id) DO UPDATE").Set("deleted_at = null").Scan(ctx)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//
-	//}
-	//
-	//if len(input.UserCompetences) >= 0 {
-	//	err = r.DB.NewDelete().Model(&db.UserCompetence{}).Where("entry_id = ?", entry.ID).Where("organisation_id = ?", currentUser.OrganisationID).Returning("*").Scan(ctx)
-	//	if err != nil && err.Error() != "sql: no rows in result set" {
-	//		return nil, err
-	//	}
-	//}
-	//
-	//// user competences
-	//if len(input.UserCompetences) > 0 {
-	//	var userCompetences []*db.UserCompetence
-	//
-	//	for _, userCompetence := range input.UserCompetences {
-	//		userCompetences = append(userCompetences, &db.UserCompetence{
-	//			EntryID:        sql.NullString{String: input.ID, Valid: true},
-	//			UserID:         userCompetence.UserID,
-	//			CompetenceID:   userCompetence.CompetenceID,
-	//			OrganisationID: currentUser.OrganisationID,
-	//			Level:          userCompetence.Level,
-	//			CreatedBy:      sql.NullString{String: currentUser.ID, Valid: true},
-	//		})
-	//	}
-	//
-	//	err = r.DB.NewInsert().
-	//		Model(&userCompetences).
-	//		On("CONFLICT (entry_id, user_id, competence_id) DO UPDATE").
-	//		Set("deleted_at = null").
-	//		Set("level = EXCLUDED.level").
-	//		Returning("*").
-	//		Scan(ctx)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//}
 
 	return &entry, nil
 }

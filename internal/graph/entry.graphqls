@@ -11,6 +11,7 @@ type Entry {
     files: [File!]!
     tags: [Tag!]!
     userCompetences: [UserCompetence!]!
+    subjects: [Competence!]!
 }
 
 type EntryConnection {

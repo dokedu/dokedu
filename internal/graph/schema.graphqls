@@ -77,42 +77,6 @@ type UserCompetenceConnection {
     totalCount: Int!
 }
 
-enum ReportStatus {
-    pending
-    processing
-    done
-    error
-}
-
-enum ReportFormat {
-    pdf
-    docx
-}
-
-enum ReportKind {
-    entries
-    subjects
-    competences
-    learned_competences
-    all_entries
-}
-
-type Report {
-    id: ID!
-    status: ReportStatus!
-    format: ReportFormat!
-    kind: ReportKind!
-    from: Time!
-    to: Time!
-    meta: String!
-    filterTags: [ID!]!
-    user: User!
-    studentUser: User!
-    file: File
-    createdAt: Time!
-    deletedAt: Time
-}
-
 type Tag {
     id: ID!
     name: String!
@@ -160,11 +124,7 @@ type CompetenceConnection {
 
 
 
-type ReportConnection {
-    edges: [Report]
-    pageInfo: PageInfo!
-    totalCount: Int!
-}
+
 
 type UserStudent {
     id: ID!
@@ -249,9 +209,6 @@ extend type Query {
     competence(id: ID!): Competence!
     competences(limit: Int, offset: Int, filter: CompetenceFilterInput, search: String, sort: CompetenceSort): CompetenceConnection!
 
-    report(id: ID!): Report!
-    reports(limit: Int, offset: Int): ReportConnection!
-
     tag(id: ID!): Tag!
     tags(limit: Int, offset: Int, search: String): TagConnection!
 
@@ -292,15 +249,7 @@ input CreateStudentInput {
     emoji: String
 }
 
-input CreateReportInput {
-    format: ReportFormat!
-    kind: ReportKind!
-    from: Time!
-    to: Time!
-#    meta: String!
-    filterTags: [ID!]!
-    studentUser: ID!
-}
+
 
 input CreateTagInput {
     name: String!
@@ -369,8 +318,6 @@ extend type Mutation {
     createTag(input: CreateTagInput!): Tag!
     archiveTag(id: ID!): Tag!
     updateTag(id: ID!, input: CreateTagInput!): Tag!
-
-    createReport(input: CreateReportInput!): Report!
 
     updatePassword(oldPassword: String!, newPassword: String!): Boolean!
 

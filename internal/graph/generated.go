@@ -248,6 +248,7 @@ type ComplexityRoot struct {
 		Events          func(childComplexity int) int
 		Files           func(childComplexity int) int
 		ID              func(childComplexity int) int
+		Subjects        func(childComplexity int) int
 		Tags            func(childComplexity int) int
 		User            func(childComplexity int) int
 		UserCompetences func(childComplexity int) int
@@ -709,6 +710,7 @@ type EntryResolver interface {
 	Files(ctx context.Context, obj *db.Entry) ([]*db.File, error)
 	Tags(ctx context.Context, obj *db.Entry) ([]*db.Tag, error)
 	UserCompetences(ctx context.Context, obj *db.Entry) ([]*db.UserCompetence, error)
+	Subjects(ctx context.Context, obj *db.Entry) ([]*db.Competence, error)
 }
 type EventResolver interface {
 	Image(ctx context.Context, obj *db.Event) (*db.File, error)
@@ -787,6 +789,7 @@ type MutationResolver interface {
 	ToggleEventCompetence(ctx context.Context, input model.AddEventCompetenceInput) (*db.Event, error)
 	ArchiveEvent(ctx context.Context, id string) (*db.Event, error)
 	UpdateOrganisation(ctx context.Context, input model.UpdateOrganisationInput) (*db.Organisation, error)
+	CreateReport(ctx context.Context, input model.CreateReportInput) (*db.Report, error)
 	SignIn(ctx context.Context, input model.SignInInput) (*model.SignInPayload, error)
 	ResetPassword(ctx context.Context, input model.ResetPasswordInput) (*model.ResetPasswordPayload, error)
 	ForgotPassword(ctx context.Context, input model.ForgotPasswordInput) (*model.ForgotPasswordPayload, error)
@@ -803,7 +806,6 @@ type MutationResolver interface {
 	CreateTag(ctx context.Context, input model.CreateTagInput) (*db.Tag, error)
 	ArchiveTag(ctx context.Context, id string) (*db.Tag, error)
 	UpdateTag(ctx context.Context, id string, input model.CreateTagInput) (*db.Tag, error)
-	CreateReport(ctx context.Context, input model.CreateReportInput) (*db.Report, error)
 	UpdatePassword(ctx context.Context, oldPassword string, newPassword string) (bool, error)
 	UpdateCompetence(ctx context.Context, input model.UpdateCompetenceInput) (*db.Competence, error)
 	UpdateCompetenceSorting(ctx context.Context, input model.UpdateCompetenceSortingInput) ([]*db.Competence, error)
@@ -845,13 +847,13 @@ type QueryResolver interface {
 	Events(ctx context.Context, limit *int, offset *int, filter *model.EventFilterInput, order *model.EventOrderBy, search *string) (*model.EventConnection, error)
 	ExportEvents(ctx context.Context, input model.ExportEventsInput) ([]*model.ExportEventsPayload, error)
 	Organisation(ctx context.Context) (*db.Organisation, error)
+	Report(ctx context.Context, id string) (*db.Report, error)
+	Reports(ctx context.Context, limit *int, offset *int) (*model.ReportConnection, error)
 	Users(ctx context.Context, limit *int, offset *int, filter *model.UserFilterInput, search *string) (*model.UserConnection, error)
 	User(ctx context.Context, id string) (*db.User, error)
 	Me(ctx context.Context) (*db.User, error)
 	Competence(ctx context.Context, id string) (*db.Competence, error)
 	Competences(ctx context.Context, limit *int, offset *int, filter *model.CompetenceFilterInput, search *string, sort *model.CompetenceSort) (*model.CompetenceConnection, error)
-	Report(ctx context.Context, id string) (*db.Report, error)
-	Reports(ctx context.Context, limit *int, offset *int) (*model.ReportConnection, error)
 	Tag(ctx context.Context, id string) (*db.Tag, error)
 	Tags(ctx context.Context, limit *int, offset *int, search *string) (*model.TagConnection, error)
 	UserStudents(ctx context.Context, limit *int, offset *int) (*model.UserStudentConnection, error)
@@ -1674,6 +1676,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Entry.ID(childComplexity), true
+
+	case "Entry.subjects":
+		if e.complexity.Entry.Subjects == nil {
+			break
+		}
+
+		return e.complexity.Entry.Subjects(childComplexity), true
 
 	case "Entry.tags":
 		if e.complexity.Entry.Tags == nil {
@@ -4525,7 +4534,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
-//go:embed "attendance.graphqls" "chat.graphqls" "drive.graphqls" "email.graphqls" "entry.graphqls" "event.graphqls" "organisation.graphqls" "schema.graphqls" "school.graphqls"
+//go:embed "attendance.graphqls" "chat.graphqls" "drive.graphqls" "email.graphqls" "entry.graphqls" "event.graphqls" "organisation.graphqls" "report.graphqls" "schema.graphqls" "school.graphqls"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -4544,6 +4553,7 @@ var sources = []*ast.Source{
 	{Name: "entry.graphqls", Input: sourceData("entry.graphqls"), BuiltIn: false},
 	{Name: "event.graphqls", Input: sourceData("event.graphqls"), BuiltIn: false},
 	{Name: "organisation.graphqls", Input: sourceData("organisation.graphqls"), BuiltIn: false},
+	{Name: "report.graphqls", Input: sourceData("report.graphqls"), BuiltIn: false},
 	{Name: "schema.graphqls", Input: sourceData("schema.graphqls"), BuiltIn: false},
 	{Name: "school.graphqls", Input: sourceData("school.graphqls"), BuiltIn: false},
 }
@@ -12162,6 +12172,74 @@ func (ec *executionContext) fieldContext_Entry_userCompetences(ctx context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _Entry_subjects(ctx context.Context, field graphql.CollectedField, obj *db.Entry) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Entry_subjects(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entry().Subjects(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*db.Competence)
+	fc.Result = res
+	return ec.marshalNCompetence2ᚕᚖexampleᚋinternalᚋdbᚐCompetenceᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Entry_subjects(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entry",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Competence_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Competence_name(ctx, field)
+			case "type":
+				return ec.fieldContext_Competence_type(ctx, field)
+			case "grades":
+				return ec.fieldContext_Competence_grades(ctx, field)
+			case "color":
+				return ec.fieldContext_Competence_color(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Competence_createdAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_Competence_parents(ctx, field)
+			case "sortOrder":
+				return ec.fieldContext_Competence_sortOrder(ctx, field)
+			case "competences":
+				return ec.fieldContext_Competence_competences(ctx, field)
+			case "userCompetences":
+				return ec.fieldContext_Competence_userCompetences(ctx, field)
+			case "tendency":
+				return ec.fieldContext_Competence_tendency(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _EntryConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.EntryConnection) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EntryConnection_edges(ctx, field)
 	if err != nil {
@@ -12223,6 +12301,8 @@ func (ec *executionContext) fieldContext_EntryConnection_edges(ctx context.Conte
 				return ec.fieldContext_Entry_tags(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
+			case "subjects":
+				return ec.fieldContext_Entry_subjects(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -17171,6 +17251,8 @@ func (ec *executionContext) fieldContext_Mutation_createEntry(ctx context.Contex
 				return ec.fieldContext_Entry_tags(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
+			case "subjects":
+				return ec.fieldContext_Entry_subjects(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -17239,6 +17321,8 @@ func (ec *executionContext) fieldContext_Mutation_updateEntry(ctx context.Contex
 				return ec.fieldContext_Entry_tags(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
+			case "subjects":
+				return ec.fieldContext_Entry_subjects(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -17318,6 +17402,8 @@ func (ec *executionContext) fieldContext_Mutation_archiveEntry(ctx context.Conte
 				return ec.fieldContext_Entry_tags(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
+			case "subjects":
+				return ec.fieldContext_Entry_subjects(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -17397,6 +17483,8 @@ func (ec *executionContext) fieldContext_Mutation_createEntryTag(ctx context.Con
 				return ec.fieldContext_Entry_tags(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
+			case "subjects":
+				return ec.fieldContext_Entry_subjects(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -17476,6 +17564,8 @@ func (ec *executionContext) fieldContext_Mutation_createEntryFile(ctx context.Co
 				return ec.fieldContext_Entry_tags(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
+			case "subjects":
+				return ec.fieldContext_Entry_subjects(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -17555,6 +17645,8 @@ func (ec *executionContext) fieldContext_Mutation_createEntryUser(ctx context.Co
 				return ec.fieldContext_Entry_tags(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
+			case "subjects":
+				return ec.fieldContext_Entry_subjects(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -17634,6 +17726,8 @@ func (ec *executionContext) fieldContext_Mutation_createEntryEvent(ctx context.C
 				return ec.fieldContext_Entry_tags(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
+			case "subjects":
+				return ec.fieldContext_Entry_subjects(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -17713,6 +17807,8 @@ func (ec *executionContext) fieldContext_Mutation_createEntryCompetence(ctx cont
 				return ec.fieldContext_Entry_tags(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
+			case "subjects":
+				return ec.fieldContext_Entry_subjects(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -17792,6 +17888,8 @@ func (ec *executionContext) fieldContext_Mutation_deleteEntryTag(ctx context.Con
 				return ec.fieldContext_Entry_tags(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
+			case "subjects":
+				return ec.fieldContext_Entry_subjects(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -17871,6 +17969,8 @@ func (ec *executionContext) fieldContext_Mutation_deleteEntryFile(ctx context.Co
 				return ec.fieldContext_Entry_tags(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
+			case "subjects":
+				return ec.fieldContext_Entry_subjects(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -17950,6 +18050,8 @@ func (ec *executionContext) fieldContext_Mutation_deleteEntryUser(ctx context.Co
 				return ec.fieldContext_Entry_tags(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
+			case "subjects":
+				return ec.fieldContext_Entry_subjects(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -18029,6 +18131,8 @@ func (ec *executionContext) fieldContext_Mutation_deleteEntryEvent(ctx context.C
 				return ec.fieldContext_Entry_tags(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
+			case "subjects":
+				return ec.fieldContext_Entry_subjects(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -18108,6 +18212,8 @@ func (ec *executionContext) fieldContext_Mutation_deleteEntryCompetence(ctx cont
 				return ec.fieldContext_Entry_tags(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
+			case "subjects":
+				return ec.fieldContext_Entry_subjects(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -18187,6 +18293,8 @@ func (ec *executionContext) fieldContext_Mutation_updateEntryUserCompetenceLevel
 				return ec.fieldContext_Entry_tags(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
+			case "subjects":
+				return ec.fieldContext_Entry_subjects(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -18576,6 +18684,89 @@ func (ec *executionContext) fieldContext_Mutation_updateOrganisation(ctx context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updateOrganisation_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createReport(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createReport(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateReport(rctx, fc.Args["input"].(model.CreateReportInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.Report)
+	fc.Result = res
+	return ec.marshalNReport2ᚖexampleᚋinternalᚋdbᚐReport(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createReport(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Report_id(ctx, field)
+			case "status":
+				return ec.fieldContext_Report_status(ctx, field)
+			case "format":
+				return ec.fieldContext_Report_format(ctx, field)
+			case "kind":
+				return ec.fieldContext_Report_kind(ctx, field)
+			case "from":
+				return ec.fieldContext_Report_from(ctx, field)
+			case "to":
+				return ec.fieldContext_Report_to(ctx, field)
+			case "meta":
+				return ec.fieldContext_Report_meta(ctx, field)
+			case "filterTags":
+				return ec.fieldContext_Report_filterTags(ctx, field)
+			case "user":
+				return ec.fieldContext_Report_user(ctx, field)
+			case "studentUser":
+				return ec.fieldContext_Report_studentUser(ctx, field)
+			case "file":
+				return ec.fieldContext_Report_file(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Report_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Report_deletedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Report", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createReport_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -19669,89 +19860,6 @@ func (ec *executionContext) fieldContext_Mutation_updateTag(ctx context.Context,
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updateTag_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_createReport(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_createReport(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateReport(rctx, fc.Args["input"].(model.CreateReportInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.Report)
-	fc.Result = res
-	return ec.marshalNReport2ᚖexampleᚋinternalᚋdbᚐReport(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_createReport(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Report_id(ctx, field)
-			case "status":
-				return ec.fieldContext_Report_status(ctx, field)
-			case "format":
-				return ec.fieldContext_Report_format(ctx, field)
-			case "kind":
-				return ec.fieldContext_Report_kind(ctx, field)
-			case "from":
-				return ec.fieldContext_Report_from(ctx, field)
-			case "to":
-				return ec.fieldContext_Report_to(ctx, field)
-			case "meta":
-				return ec.fieldContext_Report_meta(ctx, field)
-			case "filterTags":
-				return ec.fieldContext_Report_filterTags(ctx, field)
-			case "user":
-				return ec.fieldContext_Report_user(ctx, field)
-			case "studentUser":
-				return ec.fieldContext_Report_studentUser(ctx, field)
-			case "file":
-				return ec.fieldContext_Report_file(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Report_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Report_deletedAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Report", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_createReport_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -22184,6 +22292,8 @@ func (ec *executionContext) fieldContext_Query_entry(ctx context.Context, field 
 				return ec.fieldContext_Entry_tags(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
+			case "subjects":
+				return ec.fieldContext_Entry_subjects(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -22525,6 +22635,152 @@ func (ec *executionContext) fieldContext_Query_organisation(ctx context.Context,
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Organisation", field.Name)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_report(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_report(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Report(rctx, fc.Args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.Report)
+	fc.Result = res
+	return ec.marshalNReport2ᚖexampleᚋinternalᚋdbᚐReport(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_report(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Report_id(ctx, field)
+			case "status":
+				return ec.fieldContext_Report_status(ctx, field)
+			case "format":
+				return ec.fieldContext_Report_format(ctx, field)
+			case "kind":
+				return ec.fieldContext_Report_kind(ctx, field)
+			case "from":
+				return ec.fieldContext_Report_from(ctx, field)
+			case "to":
+				return ec.fieldContext_Report_to(ctx, field)
+			case "meta":
+				return ec.fieldContext_Report_meta(ctx, field)
+			case "filterTags":
+				return ec.fieldContext_Report_filterTags(ctx, field)
+			case "user":
+				return ec.fieldContext_Report_user(ctx, field)
+			case "studentUser":
+				return ec.fieldContext_Report_studentUser(ctx, field)
+			case "file":
+				return ec.fieldContext_Report_file(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Report_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Report_deletedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Report", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_report_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_reports(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_reports(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Reports(rctx, fc.Args["limit"].(*int), fc.Args["offset"].(*int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ReportConnection)
+	fc.Result = res
+	return ec.marshalNReportConnection2ᚖexampleᚋinternalᚋgraphᚋmodelᚐReportConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_reports(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "edges":
+				return ec.fieldContext_ReportConnection_edges(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_ReportConnection_pageInfo(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_ReportConnection_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ReportConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_reports_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -22875,152 +23131,6 @@ func (ec *executionContext) fieldContext_Query_competences(ctx context.Context, 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_competences_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_report(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_report(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Report(rctx, fc.Args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.Report)
-	fc.Result = res
-	return ec.marshalNReport2ᚖexampleᚋinternalᚋdbᚐReport(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_report(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Report_id(ctx, field)
-			case "status":
-				return ec.fieldContext_Report_status(ctx, field)
-			case "format":
-				return ec.fieldContext_Report_format(ctx, field)
-			case "kind":
-				return ec.fieldContext_Report_kind(ctx, field)
-			case "from":
-				return ec.fieldContext_Report_from(ctx, field)
-			case "to":
-				return ec.fieldContext_Report_to(ctx, field)
-			case "meta":
-				return ec.fieldContext_Report_meta(ctx, field)
-			case "filterTags":
-				return ec.fieldContext_Report_filterTags(ctx, field)
-			case "user":
-				return ec.fieldContext_Report_user(ctx, field)
-			case "studentUser":
-				return ec.fieldContext_Report_studentUser(ctx, field)
-			case "file":
-				return ec.fieldContext_Report_file(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Report_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Report_deletedAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Report", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_report_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_reports(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_reports(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Reports(rctx, fc.Args["limit"].(*int), fc.Args["offset"].(*int))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.ReportConnection)
-	fc.Result = res
-	return ec.marshalNReportConnection2ᚖexampleᚋinternalᚋgraphᚋmodelᚐReportConnection(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_reports(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "edges":
-				return ec.fieldContext_ReportConnection_edges(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_ReportConnection_pageInfo(ctx, field)
-			case "totalCount":
-				return ec.fieldContext_ReportConnection_totalCount(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ReportConnection", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_reports_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -27087,6 +27197,8 @@ func (ec *executionContext) fieldContext_UserCompetence_entry(ctx context.Contex
 				return ec.fieldContext_Entry_tags(ctx, field)
 			case "userCompetences":
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
+			case "subjects":
+				return ec.fieldContext_Entry_subjects(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -36723,6 +36835,42 @@ func (ec *executionContext) _Entry(ctx context.Context, sel ast.SelectionSet, ob
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "subjects":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Entry_subjects(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -37895,6 +38043,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "createReport":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createReport(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "signIn":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_signIn(ctx, field)
@@ -38003,13 +38158,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "updateTag":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateTag(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "createReport":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createReport(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -38809,6 +38957,50 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "report":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_report(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "reports":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_reports(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "users":
 			field := field
 
@@ -38907,50 +39099,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_competences(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "report":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_report(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "reports":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_reports(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
