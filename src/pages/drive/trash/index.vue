@@ -16,8 +16,8 @@
 </template>
 
 <script lang="ts" setup>
-import PageHeader from "@/components/page-header.vue";
-import PageWrapper from "@/components/page-wrapper.vue";
-import DEmpty from "@/components/d-empty/d-empty.vue";
-import { Trash } from "lucide-vue-next";
+import PageHeader from "@/components/page-header.vue"
+import PageWrapper from "@/components/page-wrapper.vue"
+import DEmpty from "@/components/d-empty/d-empty.vue"
+import { Trash } from "lucide-vue-next"
 </script>

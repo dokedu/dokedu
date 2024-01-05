@@ -11,21 +11,21 @@
 </template>
 
 <script setup lang="ts">
-import { PropType } from "@vue/runtime-dom";
-import type { Icon } from "lucide-vue-next";
+import { PropType } from "@vue/runtime-dom"
+import type { Icon } from "lucide-vue-next"
 
 defineProps({
   icon: {
     type: Object as PropType<Icon>,
-    required: true,
+    required: true
   },
   title: {
     type: String,
-    required: true,
+    required: true
   },
   text: {
     type: String,
-    required: true,
-  },
-});
+    required: true
+  }
+})
 </script>
