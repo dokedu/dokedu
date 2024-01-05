@@ -89,7 +89,7 @@
                           <tbody class="divide-y divide-neutral-200 bg-white">
                             <tr
                               v-for="competence in subject.competences.sort((a: any, b: any) =>
-                                a.name.localeCompare(b.name),
+                                a.name.localeCompare(b.name)
                               )"
                               :key="competence.id"
                               class="divide-x divide-neutral-200"
@@ -135,59 +135,59 @@
 </template>
 
 <script setup lang="ts">
-import PageHeader from "@/components/page-header.vue";
-import PageWrapper from "@/components/page-wrapper.vue";
-import PageContent from "@/components/page-content.vue";
-import { computed, reactive, ref } from "vue";
-import DButton from "../../../components/d-button/d-button.vue";
-import { Printer } from "lucide-vue-next";
-import { formatDate } from "@vueuse/core";
-import { useExportEventsQuery } from "@/gql/queries/events/exportEvents.ts";
+import PageHeader from "@/components/page-header.vue"
+import PageWrapper from "@/components/page-wrapper.vue"
+import PageContent from "@/components/page-content.vue"
+import { computed, reactive, ref } from "vue"
+import DButton from "../../../components/d-button/d-button.vue"
+import { Printer } from "lucide-vue-next"
+import { formatDate } from "@vueuse/core"
+import { useExportEventsQuery } from "@/gql/queries/events/exportEvents"
 
 function gradeToText(grades: number[]): string {
   if (grades.length > 1) {
-    return `${Math.min(...grades)} – ${Math.max(...grades)}`;
+    return `${Math.min(...grades)} – ${Math.max(...grades)}`
   } else if ((grades.length = 1)) {
-    return grades[0].toString();
+    return grades[0].toString()
   } else {
-    return "-";
+    return "-"
   }
 }
 
 const filter = ref({
   from: "2000-01-01",
   to: "2100-01-01",
-  deleted: false,
-});
+  deleted: false
+})
 
 function print() {
-  window.print();
+  window.print()
 }
 
 type Event = {
-  id: string;
-  title: string;
-  body: string;
-  startsAt: string;
-  endsAt: string;
-  subjects: [any];
-};
+  id: string
+  title: string
+  body: string
+  startsAt: string
+  endsAt: string
+  subjects: [any]
+}
 
 // @ts-expect-error
 const events = computed<Event[] | []>(() => {
   if (!data.value?.exportEvents) {
-    return [];
+    return []
   }
 
   return data.value.exportEvents.map((event) => {
     if (!event) {
-      return null;
+      return null
     }
 
-    let subjects = [];
+    let subjects = []
 
     try {
-      subjects = JSON.parse(event.subjects);
+      subjects = JSON.parse(event.subjects)
     } catch (e) {
       // ignore
     }
@@ -198,15 +198,15 @@ const events = computed<Event[] | []>(() => {
       body: event.body,
       startsAt: formatDate(new Date(event.startsAt), "DD.MM.YYYY"),
       endsAt: formatDate(new Date(event.endsAt), "DD.MM.YYYY"),
-      subjects: subjects,
-    };
-  });
-});
+      subjects: subjects
+    }
+  })
+})
 
 const { data, fetching } = useExportEventsQuery({
   variables: reactive({
-    input: filter,
+    input: filter
   }),
-  requestPolicy: "network-only",
-});
+  requestPolicy: "network-only"
+})
 </script>

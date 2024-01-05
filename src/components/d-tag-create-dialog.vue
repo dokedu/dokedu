@@ -34,57 +34,57 @@
 </template>
 
 <script setup lang="ts">
-import DDialog from "@/components/d-dialog/d-dialog.vue";
-import DButton from "@/components/d-button/d-button.vue";
-import DInput from "@/components/d-input/d-input.vue";
-import DSelect from "@/components/d-select/d-select.vue";
-import DTag from "@/components/d-tag/d-tag.vue";
-import { toRef, ref } from "vue";
-import { useCreateTagMutation } from "@/gql/mutations/tags/createTag.ts";
+import DDialog from "@/components/d-dialog/d-dialog.vue"
+import DButton from "@/components/d-button/d-button.vue"
+import DInput from "@/components/d-input/d-input.vue"
+import DSelect from "@/components/d-select/d-select.vue"
+import DTag from "@/components/d-tag/d-tag.vue"
+import { toRef, ref } from "vue"
+import { useCreateTagMutation } from "@/gql/mutations/tags/createTag"
 
-const colors = ["red", "orange", "yellow", "green", "blue", "indigo", "purple", "pink", "gray"];
+const colors = ["red", "orange", "yellow", "green", "blue", "indigo", "purple", "pink", "gray"]
 
 const colorOptions = colors.map((c) => ({
   label: capitalize(c),
-  value: c,
-}));
+  value: c
+}))
 
 function capitalize(string: string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
+  return string.charAt(0).toUpperCase() + string.slice(1)
 }
 
 const props = defineProps({
-  open: Boolean,
-});
-const emit = defineEmits(["close", "created"]);
+  open: Boolean
+})
+const emit = defineEmits(["close", "created"])
 
-const modalOpen = toRef(props, "open");
-const name = ref("");
-const tagColor = ref("gray");
-const error = ref("");
+const modalOpen = toRef(props, "open")
+const name = ref("")
+const tagColor = ref("gray")
+const error = ref("")
 
-const { executeMutation: createTag } = useCreateTagMutation();
+const { executeMutation: createTag } = useCreateTagMutation()
 
 const onClose = () => {
-  emit("close", false);
-};
+  emit("close", false)
+}
 
 const onCreate = async () => {
   const mutation = await createTag({
     input: {
       name: name.value,
-      color: tagColor.value,
-    },
-  });
+      color: tagColor.value
+    }
+  })
 
   if (mutation.error) {
-    error.value = mutation.error.graphQLErrors[0].message;
-    return;
+    error.value = mutation.error.graphQLErrors[0].message
+    return
   }
 
-  name.value = "";
-  tagColor.value = "";
+  name.value = ""
+  tagColor.value = ""
 
-  emit("created");
-};
+  emit("created")
+}
 </script>

@@ -19,7 +19,8 @@
             <Check
               v-show="selectedTags?.length > 0 && selectedTags.map((el) => el.id).includes(tag.id)"
               class="h-4 w-4"
-            ></Check>
+            >
+            </Check>
           </div>
         </div>
       </DContextMenu>
@@ -37,28 +38,28 @@
 </template>
 
 <script lang="ts" setup>
-import DContextMenu from "@/components/d-context-menu/d-context-menu.vue";
-import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue";
-import { ref } from "vue";
-import { Check } from "lucide-vue-next";
-import DTag from "@/components/d-tag/d-tag.vue";
-import { useGetTagsQuery } from "@/gql/queries/tags/getTags.ts";
-import { Tag } from "@/gql/schema.ts";
+import DContextMenu from "@/components/d-context-menu/d-context-menu.vue"
+import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue"
+import { ref } from "vue"
+import { Check } from "lucide-vue-next"
+import DTag from "@/components/d-tag/d-tag.vue"
+import { useGetTagsQuery } from "@/gql/queries/tags/getTags"
+import type { Tag } from "@/gql/schema"
 
-const emit = defineEmits(["update"]);
+const emit = defineEmits(["update"])
 
-const contextMenuOpen = ref(false);
-const selectedTags = ref<Tag[]>([]);
+const contextMenuOpen = ref(false)
+const selectedTags = ref<Tag[]>([])
 
-const { data } = useGetTagsQuery({});
+const { data } = useGetTagsQuery({})
 
 const toggleTag = (tag: Tag) => {
   if (selectedTags.value?.find((t) => t.id === tag.id)) {
-    selectedTags.value = selectedTags.value?.filter((t) => t.id !== tag.id);
+    selectedTags.value = selectedTags.value?.filter((t) => t.id !== tag.id)
   } else {
-    selectedTags.value = [...(selectedTags.value ?? []), tag];
+    selectedTags.value = [...(selectedTags.value ?? []), tag]
   }
 
-  emit("update", selectedTags.value);
-};
+  emit("update", selectedTags.value)
+}
 </script>

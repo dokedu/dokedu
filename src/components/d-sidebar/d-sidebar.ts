@@ -1,4 +1,4 @@
-import { computed } from "vue";
+import { computed } from "vue"
 
 import {
   Globe,
@@ -18,28 +18,29 @@ import {
   UserSquare,
   Wrench,
   TimerIcon,
-  MessageCircle,
-  Icon as LucideIcon,
-} from "lucide-vue-next";
+  MessageCircle
+} from "lucide-vue-next"
 
-import type { RouteNamedMap } from "vue-router/auto/routes";
-import i18n from "@/i18n.ts";
+import type { Icon as LucideIcon } from "lucide-vue-next"
+
+import type { RouteNamedMap } from "vue-router/auto/routes"
+import i18n from "@/i18n"
 
 export interface AppLink {
-  icon: LucideIcon;
-  name: string;
-  route: keyof RouteNamedMap;
+  icon: LucideIcon
+  name: string
+  route: keyof RouteNamedMap
 }
 
-export type UserRole = "owner" | "admin" | "teacher" | "student";
+export type UserRole = "owner" | "admin" | "teacher" | "student"
 
 export interface App {
-  id: string;
-  beta?: boolean;
-  allowedUserRoles: UserRole[];
-  icon: LucideIcon;
-  name: string;
-  links: AppLink[];
+  id: string
+  beta?: boolean
+  allowedUserRoles: UserRole[]
+  icon: LucideIcon
+  name: string
+  links: AppLink[]
 }
 
 export const apps = computed<App[]>(() => [
@@ -53,9 +54,9 @@ export const apps = computed<App[]>(() => [
         // icon: "file-check-02",
         icon: Settings,
         name: i18n.global.t("settings"),
-        route: "/settings/profile",
-      },
-    ],
+        route: "/settings/profile"
+      }
+    ]
   },
   {
     id: "record",
@@ -67,13 +68,13 @@ export const apps = computed<App[]>(() => [
         // icon: "file-check-02",
         icon: Pen,
         name: i18n.global.t("entry", 2),
-        route: "/record/entries/",
+        route: "/record/entries/"
       },
       {
         // icon: "users-01",
         icon: Users,
         name: i18n.global.t("student", 2),
-        route: "/record/students/",
+        route: "/record/students/"
       },
       // {
       //   // icon: "flag-04",
@@ -85,30 +86,30 @@ export const apps = computed<App[]>(() => [
         // icon: "grid-01",
         icon: Grid,
         name: i18n.global.t("project", 2),
-        route: "/record/projects/",
+        route: "/record/projects/"
       },
       {
         // icon: "check-done-01",
         icon: CopyCheck,
         name: i18n.global.t("competence", 2),
-        route: "/record/competences/",
+        route: "/record/competences/"
       },
       {
         icon: PieChart,
         name: i18n.global.t("report", 2),
-        route: "/record/reports/",
+        route: "/record/reports/"
       },
       {
         icon: Tag,
         name: i18n.global.t("tag", 2),
-        route: "/record/tags/",
+        route: "/record/tags/"
       },
       {
         icon: TimerIcon,
         name: i18n.global.t("attendance", 2),
-        route: "/record/attendances/",
-      },
-    ],
+        route: "/record/attendances/"
+      }
+    ]
   },
   {
     id: "drive",
@@ -120,12 +121,12 @@ export const apps = computed<App[]>(() => [
       {
         icon: HardDrive,
         name: i18n.global.t("my_drive"),
-        route: "/drive/my-drive/",
+        route: "/drive/my-drive/"
       },
       {
         icon: HardDrive,
         name: i18n.global.t("shared_drives"),
-        route: "/drive/shared-drives/",
+        route: "/drive/shared-drives/"
       },
       // {
       //     icon: Users2,
@@ -145,9 +146,9 @@ export const apps = computed<App[]>(() => [
       {
         icon: Trash2,
         name: i18n.global.t("trash"),
-        route: "/drive/trash/",
-      },
-    ],
+        route: "/drive/trash/"
+      }
+    ]
   },
   {
     id: "admin",
@@ -159,31 +160,31 @@ export const apps = computed<App[]>(() => [
         // icon: "👥",
         icon: Settings,
         name: i18n.global.t("general"),
-        route: "/admin/general/",
+        route: "/admin/general/"
       },
       {
         // icon: "👥",
         icon: Users,
         name: i18n.global.t("user", 2),
-        route: "/admin/users",
+        route: "/admin/users"
       },
       {
         // icon: "👥",
         icon: Landmark,
         name: i18n.global.t("billing"),
-        route: "/admin/billing/",
+        route: "/admin/billing/"
       },
       {
         icon: Mails,
         name: i18n.global.t("group", 2),
-        route: "/admin/groups",
+        route: "/admin/groups"
       },
       {
         icon: Globe,
         name: i18n.global.t("domain", 2),
-        route: "/admin/domains",
-      },
-    ],
+        route: "/admin/domains"
+      }
+    ]
   },
   {
     id: "school",
@@ -195,8 +196,8 @@ export const apps = computed<App[]>(() => [
         // icon: "👥",
         icon: UserSquare,
         name: i18n.global.t("student", 2),
-        route: "/school/students",
-      },
+        route: "/school/students"
+      }
       // {
       //   // icon: "👥",
       //   icon: UserSquare,
@@ -221,7 +222,7 @@ export const apps = computed<App[]>(() => [
       //   name: i18n.global.t("certificate", 2),
       //   route: "/school/certificates",
       // },
-    ],
+    ]
   },
   {
     id: "chat",
@@ -233,8 +234,8 @@ export const apps = computed<App[]>(() => [
       {
         icon: MessageCircle,
         name: i18n.global.t("chat"),
-        route: "/chat/chats",
-      },
-    ],
-  },
-]);
+        route: "/chat/chats"
+      }
+    ]
+  }
+])

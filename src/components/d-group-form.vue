@@ -47,114 +47,114 @@
 </template>
 
 <script lang="ts" setup>
-import DSidebar from "@/components/d-sidebar/d-sidebar.vue";
-import DSelect from "@/components/d-select/d-select.vue";
-import DInput from "@/components/d-input/d-input.vue";
-import DButton from "@/components/d-button/d-button.vue";
-import { computed, ref, toRef, watch } from "vue";
-import { useRouter } from "vue-router/auto";
-import { useI18n } from "vue-i18n";
-import { useDomainsQuery } from "@/gql/queries/domains/domains.ts";
-import { useGroupUsersQuery } from "@/gql/queries/emailAccounts/groupUsers.ts";
-import { EmailAccount } from "@/gql/schema.ts";
+import DSidebar from "@/components/d-sidebar/d-sidebar.vue"
+import DSelect from "@/components/d-select/d-select.vue"
+import DInput from "@/components/d-input/d-input.vue"
+import DButton from "@/components/d-button/d-button.vue"
+import { computed, ref, toRef, watch } from "vue"
+import { useRouter } from "vue-router/auto"
+import { useI18n } from "vue-i18n"
+import { useDomainsQuery } from "@/gql/queries/domains/domains"
+import { useGroupUsersQuery } from "@/gql/queries/emailAccounts/groupUsers"
+import type { EmailAccount } from "@/gql/schema"
 
-const router = useRouter();
-const t = useI18n().t;
+const router = useRouter()
+const t = useI18n().t
 
 const domainOptions = computed(
   () =>
     domainData?.value?.domains?.edges?.map((edge: any) => ({
       label: edge.name,
-      value: edge.name,
-    })) || [],
-);
+      value: edge.name
+    })) || []
+)
 
 export interface Props {
-  emailAccount: EmailAccount;
-  title: string;
-  deletable?: boolean;
+  emailAccount: EmailAccount
+  title: string
+  deletable?: boolean
 }
 
-const props = defineProps<Props>();
-const emit = defineEmits(["save", "delete"]);
+const props = defineProps<Props>()
+const emit = defineEmits(["save", "delete"])
 
-const account = toRef(props, "emailAccount");
-const name = ref(account.value.name.split("@")[0]);
-const domain = ref(account.value.name.split("@")[1]);
+const account = toRef(props, "emailAccount")
+const name = ref(account.value.name.split("@")[0])
+const domain = ref(account.value.name.split("@")[1])
 const members = ref(
   account.value.members?.map((member) => {
-    if (!member) return;
-    return member.name;
-  }) as string[],
-);
+    if (!member) return
+    return member.name
+  }) as string[]
+)
 
-const { data: domainData } = useDomainsQuery({});
+const { data: domainData } = useDomainsQuery({})
 
-const userSearch = ref("");
-const { data: userData } = useGroupUsersQuery({});
+const userSearch = ref("")
+const { data: userData } = useGroupUsersQuery({})
 
 const userOptions = computed(() => {
   return userData?.value?.emailAccounts?.edges?.map((edge: any) => ({
     label: edge.name,
-    value: edge.name,
-  }));
-});
+    value: edge.name
+  }))
+})
 
 watch(
   () => account.value.description,
   (newValue, oldValue) => {
-    if (!newValue) return;
-    if (name.value != oldValue?.toLowerCase().replace(/\s/g, ".")) return;
-    name.value = newValue.toLowerCase().replace(/\s/g, ".");
-  },
-);
+    if (!newValue) return
+    if (name.value != oldValue?.toLowerCase().replace(/\s/g, ".")) return
+    name.value = newValue.toLowerCase().replace(/\s/g, ".")
+  }
+)
 
 const onCancel = () => {
-  router.push({ name: "/admin/groups" });
-};
+  router.push({ name: "/admin/groups" })
+}
 
 const onDelete = () => {
-  emit("delete");
-};
+  emit("delete")
+}
 
 const errors = ref({
   description: "",
   name: "",
-  domain: "",
-});
+  domain: ""
+})
 
 const onSave = () => {
   errors.value = {
     description: "",
     name: "",
-    domain: "",
-  };
+    domain: ""
+  }
 
   if (!account.value.description) {
-    errors.value.description = t("description_required");
+    errors.value.description = t("description_required")
   }
   if (!name.value) {
-    errors.value.name = t("name_required");
+    errors.value.name = t("name_required")
   }
 
   if (!domain.value) {
-    errors.value.domain = t("domain_required");
+    errors.value.domain = t("domain_required")
   }
 
   // Check if name doesn't have spaces
   if (name.value.includes(" ")) {
-    errors.value.name = t("name_spaces");
+    errors.value.name = t("name_spaces")
   }
 
   // Return if errors
   if (errors.value.description || errors.value.name || errors.value.domain) {
-    return;
+    return
   }
 
   emit("save", {
     name: `${name.value}@${domain.value}`,
     domain: domain.value,
-    members: members.value,
-  });
-};
+    members: members.value
+  })
+}
 </script>

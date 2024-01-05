@@ -7,66 +7,66 @@ import {
   DialogPortal,
   DialogRoot,
   DialogTitle,
-  DialogTrigger,
-} from "radix-vue";
+  DialogTrigger
+} from "radix-vue"
 
-import { X } from "lucide-vue-next";
-import { ref } from "vue";
-import { useDropZone } from "@vueuse/core";
-import { createNotification } from "@/composables/useToast";
-import { useImportStudentsMutation } from "@/gql/mutations/general/importStudents.ts";
+import { X } from "lucide-vue-next"
+import { ref } from "vue"
+import { useDropZone } from "@vueuse/core"
+import { createNotification } from "@/composables/useToast"
+import { useImportStudentsMutation } from "@/gql/mutations/general/importStudents"
 
-const open = ref(false);
-const dropZoneRef = ref<HTMLDivElement>();
+const open = ref(false)
+const dropZoneRef = ref<HTMLDivElement>()
 
 async function onDrop(files: File[] | null) {
-  if (!files) return;
-  console.log(files);
+  if (!files) return
+  console.log(files)
 
   // ensure files length is 1
-  const file = files[0];
-  if (!file) return;
+  const file = files[0]
+  if (!file) return
 
-  await processFile(file);
+  await processFile(file)
 }
 
-useDropZone(dropZoneRef, onDrop);
+useDropZone(dropZoneRef, onDrop)
 
 async function onChange(event: any) {
-  event.preventDefault();
-  const file = event?.target?.files[0];
-  if (!file) return;
+  event.preventDefault()
+  const file = event?.target?.files[0]
+  if (!file) return
 
-  const { error, data } = await processFile(file);
+  const { error, data } = await processFile(file)
 
   if (data?.importStudents.errors?.length || 0 > 0 || error) {
     return createNotification({
       title: "Error",
-      description: "Something went wrong",
-    });
+      description: "Something went wrong"
+    })
   }
 
   return createNotification({
     title: "Success",
     description: `${data?.importStudents.usersCreated || 0} students imported successfully, ${
       data?.importStudents.usersExisted || 0
-    } students already existed`,
-  });
+    } students already existed`
+  })
 }
 
 async function processFile(file: File) {
   const res = await importStudents({
     input: {
-      file: file as unknown as never,
-    },
-  });
+      file: file as unknown as never
+    }
+  })
 
-  open.value = false;
+  open.value = false
 
-  return res;
+  return res
 }
 
-const { executeMutation: importStudents } = useImportStudentsMutation();
+const { executeMutation: importStudents } = useImportStudentsMutation()
 </script>
 
 <template>

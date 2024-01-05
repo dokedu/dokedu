@@ -1,10 +1,10 @@
 query bucketShares($input: ShareInput!) {
-    shares(input: $input) {
-        user {
-            id
-            firstName
-            lastName
-        }
-        permission
+  shares(input: $input) {
+    user {
+      id
+      firstName
+      lastName
     }
+    permission
+  }
 }

@@ -1,5 +1,5 @@
-const defaultTheme = require("tailwindcss/defaultTheme");
-const colors = require("tailwindcss/colors");
+const defaultTheme = require("tailwindcss/defaultTheme")
+const colors = require("tailwindcss/colors")
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -10,24 +10,24 @@ export default {
         DEFAULT: {
           css: {
             "code::before": {
-              content: '""',
+              content: '""'
             },
             "code::after": {
-              content: '""',
-            },
-          },
-        },
+              content: '""'
+            }
+          }
+        }
       },
       fontFamily: {
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
-        mono: ["JetBrains Mono", ...defaultTheme.fontFamily.mono],
+        mono: ["JetBrains Mono", ...defaultTheme.fontFamily.mono]
       },
       backgroundColor: {
         strong: colors.neutral[200],
         default: colors.white,
         subtle: colors.neutral[100],
         muted: colors.neutral[50],
-        inverted: colors.neutral[900],
+        inverted: colors.neutral[900]
       },
       // icon, text
       textColor: {
@@ -35,7 +35,7 @@ export default {
         default: colors.neutral[700],
         subtle: colors.neutral[500],
         muted: colors.neutral[400],
-        inverted: colors.white,
+        inverted: colors.white
       },
       stroke: {
         colors: {
@@ -43,20 +43,20 @@ export default {
           default: colors.neutral[700],
           subtle: colors.neutral[500],
           muted: colors.neutral[400],
-          inverted: colors.white,
-        },
+          inverted: colors.white
+        }
       },
       border: {
         strong: colors.neutral[400],
         default: colors.neutral[200],
         subtle: colors.neutral[100],
-        intense: colors.neutral[900],
-      },
-    },
+        intense: colors.neutral[900]
+      }
+    }
   },
   plugins: [
     require("@tailwindcss/forms"),
     require("@tailwindcss/container-queries"),
-    require("@tailwindcss/typography"),
-  ],
-};
+    require("@tailwindcss/typography")
+  ]
+}

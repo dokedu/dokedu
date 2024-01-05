@@ -1,7 +1,7 @@
 mutation updateOrganisation($input: UpdateOrganisationInput!) {
-    updateOrganisation(input: $input) {
-        id
-        name
-        legalName
-    }
+  updateOrganisation(input: $input) {
+    id
+    name
+    legalName
+  }
 }

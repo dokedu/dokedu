@@ -48,21 +48,21 @@
 </template>
 
 <script setup lang="ts">
-import DButton from "@/components/d-button/d-button.vue";
-import PageHeader from "@/components/page-header.vue";
-import PageWrapper from "@/components/page-wrapper.vue";
-import { Plus } from "lucide-vue-next";
-import { ref, watch } from "vue";
-import DTable from "@/components/d-table/d-table.vue";
-import { useRouter } from "vue-router/auto";
-import { formatDate, watchDebounced } from "@vueuse/core";
-import type { PageVariables } from "@/types/types.ts";
-import { AdminUsersDocument } from "@/gql/queries/users/adminUsers.ts";
-import { UserOrderBy } from "@/gql/schema.ts";
+import DButton from "@/components/d-button/d-button.vue"
+import PageHeader from "@/components/page-header.vue"
+import PageWrapper from "@/components/page-wrapper.vue"
+import { Plus } from "lucide-vue-next"
+import { ref, watch } from "vue"
+import DTable from "@/components/d-table/d-table.vue"
+import { useRouter } from "vue-router/auto"
+import { formatDate, watchDebounced } from "@vueuse/core"
+import type { PageVariables } from "@/types/types"
+import { AdminUsersDocument } from "@/gql/queries/users/adminUsers"
+import { UserOrderBy } from "@/gql/schema"
 
-const router = useRouter();
-const search = ref("");
-const showDeleted = ref(false);
+const router = useRouter()
+const search = ref("")
+const showDeleted = ref(false)
 
 const columns = [
   {
@@ -70,22 +70,22 @@ const columns = [
     key: "firstName",
     sortable: {
       asc: UserOrderBy.FirstNameAsc,
-      desc: UserOrderBy.FirstNameDesc,
-    },
+      desc: UserOrderBy.FirstNameDesc
+    }
   },
   {
     label: "last_name",
     key: "lastName",
     sortable: {
       asc: UserOrderBy.LastNameAsc,
-      desc: UserOrderBy.LastNameDesc,
-    },
+      desc: UserOrderBy.LastNameDesc
+    }
   },
   {
     label: "email",
-    key: "email",
-  },
-];
+    key: "email"
+  }
+]
 
 const pageVariables = ref<PageVariables[]>([
   {
@@ -94,15 +94,15 @@ const pageVariables = ref<PageVariables[]>([
     limit: 50,
     offset: 0,
     nextPage: undefined,
-    showDeleted: undefined,
-  },
-]);
+    showDeleted: undefined
+  }
+])
 
 watchDebounced(
   search,
   () => {
     // Get last page and set it as only with the search
-    const lastPage = pageVariables.value[pageVariables.value.length - 1];
+    const lastPage = pageVariables.value[pageVariables.value.length - 1]
     pageVariables.value = [
       {
         search: search.value,
@@ -110,16 +110,16 @@ watchDebounced(
         limit: 50,
         offset: 0,
         nextPage: undefined,
-        showDeleted: lastPage.showDeleted,
-      },
-    ];
+        showDeleted: lastPage.showDeleted
+      }
+    ]
   },
-  { debounce: 250, maxWait: 500 },
-);
+  { debounce: 250, maxWait: 500 }
+)
 
 watch(showDeleted, () => {
   // Get last page and set it as only with the search
-  const lastPage = pageVariables.value[pageVariables.value.length - 1];
+  const lastPage = pageVariables.value[pageVariables.value.length - 1]
   pageVariables.value = [
     {
       search: lastPage.search,
@@ -127,12 +127,12 @@ watch(showDeleted, () => {
       limit: 50,
       offset: 0,
       nextPage: undefined,
-      showDeleted: showDeleted.value,
-    },
-  ];
-});
+      showDeleted: showDeleted.value
+    }
+  ]
+})
 
 const goToUser = <Type extends { id: string }>(row: Type) => {
-  router.push({ name: "/admin/users/[id]", params: { id: row.id } });
-};
+  router.push({ name: "/admin/users/[id]", params: { id: row.id } })
+}
 </script>

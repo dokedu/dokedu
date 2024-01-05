@@ -46,42 +46,42 @@
 </template>
 
 <script lang="ts" setup>
-import DSidebar from "@/components/d-sidebar/d-sidebar.vue";
-import { useRouter } from "vue-router/auto";
-import DInput from "@/components/d-input/d-input.vue";
-import DButton from "@/components/d-button/d-button.vue";
-import { toRef } from "vue";
-import { Trash, Mail, Lock } from "lucide-vue-next";
-import { User } from "@/gql/schema.ts";
+import DSidebar from "@/components/d-sidebar/d-sidebar.vue"
+import { useRouter } from "vue-router/auto"
+import DInput from "@/components/d-input/d-input.vue"
+import DButton from "@/components/d-button/d-button.vue"
+import { toRef } from "vue"
+import { Trash, Mail, Lock } from "lucide-vue-next"
+import type { User } from "@/gql/schema"
 
-const router = useRouter();
+const router = useRouter()
 
 export interface Props {
-  user: User;
-  title: string;
-  deletable?: boolean;
+  user: User
+  title: string
+  deletable?: boolean
 }
-const props = defineProps<Props>();
-const emit = defineEmits(["save", "delete", "reset-password", "invite"]);
-const user = toRef(props, "user");
+const props = defineProps<Props>()
+const emit = defineEmits(["save", "delete", "reset-password", "invite"])
+const user = toRef(props, "user")
 
 const onCancel = () => {
-  router.push({ name: "/admin/users" });
-};
+  router.push({ name: "/admin/users" })
+}
 
 const onDelete = () => {
-  emit("delete");
-};
+  emit("delete")
+}
 
 const onSave = () => {
-  emit("save");
-};
+  emit("save")
+}
 
 const onResetPassword = () => {
-  emit("reset-password");
-};
+  emit("reset-password")
+}
 
 const onSendInvite = () => {
-  emit("invite");
-};
+  emit("invite")
+}
 </script>

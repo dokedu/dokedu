@@ -18,7 +18,8 @@
           size="md"
           :icon-left="ListFilter"
           @click="toggleFilters"
-          >{{ $t("filter") }}</DButton
+        >
+          {{ $t("filter") }}</DButton
         >
         <router-link :to="{ name: '/record/projects/export' }">
           <d-button type="transparent" :icon-left="Share">{{ $t("export") }}</d-button>
@@ -74,110 +75,110 @@
 </template>
 
 <script setup lang="ts">
-import PageHeader from "@/components/page-header.vue";
-import PageWrapper from "@/components/page-wrapper.vue";
-import { formatDate, onClickOutside, onKeyStroke } from "@vueuse/core";
-import DButton from "@/components/d-button/d-button.vue";
-import { Plus } from "lucide-vue-next";
-import { Share } from "lucide-vue-next";
-import { ref, computed, watch } from "vue";
-import { ListFilter } from "lucide-vue-next";
-import DTable from "@/components/d-table/d-table.vue";
-import { useRouter } from "vue-router/auto";
-import type { PageVariables } from "@/types/types.ts";
-import { EventOrderBy } from "@/gql/schema.ts";
-import { EventWithSearchDocument } from "@/gql/queries/events/eventWithSearch.ts";
+import PageHeader from "@/components/page-header.vue"
+import PageWrapper from "@/components/page-wrapper.vue"
+import { formatDate, onClickOutside, onKeyStroke } from "@vueuse/core"
+import DButton from "@/components/d-button/d-button.vue"
+import { Plus } from "lucide-vue-next"
+import { Share } from "lucide-vue-next"
+import { ref, computed, watch } from "vue"
+import { ListFilter } from "lucide-vue-next"
+import DTable from "@/components/d-table/d-table.vue"
+import { useRouter } from "vue-router/auto"
+import type { PageVariables } from "@/types/types"
+import { EventOrderBy } from "@/gql/schema"
+import { EventWithSearchDocument } from "@/gql/queries/events/eventWithSearch"
 
-const sheet = ref<HTMLElement | null>(null);
+const sheet = ref<HTMLElement | null>(null)
 
 onClickOutside(sheet, async () => {
-  await router.push({ name: "/record/projects/" });
-});
+  await router.push({ name: "/record/projects/" })
+})
 
 onKeyStroke("Escape", async () => {
-  await router.push({ name: "/record/projects/" });
-});
+  await router.push({ name: "/record/projects/" })
+})
 
-const search = ref("");
-const filtersOpen = ref(false);
-const startsAt = ref();
-const endsAt = ref();
-const router = useRouter();
+const search = ref("")
+const filtersOpen = ref(false)
+const startsAt = ref()
+const endsAt = ref()
+const router = useRouter()
 
-const startTimestamp = computed(() => startsAt.value && new Date(startsAt.value).toISOString());
-const endsTimestamp = computed(() => endsAt.value && new Date(endsAt.value).toISOString());
+const startTimestamp = computed(() => startsAt.value && new Date(startsAt.value).toISOString())
+const endsTimestamp = computed(() => endsAt.value && new Date(endsAt.value).toISOString())
 
 function toggleFilters() {
-  filtersOpen.value = !filtersOpen.value;
+  filtersOpen.value = !filtersOpen.value
 }
 
 interface Variables extends PageVariables {
   filter: {
-    from?: string;
-    to?: string;
-  };
+    from?: string
+    to?: string
+  }
 }
 
 const columns = [
   {
     label: "title",
-    key: "title",
+    key: "title"
   },
   {
     label: "description",
-    key: "body",
+    key: "body"
   },
   {
     label: "starts_at",
     key: "startsAt",
     sortable: {
       asc: EventOrderBy.StartsAtAsc,
-      desc: EventOrderBy.StartsAtDesc,
-    },
+      desc: EventOrderBy.StartsAtDesc
+    }
   },
   {
     label: "ends_at",
     key: "endsAt",
     sortable: {
       asc: EventOrderBy.EndsAtAsc,
-      desc: EventOrderBy.EndsAtDesc,
-    },
-  },
-];
+      desc: EventOrderBy.EndsAtDesc
+    }
+  }
+]
 
 const pageVariables = ref<Variables[]>([
   {
     filter: {
       from: undefined,
-      to: undefined,
+      to: undefined
     },
     search: "",
     order: EventOrderBy.StartsAtAsc,
     limit: 50,
     offset: 0,
-    nextPage: undefined,
-  },
-]);
+    nextPage: undefined
+  }
+])
 
 const onRowClick = (row: Record<string, string>) => {
   // router.push({ name: "record-projects-project-inline", params: { id: row.id } });
-  router.push({ name: "/record/projects/[id]", params: { id: row.id } });
-};
+  router.push({ name: "/record/projects/[id]", params: { id: row.id } })
+}
 
 watch([search, startTimestamp, endsTimestamp], () => {
-  const lastPage = pageVariables.value[pageVariables.value.length - 1];
+  const lastPage = pageVariables.value[pageVariables.value.length - 1]
   pageVariables.value = [
     {
       filter: {
         from: startTimestamp.value,
-        to: endsTimestamp.value,
+        to: endsTimestamp.value
       },
       search: search.value,
       order: lastPage.order,
       limit: 50,
       offset: 0,
-      nextPage: undefined,
-    },
-  ];
-});
+      nextPage: undefined
+    }
+  ]
+})
 </script>

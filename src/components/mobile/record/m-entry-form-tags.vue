@@ -35,46 +35,46 @@
 </template>
 
 <script lang="ts" setup>
-import MSheet from "@/components/mobile/m-sheet.vue";
-import DTag from "@/components/d-tag/d-tag.vue";
-import { useVModel, useWindowSize } from "@vueuse/core";
-import { Plus, Check } from "lucide-vue-next";
-import { computed, ref } from "vue";
-import { useDeleteEntryTagInputMutation } from "@/gql/mutations/entries/deleteEntryTag.ts";
-import { useCreateEntryTagMutation } from "@/gql/mutations/entries/createEntryTag.ts";
-import { useTagLimitedQuery } from "@/gql/queries/tags/tags.ts";
+import MSheet from "@/components/mobile/m-sheet.vue"
+import DTag from "@/components/d-tag/d-tag.vue"
+import { useVModel, useWindowSize } from "@vueuse/core"
+import { Plus, Check } from "lucide-vue-next"
+import { computed, ref } from "vue"
+import { useDeleteEntryTagInputMutation } from "@/gql/mutations/entries/deleteEntryTag"
+import { useCreateEntryTagMutation } from "@/gql/mutations/entries/createEntryTag"
+import { useTagLimitedQuery } from "@/gql/queries/tags/tags"
 
-const { executeMutation: deleteEntryTag } = useDeleteEntryTagInputMutation();
-const { executeMutation: createEntryTag } = useCreateEntryTagMutation();
+const { executeMutation: deleteEntryTag } = useDeleteEntryTagInputMutation()
+const { executeMutation: createEntryTag } = useCreateEntryTagMutation()
 
-const sheetOpen = ref(false);
+const sheetOpen = ref(false)
 
-const { height } = useWindowSize();
-const sheetHeight = computed(() => height.value - 72);
+const { height } = useWindowSize()
+const sheetHeight = computed(() => height.value - 72)
 
 function addTag() {
-  sheetOpen.value = true;
+  sheetOpen.value = true
 }
 
 const props = defineProps<{
-  entry: any;
-  modelValue: any;
-}>();
-const emit = defineEmits(["update:modelValue"]);
+  entry: any
+  modelValue: any
+}>()
+const emit = defineEmits(["update:modelValue"])
 
-const tags = useVModel(props, "modelValue", emit);
+const tags = useVModel(props, "modelValue", emit)
 
-const { data } = useTagLimitedQuery({});
+const { data } = useTagLimitedQuery({})
 
 async function toggleTag(tag: any) {
   if (tags.value.find((p: any) => p.id === tag.id)) {
-    await deleteEntryTag({ input: { entryId: props.entry.id, tagId: tag.id } });
+    await deleteEntryTag({ input: { entryId: props.entry.id, tagId: tag.id } })
   } else {
-    await createEntryTag({ input: { entryId: props.entry.id, tagId: tag.id } });
+    await createEntryTag({ input: { entryId: props.entry.id, tagId: tag.id } })
   }
 }
 
 function activeTag(tag: any) {
-  return tags.value.find((p: any) => p.id === tag.id);
+  return tags.value.find((p: any) => p.id === tag.id)
 }
 </script>

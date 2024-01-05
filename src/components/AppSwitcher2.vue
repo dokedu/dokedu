@@ -35,51 +35,51 @@
 </template>
 
 <script lang="ts" setup>
-import { Grip } from "lucide-vue-next";
-import { computed, ref } from "vue";
-import useActiveApp from "@/composables/useActiveApp.ts";
-import { apps, UserRole } from "@/components/d-sidebar/d-sidebar.ts";
-import { onClickOutside, useStorage } from "@vueuse/core";
-import { useRouter } from "vue-router/auto";
-import { useMeQuery } from "@/gql/queries/auth/me.ts";
+import { Grip } from "lucide-vue-next"
+import { computed, ref } from "vue"
+import useActiveApp from "@/composables/useActiveApp"
+import { apps, UserRole } from "@/components/d-sidebar/d-sidebar"
+import { onClickOutside, useStorage } from "@vueuse/core"
+import { useRouter } from "vue-router/auto"
+import { useMeQuery } from "@/gql/queries/auth/me"
 
-const visibleAppSwitcher = ref<boolean>(false);
-const app = computed(() => apps.value.find((el) => el.id === activeApp.value) || null);
+const visibleAppSwitcher = ref<boolean>(false)
+const app = computed(() => apps.value.find((el) => el.id === activeApp.value) || null)
 
-const { activeApp } = useActiveApp();
-const router = useRouter();
+const { activeApp } = useActiveApp()
+const router = useRouter()
 
-const appSwitcher = ref();
+const appSwitcher = ref()
 
 onClickOutside(appSwitcher, () => {
-  visibleAppSwitcher.value = false;
-});
+  visibleAppSwitcher.value = false
+})
 
-const enabledAppList = useStorage<string[]>("enabled_apps", []);
-const { data: userData } = useMeQuery({});
+const enabledAppList = useStorage<string[]>("enabled_apps", [])
+const { data: userData } = useMeQuery({})
 
 function switchApp(appId: string | null = null) {
   if (appId) {
-    activeApp.value = appId;
-    visibleAppSwitcher.value = false;
+    activeApp.value = appId
+    visibleAppSwitcher.value = false
 
     // Reroute to first link of app
-    const app = apps.value.find((el) => el.id === appId);
+    const app = apps.value.find((el) => el.id === appId)
     if (app) {
-      router.push({ name: app.links[0].route });
+      router.push({ name: app.links[0].route })
     }
-    return;
+    return
   }
   // start at first app of index is out of bounds
-  const nextIndex = (enabledApps.value.findIndex((el) => el.id === activeApp.value) + 1) % enabledApps.value.length;
-  activeApp.value = enabledApps.value[nextIndex].id;
+  const nextIndex = (enabledApps.value.findIndex((el) => el.id === activeApp.value) + 1) % enabledApps.value.length
+  activeApp.value = enabledApps.value[nextIndex].id
 }
 
 const enabledApps = computed(() => {
-  const enabled = apps.value.filter((el: { id: string }) => enabledAppList.value.includes(el.id));
-  const role = userData.value?.me?.role;
-  return enabled.filter((el: { allowedUserRoles: UserRole[] }) => el.allowedUserRoles.includes(role as UserRole));
-});
+  const enabled = apps.value.filter((el: { id: string }) => enabledAppList.value.includes(el.id))
+  const role = userData.value?.me?.role
+  return enabled.filter((el: { allowedUserRoles: UserRole[] }) => el.allowedUserRoles.includes(role as UserRole))
+})
 
 // code here
 </script>

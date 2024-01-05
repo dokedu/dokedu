@@ -28,7 +28,7 @@
             :class="[
               selected.some((s) => s.id === competence?.id)
                 ? 'bg-blue-50 border !border-blue-300 shadow-sm shadow-blue-200 hover:bg-blue-50 transition-all'
-                : 'border border-transparent hover:bg-neutral-100 transition-all',
+                : 'border border-transparent hover:bg-neutral-100 transition-all'
             ]"
           />
         </div>
@@ -61,69 +61,69 @@
 </template>
 
 <script lang="ts" setup>
-import DCompetence from "@/components/d-competence/d-competence.vue";
-import { computed, reactive, Ref, ref } from "vue";
-import { ChevronRight, PlusIcon } from "lucide-vue-next";
-import DCreateCompetence from "@/components/d-competence-search/d-create-competence.vue";
-import { useCompetenceSearchQuery } from "@/gql/queries/competences/competenceSearch.ts";
-import { useCompetencePathQuery } from "@/gql/queries/competences/competencePath.ts";
+import DCompetence from "@/components/d-competence/d-competence.vue"
+import { computed, reactive, Ref, ref } from "vue"
+import { ChevronRight, PlusIcon } from "lucide-vue-next"
+import DCreateCompetence from "@/components/d-competence-search/d-create-competence.vue"
+import { useCompetenceSearchQuery } from "@/gql/queries/competences/competenceSearch"
+import { useCompetencePathQuery } from "@/gql/queries/competences/competencePath"
 
 defineProps({
   selected: {
     type: Array as () => { id: string }[],
-    default: () => [],
-  },
-});
+    default: () => []
+  }
+})
 
-const createCompetenceDialog = ref(false);
+const createCompetenceDialog = ref(false)
 
-const search = ref("");
-const parentId = ref<string | null>(null);
+const search = ref("")
+const parentId = ref<string | null>(null)
 const parents = computed(() => {
-  if (!parentId.value) return [];
-  return [parentId.value];
-});
+  if (!parentId.value) return []
+  return [parentId.value]
+})
 
 const filter = computed<any>(() => {
-  const searchLength = search.value.length;
-  const hasParent = !!parentId.value;
-  if (!hasParent && searchLength === 0) return { type: "subject" };
-  if (!hasParent && searchLength > 0) return { type: ["competence", "group"] };
-  return { parents: parents.value };
-});
+  const searchLength = search.value.length
+  const hasParent = !!parentId.value
+  if (!hasParent && searchLength === 0) return { type: "subject" }
+  if (!hasParent && searchLength > 0) return { type: ["competence", "group"] }
+  return { parents: parents.value }
+})
 
 const { data: competenceData } = useCompetenceSearchQuery({
   variables: reactive({
     search: search,
-    filter: filter,
-  }),
-});
+    filter: filter
+  })
+})
 
 const { data: parentData } = useCompetencePathQuery({
   variables: reactive({
-    id: parentId as unknown as string,
+    id: parentId as unknown as string
   }),
-  pause: !parentId,
-});
+  pause: !parentId
+})
 
 const parentPath = computed(() => {
-  if (!parentId.value) return [];
-  if (!parentData.value?.competence?.parents) return [];
-  return [...parentData.value.competence.parents, parentData.value.competence];
-});
+  if (!parentId.value) return []
+  if (!parentData.value?.competence?.parents) return []
+  return [...parentData.value.competence.parents, parentData.value.competence]
+})
 
 const competences = computed(() => {
-  if (!competenceData.value?.competences?.edges) return [];
-  return competenceData.value.competences.edges;
-});
+  if (!competenceData.value?.competences?.edges) return []
+  return competenceData.value.competences.edges
+})
 
-const emit = defineEmits(["add"]);
+const emit = defineEmits(["add"])
 
 function onClick(competence: any) {
   if (competence.type !== "competence") {
-    parentId.value = competence.id;
+    parentId.value = competence.id
   } else {
-    emit("add", competence);
+    emit("add", competence)
   }
 }
 </script>

@@ -3,14 +3,14 @@
 </template>
 
 <script lang="ts" setup>
-import DStudentForm from "@/components/d-student-form.vue";
-import { User } from "@/gql/schema.ts";
-import { reactive } from "vue";
-import { createNotification } from "@/composables/useToast";
-import { useRouter } from "vue-router/auto";
-import { useCreateStudentMutation } from "@/gql/mutations/users/createStudent.ts";
+import DStudentForm from "@/components/d-student-form.vue"
+import type { User } from "@/gql/schema"
+import { reactive } from "vue"
+import { createNotification } from "@/composables/useToast"
+import { useRouter } from "vue-router/auto"
+import { useCreateStudentMutation } from "@/gql/mutations/users/createStudent"
 
-const router = useRouter();
+const router = useRouter()
 
 const student = reactive<User>({
   firstName: "",
@@ -21,28 +21,28 @@ const student = reactive<User>({
     birthday: null,
     leftAt: null,
     joinedAt: null,
-    emoji: null,
-  },
-});
+    emoji: null
+  }
+})
 
-const { executeMutation: createStudent } = useCreateStudentMutation();
+const { executeMutation: createStudent } = useCreateStudentMutation()
 
 const onCreateStudent = async () => {
   if (!student.firstName) {
-    alert("First name is required");
-    return;
+    alert("First name is required")
+    return
   }
   if (!student.lastName) {
-    alert("Last name is required");
-    return;
+    alert("Last name is required")
+    return
   }
   if (!student.student?.grade) {
-    alert("Grade is required");
-    return;
+    alert("Grade is required")
+    return
   }
   if (student.student.grade < 0 || student.student.grade > 13) {
-    alert("Grade must be between 0 and 13");
-    return;
+    alert("Grade must be between 0 and 13")
+    return
   }
 
   await createStudent({
@@ -53,15 +53,15 @@ const onCreateStudent = async () => {
       birthday: student.student?.birthday,
       leftAt: student.student?.leftAt,
       joinedAt: student.student?.joinedAt,
-      emoji: student.student?.emoji,
-    },
-  });
+      emoji: student.student?.emoji
+    }
+  })
 
-  await router.push({ name: "/school/students" });
+  await router.push({ name: "/school/students" })
 
   createNotification({
     title: "Student created",
-    description: `${student.firstName} ${student.lastName} was created`,
-  });
-};
+    description: `${student.firstName} ${student.lastName} was created`
+  })
+}
 </script>

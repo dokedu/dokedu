@@ -35,50 +35,50 @@
 </template>
 
 <script setup lang="ts">
-import { computed, toRef } from "vue";
-import { formatDate, useTextareaAutosize, watchDebounced } from "@vueuse/core";
-import EntryFormHeader from "./d-entry-form-header.vue";
-import EntryFormCompetences from "./d-entry-form-competences.vue";
-import EntryFormProjects from "./d-entry-form-projects.vue";
-import EntryFormLabels from "./d-entry-form-labels.vue";
-import EntryFormStudents from "./d-entry-form-students.vue";
-import { useArchiveEntryMutation } from "@/gql/mutations/entries/archiveEntry.ts";
-import { useUpdateEntryMutation } from "@/gql/mutations/entries/updateEntry.ts";
-import { Entry } from "@/gql/schema.ts";
+import { computed, toRef } from "vue"
+import { formatDate, useTextareaAutosize, watchDebounced } from "@vueuse/core"
+import EntryFormHeader from "./d-entry-form-header.vue"
+import EntryFormCompetences from "./d-entry-form-competences.vue"
+import EntryFormProjects from "./d-entry-form-projects.vue"
+import EntryFormLabels from "./d-entry-form-labels.vue"
+import EntryFormStudents from "./d-entry-form-students.vue"
+import { useArchiveEntryMutation } from "@/gql/mutations/entries/archiveEntry"
+import { useUpdateEntryMutation } from "@/gql/mutations/entries/updateEntry"
+import type { Entry } from "@/gql/schema"
 
-const { executeMutation: archiveEntryMut } = useArchiveEntryMutation();
-const { executeMutation: updateEntry } = useUpdateEntryMutation();
+const { executeMutation: archiveEntryMut } = useArchiveEntryMutation()
+const { executeMutation: updateEntry } = useUpdateEntryMutation()
 
 const props = defineProps<{
-  entry: Partial<Entry>;
-}>();
+  entry: Partial<Entry>
+}>()
 
-const emit = defineEmits(["archived"]);
+const emit = defineEmits(["archived"])
 
-const entry = toRef(props, "entry");
+const entry = toRef(props, "entry")
 
-const { textarea, input: body } = useTextareaAutosize({ input: entry.value.body as string });
+const { textarea, input: body } = useTextareaAutosize({ input: entry.value.body as string })
 
 watchDebounced(
   body,
   async (value) => {
-    await updateEntry({ input: { id: entry.value.id as string, body: value } });
+    await updateEntry({ input: { id: entry.value.id as string, body: value } })
   },
-  { debounce: 250, maxWait: 1000 },
-);
+  { debounce: 250, maxWait: 1000 }
+)
 
 const formattedDate = computed({
   get() {
-    const date = new Date(entry.value.date as string);
-    return formatDate(date, "YYYY-MM-DD");
+    const date = new Date(entry.value.date as string)
+    return formatDate(date, "YYYY-MM-DD")
   },
   async set(value: string) {
-    await updateEntry({ input: { id: entry.value.id as string, date: value } });
-  },
-});
+    await updateEntry({ input: { id: entry.value.id as string, date: value } })
+  }
+})
 
 async function archive() {
-  await archiveEntryMut({ id: entry.value.id });
-  emit("archived");
+  await archiveEntryMut({ id: entry.value.id })
+  emit("archived")
 }
 </script>

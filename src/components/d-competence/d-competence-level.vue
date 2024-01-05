@@ -59,27 +59,27 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
-import { onClickOutside, onKeyStroke } from "@vueuse/core";
-import DCompetenceLevelIcon from "./d-competence-level-icon.vue";
-import { Check } from "lucide-vue-next";
+import { ref } from "vue"
+import { onClickOutside, onKeyStroke } from "@vueuse/core"
+import DCompetenceLevelIcon from "./d-competence-level-icon.vue"
+import { Check } from "lucide-vue-next"
 
-const props = defineProps<{ id: string; level: number; editable: boolean }>();
-const emit = defineEmits(["update"]);
+const props = defineProps<{ id: string; level: number; editable: boolean }>()
+const emit = defineEmits(["update"])
 
-const open = ref(false);
-const menu = ref<HTMLElement | null>(null);
+const open = ref(false)
+const menu = ref<HTMLElement | null>(null)
 
-onClickOutside(menu, () => (open.value = false));
+onClickOutside(menu, () => (open.value = false))
 
 onKeyStroke("Escape", () => {
-  open.value = false;
-});
+  open.value = false
+})
 
 function update(level: number) {
   if (props.editable) {
-    emit("update", { id: props.id, level });
+    emit("update", { id: props.id, level })
   }
-  open.value = false;
+  open.value = false
 }
 </script>

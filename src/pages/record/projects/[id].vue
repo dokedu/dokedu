@@ -5,33 +5,33 @@
 </template>
 
 <script lang="ts" setup>
-import { onKeyStroke } from "@vueuse/core";
-import { reactive } from "vue";
-import { useRoute, useRouter } from "vue-router/auto";
-import DProjectForm from "@/components/d-project-form.vue";
-import { useEventQuery } from "@/gql/queries/events/event.ts";
-import { Event } from "@/gql/schema.ts";
+import { onKeyStroke } from "@vueuse/core"
+import { reactive } from "vue"
+import { useRoute, useRouter } from "vue-router/auto"
+import DProjectForm from "@/components/d-project-form.vue"
+import { useEventQuery } from "@/gql/queries/events/event"
+import type { Event } from "@/gql/schema"
 
-const route = useRoute<"/record/projects/[id]">();
-const router = useRouter();
+const route = useRoute<"/record/projects/[id]">()
+const router = useRouter()
 
 async function cancel() {
-  await router.push({ name: "/record/projects/" });
+  await router.push({ name: "/record/projects/" })
 }
 
 async function save() {
-  if (route.name === "/record/projects/[id]") return;
-  await router.push({ name: "/record/projects/" });
+  if (route.name === "/record/projects/[id]") return
+  await router.push({ name: "/record/projects/" })
 }
 
 onKeyStroke("Escape", async () => {
-  if (route.name === "/record/projects/[id]") return;
-  await cancel();
-});
+  if (route.name === "/record/projects/[id]") return
+  await cancel()
+})
 
 const { data } = useEventQuery({
   variables: reactive({
-    id: route.params.id as string,
-  }),
-});
+    id: route.params.id as string
+  })
+})
 </script>

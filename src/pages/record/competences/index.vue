@@ -46,31 +46,31 @@
 </template>
 
 <script setup lang="ts">
-import PageHeader from "@/components/page-header.vue";
-import PageWrapper from "@/components/page-wrapper.vue";
-import { ref } from "vue";
-import { Edit2, Folder } from "lucide-vue-next";
-import DCompetenceEditDialog from "@/components/d-competence/d-competence-edit-dialog.vue";
-import DTag from "@/components/d-tag/d-tag.vue";
-import DTable from "@/components/d-table/d-table.vue";
-import { useRouter } from "vue-router/auto";
-import { watchDebounced } from "@vueuse/core";
-import type { PageVariables } from "@/types/types.ts";
-import { Competence } from "@/gql/schema.ts";
-import { CompetenceSubjectsDocument } from "@/gql/queries/competences/competenceSubjects.ts";
+import PageHeader from "@/components/page-header.vue"
+import PageWrapper from "@/components/page-wrapper.vue"
+import { ref } from "vue"
+import { Edit2, Folder } from "lucide-vue-next"
+import DCompetenceEditDialog from "@/components/d-competence/d-competence-edit-dialog.vue"
+import DTag from "@/components/d-tag/d-tag.vue"
+import DTable from "@/components/d-table/d-table.vue"
+import { useRouter } from "vue-router/auto"
+import { watchDebounced } from "@vueuse/core"
+import type { PageVariables } from "@/types/types"
+import type { Competence } from "@/gql/schema"
+import { CompetenceSubjectsDocument } from "@/gql/queries/competences/competenceSubjects"
 
-const search = ref("");
-const competence = ref<Competence | null>(null);
-const router = useRouter();
+const search = ref("")
+const competence = ref<Competence | null>(null)
+const router = useRouter()
 
 const pageVariables = ref<PageVariables[]>([
   {
     limit: 100,
     offset: 0,
     search: "",
-    nextPage: undefined,
-  },
-]);
+    nextPage: undefined
+  }
+])
 
 watchDebounced(
   search,
@@ -80,46 +80,46 @@ watchDebounced(
         search: search.value,
         limit: 100,
         offset: 0,
-        nextPage: undefined,
-      },
-    ];
+        nextPage: undefined
+      }
+    ]
   },
-  { debounce: 250, maxWait: 500 },
-);
+  { debounce: 250, maxWait: 500 }
+)
 
 const columns = [
   {
     label: "name",
     key: "name",
-    width: 0.8,
+    width: 0.8
   },
   {
     label: "grade",
-    key: "grade",
-  },
-];
+    key: "grade"
+  }
+]
 
 function editCompetence(value: Competence) {
-  competence.value = value;
+  competence.value = value
 }
 
 function grades(competence: Competence) {
   // return first and last grade and if only one grade only that one as string
   if (competence.grades.length === 1) {
-    return competence.grades[0].toString();
+    return competence.grades[0].toString()
   }
 
-  const sorted = competence.grades.sort((a, b) => a - b);
+  const sorted = competence.grades.sort((a, b) => a - b)
 
-  return `${sorted[0]} - ${sorted[sorted.length - 1]}`;
+  return `${sorted[0]} - ${sorted[sorted.length - 1]}`
 }
 
 const goToCompetence = <Type extends { id: string }>(row: Type) => {
   router.push({
     name: "/record/competences/[id]",
     params: {
-      id: row.id,
-    },
-  });
-};
+      id: row.id
+    }
+  })
+}
 </script>

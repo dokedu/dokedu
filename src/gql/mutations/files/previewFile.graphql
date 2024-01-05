@@ -1,5 +1,5 @@
 mutation previewFile($id: ID!) {
-    previewFile(input: { id: $id }) {
-        url
-    }
+  previewFile(input: { id: $id }) {
+    url
+  }
 }

@@ -1,7 +1,7 @@
 mutation importStudents($input: ImportStudentsInput!) {
-    importStudents(input: $input) {
-        usersCreated
-        usersExisted
-        errors
-    }
+  importStudents(input: $input) {
+    usersCreated
+    usersExisted
+    errors
+  }
 }

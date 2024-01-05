@@ -56,24 +56,24 @@
 </template>
 
 <script setup lang="ts">
-import PageHeader from "@/components/page-header.vue";
-import PageWrapper from "@/components/page-wrapper.vue";
-import { computed, reactive, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router/auto";
-import DTable from "@/components/d-table/d-table.vue";
-import { watchDebounced } from "@vueuse/core";
-import type { PageVariables } from "@/types/types.ts";
-import { Folder } from "lucide-vue-next";
-import { CompetenceDocument } from "@/gql/queries/competences/competence.ts";
-import { useZeCompetenceParentsQuery } from "@/gql/queries/competences/zeCompetenceParents.ts";
-import { Competence } from "@/gql/schema.ts";
+import PageHeader from "@/components/page-header.vue"
+import PageWrapper from "@/components/page-wrapper.vue"
+import { computed, reactive, ref, watch } from "vue"
+import { useRoute, useRouter } from "vue-router/auto"
+import DTable from "@/components/d-table/d-table.vue"
+import { watchDebounced } from "@vueuse/core"
+import type { PageVariables } from "@/types/types"
+import { Folder } from "lucide-vue-next"
+import { CompetenceDocument } from "@/gql/queries/competences/competence"
+import { useZeCompetenceParentsQuery } from "@/gql/queries/competences/zeCompetenceParents"
+import type { Competence } from "@/gql/schema"
 
-const route = useRoute<"/record/competences/[id]">();
-const router = useRouter();
+const route = useRoute<"/record/competences/[id]">()
+const router = useRouter()
 
-const search = ref("");
+const search = ref("")
 
-const id = computed(() => route.params.id as string);
+const id = computed(() => route.params.id as string)
 
 interface Variables extends PageVariables {}
 
@@ -83,9 +83,9 @@ const pageVariables = ref<Variables[]>([
     limit: 50,
     offset: 0,
     filter: { parents: id.value },
-    nextPage: undefined,
-  },
-]);
+    nextPage: undefined
+  }
+])
 
 watchDebounced(
   search,
@@ -96,12 +96,12 @@ watchDebounced(
         limit: 50,
         offset: 0,
         filter: { parents: id.value },
-        nextPage: undefined,
-      },
-    ];
+        nextPage: undefined
+      }
+    ]
   },
-  { debounce: 250, maxWait: 500 },
-);
+  { debounce: 250, maxWait: 500 }
+)
 
 // To ensure the router view updates
 watch(id, () => {
@@ -111,45 +111,45 @@ watch(id, () => {
       limit: 50,
       offset: 0,
       filter: { parents: id.value },
-      nextPage: undefined,
-    },
-  ];
-});
+      nextPage: undefined
+    }
+  ]
+})
 
 const columns = [
   {
     key: "name",
     label: "name",
-    width: 0.8,
+    width: 0.8
   },
   {
     key: "grade",
-    label: "grade",
-  },
-];
+    label: "grade"
+  }
+]
 
 function grades(competence: Competence) {
   // return first and last grade and if only one grade only that one as string
   if (competence.grades.length === 1) {
-    return competence.grades[0].toString();
+    return competence.grades[0].toString()
   }
 
-  const sorted = competence.grades.sort((a, b) => a - b);
+  const sorted = competence.grades.sort((a, b) => a - b)
 
-  return `${sorted[0]} - ${sorted[sorted.length - 1]}`;
+  return `${sorted[0]} - ${sorted[sorted.length - 1]}`
 }
 
 function goToCompetence<Type extends { id: string; type: string }>(row: Type) {
-  if (row.type === "competence") return;
-  router.push({ name: "/record/competences/[id]", params: { id: row.id } });
+  if (row.type === "competence") return
+  router.push({ name: "/record/competences/[id]", params: { id: row.id } })
 }
 
 const { data: parents } = useZeCompetenceParentsQuery({
-  variables: reactive({ id: id }),
-});
+  variables: reactive({ id: id })
+})
 
 const breadcrumbs = computed(() => {
-  if (!parents.value?.competence) return [];
-  return [...parents.value.competence.parents, parents.value.competence];
-});
+  if (!parents.value?.competence) return []
+  return [...parents.value.competence.parents, parents.value.competence]
+})
 </script>

@@ -74,8 +74,8 @@
 
 <script lang="ts">
 export interface Props {
-  folderId: string | null;
-  bucketId: string | null;
+  folderId: string | null
+  bucketId: string | null
 }
 </script>
 
@@ -90,59 +90,58 @@ import {
   File as FileFile,
   Trash,
   FileVideo,
-  Edit2,
-} from "lucide-vue-next";
-import DFileListDropdown from "./d-file-list-dropdown.vue";
-import useDownloadFile from "@/composables/useDownloadFile";
-import DDialogRenameFile from "./d-dialog/d-dialog-rename-file.vue";
-import DDialogDeleteFile from "./d-dialog/d-dialog-delete-file.vue";
-import DTable from "@/components/d-table/d-table.vue";
-import DEmpty from "@/components/d-empty/d-empty.vue";
-import type { PageVariables } from "@/types/types.ts";
-import { computed, reactive, ref, toRefs } from "vue";
-import { formatDate } from "@vueuse/core";
-import i18n from "@/i18n.ts";
-import { onClickOutside } from "@vueuse/core";
-import { Option } from "@/components/_drive/d-file-list-dropdown.vue";
-import { FilesDocument } from "@/gql/queries/files/files.ts";
-import { useDeleteFileMutation } from "@/gql/mutations/files/deleteFile.ts";
-import type { File } from "@/gql/schema.ts";
+  Edit2
+} from "lucide-vue-next"
+import DFileListDropdown from "./d-file-list-dropdown.vue"
+import useDownloadFile from "@/composables/useDownloadFile"
+import DDialogRenameFile from "./d-dialog/d-dialog-rename-file.vue"
+import DDialogDeleteFile from "./d-dialog/d-dialog-delete-file.vue"
+import DTable from "@/components/d-table/d-table.vue"
+import type { PageVariables } from "@/types/types"
+import { computed, reactive, ref, toRefs } from "vue"
+import { formatDate } from "@vueuse/core"
+import i18n from "@/i18n"
+import { onClickOutside } from "@vueuse/core"
+import { Option } from "@/components/_drive/d-file-list-dropdown.vue"
+import { FilesDocument } from "@/gql/queries/files/files"
+import { useDeleteFileMutation } from "@/gql/mutations/files/deleteFile"
+import type { File } from "@/gql/schema"
 
-const dFileList = ref<any>(null);
+const dFileList = ref<any>(null)
 
 const props = withDefaults(defineProps<Props>(), {
   folderId: null,
-  bucketId: null,
-});
+  bucketId: null
+})
 
-const { folderId: parentId, bucketId } = toRefs(props);
+const { folderId: parentId, bucketId } = toRefs(props)
 
 interface Variables extends PageVariables {}
 
-const showRenameDialog = ref(false);
-const renameDialogFile = ref<File | null>(null);
+const showRenameDialog = ref(false)
+const renameDialogFile = ref<File | null>(null)
 function onRenameFile(file: File) {
-  renameDialogFile.value = file;
-  showRenameDialog.value = true;
+  renameDialogFile.value = file
+  showRenameDialog.value = true
 }
 function closeRenameDialog() {
-  showRenameDialog.value = false;
+  showRenameDialog.value = false
 }
 
-const showDeleteDialog = ref(false);
-const deleteDialogFile = ref<File | null>(null);
+const showDeleteDialog = ref(false)
+const deleteDialogFile = ref<File | null>(null)
 function closeDeleteDialog() {
-  showDeleteDialog.value = false;
+  showDeleteDialog.value = false
 }
 function openDeleteFileDialog(file: File) {
-  deleteDialogFile.value = file;
-  showDeleteDialog.value = true;
+  deleteDialogFile.value = file
+  showDeleteDialog.value = true
 }
 async function onDeleteFile(file: File) {
-  await deleteFile({ id: file.id });
+  await deleteFile({ id: file.id })
 }
 
-const { executeMutation: deleteFile } = useDeleteFileMutation();
+const { executeMutation: deleteFile } = useDeleteFileMutation()
 
 const pageVariables = computed<Variables[]>(() => [
   {
@@ -151,121 +150,120 @@ const pageVariables = computed<Variables[]>(() => [
     filter: reactive({
       parentId: parentId,
       myBucket: !bucketId.value,
-      ...(bucketId.value ? { bucketId: bucketId } : {}),
-    }),
-  },
-]);
+      ...(bucketId.value ? { bucketId: bucketId } : {})
+    })
+  }
+])
 
-const selected = ref<{ id: string }[]>([]);
+const selected = ref<{ id: string }[]>([])
 
 onClickOutside(dFileList, () => {
-  console.log("click outside", selected.value);
-  selected.value = [];
-});
+  selected.value = []
+})
 
 function isFolder(file: File) {
-  return file.fileType === "folder";
+  return file.fileType === "folder"
 }
 
 function useFileIcon(file: File) {
   if (isFolder(file)) {
-    return Folder;
+    return Folder
   }
 
   switch (file.MIMEType) {
     case "application/pdf":
-      return FileText;
+      return FileText
     case "image/png":
-      return FileImage;
+      return FileImage
     case "image/jpeg":
-      return FileImage;
+      return FileImage
     case "image/gif":
-      return FileImage;
+      return FileImage
     case "image/webp":
-      return FileImage;
+      return FileImage
     case "image/jpg":
-      return FileImage;
+      return FileImage
     case "application/zip":
-      return Archive;
+      return Archive
     // video
     case "video/mp4":
-      return FileVideo;
+      return FileVideo
     default:
-      return FileFile;
+      return FileFile
   }
 }
 
 function isBlob(file: File) {
-  return file.fileType === "blob";
+  return file.fileType === "blob"
 }
 
-const { downloadFile } = useDownloadFile();
+const { downloadFile } = useDownloadFile()
 
-const emit = defineEmits(["click"]);
+const emit = defineEmits(["click"])
 
 const columns = [
   {
     label: "name",
     key: "name",
-    width: 0.5,
+    width: 0.5
   },
   {
     label: "created_at",
-    key: "createdAt",
+    key: "createdAt"
   },
   {
     label: "filesize",
-    key: "size",
+    key: "size"
   },
   {
     label: "-",
     key: "id",
-    width: 0.1,
-  },
-];
+    width: 0.1
+  }
+]
 
 function clickFile(file: any) {
-  const isSelected = selected.value.find((f) => f.id === file.id);
-  if (!isSelected) return;
+  const isSelected = selected.value.find((f) => f.id === file.id)
+  if (!isSelected) return
 
-  emit("click", file);
+  emit("click", file)
 }
 
 function prettyBytes(bytes: number) {
-  const units = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+  const units = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
 
   if (Math.abs(bytes) < 1) {
-    return bytes + "B";
+    return bytes + "B"
   }
 
-  const u = Math.min(Math.floor(Math.log10(bytes) / 3), units.length - 1);
-  const n = Number((bytes / Math.pow(1000, u)).toFixed(2));
-  return `${n} ${units[u]}`;
+  const u = Math.min(Math.floor(Math.log10(bytes) / 3), units.length - 1)
+  const n = Number((bytes / Math.pow(1000, u)).toFixed(2))
+  return `${n} ${units[u]}`
 }
 
 function optionListWithItem(item: File): Option[][] {
   const downloadAction = {
     text: i18n.global.t("download"),
     icon: Download,
-    func: () => downloadFile(item),
-  };
+    func: () => downloadFile(item)
+  }
 
   return [
     [
       {
         text: i18n.global.t("rename"),
         icon: Edit2,
-        func: () => onRenameFile(item),
+        func: () => onRenameFile(item)
       },
-      ...(isBlob(item) ? [downloadAction] : []),
+      ...(isBlob(item) ? [downloadAction] : [])
     ],
     [
       {
         text: i18n.global.t("delete"),
         icon: Trash,
-        func: () => openDeleteFileDialog(item),
-      },
-    ],
-  ];
+        func: () => openDeleteFileDialog(item)
+      }
+    ]
+  ]
 }
 </script>

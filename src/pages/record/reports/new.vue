@@ -34,47 +34,47 @@
 </template>
 
 <script lang="ts" setup>
-import PageHeader from "@/components/page-header.vue";
-import PageWrapper from "@/components/page-wrapper.vue";
-import PageContent from "@/components/page-content.vue";
-import { Save } from "lucide-vue-next";
-import dButton from "@/components/d-button/d-button.vue";
-import ReportTypeList from "@/components/d-report/d-report-type-list.vue";
-import ReportTagList from "@/components/d-report/d-report-tag-list.vue";
-import { Tag } from "@/gql/schema.ts";
-import { computed, reactive, ref } from "vue";
-import dInput from "@/components/d-input/d-input.vue";
-import { useRouter } from "vue-router/auto";
-import DSelect from "@/components/d-select/d-select.vue";
-import { createNotification } from "@/composables/useToast.ts";
-import { array, date, object, string } from "yup";
-import { useCreateReportMutation } from "@/gql/mutations/reports/createReport.ts";
-import { useGetEntryFilterStudentsQuery } from "@/gql/queries/users/getEntryFilterStudents.ts";
+import PageHeader from "@/components/page-header.vue"
+import PageWrapper from "@/components/page-wrapper.vue"
+import PageContent from "@/components/page-content.vue"
+import { Save } from "lucide-vue-next"
+import dButton from "@/components/d-button/d-button.vue"
+import ReportTypeList from "@/components/d-report/d-report-type-list.vue"
+import ReportTagList from "@/components/d-report/d-report-tag-list.vue"
+import type { Tag } from "@/gql/schema"
+import { computed, reactive, ref } from "vue"
+import dInput from "@/components/d-input/d-input.vue"
+import { useRouter } from "vue-router/auto"
+import DSelect from "@/components/d-select/d-select.vue"
+import { createNotification } from "@/composables/useToast"
+import { array, date, object, string } from "yup"
+import { useCreateReportMutation } from "@/gql/mutations/reports/createReport"
+import { useGetEntryFilterStudentsQuery } from "@/gql/queries/users/getEntryFilterStudents"
 
-const router = useRouter();
+const router = useRouter()
 
-const student = ref<string>();
-const from = ref<string>("");
-const to = ref<string>("");
-const type = ref("entries");
-const tags = ref<Tag[]>();
+const student = ref<string>()
+const from = ref<string>("")
+const to = ref<string>("")
+const type = ref("entries")
+const tags = ref<Tag[]>()
 
-const { executeMutation: createReportMutation } = useCreateReportMutation();
+const { executeMutation: createReportMutation } = useCreateReportMutation()
 
-const studentSearch = ref("");
+const studentSearch = ref("")
 const { data: studentData } = useGetEntryFilterStudentsQuery({
   variables: reactive({
-    search: studentSearch,
-  }),
-});
+    search: studentSearch
+  })
+})
 
 const studentOptions = computed(
   () =>
     studentData?.value?.users?.edges?.map((edge: any) => ({
       label: `${edge.firstName} ${edge.lastName}`,
-      value: edge.id,
-    })) || [],
-);
+      value: edge.id
+    })) || []
+)
 
 const createReportInput = object({
   studentUser: string().required(),
@@ -82,8 +82,8 @@ const createReportInput = object({
   to: date().required(),
   kind: string().required(),
   format: string().required(),
-  filterTags: array().ensure(),
-});
+  filterTags: array().ensure()
+})
 
 async function createReport() {
   const value = {
@@ -92,28 +92,28 @@ async function createReport() {
     to: to.value.slice(0, 10),
     kind: type.value,
     format: "pdf",
-    filterTags: tags.value?.map((tag) => tag.id) || [],
-  };
+    filterTags: tags.value?.map((tag) => tag.id) || []
+  }
 
   if (!(await createReportInput.isValid(value))) {
     return createNotification({
       title: "Formular ungültig",
-      description: "Bitte überprüfe deine Eingaben",
-    });
+      description: "Bitte überprüfe deine Eingaben"
+    })
   }
 
-  const input = createReportInput.cast(value);
+  const input = createReportInput.cast(value)
 
   // @ts-expect-error
-  const { error } = await createReportMutation({ input });
+  const { error } = await createReportMutation({ input })
 
   if (error) {
     return createNotification({
       title: "Beim Erstellen des Berichts ist ein Fehler aufgetreten",
-      description: error.message,
-    });
+      description: error.message
+    })
   }
 
-  await router.push({ name: "/record/reports/" });
+  await router.push({ name: "/record/reports/" })
 }
 </script>

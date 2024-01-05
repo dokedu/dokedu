@@ -1,12 +1,12 @@
 query userAttendanceOverview($date: Time!) {
-    userAttendanceOverview(date: $date) {
-        id
-        date
-        state
-        user {
-            id
-            firstName
-            lastName
-        }
+  userAttendanceOverview(date: $date) {
+    id
+    date
+    state
+    user {
+      id
+      firstName
+      lastName
     }
+  }
 }

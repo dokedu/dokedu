@@ -11,44 +11,44 @@
 </template>
 
 <script lang="ts" setup>
-import DStudentForm from "@/components/d-student-form.vue";
-import { computed, reactive, ref } from "vue";
-import { useRoute, useRouter } from "vue-router/auto";
-import { createNotification } from "@/composables/useToast";
-import { useAdminStudentByIdQuery } from "@/gql/queries/users/adminStudentById.ts";
-import { useUpdateStudentMutation } from "@/gql/mutations/users/updateStudent.ts";
-import { useArchiveStudentMutation } from "@/gql/mutations/users/archiveStudent.ts";
-import { User } from "@/gql/schema.ts";
+import DStudentForm from "@/components/d-student-form.vue"
+import { computed, reactive, ref } from "vue"
+import { useRoute, useRouter } from "vue-router/auto"
+import { createNotification } from "@/composables/useToast"
+import { useAdminStudentByIdQuery } from "@/gql/queries/users/adminStudentById"
+import { useUpdateStudentMutation } from "@/gql/mutations/users/updateStudent"
+import { useArchiveStudentMutation } from "@/gql/mutations/users/archiveStudent"
+import type { User } from "@/gql/schema"
 
-const route = useRoute<"/school/students/[id]">();
-const router = useRouter();
-const id = computed(() => route.params.id as string);
+const route = useRoute<"/school/students/[id]">()
+const router = useRouter()
+const id = computed(() => route.params.id as string)
 
 const { data } = useAdminStudentByIdQuery({
-  variables: reactive({ id }),
-});
-const { executeMutation: updateStudent } = useUpdateStudentMutation();
+  variables: reactive({ id })
+})
 
-const { executeMutation: archiveStudent } = useArchiveStudentMutation();
+const { executeMutation: updateStudent } = useUpdateStudentMutation()
+const { executeMutation: archiveStudent } = useArchiveStudentMutation()
 
 const onEditStudent = async () => {
-  const student = ref(data?.value?.user);
+  const student = ref(data?.value?.user)
 
   if (!student.value?.firstName) {
-    alert("First name is required");
-    return;
+    alert("First name is required")
+    return
   }
   if (!student.value?.lastName) {
-    alert("Last name is required");
-    return;
+    alert("Last name is required")
+    return
   }
   if (!student.value?.student?.grade) {
-    alert("Grade is required");
-    return;
+    alert("Grade is required")
+    return
   }
   if (student.value.student.grade < 0 || student.value.student.grade > 13) {
-    alert("Grade must be between 0 and 13");
-    return;
+    alert("Grade must be between 0 and 13")
+    return
   }
 
   await updateStudent({
@@ -60,26 +60,26 @@ const onEditStudent = async () => {
       birthday: student.value.student?.birthday,
       leftAt: student.value.student?.leftAt,
       joinedAt: student.value.student?.joinedAt,
-      emoji: student.value.student?.emoji,
-    },
-  });
+      emoji: student.value.student?.emoji
+    }
+  })
 
   createNotification({
     title: "Student updated",
-    description: `${student.value.firstName} ${student.value.lastName} was updated`,
-  });
-};
+    description: `${student.value.firstName} ${student.value.lastName} was updated`
+  })
+}
 
 const onDeleteStudent = async () => {
-  const student = data?.value?.user;
+  const student = data?.value?.user
 
-  await archiveStudent({ id: id.value });
+  await archiveStudent({ id: id.value })
 
-  await router.push({ name: "/school/students" });
+  await router.push({ name: "/school/students" })
 
   createNotification({
     title: "Student updated",
-    description: `${student?.firstName} ${student?.lastName} was updated`,
-  });
-};
+    description: `${student?.firstName} ${student?.lastName} was updated`
+  })
+}
 </script>

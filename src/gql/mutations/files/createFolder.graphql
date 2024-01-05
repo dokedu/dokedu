@@ -1,5 +1,5 @@
 mutation createFolder($input: CreateFolderInput!) {
-    createFolder(input: $input) {
-        id
-    }
+  createFolder(input: $input) {
+    id
+  }
 }

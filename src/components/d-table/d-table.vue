@@ -61,71 +61,71 @@
 </template>
 
 <script lang="ts" setup generic="T, K extends PageVariables, U">
-import TableSearchResult from "./d-table-search-result.vue";
-import DButton from "../d-button/d-button.vue";
-import { ref, toRef, watch, computed, toRefs } from "vue";
-import { useInfiniteScroll, useElementSize } from "@vueuse/core";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-vue-next";
-import { onClickOutside, onKeyStroke } from "@vueuse/core";
-import type { PageVariables } from "@/types/types.ts";
+import TableSearchResult from "./d-table-search-result.vue"
+import DButton from "../d-button/d-button.vue"
+import { ref, toRef, watch, computed, toRefs } from "vue"
+import { useInfiniteScroll, useElementSize } from "@vueuse/core"
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-vue-next"
+import { onClickOutside, onKeyStroke } from "@vueuse/core"
+import type { PageVariables } from "@/types/types"
 
-const tableRows = ref();
+const tableRows = ref()
 
-onClickOutside(tableRows, () => (selectedRows.value = []));
-onKeyStroke("Escape", () => (selectedRows.value = []));
+onClickOutside(tableRows, () => (selectedRows.value = []))
+onKeyStroke("Escape", () => (selectedRows.value = []))
 
 type Column = {
-  key: string;
-  label: string;
-  sortable?: { [key: string]: string };
-  headerClass?: string;
-  dataClass?: string;
-  width?: number;
-};
+  key: string
+  label: string
+  sortable?: { [key: string]: string }
+  headerClass?: string
+  dataClass?: string
+  width?: number
+}
 
 type Props = {
-  modelValue?: T | T[];
-  columns: Column[];
-  query: object;
-  variables: K[];
-  selected?: T[];
-  objectName: string;
-  watchers?: U[];
-  hideHeader?: boolean;
-  defaultSort?: string;
-  search?: string;
-  additionalTypenames?: string[];
-  draggable?: boolean;
+  modelValue?: T | T[]
+  columns: Column[]
+  query: object
+  variables: K[]
+  selected?: T[]
+  objectName: string
+  watchers?: U[]
+  hideHeader?: boolean
+  defaultSort?: string
+  search?: string
+  additionalTypenames?: string[]
+  draggable?: boolean
   // drag-data-type
-  dragDataType?: string;
-};
+  dragDataType?: string
+}
 
 const props = withDefaults(defineProps<Props>(), {
   watchers: () => [],
   hideHeader: false,
-  draggable: false,
-});
+  draggable: false
+})
 
-const emit = defineEmits(["update:modelValue", "update:variables", "row-click", "update:selected"]);
+const emit = defineEmits(["update:modelValue", "update:variables", "row-click", "update:selected"])
 
 const getSortIcon = (column: Column) => {
   return currentKey.value === column.key
     ? currentSort.value === column.sortable?.asc
       ? ArrowUp
       : ArrowDown
-    : ArrowUpDown;
-};
+    : ArrowUpDown
+}
 
-const table = ref<HTMLElement>();
-const columns = computed(() => props.columns);
-const selectedRows = ref<{ id: string }[]>([]);
+const table = ref<HTMLElement>()
+const columns = computed(() => props.columns)
+const selectedRows = ref<{ id: string }[]>([])
 
 const isSelected = (row: { id: string }) => {
-  return selectedRows.value.some((selectedRow) => selectedRow.id === row.id);
-};
+  return selectedRows.value.some((selectedRow) => selectedRow.id === row.id)
+}
 
 function toggleSelectedRow(row: { id: string }) {
-  selectedRows.value = [row];
+  selectedRows.value = [row]
   // const index = selectedRows.value.findIndex((selectedRow) => selectedRow.id === row.id);
   // if (index > -1) {
   //   selectedRows.value.splice(index, 1);
@@ -135,61 +135,61 @@ function toggleSelectedRow(row: { id: string }) {
 }
 
 const onRowClick = (row: { id: string }) => {
-  toggleSelectedRow(row);
-  emit("update:modelValue", row);
-  emit("row-click", row);
-  emit("update:selected", selectedRows.value);
-};
+  toggleSelectedRow(row)
+  emit("update:modelValue", row)
+  emit("row-click", row)
+  emit("update:selected", selectedRows.value)
+}
 
-const { width } = useElementSize(table);
+const { width } = useElementSize(table)
 
 // If column has set explicit relative width, use that, otherwise calculate the width
 const gridColumns = computed(() => {
-  const totalWidth = width.value;
-  const columnsData = columns.value;
-  const columnCount = columnsData.length;
+  const totalWidth = width.value
+  const columnsData = columns.value
+  const columnCount = columnsData.length
 
   // Find the columns with explicitly set widths
-  const explicitWidthColumns = columnsData.filter((column: Column) => column.width);
-  const explicitColumnCount = explicitWidthColumns.length;
+  const explicitWidthColumns = columnsData.filter((column: Column) => column.width)
+  const explicitColumnCount = explicitWidthColumns.length
 
   // Calculate the remaining width for columns without explicit widths
   const remainingWidth = explicitWidthColumns.reduce((total: number, column: Column) => {
-    if (!column.width) return total;
-    return total - totalWidth * column.width;
-  }, totalWidth);
+    if (!column.width) return total
+    return total - totalWidth * column.width
+  }, totalWidth)
 
   // Calculate the width for columns without explicit widths
-  const calculatedWidth = remainingWidth / (columnCount - explicitColumnCount);
+  const calculatedWidth = remainingWidth / (columnCount - explicitColumnCount)
 
   // Build the grid-template-columns property
-  let gridTemplateColumns = "";
+  let gridTemplateColumns = ""
   columnsData.forEach((column: Column) => {
-    const columnWidth = column.width ? `${Math.floor(column.width * totalWidth)}px` : `${calculatedWidth}px`;
-    gridTemplateColumns += `${columnWidth} `;
-  });
+    const columnWidth = column.width ? `${Math.floor(column.width * totalWidth)}px` : `${calculatedWidth}px`
+    gridTemplateColumns += `${columnWidth} `
+  })
 
-  return `grid-template-columns: ${gridTemplateColumns}`;
-});
+  return `grid-template-columns: ${gridTemplateColumns}`
+})
 
 const pageVariables = computed<K[]>({
   get() {
-    return props.variables;
+    return props.variables
   },
   set(value) {
-    emit("update:variables", value);
-  },
-});
+    emit("update:variables", value)
+  }
+})
 
-const currentSort = ref(pageVariables.value[0].order);
-const currentKey = ref(props.defaultSort || "");
-const search = toRef(props, "search");
+const currentSort = ref(pageVariables.value[0].order)
+const currentKey = ref(props.defaultSort || "")
+const search = toRef(props, "search")
 
 useInfiniteScroll(
   table,
   () => {
-    const lastPage = pageVariables.value[pageVariables.value.length - 1];
-    if (!lastPage.nextPage) return;
+    const lastPage = pageVariables.value[pageVariables.value.length - 1]
+    if (!lastPage.nextPage) return
 
     const nextPageVariables = {
       limit: lastPage.limit,
@@ -198,38 +198,38 @@ useInfiniteScroll(
       sortBy: lastPage.sortBy,
       filter: lastPage.filter,
       offset: (lastPage.offset as number) + ((lastPage.limit as number) || 50),
-      nextPage: undefined,
-    } as K;
+      nextPage: undefined
+    } as K
 
-    pageVariables.value.push(nextPageVariables);
+    pageVariables.value.push(nextPageVariables)
   },
-  { distance: 500 },
-);
+  { distance: 500 }
+)
 
 function sortBy(column: Column) {
-  if (!column.sortable) return;
-  currentKey.value = column.key;
-  currentSort.value = currentSort.value === column.sortable?.asc ? column.sortable.desc : column.sortable.asc;
+  if (!column.sortable) return
+  currentKey.value = column.key
+  currentSort.value = currentSort.value === column.sortable?.asc ? column.sortable.desc : column.sortable.asc
 
   pageVariables.value = [
     {
       ...pageVariables.value[0],
       offset: 0,
       order: currentSort.value,
-      search: search.value,
-    },
-  ];
+      search: search.value
+    }
+  ]
 }
 
-const { watchers } = toRefs(props);
+const { watchers } = toRefs(props)
 
 // Scroll to top if sort or search changes
 watch(
   [currentSort, currentKey, search, watchers],
   (newValue, oldValue) => {
-    if (JSON.stringify(newValue) === JSON.stringify(oldValue)) return;
-    table.value?.scrollTo({ top: 0, behavior: "smooth" });
+    if (JSON.stringify(newValue) === JSON.stringify(oldValue)) return
+    table.value?.scrollTo({ top: 0, behavior: "smooth" })
   },
-  { flush: "post" },
-);
+  { flush: "post" }
+)
 </script>

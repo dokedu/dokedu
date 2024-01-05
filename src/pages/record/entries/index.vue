@@ -115,169 +115,169 @@
 </template>
 
 <script setup lang="ts">
-import PageHeader from "@/components/page-header.vue";
-import PageWrapper from "@/components/page-wrapper.vue";
-import DButton from "@/components/d-button/d-button.vue";
-import { Plus } from "lucide-vue-next";
-import { ref, computed, reactive } from "vue";
-import DTag from "@/components/d-tag/d-tag.vue";
-import { useI18n } from "vue-i18n";
-import { watch } from "vue";
-import { LayoutGrid } from "lucide-vue-next";
-import DTable from "@/components/d-table/d-table.vue";
-import { useRouter } from "vue-router/auto";
-import { PageVariables } from "@/types/types";
-import DSelect from "@/components/d-select/d-select.vue";
-import { useSessionStorage } from "@vueuse/core";
-import { GetEntriesDocument } from "@/gql/queries/entries/getEntries.ts";
-import { useGetEntryFilterTeachersQuery } from "@/gql/queries/users/getEntryFilterTeachers.ts";
-import { useTagLimitedQuery } from "@/gql/queries/tags/tags.ts";
-import { useGetEntryFilterStudentsQuery } from "@/gql/queries/users/getEntryFilterStudents.ts";
-import { useCreateEntryDraftMutation } from "@/gql/mutations/entries/createEntryDraft.ts";
-import { EntrySortBy } from "@/gql/schema.ts";
+import PageHeader from "@/components/page-header.vue"
+import PageWrapper from "@/components/page-wrapper.vue"
+import DButton from "@/components/d-button/d-button.vue"
+import { Plus } from "lucide-vue-next"
+import { ref, computed, reactive } from "vue"
+import DTag from "@/components/d-tag/d-tag.vue"
+import { useI18n } from "vue-i18n"
+import { watch } from "vue"
+import { LayoutGrid } from "lucide-vue-next"
+import DTable from "@/components/d-table/d-table.vue"
+import { useRouter } from "vue-router/auto"
+import { type PageVariables } from "@/types/types"
+import DSelect from "@/components/d-select/d-select.vue"
+import { useSessionStorage } from "@vueuse/core"
+import { GetEntriesDocument } from "@/gql/queries/entries/getEntries"
+import { useGetEntryFilterTeachersQuery } from "@/gql/queries/users/getEntryFilterTeachers"
+import { useTagLimitedQuery } from "@/gql/queries/tags/tags"
+import { useGetEntryFilterStudentsQuery } from "@/gql/queries/users/getEntryFilterStudents"
+import { useCreateEntryDraftMutation } from "@/gql/mutations/entries/createEntryDraft"
+import { EntrySortBy } from "@/gql/schema"
 
-const i18nLocale = useI18n();
-const router = useRouter();
+const i18nLocale = useI18n()
+const router = useRouter()
 
-const tagSearch = ref("");
+const tagSearch = ref("")
 
-const student = useSessionStorage<string>("filter/record/entries/index#student", null);
-const teacher = useSessionStorage<string>("filter/record/entries/index#teacher", null);
-const tags = useSessionStorage<string[]>(`filter/record/entries/index#tags`, []);
+const student = useSessionStorage<string>("filter/record/entries/index#student", null)
+const teacher = useSessionStorage<string>("filter/record/entries/index#teacher", null)
+const tags = useSessionStorage<string[]>(`filter/record/entries/index#tags`, [])
 
 interface Variables extends PageVariables {
   filter: {
-    users?: string;
-    authors?: string;
-    tags?: string[];
-  };
+    users?: string
+    authors?: string
+    tags?: string[]
+  }
 }
 
 const columns = [
   {
     key: "body",
     label: "description",
-    width: 0.6,
+    width: 0.6
   },
   {
     key: "date",
     label: "date",
     sortable: {
       asc: EntrySortBy.DateAsc,
-      desc: EntrySortBy.DateDesc,
-    },
+      desc: EntrySortBy.DateDesc
+    }
   },
   {
     key: "createdAt",
     label: "created_at",
     sortable: {
       asc: EntrySortBy.CreatedAtAsc,
-      desc: EntrySortBy.CreatedAtDesc,
-    },
-  },
-];
+      desc: EntrySortBy.CreatedAtDesc
+    }
+  }
+]
 
 const goToEntry = <Type extends { id: string }>(row: Type) => {
-  router.push({ name: "/record/entries/[id]", params: { id: row.id } });
-};
+  router.push({ name: "/record/entries/[id]", params: { id: row.id } })
+}
 
 const goToProject = (id: string) => {
-  router.push({ name: "/record/projects/[id]", params: { id } });
-};
+  router.push({ name: "/record/projects/[id]", params: { id } })
+}
 
 const pageVariables = ref<Variables[]>([
   {
     filter: {
       users: student.value || undefined,
       authors: teacher.value || undefined,
-      tags: tags.value,
+      tags: tags.value
     },
     limit: 30,
     order: EntrySortBy.CreatedAtDesc,
     offset: 0,
-    nextPage: undefined,
-  },
-]);
+    nextPage: undefined
+  }
+])
 
 watch([student, teacher, tags], () => {
   // Get last page
-  const lastPage = pageVariables.value[pageVariables.value.length - 1];
+  const lastPage = pageVariables.value[pageVariables.value.length - 1]
   pageVariables.value = [
     {
       filter: {
         users: student.value || undefined,
         authors: teacher.value || undefined,
-        tags: tags.value,
+        tags: tags.value
       },
       limit: 30,
       order: lastPage.order,
       offset: 0,
-      nextPage: undefined,
-    },
-  ];
-});
+      nextPage: undefined
+    }
+  ]
+})
 
-const teacherSearch = ref("");
+const teacherSearch = ref("")
 const { data: teacherData } = useGetEntryFilterTeachersQuery({
   variables: reactive({
-    search: teacherSearch,
-  }),
-});
+    search: teacherSearch
+  })
+})
 
-const studentSearch = ref("");
+const studentSearch = ref("")
 const { data: studentData } = useGetEntryFilterStudentsQuery({
   variables: reactive({
-    search: studentSearch,
-  }),
-});
+    search: studentSearch
+  })
+})
 
 const { data: tagData } = useTagLimitedQuery({
   variables: reactive({
-    search: tagSearch,
-  }),
-});
+    search: tagSearch
+  })
+})
 
 const teacherOptions = computed(
   () =>
     teacherData?.value?.users?.edges?.map((edge: any) => ({
       label: `${edge.firstName} ${edge.lastName}`,
-      value: edge.id,
-    })) || [],
-);
+      value: edge.id
+    })) || []
+)
 
 const studentOptions = computed(
   () =>
     studentData?.value?.users?.edges?.map((edge: any) => ({
       label: `${edge.firstName} ${edge.lastName}`,
-      value: edge.id,
-    })) || [],
-);
+      value: edge.id
+    })) || []
+)
 
 const tagOptions = computed(
   () =>
     tagData?.value?.tags?.edges?.map((edge: any) => ({
       label: edge.name,
-      value: edge.id,
-    })) || [],
-);
+      value: edge.id
+    })) || []
+)
 
 function dateOnly(date: string) {
   const options: Intl.DateTimeFormatOptions = {
     year: "numeric",
     month: "short",
-    day: "2-digit",
-  };
-  return new Date(date).toLocaleDateString(i18nLocale.locale.value, options);
+    day: "2-digit"
+  }
+  return new Date(date).toLocaleDateString(i18nLocale.locale.value, options)
 }
 
-const { executeMutation: createEntryDraft } = useCreateEntryDraftMutation();
+const { executeMutation: createEntryDraft } = useCreateEntryDraftMutation()
 
 async function createEntry() {
-  const { data, error } = await createEntryDraft({});
+  const { data, error } = await createEntryDraft({})
   if (error) {
-    alert(error.message);
-    return;
+    alert(error.message)
+    return
   }
-  await router.push({ name: "/record/entries/[id]", params: { id: data?.createEntry.id as string } });
+  await router.push({ name: "/record/entries/[id]", params: { id: data?.createEntry.id as string } })
 }
 </script>

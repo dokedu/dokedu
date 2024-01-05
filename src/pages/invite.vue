@@ -55,51 +55,51 @@
 </route>
 
 <script lang="ts" setup>
-import { ref } from "vue";
-import { useRoute, useRouter } from "vue-router/auto";
-import { useI18n } from "vue-i18n";
-import { useResetPasswordMutation } from "@/gql/queries/auth/resetPasswordMutation.ts";
+import { ref } from "vue"
+import { useRoute, useRouter } from "vue-router/auto"
+import { useI18n } from "vue-i18n"
+import { useResetPasswordMutation } from "@/gql/queries/auth/resetPasswordMutation"
 
-const { t } = useI18n();
+const { t } = useI18n()
 
-const route = useRoute();
-const router = useRouter();
+const route = useRoute()
+const router = useRouter()
 
-const { executeMutation: passwordReset } = useResetPasswordMutation();
+const { executeMutation: passwordReset } = useResetPasswordMutation()
 
-const password = ref("");
-const passwordConfirm = ref("");
+const password = ref("")
+const passwordConfirm = ref("")
 
 async function onSubmit() {
-  const token = route.hash.slice(1).split("&")[0].split("=")[1];
+  const token = route.hash.slice(1).split("&")[0].split("=")[1]
 
   if (password.value !== passwordConfirm.value) {
-    alert(t("passwords_dont_match"));
-    return;
+    alert(t("passwords_dont_match"))
+    return
   }
 
   if (!token) {
-    alert(t("invalid_token"));
-    return;
+    alert(t("invalid_token"))
+    return
   }
 
   if (password.value.length < 8) {
-    alert(t("password_too_short"));
-    return;
+    alert(t("password_too_short"))
+    return
   }
 
   const { data } = await passwordReset({
     input: {
       token,
-      password: password.value,
-    },
-  });
+      password: password.value
+    }
+  })
 
   if (data?.resetPassword?.success) {
-    alert(t("password_set_successfuly"));
-    await router.push("/login");
+    alert(t("password_set_successfuly"))
+    await router.push("/login")
   } else {
-    alert(t("something_went_wrong"));
+    alert(t("something_went_wrong"))
   }
 }
 </script>

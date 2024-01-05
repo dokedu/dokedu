@@ -8,7 +8,7 @@
         v-for="competence in data?.competences?.edges"
         :to="{
           name: '/record/students/[id]/competences/[cid]',
-          params: { id: route.params.id, cid: competence?.id as string },
+          params: { id: route.params.id, cid: competence?.id as string }
         }"
       >
         <DCompetence v-if="competence" :competence="competence as Competence" />
@@ -18,17 +18,17 @@
 </template>
 
 <script lang="ts" setup>
-import DCompetence from "@/components/d-competence/d-competence.vue";
-import { Competence } from "@/gql/schema.ts";
-import { useRoute } from "vue-router/auto";
-import { reactive } from "vue";
-import { useStudentCompetencesQuery } from "@/gql/queries/competences/studentCompetences.ts";
+import DCompetence from "@/components/d-competence/d-competence.vue"
+import type { Competence } from "@/gql/schema"
+import { useRoute } from "vue-router/auto"
+import { reactive } from "vue"
+import { useStudentCompetencesQuery } from "@/gql/queries/competences/studentCompetences"
 
-const route = useRoute("/record/students/[id]/competences/");
+const route = useRoute("/record/students/[id]/competences/")
 
 const { data } = useStudentCompetencesQuery({
   variables: reactive({
-    userId: route.params.id as unknown as string,
-  }),
-});
+    userId: route.params.id as unknown as string
+  })
+})
 </script>

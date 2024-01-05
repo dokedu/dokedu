@@ -41,54 +41,54 @@
 </template>
 
 <script lang="ts" setup>
-import PageWrapper from "@/components/page-wrapper.vue";
-import PageHeader from "@/components/page-header.vue";
-import DTable from "@/components/d-table/d-table.vue";
-import { PageVariables } from "@/types/types.ts";
-import { ref } from "vue";
-import { useRouter } from "vue-router/auto";
-import { useSchoolYearsQuery } from "@/gql/queries/schoolYears/schoolYears.ts";
-import { useSubjectsQuery } from "@/gql/queries/subjects/subjects.ts";
-import { UserStudentGradesDocument } from "@/gql/queries/userStudentGrades/userStudentGrades.ts";
+import PageWrapper from "@/components/page-wrapper.vue"
+import PageHeader from "@/components/page-header.vue"
+import DTable from "@/components/d-table/d-table.vue"
+import { PageVariables } from "@/types/types"
+import { ref } from "vue"
+import { useRouter } from "vue-router/auto"
+import { useSchoolYearsQuery } from "@/gql/queries/schoolYears/schoolYears"
+import { useSubjectsQuery } from "@/gql/queries/subjects/subjects"
+import { UserStudentGradesDocument } from "@/gql/queries/userStudentGrades/userStudentGrades"
 
-const search = ref("");
+const search = ref("")
 
-const router = useRouter();
+const router = useRouter()
 
-const subjectFilter = ref<null | string>(null);
-const { data: subjectData } = useSubjectsQuery({});
+const subjectFilter = ref<null | string>(null)
+const { data: subjectData } = useSubjectsQuery({})
 
-const schoolYearFilter = ref<null | string>(null);
-const { data: schoolYearsData } = useSchoolYearsQuery({});
+const schoolYearFilter = ref<null | string>(null)
+const { data: schoolYearsData } = useSchoolYearsQuery({})
 
 const columns = [
   {
     label: "student",
-    key: "student",
+    key: "student"
   },
   {
     label: "school_year",
-    key: "schoolYear",
+    key: "schoolYear"
   },
   {
     label: "subject",
-    key: "subject",
+    key: "subject"
   },
   {
     label: "grade",
-    key: "grade",
-  },
-];
+    key: "grade"
+  }
+]
 
 const pageVariables = ref<PageVariables[]>([
   {
     search: "",
     limit: 10,
-    offset: 0,
-  },
-]);
+    offset: 0
+  }
+])
 
 function goToUserStudentGrade(item: any) {
-  router.push({ name: "/school/grades/[id]", params: { id: item.id } });
+  router.push({ name: "/school/grades/[id]", params: { id: item.id } })
 }
 </script>

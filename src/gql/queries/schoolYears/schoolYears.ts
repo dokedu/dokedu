@@ -1,45 +1,36 @@
-import type * as Types from '../../schema';
+import type * as Types from "../../schema"
 
-import gql from 'graphql-tag';
-import * as Urql from '@urql/vue';
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+import gql from "graphql-tag"
+import * as Urql from "@urql/vue"
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 export type SchoolYearsQueryVariables = Types.Exact<{
-  limit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
-  offset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
-}>;
+  limit?: Types.InputMaybe<Types.Scalars["Int"]["input"]>
+  offset?: Types.InputMaybe<Types.Scalars["Int"]["input"]>
+}>
 
-
-export type SchoolYearsQuery = (
-  { __typename?: 'Query' }
-  & { schoolYears: (
-    { __typename?: 'SchoolYearConnection' }
-    & { edges: Array<(
-      { __typename?: 'SchoolYear' }
-      & Pick<Types.SchoolYear, 'id' | 'year' | 'description'>
-    )>, pageInfo: (
-      { __typename?: 'PageInfo' }
-      & Pick<Types.PageInfo, 'hasNextPage' | 'hasPreviousPage'>
-    ) }
-  ) }
-);
-
-
-export const SchoolYearsDocument = gql`
-    query schoolYears($limit: Int, $offset: Int) {
-  schoolYears(limit: $limit, offset: $offset) {
-    edges {
-      id
-      year
-      description
-    }
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-    }
+export type SchoolYearsQuery = { __typename?: "Query" } & {
+  schoolYears: { __typename?: "SchoolYearConnection" } & {
+    edges: Array<{ __typename?: "SchoolYear" } & Pick<Types.SchoolYear, "id" | "year" | "description">>
+    pageInfo: { __typename?: "PageInfo" } & Pick<Types.PageInfo, "hasNextPage" | "hasPreviousPage">
   }
 }
-    `;
 
-export function useSchoolYearsQuery(options: Omit<Urql.UseQueryArgs<never, SchoolYearsQueryVariables>, 'query'>) {
-  return Urql.useQuery<SchoolYearsQuery, SchoolYearsQueryVariables>({ query: SchoolYearsDocument, ...options });
-};
+export const SchoolYearsDocument = gql`
+  query schoolYears($limit: Int, $offset: Int) {
+    schoolYears(limit: $limit, offset: $offset) {
+      edges {
+        id
+        year
+        description
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+      }
+    }
+  }
+`
+
+export function useSchoolYearsQuery(options: Omit<Urql.UseQueryArgs<never, SchoolYearsQueryVariables>, "query">) {
+  return Urql.useQuery<SchoolYearsQuery, SchoolYearsQueryVariables>({ query: SchoolYearsDocument, ...options })
+}

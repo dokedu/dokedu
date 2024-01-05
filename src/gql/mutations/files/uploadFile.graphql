@@ -1,5 +1,5 @@
 mutation uploadFile($input: FileUploadInput!) {
-    uploadFile(input: $input) {
-        id
-    }
+  uploadFile(input: $input) {
+    id
+  }
 }

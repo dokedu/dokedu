@@ -45,30 +45,30 @@
 </route>
 
 <script lang="ts" setup>
-import MPageHeader from "@/components/mobile/m-page-header.vue";
-import MPageFooter from "@/components/mobile/m-page-footer.vue";
-import { Plus } from "lucide-vue-next";
-import { useRouter } from "vue-router/auto";
-import { useMGetEntriesQuery } from "@/gql/queries/entries/mGetEntries.ts";
-import { useCreateEntryDraftMutation } from "@/gql/mutations/entries/createEntryDraft.ts";
-import { EntrySortBy } from "@/gql/schema.ts";
+import MPageHeader from "@/components/mobile/m-page-header.vue"
+import MPageFooter from "@/components/mobile/m-page-footer.vue"
+import { Plus } from "lucide-vue-next"
+import { useRouter } from "vue-router/auto"
+import { useMGetEntriesQuery } from "@/gql/queries/entries/mGetEntries"
+import { useCreateEntryDraftMutation } from "@/gql/mutations/entries/createEntryDraft"
+import type { EntrySortBy } from "@/gql/schema"
 
-const { executeMutation: createEntryDraft } = useCreateEntryDraftMutation();
+const { executeMutation: createEntryDraft } = useCreateEntryDraftMutation()
 
-const router = useRouter();
+const router = useRouter()
 
 async function createEntry() {
-  const { data } = await createEntryDraft({});
+  const { data } = await createEntryDraft({})
 
-  await router.push({ name: "/m/record/entries/[id]", params: { id: data?.createEntry?.id as string } });
+  await router.push({ name: "/m/record/entries/[id]", params: { id: data?.createEntry?.id as string } })
 }
 
 const { data } = useMGetEntriesQuery({
   variables: {
     order: EntrySortBy.CreatedAtDesc,
-    limit: 10,
-  },
-});
+    limit: 10
+  }
+})
 
 function toLocateDateString(date: string) {
   return new Date(date).toLocaleDateString("de-DE", {
@@ -77,8 +77,8 @@ function toLocateDateString(date: string) {
     month: "long",
     day: "numeric",
     hour: "numeric",
-    minute: "numeric",
-  });
+    minute: "numeric"
+  })
 }
 </script>
 

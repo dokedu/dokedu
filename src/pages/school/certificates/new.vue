@@ -11,28 +11,28 @@
 </template>
 
 <script lang="ts" setup>
-import DSidebar from "@/components/d-sidebar/d-sidebar.vue";
-import DInput from "@/components/d-input/d-input.vue";
-import DButton from "@/components/d-button/d-button.vue";
-import { useRouter } from "vue-router/auto";
-import { ref } from "vue";
-import { useCreateSubjectMutation } from "@/gql/mutations/subjects/createSubject.ts";
+import DSidebar from "@/components/d-sidebar/d-sidebar.vue"
+import DInput from "@/components/d-input/d-input.vue"
+import DButton from "@/components/d-button/d-button.vue"
+import { useRouter } from "vue-router/auto"
+import { ref } from "vue"
+import { useCreateSubjectMutation } from "@/gql/mutations/subjects/createSubject"
 
-const router = useRouter();
+const router = useRouter()
 
-const name = ref("");
+const name = ref("")
 
-const { executeMutation: createSubject } = useCreateSubjectMutation();
+const { executeMutation: createSubject } = useCreateSubjectMutation()
 
 function onClose() {
-  router.push({ name: "/school/subjects" });
+  router.push({ name: "/school/subjects" })
 }
 
 async function onSave() {
-  await createSubject({ name: name.value });
+  await createSubject({ name: name.value })
 
-  name.value = "";
+  name.value = ""
 
-  await router.push({ name: "/school/subjects" });
+  await router.push({ name: "/school/subjects" })
 }
 </script>

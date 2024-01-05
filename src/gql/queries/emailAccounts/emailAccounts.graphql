@@ -1,14 +1,14 @@
 query emailAccounts {
-    emailAccounts(filter: { type: GROUP }) {
-        edges {
-            id
-            name
-            description
-        }
-        totalCount
-        pageInfo {
-            hasNextPage
-            hasPreviousPage
-        }
+  emailAccounts(filter: { type: GROUP }) {
+    edges {
+      id
+      name
+      description
     }
+    totalCount
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+    }
+  }
 }

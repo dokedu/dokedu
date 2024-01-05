@@ -12,28 +12,28 @@
 </template>
 
 <script lang="ts" setup>
-import DDialog from "@/components/d-dialog/d-dialog.vue";
-import DButton from "@/components/d-button/d-button.vue";
-import { toRef } from "vue";
-import { useVModel } from "@vueuse/core";
+import DDialog from "@/components/d-dialog/d-dialog.vue"
+import DButton from "@/components/d-button/d-button.vue"
+import { toRef } from "vue"
+import { useVModel } from "@vueuse/core"
 
 const props = defineProps<{
-  modelValue: File | null;
-  open: boolean;
-}>();
-const emit = defineEmits(["update:modelValue", "close", "delete"]);
+  modelValue: File | null
+  open: boolean
+}>()
+const emit = defineEmits(["update:modelValue", "close", "delete"])
 
-const open = toRef(props, "open");
+const open = toRef(props, "open")
 
-const file = useVModel(props, "modelValue", emit);
+const file = useVModel(props, "modelValue", emit)
 
 function onClose() {
-  emit("close");
+  emit("close")
 }
 
 function onSave() {
-  if (!file.value) return;
-  emit("delete", file.value);
-  emit("close");
+  if (!file.value) return
+  emit("delete", file.value)
+  emit("close")
 }
 </script>

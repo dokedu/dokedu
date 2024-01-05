@@ -32,38 +32,38 @@
 </template>
 
 <script lang="ts" setup>
-import PageHeader from "@/components/page-header.vue";
-import PageWrapper from "@/components/page-wrapper.vue";
-import DButton from "@/components/d-button/d-button.vue";
-import DInput from "@/components/d-input/d-input.vue";
-import { ref } from "vue";
-import { useI18n } from "vue-i18n";
-import { useResetPasswordMutation } from "@/gql/queries/auth/resetPasswordMutation.ts";
+import PageHeader from "@/components/page-header.vue"
+import PageWrapper from "@/components/page-wrapper.vue"
+import DButton from "@/components/d-button/d-button.vue"
+import DInput from "@/components/d-input/d-input.vue"
+import { ref } from "vue"
+import { useI18n } from "vue-i18n"
+import { useResetPasswordMutation } from "@/gql/queries/auth/resetPasswordMutation"
 
-const { t } = useI18n();
+const { t } = useI18n()
 
-const password = ref("");
-const passwordConfirm = ref("");
+const password = ref("")
+const passwordConfirm = ref("")
 
-const { executeMutation: passwordReset } = useResetPasswordMutation();
+const { executeMutation: passwordReset } = useResetPasswordMutation()
 
 async function onSave() {
   if (password.value !== passwordConfirm.value) {
-    alert(t("passwords_dont_match"));
-    return;
+    alert(t("passwords_dont_match"))
+    return
   }
 
   if (password.value.length < 8) {
-    alert(t("password_too_short"));
-    return;
+    alert(t("password_too_short"))
+    return
   }
 
-  const res = await passwordReset({ input: { password: password.value } });
+  const res = await passwordReset({ input: { password: password.value } })
   if (res.error) {
-    alert("Error changing password");
-    return;
+    alert("Error changing password")
+    return
   }
 
-  alert("Password changed successfully");
+  alert("Password changed successfully")
 }
 </script>

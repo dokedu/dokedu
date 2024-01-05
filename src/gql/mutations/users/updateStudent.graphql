@@ -1,16 +1,16 @@
 mutation updateStudent($student: UpdateUserInput!) {
-    updateUser(input: $student) {
-        id
-        firstName
-        lastName
-        role
-        student {
-            id
-            birthday
-            grade
-            leftAt
-            joinedAt
-            emoji
-        }
+  updateUser(input: $student) {
+    id
+    firstName
+    lastName
+    role
+    student {
+      id
+      birthday
+      grade
+      leftAt
+      joinedAt
+      emoji
     }
+  }
 }

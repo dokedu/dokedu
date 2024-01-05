@@ -1,8 +1,8 @@
 query groupUsers {
-    emailAccounts(filter: { type: INDIVIDUAL }) {
-        edges {
-            id
-            name
-        }
+  emailAccounts(filter: { type: INDIVIDUAL }) {
+    edges {
+      id
+      name
     }
+  }
 }

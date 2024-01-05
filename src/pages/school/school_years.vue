@@ -22,43 +22,43 @@
 </template>
 
 <script lang="ts" setup>
-import PageWrapper from "@/components/page-wrapper.vue";
-import PageHeader from "@/components/page-header.vue";
-import DTable from "@/components/d-table/d-table.vue";
-import DButton from "@/components/d-button/d-button.vue";
-import { PageVariables } from "@/types/types.ts";
-import { ref } from "vue";
-import { useRouter } from "vue-router/auto";
-import { SchoolYearsDocument } from "@/gql/queries/schoolYears/schoolYears.ts";
+import PageWrapper from "@/components/page-wrapper.vue"
+import PageHeader from "@/components/page-header.vue"
+import DTable from "@/components/d-table/d-table.vue"
+import DButton from "@/components/d-button/d-button.vue"
+import { PageVariables } from "@/types/types"
+import { ref } from "vue"
+import { useRouter } from "vue-router/auto"
+import { SchoolYearsDocument } from "@/gql/queries/schoolYears/schoolYears"
 
-const search = ref("");
+const search = ref("")
 
-const router = useRouter();
+const router = useRouter()
 
 const columns = [
   {
     label: "year",
-    key: "year",
+    key: "year"
   },
   {
     label: "description",
-    key: "description",
-  },
-];
+    key: "description"
+  }
+]
 
 const pageVariables = ref<PageVariables[]>([
   {
     search: "",
     limit: 25,
-    offset: 0,
-  },
-]);
+    offset: 0
+  }
+])
 
 function goToSchoolYear(item: any) {
-  router.push({ name: "/school/school_years/[id]", params: { id: item.id } });
+  router.push({ name: "/school/school_years/[id]", params: { id: item.id } })
 }
 
 function onCreate() {
-  router.push({ name: "/school/school_years/new" });
+  router.push({ name: "/school/school_years/new" })
 }
 </script>

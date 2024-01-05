@@ -1,6 +1,6 @@
 mutation renameFile($input: RenameFileInput!) {
-    renameFile(input: $input) {
-        id
-        name
-    }
+  renameFile(input: $input) {
+    id
+    name
+  }
 }

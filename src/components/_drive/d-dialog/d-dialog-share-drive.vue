@@ -48,94 +48,94 @@
 </template>
 
 <script lang="ts" setup>
-import DDialog from "@/components/d-dialog/d-dialog.vue";
-import { Trash } from "lucide-vue-next";
-import { computed, reactive, ref } from "vue";
-import DSelect from "@/components/d-select/d-select.vue";
-import { useShareUsersQuery } from "@/gql/queries/users/shareUsers.ts";
-import { useBucketSharesQuery } from "@/gql/queries/shares/bucketShares.ts";
-import { Bucket, FilePermission, ShareUser } from "@/gql/schema.ts";
-import { useMeBucketShareQuery } from "@/gql/queries/shares/meBucketShare.ts";
-import { useCreateShareMutation } from "@/gql/mutations/shares/createShare.ts";
-import { useDeleteShareMutation } from "@/gql/mutations/shares/deleteShare.ts";
-import { useEditShareMutation } from "@/gql/mutations/shares/editShare.ts";
+import DDialog from "@/components/d-dialog/d-dialog.vue"
+import { Trash } from "lucide-vue-next"
+import { computed, reactive, ref } from "vue"
+import DSelect from "@/components/d-select/d-select.vue"
+import { useShareUsersQuery } from "@/gql/queries/users/shareUsers"
+import { useBucketSharesQuery } from "@/gql/queries/shares/bucketShares"
+import { type Bucket, FilePermission, type ShareUser } from "@/gql/schema"
+import { useMeBucketShareQuery } from "@/gql/queries/shares/meBucketShare"
+import { useCreateShareMutation } from "@/gql/mutations/shares/createShare"
+import { useDeleteShareMutation } from "@/gql/mutations/shares/deleteShare"
+import { useEditShareMutation } from "@/gql/mutations/shares/editShare"
 
 interface Props {
-  open: boolean;
-  item: Bucket;
+  open: boolean
+  item: Bucket
 }
-const props = defineProps<Props>();
-const emit = defineEmits(["close", "share"]);
-const bucketId = computed(() => props.item?.id);
-const permission = computed(() => props.item?.permission || FilePermission.Viewer);
+const props = defineProps<Props>()
+const emit = defineEmits(["close", "share"])
+const bucketId = computed(() => props.item?.id)
+const permission = computed(() => props.item?.permission || FilePermission.Viewer)
 
 const permissionOptions = [
   {
     label: "Viewer",
-    value: FilePermission.Viewer,
+    value: FilePermission.Viewer
   },
   {
     label: "Manager",
-    value: FilePermission.Manager,
-  },
-];
+    value: FilePermission.Manager
+  }
+]
 
 function onClose() {
-  emit("close");
+  emit("close")
 }
 
-const { data: users } = useShareUsersQuery({});
+const { data: users } = useShareUsersQuery({})
 
 const { data: shares } = useBucketSharesQuery({
   context: { additionalTypenames: ["ShareUser"] },
   variables: {
     input: reactive({
-      bucketId,
-    }),
-  },
-});
+      bucketId
+    })
+  }
+})
 
-const { data: me } = useMeBucketShareQuery({});
+const { data: me } = useMeBucketShareQuery({})
 
-const selectedUser = ref<string>();
+const selectedUser = ref<string>()
 const userOptions = computed(() => {
   // Filter out current user
-  const myId = me?.value?.me?.id;
-  let filteredUsers = users?.value?.users?.edges?.filter((user: any) => user.id !== myId);
+  const myId = me?.value?.me?.id
+  let filteredUsers = users?.value?.users?.edges?.filter((user: any) => user.id !== myId)
 
   // Filter out users that are already shared with
-  const sharedWith = shares?.value?.shares?.map((share: any) => share.user.id);
-  filteredUsers = filteredUsers?.filter((user: any) => !sharedWith?.includes(user.id));
+  const sharedWith = shares?.value?.shares?.map((share: any) => share.user.id)
+  filteredUsers = filteredUsers?.filter((user: any) => !sharedWith?.includes(user.id))
 
   return filteredUsers?.map((user: any) => ({
     label: `${user.firstName} ${user.lastName}`,
-    value: user.id,
-  }));
-});
+    value: user.id
+  }))
+})
 
-const { executeMutation: createShare } = useCreateShareMutation();
-const { executeMutation: deleteShare } = useDeleteShareMutation();
-const { executeMutation: editShare } = useEditShareMutation();
+const { executeMutation: createShare } = useCreateShareMutation()
+const { executeMutation: deleteShare } = useDeleteShareMutation()
+const { executeMutation: editShare } = useEditShareMutation()
 
 async function onCreateShare(id: string) {
   await createShare({
     input: reactive({
       bucketId,
       user: id,
-      permission: FilePermission.Viewer,
-    }),
-  });
+      permission: FilePermission.Viewer
+    })
+  })
 
-  selectedUser.value = undefined;
+  selectedUser.value = undefined
 }
 
 async function removeShare(share: ShareUser) {
   await deleteShare({
     input: reactive({
       bucketId,
-      user: share.user.id,
-    }),
-  });
+      user: share.user.id
+    })
+  })
 }
 
 async function onEditShare(share: ShareUser) {
@@ -143,8 +143,8 @@ async function onEditShare(share: ShareUser) {
     input: reactive({
       bucketId,
       user: share.user.id,
-      permission: share.permission,
-    }),
-  });
+      permission: share.permission
+    })
+  })
 }
 </script>

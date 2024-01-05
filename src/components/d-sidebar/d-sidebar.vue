@@ -22,35 +22,35 @@
 </template>
 
 <script lang="ts" setup>
-import { Trash } from "lucide-vue-next";
-import { ref, toRef } from "vue";
-import { onClickOutside, onKeyStroke } from "@vueuse/core";
-import DButton from "../d-button/d-button.vue";
+import { Trash } from "lucide-vue-next"
+import { ref, toRef } from "vue"
+import { onClickOutside, onKeyStroke } from "@vueuse/core"
+import DButton from "../d-button/d-button.vue"
 
-const sidebar = ref<HTMLElement | null>(null);
+const sidebar = ref<HTMLElement | null>(null)
 
 const props = defineProps({
   title: {
     type: String,
-    default: "title",
+    default: "title"
   },
   delete: {
     type: Boolean,
-    default: false,
-  },
-});
+    default: false
+  }
+})
 
-const deletable = toRef(props, "delete");
+const deletable = toRef(props, "delete")
 
-const emit = defineEmits(["delete", "cancel"]);
+const emit = defineEmits(["delete", "cancel"])
 function cancel() {
-  emit("cancel");
+  emit("cancel")
 }
 
 function onTrash() {
-  emit("delete");
+  emit("delete")
 }
 
-onClickOutside(sidebar, () => cancel());
-onKeyStroke("Escape", () => cancel());
+onClickOutside(sidebar, () => cancel())
+onKeyStroke("Escape", () => cancel())
 </script>

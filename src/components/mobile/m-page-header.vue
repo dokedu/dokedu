@@ -25,8 +25,8 @@
 </template>
 
 <script lang="ts" setup>
-import { useAuth } from "@/composables/auth";
-import { LogOutIcon } from "lucide-vue-next";
+import { useAuth } from "@/composables/auth"
+import { LogOutIcon } from "lucide-vue-next"
 
-const { signOut } = useAuth();
+const { signOut } = useAuth()
 </script>

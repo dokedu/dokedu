@@ -43,53 +43,53 @@
 </template>
 
 <script lang="ts" setup>
-import MSheet from "@/components/mobile/m-sheet.vue";
-import DInput from "@/components/d-input/d-input.vue";
-import { useVModel, useWindowSize } from "@vueuse/core";
-import { Plus, X, Check } from "lucide-vue-next";
-import { computed, reactive, ref } from "vue";
-import { useDeleteEntryUserInputMutation } from "@/gql/mutations/entries/deleteEntryUser.ts";
-import { useCreateEntryUserMutation } from "@/gql/mutations/entries/createEntryUser.ts";
-import { useUsersQuery } from "@/gql/queries/users/users.ts";
+import MSheet from "@/components/mobile/m-sheet.vue"
+import DInput from "@/components/d-input/d-input.vue"
+import { useVModel, useWindowSize } from "@vueuse/core"
+import { Plus, X, Check } from "lucide-vue-next"
+import { computed, reactive, ref } from "vue"
+import { useDeleteEntryUserInputMutation } from "@/gql/mutations/entries/deleteEntryUser"
+import { useCreateEntryUserMutation } from "@/gql/mutations/entries/createEntryUser"
+import { useUsersQuery } from "@/gql/queries/users/users"
 
-const { executeMutation: deleteEntryUser } = useDeleteEntryUserInputMutation();
-const { executeMutation: createEntryUser } = useCreateEntryUserMutation();
+const { executeMutation: deleteEntryUser } = useDeleteEntryUserInputMutation()
+const { executeMutation: createEntryUser } = useCreateEntryUserMutation()
 
-const search = ref("");
-const sheetOpen = ref(false);
+const search = ref("")
+const sheetOpen = ref(false)
 
-const { height } = useWindowSize();
-const sheetHeight = computed(() => height.value - 125);
+const { height } = useWindowSize()
+const sheetHeight = computed(() => height.value - 125)
 
 function addStudent() {
-  sheetOpen.value = true;
+  sheetOpen.value = true
 }
 
 const props = defineProps<{
-  entry: any;
-  modelValue: any;
-}>();
-const emit = defineEmits(["update:modelValue"]);
+  entry: any
+  modelValue: any
+}>()
+const emit = defineEmits(["update:modelValue"])
 
-const students = useVModel(props, "modelValue", emit);
+const students = useVModel(props, "modelValue", emit)
 
 const { data } = useUsersQuery({
-  variables: reactive({ search }),
-});
+  variables: reactive({ search })
+})
 
 async function toggleStudent(student: any) {
   if (students.value.find((p: any) => p.id === student.id)) {
-    await deleteEntryUser({ input: { entryId: props.entry.id, userId: student.id } });
+    await deleteEntryUser({ input: { entryId: props.entry.id, userId: student.id } })
   } else {
-    await createEntryUser({ input: { entryId: props.entry.id, userId: student.id } });
+    await createEntryUser({ input: { entryId: props.entry.id, userId: student.id } })
   }
 }
 
 function activeStudent(student: any) {
-  return students.value.find((p: any) => p.id === student.id);
+  return students.value.find((p: any) => p.id === student.id)
 }
 
 function fullName(student: any) {
-  return `${student.firstName} ${student.lastName}`;
+  return `${student.firstName} ${student.lastName}`
 }
 </script>

@@ -14,55 +14,55 @@
 </template>
 
 <script lang="ts" setup>
-import DSidebar from "@/components/d-sidebar/d-sidebar.vue";
-import DInput from "@/components/d-input/d-input.vue";
-import DButton from "@/components/d-button/d-button.vue";
-import { useRouter, useRoute } from "vue-router/auto";
-import { computed } from "vue";
-import { useUpdateUserStudentGradeMutation } from "@/gql/mutations/userStudentGrades/updateUserStudentGrade.ts";
-import { useUserStudentGradeQuery } from "@/gql/queries/userStudentGrades/userStudentGrade.ts";
+import DSidebar from "@/components/d-sidebar/d-sidebar.vue"
+import DInput from "@/components/d-input/d-input.vue"
+import DButton from "@/components/d-button/d-button.vue"
+import { useRouter, useRoute } from "vue-router/auto"
+import { computed } from "vue"
+import { useUpdateUserStudentGradeMutation } from "@/gql/mutations/userStudentGrades/updateUserStudentGrade"
+import { useUserStudentGradeQuery } from "@/gql/queries/userStudentGrades/userStudentGrade"
 
-const router = useRouter();
-const route = useRoute("/school/grades/[id]");
+const router = useRouter()
+const route = useRoute("/school/grades/[id]")
 
 const { data } = useUserStudentGradeQuery({
   variables: {
-    id: route.params.id,
-  },
-});
+    id: route.params.id
+  }
+})
 
-const { executeMutation: updateGrade } = useUpdateUserStudentGradeMutation();
+const { executeMutation: updateGrade } = useUpdateUserStudentGradeMutation()
 
 const grade = computed({
   get() {
-    return data.value?.userStudentGrade.grade || 0;
+    return data.value?.userStudentGrade.grade || 0
   },
   set(value: number) {
-    if (!data.value) return;
-    data.value.userStudentGrade.grade = value;
-  },
-});
+    if (!data.value) return
+    data.value.userStudentGrade.grade = value
+  }
+})
 
 const studentFullName = computed(() => {
-  if (!data.value) return "";
-  return `${data.value.userStudentGrade.student.user.firstName} ${data.value.userStudentGrade.student.user.lastName}`;
-});
+  if (!data.value) return ""
+  return `${data.value.userStudentGrade.student.user.firstName} ${data.value.userStudentGrade.student.user.lastName}`
+})
 const schoolYear = computed(() => {
-  if (!data.value) return "";
-  return `${data.value.userStudentGrade.schoolYear.description}`;
-});
+  if (!data.value) return ""
+  return `${data.value.userStudentGrade.schoolYear.description}`
+})
 const subject = computed(() => {
-  if (!data.value) return "";
-  return `${data.value.userStudentGrade.subject.name}`;
-});
+  if (!data.value) return ""
+  return `${data.value.userStudentGrade.subject.name}`
+})
 
 function onClose() {
-  router.push({ name: "/school/grades" });
+  router.push({ name: "/school/grades" })
 }
 
 async function onSave() {
-  await updateGrade({ id: route.params.id, grade: grade.value });
+  await updateGrade({ id: route.params.id, grade: grade.value })
 
-  router.push({ name: "/school/grades" });
+  router.push({ name: "/school/grades" })
 }
 </script>

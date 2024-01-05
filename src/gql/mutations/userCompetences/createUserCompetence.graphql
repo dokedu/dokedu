@@ -1,6 +1,6 @@
 mutation createUserCompetence($input: CreateUserCompetenceInput!) {
-    createUserCompetence(input: $input) {
-        id
-        level
-    }
+  createUserCompetence(input: $input) {
+    id
+    level
+  }
 }

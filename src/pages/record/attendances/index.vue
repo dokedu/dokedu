@@ -44,7 +44,7 @@
         @click="
           updateDailyAttendance({
             date: date,
-            state: UserAttendanceState.Present,
+            state: UserAttendanceState.Present
           })
         "
         type="submit"
@@ -63,7 +63,7 @@
               :key="state"
               class="p-1 w-8 flex items-center justify-center grayscale rounded-md text-center transition-all leading-none h-8 hover:bg-neutral-200"
               :class="{
-                'bg-neutral-200 border border-neutral-300 shadow-sm grayscale-0': state === item.state,
+                'bg-neutral-200 border border-neutral-300 shadow-sm grayscale-0': state === item.state
               }"
               :title="$t(state)"
               @click="setAttendance(item.user.id, state)"
@@ -78,71 +78,71 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, reactive, ref } from "vue";
-import { ChevronRight, ChevronLeft } from "lucide-vue-next";
-import PageHeader from "@/components/page-header.vue";
-import PageWrapper from "@/components/page-wrapper.vue";
-import { useUpdateDailyAttendanceMutation } from "@/gql/mutations/attendances/updateDailyAttendance.ts";
-import { useSetUserAttendanceStateMutation } from "@/gql/mutations/attendances/setUserAttendanceState.ts";
-import { useUserAttendanceOverviewQuery } from "@/gql/queries/attendances/userAttendanceOverview.ts";
-import { UserAttendanceState } from "@/gql/schema.ts";
+import { computed, reactive, ref } from "vue"
+import { ChevronRight, ChevronLeft } from "lucide-vue-next"
+import PageHeader from "@/components/page-header.vue"
+import PageWrapper from "@/components/page-wrapper.vue"
+import { useUpdateDailyAttendanceMutation } from "@/gql/mutations/attendances/updateDailyAttendance"
+import { useSetUserAttendanceStateMutation } from "@/gql/mutations/attendances/setUserAttendanceState"
+import { useUserAttendanceOverviewQuery } from "@/gql/queries/attendances/userAttendanceOverview"
+import { UserAttendanceState } from "@/gql/schema"
 
-const search = ref("");
+const search = ref("")
 
-const date = ref(new Date());
+const date = ref(new Date())
 const formattedDate = computed({
   get: () => {
-    return date.value.toISOString().substr(0, 10);
+    return date.value.toISOString().substr(0, 10)
   },
   set: (value) => {
-    date.value = new Date(value);
-  },
-});
+    date.value = new Date(value)
+  }
+})
 
 function today() {
-  date.value = new Date();
+  date.value = new Date()
 }
 
 function previousDate() {
-  date.value = new Date(date.value.getTime() - 24 * 60 * 60 * 1000 - 1);
+  date.value = new Date(date.value.getTime() - 24 * 60 * 60 * 1000 - 1)
 }
 
 function nextDate() {
-  date.value = new Date(date.value.getTime() + 24 * 60 * 60 * 1000 + 1);
+  date.value = new Date(date.value.getTime() + 24 * 60 * 60 * 1000 + 1)
 }
 
-const { executeMutation: updateDailyAttendance } = useUpdateDailyAttendanceMutation();
-const { executeMutation: setUserAttendanceState } = useSetUserAttendanceStateMutation();
+const { executeMutation: updateDailyAttendance } = useUpdateDailyAttendanceMutation()
+const { executeMutation: setUserAttendanceState } = useSetUserAttendanceStateMutation()
 
 const { data, executeQuery: refresh } = useUserAttendanceOverviewQuery({
   variables: reactive({
-    date: date as unknown as never,
+    date: date as unknown as never
   }),
   context: {
-    additionalTypenames: ["UserAttendance"],
-  },
-});
+    additionalTypenames: ["UserAttendance"]
+  }
+})
 
 const filteredData = computed(() => {
-  if (!data) return [];
+  if (!data) return []
 
-  if (search.value === "") return data.value?.userAttendanceOverview;
+  if (search.value === "") return data.value?.userAttendanceOverview
 
   return data.value?.userAttendanceOverview.filter((item: any) => {
     return (
       item.user.firstName.toLowerCase().includes(search.value.toLowerCase()) ||
       item.user.lastName.toLowerCase().includes(search.value.toLowerCase())
-    );
-  });
-});
+    )
+  })
+})
 
 async function setAttendance(userId: string, attendance: UserAttendanceState) {
   await setUserAttendanceState({
     userId: userId,
     date: date.value,
-    state: attendance,
-  });
-  await refresh();
+    state: attendance
+  })
+  await refresh()
 }
 
 const states = [
@@ -150,23 +150,23 @@ const states = [
   UserAttendanceState.Present,
   UserAttendanceState.Absent,
   UserAttendanceState.Late,
-  UserAttendanceState.Sick,
-];
+  UserAttendanceState.Sick
+]
 
 function stateToEmoji(state: UserAttendanceState) {
   switch (state) {
     case UserAttendanceState.Unknown:
-      return "❓";
+      return "❓"
     case UserAttendanceState.Present:
-      return "✅";
+      return "✅"
     case UserAttendanceState.Absent:
-      return "❌";
+      return "❌"
     case UserAttendanceState.Late:
-      return "⏰";
+      return "⏰"
     case UserAttendanceState.Sick:
-      return "🤒";
+      return "🤒"
     default:
-      return "❓";
+      return "❓"
   }
 }
 </script>

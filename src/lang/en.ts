@@ -230,5 +230,5 @@ export const en = {
   enter_password: "Enter password",
   password_incorrect_try_again: "Password incorrect. Please try again.",
 
-  attendance: "Attendance",
-};
+  attendance: "Attendance"
+}

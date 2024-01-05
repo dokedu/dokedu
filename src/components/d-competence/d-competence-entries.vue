@@ -39,20 +39,20 @@
 </template>
 
 <script lang="ts" setup>
-import { ChevronDown } from "lucide-vue-next";
-import { ref } from "vue";
-import { formatDate } from "@vueuse/core";
-import { UserCompetence } from "@/gql/schema.ts";
+import { ChevronDown } from "lucide-vue-next"
+import { ref } from "vue"
+import { formatDate } from "@vueuse/core"
+import type { UserCompetence } from "@/gql/schema"
 
 export interface Props {
-  competences: UserCompetence[];
+  competences: UserCompetence[]
 }
 
-defineProps<Props>();
+defineProps<Props>()
 
-const entriesOpen = ref(false);
+const entriesOpen = ref(false)
 
 function toggleEntries() {
-  entriesOpen.value = !entriesOpen.value;
+  entriesOpen.value = !entriesOpen.value
 }
 </script>

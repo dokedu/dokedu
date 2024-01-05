@@ -1,8 +1,8 @@
 mutation moveFile($input: MoveFileInput!) {
-    moveFile(input: $input) {
-        id
-        parent {
-            id
-        }
+  moveFile(input: $input) {
+    id
+    parent {
+      id
     }
+  }
 }

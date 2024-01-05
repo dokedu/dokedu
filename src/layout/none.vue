@@ -5,14 +5,14 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted } from "vue";
-import { useMeQuery } from "@/gql/queries/auth/me.ts";
+import { onMounted } from "vue"
+import { useMeQuery } from "@/gql/queries/auth/me"
 
 const { executeQuery: refresh } = useMeQuery({
-  requestPolicy: "network-only",
-});
+  requestPolicy: "network-only"
+})
 
 onMounted(() => {
-  refresh();
-});
+  refresh()
+})
 </script>

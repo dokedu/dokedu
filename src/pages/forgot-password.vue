@@ -44,29 +44,29 @@
 </route>
 
 <script lang="ts" setup>
-import { ref } from "vue";
-import { useI18n } from "vue-i18n";
-import { useForgotPasswordMutation } from "@/gql/mutations/auth/forgotPassword.ts";
+import { ref } from "vue"
+import { useI18n } from "vue-i18n"
+import { useForgotPasswordMutation } from "@/gql/mutations/auth/forgotPassword"
 
-const { t } = useI18n();
+const { t } = useI18n()
 
-const email = ref("");
-const successBanner = ref(false);
+const email = ref("")
+const successBanner = ref(false)
 
-const { executeMutation: forgotPassword } = useForgotPasswordMutation();
+const { executeMutation: forgotPassword } = useForgotPasswordMutation()
 
 async function onSubmit() {
   const { data } = await forgotPassword({
     input: {
-      email: email.value,
-    },
-  });
+      email: email.value
+    }
+  })
 
   if (data?.forgotPassword.success) {
-    successBanner.value = true;
-    email.value = "";
+    successBanner.value = true
+    email.value = ""
   } else {
-    alert(t("something_went_wrong"));
+    alert(t("something_went_wrong"))
   }
 }
 </script>

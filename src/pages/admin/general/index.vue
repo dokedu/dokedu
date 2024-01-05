@@ -17,54 +17,54 @@
 </template>
 
 <script lang="ts" setup>
-import PageHeader from "@/components/page-header.vue";
-import PageWrapper from "@/components/page-wrapper.vue";
-import DButton from "@/components/d-button/d-button.vue";
-import DInput from "@/components/d-input/d-input.vue";
-import { computed } from "vue";
-import { createNotification } from "@/composables/useToast";
-import { useOrganisationQuery } from "@/gql/queries/organisation/organisation.ts";
-import { useUpdateOrganisationMutation } from "@/gql/mutations/organisation/updateOrganisation.ts";
+import PageHeader from "@/components/page-header.vue"
+import PageWrapper from "@/components/page-wrapper.vue"
+import DButton from "@/components/d-button/d-button.vue"
+import DInput from "@/components/d-input/d-input.vue"
+import { computed } from "vue"
+import { createNotification } from "@/composables/useToast"
+import { useOrganisationQuery } from "@/gql/queries/organisation/organisation"
+import { useUpdateOrganisationMutation } from "@/gql/mutations/organisation/updateOrganisation"
 
 async function onSave() {
-  if (!data?.value?.organisation) return;
+  if (!data?.value?.organisation) return
 
   await updateOrganisation({
     input: {
       id: data.value.organisation.id,
       name: name.value,
-      legalName: legalName.value,
-    },
-  });
+      legalName: legalName.value
+    }
+  })
 
   createNotification({
     title: "Organisation updated",
-    description: `The organisation ${name.value} was updated.`,
-  });
+    description: `The organisation ${name.value} was updated.`
+  })
 }
 
-const { data } = useOrganisationQuery({});
+const { data } = useOrganisationQuery({})
 
 const name = computed({
   get: () => {
-    if (!data?.value?.organisation) return "";
-    return data.value?.organisation?.name as string;
+    if (!data?.value?.organisation) return ""
+    return data.value?.organisation?.name as string
   },
   set: (value) => {
-    if (!data?.value?.organisation) return;
-    data.value.organisation.name = value as string;
-  },
-});
+    if (!data?.value?.organisation) return
+    data.value.organisation.name = value as string
+  }
+})
 const legalName = computed({
   get: () => {
-    if (!data?.value?.organisation) return "";
-    return data.value?.organisation?.legalName as string;
+    if (!data?.value?.organisation) return ""
+    return data.value?.organisation?.legalName as string
   },
   set: (value) => {
-    if (!data?.value?.organisation) return;
-    data.value.organisation.legalName = value as string;
-  },
-});
+    if (!data?.value?.organisation) return
+    data.value.organisation.legalName = value as string
+  }
+})
 
-const { executeMutation: updateOrganisation } = useUpdateOrganisationMutation();
+const { executeMutation: updateOrganisation } = useUpdateOrganisationMutation()
 </script>

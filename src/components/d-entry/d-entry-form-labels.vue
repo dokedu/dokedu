@@ -29,67 +29,67 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, toRef } from "vue";
-import DTag from "../d-tag/d-tag.vue";
-import DSelect from "@/components/d-select/d-select.vue";
-import { useDeleteEntryTagInputMutation } from "@/gql/mutations/entries/deleteEntryTag.ts";
-import { useCreateEntryTagMutation } from "@/gql/mutations/entries/createEntryTag.ts";
-import { useTagLimitedQuery } from "@/gql/queries/tags/tags.ts";
-import { Entry, Tag } from "@/gql/schema.ts";
+import { computed, ref, toRef } from "vue"
+import DTag from "../d-tag/d-tag.vue"
+import DSelect from "@/components/d-select/d-select.vue"
+import { useDeleteEntryTagInputMutation } from "@/gql/mutations/entries/deleteEntryTag"
+import { useCreateEntryTagMutation } from "@/gql/mutations/entries/createEntryTag"
+import { useTagLimitedQuery } from "@/gql/queries/tags/tags"
+import type { Entry, Tag } from "@/gql/schema"
 
-const { executeMutation: deleteEntryTag } = useDeleteEntryTagInputMutation();
-const { executeMutation: createEntryTag } = useCreateEntryTagMutation();
+const { executeMutation: deleteEntryTag } = useDeleteEntryTagInputMutation()
+const { executeMutation: createEntryTag } = useCreateEntryTagMutation()
 
 const props = defineProps<{
-  entry: Partial<Entry>;
-}>();
+  entry: Partial<Entry>
+}>()
 
-const entry = toRef(props, "entry");
-const tagSearch = ref("");
+const entry = toRef(props, "entry")
+const tagSearch = ref("")
 
-const { data: tagsData } = useTagLimitedQuery({});
+const { data: tagsData } = useTagLimitedQuery({})
 
 const selected = computed({
   get: () => {
-    return entry.value.tags?.map((el: any) => el.id) || [];
+    return entry.value.tags?.map((el: any) => el.id) || []
   },
   set: async (value: string[]) => {
     // value contains all selected ids, we need to compare it to the existing ones
     // and if there are any differences, we need to create or delete the entryTag
-    const existing = entry.value.tags?.map((el: any) => el.id) || [];
+    const existing = entry.value.tags?.map((el: any) => el.id) || []
 
-    const toDelete = existing.filter((el) => !value.includes(el));
-    const toCreate = value.filter((el) => !existing.includes(el));
+    const toDelete = existing.filter((el) => !value.includes(el))
+    const toCreate = value.filter((el) => !existing.includes(el))
 
     for (const id of toDelete || []) {
-      await deleteEntryTag({ input: { entryId: entry.value.id as string, tagId: id } });
+      await deleteEntryTag({ input: { entryId: entry.value.id as string, tagId: id } })
     }
 
     for (const id of toCreate || []) {
-      await createEntryTag({ input: { entryId: entry.value.id as string, tagId: id } });
+      await createEntryTag({ input: { entryId: entry.value.id as string, tagId: id } })
     }
-  },
-});
+  }
+})
 
 const filteredTagData = computed(() => {
-  const searchValid = tagSearch.value && tagSearch.value !== "";
-  if (!searchValid) return tagsData?.value?.tags?.edges || [];
+  const searchValid = tagSearch.value && tagSearch.value !== ""
+  if (!searchValid) return tagsData?.value?.tags?.edges || []
 
   return (
     tagsData?.value?.tags?.edges?.filter((el: any) => el.name.toLowerCase().includes(tagSearch.value.toLowerCase())) ||
     []
-  );
-});
+  )
+})
 
 async function removeTag(tag: Tag) {
-  await deleteEntryTag({ input: { entryId: entry.value.id as string, tagId: tag.id } });
+  await deleteEntryTag({ input: { entryId: entry.value.id as string, tagId: tag.id } })
 }
 
 const tagOptions = computed(
   () =>
     filteredTagData.value.map((edge: any) => ({
       label: edge.name,
-      value: edge.id,
-    })) || [],
-);
+      value: edge.id
+    })) || []
+)
 </script>

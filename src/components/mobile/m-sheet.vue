@@ -22,84 +22,84 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
-import { executeTransition, useEventListener, useMouse } from "@vueuse/core";
-import { X } from "lucide-vue-next";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue"
+import { executeTransition, useEventListener, useMouse } from "@vueuse/core"
+import { X } from "lucide-vue-next"
 
-const MIN_HEIGHT = 32;
-const MAX_HEIGHT = window.innerHeight;
-const THRESHOLD = Math.round(MAX_HEIGHT * 0.3);
+const MIN_HEIGHT = 32
+const MAX_HEIGHT = window.innerHeight
+const THRESHOLD = Math.round(MAX_HEIGHT * 0.3)
 
-const handle = ref();
-const opening = ref(true);
-const dragging = ref(false);
-const animating = ref(false);
-const sheetHeight = ref<number>(MAX_HEIGHT);
+const handle = ref()
+const opening = ref(true)
+const dragging = ref(false)
+const animating = ref(false)
+const sheetHeight = ref<number>(MAX_HEIGHT)
 
-const sheetHeightPx = computed(() => sheetHeight.value + "px");
+const sheetHeightPx = computed(() => sheetHeight.value + "px")
 
-const emit = defineEmits(["close"]);
+const emit = defineEmits(["close"])
 
 async function close() {
-  dragging.value = false;
-  await animate(MAX_HEIGHT);
-  emit("close");
+  dragging.value = false
+  await animate(MAX_HEIGHT)
+  emit("close")
 }
 
 async function animate(to: number) {
-  if (animating.value) return;
-  animating.value = true;
+  if (animating.value) return
+  animating.value = true
 
   await executeTransition(sheetHeight, sheetHeight, to, {
-    duration: (Math.abs(sheetHeight.value - to) / (MAX_HEIGHT - MIN_HEIGHT)) * 300,
-  });
+    duration: (Math.abs(sheetHeight.value - to) / (MAX_HEIGHT - MIN_HEIGHT)) * 300
+  })
 
-  animating.value = false;
+  animating.value = false
 }
 
 async function resize(y: number) {
-  if (sheetHeight) if (MIN_HEIGHT > y) return;
+  if (sheetHeight) if (MIN_HEIGHT > y) return
 
   if (dragging.value) {
-    sheetHeight.value = y - 5;
+    sheetHeight.value = y - 5
   } else {
-    if (sheetHeight.value === MIN_HEIGHT) return;
-    if (sheetHeight.value === MAX_HEIGHT) return;
+    if (sheetHeight.value === MIN_HEIGHT) return
+    if (sheetHeight.value === MAX_HEIGHT) return
 
     if (y > THRESHOLD) {
-      await close();
+      await close()
     } else {
-      await animate(MIN_HEIGHT);
+      await animate(MIN_HEIGHT)
     }
   }
 }
 
 onMounted(async () => {
-  window.scrollTo(0, 1);
+  window.scrollTo(0, 1)
 
-  await animate(MIN_HEIGHT);
-  opening.value = false;
+  await animate(MIN_HEIGHT)
+  opening.value = false
 
-  if (!handle.value) return;
-});
+  if (!handle.value) return
+})
 
-onUnmounted(() => close);
+onUnmounted(() => close)
 
 useEventListener(handle, ["mousedown", "touchstart"], () => {
-  dragging.value = true;
-});
+  dragging.value = true
+})
 
 useEventListener(window, ["mouseup", "touchend"], () => {
-  dragging.value = false;
-  resize(y.value);
-});
+  dragging.value = false
+  resize(y.value)
+})
 
-const { y } = useMouse();
+const { y } = useMouse()
 
 watch(y, async () => {
-  if (opening.value) return;
-  resize(y.value);
-});
+  if (opening.value) return
+  resize(y.value)
+})
 </script>
 
 <style>

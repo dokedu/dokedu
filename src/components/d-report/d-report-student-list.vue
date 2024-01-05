@@ -33,21 +33,21 @@
 </template>
 
 <script lang="ts" setup>
-import DContextMenu from "@/components/d-context-menu/d-context-menu.vue";
-import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue";
-import { ref } from "vue";
-import { Check } from "lucide-vue-next";
-import { useStudentsQuery } from "@/gql/queries/users/students.ts";
-import { User } from "@/gql/schema.ts";
+import DContextMenu from "@/components/d-context-menu/d-context-menu.vue"
+import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue"
+import { ref } from "vue"
+import { Check } from "lucide-vue-next"
+import { useStudentsQuery } from "@/gql/queries/users/students"
+import type { User } from "@/gql/schema"
 
-const emit = defineEmits(["update"]);
+const emit = defineEmits(["update"])
 
-const contextMenuOpen = ref(false);
-const selectedStudent = ref<User>();
+const contextMenuOpen = ref(false)
+const selectedStudent = ref<User>()
 
-const { data } = useStudentsQuery({});
+const { data } = useStudentsQuery({})
 function selectStudent(student: User) {
-  selectedStudent.value = student;
-  emit("update", selectedStudent.value);
+  selectedStudent.value = student
+  emit("update", selectedStudent.value)
 }
 </script>

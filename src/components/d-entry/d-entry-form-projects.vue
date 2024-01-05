@@ -29,65 +29,65 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, toRef } from "vue";
-import DTag from "../d-tag/d-tag.vue";
-import DSelect from "@/components/d-select/d-select.vue";
-import { useDeleteEntryEventInputMutation } from "@/gql/mutations/entries/deleteEntryEvent.ts";
-import { useCreateEntryEventMutation } from "@/gql/mutations/entries/createEntryEvent.ts";
-import { useEventsQuery } from "@/gql/queries/events/events.ts";
-import { Entry } from "@/gql/schema.ts";
+import { computed, ref, toRef } from "vue"
+import DTag from "../d-tag/d-tag.vue"
+import DSelect from "@/components/d-select/d-select.vue"
+import { useDeleteEntryEventInputMutation } from "@/gql/mutations/entries/deleteEntryEvent"
+import { useCreateEntryEventMutation } from "@/gql/mutations/entries/createEntryEvent"
+import { useEventsQuery } from "@/gql/queries/events/events"
+import type { Entry } from "@/gql/schema"
 
-const { executeMutation: deleteEntryEvent } = useDeleteEntryEventInputMutation();
-const { executeMutation: createEntryEvent } = useCreateEntryEventMutation();
+const { executeMutation: deleteEntryEvent } = useDeleteEntryEventInputMutation()
+const { executeMutation: createEntryEvent } = useCreateEntryEventMutation()
 
 const props = defineProps<{
-  entry: Partial<Entry>;
-}>();
+  entry: Partial<Entry>
+}>()
 
-const entry = toRef(props, "entry");
-const eventSearch = ref("");
+const entry = toRef(props, "entry")
+const eventSearch = ref("")
 
-const { data: eventsData } = useEventsQuery({});
+const { data: eventsData } = useEventsQuery({})
 
 const selected = computed({
   get: () => {
-    return entry.value.events?.map((el: any) => el.id) || [];
+    return entry.value.events?.map((el: any) => el.id) || []
   },
   set: async (value: string[]) => {
-    const existing = entry.value.events?.map((el: any) => el.id) || [];
-    const removables = existing.filter((el) => !value.includes(el));
-    const creatables = value.filter((el) => !existing.includes(el));
+    const existing = entry.value.events?.map((el: any) => el.id) || []
+    const removables = existing.filter((el) => !value.includes(el))
+    const creatables = value.filter((el) => !existing.includes(el))
 
     for (const id of creatables || []) {
-      await createEntryEvent({ input: { entryId: entry.value.id as string, eventId: id } });
+      await createEntryEvent({ input: { entryId: entry.value.id as string, eventId: id } })
     }
 
     for (const id of removables || []) {
-      await deleteEntryEvent({ input: { entryId: entry.value.id as string, eventId: id } });
+      await deleteEntryEvent({ input: { entryId: entry.value.id as string, eventId: id } })
     }
-  },
-});
+  }
+})
 
 const filteredEventData = computed(() => {
-  const searchValid = eventSearch.value && eventSearch.value !== "";
-  if (!searchValid) return eventsData?.value?.events?.edges || [];
+  const searchValid = eventSearch.value && eventSearch.value !== ""
+  if (!searchValid) return eventsData?.value?.events?.edges || []
 
   return (
     eventsData?.value?.events?.edges?.filter((el: any) =>
-      el.title.toLowerCase().includes(eventSearch.value.toLowerCase()),
+      el.title.toLowerCase().includes(eventSearch.value.toLowerCase())
     ) || []
-  );
-});
+  )
+})
 
 async function removeEvent(event: Event) {
-  await deleteEntryEvent({ input: { entryId: entry.value.id as string, eventId: event.id } });
+  await deleteEntryEvent({ input: { entryId: entry.value.id as string, eventId: event.id } })
 }
 
 const eventOptions = computed(
   () =>
     filteredEventData.value.map((edge: any) => ({
       label: edge.title,
-      value: edge.id,
-    })) || [],
-);
+      value: edge.id
+    })) || []
+)
 </script>
