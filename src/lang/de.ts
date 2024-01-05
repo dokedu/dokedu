@@ -203,13 +203,15 @@ export const de = {
   shared_drives: "Geteilte Ablagen",
   my_drive: "Meine Ablage",
   share: "Teilen",
-  no_shared_drives: "Keine gemeinsamen Ablagen gefunden",
+  no_shared_drives_title: "Sieht so aus, als hättest du keine Geteilten Ablagen",
+  no_shared_drives_text: "Wenn andere Personen ihre Ablage mit dir teilen, wird diese hier erscheinen",
   folder: "Ordner | Ordner",
   folder_name: "Name des Ordners",
   shared_with_me: "Geteilt mit mir",
   trash: "Papierkorb",
-  trash_work_in_progress:
-    "Diese Seite ist noch in Arbeit. Sie wird verwendet, um die Dateien anzuzeigen, die von Ihnen gelöscht wurden.",
+
+  trash_work_in_progress_title: "Diese Seite ist noch in Arbeit.",
+  trash_work_in_progress_text: "Sie wird verwendet, um die Dateien anzuzeigen, die von dir gelöscht wurden.",
 
   support: "Support",
 
