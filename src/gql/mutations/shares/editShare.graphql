@@ -1,10 +1,10 @@
 mutation editShare($input: CreateShareInput!) {
-    editShare(input: $input) {
-        permission
-        user {
-            id
-            firstName
-            lastName
-        }
+  editShare(input: $input) {
+    permission
+    user {
+      id
+      firstName
+      lastName
     }
+  }
 }

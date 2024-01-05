@@ -14,23 +14,23 @@
 </template>
 
 <script setup lang="ts">
-import { useWindowSize } from "@vueuse/core";
-import DButton from "@/components/d-button/d-button.vue";
-import { useAuth } from "@/composables/auth";
-import { onMounted } from "vue";
-import { useMeQuery } from "@/gql/queries/auth/me.ts";
+import { useWindowSize } from "@vueuse/core"
+import DButton from "@/components/d-button/d-button.vue"
+import { useAuth } from "@/composables/auth"
+import { onMounted } from "vue"
+import { useMeQuery } from "@/gql/queries/auth/me"
 
-const { width } = useWindowSize();
+const { width } = useWindowSize()
 
 const onLogOut = async () => {
-  await useAuth().signOut();
-};
+  await useAuth().signOut()
+}
 
 const { executeQuery: refresh } = useMeQuery({
-  requestPolicy: "network-only",
-});
+  requestPolicy: "network-only"
+})
 
 onMounted(() => {
-  refresh();
-});
+  refresh()
+})
 </script>

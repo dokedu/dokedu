@@ -1,10 +1,10 @@
 query adminGroupById($id: ID!) {
-    emailAccount(id: $id) {
-        id
-        name
-        description
-        members {
-            name
-        }
+  emailAccount(id: $id) {
+    id
+    name
+    description
+    members {
+      name
     }
+  }
 }

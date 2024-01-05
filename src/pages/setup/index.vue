@@ -36,8 +36,8 @@
 </route>
 
 <script lang="ts" setup>
-import DButton from "@/components/d-button/d-button.vue";
-import { useAuth } from "@/composables/auth";
+import DButton from "@/components/d-button/d-button.vue"
+import { useAuth } from "@/composables/auth"
 
-const { signOut } = useAuth();
+const { signOut } = useAuth()
 </script>

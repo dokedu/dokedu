@@ -1,5 +1,5 @@
 query meBucketShare {
-    me {
-        id
-    }
+  me {
+    id
+  }
 }

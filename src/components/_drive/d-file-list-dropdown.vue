@@ -1,14 +1,14 @@
 <script lang="ts">
 export type Option = {
-  text: string;
-  icon: any;
-  func: (...args: any[]) => void;
-};
+  text: string
+  icon: any
+  func: (...args: any[]) => void
+}
 </script>
 
 <script setup lang="ts">
-import { PropType, ref, toRef } from "vue";
-import { MoreVertical } from "lucide-vue-next";
+import { PropType, ref, toRef } from "vue"
+import { MoreVertical } from "lucide-vue-next"
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -16,19 +16,19 @@ import {
   DropdownMenuPortal,
   DropdownMenuRoot,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "radix-vue";
+  DropdownMenuTrigger
+} from "radix-vue"
 
-const toggleState = ref(false);
+const toggleState = ref(false)
 
 const props = defineProps({
   optionList: {
     type: Array as PropType<Option[][]>,
-    required: true,
-  },
-});
+    required: true
+  }
+})
 
-const optionList = toRef(props, "optionList");
+const optionList = toRef(props, "optionList")
 </script>
 
 <template>

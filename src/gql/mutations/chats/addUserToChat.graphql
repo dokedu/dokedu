@@ -1,14 +1,14 @@
 mutation addUserToChat($input: AddUserToChatInput!) {
-    addUserToChat(input: $input) {
+  addUserToChat(input: $input) {
+    id
+    chat {
+      id
+      users {
         id
-        chat {
-            id
-            users {
-                id
-                firstName
-                firstName
-                email
-            }
-        }
+        firstName
+        firstName
+        email
+      }
     }
+  }
 }

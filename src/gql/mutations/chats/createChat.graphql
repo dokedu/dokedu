@@ -1,7 +1,7 @@
 mutation createChat($input: CreateChatInput!) {
-    createChat(input: $input) {
-        id
-        name
-        createdAt
-    }
+  createChat(input: $input) {
+    id
+    name
+    createdAt
+  }
 }

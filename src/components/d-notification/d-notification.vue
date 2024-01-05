@@ -8,7 +8,7 @@
       <div>
         <div class="p-4">
           <div class="flex gap-2" :class="{ 'items-start': description, 'items-center': !description }">
-            <component v-if="icon" :is="icon" class="h-4 w-4"></component>
+            <component v-if="icon" :icon="icon" class="h-4 w-4"></component>
 
             <div class="w-0 flex-1 text-sm font-medium text-strong">
               <p>
@@ -36,76 +36,83 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, onUnmounted, watchEffect } from "vue";
-import { useTimer } from "@/composables/useTimer";
-import { Icon } from "lucide-vue-next";
-import { X } from "lucide-vue-next";
-import { useSlots } from "vue";
+import { ref, computed, onMounted, onUnmounted, watchEffect, type FunctionalComponent, type SVGAttributes } from "vue"
+import { useTimer } from "@/composables/useTimer"
+import { X } from "lucide-vue-next"
+import { useSlots } from "vue"
 
-const slots = useSlots();
+interface SVGProps extends Partial<SVGAttributes> {
+  size?: 24 | number
+  strokeWidth?: number | string
+  absoluteStrokeWidth?: boolean
+}
+
+type Icon = FunctionalComponent<SVGProps>
+
+const slots = useSlots()
 
 export interface Props {
-  title: string;
-  description: string;
-  icon?: Icon;
-  closeIcon?: Icon;
-  timeout?: number;
+  title: string
+  description: string
+  icon?: Icon
+  closeIcon?: Icon
+  timeout?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
   icon: undefined,
   closeIcon: X,
-  timeout: 5000,
-});
+  timeout: 5000
+})
 
-const emit = defineEmits(["close"]);
+const emit = defineEmits(["close"])
 
-let timer: any = null;
-const remaining = ref(props.timeout);
+let timer: any = null
+const remaining = ref(props.timeout)
 
 const progressStyle = computed(() => {
-  const remainingPercent = (remaining.value / props.timeout) * 100;
+  const remainingPercent = (remaining.value / props.timeout) * 100
 
-  return { width: `${remainingPercent || 0}%` };
-});
+  return { width: `${remainingPercent || 0}%` }
+})
 
 function onMouseover() {
   if (timer) {
-    timer.pause();
+    timer.pause()
   }
 }
 
 function onMouseleave() {
   if (timer) {
-    timer.resume();
+    timer.resume()
   }
 }
 
 function onClose() {
   if (timer) {
-    timer.stop();
+    timer.stop()
   }
 
-  emit("close");
+  emit("close")
 }
 
 onMounted(() => {
   if (!props.timeout) {
-    return;
+    return
   }
 
   timer = useTimer(() => {
-    onClose();
-  }, props.timeout);
+    onClose()
+  }, props.timeout)
 
   watchEffect(() => {
-    remaining.value = timer.remaining.value;
-  });
-});
+    remaining.value = timer.remaining.value
+  })
+})
 
 onUnmounted(() => {
   if (timer) {
-    timer.stop();
+    timer.stop()
   }
-});
+})
 </script>

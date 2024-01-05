@@ -20,14 +20,14 @@ Luckily, you can give urql more context by manually defining a typename to "list
 1. Write your query as usual:
 
    ```ts
-   const query = `query { todos { id name } }`;
-   const result = { todos: [] };
+   const query = `query { todos { id name } }`
+   const result = { todos: [] }
    ```
 
 2. Create a context with the additional typenames you want to monitor, keeping the reference stable:
    ```ts
-   const context = { additionalTypenames: ["File"] };
-   const [result] = useQuery({ query, context });
+   const context = { additionalTypenames: ["File"] }
+   const [result] = useQuery({ query, context })
    ```
    This approach helps urql to recognize the type you're working with and updates the list accordingly.
 

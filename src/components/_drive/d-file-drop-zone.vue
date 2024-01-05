@@ -8,67 +8,67 @@
 </template>
 
 <script lang="ts" setup>
-import { useEventListener } from "@vueuse/core";
-import { ref } from "vue";
+import { useEventListener } from "@vueuse/core"
+import { ref } from "vue"
 
-const hasDragover = ref(false);
+const hasDragover = ref(false)
 
-const emit = defineEmits(["upload"]);
+const emit = defineEmits(["upload"])
 
-const dropzone = ref<HTMLElement | null>(null);
+const dropzone = ref<HTMLElement | null>(null)
 
 useEventListener(dropzone, "dragenter", (event: DragEvent) => {
-  const types = event.dataTransfer?.types || [];
+  const types = event.dataTransfer?.types || []
 
   if (types.includes("dokedu/vnd.dokedu-drive-file")) {
-    hasDragover.value = false;
-    return false;
+    hasDragover.value = false
+    return false
   }
 
-  hasDragover.value = true;
+  hasDragover.value = true
 
-  event.preventDefault();
-});
+  event.preventDefault()
+})
 
 useEventListener(dropzone, "dragend", (event: DragEvent) => {
-  hasDragover.value = false;
+  hasDragover.value = false
 
-  event.preventDefault();
-});
+  event.preventDefault()
+})
 
 useEventListener(dropzone, "dragover", (event: DragEvent) => {
-  const types = event.dataTransfer?.types || [];
+  const types = event.dataTransfer?.types || []
 
   if (types.includes("dokedu/vnd.dokedu-drive-file")) {
-    hasDragover.value = false;
-    return false;
+    hasDragover.value = false
+    return false
   }
 
-  hasDragover.value = true;
+  hasDragover.value = true
 
-  event.preventDefault();
-});
+  event.preventDefault()
+})
 
 // useEventListener(dropzone, "dragend", () => {});
 
 useEventListener(dropzone, "drop", (event: DragEvent) => {
-  event.preventDefault();
+  event.preventDefault()
 
-  const types = event.dataTransfer?.types || [];
+  const types = event.dataTransfer?.types || []
 
   if (types.includes("dokedu/vnd.dokedu-drive-file")) {
-    hasDragover.value = false;
-    return false;
+    hasDragover.value = false
+    return false
   }
 
   if (event.dataTransfer) {
     if (event.dataTransfer.files.length > 0) {
       emit("upload", {
-        files: event.dataTransfer.files,
-      });
+        files: event.dataTransfer.files
+      })
 
-      hasDragover.value = false;
+      hasDragover.value = false
     }
   }
-});
+})
 </script>

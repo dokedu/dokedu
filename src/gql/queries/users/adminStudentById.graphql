@@ -1,16 +1,16 @@
 query adminStudentById($id: ID!) {
-    user(id: $id) {
-        id
-        firstName
-        lastName
-        role
-        student {
-            id
-            grade
-            birthday
-            joinedAt
-            leftAt
-            emoji
-        }
+  user(id: $id) {
+    id
+    firstName
+    lastName
+    role
+    student {
+      id
+      grade
+      birthday
+      joinedAt
+      leftAt
+      emoji
     }
+  }
 }

@@ -25,50 +25,50 @@
 </template>
 
 <script setup lang="ts">
-import PageHeader from "../../../components/page-header.vue";
-import PageWrapper from "../../../components/page-wrapper.vue";
-import DButton from "../../../components/d-button/d-button.vue";
-import { Plus } from "lucide-vue-next";
-import DTag from "../../../components/d-tag/d-tag.vue";
-import TagCreateDialog from "@/components/d-tag-create-dialog.vue";
-import TagEditDialog from "@/components/d-tag-edit-dialog.vue";
-import { ref } from "vue";
-import DTable from "@/components/d-table/d-table.vue";
-import type { PageVariables } from "@/types/types.ts";
-import { GetTagWithLimitDocument } from "@/gql/queries/tags/getTagWithLimit.ts";
+import PageHeader from "../../../components/page-header.vue"
+import PageWrapper from "../../../components/page-wrapper.vue"
+import DButton from "../../../components/d-button/d-button.vue"
+import { Plus } from "lucide-vue-next"
+import DTag from "../../../components/d-tag/d-tag.vue"
+import TagCreateDialog from "@/components/d-tag-create-dialog.vue"
+import TagEditDialog from "@/components/d-tag-edit-dialog.vue"
+import { ref } from "vue"
+import DTable from "@/components/d-table/d-table.vue"
+import type { PageVariables } from "@/types/types"
+import { GetTagWithLimitDocument } from "@/gql/queries/tags/getTagWithLimit"
 
-const createOpen = ref(false);
-const editOpen = ref(false);
-const currentTag = ref();
+const createOpen = ref(false)
+const editOpen = ref(false)
+const currentTag = ref()
 
 function toggleCreateDialog() {
-  createOpen.value = !createOpen.value;
+  createOpen.value = !createOpen.value
 }
 
 const toggleEditDialog = <Type,>(tag: Type) => {
-  currentTag.value = tag;
-  editOpen.value = true;
-};
+  currentTag.value = tag
+  editOpen.value = true
+}
 
 const columns = [
   {
     key: "name",
-    label: "name",
-  },
-];
+    label: "name"
+  }
+]
 
 const pageVariables = ref<PageVariables[]>([
   {
     limit: 50,
-    offset: 0,
-  },
-]);
+    offset: 0
+  }
+])
 
 function onTagCreate() {
-  createOpen.value = false;
+  createOpen.value = false
 }
 
 function onTagUpdate() {
-  editOpen.value = false;
+  editOpen.value = false
 }
 </script>

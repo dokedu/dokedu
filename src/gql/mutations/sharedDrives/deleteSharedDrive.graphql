@@ -1,5 +1,5 @@
 mutation deleteSharedDrive($id: ID!) {
-    deleteSharedDrive(id: $id) {
-        id
-    }
+  deleteSharedDrive(id: $id) {
+    id
+  }
 }

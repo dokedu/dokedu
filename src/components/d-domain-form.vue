@@ -34,29 +34,29 @@
 </template>
 
 <script lang="ts" setup>
-import DSidebar from "@/components/d-sidebar/d-sidebar.vue";
-import DInput from "@/components/d-input/d-input.vue";
-import DButton from "@/components/d-button/d-button.vue";
-import { computed, toRef } from "vue";
-import { useRouter } from "vue-router/auto";
-import { Domain } from "@/gql/schema.ts";
+import DSidebar from "@/components/d-sidebar/d-sidebar.vue"
+import DInput from "@/components/d-input/d-input.vue"
+import DButton from "@/components/d-button/d-button.vue"
+import { computed, toRef } from "vue"
+import { useRouter } from "vue-router/auto"
+import type { Domain } from "@/gql/schema"
 
-const router = useRouter();
+const router = useRouter()
 
 export interface Props {
-  domain: Domain;
-  title: string;
-  deletable?: boolean;
+  domain: Domain
+  title: string
+  deletable?: boolean
 }
-const props = defineProps<Props>();
-const emit = defineEmits(["save", "delete"]);
-const domain = toRef(props, "domain");
+const props = defineProps<Props>()
+const emit = defineEmits(["save", "delete"])
+const domain = toRef(props, "domain")
 
 interface DNSRecord {
-  hostname?: string;
-  type: "MX" | "TXT";
-  ttl?: number;
-  value: string;
+  hostname?: string
+  type: "MX" | "TXT"
+  ttl?: number
+  value: string
 }
 
 const records = computed<DNSRecord[]>(() => {
@@ -64,33 +64,33 @@ const records = computed<DNSRecord[]>(() => {
     {
       hostname: "",
       type: "MX",
-      value: "10 mail.dokedu.org",
+      value: "10 mail.dokedu.org"
     },
     {
       type: "TXT",
-      value: "v=spf1 ~all",
+      value: "v=spf1 ~all"
     },
     {
       type: "TXT",
       value:
-        'v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2iuKGW084CSLAV4eg+56nXs6rx/YCypG2ZRLJY8zhttyJm6UGoa2M78JBPyHmtO2fn8zQw7b1dVHjLYI79F+2GvjTF9K0RYIaUPXAvU1Hfh83OLbcvMwAQKgRPsYZSIF72Q6fHLSGs6Boqz9dFTPziQkoh1a86EnFbb4NoLt8CHYjqeW6mHP3ZaLZkwWsST1A" "HS133F4XMopYrZ/HGKFdpJg3LbmYGwuK6Yh0adRvVpFJLdB5GfcCoLGloo8UKw7tT1E2Nr6V5Hn3nuy5GniORAf5neXBEnHBM3rXv2JBUFrnAUKb7iAqaxJtm6BMT7MlXq76zSFR4JaRerzptPdrQIDAQAB',
+        'v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2iuKGW084CSLAV4eg+56nXs6rx/YCypG2ZRLJY8zhttyJm6UGoa2M78JBPyHmtO2fn8zQw7b1dVHjLYI79F+2GvjTF9K0RYIaUPXAvU1Hfh83OLbcvMwAQKgRPsYZSIF72Q6fHLSGs6Boqz9dFTPziQkoh1a86EnFbb4NoLt8CHYjqeW6mHP3ZaLZkwWsST1A" "HS133F4XMopYrZ/HGKFdpJg3LbmYGwuK6Yh0adRvVpFJLdB5GfcCoLGloo8UKw7tT1E2Nr6V5Hn3nuy5GniORAf5neXBEnHBM3rXv2JBUFrnAUKb7iAqaxJtm6BMT7MlXq76zSFR4JaRerzptPdrQIDAQAB'
     },
     {
       type: "TXT",
-      value: "v=DMARC1; p=none; rua=mailto:postmaster@domain.com; ruf=mailto:postmaster@domain.com",
-    },
-  ] as DNSRecord[];
-});
+      value: "v=DMARC1; p=none; rua=mailto:postmaster@domain.com; ruf=mailto:postmaster@domain.com"
+    }
+  ] as DNSRecord[]
+})
 
 const onCancel = () => {
-  router.push({ name: "/admin/domains" });
-};
+  router.push({ name: "/admin/domains" })
+}
 
 const onDelete = () => {
-  emit("delete");
-};
+  emit("delete")
+}
 
 const onSave = () => {
-  emit("save");
-};
+  emit("save")
+}
 </script>

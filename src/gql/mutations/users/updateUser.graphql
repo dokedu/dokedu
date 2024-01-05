@@ -1,9 +1,9 @@
 mutation updateUser($input: UpdateUserInput!) {
-    updateUser(input: $input) {
-        id
-        firstName
-        lastName
-        email
-        role
-    }
+  updateUser(input: $input) {
+    id
+    firstName
+    lastName
+    email
+    role
+  }
 }

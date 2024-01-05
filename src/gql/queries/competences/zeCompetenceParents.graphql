@@ -1,14 +1,14 @@
 query zeCompetenceParents($id: ID!) {
-    competence(id: $id) {
-        id
-        name
-        type
-        grades
-        parents {
-            id
-            name
-            type
-            grades
-        }
+  competence(id: $id) {
+    id
+    name
+    type
+    grades
+    parents {
+      id
+      name
+      type
+      grades
     }
+  }
 }

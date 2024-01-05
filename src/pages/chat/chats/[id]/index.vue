@@ -56,79 +56,79 @@
 </route>
 
 <script setup lang="ts">
-import { useRoute } from "vue-router/auto";
-import { computed, nextTick, reactive, ref, watch } from "vue";
-import DMarkdown from "@/components/d-markdown/d-markdown.vue";
-import { useTextareaAutosize } from "@vueuse/core";
-import { useChatQuery } from "@/gql/queries/chats/chat.ts";
-import { useMeQuery } from "@/gql/queries/auth/me.ts";
-import { useSendMessageMutation } from "@/gql/mutations/chats/sendMessage.ts";
-import { useMessageAddedSubscription } from "@/gql/subscriptions/messageAdded.ts";
+import { useRoute } from "vue-router/auto"
+import { computed, nextTick, reactive, ref, watch } from "vue"
+import DMarkdown from "@/components/d-markdown/d-markdown.vue"
+import { useTextareaAutosize } from "@vueuse/core"
+import { useChatQuery } from "@/gql/queries/chats/chat"
+import { useMeQuery } from "@/gql/queries/auth/me"
+import { useSendMessageMutation } from "@/gql/mutations/chats/sendMessage"
+import { useMessageAddedSubscription } from "@/gql/subscriptions/messageAdded"
 
-const route = useRoute("/chat/chats/[id]/");
+const route = useRoute("/chat/chats/[id]/")
 
-const id = computed(() => route.params.id);
-const messageContainer = ref<HTMLElement>();
+const id = computed(() => route.params.id)
+const messageContainer = ref<HTMLElement>()
 
-const { textarea, input } = useTextareaAutosize();
+const { textarea, input } = useTextareaAutosize()
 
 const { data, executeQuery: refresh } = useChatQuery({
   variables: reactive({
-    id: id,
-  }),
-});
+    id: id
+  })
+})
 
-const { data: userData } = useMeQuery({});
+const { data: userData } = useMeQuery({})
 
 function fullName(user: { firstName: string; lastName: string }) {
-  return `${user.firstName} ${user.lastName}`;
+  return `${user.firstName} ${user.lastName}`
 }
 
-const { executeMutation: sendMessageMutation } = useSendMessageMutation();
+const { executeMutation: sendMessageMutation } = useSendMessageMutation()
 
 async function onSubmit() {
-  await sendMessage(input.value.replace(/^\s+|\s+$/g, ""));
-  input.value = "";
+  await sendMessage(input.value.replace(/^\s+|\s+$/g, ""))
+  input.value = ""
 }
 
 async function sendMessage(message: string) {
-  if (!message) return;
-  if (message.length === 0) return;
+  if (!message) return
+  if (message.length === 0) return
   await sendMessageMutation({
     input: {
       chatId: id.value,
-      message: message,
-    },
-  });
+      message: message
+    }
+  })
   if (messageContainer.value) {
-    messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
+    messageContainer.value.scrollTop = messageContainer.value.scrollHeight
   }
 }
 
 async function handleSubscription() {
-  await refresh();
+  await refresh()
 }
 
 useMessageAddedSubscription(
   {
     variables: reactive({
-      chatId: id,
-    }),
+      chatId: id
+    })
   },
-  handleSubscription,
-);
+  handleSubscription
+)
 
 watch(
   [data],
   () => {
     nextTick(() => {
-      scrollToBottomConditionally();
-    });
+      scrollToBottomConditionally()
+    })
   },
   {
-    flush: "post",
-  },
-);
+    flush: "post"
+  }
+)
 
 function scrollToBottomConditionally() {
   if (messageContainer.value) {
@@ -137,7 +137,7 @@ function scrollToBottomConditionally() {
       messageContainer.value.scrollTop + messageContainer.value.clientHeight + 100 >=
       messageContainer.value.scrollHeight
     ) {
-      messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
+      messageContainer.value.scrollTop = messageContainer.value.scrollHeight
     }
   }
 }
@@ -147,12 +147,12 @@ watch(
   () => {
     nextTick(() => {
       if (messageContainer.value) {
-        messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
+        messageContainer.value.scrollTop = messageContainer.value.scrollHeight
       }
-    });
+    })
   },
   {
-    flush: "post",
-  },
-);
+    flush: "post"
+  }
+)
 </script>

@@ -32,44 +32,44 @@ import {
   DialogOverlay,
   DialogPortal,
   DialogRoot,
-  DialogTitle,
-} from "radix-vue";
+  DialogTitle
+} from "radix-vue"
 
-import { X } from "lucide-vue-next";
-import { ref, watch } from "vue";
+import { X } from "lucide-vue-next"
+import { ref, watch } from "vue"
 
 interface Props {
-  title: string;
-  open?: boolean;
-  padding: boolean;
-  header: boolean;
+  title: string
+  open?: boolean
+  padding: boolean
+  header: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   padding: true,
-  header: true,
-});
+  header: true
+})
 
-const emit = defineEmits(["close"]);
-const modalOpen = ref(props.open);
-const padding = ref(props.padding);
-const header = ref(props.header);
+const emit = defineEmits(["close"])
+const modalOpen = ref(props.open)
+const padding = ref(props.padding)
+const header = ref(props.header)
 
 watch(
   () => props.open,
   () => {
-    modalOpen.value = props.open;
-  },
-);
+    modalOpen.value = props.open
+  }
+)
 
 const onUpdate = () => {
   if (!modalOpen.value) {
-    emit("close");
+    emit("close")
   }
-};
+}
 
 const onClose = () => {
-  modalOpen.value = false;
-  emit("close");
-};
+  modalOpen.value = false
+  emit("close")
+}
 </script>

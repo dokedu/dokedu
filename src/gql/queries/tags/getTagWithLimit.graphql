@@ -1,15 +1,15 @@
 query getTagWithLimit($limit: Int, $offset: Int) {
-    tags(limit: $limit, offset: $offset) {
-        pageInfo {
-            hasNextPage
-            hasPreviousPage
-        }
-        edges {
-            id
-            name
-            color
-            deletedAt
-            createdAt
-        }
+  tags(limit: $limit, offset: $offset) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
     }
+    edges {
+      id
+      name
+      color
+      deletedAt
+      createdAt
+    }
+  }
 }

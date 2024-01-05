@@ -1,39 +1,35 @@
-import type * as Types from '../../schema';
+import type * as Types from "../../schema"
 
-import gql from 'graphql-tag';
-import * as Urql from '@urql/vue';
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+import gql from "graphql-tag"
+import * as Urql from "@urql/vue"
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 export type CreateEmailGroupMutationVariables = Types.Exact<{
-  input: Types.CreateEmailGroupInput;
-}>;
+  input: Types.CreateEmailGroupInput
+}>
 
-
-export type CreateEmailGroupMutation = (
-  { __typename?: 'Mutation' }
-  & { createEmailGroup?: Types.Maybe<(
-    { __typename?: 'EmailAccount' }
-    & Pick<Types.EmailAccount, 'id' | 'name' | 'description'>
-    & { members?: Types.Maybe<Array<Types.Maybe<(
-      { __typename?: 'EmailGroupMember' }
-      & Pick<Types.EmailGroupMember, 'name'>
-    )>>> }
-  )> }
-);
-
+export type CreateEmailGroupMutation = { __typename?: "Mutation" } & {
+  createEmailGroup?: Types.Maybe<
+    { __typename?: "EmailAccount" } & Pick<Types.EmailAccount, "id" | "name" | "description"> & {
+        members?: Types.Maybe<
+          Array<Types.Maybe<{ __typename?: "EmailGroupMember" } & Pick<Types.EmailGroupMember, "name">>>
+        >
+      }
+  >
+}
 
 export const CreateEmailGroupDocument = gql`
-    mutation createEmailGroup($input: CreateEmailGroupInput!) {
-  createEmailGroup(input: $input) {
-    id
-    name
-    description
-    members {
+  mutation createEmailGroup($input: CreateEmailGroupInput!) {
+    createEmailGroup(input: $input) {
+      id
       name
+      description
+      members {
+        name
+      }
     }
   }
-}
-    `;
+`
 
 export function useCreateEmailGroupMutation() {
-  return Urql.useMutation<CreateEmailGroupMutation, CreateEmailGroupMutationVariables>(CreateEmailGroupDocument);
-};
+  return Urql.useMutation<CreateEmailGroupMutation, CreateEmailGroupMutationVariables>(CreateEmailGroupDocument)
+}

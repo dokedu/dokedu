@@ -76,21 +76,21 @@
 </template>
 
 <script setup lang="ts">
-import PageWrapper from "../../../components/page-wrapper.vue";
-import { useRoute } from "vue-router/auto";
-import { ChevronRight, X } from "lucide-vue-next";
-import { computed, reactive, ref } from "vue";
-import DIconButton from "@/components/d-icon-button/d-icon-button.vue";
-import { definePage } from "vue-router/auto";
-import { useUserByIdQuery } from "@/gql/queries/users/userById.ts";
+import PageWrapper from "../../../components/page-wrapper.vue"
+import { useRoute } from "vue-router/auto"
+import { ChevronRight, X } from "lucide-vue-next"
+import { computed, reactive, ref } from "vue"
+import DIconButton from "@/components/d-icon-button/d-icon-button.vue"
+import { definePage } from "vue-router/auto"
+import { useUserByIdQuery } from "@/gql/queries/users/userById"
 
 definePage({
-  redirect: () => ({ name: "/record/students/[id]/competences/" }),
-});
+  redirect: () => ({ name: "/record/students/[id]/competences/" })
+})
 
-const route = useRoute<"/record/students/[id]">();
+const route = useRoute<"/record/students/[id]">()
 
-const id = computed<string>(() => route.params.id as string);
+const id = computed<string>(() => route.params.id as string)
 
 // colors for tailwind
 // bg-blue-500
@@ -100,20 +100,20 @@ const id = computed<string>(() => route.params.id as string);
 // bg-indigo-500
 // bg-teal-500
 // Randomly generate avatar color
-const colors = ["blue", "green", "red", "purple", "indigo", "teal"];
-const color = ref(colors[Math.floor(Math.random() * colors.length)]);
+const colors = ["blue", "green", "red", "purple", "indigo", "teal"]
+const color = ref(colors[Math.floor(Math.random() * colors.length)])
 
 const toNormalisedDate = (date: string) => {
-  const d = new Date(date);
+  const d = new Date(date)
 
-  const day = String(d.getUTCDate()).padStart(2, "0");
-  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const year = d.getUTCFullYear();
+  const day = String(d.getUTCDate()).padStart(2, "0")
+  const month = String(d.getUTCMonth() + 1).padStart(2, "0")
+  const year = d.getUTCFullYear()
 
-  return `${day}.${month}.${year}`;
-};
+  return `${day}.${month}.${year}`
+}
 
 const { data } = useUserByIdQuery({
-  variables: reactive({ id }),
-});
+  variables: reactive({ id })
+})
 </script>

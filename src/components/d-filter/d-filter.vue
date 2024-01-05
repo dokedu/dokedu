@@ -10,7 +10,7 @@
       class="relative cursor-pointer rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-left align-middle sm:text-sm"
       :class="{
         'border-neutral-500 outline-none ring-1 ring-neutral-500 ': state.isOpen,
-        'border-neutral-600 pr-7 text-strong': modelValue && (modelValue as string).length,
+        'border-neutral-600 pr-7 text-strong': modelValue && (modelValue as string).length
       }"
     >
       <input
@@ -87,19 +87,19 @@
 </template>
 
 <script lang="ts">
-import { computed, ComputedRef, defineComponent, reactive, ref, watch, WritableComputedRef } from "vue";
-import { Check, ChevronDown, X } from "lucide-vue-next";
+import { computed, ComputedRef, defineComponent, reactive, ref, watch, WritableComputedRef } from "vue"
+import { Check, ChevronDown, X } from "lucide-vue-next"
 
 export interface DropdownOption {
-  value: string | number | symbol | undefined;
-  label: string;
-  data?: object | undefined;
+  value: string | number | symbol | undefined
+  label: string
+  data?: object | undefined
 }
 
 interface DropdownState {
-  isOpen: boolean;
-  selected: unknown[];
-  search: string;
+  isOpen: boolean
+  selected: unknown[]
+  search: string
 }
 
 export default defineComponent({
@@ -107,74 +107,74 @@ export default defineComponent({
   props: {
     modelValue: {
       type: [String, Number, Boolean, Object, Array],
-      default: null,
+      default: null
     },
     name: {
       type: String,
-      default: "",
+      default: ""
     },
     label: {
       type: String,
-      default: "",
+      default: ""
     },
     placeholder: {
       type: String,
-      default: "Wähle eine Option",
+      default: "Wähle eine Option"
     },
     searchable: {
       type: Boolean,
-      default: true,
+      default: true
     },
     multiple: {
       type: Boolean,
-      default: false,
+      default: false
     },
     openOnTop: {
       type: Boolean,
-      default: false,
+      default: false
     },
     options: {
       type: Array as () => DropdownOption[],
-      default: () => [] as DropdownOption[],
-    },
+      default: () => [] as DropdownOption[]
+    }
   },
   emits: ["update:modelValue", "search", "blur", "dispose"],
   setup(props, { emit, expose }) {
-    const focusedOptionIndex = ref<number>(-1);
-    const searchRef = ref();
+    const focusedOptionIndex = ref<number>(-1)
+    const searchRef = ref()
     const state = reactive({
       isOpen: false,
       selected: Array.isArray(props.modelValue) ? props.modelValue : [props.modelValue],
-      search: "",
-    } as DropdownState);
+      search: ""
+    } as DropdownState)
 
-    const model = ref();
+    const model = ref()
 
     //ToDo: check perfromance we have a lot of watchers here
     watch(
       () => props.modelValue,
       (value) => {
-        state.selected = Array.isArray(value) ? value : [value];
-      },
-    );
+        state.selected = Array.isArray(value) ? value : [value]
+      }
+    )
 
     /**
      * Search function
      */
     const search = computed({
       set: (value) => {
-        state.search = value;
+        state.search = value
         if (value) {
-          selectedOptions.value = undefined;
+          selectedOptions.value = undefined
         }
       },
-      get: () => state.search,
-    }) as WritableComputedRef<string>;
+      get: () => state.search
+    }) as WritableComputedRef<string>
 
     // enables us to query specific for searches
     watch(search, (value) => {
-      emit("search", value);
-    });
+      emit("search", value)
+    })
 
     /**
      * Select functionality
@@ -182,148 +182,148 @@ export default defineComponent({
 
     const filteredOptions = computed(() => {
       let options = props.options.filter((option: DropdownOption) => {
-        return option.label.toLowerCase().includes(search.value.toLowerCase());
-      });
+        return option.label.toLowerCase().includes(search.value.toLowerCase())
+      })
 
       if (props.multiple) {
         options = options.sort((a: DropdownOption, b: DropdownOption) => {
-          return state.selected.includes(a.value) && !state.selected.includes(b.value) ? -1 : 1;
-        });
+          return state.selected.includes(a.value) && !state.selected.includes(b.value) ? -1 : 1
+        })
       }
 
-      return options;
-    }) as ComputedRef<DropdownOption[]>;
+      return options
+    }) as ComputedRef<DropdownOption[]>
 
     const selectedOptionIndexes = computed(() => {
       return state.selected.map((selected: unknown) =>
-        filteredOptions.value.findIndex((option: DropdownOption) => option.value === selected),
-      );
-    }) as ComputedRef<number[]>;
+        filteredOptions.value.findIndex((option: DropdownOption) => option.value === selected)
+      )
+    }) as ComputedRef<number[]>
 
     const selectedOptions = computed({
       get: () => {
-        return filteredOptions.value.filter((_, index) => selectedOptionIndexes.value?.includes(index));
+        return filteredOptions.value.filter((_, index) => selectedOptionIndexes.value?.includes(index))
       },
       set: (option: DropdownOption | DropdownOption[]) => {
-        let value = (option as DropdownOption)?.value;
+        let value = (option as DropdownOption)?.value
 
         // deselect if already in selected
         if (state.selected.includes(value)) {
-          state.selected = state.selected.filter((selected: unknown) => selected !== value);
+          state.selected = state.selected.filter((selected: unknown) => selected !== value)
         } else {
-          state.selected = props.multiple ? [...state.selected, value] : [value];
+          state.selected = props.multiple ? [...state.selected, value] : [value]
         }
 
         if (option) {
-          search.value = "";
-          dropdownInput.value.style.width = "auto";
+          search.value = ""
+          dropdownInput.value.style.width = "auto"
         }
 
-        const result = props.multiple ? state.selected.filter((s: unknown) => !!s) : state.selected[0] || null;
-        model.value = result as unknown as string | number | boolean | object | Array<unknown>;
-        emit("update:modelValue", result);
+        const result = props.multiple ? state.selected.filter((s: unknown) => !!s) : state.selected[0] || null
+        model.value = result as unknown as string | number | boolean | object | Array<unknown>
+        emit("update:modelValue", result)
 
         if (!props.multiple && !search.value) {
-          state.isOpen = false;
-          emit("blur");
+          state.isOpen = false
+          emit("blur")
         }
-      },
-    }) as WritableComputedRef<DropdownOption | DropdownOption[] | undefined>;
+      }
+    }) as WritableComputedRef<DropdownOption | DropdownOption[] | undefined>
 
     const dropdownLabel = computed(() => {
       if (props.multiple) {
-        return props.label;
+        return props.label
       }
       // @ts-ignore
-      return selectedOptions.value?.[0]?.label || props.label;
-    });
+      return selectedOptions.value?.[0]?.label || props.label
+    })
 
     /**
      * Keyboard navigation stuff still a bit janky
      */
 
     const selectNext = () => {
-      const index = focusedOptionIndex.value;
+      const index = focusedOptionIndex.value
       if (index < filteredOptions.value.length - 1) {
-        focusedOptionIndex.value++;
-        return;
+        focusedOptionIndex.value++
+        return
       }
 
-      focusedOptionIndex.value = 0;
-    };
+      focusedOptionIndex.value = 0
+    }
 
     const selectPrevious = () => {
-      const index = focusedOptionIndex.value;
+      const index = focusedOptionIndex.value
       if (index >= 0) {
-        focusedOptionIndex.value--;
-        return;
+        focusedOptionIndex.value--
+        return
       }
 
-      focusedOptionIndex.value = filteredOptions.value.length - 1;
-    };
+      focusedOptionIndex.value = filteredOptions.value.length - 1
+    }
 
-    const dropdownMenu = ref();
-    const dropdownInput = ref();
+    const dropdownMenu = ref()
+    const dropdownInput = ref()
     const onFocusOut = (e: PointerEvent) => {
-      if (e.composedPath().includes(dropdownMenu.value)) return;
-      if (e.composedPath().includes(dropdownInput.value)) return;
-      focusedOptionIndex.value = -1;
-      state.isOpen = false;
-      emit("blur");
-    };
+      if (e.composedPath().includes(dropdownMenu.value)) return
+      if (e.composedPath().includes(dropdownInput.value)) return
+      focusedOptionIndex.value = -1
+      state.isOpen = false
+      emit("blur")
+    }
 
     watch(
       () => state.isOpen,
       (isOpen) => {
         if (isOpen) {
           // @ts-expect-error
-          document.body.addEventListener("mousedown", onFocusOut);
+          document.body.addEventListener("mousedown", onFocusOut)
         } else {
           // @ts-expect-error
-          document.body.removeEventListener("mousedown", onFocusOut);
+          document.body.removeEventListener("mousedown", onFocusOut)
         }
-      },
-    );
+      }
+    )
 
     const onEnter = () => {
-      onCalculateWidth();
+      onCalculateWidth()
       if (focusedOptionIndex.value === -1) {
-        state.isOpen = false;
-        searchRef.value.blur();
-        return;
+        state.isOpen = false
+        searchRef.value.blur()
+        return
       }
 
-      selectedOptions.value = filteredOptions.value[focusedOptionIndex.value];
-      focusedOptionIndex.value = -1;
-    };
+      selectedOptions.value = filteredOptions.value[focusedOptionIndex.value]
+      focusedOptionIndex.value = -1
+    }
 
     const onClearValue = () => {
-      emit("update:modelValue", props.multiple ? [] : null);
-      emit("dispose");
-    };
+      emit("update:modelValue", props.multiple ? [] : null)
+      emit("dispose")
+    }
 
     const onCalculateWidth = () => {
       if (!search.value) {
-        dropdownInput.value.style.width = "auto";
-        return;
+        dropdownInput.value.style.width = "auto"
+        return
       }
 
-      let tmpElement = document.createElement("span");
-      tmpElement.className = "display-none text-sm whitespace-pre";
-      tmpElement.innerHTML = search.value;
-      document.body.appendChild(tmpElement);
-      const width = tmpElement.offsetWidth;
-      document.body.removeChild(tmpElement);
+      let tmpElement = document.createElement("span")
+      tmpElement.className = "display-none text-sm whitespace-pre"
+      tmpElement.innerHTML = search.value
+      document.body.appendChild(tmpElement)
+      const width = tmpElement.offsetWidth
+      document.body.removeChild(tmpElement)
 
-      dropdownInput.value.style.width = `${width + 44}px`;
-    };
+      dropdownInput.value.style.width = `${width + 44}px`
+    }
 
     expose({
       state,
       focusedOptionIndex,
       onFocusOut,
-      searchRef,
-    });
+      searchRef
+    })
 
     return {
       dropdownLabel,
@@ -342,8 +342,8 @@ export default defineComponent({
       dropdownInput,
       model,
       onClearValue,
-      onCalculateWidth,
-    };
-  },
-});
+      onCalculateWidth
+    }
+  }
+})
 </script>

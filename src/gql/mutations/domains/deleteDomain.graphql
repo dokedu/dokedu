@@ -1,6 +1,6 @@
 mutation deleteDomain($input: DeleteDomainInput!) {
-    deleteDomain(input: $input) {
-        name
-        createdAt
-    }
+  deleteDomain(input: $input) {
+    name
+    createdAt
+  }
 }

@@ -32,84 +32,84 @@
 </template>
 
 <script setup lang="ts">
-import DDialog from "./d-dialog/d-dialog.vue";
-import DButton from "./d-button/d-button.vue";
-import DSelect from "@/components/d-select/d-select.vue";
-import { toRef, ref, computed } from "vue";
-import DInput from "./d-input/d-input.vue";
-import DTag from "./d-tag/d-tag.vue";
-import { useUpdateTagMutation } from "@/gql/mutations/tags/updateTag.ts";
-import { useArchiveTagMutation } from "@/gql/mutations/tags/archiveTag.ts";
-import { Tag } from "@/gql/schema.ts";
+import DDialog from "./d-dialog/d-dialog.vue"
+import DButton from "./d-button/d-button.vue"
+import DSelect from "@/components/d-select/d-select.vue"
+import { toRef, ref, computed } from "vue"
+import DInput from "./d-input/d-input.vue"
+import DTag from "./d-tag/d-tag.vue"
+import { useUpdateTagMutation } from "@/gql/mutations/tags/updateTag"
+import { useArchiveTagMutation } from "@/gql/mutations/tags/archiveTag"
+import type { Tag } from "@/gql/schema"
 
-const colors = ["red", "orange", "yellow", "green", "blue", "indigo", "purple", "pink", "gray"];
+const colors = ["red", "orange", "yellow", "green", "blue", "indigo", "purple", "pink", "gray"]
 
 const colorOptions = colors.map((color) => ({
   label: capitalize(color),
-  value: color,
-}));
+  value: color
+}))
 
 function capitalize(string: string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
+  return string.charAt(0).toUpperCase() + string.slice(1)
 }
 
 export interface Props {
-  open: boolean;
-  tag: Tag | undefined;
+  open: boolean
+  tag: Tag | undefined
 }
 
-const props = defineProps<Props>();
-const emit = defineEmits(["close", "updated"]);
+const props = defineProps<Props>()
+const emit = defineEmits(["close", "updated"])
 
-const modalOpen = toRef(props, "open");
-const tag = toRef(props, "tag");
-const error = ref("");
+const modalOpen = toRef(props, "open")
+const tag = toRef(props, "tag")
+const error = ref("")
 
 const tagColor = computed({
   get() {
-    return tag.value?.color || "gray";
+    return tag.value?.color || "gray"
   },
   set(value: string) {
     if (tag.value) {
-      tag.value.color = value;
+      tag.value.color = value
     }
-  },
-});
+  }
+})
 
-const { executeMutation: updateTag } = useUpdateTagMutation();
-const { executeMutation: archiveTag } = useArchiveTagMutation();
+const { executeMutation: updateTag } = useUpdateTagMutation()
+const { executeMutation: archiveTag } = useArchiveTagMutation()
 
 function onClose() {
-  emit("close", false);
+  emit("close", false)
 }
 
 async function onUpdate() {
-  if (!tag.value) return;
+  if (!tag.value) return
 
   const res = await updateTag({
     id: tag.value.id,
     input: {
       name: tag.value.name,
-      color: tag.value.color,
-    },
-  });
+      color: tag.value.color
+    }
+  })
 
   if (res.error) {
-    error.value = res.error.graphQLErrors[0].message;
+    error.value = res.error.graphQLErrors[0].message
   }
 
-  emit("updated");
+  emit("updated")
 }
 
 async function onArchive() {
-  if (!tag.value) return;
+  if (!tag.value) return
 
-  const res = await archiveTag({ id: tag.value.id });
+  const res = await archiveTag({ id: tag.value.id })
 
   if (res.error) {
-    error.value = res.error.graphQLErrors[0].message;
+    error.value = res.error.graphQLErrors[0].message
   }
 
-  emit("updated");
+  emit("updated")
 }
 </script>

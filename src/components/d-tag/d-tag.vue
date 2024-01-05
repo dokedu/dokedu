@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { X } from "lucide-vue-next";
+import { X } from "lucide-vue-next"
 // colors
 // bg-blue-50    text-blue-700    !text-blue-700    border-blue-200    stroke-blue-500     hover:bg-blue-100
 // bg-red-50     text-red-700     !text-red-700     border-red-200     stroke-red-500      hover:bg-red-100
@@ -35,21 +35,21 @@ import { X } from "lucide-vue-next";
 const props = defineProps({
   color: {
     type: String,
-    default: "blue",
+    default: "blue"
   },
   id: {
     type: String,
-    default: "",
+    default: ""
   },
   removable: {
     type: Boolean,
-    default: false,
-  },
-});
+    default: false
+  }
+})
 
-const emit = defineEmits(["remove"]);
+const emit = defineEmits(["remove"])
 
 const remove = () => {
-  emit("remove", props.id);
-};
+  emit("remove", props.id)
+}
 </script>

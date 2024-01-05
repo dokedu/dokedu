@@ -1,5 +1,5 @@
 mutation createReport($input: CreateReportInput!) {
-    createReport(input: $input) {
-        id
-    }
+  createReport(input: $input) {
+    id
+  }
 }

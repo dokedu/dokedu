@@ -19,14 +19,9 @@
         <d-input name="email" :label="$t('email')" v-model="user.email as string"></d-input>
         <div class="flex flex-col">
           <label class="mb-1 text-sm text-neutral-500" for="role">{{ $t("role") }}</label>
-          <select
-            v-model="user.role as string"
-            name="role"
-            id="role"
-            class="rounded-md border border-neutral-200 text-sm shadow"
-            :disabled="!!user.id"
-            :class="{ '!cursor-not-allowed': !!user.id }"
-          >
+          <select v-model="user.role as string" name="role" id="role"
+            class="rounded-md border border-neutral-200 text-sm shadow" :disabled="!!user.id"
+            :class="{ '!cursor-not-allowed': !!user.id }">
             <option value disabled>{{ $t("select_role") }}</option>
             <option value="owner">{{ $t("owner") }}</option>
             <option value="admin">{{ $t("admin") }}</option>
@@ -46,42 +41,42 @@
 </template>
 
 <script lang="ts" setup>
-import DSidebar from "@/components/d-sidebar/d-sidebar.vue";
-import { useRouter } from "vue-router/auto";
-import DInput from "@/components/d-input/d-input.vue";
-import DButton from "@/components/d-button/d-button.vue";
-import { toRef } from "vue";
-import { Trash, Mail, Lock } from "lucide-vue-next";
-import { User } from "@/gql/schema.ts";
+import DSidebar from "@/components/d-sidebar/d-sidebar.vue"
+import { useRouter } from "vue-router/auto"
+import DInput from "@/components/d-input/d-input.vue"
+import DButton from "@/components/d-button/d-button.vue"
+import { toRef } from "vue"
+import { Trash, Mail, Lock } from "lucide-vue-next"
+import type { User } from "@/gql/schema"
 
-const router = useRouter();
+const router = useRouter()
 
 export interface Props {
-  user: User;
-  title: string;
-  deletable?: boolean;
+  user: User
+  title: string
+  deletable?: boolean
 }
-const props = defineProps<Props>();
-const emit = defineEmits(["save", "delete", "reset-password", "invite"]);
-const user = toRef(props, "user");
+const props = defineProps<Props>()
+const emit = defineEmits(["save", "delete", "reset-password", "invite"])
+const user = toRef(props, "user")
 
 const onCancel = () => {
-  router.push({ name: "/admin/users" });
-};
+  router.push({ name: "/admin/users" })
+}
 
 const onDelete = () => {
-  emit("delete");
-};
+  emit("delete")
+}
 
 const onSave = () => {
-  emit("save");
-};
+  emit("save")
+}
 
 const onResetPassword = () => {
-  emit("reset-password");
-};
+  emit("reset-password")
+}
 
 const onSendInvite = () => {
-  emit("invite");
-};
+  emit("invite")
+}
 </script>

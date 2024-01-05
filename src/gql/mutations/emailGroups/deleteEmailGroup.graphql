@@ -1,6 +1,6 @@
 mutation deleteEmailGroup($id: ID!) {
-    deleteEmailGroup(id: $id) {
-        id
-        name
-    }
+  deleteEmailGroup(id: $id) {
+    id
+    name
+  }
 }

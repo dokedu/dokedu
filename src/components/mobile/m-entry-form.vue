@@ -17,39 +17,39 @@
 </template>
 
 <script setup lang="ts">
-import MEntryFormProjects from "@/components/mobile/record/m-entry-form-projects.vue";
-import MEntryFormStudents from "@/components/mobile/record/m-entry-form-students.vue";
-import MEntryFormTags from "@/components/mobile/record/m-entry-form-tags.vue";
-import MEntryFormCompetences from "@/components/mobile/record/m-entry-form-competences.vue";
-import MEntryFormDate from "@/components/mobile/record/m-entry-form-date.vue";
-import { useTextareaAutosize, useVModel, watchDebounced } from "@vueuse/core";
-import { useUpdateEntryMutation } from "@/gql/mutations/entries/updateEntry.ts";
+import MEntryFormProjects from "@/components/mobile/record/m-entry-form-projects.vue"
+import MEntryFormStudents from "@/components/mobile/record/m-entry-form-students.vue"
+import MEntryFormTags from "@/components/mobile/record/m-entry-form-tags.vue"
+import MEntryFormCompetences from "@/components/mobile/record/m-entry-form-competences.vue"
+import MEntryFormDate from "@/components/mobile/record/m-entry-form-date.vue"
+import { useTextareaAutosize, useVModel, watchDebounced } from "@vueuse/core"
+import { useUpdateEntryMutation } from "@/gql/mutations/entries/updateEntry"
 
-const { executeMutation: updateEntry } = useUpdateEntryMutation();
+const { executeMutation: updateEntry } = useUpdateEntryMutation()
 
 const props = defineProps<{
-  modelValue: any;
-}>();
-const emit = defineEmits(["update:modelValue"]);
+  modelValue: any
+}>()
+const emit = defineEmits(["update:modelValue"])
 
-const entry = useVModel(props, "modelValue", emit);
+const entry = useVModel(props, "modelValue", emit)
 
 const { textarea, input: body } = useTextareaAutosize({
-  input: entry.value.body as string,
-});
+  input: entry.value.body as string
+})
 
 watchDebounced(
   body,
   async (value: string) => {
-    await updateEntry({ input: { id: entry.value.id as string, body: value } });
+    await updateEntry({ input: { id: entry.value.id as string, body: value } })
   },
-  { debounce: 250, maxWait: 1000 },
-);
+  { debounce: 250, maxWait: 1000 }
+)
 
 watchDebounced(
   () => entry.value.date,
   async (value: string) => {
-    await updateEntry({ input: { id: entry.value.id as string, date: value } });
-  },
-);
+    await updateEntry({ input: { id: entry.value.id as string, date: value } })
+  }
+)
 </script>

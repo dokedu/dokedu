@@ -12,39 +12,39 @@
 </template>
 
 <script lang="ts" setup>
-import DDialog from "@/components/d-dialog/d-dialog.vue";
-import DInput from "@/components/d-input/d-input.vue";
-import DButton from "@/components/d-button/d-button.vue";
-import { ref, toRefs } from "vue";
-import { useRenameSharedDriveMutation } from "@/gql/mutations/sharedDrives/renameSharedDrive.ts";
+import DDialog from "@/components/d-dialog/d-dialog.vue"
+import DInput from "@/components/d-input/d-input.vue"
+import DButton from "@/components/d-button/d-button.vue"
+import { ref, toRefs } from "vue"
+import { useRenameSharedDriveMutation } from "@/gql/mutations/sharedDrives/renameSharedDrive"
 
 const props = defineProps<{
-  open: boolean;
-  item: any;
-}>();
+  open: boolean
+  item: any
+}>()
 
-const { item: drive, open } = toRefs(props);
-const emit = defineEmits(["close"]);
+const { item: drive, open } = toRefs(props)
+const emit = defineEmits(["close"])
 
-const name = ref("");
+const name = ref("")
 
 function onClose() {
-  emit("close");
+  emit("close")
 }
 
-const { executeMutation: updateBucket } = useRenameSharedDriveMutation();
+const { executeMutation: updateBucket } = useRenameSharedDriveMutation()
 
 async function onSave() {
-  if (!drive.value) return;
+  if (!drive.value) return
   // min length of name 3
-  if (name.value.length < 2) return alert("Name must be at least 2 characters long");
+  if (name.value.length < 2) return alert("Name must be at least 2 characters long")
   await updateBucket({
     input: {
       id: drive.value.id,
-      name: name.value,
-    },
-  });
-  name.value = "";
-  emit("close");
+      name: name.value
+    }
+  })
+  name.value = ""
+  emit("close")
 }
 </script>

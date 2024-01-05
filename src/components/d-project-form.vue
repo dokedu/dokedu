@@ -1,18 +1,14 @@
 <template>
   <div class="flex h-screen w-full select-none flex-col text-sm @container">
     <div
-      class="flex h-[56px] min-h-0 w-full items-center justify-between border-b border-neutral-100 px-8 py-2 text-sm text-neutral-700"
-    >
+      class="flex h-[56px] min-h-0 w-full items-center justify-between border-b border-neutral-100 px-8 py-2 text-sm text-neutral-700">
       <div class="flex items-center gap-2">
         <router-link to="/record/projects/" class="select-none text-sm font-medium text-strong">
           {{ $t("project", 2) }}
         </router-link>
         <ChevronRight :size="16" />
-        <router-link
-          v-if="$route.name !== '/record/projects/new'"
-          :to="{ name: '/record/projects/[id]' }"
-          class="select-none text-sm font-medium text-strong"
-        >
+        <router-link v-if="$route.name !== '/record/projects/new'" :to="{ name: '/record/projects/[id]' }"
+          class="select-none text-sm font-medium text-strong">
           {{ $t("project", 1) }}
         </router-link>
         <div v-if="$route.name === '/record/projects/new'" class="select-none text-sm font-medium text-strong">
@@ -35,13 +31,8 @@
               </div>
             </div>
           </div>
-          <d-input
-            v-model="project.title"
-            name="name"
-            label="Name"
-            :placeholder="$t('name_of_project')"
-            :required="true"
-          />
+          <d-input v-model="project.title" name="name" label="Name" :placeholder="$t('name_of_project')"
+            :required="true" />
           <div class="grid grid-cols-2 gap-2">
             <d-input v-model="startsAt" name="starts-at" type="datetime-local" />
             <d-input v-model="endsAt" name="ends-at" type="datetime-local" />
@@ -49,17 +40,10 @@
         </div>
 
         <div class="mt-2">
-          <textarea
-            ref="textarea"
-            v-model="body"
+          <textarea ref="textarea" v-model="body"
             class="block min-h-[6rem] w-full resize-none rounded-md border-0 py-2 text-neutral-900 shadow-sm ring-1 ring-inset ring-neutral-300 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-neutral-950 sm:text-sm sm:leading-6"
-            name="description"
-            id="description"
-            cols="30"
-            rows="3"
-            :placeholder="$t('project_description_placeholder')"
-            required
-          />
+            name="description" id="description" cols="30" rows="3" :placeholder="$t('project_description_placeholder')"
+            required />
         </div>
         <div class="mt-4 flex justify-between">
           <div class="flex gap-2">
@@ -76,10 +60,8 @@
             <d-button type="transparent" size="xs" @click="editCompetences = true">{{ $t("add") }}</d-button>
           </div>
         </header>
-        <div
-          v-if="project.competences && project.competences.length > 0"
-          class="flex flex-1 flex-col gap-1 overflow-scroll"
-        >
+        <div v-if="project.competences && project.competences.length > 0"
+          class="flex flex-1 flex-col gap-1 overflow-scroll">
           <d-competence v-for="competence in project.competences" :key="competence.id" :competence="competence">
             <div class="rounded-lg p-0.5 hover:bg-neutral-100" @click="toggleCompetence(competence)">
               <X :size="18" class="stroke-colors-default" />
@@ -106,174 +88,174 @@
 </template>
 
 <script lang="ts" setup>
-import dButton from "@/components/d-button/d-button.vue";
-import { Plus, Image, ChevronRight } from "lucide-vue-next";
-import { computed, ref, toRef } from "vue";
-import { onClickOutside, onKeyStroke, useTextareaAutosize } from "@vueuse/core";
-import { Save } from "lucide-vue-next";
-import DCompetence from "@/components/d-competence/d-competence.vue";
-import { Trash, X } from "lucide-vue-next";
-import DInput from "@/components/d-input/d-input.vue";
-import DCompetenceSearch from "@/components/d-competence-search/d-competence-search.vue";
-import { useRoute } from "vue-router/auto";
-import { useToggleEventCompetenceMutation } from "@/gql/mutations/events/toggleEventCompetence.ts";
-import { Competence } from "@/gql/schema.ts";
-import { useArchiveEventMutation } from "@/gql/mutations/events/archiveEvent.ts";
-import { useCreateEventMutation } from "@/gql/mutations/events/createEvent.ts";
-import { useUpdateEventMutation } from "@/gql/mutations/events/updateEvent.ts";
+import dButton from "@/components/d-button/d-button.vue"
+import { Plus, Image, ChevronRight } from "lucide-vue-next"
+import { computed, ref, toRef } from "vue"
+import { onClickOutside, onKeyStroke, useTextareaAutosize } from "@vueuse/core"
+import { Save } from "lucide-vue-next"
+import DCompetence from "@/components/d-competence/d-competence.vue"
+import { Trash, X } from "lucide-vue-next"
+import DInput from "@/components/d-input/d-input.vue"
+import DCompetenceSearch from "@/components/d-competence-search/d-competence-search.vue"
+import { useRoute } from "vue-router/auto"
+import { useToggleEventCompetenceMutation } from "@/gql/mutations/events/toggleEventCompetence"
+import type { Competence } from "@/gql/schema"
+import { useArchiveEventMutation } from "@/gql/mutations/events/archiveEvent"
+import { useCreateEventMutation } from "@/gql/mutations/events/createEvent"
+import { useUpdateEventMutation } from "@/gql/mutations/events/updateEvent"
 
-const route = useRoute();
-const editCompetences = ref(false);
-const edit = ref();
+const route = useRoute()
+const editCompetences = ref(false)
+const edit = ref()
 
 const isFullPage = computed(() => {
-  return route.name === "/record/projects/[id]";
-});
+  return route.name === "/record/projects/[id]"
+})
 
 onClickOutside(edit, () => {
-  editCompetences.value = false;
-});
+  editCompetences.value = false
+})
 
 onKeyStroke("Escape", async () => {
-  editCompetences.value = false;
-});
+  editCompetences.value = false
+})
 
 async function toggleCompetence(competence: Competence) {
   await toggleEventCompetence({
     input: {
       eventId: project?.value?.id,
-      competenceId: competence.id,
-    },
-  });
+      competenceId: competence.id
+    }
+  })
 }
 
-const { executeMutation: toggleEventCompetence } = useToggleEventCompetenceMutation();
+const { executeMutation: toggleEventCompetence } = useToggleEventCompetenceMutation()
 
 export interface Props {
-  project: Event;
+  project: Event
 }
 
-const props = defineProps<Props>();
+const props = defineProps<Props>()
 
-const project = toRef(props, "project");
+const project = toRef(props, "project")
 const startsAt = computed({
   get: () => {
     // to local time
-    const date = new Date(project.value.startsAt);
-    return date.toISOString().slice(0, 16);
+    const date = new Date(project.value.startsAt)
+    return date.toISOString().slice(0, 16)
   },
-  set: (value) => (project.value.startsAt = value),
-});
+  set: (value) => (project.value.startsAt = value)
+})
 const endsAt = computed({
   get: () => project.value.endsAt.slice(0, 16),
-  set: (value) => (project.value.endsAt = value),
-});
+  set: (value) => (project.value.endsAt = value)
+})
 
-const emit = defineEmits(["cancel", "save"]);
+const emit = defineEmits(["cancel", "save"])
 
 function cancel() {
-  emit("cancel");
+  emit("cancel")
 }
 
 function save() {
-  emit("save");
+  emit("save")
 }
 
 const { textarea, input: body } = useTextareaAutosize({
-  input: project.value.body as string,
-});
+  input: project.value.body as string
+})
 
 async function trash() {
-  if (!confirm("Are you sure you want to delete this event?")) return;
+  if (!confirm("Are you sure you want to delete this event?")) return
   await archiveEvent({
-    id: project.value.id as string,
-  });
-  cancel();
+    id: project.value.id as string
+  })
+  cancel()
 }
 
 // archiveEvent(id: ID!): Event!
-const { executeMutation: archiveEvent } = useArchiveEventMutation();
+const { executeMutation: archiveEvent } = useArchiveEventMutation()
 
-const { executeMutation: createEvent } = useCreateEventMutation();
+const { executeMutation: createEvent } = useCreateEventMutation()
 
-const { executeMutation: updateEvent } = useUpdateEventMutation();
+const { executeMutation: updateEvent } = useUpdateEventMutation()
 
 async function update() {
   if (!project.value.title) {
-    alert("Please provide a title");
-    return;
+    alert("Please provide a title")
+    return
   }
 
   if (!body.value) {
-    alert("Please provide a description");
-    return;
+    alert("Please provide a description")
+    return
   }
 
   if (!startsAt.value) {
-    alert("Please provide a start date");
-    return;
+    alert("Please provide a start date")
+    return
   }
 
   if (!endsAt.value) {
-    alert("Please provide an end date");
-    return;
+    alert("Please provide an end date")
+    return
   }
 
-  let starts = new Date(startsAt.value).toUTCString();
-  let ends = new Date(endsAt.value).toUTCString();
+  let starts = new Date(startsAt.value).toUTCString()
+  let ends = new Date(endsAt.value).toUTCString()
 
   const event = {
     id: project.value.id as string,
     title: project.value.title,
     body: body.value,
     startsAt: starts,
-    endsAt: ends,
-  };
+    endsAt: ends
+  }
 
   try {
-    await updateEvent({ input: event });
-    save();
+    await updateEvent({ input: event })
+    save()
   } catch (e) {
-    alert(e);
+    alert(e)
   }
 }
 
 async function create() {
   if (!project.value.title) {
-    alert("Please provide a title");
-    return;
+    alert("Please provide a title")
+    return
   }
 
   if (!body.value) {
-    alert("Please provide a description");
-    return;
+    alert("Please provide a description")
+    return
   }
 
   if (!startsAt.value) {
-    alert("Please provide a start date");
-    return;
+    alert("Please provide a start date")
+    return
   }
 
   if (!endsAt.value) {
-    alert("Please provide an end date");
-    return;
+    alert("Please provide an end date")
+    return
   }
 
-  let starts = new Date(startsAt.value).toUTCString();
-  let ends = new Date(endsAt.value).toUTCString();
+  let starts = new Date(startsAt.value).toUTCString()
+  let ends = new Date(endsAt.value).toUTCString()
 
   const event = {
     title: project.value.title,
     body: body.value,
     startsAt: starts,
-    endsAt: ends,
-  };
+    endsAt: ends
+  }
 
   try {
-    await createEvent({ input: event });
-    save();
+    await createEvent({ input: event })
+    save()
   } catch (e) {
-    alert(e);
+    alert(e)
   }
 }
 </script>

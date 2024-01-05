@@ -11,13 +11,8 @@
         <div></div>
       </template>
       <template v-else>
-        <d-input
-          v-model="chatName"
-          type="text"
-          name="name"
-          placeholder="Chat name"
-          class="w-full border-none bg-transparent"
-        />
+        <d-input v-model="chatName" type="text" name="name" placeholder="Chat name"
+          class="w-full border-none bg-transparent" />
         <div class="flex justify-end">
           <d-button @click="updateChat" size="md">Save</d-button>
         </div>
@@ -35,11 +30,8 @@
             <div class="mb-1">{{ user.firstName }} {{ user.lastName }}</div>
             <div class="text-neutral-500 text-xs min-h-[1rem]">{{ user.email ? user.email : user.id }}</div>
           </div>
-          <d-button
-            @click="removeUserFromChat(user.id)"
-            type="transparent"
-            class="hidden group-hover:block text-red-500 hover:text-red-500"
-          >
+          <d-button @click="removeUserFromChat(user.id)" type="transparent"
+            class="hidden group-hover:block text-red-500 hover:text-red-500">
             Remove
           </d-button>
         </div>
@@ -49,59 +41,59 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from "vue-router/auto";
-import { computed, reactive } from "vue";
-import DButton from "@/components/d-button/d-button.vue";
-import { ChevronLeft } from "lucide-vue-next";
-import DButtonAddChatUser from "@/components/_chat/d-button-add-chat-user.vue";
-import DInput from "@/components/d-input/d-input.vue";
-import { useChatWithMembersQuery } from "@/gql/queries/chats/chatWithMembers.ts";
-import { useUpdateChatMutation } from "@/gql/mutations/chats/updateChat.ts";
-import { useRemoveUserFromChatMutation } from "@/gql/mutations/chats/removeUserFromChat.ts";
-import { ChatType } from "@/gql/schema.ts";
+import { useRoute } from "vue-router/auto"
+import { computed, reactive } from "vue"
+import DButton from "@/components/d-button/d-button.vue"
+import { ChevronLeft } from "lucide-vue-next"
+import DButtonAddChatUser from "@/components/_chat/d-button-add-chat-user.vue"
+import DInput from "@/components/d-input/d-input.vue"
+import { useChatWithMembersQuery } from "@/gql/queries/chats/chatWithMembers"
+import { useUpdateChatMutation } from "@/gql/mutations/chats/updateChat"
+import { useRemoveUserFromChatMutation } from "@/gql/mutations/chats/removeUserFromChat"
+import { ChatType } from "@/gql/schema"
 
-const route = useRoute("/chat/chats/[id]/edit");
+const route = useRoute("/chat/chats/[id]/edit")
 
-const id = computed(() => route.params.id);
+const id = computed(() => route.params.id)
 
 const { data } = useChatWithMembersQuery({
   variables: reactive({
-    id: id,
-  }),
-});
+    id: id
+  })
+})
 
-const { executeMutation } = useUpdateChatMutation();
+const { executeMutation } = useUpdateChatMutation()
 
 async function updateChat() {
   await executeMutation({
     input: {
       id: id.value,
-      name: chatName.value,
-    },
-  });
+      name: chatName.value
+    }
+  })
 }
 
 const chatName = computed({
   get: () => data?.value?.chat.name || "",
   set: (value: string) => {
     if (data.value) {
-      data.value.chat.name = value;
+      data.value.chat.name = value
     }
-  },
-});
+  }
+})
 
-const { executeMutation: removeUserFromChatMut } = useRemoveUserFromChatMutation();
+const { executeMutation: removeUserFromChatMut } = useRemoveUserFromChatMutation()
 
 async function removeUserFromChat(userId: string) {
   await removeUserFromChatMut({
     input: {
       chatId: id.value,
-      userId: userId,
-    },
-  });
+      userId: userId
+    }
+  })
 }
 
 function soon() {
-  alert("This feature is coming soon!");
+  alert("This feature is coming soon!")
 }
 </script>

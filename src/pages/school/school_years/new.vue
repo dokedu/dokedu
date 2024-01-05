@@ -11,32 +11,32 @@
 </template>
 
 <script lang="ts" setup>
-import DSidebar from "@/components/d-sidebar/d-sidebar.vue";
-import DInput from "@/components/d-input/d-input.vue";
-import DButton from "@/components/d-button/d-button.vue";
-import { useRouter } from "vue-router/auto";
-import { ref } from "vue";
-import { useCreateSchoolYearMutation } from "@/gql/mutations/schoolYears/createSchoolYear.ts";
+import DSidebar from "@/components/d-sidebar/d-sidebar.vue"
+import DInput from "@/components/d-input/d-input.vue"
+import DButton from "@/components/d-button/d-button.vue"
+import { useRouter } from "vue-router/auto"
+import { ref } from "vue"
+import { useCreateSchoolYearMutation } from "@/gql/mutations/schoolYears/createSchoolYear"
 
-const router = useRouter();
+const router = useRouter()
 
-const year = ref("");
+const year = ref("")
 
-const { executeMutation: createSchoolYear } = useCreateSchoolYearMutation();
+const { executeMutation: createSchoolYear } = useCreateSchoolYearMutation()
 
 function onClose() {
-  router.push({ name: "/school/school_years" });
+  router.push({ name: "/school/school_years" })
 }
 
 async function onSave() {
-  const { error } = await createSchoolYear({ year: Number.parseInt(year.value) });
+  const { error } = await createSchoolYear({ year: Number.parseInt(year.value) })
   if (error) {
-    alert(error.message);
-    return;
+    alert(error.message)
+    return
   }
 
-  year.value = "";
+  year.value = ""
 
-  await router.push({ name: "/school/school_years" });
+  await router.push({ name: "/school/school_years" })
 }
 </script>

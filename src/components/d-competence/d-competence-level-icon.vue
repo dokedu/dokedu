@@ -7,5 +7,5 @@
 </template>
 
 <script lang="ts" setup>
-defineProps<{ level: number }>();
+defineProps<{ level: number }>()
 </script>

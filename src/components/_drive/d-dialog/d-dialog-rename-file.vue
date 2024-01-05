@@ -12,38 +12,38 @@
 </template>
 
 <script lang="ts" setup>
-import DDialog from "@/components/d-dialog/d-dialog.vue";
-import DInput from "@/components/d-input/d-input.vue";
-import DButton from "@/components/d-button/d-button.vue";
-import { toRef } from "vue";
-import { useVModel } from "@vueuse/core";
-import { useRenameFileMutation } from "@/gql/mutations/files/renameFile.ts";
+import DDialog from "@/components/d-dialog/d-dialog.vue"
+import DInput from "@/components/d-input/d-input.vue"
+import DButton from "@/components/d-button/d-button.vue"
+import { toRef } from "vue"
+import { useVModel } from "@vueuse/core"
+import { useRenameFileMutation } from "@/gql/mutations/files/renameFile"
 
 const props = defineProps<{
-  modelValue: File | null;
-  open: boolean;
-}>();
-const emit = defineEmits(["update:modelValue", "close"]);
+  modelValue: File | null
+  open: boolean
+}>()
+const emit = defineEmits(["update:modelValue", "close"])
 
-const open = toRef(props, "open");
+const open = toRef(props, "open")
 
-const file = useVModel(props, "modelValue", emit);
+const file = useVModel(props, "modelValue", emit)
 
 function onClose() {
-  emit("close");
+  emit("close")
 }
 
-const { executeMutation: renameFile } = useRenameFileMutation();
+const { executeMutation: renameFile } = useRenameFileMutation()
 
 function onSave() {
-  if (!file.value) return;
+  if (!file.value) return
 
   renameFile({
     input: {
       id: file.value.id,
-      name: file.value.name,
-    },
-  });
-  emit("close");
+      name: file.value.name
+    }
+  })
+  emit("close")
 }
 </script>

@@ -1,49 +1,49 @@
 query entryById2($id: ID!) {
-    entry(id: $id) {
-        id
-        date
-        body
-        deletedAt
-        user {
-            id
-            firstName
-            lastName
-        }
-        createdAt
-        tags {
-            id
-            name
-            color
-        }
-        events {
-            id
-            title
-        }
-        users {
-            id
-            firstName
-            lastName
-            student {
-                id
-                emoji
-            }
-        }
-        userCompetences {
-            id
-            level
-            competence {
-                id
-                name
-                color
-                type
-                grades
-                parents {
-                    id
-                    name
-                    grades
-                    color
-                }
-            }
-        }
+  entry(id: $id) {
+    id
+    date
+    body
+    deletedAt
+    user {
+      id
+      firstName
+      lastName
     }
+    createdAt
+    tags {
+      id
+      name
+      color
+    }
+    events {
+      id
+      title
+    }
+    users {
+      id
+      firstName
+      lastName
+      student {
+        id
+        emoji
+      }
+    }
+    userCompetences {
+      id
+      level
+      competence {
+        id
+        name
+        color
+        type
+        grades
+        parents {
+          id
+          name
+          grades
+          color
+        }
+      }
+    }
+  }
 }

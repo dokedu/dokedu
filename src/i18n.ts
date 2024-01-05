@@ -1,13 +1,13 @@
-import { en } from "@/lang/en.ts";
-import { de } from "@/lang/de.ts";
-import { createI18n } from "vue-i18n";
+import { en } from "@/lang/en"
+import { de } from "@/lang/de"
+import { createI18n } from "vue-i18n"
 
 export default createI18n({
   locale: localStorage.getItem("language") || "en",
   fallbackLocale: "en",
   messages: {
     en,
-    de,
+    de
   },
-  legacy: false,
-});
+  legacy: false
+})

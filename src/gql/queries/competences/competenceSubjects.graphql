@@ -1,28 +1,28 @@
 query competenceSubjects($search: String, $limit: Int, $offset: Int) {
-    competences(
-        filter: { type: subject }
-        search: $search
-        limit: $limit
-        offset: $offset
-        sort: { field: sort_order, order: asc }
-    ) {
-        pageInfo {
-            hasNextPage
-            hasPreviousPage
-        }
-        edges {
-            id
-            name
-            type
-            grades
-            color
-            sortOrder
-            parents {
-                id
-                name
-                type
-                grades
-            }
-        }
+  competences(
+    filter: { type: subject }
+    search: $search
+    limit: $limit
+    offset: $offset
+    sort: { field: sort_order, order: asc }
+  ) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
     }
+    edges {
+      id
+      name
+      type
+      grades
+      color
+      sortOrder
+      parents {
+        id
+        name
+        type
+        grades
+      }
+    }
+  }
 }

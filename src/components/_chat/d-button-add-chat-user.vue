@@ -29,43 +29,43 @@
 </template>
 
 <script lang="ts" setup>
-import DButton from "@/components/d-button/d-button.vue";
-import DDialog from "@/components/d-dialog/d-dialog.vue";
-import { computed, ref } from "vue";
-import { useAddUserToChatMutation } from "@/gql/mutations/chats/addUserToChat.ts";
-import { useUserListQuery } from "@/gql/queries/users/userList.ts";
+import DButton from "@/components/d-button/d-button.vue"
+import DDialog from "@/components/d-dialog/d-dialog.vue"
+import { computed, ref } from "vue"
+import { useAddUserToChatMutation } from "@/gql/mutations/chats/addUserToChat"
+import { useUserListQuery } from "@/gql/queries/users/userList"
 
 interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
+  id: string
+  firstName: string
+  lastName: string
+  email: string
 }
 
 const props = defineProps<{
-  chatId: string;
-}>();
+  chatId: string
+}>()
 
-const modalOpen = ref(false);
-const search = ref("");
+const modalOpen = ref(false)
+const search = ref("")
 
 const { data } = useUserListQuery({
   variables: {
-    search: search.value,
-  },
-});
+    search: search.value
+  }
+})
 
-const users = computed(() => data?.value?.users.edges ?? []);
+const users = computed(() => data?.value?.users.edges ?? [])
 
-const { executeMutation: addUserToChatMut } = useAddUserToChatMutation();
+const { executeMutation: addUserToChatMut } = useAddUserToChatMutation()
 
 async function addUserToChat(userId: string) {
   await addUserToChatMut({
     input: {
       chatId: props.chatId,
-      userId: userId,
-    },
-  });
-  modalOpen.value = false;
+      userId: userId
+    }
+  })
+  modalOpen.value = false
 }
 </script>

@@ -14,9 +14,9 @@
 </template>
 
 <script lang="ts" setup>
-import DButton from "../d-button/d-button.vue";
-import DIconButton from "../d-icon-button/d-icon-button.vue";
-import { X, Trash2 } from "lucide-vue-next";
+import DButton from "../d-button/d-button.vue"
+import DIconButton from "../d-icon-button/d-icon-button.vue"
+import { X, Trash2 } from "lucide-vue-next"
 
-defineEmits(["submit", "archive"]);
+defineEmits(["submit", "archive"])
 </script>

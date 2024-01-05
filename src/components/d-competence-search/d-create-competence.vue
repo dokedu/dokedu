@@ -2,7 +2,9 @@
   <form @submit="onSubmit" class="flex flex-col gap-4">
     <div class="flex justify-between items-center">
       <div>Neue Kompetenz</div>
-      <div class="p-0.5 rounded-md hover:bg-neutral-100" @click="emit('close')"><XIcon /></div>
+      <div class="p-0.5 rounded-md hover:bg-neutral-100" @click="emit('close')">
+        <XIcon />
+      </div>
     </div>
     <div>
       <input
@@ -28,69 +30,69 @@
 </template>
 
 <script lang="ts" setup>
-import { Form, useForm, useField } from "vee-validate";
-import DSelect from "@/components/d-select/d-select.vue";
-import { computed, reactive, ref } from "vue";
-import { XIcon } from "lucide-vue-next";
-import * as yup from "yup";
-import { useSubjectsDataQuery } from "@/gql/queries/competences/subjectsData.ts";
-import { useCreateCompetenceMutation } from "@/gql/mutations/competences/createCompetence.ts";
+import { Form, useForm, useField } from "vee-validate"
+import DSelect from "@/components/d-select/d-select.vue"
+import { computed, reactive, ref } from "vue"
+import { XIcon } from "lucide-vue-next"
+import * as yup from "yup"
+import { useSubjectsDataQuery } from "@/gql/queries/competences/subjectsData"
+import { useCreateCompetenceMutation } from "@/gql/mutations/competences/createCompetence"
 
 yup.setLocale({
   mixed: {
-    required: "Dieses Feld ist erforderlich",
+    required: "Dieses Feld ist erforderlich"
   },
   string: {
     min: "Dieses Feld muss mindestens ${min} Zeichen lang sein",
-    max: "Dieses Feld darf maximal ${max} Zeichen lang sein",
-  },
-});
+    max: "Dieses Feld darf maximal ${max} Zeichen lang sein"
+  }
+})
 
-const subjectSearch = ref("");
+const subjectSearch = ref("")
 
 const schema = yup.object({
   name: yup.string().required().min(3).max(100).label("Name"),
-  parentId: yup.string().required().label("Fach"),
-});
+  parentId: yup.string().required().label("Fach")
+})
 
 const { handleSubmit, errors } = useForm({
-  validationSchema: schema,
-});
+  validationSchema: schema
+})
 
-const { value: name } = useField("name");
-const { value: parentId } = useField<string>("parentId");
+const { value: name } = useField("name")
+const { value: parentId } = useField<string>("parentId")
 
 const onSubmit = handleSubmit(async (values) => {
-  console.log(values);
+  console.log(values)
 
   const { data, error } = await createCompetence({
-    input: values as { name: string; parentId: string },
-  });
+    input: values as { name: string; parentId: string }
+  })
 
   if (error) {
-    return alert(error.message);
+    return alert(error.message)
   }
 
   // wait 1s
-  await new Promise((resolve) => setTimeout(resolve, 250));
+  await new Promise((resolve) => setTimeout(resolve, 250))
 
-  emit("created", data?.createCompetence);
-  emit("close");
-});
+  emit("created", data?.createCompetence)
+  emit("close")
+})
 
-const emit = defineEmits(["close", "created"]);
+const emit = defineEmits(["close", "created"])
 
 const { data: subjectsData } = useSubjectsDataQuery({
-  variables: reactive({ search: subjectSearch }),
-});
+  variables: reactive({ search: subjectSearch })
+})
 
-const { executeMutation: createCompetence } = useCreateCompetenceMutation();
+const { executeMutation: createCompetence } = useCreateCompetenceMutation()
 
 const subjectsOptions = computed(() => {
-  if (!subjectsData.value?.competences?.edges) return [];
+  if (!subjectsData.value?.competences?.edges) return []
   return subjectsData.value.competences.edges.map((subject: any) => ({
     label: subject.name,
-    value: subject.id,
-  }));
-});
+    value: subject.id
+  }))
+})
 </script>

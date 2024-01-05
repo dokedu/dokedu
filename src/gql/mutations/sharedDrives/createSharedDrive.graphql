@@ -1,6 +1,6 @@
 mutation createSharedDrive($name: String!) {
-    createSharedDrive(name: $name) {
-        id
-        name
-    }
+  createSharedDrive(name: $name) {
+    id
+    name
+  }
 }

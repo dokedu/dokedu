@@ -1,16 +1,16 @@
 mutation createCompetence($input: CreateCompetenceInput!) {
-    createCompetence(input: $input) {
-        id
-        name
-        type
-        grades
-        color
-        parents {
-            id
-            name
-            type
-            grades
-            color
-        }
+  createCompetence(input: $input) {
+    id
+    name
+    type
+    grades
+    color
+    parents {
+      id
+      name
+      type
+      grades
+      color
     }
+  }
 }

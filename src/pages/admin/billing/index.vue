@@ -58,7 +58,7 @@
 </template>
 
 <script setup lang="ts">
-import PageHeader from "@/components/page-header.vue";
-import PageWrapper from "@/components/page-wrapper.vue";
-import DButton from "@/components/d-button/d-button.vue";
+import PageHeader from "@/components/page-header.vue"
+import PageWrapper from "@/components/page-wrapper.vue"
+import DButton from "@/components/d-button/d-button.vue"
 </script>

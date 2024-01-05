@@ -9,7 +9,7 @@
         @drop="(event: DragEvent) => drop(event, 0)"
         class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 font-medium hover:bg-neutral-100"
         :class="{
-          ' border-blue-500 bg-blue-100': dragoverItem === 0,
+          ' border-blue-500 bg-blue-100': dragoverItem === 0
         }"
       >
         {{ item.title }}
@@ -22,7 +22,7 @@
         @dragleave="dragoverItem = null"
         class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 font-medium hover:bg-neutral-100"
         :class="{
-          ' border-blue-500 bg-blue-100': dragoverItem === item.route.params.id,
+          ' border-blue-500 bg-blue-100': dragoverItem === item.route.params.id
         }"
       >
         {{ item.title }}
@@ -35,110 +35,109 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, reactive, ref } from "vue";
-import { useRoute } from "vue-router/auto";
-import { useI18n } from "vue-i18n";
-import { useMoveFileMutation } from "@/gql/mutations/files/moveFile.ts";
-import { useFileByIdQuery } from "@/gql/queries/files/fileById.ts";
-import { useBucketByIdQuery } from "@/gql/mutations/buckets/bucketById.ts";
+import { computed, reactive, ref } from "vue"
+import { useRoute } from "vue-router/auto"
+import { useI18n } from "vue-i18n"
+import { useMoveFileMutation } from "@/gql/mutations/files/moveFile"
+import { useFileByIdQuery } from "@/gql/queries/files/fileById"
+import { useBucketByIdQuery } from "@/gql/mutations/buckets/bucketById"
 
-const { t } = useI18n();
+const { t } = useI18n()
 
-type RouteNameMyDrive = "/drive/my-drive/folders/[id]";
-type RouteNameSharedDrive = "/drive/shared-drives/[id]/folders/[folderId]";
-const routeNameSharedDrive = "/drive/shared-drives/[id]/folders/[folderId]";
+type RouteNameMyDrive = "/drive/my-drive/folders/[id]"
+type RouteNameSharedDrive = "/drive/shared-drives/[id]/folders/[folderId]"
+const routeNameSharedDrive = "/drive/shared-drives/[id]/folders/[folderId]"
 type RouteName =
   | RouteNameMyDrive
   | RouteNameSharedDrive
   | "/drive/my-drive/"
   | "/drive/shared-drives/"
-  | "/drive/shared-drives/[id]/";
+  | "/drive/shared-drives/[id]/"
 
-const route = useRoute<RouteName>();
+const route = useRoute<RouteName>()
 
-const dragoverItem = ref<string | number | null>(null);
+const dragoverItem = ref<string | number | null>(null)
 
 function dragover(_: DragEvent, item: any) {
   if (item === 0) {
-    dragoverItem.value = 0;
-    return;
+    dragoverItem.value = 0
+    return
   }
-  if (item.route.params.id === dragoverItem.value) return;
-  console.log("Dragover", item.route.params.id);
-  dragoverItem.value = item.route.params.id;
+  if (item.route.params.id === dragoverItem.value) return
+  console.log("Dragover", item.route.params.id)
+  dragoverItem.value = item.route.params.id
 }
 
 async function drop(event: DragEvent, row: any) {
-  const id: string | undefined = event.dataTransfer?.getData("dokedu/vnd.dokedu-drive-file");
-  const targetId =
-    row === 0 ? null : row.route.name === "/drive/shared-drives/[id]/" ? null : row.route.params.folderId;
+  const id: string | undefined = event.dataTransfer?.getData("dokedu/vnd.dokedu-drive-file")
+  const targetId = row === 0 ? null : row.route.name === "/drive/shared-drives/[id]/" ? null : row.route.params.folderId
 
-  if (!id) return;
-  if (id === targetId) return;
+  if (!id) return
+  if (id === targetId) return
 
-  console.log(row);
+  console.log(row)
 
   console.log({
     id: id,
-    targetId: targetId,
-  });
+    targetId: targetId
+  })
 
   await moveFile({
     input: {
       id: id,
-      targetId: targetId,
-    },
-  });
+      targetId: targetId
+    }
+  })
 
   // prevent
-  event.preventDefault();
-  dragoverItem.value = null;
+  event.preventDefault()
+  dragoverItem.value = null
 }
 
-const { executeMutation: moveFile } = useMoveFileMutation();
+const { executeMutation: moveFile } = useMoveFileMutation()
 
 const folderId = computed(() => {
   if (route.name === routeNameSharedDrive) {
-    return route.params.folderId;
+    return route.params.folderId
   } else if (route.name === "/drive/my-drive/folders/[id]") {
-    return route.params.id;
+    return route.params.id
   }
 
-  return "";
-});
+  return ""
+})
 
 const bucketId = computed(() => {
   if (route.name === "/drive/shared-drives/[id]/" || route.name === "/drive/shared-drives/[id]/folders/[folderId]") {
-    return route.params.id;
+    return route.params.id
   } else {
-    return "";
+    return ""
   }
-});
+})
 
 const { data: folder } = useFileByIdQuery({
   variables: reactive({
-    id: folderId,
+    id: folderId
   }),
   pause: computed(() => {
-    return folderId.value === undefined || folderId.value === null;
-  }),
-});
+    return folderId.value === undefined || folderId.value === null
+  })
+})
 
 const { data: bucket } = useBucketByIdQuery({
   variables: reactive({
-    id: bucketId,
+    id: bucketId
   }),
   pause: computed(() => {
-    return !route.name.includes("/drive/shared-drives/[id]/");
-  }),
-});
+    return !route.name.includes("/drive/shared-drives/[id]/")
+  })
+})
 
 const items = computed<any[]>(() => {
-  const isMyDriveRoute = route.name.includes("/drive/my-drive/");
-  const rootTo = isMyDriveRoute ? "/drive/my-drive/" : "/drive/shared-drives/";
-  const folderTo = isMyDriveRoute ? "/drive/my-drive/folders/[id]" : "/drive/shared-drives/[id]/folders/[folderId]";
-  const parents = folder.value?.file.parents || [];
-  const title = isMyDriveRoute ? t("my_drive") : t("shared_drives");
+  const isMyDriveRoute = route.name.includes("/drive/my-drive/")
+  const rootTo = isMyDriveRoute ? "/drive/my-drive/" : "/drive/shared-drives/"
+  const folderTo = isMyDriveRoute ? "/drive/my-drive/folders/[id]" : "/drive/shared-drives/[id]/folders/[folderId]"
+  const parents = folder.value?.file.parents || []
+  const title = isMyDriveRoute ? t("my_drive") : t("shared_drives")
 
   const createPath = (title: string, routeName: string, id: string, folderId?: string) => {
     return {
@@ -146,23 +145,23 @@ const items = computed<any[]>(() => {
       bucketId: null,
       route: {
         name: routeName,
-        params: isMyDriveRoute ? { id } : { id, folderId },
-      },
-    };
-  };
+        params: isMyDriveRoute ? { id } : { id, folderId }
+      }
+    }
+  }
 
   const paths = [
     {
       title: title,
       route: {
-        name: rootTo,
-      },
-    },
+        name: rootTo
+      }
+    }
   ] as {
-    title: string;
-    bucketId: string | null;
-    route: { name: string; params?: { id?: string; folderId?: string } };
-  }[];
+    title: string
+    bucketId: string | null
+    route: { name: string; params?: { id?: string; folderId?: string } }
+  }[]
 
   if (route.name === "/drive/shared-drives/[id]/" || route.name === "/drive/shared-drives/[id]/folders/[folderId]") {
     paths.push({
@@ -170,23 +169,23 @@ const items = computed<any[]>(() => {
       bucketId: route.name === "/drive/shared-drives/[id]/" ? (bucket.value ? bucket.value.bucket.id : null) : null,
       route: {
         name: "/drive/shared-drives/[id]/",
-        params: { id: route.params.id },
-      },
-    });
+        params: { id: route.params.id }
+      }
+    })
 
     for (const parent of parents) {
-      paths.push(createPath(parent.name, folderTo, route.params.id, parent.id));
+      paths.push(createPath(parent.name, folderTo, route.params.id, parent.id))
     }
   } else {
     for (const parent of parents) {
-      paths.push(createPath(parent.name, folderTo, parent.id));
+      paths.push(createPath(parent.name, folderTo, parent.id))
     }
   }
 
   if (folder.value?.file.name) {
-    paths.push(createPath(folder.value.file.name, folderTo, folder.value.file.id));
+    paths.push(createPath(folder.value.file.name, folderTo, folder.value.file.id))
   }
 
-  return paths;
-});
+  return paths
+})
 </script>

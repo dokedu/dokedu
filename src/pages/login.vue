@@ -60,61 +60,61 @@
 </route>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
-import { useRouter } from "vue-router/auto";
-import i18n from "@/i18n.ts";
-import { useWindowSize } from "@vueuse/core";
-import { useSignInMutation } from "@/gql/mutations/auth/signIn.ts";
+import { computed, ref } from "vue"
+import { useRouter } from "vue-router/auto"
+import i18n from "@/i18n"
+import { useWindowSize } from "@vueuse/core"
+import { useSignInMutation } from "@/gql/mutations/auth/signIn"
 
-const router = useRouter();
+const router = useRouter()
 
-const email = ref("");
-const password = ref("");
+const email = ref("")
+const password = ref("")
 
-const { width } = useWindowSize();
-const isMobile = computed(() => width.value <= 900);
+const { width } = useWindowSize()
+const isMobile = computed(() => width.value <= 900)
 
-const { executeMutation: signIn, error } = useSignInMutation();
+const { executeMutation: signIn, error } = useSignInMutation()
 
 async function onSubmit() {
   const { data } = await signIn({
     email: email.value,
-    password: password.value,
-  });
+    password: password.value
+  })
 
   if (!data?.signIn.token) {
-    alert("Invalid credentials");
-    return;
+    alert("Invalid credentials")
+    return
   }
 
-  const { enabled_apps, token, setupComplete, language } = data.signIn;
+  const { enabled_apps, token, setupComplete, language } = data.signIn
 
-  localStorage.setItem("enabled_apps", JSON.stringify(enabled_apps));
-  localStorage.setItem("authorization", token);
-  localStorage.setItem("language", language);
-  localStorage.setItem("setupComplete", setupComplete.toString());
+  localStorage.setItem("enabled_apps", JSON.stringify(enabled_apps))
+  localStorage.setItem("authorization", token)
+  localStorage.setItem("language", language)
+  localStorage.setItem("setupComplete", setupComplete.toString())
 
   // Set the i18n locale to the user's language
-  i18n.global.locale.value = language as unknown as any;
+  i18n.global.locale.value = language as unknown as any
 
   if (setupComplete === false) {
-    await router.push({ name: "/setup/" });
-    return;
+    await router.push({ name: "/setup/" })
+    return
   }
 
   // enabled_apps
   if (enabled_apps.includes("record")) {
     if (isMobile.value) {
-      await router.push({ name: "/m/record/entries/" });
+      await router.push({ name: "/m/record/entries/" })
     } else {
-      await router.push({ name: "/record/entries/" });
+      await router.push({ name: "/record/entries/" })
     }
   } else if (enabled_apps.includes("drive")) {
-    await router.push({ name: "/drive/my-drive/" });
-    return;
+    await router.push({ name: "/drive/my-drive/" })
+    return
   } else {
-    await router.push({ name: "/settings/profile" });
-    return;
+    await router.push({ name: "/settings/profile" })
+    return
   }
 }
 </script>

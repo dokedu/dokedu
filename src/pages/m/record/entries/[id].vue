@@ -20,23 +20,23 @@
 </route>
 
 <script lang="ts" setup>
-import MPageHeader from "@/components/mobile/m-page-header.vue";
-import MEntryForm from "@/components/mobile/m-entry-form.vue";
-import { useRoute } from "vue-router/auto";
-import { computed } from "vue";
-import { useEntryByIdQuery } from "@/gql/queries/entries/entryById.ts";
+import MPageHeader from "@/components/mobile/m-page-header.vue"
+import MEntryForm from "@/components/mobile/m-entry-form.vue"
+import { useRoute } from "vue-router/auto"
+import { computed } from "vue"
+import { useEntryByIdQuery } from "@/gql/queries/entries/entryById"
 
-const route = useRoute("/m/record/entries/[id]");
+const route = useRoute("/m/record/entries/[id]")
 
 const { data, fetching } = useEntryByIdQuery({
   variables: {
-    id: route.params.id,
-  },
-});
+    id: route.params.id
+  }
+})
 
 const entryData = computed(() => {
-  return data.value?.entry || {};
-});
+  return data.value?.entry || {}
+})
 </script>
 
 <style scoped>

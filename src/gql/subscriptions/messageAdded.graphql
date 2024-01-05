@@ -1,15 +1,15 @@
 subscription messageAdded($chatId: ID!) {
-    messageAdded(chatId: $chatId) {
-        id
-        chat {
-            id
-            lastMessage
-        }
-        user {
-            id
-            firstName
-            lastName
-        }
-        message
+  messageAdded(chatId: $chatId) {
+    id
+    chat {
+      id
+      lastMessage
     }
+    user {
+      id
+      firstName
+      lastName
+    }
+    message
+  }
 }

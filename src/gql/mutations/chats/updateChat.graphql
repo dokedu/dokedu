@@ -1,6 +1,6 @@
 mutation updateChat($input: UpdateChatInput!) {
-    updateChat(input: $input) {
-        id
-        name
-    }
+  updateChat(input: $input) {
+    id
+    name
+  }
 }

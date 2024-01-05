@@ -14,6 +14,6 @@
 </template>
 
 <script lang="ts" setup>
-import PageHeader from "@/components/page-header.vue";
-import PageWrapper from "@/components/page-wrapper.vue";
+import PageHeader from "@/components/page-header.vue"
+import PageWrapper from "@/components/page-wrapper.vue"
 </script>

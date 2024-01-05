@@ -22,45 +22,45 @@
 defineProps({
   modelValue: {
     type: [String, Number, Date],
-    required: true,
+    required: true
   },
   label: {
     type: String,
-    default: "",
+    default: ""
   },
   type: {
     type: String,
-    default: "text",
+    default: "text"
   },
   name: {
     type: String,
-    required: true,
+    required: true
   },
   max: {
     type: Number,
-    default: null,
+    default: null
   },
   min: {
     type: Number,
-    default: null,
+    default: null
   },
   placeholder: {
     type: String,
-    default: "",
+    default: ""
   },
   required: {
     type: Boolean,
-    default: false,
+    default: false
   },
   disabled: {
     type: Boolean,
-    default: false,
-  },
-});
+    default: false
+  }
+})
 
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(["update:modelValue"])
 
 const onInput = (event: Event) => {
-  emit("update:modelValue", (event.target as HTMLInputElement).value);
-};
+  emit("update:modelValue", (event.target as HTMLInputElement).value)
+}
 </script>

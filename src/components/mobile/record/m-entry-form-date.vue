@@ -11,12 +11,12 @@
 </template>
 
 <script lang="ts" setup>
-import { useVModel } from "@vueuse/core";
+import { useVModel } from "@vueuse/core"
 
 const props = defineProps<{
-  modelValue: string;
-}>();
-const emit = defineEmits(["update:modelValue"]);
+  modelValue: string
+}>()
+const emit = defineEmits(["update:modelValue"])
 
-const date = useVModel(props, "modelValue", emit);
+const date = useVModel(props, "modelValue", emit)
 </script>

@@ -7,17 +7,9 @@
       </div>
     </PageHeader>
     <PageContent>
-      <DTable
-        v-model:variables="pageVariables"
-        v-model:selected="selected"
-        :columns="columns"
-        objectName="buckets"
-        :query="BucketsDocument"
-        defaultSort="createdAt"
-        :additionalTypenames="['Bucket']"
-        @row-click="clickRow"
-        ref="dFileList"
-      >
+      <DTable v-model:variables="pageVariables" v-model:selected="selected" :columns="columns" objectName="buckets"
+        :query="BucketsDocument" defaultSort="createdAt" :additionalTypenames="['Bucket']" @row-click="clickRow"
+        ref="dFileList">
         <template #name-data="{ column }">
           <div class="flex items-center gap-3">
             <Folder :size="18" class="fill-neutral-700 stroke-colors-default" />
@@ -42,113 +34,112 @@
 </template>
 
 <script setup lang="ts">
-import DDriveHeaderBreadcrumbs from "@/components/_drive/d-drive-header-breadcrumbs.vue";
-import PageWrapper from "@/components/page-wrapper.vue";
-import PageHeader from "@/components/page-header.vue";
-import PageContent from "@/components/page-content.vue";
-import DTable from "@/components/d-table/d-table.vue";
-import DButton from "@/components/d-button/d-button.vue";
-import type { PageVariables } from "@/types/types.ts";
-import { ref } from "vue";
-import { Plus, Folder, Edit2, Trash } from "lucide-vue-next";
-import router from "@/router/router.ts";
-import DDialogShareDrive from "@/components/_drive/d-dialog/d-dialog-share-drive.vue";
-import DDialogRenameDrive from "@/components/_drive/d-dialog/d-dialog-rename-drive.vue";
-import { formatDate, onClickOutside } from "@vueuse/core";
-import i18n from "@/i18n.ts";
-import { Share2 } from "lucide-vue-next";
-import DFileListDropdown from "@/components/_drive/d-file-list-dropdown.vue";
-import type { Option } from "@/components/_drive/d-file-list-dropdown.vue";
-import { useDeleteSharedDriveMutation } from "@/gql/mutations/sharedDrives/deleteSharedDrive.ts";
-import { Bucket } from "@/gql/schema.ts";
-import { useCreateSharedDriveMutation } from "@/gql/mutations/sharedDrives/createSharedDrive.ts";
-import { BucketsDocument } from "@/gql/mutations/sharedDrives/buckets.ts";
+import DDriveHeaderBreadcrumbs from "@/components/_drive/d-drive-header-breadcrumbs.vue"
+import PageWrapper from "@/components/page-wrapper.vue"
+import PageHeader from "@/components/page-header.vue"
+import PageContent from "@/components/page-content.vue"
+import DTable from "@/components/d-table/d-table.vue"
+import DButton from "@/components/d-button/d-button.vue"
+import type { PageVariables } from "@/types/types"
+import { ref } from "vue"
+import { Plus, Folder, Edit2, Trash } from "lucide-vue-next"
+import router from "@/router/router"
+import DDialogShareDrive from "@/components/_drive/d-dialog/d-dialog-share-drive.vue"
+import DDialogRenameDrive from "@/components/_drive/d-dialog/d-dialog-rename-drive.vue"
+import { formatDate, onClickOutside } from "@vueuse/core"
+import i18n from "@/i18n"
+import { Share2 } from "lucide-vue-next"
+import DFileListDropdown from "@/components/_drive/d-file-list-dropdown.vue"
+import type { Option } from "@/components/_drive/d-file-list-dropdown.vue"
+import { useDeleteSharedDriveMutation } from "@/gql/mutations/sharedDrives/deleteSharedDrive"
+import type { Bucket } from "@/gql/schema"
+import { useCreateSharedDriveMutation } from "@/gql/mutations/sharedDrives/createSharedDrive"
+import { BucketsDocument } from "@/gql/mutations/sharedDrives/buckets"
 
-const dFileList = ref<any>(null);
+const dFileList = ref<any>(null)
 
-const currentItem = ref<Bucket>();
-const shareOpen = ref(false);
-const renameOpen = ref(false);
+const currentItem = ref<Bucket>()
+const shareOpen = ref(false)
+const renameOpen = ref(false)
 
-const { executeMutation } = useDeleteSharedDriveMutation();
+const { executeMutation } = useDeleteSharedDriveMutation()
 
 async function deleteSharedDrive(item: any) {
-  item.open = false;
+  item.open = false
   if (confirm("Are you sure?")) {
-    const { error } = await executeMutation({ id: item.id });
+    const { error } = await executeMutation({ id: item.id })
     if (error) {
-      alert(error.message);
+      alert(error.message)
     }
   }
 }
 
 function toggleShareModal(item: any) {
-  item.open = false;
-  currentItem.value = item;
-  shareOpen.value = true;
+  item.open = false
+  currentItem.value = item
+  shareOpen.value = true
 }
 
 function toggleRenameModal(item: any) {
-  item.open = false;
-  currentItem.value = item;
-  renameOpen.value = true;
+  item.open = false
+  currentItem.value = item
+  renameOpen.value = true
 }
 
 async function newSharedDrive() {
-  const name = prompt("Enter name");
+  const name = prompt("Enter name")
 
   if (name) {
-    await createSharedDrive({ name });
+    await createSharedDrive({ name })
   }
 }
 
-const selected = ref<{ id: string }[]>([]);
+const selected = ref<{ id: string }[]>([])
 
 onClickOutside(dFileList, () => {
-  console.log("click outside", selected.value);
-  selected.value = [];
-});
+  selected.value = []
+})
 
 async function clickRow(item: any) {
-  console.log("click row", item);
-  const isSelected = selected.value.find((f) => f.id === item.id);
-  if (!isSelected) return;
+  console.log("click row", item)
+  const isSelected = selected.value.find((f) => f.id === item.id)
+  if (!isSelected) return
 
   await router.push({
     name: "/drive/shared-drives/[id]/",
     params: {
-      id: item.id,
-    },
-  });
+      id: item.id
+    }
+  })
 }
 
-const { executeMutation: createSharedDrive } = useCreateSharedDriveMutation();
+const { executeMutation: createSharedDrive } = useCreateSharedDriveMutation()
 
 const columns = [
   {
     label: "name",
     key: "name",
-    width: 0.5,
+    width: 0.5
   },
   {
     label: "created_at",
-    key: "createdAt",
+    key: "createdAt"
   },
   {
     label: "-",
     key: "id",
-    width: 0.1,
-  },
-];
+    width: 0.1
+  }
+]
 
-interface Variables extends PageVariables {}
+interface Variables extends PageVariables { }
 
 const pageVariables = ref<Variables[]>([
   {
     limit: 25,
-    offset: 0,
-  },
-]);
+    offset: 0
+  }
+])
 
 function optionListWithItem(item: File): Option[][] {
   return [
@@ -156,21 +147,21 @@ function optionListWithItem(item: File): Option[][] {
       {
         text: i18n.global.t("rename"),
         icon: Edit2,
-        func: () => toggleRenameModal(item),
+        func: () => toggleRenameModal(item)
       },
       {
         text: i18n.global.t("share"),
         icon: Share2,
-        func: () => toggleShareModal(item),
-      },
+        func: () => toggleShareModal(item)
+      }
     ],
     [
       {
         text: i18n.global.t("delete"),
         icon: Trash,
-        func: () => deleteSharedDrive(item),
-      },
-    ],
-  ];
+        func: () => deleteSharedDrive(item)
+      }
+    ]
+  ]
 }
 </script>

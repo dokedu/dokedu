@@ -57,12 +57,12 @@
 </route>
 
 <script setup lang="ts">
-import { useRoute } from "vue-router/auto";
-import AppSwitcher2 from "@/components/AppSwitcher2.vue";
-import DNewChat from "@/components/_chat/d-new-chat.vue";
-import { useChatsQuery } from "@/gql/queries/chats/chats.ts";
+import { useRoute } from "vue-router/auto"
+import AppSwitcher2 from "@/components/AppSwitcher2.vue"
+import DNewChat from "@/components/_chat/d-new-chat.vue"
+import { useChatsQuery } from "@/gql/queries/chats/chats"
 
-const route = useRoute("/chat/chats/[id]/");
+const route = useRoute("/chat/chats/[id]/")
 
-const { data: chatList } = useChatsQuery({});
+const { data: chatList } = useChatsQuery({})
 </script>

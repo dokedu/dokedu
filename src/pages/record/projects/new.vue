@@ -3,17 +3,17 @@
 </template>
 
 <script lang="ts" setup>
-import { onClickOutside, onKeyStroke } from "@vueuse/core";
-import { ref } from "vue";
-import { useRouter } from "vue-router/auto";
-import DProjectForm from "@/components/d-project-form.vue";
-import { Event } from "@/gql/schema.ts";
+import { onClickOutside, onKeyStroke } from "@vueuse/core"
+import { ref } from "vue"
+import { useRouter } from "vue-router/auto"
+import DProjectForm from "@/components/d-project-form.vue"
+import type { Event } from "@/gql/schema"
 
-const router = useRouter();
-const sheet = ref<HTMLElement | null>(null);
+const router = useRouter()
+const sheet = ref<HTMLElement | null>(null)
 
 async function cancel() {
-  await router.push({ name: "/record/projects/" });
+  await router.push({ name: "/record/projects/" })
 }
 
 // @ts-expect-error
@@ -22,18 +22,18 @@ const project = ref<Event>({
   body: "",
   startsAt: new Date().toISOString(),
   endsAt: new Date().toISOString(),
-  competences: [],
-});
+  competences: []
+})
 
 onClickOutside(sheet, async () => {
-  await cancel();
-});
+  await cancel()
+})
 
 onKeyStroke("Escape", async () => {
-  await cancel();
-});
+  await cancel()
+})
 
 function saved() {
-  router.push({ name: "/record/projects/" });
+  router.push({ name: "/record/projects/" })
 }
 </script>

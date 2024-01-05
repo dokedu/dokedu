@@ -5,16 +5,16 @@
 </template>
 
 <script lang="ts" setup>
-import { PenSquare } from "lucide-vue-next";
-import { useCreateChatMutation } from "@/gql/mutations/chats/createChat.ts";
+import { PenSquare } from "lucide-vue-next"
+import { useCreateChatMutation } from "@/gql/mutations/chats/createChat"
 
-const { executeMutation: createChat } = useCreateChatMutation();
+const { executeMutation: createChat } = useCreateChatMutation()
 
 async function createNewChat() {
   await createChat({
     input: {
-      name: "New chat",
-    },
-  });
+      name: "New chat"
+    }
+  })
 }
 </script>

@@ -1,13 +1,13 @@
 query domains {
-    domains {
-        edges {
-            id
-            name
-            createdAt
-        }
-        pageInfo {
-            hasNextPage
-            hasPreviousPage
-        }
+  domains {
+    edges {
+      id
+      name
+      createdAt
     }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+    }
+  }
 }

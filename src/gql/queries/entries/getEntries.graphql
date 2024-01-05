@@ -1,33 +1,33 @@
 query getEntries($filter: EntryFilterInput, $limit: Int, $order: EntrySortBy, $offset: Int) {
-    entries(filter: $filter, limit: $limit, sortBy: $order, offset: $offset) {
-        pageInfo {
-            hasNextPage
-            hasPreviousPage
-        }
-        edges {
-            id
-            date
-            body
-            user {
-                id
-                firstName
-                lastName
-            }
-            createdAt
-            events {
-                id
-                title
-            }
-            tags {
-                id
-                name
-                color
-            }
-            subjects {
-                id
-                name
-                color
-            }
-        }
+  entries(filter: $filter, limit: $limit, sortBy: $order, offset: $offset) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
     }
+    edges {
+      id
+      date
+      body
+      user {
+        id
+        firstName
+        lastName
+      }
+      createdAt
+      events {
+        id
+        title
+      }
+      tags {
+        id
+        name
+        color
+      }
+      subjects {
+        id
+        name
+        color
+      }
+    }
+  }
 }

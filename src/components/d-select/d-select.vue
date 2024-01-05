@@ -62,23 +62,23 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, toRef, computed, nextTick } from "vue";
-import { onClickOutside, onKeyStroke } from "@vueuse/core";
-import { SearchIcon, XIcon, ChevronRightIcon, CheckIcon } from "lucide-vue-next";
+import { ref, toRef, computed, nextTick } from "vue"
+import { onClickOutside, onKeyStroke } from "@vueuse/core"
+import { SearchIcon, XIcon, ChevronRightIcon, CheckIcon } from "lucide-vue-next"
 
-import i18n from "@/i18n";
+import i18n from "@/i18n"
 
-const emit = defineEmits(["update:modelValue", "update:search", "select"]);
+const emit = defineEmits(["update:modelValue", "update:search", "select"])
 
 interface Props {
-  label?: string;
-  multiple?: boolean;
-  modelValue?: string | string[] | null;
-  search?: string | null;
-  searchable?: boolean;
-  removable?: boolean;
-  options?: { label: string; value: string }[];
-  type?: "default" | "borderless";
+  label?: string
+  multiple?: boolean
+  modelValue?: string | string[] | null
+  search?: string | null
+  searchable?: boolean
+  removable?: boolean
+  options?: { label: string; value: string }[]
+  type?: "default" | "borderless"
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -88,30 +88,30 @@ const props = withDefaults(defineProps<Props>(), {
   search: null,
   removable: true,
   type: "default",
-  options: () => [],
-});
+  options: () => []
+})
 
-const open = ref(false);
-const select = ref();
-const container = ref(null);
-const model = toRef(props, "modelValue");
-const toggle = ref();
-const multiple = toRef(props, "multiple");
+const open = ref(false)
+const select = ref()
+const container = ref(null)
+const model = toRef(props, "modelValue")
+const toggle = ref()
+const multiple = toRef(props, "multiple")
 
 function onClose() {
-  focusedOptionIndex.value = null;
-  open.value = false;
-  toggle.value.blur();
-  emit("update:search", null);
+  focusedOptionIndex.value = null
+  open.value = false
+  toggle.value.blur()
+  emit("update:search", null)
 }
 
-onClickOutside(select, onClose);
+onClickOutside(select, onClose)
 
-onKeyStroke("Escape", onClose);
+onKeyStroke("Escape", onClose)
 
 const onSearch = (event: Event) => {
-  emit("update:search", (event.target as HTMLInputElement).value);
-};
+  emit("update:search", (event.target as HTMLInputElement).value)
+}
 
 const onSelect = async (option: { label: string; value: string }) => {
   // Set the focus index on the selected option
@@ -119,101 +119,101 @@ const onSelect = async (option: { label: string; value: string }) => {
     if (model.value.includes(option.value)) {
       emit(
         "update:modelValue",
-        model.value.filter((id: string) => id !== option.value),
-      );
+        model.value.filter((id: string) => id !== option.value)
+      )
     } else {
-      emit("update:modelValue", [...model.value, option.value]);
+      emit("update:modelValue", [...model.value, option.value])
     }
 
-    await nextTick();
-    focusedOptionIndex.value = sortedOptions.value.indexOf(option);
+    await nextTick()
+    focusedOptionIndex.value = sortedOptions.value.indexOf(option)
   } else {
     if (model.value === option.value) {
-      emit("update:modelValue", null);
+      emit("update:modelValue", null)
     } else {
-      emit("update:modelValue", option.value);
-      focusedOptionIndex.value = sortedOptions.value.indexOf(option);
-      emit("select", option.value);
+      emit("update:modelValue", option.value)
+      focusedOptionIndex.value = sortedOptions.value.indexOf(option)
+      emit("select", option.value)
     }
-    open.value = false;
+    open.value = false
   }
-};
+}
 
 const displayedLabel = computed(() => {
-  if (!model.value || !model.value.length) return props.label;
+  if (!model.value || !model.value.length) return props.label
 
   if (props.multiple && Array.isArray(model.value)) {
-    return model.value.length + " " + i18n.global.t("selected");
+    return model.value.length + " " + i18n.global.t("selected")
   }
 
-  if (!props.options.length) return i18n.global.t("no_results");
-  const option = props.options.find((option) => option.value === model.value);
-  return option?.label;
-});
+  if (!props.options.length) return i18n.global.t("no_results")
+  const option = props.options.find((option) => option.value === model.value)
+  return option?.label
+})
 
 const onClear = () => {
-  emit("update:search", "");
+  emit("update:search", "")
 
   if (props.multiple) {
-    emit("update:modelValue", null);
+    emit("update:modelValue", null)
   } else {
-    emit("update:modelValue", null);
+    emit("update:modelValue", null)
   }
 
-  toggle.value.blur();
-  open.value = false;
-};
+  toggle.value.blur()
+  open.value = false
+}
 
 const isSelected = (option: { label: string; value: string }) => {
   if (props.multiple && Array.isArray(model.value)) {
-    return model.value.includes(option.value);
+    return model.value.includes(option.value)
   }
 
-  return model.value === option.value;
-};
+  return model.value === option.value
+}
 
 // Computed to sort selected at top
 const sortedOptions = computed(() => {
-  if (!props.multiple || !Array.isArray(model.value)) return props.options;
+  if (!props.multiple || !Array.isArray(model.value)) return props.options
 
-  return [...props.options];
-});
+  return [...props.options]
+})
 
 // Keyboard navigation
-const focusedOptionIndex = ref<number | null>(null);
+const focusedOptionIndex = ref<number | null>(null)
 
 onKeyStroke("Enter", async () => {
-  if (!open.value) return;
-  if (!focusedOptionIndex.value) return;
+  if (!open.value) return
+  if (!focusedOptionIndex.value) return
 
-  onSelect(sortedOptions.value[focusedOptionIndex.value]);
-});
+  onSelect(sortedOptions.value[focusedOptionIndex.value])
+})
 
 onKeyStroke("ArrowDown", () => {
   if (focusedOptionIndex.value === null) {
-    focusedOptionIndex.value = 0;
-    return;
+    focusedOptionIndex.value = 0
+    return
   }
 
   if (focusedOptionIndex.value === sortedOptions.value.length - 1) {
-    focusedOptionIndex.value = 0;
-    return;
+    focusedOptionIndex.value = 0
+    return
   }
 
-  focusedOptionIndex.value++;
-});
+  focusedOptionIndex.value++
+})
 
 onKeyStroke("ArrowUp", () => {
   if (focusedOptionIndex.value === null) {
-    focusedOptionIndex.value = sortedOptions.value.length - 1;
-    return;
+    focusedOptionIndex.value = sortedOptions.value.length - 1
+    return
   }
 
   if (focusedOptionIndex.value === 0) {
-    focusedOptionIndex.value = sortedOptions.value.length - 1;
-    return;
+    focusedOptionIndex.value = sortedOptions.value.length - 1
+    return
   }
 
-  focusedOptionIndex.value--;
-});
+  focusedOptionIndex.value--
+})
 </script>

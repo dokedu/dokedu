@@ -17,24 +17,24 @@
 </template>
 
 <script setup lang="ts">
-import PageSidebar from "../components/page-sidebar.vue";
-import { useWindowSize } from "@vueuse/core";
-import DButton from "@/components/d-button/d-button.vue";
-import { useAuth } from "@/composables/auth";
-import { onMounted } from "vue";
-import { useMeQuery } from "@/gql/queries/auth/me.ts";
+import PageSidebar from "../components/page-sidebar.vue"
+import { useWindowSize } from "@vueuse/core"
+import DButton from "@/components/d-button/d-button.vue"
+import { useAuth } from "@/composables/auth"
+import { onMounted } from "vue"
+import { useMeQuery } from "@/gql/queries/auth/me"
 
-const { width } = useWindowSize();
+const { width } = useWindowSize()
 
 async function onLogOut() {
-  await useAuth().signOut();
+  await useAuth().signOut()
 }
 
 const { executeQuery: refresh } = useMeQuery({
-  requestPolicy: "network-only",
-});
+  requestPolicy: "network-only"
+})
 
 onMounted(() => {
-  refresh();
-});
+  refresh()
+})
 </script>

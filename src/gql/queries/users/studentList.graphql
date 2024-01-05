@@ -1,14 +1,14 @@
 query studentList($search: String) {
-    users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {
-        edges {
-            id
-            firstName
-            lastName
-            student {
-                id
-                grade
-                emoji
-            }
-        }
+  users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {
+    edges {
+      id
+      firstName
+      lastName
+      student {
+        id
+        grade
+        emoji
+      }
     }
+  }
 }

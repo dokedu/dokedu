@@ -8,26 +8,21 @@
       <div v-if="competence.entry">
         <span class="font-medium text-strong">{{ $t("level") }} {{ competence.level }}</span>
         {{ $t("was_documented_by") }}
-        <span class="font-medium text-strong"
-          >{{ competence.createdBy?.firstName }} {{ competence.createdBy?.lastName }}</span
-        >
+        <span class="font-medium text-strong">{{ competence.createdBy?.firstName }} {{ competence.createdBy?.lastName
+        }}</span>
         {{ $t("at") }}
         <span class="font-medium text-strong">
           {{ formatDate(new Date(Date.parse(competence.createdAt)), "DD.MM.YYYY HH:MM") }}
         </span>
         {{ $t("in") }}
-        <RouterLink
-          :to="{ name: '/record/entries/[id]', params: { id: competence.entry.id } }"
-          class="font-medium text-strong"
-          >{{ $t("entry") }}</RouterLink
-        >
+        <RouterLink :to="{ name: '/record/entries/[id]', params: { id: competence.entry.id } }"
+          class="font-medium text-strong">{{ $t("entry") }}</RouterLink>
       </div>
       <div v-else>
         <span class="font-medium text-strong">{{ $t("level") }} {{ competence.level }}</span>
         {{ $t("was_documented_by") }}
-        <span class="font-medium text-strong"
-          >{{ competence.createdBy?.firstName }} {{ competence.createdBy?.lastName }}</span
-        >
+        <span class="font-medium text-strong">{{ competence.createdBy?.firstName }} {{ competence.createdBy?.lastName
+        }}</span>
         {{ $t("at") }}
         <span class="font-medium text-strong">
           {{ formatDate(new Date(Date.parse(competence.createdAt)), "DD.MM.YYYY HH:MM") }}
@@ -39,20 +34,20 @@
 </template>
 
 <script lang="ts" setup>
-import { ChevronDown } from "lucide-vue-next";
-import { ref } from "vue";
-import { formatDate } from "@vueuse/core";
-import { UserCompetence } from "@/gql/schema.ts";
+import { ChevronDown } from "lucide-vue-next"
+import { ref } from "vue"
+import { formatDate } from "@vueuse/core"
+import type { UserCompetence } from "@/gql/schema"
 
 export interface Props {
-  competences: UserCompetence[];
+  competences: UserCompetence[]
 }
 
-defineProps<Props>();
+defineProps<Props>()
 
-const entriesOpen = ref(false);
+const entriesOpen = ref(false)
 
 function toggleEntries() {
-  entriesOpen.value = !entriesOpen.value;
+  entriesOpen.value = !entriesOpen.value
 }
 </script>

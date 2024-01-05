@@ -2,11 +2,9 @@
   <div id="element" class="flex w-full flex-col">
     <MPageHeader />
     <div class="flex-1 divide-y divide-neutral-200 overflow-scroll text-sm">
-      <router-link
-        v-for="entry in data?.entries.edges"
+      <router-link v-for="entry in data?.entries.edges"
         :to="{ name: '/m/record/entries/[id]', params: { id: `${entry?.id}` } }"
-        class="flex flex-col gap-2 p-4 text-neutral-700"
-      >
+        class="flex flex-col gap-2 p-4 text-neutral-700">
         <div class="line-clamp-3">
           {{ entry?.body }}
         </div>
@@ -24,10 +22,8 @@
       </div>
     </div>
     <MPageFooter>
-      <div
-        @click="createEntry"
-        class="flex w-full items-center justify-center gap-2 rounded-lg bg-neutral-950 px-8 py-2.5 text-center text-sm text-white"
-      >
+      <div @click="createEntry"
+        class="flex w-full items-center justify-center gap-2 rounded-lg bg-neutral-950 px-8 py-2.5 text-center text-sm text-white">
         <Plus :size="18" />
         <div>Eintrag erstellen</div>
       </div>
@@ -45,30 +41,30 @@
 </route>
 
 <script lang="ts" setup>
-import MPageHeader from "@/components/mobile/m-page-header.vue";
-import MPageFooter from "@/components/mobile/m-page-footer.vue";
-import { Plus } from "lucide-vue-next";
-import { useRouter } from "vue-router/auto";
-import { useMGetEntriesQuery } from "@/gql/queries/entries/mGetEntries.ts";
-import { useCreateEntryDraftMutation } from "@/gql/mutations/entries/createEntryDraft.ts";
-import { EntrySortBy } from "@/gql/schema.ts";
+import MPageHeader from "@/components/mobile/m-page-header.vue"
+import MPageFooter from "@/components/mobile/m-page-footer.vue"
+import { Plus } from "lucide-vue-next"
+import { useRouter } from "vue-router/auto"
+import { useMGetEntriesQuery } from "@/gql/queries/entries/mGetEntries"
+import { useCreateEntryDraftMutation } from "@/gql/mutations/entries/createEntryDraft"
+import type { EntrySortBy } from "@/gql/schema"
 
-const { executeMutation: createEntryDraft } = useCreateEntryDraftMutation();
+const { executeMutation: createEntryDraft } = useCreateEntryDraftMutation()
 
-const router = useRouter();
+const router = useRouter()
 
 async function createEntry() {
-  const { data } = await createEntryDraft({});
+  const { data } = await createEntryDraft({})
 
-  await router.push({ name: "/m/record/entries/[id]", params: { id: data?.createEntry?.id as string } });
+  await router.push({ name: "/m/record/entries/[id]", params: { id: data?.createEntry?.id as string } })
 }
 
 const { data } = useMGetEntriesQuery({
   variables: {
     order: EntrySortBy.CreatedAtDesc,
-    limit: 10,
-  },
-});
+    limit: 10
+  }
+})
 
 function toLocateDateString(date: string) {
   return new Date(date).toLocaleDateString("de-DE", {
@@ -77,8 +73,8 @@ function toLocateDateString(date: string) {
     month: "long",
     day: "numeric",
     hour: "numeric",
-    minute: "numeric",
-  });
+    minute: "numeric"
+  })
 }
 </script>
 
