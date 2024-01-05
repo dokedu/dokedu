@@ -3,14 +3,23 @@
     <PageHeader class="justify-between">
       <div class="flex items-center gap-4">
         <div class="font-medium text-neutral-950">{{ $t("user", 2) }}</div>
-        <input v-model="search" type="text" name="search" id="search" :placeholder="$t('search')"
-          class="h-8 rounded-md border border-neutral-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-neutral-200 focus:shadow-sm focus:ring-0" />
+        <input
+          v-model="search"
+          type="text"
+          name="search"
+          id="search"
+          :placeholder="$t('search')"
+          class="h-8 rounded-md border border-neutral-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-neutral-200 focus:shadow-sm focus:ring-0"
+        />
       </div>
       <div class="flex items-center gap-8">
         <div class="flex items-center gap-2">
           <input
             class="border-subtle rounded checked:bg-neutral-900 checked:text-neutral-900 checked:hover:bg-neutral-900 focus:ring-0 checked:focus:bg-neutral-900"
-            type="checkbox" id="showDeletedAdmin" v-model="showDeleted" />
+            type="checkbox"
+            id="showDeletedAdmin"
+            v-model="showDeleted"
+          />
           <label for="showDeletedAdmin">{{ $t("show_deleted") }}</label>
         </div>
         <RouterLink :to="{ name: '/admin/users/new' }">
@@ -18,8 +27,15 @@
         </RouterLink>
       </div>
     </PageHeader>
-    <DTable v-model:variables="pageVariables" :search="search" :columns="columns" objectName="users"
-      :query="AdminUsersDocument" @row-click="goToUser" defaultSort="lastName">
+    <DTable
+      v-model:variables="pageVariables"
+      :search="search"
+      :columns="columns"
+      objectName="users"
+      :query="AdminUsersDocument"
+      @row-click="goToUser"
+      defaultSort="lastName"
+    >
       <template #birthday-data="{ item }">
         {{ item.user?.birthday ? formatDate(new Date(Date.parse(item?.user.birthday as string)), "DD.MM.YYYY") : "-" }}
       </template>

@@ -5,25 +5,42 @@
         <div class="font-medium text-neutral-950">
           <router-link :to="{ name: '/record/competences/' }"> {{ $t("competence", 2) }}</router-link>
         </div>
-        <input v-model="search" type="text" name="search" id="search" :placeholder="$t('search')"
-          class="h-8 rounded-md border border-neutral-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-neutral-200 focus:shadow-sm focus:ring-0" />
+        <input
+          v-model="search"
+          type="text"
+          name="search"
+          id="search"
+          :placeholder="$t('search')"
+          class="h-8 rounded-md border border-neutral-100 text-sm text-strong outline-none ring-0 transition-all placeholder:text-subtle focus:border-neutral-200 focus:shadow-sm focus:ring-0"
+        />
       </div>
     </PageHeader>
-    <div v-if="breadcrumbs.length > 0"
-      class="flex select-none flex-wrap items-center gap-1 px-7 py-2 text-sm text-neutral-700">
+    <div
+      v-if="breadcrumbs.length > 0"
+      class="flex select-none flex-wrap items-center gap-1 px-7 py-2 text-sm text-neutral-700"
+    >
       <router-link class="rounded-lg px-1.5 py-0.5 hover:bg-neutral-100" :to="{ name: '/record/competences/' }">
         Fächer
       </router-link>
       <template v-for="parent in breadcrumbs" :key="parent.id">
         <span>/</span>
-        <router-link :to="{ name: '/record/competences/[id]', params: { id: parent.id } }"
-          class="rounded-lg px-1.5 py-0.5 hover:bg-neutral-100">
+        <router-link
+          :to="{ name: '/record/competences/[id]', params: { id: parent.id } }"
+          class="rounded-lg px-1.5 py-0.5 hover:bg-neutral-100"
+        >
           {{ parent.name }}
         </router-link>
       </template>
     </div>
-    <DTable :query="CompetenceDocument" :columns="columns" hideHeader objectName="competences"
-      v-model:variables="pageVariables" @row-click="goToCompetence" :search="search">
+    <DTable
+      :query="CompetenceDocument"
+      :columns="columns"
+      hideHeader
+      objectName="competences"
+      v-model:variables="pageVariables"
+      @row-click="goToCompetence"
+      :search="search"
+    >
       <template #name-data="{ item }">
         <div class="flex items-center gap-2">
           <Folder v-if="item.type !== 'competence'" :size="16" class="fill-neutral-700 stroke-neutral-700" />
@@ -58,7 +75,7 @@ const search = ref("")
 
 const id = computed(() => route.params.id as string)
 
-interface Variables extends PageVariables { }
+interface Variables extends PageVariables {}
 
 const pageVariables = ref<Variables[]>([
   {

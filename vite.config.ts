@@ -13,11 +13,9 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    exclude: [
-      "pdfjs-dist/build/pdf",
-    ]
+    exclude: ["pdfjs-dist/build/pdf"]
   },
   build: {
-    target: "esnext",
+    target: "esnext"
   }
 })

@@ -3,8 +3,15 @@
     <label for="date" class="mt-2 min-w-[64px] text-neutral-500">{{ $t("label", 2) }}</label>
 
     <div class="flex w-full flex-col gap-4">
-      <DSelect :options="tagOptions" :label="$t('label', 2)" multiple v-model="selected" v-model:search="tagSearch"
-        class="w-full" searchable>
+      <DSelect
+        :options="tagOptions"
+        :label="$t('label', 2)"
+        multiple
+        v-model="selected"
+        v-model:search="tagSearch"
+        class="w-full"
+        searchable
+      >
         <template v-slot="{ option }">
           <d-tag :color="tagsData?.tags.edges?.find((el: any) => el.id === option.value)?.color">
             {{ option.label }}

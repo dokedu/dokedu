@@ -29,11 +29,17 @@
         {{ formatDate(new Date(column), "DD.MM.YYYY HH:ss") }} {{ $t("hour") }}
       </template>
       <template #file-data="{ item }">
-        <div v-if="item?.status === 'done' && item.file"
-          class="p-2 pr-8 text-left text-sm font-normal text-default hover:underline" @click="downloadReport(item)">
+        <div
+          v-if="item?.status === 'done' && item.file"
+          class="p-2 pr-8 text-left text-sm font-normal text-default hover:underline"
+          @click="downloadReport(item)"
+        >
           {{ $t("download") }}
         </div>
-        <div v-else-if="!item.file && item.status === 'done'" class="p-2 pr-8 text-left text-sm font-normal text-default">
+        <div
+          v-else-if="!item.file && item.status === 'done'"
+          class="p-2 pr-8 text-left text-sm font-normal text-default"
+        >
           {{ $t("no-file") }}
         </div>
         <div v-else class="p-2 pr-8 text-left text-sm font-normal text-default"></div>
@@ -41,8 +47,10 @@
     </DTable>
   </PageWrapper>
   <!-- requesting download file toast -->
-  <div v-if="downloadingFilesCount > 0"
-    class="fixed bottom-4 right-4 flex select-none gap-2 rounded-md bg-white px-4 py-2 text-sm shadow-md">
+  <div
+    v-if="downloadingFilesCount > 0"
+    class="fixed bottom-4 right-4 flex select-none gap-2 rounded-md bg-white px-4 py-2 text-sm shadow-md"
+  >
     <div class="animate-spin">
       <Loader2 :size="20" />
     </div>

@@ -2,9 +2,11 @@
   <div id="element" class="flex w-full flex-col">
     <MPageHeader />
     <div class="flex-1 divide-y divide-neutral-200 overflow-scroll text-sm">
-      <router-link v-for="entry in data?.entries.edges"
+      <router-link
+        v-for="entry in data?.entries.edges"
         :to="{ name: '/m/record/entries/[id]', params: { id: `${entry?.id}` } }"
-        class="flex flex-col gap-2 p-4 text-neutral-700">
+        class="flex flex-col gap-2 p-4 text-neutral-700"
+      >
         <div class="line-clamp-3">
           {{ entry?.body }}
         </div>
@@ -22,8 +24,10 @@
       </div>
     </div>
     <MPageFooter>
-      <div @click="createEntry"
-        class="flex w-full items-center justify-center gap-2 rounded-lg bg-neutral-950 px-8 py-2.5 text-center text-sm text-white">
+      <div
+        @click="createEntry"
+        class="flex w-full items-center justify-center gap-2 rounded-lg bg-neutral-950 px-8 py-2.5 text-center text-sm text-white"
+      >
         <Plus :size="18" />
         <div>Eintrag erstellen</div>
       </div>

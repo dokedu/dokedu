@@ -1,7 +1,14 @@
 <template>
   <div v-if="data?.user">
-    <d-user-form :user="data.user as User" :title="$t('edit_user')" deletable @save="onEditUser" @delete="onDeleteUser"
-      @invite="onInviteUser" @resetPassword="onResetPassword"></d-user-form>
+    <d-user-form
+      :user="data.user as User"
+      :title="$t('edit_user')"
+      deletable
+      @save="onEditUser"
+      @delete="onDeleteUser"
+      @invite="onInviteUser"
+      @resetPassword="onResetPassword"
+    ></d-user-form>
   </div>
 </template>
 

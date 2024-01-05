@@ -1,21 +1,40 @@
 <template>
-  <div v-bind="$attrs" v-if="fetching && data && data[objectName]?.edges?.length > 0" v-for="i in variables.limit"
-    :key="i" class="animate-pulse">
+  <div
+    v-bind="$attrs"
+    v-if="fetching && data && data[objectName]?.edges?.length > 0"
+    v-for="i in variables.limit"
+    :key="i"
+    class="animate-pulse"
+  >
     <div v-for="column in columns" :key="column.key" class="border-b border-neutral-100 px-8 py-3">
       <div class="h-3 rounded-full bg-neutral-100"></div>
     </div>
   </div>
-  <div v-bind="$attrs" v-if="!fetching && data && data[objectName]?.edges?.length > 0"
-    v-for="row in data[objectName]?.edges" :key="row.id" ref="items" :draggable="draggable"
-    class="group/row grid border border-transparent transition-colors hover:bg-neutral-50" :class="{
+  <div
+    v-bind="$attrs"
+    v-if="!fetching && data && data[objectName]?.edges?.length > 0"
+    v-for="row in data[objectName]?.edges"
+    :key="row.id"
+    ref="items"
+    :draggable="draggable"
+    class="group/row grid border border-transparent transition-colors hover:bg-neutral-50"
+    :class="{
       ' border-blue-500 bg-blue-100': dragoverItem === row.id && draggingItem !== row.id
-    }" @dragstart="(event) => dragStart(event, row)" @dragend="dragend" @drop="(event) => drop(event, row)"
-    @dragover.prevent="(event) => dragover(event, row)">
+    }"
+    @dragstart="(event) => dragStart(event, row)"
+    @dragend="dragend"
+    @drop="(event) => drop(event, row)"
+    @dragover.prevent="(event) => dragover(event, row)"
+  >
     <slot :row="row" :fetching="fetching"></slot>
   </div>
-  <slot name="empty" v-if="(!fetching && !data && pageVariables.offset === 0) ||
-    (!fetching && data && data[objectName]?.edges?.length === 0 && pageVariables.offset === 0)
-    " />
+  <slot
+    name="empty"
+    v-if="
+      (!fetching && !data && pageVariables.offset === 0) ||
+      (!fetching && data && data[objectName]?.edges?.length === 0 && pageVariables.offset === 0)
+    "
+  />
 </template>
 
 <script lang="ts" setup>

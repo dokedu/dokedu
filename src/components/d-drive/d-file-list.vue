@@ -1,7 +1,12 @@
 <template>
   <PageWrapper>
-    <PageHeaderDrive :title="title" @upload="upload" :bucket-id="bucketId" :folder-id="folderId"
-      :permission="permission" />
+    <PageHeaderDrive
+      :title="title"
+      @upload="upload"
+      :bucket-id="bucketId"
+      :folder-id="folderId"
+      :permission="permission"
+    />
     <div class="h-full overflow-auto">
       <DFileDropZone @upload="upload">
         <DFileList @click="clickFile" :bucket-id="bucketId" :folder-id="folderId" />

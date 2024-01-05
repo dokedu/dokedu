@@ -1,37 +1,56 @@
 <template>
   <header
-    class="flex h-screen w-full max-w-[230px] select-none flex-col justify-between border-r border-neutral-100 bg-neutral-50 print:hidden">
+    class="flex h-screen w-full max-w-[230px] select-none flex-col justify-between border-r border-neutral-100 bg-neutral-50 print:hidden"
+  >
     <div class="relative flex flex-col">
       <div class="flex items-center justify-between px-3 py-3 pb-1">
         <app-switcher2 />
       </div>
       <div class="flex flex-col gap-0.5 p-3 pt-2.5">
-        <router-link v-for="link in app?.links" :to="link.route"
+        <router-link
+          v-for="link in app?.links"
+          :to="link.route"
           class="flex items-center gap-3 rounded-md px-3 py-1.5 text-neutral-500 transition-all duration-100 hover:bg-neutral-100 hover:text-neutral-950"
-          active-class="" :class="{ '!bg-neutral-200 text-neutral-900': isLinkActive(link) }">
-          <component :is="link.icon" class="stroke-neutral-500" :size="18"
-            :class="{ '!stroke-neutral-900': isLinkActive(link) }" />
+          active-class=""
+          :class="{ '!bg-neutral-200 text-neutral-900': isLinkActive(link) }"
+        >
+          <component
+            :is="link.icon"
+            class="stroke-neutral-500"
+            :size="18"
+            :class="{ '!stroke-neutral-900': isLinkActive(link) }"
+          />
           <div class="text-sm">{{ link.name }}</div>
         </router-link>
       </div>
     </div>
     <div class="px-1 py-4">
-      <a href="https://dokedu.org/hilfe" target="_blank"
-        class="flex items-center gap-3 rounded-md p-1 px-3 text-neutral-500 transition-all duration-100 hover:bg-neutral-100 hover:text-neutral-950">
+      <a
+        href="https://dokedu.org/hilfe"
+        target="_blank"
+        class="flex items-center gap-3 rounded-md p-1 px-3 text-neutral-500 transition-all duration-100 hover:bg-neutral-100 hover:text-neutral-950"
+      >
         <HelpCircle class="stroke-neutral-500" :size="18" />
         <div class="text-sm">{{ $t("support") }}</div>
       </a>
-      <router-link to="/settings/profile"
-        class="flex items-center gap-3 rounded-md p-1 px-3 text-neutral-500 transition-all duration-100 hover:bg-neutral-100 hover:text-neutral-950">
+      <router-link
+        to="/settings/profile"
+        class="flex items-center gap-3 rounded-md p-1 px-3 text-neutral-500 transition-all duration-100 hover:bg-neutral-100 hover:text-neutral-950"
+      >
         <Settings class="stroke-neutral-500" :size="18" />
         <div class="text-sm">{{ $t("settings") }}</div>
       </router-link>
 
       <div
-        class="flex items-center gap-3 rounded-md p-1 px-3 text-neutral-500 transition-all duration-100 hover:bg-neutral-100 hover:text-neutral-950">
+        class="flex items-center gap-3 rounded-md p-1 px-3 text-neutral-500 transition-all duration-100 hover:bg-neutral-100 hover:text-neutral-950"
+      >
         <globe class="stroke-neutral-500" :size="18" />
-        <select name="language" id="lang"
-          class="block w-full rounded-lg border border-neutral-200 bg-neutral-50 px-2 py-1 text-sm" v-model="language">
+        <select
+          name="language"
+          id="lang"
+          class="block w-full rounded-lg border border-neutral-200 bg-neutral-50 px-2 py-1 text-sm"
+          v-model="language"
+        >
           <option value="en">English</option>
           <option value="de">Deutsch</option>
         </select>
@@ -39,7 +58,8 @@
 
       <div
         class="flex items-center gap-3 rounded-md p-1 px-3 text-neutral-500 transition-all duration-100 hover:bg-neutral-100 hover:text-neutral-950"
-        @click="loggingOut">
+        @click="loggingOut"
+      >
         <log-out class="stroke-neutral-500" :size="18" />
         <div class="text-sm">{{ $t("log_out") }}</div>
       </div>

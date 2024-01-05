@@ -5,12 +5,28 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <div class="font-medium text-strong">{{ $t("filter", 2) }}</div>
-            <DSelect searchable :options="studentOptions" :label="$t('student')" v-model:search="studentSearch"
-              v-model="student" />
-            <DSelect searchable :options="teacherOptions" :label="$t('teacher')" v-model="teacher"
-              v-model:search="teacherSearch" />
-            <DSelect searchable :options="tagOptions" :label="$t('tag', 2)" multiple v-model="tags"
-              v-model:search="tagSearch">
+            <DSelect
+              searchable
+              :options="studentOptions"
+              :label="$t('student')"
+              v-model:search="studentSearch"
+              v-model="student"
+            />
+            <DSelect
+              searchable
+              :options="teacherOptions"
+              :label="$t('teacher')"
+              v-model="teacher"
+              v-model:search="teacherSearch"
+            />
+            <DSelect
+              searchable
+              :options="tagOptions"
+              :label="$t('tag', 2)"
+              multiple
+              v-model="tags"
+              v-model:search="tagSearch"
+            >
               <template v-slot="{ option }">
                 <d-tag :color="tagData?.tags.edges?.find((el: any) => el.id === option.value)?.color">
                   {{ option.label }}
@@ -23,8 +39,15 @@
       </div>
     </PageHeader>
 
-    <DTable v-model:variables="pageVariables" :columns="columns" objectName="entries" :query="GetEntriesDocument"
-      defaultSort="createdAt" @row-click="goToEntry" :watchers="[student, teacher, tags]">
+    <DTable
+      v-model:variables="pageVariables"
+      :columns="columns"
+      objectName="entries"
+      :query="GetEntriesDocument"
+      defaultSort="createdAt"
+      @row-click="goToEntry"
+      :watchers="[student, teacher, tags]"
+    >
       <template #body-data="{ column, item }">
         <div class="flex h-full w-full items-center justify-between gap-2">
           <div class="truncate">{{ column }}</div>
@@ -33,8 +56,10 @@
               <DTag color="neutral" class="w-1/4 p-2">{{ item.events?.length }} {{ $t("project", 2) }} </DTag>
             </div>
             <div v-else v-for="event in item.events" class="flex gap-1">
-              <div @click.stop="goToProject(event.id)"
-                class="line-clamp-1 inline-flex h-7 max-w-[120px] items-center gap-1.5 text-ellipsis whitespace-nowrap rounded-full border bg-default px-3 py-1 transition-all duration-150 ease-linear hover:max-w-[250px] hover:bg-subtle">
+              <div
+                @click.stop="goToProject(event.id)"
+                class="line-clamp-1 inline-flex h-7 max-w-[120px] items-center gap-1.5 text-ellipsis whitespace-nowrap rounded-full border bg-default px-3 py-1 transition-all duration-150 ease-linear hover:max-w-[250px] hover:bg-subtle"
+              >
                 <LayoutGrid class="stroke-subtle w-4 min-w-[16px]" />
                 <div class="flex-1 overflow-hidden text-ellipsis">
                   {{ event.title }}
@@ -71,8 +96,11 @@
             {{ dateOnly(column) }}
           </div>
 
-          <div :title="`${item.user?.firstName} ${item.user?.lastName}`" class="h-8 w-8 rounded-full"
-            :class="`bg-subtle`">
+          <div
+            :title="`${item.user?.firstName} ${item.user?.lastName}`"
+            class="h-8 w-8 rounded-full"
+            :class="`bg-subtle`"
+          >
             <div class="flex h-full w-full items-center justify-center">
               <div class="text-xs font-bold text-subtle">{{ item.user?.firstName[0] }}{{ item.user?.lastName[0] }}</div>
             </div>

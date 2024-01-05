@@ -4,8 +4,14 @@
       <div class="flex flex-col gap-2">
         <DInput name="firstName" :label="$t('first_name')" v-model="student.firstName"></DInput>
         <DInput name="lastName" :label="$t('last_name')" v-model="student.lastName"></DInput>
-        <DInput type="number" v-if="student.student" :label="$t('grade')" :min="0" name="grade"
-          v-model="student.student.grade"></DInput>
+        <DInput
+          type="number"
+          v-if="student.student"
+          :label="$t('grade')"
+          :min="0"
+          name="grade"
+          v-model="student.student.grade"
+        ></DInput>
         <DInput type="date" :label="$t('birthday')" name="birthday" v-model="birthday"></DInput>
         <DInput type="date" :label="$t('joined_at')" name="birthday" v-model="joinedAt"></DInput>
         <DInput type="date" :label="$t('left_at')" name="birthday" v-model="leftAt"></DInput>
@@ -13,7 +19,8 @@
         <div class="flex items-end gap-2">
           <DInput type="text" class="flex-1" disabled :label="$t('emoji')" name="emoji" v-model="emoji"></DInput>
           <div class="relative">
-            <DButton size="md" type="outline" class="!h-10" :icon-left="Smile" @click="onToggleEmojiPicker">Select emoji
+            <DButton size="md" type="outline" class="!h-10" :icon-left="Smile" @click="onToggleEmojiPicker"
+              >Select emoji
             </DButton>
             <div v-if="emojiPickerOpen" ref="emojiPickerContainer" class="absolute z-10 top-12 right-0">
               <Picker color="black" :data="emojiIndex" set="apple" @select="showEmoji"></Picker>

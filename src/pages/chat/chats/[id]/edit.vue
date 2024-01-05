@@ -11,8 +11,13 @@
         <div></div>
       </template>
       <template v-else>
-        <d-input v-model="chatName" type="text" name="name" placeholder="Chat name"
-          class="w-full border-none bg-transparent" />
+        <d-input
+          v-model="chatName"
+          type="text"
+          name="name"
+          placeholder="Chat name"
+          class="w-full border-none bg-transparent"
+        />
         <div class="flex justify-end">
           <d-button @click="updateChat" size="md">Save</d-button>
         </div>
@@ -30,8 +35,11 @@
             <div class="mb-1">{{ user.firstName }} {{ user.lastName }}</div>
             <div class="text-neutral-500 text-xs min-h-[1rem]">{{ user.email ? user.email : user.id }}</div>
           </div>
-          <d-button @click="removeUserFromChat(user.id)" type="transparent"
-            class="hidden group-hover:block text-red-500 hover:text-red-500">
+          <d-button
+            @click="removeUserFromChat(user.id)"
+            type="transparent"
+            class="hidden group-hover:block text-red-500 hover:text-red-500"
+          >
             Remove
           </d-button>
         </div>

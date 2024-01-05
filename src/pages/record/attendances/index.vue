@@ -3,32 +3,53 @@
     <PageHeader class="flex gap-4">
       <div class="font-medium text-strong">{{ $t("attendance", 2) }}</div>
       <div class="flex items-center gap-2">
-        <button @click="today" type="submit"
-          class="text-sm items-center hover:bg-neutral-100 transition-all rounded-lg border border-neutral-200 shadow-sm focus:!outline-none px-4 text-neutral-700 py-2">
+        <button
+          @click="today"
+          type="submit"
+          class="text-sm items-center hover:bg-neutral-100 transition-all rounded-lg border border-neutral-200 shadow-sm focus:!outline-none px-4 text-neutral-700 py-2"
+        >
           Today
         </button>
-        <div @click="previousDate"
-          class="w-8 flex items-center justify-center h-8 hover:bg-neutral-100 transition-all rounded-md">
+        <div
+          @click="previousDate"
+          class="w-8 flex items-center justify-center h-8 hover:bg-neutral-100 transition-all rounded-md"
+        >
           <ChevronLeft />
         </div>
-        <input class="text-sm items-center rounded-lg border border-neutral-200 shadow-sm focus:!outline-none"
-          v-model="formattedDate" type="date" name="date" id="date" />
-        <div @click="nextDate"
-          class="w-8 flex items-center justify-center h-8 hover:bg-neutral-100 transition-all rounded-md">
+        <input
+          class="text-sm items-center rounded-lg border border-neutral-200 shadow-sm focus:!outline-none"
+          v-model="formattedDate"
+          type="date"
+          name="date"
+          id="date"
+        />
+        <div
+          @click="nextDate"
+          class="w-8 flex items-center justify-center h-8 hover:bg-neutral-100 transition-all rounded-md"
+        >
           <ChevronRight />
         </div>
       </div>
 
-      <input class="text-sm items-center rounded-lg border border-neutral-200 shadow-sm focus:!outline-none"
-        v-model="search" type="text" name="search" id="search" :placeholder="$t('search') + '...'" />
+      <input
+        class="text-sm items-center rounded-lg border border-neutral-200 shadow-sm focus:!outline-none"
+        v-model="search"
+        type="text"
+        name="search"
+        id="search"
+        :placeholder="$t('search') + '...'"
+      />
 
-      <button @click="
-        updateDailyAttendance({
-          date: date,
-          state: UserAttendanceState.Present
-        })
-        " type="submit"
-        class="text-sm items-center hover:bg-neutral-100 transition-all rounded-lg border border-neutral-200 shadow-sm focus:!outline-none px-4 text-neutral-700 py-2">
+      <button
+        @click="
+          updateDailyAttendance({
+            date: date,
+            state: UserAttendanceState.Present
+          })
+        "
+        type="submit"
+        class="text-sm items-center hover:bg-neutral-100 transition-all rounded-lg border border-neutral-200 shadow-sm focus:!outline-none px-4 text-neutral-700 py-2"
+      >
         Alle Anwesend
       </button>
     </PageHeader>
@@ -37,11 +58,16 @@
         <div v-for="item in filteredData" :key="item.id" class="flex px-8 items-center justify-between py-2.5">
           <div class="text-sm">{{ item.user.firstName }} {{ item.user.lastName }}</div>
           <div class="flex bg-neutral-50 border border-neutral-200 shadow-sm p-0.5 rounded-lg gap-1">
-            <div v-for="state in states.slice(1, states.length)" :key="state"
+            <div
+              v-for="state in states.slice(1, states.length)"
+              :key="state"
               class="p-1 w-8 flex items-center justify-center grayscale rounded-md text-center transition-all leading-none h-8 hover:bg-neutral-200"
               :class="{
                 'bg-neutral-200 border border-neutral-300 shadow-sm grayscale-0': state === item.state
-              }" :title="$t(state)" @click="setAttendance(item.user.id, state)">
+              }"
+              :title="$t(state)"
+              @click="setAttendance(item.user.id, state)"
+            >
               {{ stateToEmoji(state) }}
             </div>
           </div>

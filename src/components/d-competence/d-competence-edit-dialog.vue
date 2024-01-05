@@ -1,6 +1,10 @@
 <template>
-  <dialog ref="dialog" class="w-full max-w-sm rounded-lg p-4 text-sm backdrop:bg-neutral-900/90" style="overflow: visible"
-    @close.prevent="$emit('close')">
+  <dialog
+    ref="dialog"
+    class="w-full max-w-sm rounded-lg p-4 text-sm backdrop:bg-neutral-900/90"
+    style="overflow: visible"
+    @close.prevent="$emit('close')"
+  >
     <div class="mb-4 flex items-center justify-between">
       <div class="font-medium text-strong">{{ $t("edit_competence") }}</div>
       <button @click="onClose">

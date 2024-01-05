@@ -19,9 +19,14 @@
         <d-input name="email" :label="$t('email')" v-model="user.email as string"></d-input>
         <div class="flex flex-col">
           <label class="mb-1 text-sm text-neutral-500" for="role">{{ $t("role") }}</label>
-          <select v-model="user.role as string" name="role" id="role"
-            class="rounded-md border border-neutral-200 text-sm shadow" :disabled="!!user.id"
-            :class="{ '!cursor-not-allowed': !!user.id }">
+          <select
+            v-model="user.role as string"
+            name="role"
+            id="role"
+            class="rounded-md border border-neutral-200 text-sm shadow"
+            :disabled="!!user.id"
+            :class="{ '!cursor-not-allowed': !!user.id }"
+          >
             <option value disabled>{{ $t("select_role") }}</option>
             <option value="owner">{{ $t("owner") }}</option>
             <option value="admin">{{ $t("admin") }}</option>

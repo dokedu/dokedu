@@ -3,8 +3,15 @@
     <label for="date" class="mt-2 min-w-[64px] text-neutral-500">{{ $t("project", 2) }}</label>
 
     <div class="flex w-full flex-col gap-4">
-      <DSelect :options="eventOptions" :label="$t('label', 2)" multiple v-model="selected" v-model:search="eventSearch"
-        searchable class="w-full">
+      <DSelect
+        :options="eventOptions"
+        :label="$t('label', 2)"
+        multiple
+        v-model="selected"
+        v-model:search="eventSearch"
+        searchable
+        class="w-full"
+      >
         <template v-slot="{ option }">
           <DTag color="stone">
             {{ option.label }}

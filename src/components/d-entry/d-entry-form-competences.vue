@@ -9,15 +9,21 @@
       </header>
       <div class="mb-2 flex flex-col gap-2">
         <d-competence v-for="competence in competences" :key="competence.id" :competence="competence">
-          <d-competence-level :id="competence.id" :level="competence.level" :editable="true"
-            @update="updateCompetenceLevel" />
+          <d-competence-level
+            :id="competence.id"
+            :level="competence.level"
+            :editable="true"
+            @update="updateCompetenceLevel"
+          />
           <div class="rounded-md p-1 hover:bg-neutral-100" @click="toggleCompetence(competence)">
             <X :size="20" class="stroke-neutral-500" />
           </div>
         </d-competence>
       </div>
-      <div class="flex w-fit select-none items-center gap-2 rounded-md p-1 hover:bg-neutral-100"
-        @click="dialogOpen = true">
+      <div
+        class="flex w-fit select-none items-center gap-2 rounded-md p-1 hover:bg-neutral-100"
+        @click="dialogOpen = true"
+      >
         <div class="rounded-md">
           <Plus :size="20" class="stroke-neutral-500" />
         </div>
@@ -26,8 +32,11 @@
     </div>
   </div>
   <Teleport to="body">
-    <div v-if="dialogOpen" ref="dialog"
-      class="absolute right-0 top-0 h-screen w-full max-w-xl bg-white shadow-lg backdrop:bg-neutral-950/20">
+    <div
+      v-if="dialogOpen"
+      ref="dialog"
+      class="absolute right-0 top-0 h-screen w-full max-w-xl bg-white shadow-lg backdrop:bg-neutral-950/20"
+    >
       <div class="flex h-full flex-col p-4">
         <d-competence-search :selected="competences" @add="toggleCompetence" />
       </div>

@@ -1,5 +1,5 @@
 <template>
-  <DUserForm :user="(user as User)" :title="$t('add_user')" @save="onCreateUser"></DUserForm>
+  <DUserForm :user="user as User" :title="$t('add_user')" @save="onCreateUser"></DUserForm>
 </template>
 
 <script lang="ts" setup>

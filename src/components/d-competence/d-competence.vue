@@ -6,11 +6,18 @@
         {{ competence.name }}
       </div>
       <div class="flex items-center gap-2">
-        <div v-if="competence.tendency" class="flex items-center gap-2 text-sm"
-          :title="`${competence.tendency?.countLearnedCompetences} von ${competence.tendency?.countChildCompetences} Kompetenzen gelernt`">
+        <div
+          v-if="competence.tendency"
+          class="flex items-center gap-2 text-sm"
+          :title="`${competence.tendency?.countLearnedCompetences} von ${competence.tendency?.countChildCompetences} Kompetenzen gelernt`"
+        >
           <div class="h-2 w-[75px] overflow-clip rounded-md bg-neutral-200">
-            <div class="h-full bg-neutral-700" :style="`width: ${(competence.tendency?.countLearnedCompetences / competence.tendency?.countChildCompetences) * 100
-              }%;`" />
+            <div
+              class="h-full bg-neutral-700"
+              :style="`width: ${
+                (competence.tendency?.countLearnedCompetences / competence.tendency?.countChildCompetences) * 100
+              }%;`"
+            />
           </div>
         </div>
         <div class="w-[50px] px-1 text-right text-default">
@@ -23,15 +30,17 @@
     <div class="flex max-w-full gap-1 overflow-hidden text-xs">
       <div v-for="(parent, index) in competence.parents" class="flex items-center py-0.5">
         <div v-if="index !== 0" class="mx-1 text-muted">/</div>
-        <div :class="[
-          index === 0 ? 'block rounded-full px-2 py-0.5 text-strong' : '',
-          index !== 0 ? 'line-clamp-1 pl-0.5 pr-0 text-subtle' : '',
-          parent.color && parent.color.length > 0
-            ? `bg-${parent.color}-50 !text-${parent.color}-700`
-            : index === 0
-              ? 'border border-neutral-200'
-              : ''
-        ]">
+        <div
+          :class="[
+            index === 0 ? 'block rounded-full px-2 py-0.5 text-strong' : '',
+            index !== 0 ? 'line-clamp-1 pl-0.5 pr-0 text-subtle' : '',
+            parent.color && parent.color.length > 0
+              ? `bg-${parent.color}-50 !text-${parent.color}-700`
+              : index === 0
+                ? 'border border-neutral-200'
+                : ''
+          ]"
+        >
           {{ parent.name }}
         </div>
       </div>

@@ -10,8 +10,13 @@
     </PageHeader>
     <PageContent>
       <div class="mt-4 max-w-sm space-y-4 px-8">
-        <DSelect searchable :options="studentOptions" :label="$t('student')" v-model:search="studentSearch"
-          v-model="student" />
+        <DSelect
+          searchable
+          :options="studentOptions"
+          :label="$t('student')"
+          v-model:search="studentSearch"
+          v-model="student"
+        />
 
         <div class="flex items-center gap-2">
           <div class="w-20 text-sm font-medium text-strong">{{ $t("from") }}</div>

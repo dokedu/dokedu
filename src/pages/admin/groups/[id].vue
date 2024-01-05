@@ -1,7 +1,12 @@
 <template>
   <div v-if="data?.emailAccount">
-    <d-group-form :email-account="data.emailAccount as EmailAccount" :title="$t('edit_group')" deletable
-      @delete="onDeleteGroup" @save="onEditGroup"></d-group-form>
+    <d-group-form
+      :email-account="data.emailAccount as EmailAccount"
+      :title="$t('edit_group')"
+      deletable
+      @delete="onDeleteGroup"
+      @save="onEditGroup"
+    ></d-group-form>
   </div>
 </template>
 

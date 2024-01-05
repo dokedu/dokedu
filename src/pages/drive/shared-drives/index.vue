@@ -7,9 +7,17 @@
       </div>
     </PageHeader>
     <PageContent>
-      <DTable v-model:variables="pageVariables" v-model:selected="selected" :columns="columns" objectName="buckets"
-        :query="BucketsDocument" defaultSort="createdAt" :additionalTypenames="['Bucket']" @row-click="clickRow"
-        ref="dFileList">
+      <DTable
+        v-model:variables="pageVariables"
+        v-model:selected="selected"
+        :columns="columns"
+        objectName="buckets"
+        :query="BucketsDocument"
+        defaultSort="createdAt"
+        :additionalTypenames="['Bucket']"
+        @row-click="clickRow"
+        ref="dFileList"
+      >
         <template #name-data="{ column }">
           <div class="flex items-center gap-3">
             <Folder :size="18" class="fill-neutral-700 stroke-colors-default" />
@@ -132,7 +140,7 @@ const columns = [
   }
 ]
 
-interface Variables extends PageVariables { }
+interface Variables extends PageVariables {}
 
 const pageVariables = ref<Variables[]>([
   {

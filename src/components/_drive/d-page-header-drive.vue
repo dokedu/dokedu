@@ -2,8 +2,13 @@
   <PageHeader class="flex min-h-0 select-none justify-between gap-4">
     <d-drive-header-breadcrumbs />
     <div class="flex gap-2">
-      <DButton v-if="permission == FilePermission.Manager" type="transparent" size="md" :icon-left="FolderPlus"
-        @click="addFolder">
+      <DButton
+        v-if="permission == FilePermission.Manager"
+        type="transparent"
+        size="md"
+        :icon-left="FolderPlus"
+        @click="addFolder"
+      >
         {{ $t("folder") }}
       </DButton>
       <DButton v-if="permission == FilePermission.Manager" type="primary" size="md" :icon-left="Plus" @click="open()">
