@@ -1,0 +1,8 @@
+mutation deleteFile($id: ID!) {
+    deleteFile(input: { id: $id }) {
+        success
+        file {
+            id
+        }
+    }
+}

@@ -50,14 +50,14 @@
 </template>
 
 <script lang="ts" setup>
-import { useQuery, useMutation } from "@urql/vue";
-import { graphql } from "../../../../../gql";
 import { useRoute } from "vue-router/auto";
 import { computed, reactive } from "vue";
 import DCompetence from "@/components/d-competence/d-competence.vue";
 import DCompetenceLevel from "@/components/d-competence/d-competence-level.vue";
 import DCompetenceEntries from "@/components/d-competence/d-competence-entries.vue";
-import { Competence, UserCompetence } from "@/gql/graphql";
+import { Competence, UserCompetence } from "@/gql/schema.ts";
+import { useStudentCompetenceQuery } from "@/gql/queries/competences/studentCompetence.ts";
+import { useCreateUserCompetenceMutation } from "@/gql/mutations/userCompetences/createUserCompetence.ts";
 
 const route = computed(() => useRoute("/record/students/[id]/competences/[cid]"));
 const competenceId = computed(() => route.value.params.cid as string);
@@ -72,59 +72,11 @@ const getLevel = (competence: Competence) => {
   return competence?.userCompetences[0].level || 0;
 };
 
-const { data, executeQuery: fetchCompetence } = useQuery({
-  query: graphql(`
-    query studentCompetence($competenceId: ID!, $user: ID!) {
-      competence(id: $competenceId) {
-        id
-        name
-        parents {
-          id
-          name
-        }
-        competences(sort: { field: sort_order, order: asc }) {
-          type
-          id
-          name
-          grades
-          parents {
-            id
-            name
-          }
-          tendency(userId: $user) {
-            tendency
-            countChildCompetences
-            countLearnedCompetences
-          }
-          userCompetences(userId: $user) {
-            id
-            level
-            entry {
-              id
-            }
-            createdBy {
-              firstName
-              lastName
-            }
-            createdAt
-          }
-        }
-      }
-    }
-  `),
+const { data, executeQuery: fetchCompetence } = useStudentCompetenceQuery({
   variables: reactive({ competenceId, user: id }),
 });
 
-const { executeMutation: createUserCompetenceMutation } = useMutation(
-  graphql(`
-    mutation createUserCompetence($input: CreateUserCompetenceInput!) {
-      createUserCompetence(input: $input) {
-        id
-        level
-      }
-    }
-  `),
-);
+const { executeMutation: createUserCompetenceMutation } = useCreateUserCompetenceMutation();
 
 async function createUserCompetence(input: { id: string; level: number }) {
   await createUserCompetenceMutation({

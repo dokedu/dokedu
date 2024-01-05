@@ -32,7 +32,7 @@
       :search="search"
       :columns="columns"
       objectName="users"
-      :query="usersQuery"
+      :query="AdminUsersDocument"
       @row-click="goToUser"
       defaultSort="lastName"
     >
@@ -53,12 +53,12 @@ import PageHeader from "@/components/page-header.vue";
 import PageWrapper from "@/components/page-wrapper.vue";
 import { Plus } from "lucide-vue-next";
 import { ref, watch } from "vue";
-import { UserOrderBy } from "@/gql/graphql";
-import { graphql } from "@/gql";
 import DTable from "@/components/d-table/d-table.vue";
 import { useRouter } from "vue-router/auto";
 import { formatDate, watchDebounced } from "@vueuse/core";
 import type { PageVariables } from "@/types/types.ts";
+import { AdminUsersDocument } from "@/gql/queries/users/adminUsers.ts";
+import { UserOrderBy } from "@/gql/schema.ts";
 
 const router = useRouter();
 const search = ref("");
@@ -131,27 +131,6 @@ watch(showDeleted, () => {
     },
   ];
 });
-
-const usersQuery = graphql(`
-  query adminUsers($search: String, $order: UserOrderBy, $offset: Int, $showDeleted: Boolean) {
-    users(
-      filter: { role: [owner, admin, teacher], orderBy: $order, showDeleted: $showDeleted }
-      search: $search
-      offset: $offset
-    ) {
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-      }
-      edges {
-        id
-        firstName
-        lastName
-        email
-      }
-    }
-  }
-`);
 
 const goToUser = <Type extends { id: string }>(row: Type) => {
   router.push({ name: "/admin/users/[id]", params: { id: row.id } });

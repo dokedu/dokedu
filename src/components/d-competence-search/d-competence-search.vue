@@ -61,13 +61,12 @@
 </template>
 
 <script lang="ts" setup>
-import { useQuery } from "@urql/vue";
-import { graphql } from "@/gql";
 import DCompetence from "@/components/d-competence/d-competence.vue";
-import { computed, reactive, ref } from "vue";
+import { computed, reactive, Ref, ref } from "vue";
 import { ChevronRight, PlusIcon } from "lucide-vue-next";
-import { Competence } from "@/gql/graphql";
 import DCreateCompetence from "@/components/d-competence-search/d-create-competence.vue";
+import { useCompetenceSearchQuery } from "@/gql/queries/competences/competenceSearch.ts";
+import { useCompetencePathQuery } from "@/gql/queries/competences/competencePath.ts";
 
 defineProps({
   selected: {
@@ -85,7 +84,7 @@ const parents = computed(() => {
   return [parentId.value];
 });
 
-const filter = computed(() => {
+const filter = computed<any>(() => {
   const searchLength = search.value.length;
   const hasParent = !!parentId.value;
   if (!hasParent && searchLength === 0) return { type: "subject" };
@@ -93,58 +92,18 @@ const filter = computed(() => {
   return { parents: parents.value };
 });
 
-const { data: competenceData } = useQuery({
-  query: graphql(`
-    query competenceSearch($search: String, $filter: CompetenceFilterInput) {
-      competences(search: $search, filter: $filter, sort: { field: sort_order, order: asc }) {
-        edges {
-          id
-          name
-          type
-          color
-          grades
-          parents {
-            id
-            name
-            type
-            grades
-            color
-          }
-        }
-      }
-    }
-  `),
-  // @ts-ignore
+const { data: competenceData } = useCompetenceSearchQuery({
   variables: reactive({
-    search,
-    filter,
+    search: search,
+    filter: filter,
   }),
 });
 
-const { data: parentData } = useQuery({
-  query: graphql(`
-    query competencePath($id: ID!) {
-      competence(id: $id) {
-        id
-        name
-        type
-        color
-        grades
-        parents {
-          id
-          name
-          type
-          grades
-          color
-        }
-      }
-    }
-  `),
-  variables: {
-    // @ts-ignore
-    id: parentId,
-  },
-  pause: computed(() => !parentId.value),
+const { data: parentData } = useCompetencePathQuery({
+  variables: reactive({
+    id: parentId as unknown as string,
+  }),
+  pause: !parentId,
 });
 
 const parentPath = computed(() => {

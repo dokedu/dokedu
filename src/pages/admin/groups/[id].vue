@@ -12,55 +12,24 @@
 
 <script lang="ts" setup>
 import DGroupForm from "@/components/d-group-form.vue";
-import { useQuery, useMutation } from "@urql/vue";
-import { graphql } from "@/gql";
 import { computed, reactive } from "vue";
 import { useRoute } from "vue-router/auto";
 import { createNotification } from "@/composables/useToast";
 import router from "@/router/router.ts";
-import { EmailAccount } from "@/gql/graphql";
+import { useAdminGroupByIdQuery } from "@/gql/queries/emailAccounts/adminGroupById.ts";
+import { useDeleteEmailGroupMutation } from "@/gql/mutations/emailGroups/deleteEmailGroup.ts";
+import { useEditEmailGroupMutation } from "@/gql/mutations/emailGroups/editEmailGroup.ts";
+import { EmailAccount } from "@/gql/schema.ts";
 
 const route = useRoute<"/admin/groups/[id]">();
 const id = computed(() => route.params.id as string);
 
-const { data } = useQuery({
-  query: graphql(`
-    query adminGroupById($id: ID!) {
-      emailAccount(id: $id) {
-        id
-        name
-        description
-        members {
-          name
-        }
-      }
-    }
-  `),
+const { data } = useAdminGroupByIdQuery({
   variables: reactive({ id }),
 });
 
-const { executeMutation: deleteGroup } = useMutation(
-  graphql(`
-    mutation deleteEmailGroup($id: ID!) {
-      deleteEmailGroup(id: $id) {
-        id
-        name
-      }
-    }
-  `),
-);
-
-const { executeMutation: editGroup } = useMutation(
-  graphql(`
-    mutation editEmailGroup($input: UpdateEmailGroupInput!) {
-      updateEmailGroup(input: $input) {
-        id
-        name
-        description
-      }
-    }
-  `),
-);
+const { executeMutation: deleteGroup } = useDeleteEmailGroupMutation();
+const { executeMutation: editGroup } = useEditEmailGroupMutation();
 
 async function onDeleteGroup() {
   const { error } = await deleteGroup({ id: data?.value?.emailAccount?.id as string });

@@ -1,0 +1,5 @@
+mutation previewFile($id: ID!) {
+    previewFile(input: { id: $id }) {
+        url
+    }
+}

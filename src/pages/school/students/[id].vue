@@ -12,77 +12,24 @@
 
 <script lang="ts" setup>
 import DStudentForm from "@/components/d-student-form.vue";
-import { useQuery, useMutation } from "@urql/vue";
-import { graphql } from "@/gql";
 import { computed, reactive, ref } from "vue";
-import { User } from "@/gql/graphql";
 import { useRoute, useRouter } from "vue-router/auto";
 import { createNotification } from "@/composables/useToast";
+import { useAdminStudentByIdQuery } from "@/gql/queries/users/adminStudentById.ts";
+import { useUpdateStudentMutation } from "@/gql/mutations/users/updateStudent.ts";
+import { useArchiveStudentMutation } from "@/gql/mutations/users/archiveStudent.ts";
+import { User } from "@/gql/schema.ts";
 
 const route = useRoute<"/school/students/[id]">();
 const router = useRouter();
 const id = computed(() => route.params.id as string);
 
-const { data } = useQuery({
-  query: graphql(`
-    query adminStudentById($id: ID!) {
-      user(id: $id) {
-        id
-        firstName
-        lastName
-        role
-        student {
-          id
-          grade
-          birthday
-          joinedAt
-          leftAt
-          emoji
-        }
-      }
-    }
-  `),
+const { data } = useAdminStudentByIdQuery({
   variables: reactive({ id }),
 });
-const { executeMutation: updateStudent } = useMutation(
-  graphql(`
-    mutation updateStudent($student: UpdateUserInput!) {
-      updateUser(input: $student) {
-        id
-        firstName
-        lastName
-        role
-        student {
-          id
-          birthday
-          grade
-          leftAt
-          joinedAt
-          emoji
-        }
-      }
-    }
-  `),
-);
+const { executeMutation: updateStudent } = useUpdateStudentMutation();
 
-const { executeMutation: archiveStudent } = useMutation(
-  graphql(`
-    mutation archiveStudent($id: ID!) {
-      archiveUser(id: $id) {
-        id
-        firstName
-        lastName
-        role
-        student {
-          birthday
-          grade
-          leftAt
-          joinedAt
-        }
-      }
-    }
-  `),
-);
+const { executeMutation: archiveStudent } = useArchiveStudentMutation();
 
 const onEditStudent = async () => {
   const student = ref(data?.value?.user);

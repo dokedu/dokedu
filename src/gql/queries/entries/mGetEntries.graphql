@@ -1,0 +1,19 @@
+query mGetEntries($limit: Int, $order: EntrySortBy, $offset: Int) {
+    entries(limit: $limit, sortBy: $order, offset: $offset) {
+        pageInfo {
+            hasNextPage
+            hasPreviousPage
+        }
+        edges {
+            id
+            date
+            body
+            user {
+                id
+                firstName
+                lastName
+            }
+            createdAt
+        }
+    }
+}

@@ -9,9 +9,8 @@ import { onKeyStroke } from "@vueuse/core";
 import { reactive } from "vue";
 import { useRoute, useRouter } from "vue-router/auto";
 import DProjectForm from "@/components/d-project-form.vue";
-import { useQuery } from "@urql/vue";
-import { graphql } from "@/gql";
-import { Event } from "@/gql/graphql";
+import { useEventQuery } from "@/gql/queries/events/event.ts";
+import { Event } from "@/gql/schema.ts";
 
 const route = useRoute<"/record/projects/[id]">();
 const router = useRouter();
@@ -30,32 +29,7 @@ onKeyStroke("Escape", async () => {
   await cancel();
 });
 
-const { data } = useQuery({
-  query: graphql(`
-    query event($id: ID!) {
-      event(id: $id) {
-        id
-        title
-        body
-        createdAt
-        startsAt
-        endsAt
-        competences {
-          id
-          name
-          type
-          grades
-          parents {
-            id
-            name
-            type
-            grades
-            color
-          }
-        }
-      }
-    }
-  `),
+const { data } = useEventQuery({
   variables: reactive({
     id: route.params.id as string,
   }),

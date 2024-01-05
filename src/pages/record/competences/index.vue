@@ -15,7 +15,7 @@
     </PageHeader>
     <DTable
       :columns="columns"
-      :query="competencesQuery"
+      :query="CompetenceSubjectsDocument"
       v-model:variables="pageVariables"
       objectName="competences"
       hideHeader
@@ -48,16 +48,16 @@
 <script setup lang="ts">
 import PageHeader from "@/components/page-header.vue";
 import PageWrapper from "@/components/page-wrapper.vue";
-import { graphql } from "@/gql";
 import { ref } from "vue";
 import { Edit2, Folder } from "lucide-vue-next";
 import DCompetenceEditDialog from "@/components/d-competence/d-competence-edit-dialog.vue";
-import { Competence } from "@/gql/graphql";
 import DTag from "@/components/d-tag/d-tag.vue";
 import DTable from "@/components/d-table/d-table.vue";
 import { useRouter } from "vue-router/auto";
 import { watchDebounced } from "@vueuse/core";
 import type { PageVariables } from "@/types/types.ts";
+import { Competence } from "@/gql/schema.ts";
+import { CompetenceSubjectsDocument } from "@/gql/queries/competences/competenceSubjects.ts";
 
 const search = ref("");
 const competence = ref<Competence | null>(null);
@@ -113,37 +113,6 @@ function grades(competence: Competence) {
 
   return `${sorted[0]} - ${sorted[sorted.length - 1]}`;
 }
-
-const competencesQuery = graphql(`
-  query competenceSubjects($search: String, $limit: Int, $offset: Int) {
-    competences(
-      filter: { type: subject }
-      search: $search
-      limit: $limit
-      offset: $offset
-      sort: { field: sort_order, order: asc }
-    ) {
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-      }
-      edges {
-        id
-        name
-        type
-        grades
-        color
-        sortOrder
-        parents {
-          id
-          name
-          type
-          grades
-        }
-      }
-    }
-  }
-`);
 
 const goToCompetence = <Type extends { id: string }>(row: Type) => {
   router.push({

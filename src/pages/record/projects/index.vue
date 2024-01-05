@@ -56,7 +56,7 @@
       v-model:variables="pageVariables"
       :columns="columns"
       objectName="events"
-      :query="eventsQuery"
+      :query="EventWithSearchDocument"
       defaultSort="startsAt"
       @row-click="onRowClick"
     >
@@ -81,12 +81,12 @@ import DButton from "@/components/d-button/d-button.vue";
 import { Plus } from "lucide-vue-next";
 import { Share } from "lucide-vue-next";
 import { ref, computed, watch } from "vue";
-import { graphql } from "@/gql";
 import { ListFilter } from "lucide-vue-next";
 import DTable from "@/components/d-table/d-table.vue";
 import { useRouter } from "vue-router/auto";
 import type { PageVariables } from "@/types/types.ts";
-import { EventOrderBy } from "@/gql/graphql.ts";
+import { EventOrderBy } from "@/gql/schema.ts";
+import { EventWithSearchDocument } from "@/gql/queries/events/eventWithSearch.ts";
 
 const sheet = ref<HTMLElement | null>(null);
 
@@ -180,23 +180,4 @@ watch([search, startTimestamp, endsTimestamp], () => {
     },
   ];
 });
-
-const eventsQuery = graphql(`
-  query eventWithSearch($search: String, $offset: Int, $order: EventOrderBy, $filter: EventFilterInput) {
-    events(search: $search, limit: 50, offset: $offset, order: $order, filter: $filter) {
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-      }
-      edges {
-        id
-        title
-        body
-        createdAt
-        startsAt
-        endsAt
-      }
-    }
-  }
-`);
 </script>

@@ -48,35 +48,12 @@
 import MPageHeader from "@/components/mobile/m-page-header.vue";
 import MPageFooter from "@/components/mobile/m-page-footer.vue";
 import { Plus } from "lucide-vue-next";
-import { graphql } from "@/gql";
-import { useMutation, useQuery } from "@urql/vue";
-import { EntrySortBy } from "@/gql/graphql";
-import createEntryDraftMutation from "@/queries/createEntryDraft.mutation.ts";
 import { useRouter } from "vue-router/auto";
+import { useMGetEntriesQuery } from "@/gql/queries/entries/mGetEntries.ts";
+import { useCreateEntryDraftMutation } from "@/gql/mutations/entries/createEntryDraft.ts";
+import { EntrySortBy } from "@/gql/schema.ts";
 
-const { executeMutation: createEntryDraft } = useMutation(createEntryDraftMutation);
-
-const query = graphql(`
-  query mGetEntries($limit: Int, $order: EntrySortBy, $offset: Int) {
-    entries(limit: $limit, sortBy: $order, offset: $offset) {
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-      }
-      edges {
-        id
-        date
-        body
-        user {
-          id
-          firstName
-          lastName
-        }
-        createdAt
-      }
-    }
-  }
-`);
+const { executeMutation: createEntryDraft } = useCreateEntryDraftMutation();
 
 const router = useRouter();
 
@@ -86,8 +63,7 @@ async function createEntry() {
   await router.push({ name: "/m/record/entries/[id]", params: { id: data?.createEntry?.id as string } });
 }
 
-const { data } = useQuery({
-  query,
+const { data } = useMGetEntriesQuery({
   variables: {
     order: EntrySortBy.CreatedAtDesc,
     limit: 10,

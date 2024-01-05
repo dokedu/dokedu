@@ -30,11 +30,11 @@
 <script lang="ts" setup>
 import { Form, useForm, useField } from "vee-validate";
 import DSelect from "@/components/d-select/d-select.vue";
-import { useMutation, useQuery } from "@urql/vue";
-import { graphql } from "@/gql";
 import { computed, reactive, ref } from "vue";
 import { XIcon } from "lucide-vue-next";
 import * as yup from "yup";
+import { useSubjectsDataQuery } from "@/gql/queries/competences/subjectsData.ts";
+import { useCreateCompetenceMutation } from "@/gql/mutations/competences/createCompetence.ts";
 
 yup.setLocale({
   mixed: {
@@ -80,43 +80,11 @@ const onSubmit = handleSubmit(async (values) => {
 
 const emit = defineEmits(["close", "created"]);
 
-const { data: subjectsData } = useQuery({
-  query: graphql(`
-    query subjectsData($search: String) {
-      competences(filter: { type: [subject] }, search: $search) {
-        edges {
-          id
-          name
-          type
-          color
-          grades
-        }
-      }
-    }
-  `),
+const { data: subjectsData } = useSubjectsDataQuery({
   variables: reactive({ search: subjectSearch }),
 });
 
-const { executeMutation: createCompetence } = useMutation(
-  graphql(`
-    mutation createCompetence($input: CreateCompetenceInput!) {
-      createCompetence(input: $input) {
-        id
-        name
-        type
-        grades
-        color
-        parents {
-          id
-          name
-          type
-          grades
-          color
-        }
-      }
-    }
-  `),
-);
+const { executeMutation: createCompetence } = useCreateCompetenceMutation();
 
 const subjectsOptions = computed(() => {
   if (!subjectsData.value?.competences?.edges) return [];

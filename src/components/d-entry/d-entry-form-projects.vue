@@ -30,16 +30,15 @@
 
 <script lang="ts" setup>
 import { computed, ref, toRef } from "vue";
-import { Entry, Event } from "@/gql/graphql";
-import { useMutation, useQuery } from "@urql/vue";
 import DTag from "../d-tag/d-tag.vue";
-import eventQuery from "@/queries/events";
 import DSelect from "@/components/d-select/d-select.vue";
-import deleteEntryEventMutation from "@/queries/deleteEntryEvent.mutation.ts";
-import createEntryEventMutation from "@/queries/createEntryEvent.mutation.ts";
+import { useDeleteEntryEventInputMutation } from "@/gql/mutations/entries/deleteEntryEvent.ts";
+import { useCreateEntryEventMutation } from "@/gql/mutations/entries/createEntryEvent.ts";
+import { useEventsQuery } from "@/gql/queries/events/events.ts";
+import { Entry } from "@/gql/schema.ts";
 
-const { executeMutation: deleteEntryEvent } = useMutation(deleteEntryEventMutation);
-const { executeMutation: createEntryEvent } = useMutation(createEntryEventMutation);
+const { executeMutation: deleteEntryEvent } = useDeleteEntryEventInputMutation();
+const { executeMutation: createEntryEvent } = useCreateEntryEventMutation();
 
 const props = defineProps<{
   entry: Partial<Entry>;
@@ -48,9 +47,7 @@ const props = defineProps<{
 const entry = toRef(props, "entry");
 const eventSearch = ref("");
 
-const { data: eventsData } = useQuery({
-  query: eventQuery,
-});
+const { data: eventsData } = useEventsQuery({});
 
 const selected = computed({
   get: () => {

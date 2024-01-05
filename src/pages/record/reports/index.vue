@@ -9,7 +9,7 @@
         </router-link>
       </div>
     </PageHeader>
-    <DTable :columns="columns" objectName="reports" :query="reportsQuery" v-model:variables="pageVariables">
+    <DTable :columns="columns" objectName="reports" :query="ReportsDocument" v-model:variables="pageVariables">
       <template #student-data="{ item }">
         <div>{{ item.studentUser.firstName }} {{ item.studentUser.lastName }}</div>
       </template>
@@ -64,14 +64,14 @@ import PageHeader from "@/components/page-header.vue";
 import PageWrapper from "@/components/page-wrapper.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { Plus, Loader2 } from "lucide-vue-next";
-import { graphql } from "@/gql";
 import { formatDate } from "@vueuse/core";
-import { Report } from "@/gql/graphql";
+import { Report } from "@/gql/schema.ts";
 import DReportStatus from "@/components/d-report/d-report-status.vue";
 import { ref } from "vue";
 import DTable from "@/components/d-table/d-table.vue";
 import type { PageVariables } from "@/types/types.ts";
 import useDownloadFile from "@/composables/useDownloadFile";
+import { ReportsDocument } from "@/gql/queries/reports/reports.ts";
 
 const columns = [
   {
@@ -114,40 +114,6 @@ const pageVariables = ref<PageVariables[]>([
     nextPage: undefined,
   },
 ]);
-
-const reportsQuery = graphql(`
-  query reports {
-    reports(limit: 30) {
-      totalCount
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-      }
-      edges {
-        id
-        status
-        format
-        kind
-        from
-        to
-        createdAt
-        studentUser {
-          id
-          firstName
-          lastName
-        }
-        user {
-          id
-          firstName
-          lastName
-        }
-        file {
-          id
-        }
-      }
-    }
-  }
-`);
 
 const downloadingFilesCount = ref(0);
 

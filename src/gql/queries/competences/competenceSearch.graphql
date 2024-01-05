@@ -1,0 +1,18 @@
+query competenceSearch($search: String, $filter: CompetenceFilterInput) {
+    competences(search: $search, filter: $filter, sort: { field: sort_order, order: asc }) {
+        edges {
+            id
+            name
+            type
+            color
+            grades
+            parents {
+                id
+                name
+                type
+                grades
+                color
+            }
+        }
+    }
+}

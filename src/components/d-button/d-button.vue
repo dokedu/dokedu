@@ -1,8 +1,8 @@
 <template>
   <div tabindex="1" :class="buttonClasses">
-    <component v-if="iconLeft" :is="iconLeft" :size="16" :class="iconLeftClasses" />
+    <component v-if="iconLeft" :is="iconLeft" :size="18" :class="iconLeftClasses" />
     <slot />
-    <component v-if="iconRight" :is="iconRight" :size="16" />
+    <component v-if="iconRight" :is="iconRight" :size="18" />
   </div>
 </template>
 
@@ -32,7 +32,6 @@ const buttonClasses = computed(() => {
     "group",
     "relative",
     "inline-flex",
-    "h-fit",
     "select-none",
     "items-center",
     "justify-center",

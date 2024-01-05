@@ -1,0 +1,5 @@
+mutation createEntryCompetence($input: CreateEntryCompetenceInput!) {
+  createEntryCompetence(input: $input) {
+    id
+  }
+}

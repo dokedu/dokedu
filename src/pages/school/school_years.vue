@@ -14,7 +14,7 @@
       :columns="columns"
       objectName="schoolYears"
       @row-click="goToSchoolYear"
-      :query="schoolYearsQuery"
+      :query="SchoolYearsDocument"
     >
     </DTable>
   </PageWrapper>
@@ -29,7 +29,7 @@ import DButton from "@/components/d-button/d-button.vue";
 import { PageVariables } from "@/types/types.ts";
 import { ref } from "vue";
 import { useRouter } from "vue-router/auto";
-import schoolYearsQuery from "@/queries/schoolYears.query.ts";
+import { SchoolYearsDocument } from "@/gql/queries/schoolYears/schoolYears.ts";
 
 const search = ref("");
 

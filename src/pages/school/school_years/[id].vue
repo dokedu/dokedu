@@ -16,21 +16,19 @@ import DInput from "@/components/d-input/d-input.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { useRouter, useRoute } from "vue-router/auto";
 import { computed } from "vue";
-import { useMutation, useQuery } from "@urql/vue";
-import schoolYearQuery from "@/queries/schoolYear.query.ts";
-import updateSchoolYearMutation from "@/queries/updateSchoolYear.mutation.ts";
+import { useUpdateSchoolYearMutation } from "@/gql/mutations/schoolYears/updateSchoolYear.ts";
+import { useSchoolYearQuery } from "@/gql/queries/schoolYears/schoolYear.ts";
 
 const router = useRouter();
 const route = useRoute("/school/school_years/[id]");
 
-const { data } = useQuery({
-  query: schoolYearQuery,
+const { data } = useSchoolYearQuery({
   variables: {
     id: route.params.id,
   },
 });
 
-const { executeMutation: updateSchoolYear } = useMutation(updateSchoolYearMutation);
+const { executeMutation: updateSchoolYear } = useUpdateSchoolYearMutation();
 
 const year = computed({
   get() {

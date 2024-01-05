@@ -39,10 +39,10 @@
 </template>
 
 <script lang="ts" setup>
-import { UserCompetence } from "@/gql/graphql.ts";
 import { ChevronDown } from "lucide-vue-next";
 import { ref } from "vue";
 import { formatDate } from "@vueuse/core";
+import { UserCompetence } from "@/gql/schema.ts";
 
 export interface Props {
   competences: UserCompetence[];

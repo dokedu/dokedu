@@ -14,62 +14,28 @@
 
 <script lang="ts" setup>
 import DUserForm from "@/components/d-user-form.vue";
-import { useQuery, useMutation } from "@urql/vue";
-import { graphql } from "@/gql";
 import { computed, reactive, ref } from "vue";
-import { User } from "@/gql/graphql";
 import { useRoute, useRouter } from "vue-router/auto";
 import { createNotification } from "@/composables/useToast";
 import { useI18n } from "vue-i18n";
+import { User } from "@/gql/schema.ts";
+import { useAdminUserByIdQuery } from "@/gql/mutations/users/adminUserById.ts";
+import { useUpdateUserMutation } from "@/gql/mutations/users/updateUser.ts";
+import { useArchiveUserMutation } from "@/gql/queries/users/archiveUser.ts";
+import { useForgotPasswordMutation } from "@/gql/mutations/auth/forgotPassword.ts";
+import { useSendInviteMutation } from "@/gql/mutations/users/sendInvite.ts";
 
 const route = useRoute<"/admin/users/[id]">();
 const router = useRouter();
 const id = computed(() => route.params.id as string);
 const { t } = useI18n();
 
-const { data } = useQuery({
-  query: graphql(`
-    query adminUserById($id: ID!) {
-      user(id: $id) {
-        id
-        firstName
-        lastName
-        email
-        role
-        inviteAccepted
-      }
-    }
-  `),
+const { data } = useAdminUserByIdQuery({
   variables: reactive({ id }),
 });
 
-const { executeMutation: updateUser } = useMutation(
-  graphql(`
-    mutation updateUser($input: UpdateUserInput!) {
-      updateUser(input: $input) {
-        id
-        firstName
-        lastName
-        email
-        role
-      }
-    }
-  `),
-);
-
-const { executeMutation: archiveUser } = useMutation(
-  graphql(`
-    mutation archiveUser($id: ID!) {
-      archiveUser(id: $id) {
-        id
-        firstName
-        lastName
-        email
-        role
-      }
-    }
-  `),
-);
+const { executeMutation: updateUser } = useUpdateUserMutation();
+const { executeMutation: archiveUser } = useArchiveUserMutation();
 
 const onEditUser = async () => {
   const user = ref(data?.value?.user);
@@ -106,23 +72,8 @@ const onEditUser = async () => {
   });
 };
 
-const { executeMutation: forgotPassword } = useMutation(
-  graphql(`
-    mutation forgotPassword($input: ForgotPasswordInput!) {
-      forgotPassword(input: $input) {
-        success
-      }
-    }
-  `),
-);
-
-const { executeMutation: inviteUser } = useMutation(
-  graphql(`
-    mutation sendInvite($id: ID!) {
-      sendUserInvite(id: $id)
-    }
-  `),
-);
+const { executeMutation: forgotPassword } = useForgotPasswordMutation();
+const { executeMutation: inviteUser } = useSendInviteMutation();
 
 const onInviteUser = async () => {
   const user = ref(data?.value?.user);

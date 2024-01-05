@@ -1,0 +1,9 @@
+query getEntryFilterTeachers($search: String) {
+    users(filter: { role: [owner, admin, teacher, educator] }, limit: 500, search: $search) {
+        edges {
+            id
+            firstName
+            lastName
+        }
+    }
+}

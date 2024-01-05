@@ -1,0 +1,5 @@
+mutation updateEntryUserCompetenceLevel($input: UpdateEntryUserCompetenceLevel!) {
+  updateEntryUserCompetenceLevel(input: $input) {
+    id
+  }
+}

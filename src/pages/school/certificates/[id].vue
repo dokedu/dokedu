@@ -16,21 +16,19 @@ import DInput from "@/components/d-input/d-input.vue";
 import DButton from "@/components/d-button/d-button.vue";
 import { useRouter, useRoute } from "vue-router/auto";
 import { computed } from "vue";
-import { useMutation, useQuery } from "@urql/vue";
-import subjectQuery from "@/queries/subject.query.ts";
-import updateSubjectMutation from "@/queries/updateSubject.mutation.ts";
+import { useUpdateSubjectMutation } from "@/gql/mutations/subjects/updateSubject.ts";
+import { useSubjectQuery } from "@/gql/queries/subjects/subject.ts";
 
 const router = useRouter();
 const route = useRoute("/school/subjects/[id]");
 
-const { data } = useQuery({
-  query: subjectQuery,
+const { data } = useSubjectQuery({
   variables: {
     id: route.params.id,
   },
 });
 
-const { executeMutation: updateSubject } = useMutation(updateSubjectMutation);
+const { executeMutation: updateSubject } = useUpdateSubjectMutation();
 
 const name = computed({
   get() {

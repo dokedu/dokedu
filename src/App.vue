@@ -14,6 +14,7 @@ import Default from "./layout/default.vue";
 import Auth from "./layout/auth.vue";
 import None from "./layout/none.vue";
 import Mobile from "./layout/mobile.vue";
+import Chat from "./layout/chat.vue";
 import { useRoute } from "vue-router/auto";
 import { computed } from "vue";
 import { publicRoutes } from "./router/publicRoutes";
@@ -34,6 +35,8 @@ const layout = computed(() => {
       return Auth;
     case "none":
       return None;
+    case "chat":
+      return Chat;
     case "mobile":
       return Mobile;
     default:

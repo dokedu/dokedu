@@ -11,40 +11,22 @@
 
 <script lang="ts" setup>
 import DDomainForm from "@/components/d-domain-form.vue";
-import { useQuery, useMutation } from "@urql/vue";
-import { graphql } from "@/gql";
 import { computed, reactive } from "vue";
-import { Domain } from "@/gql/graphql";
 import { createNotification } from "@/composables/useToast";
 import { useRoute, useRouter } from "vue-router/auto";
+import { useAdminDomainByIdQuery } from "@/gql/queries/domains/adminDomainById.ts";
+import { useDeleteDomainMutation } from "@/gql/mutations/domains/deleteDomain.ts";
+import { Domain } from "@/gql/schema.ts";
 
 const route = useRoute<"/admin/domains/[id]">();
 const router = useRouter();
 const id = computed(() => route.params.id as string);
 
-const { data } = useQuery({
-  query: graphql(`
-    query adminDomainById($id: ID!) {
-      domain(id: $id) {
-        id
-        name
-        createdAt
-      }
-    }
-  `),
+const { data } = useAdminDomainByIdQuery({
   variables: reactive({ id }),
 });
 
-const { executeMutation: deleteDomain } = useMutation(
-  graphql(`
-    mutation deleteDomain($input: DeleteDomainInput!) {
-      deleteDomain(input: $input) {
-        name
-        createdAt
-      }
-    }
-  `),
-);
+const { executeMutation: deleteDomain } = useDeleteDomainMutation();
 
 const onDeleteDomain = async () => {
   const domain = data?.value?.domain;

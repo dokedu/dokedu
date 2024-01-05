@@ -18,7 +18,7 @@
       :search="search"
       :columns="columns"
       objectName="users"
-      :query="studentsQuery"
+      :query="RecordStudentsDocument"
       @row-click="goToStudent"
       defaultSort="lastName"
     >
@@ -45,11 +45,11 @@ import { ref } from "vue";
 import PageHeader from "../../../components/page-header.vue";
 import PageWrapper from "../../../components/page-wrapper.vue";
 import { formatDate, watchDebounced } from "@vueuse/core";
-import { graphql } from "@/gql";
 import { useRouter } from "vue-router/auto";
-import { UserOrderBy } from "@/gql/graphql";
+import { UserOrderBy } from "@/gql/schema.ts";
 import DTable from "@/components/d-table/d-table.vue";
 import type { PageVariables } from "@/types/types.ts";
+import { RecordStudentsDocument } from "@/gql/queries/users/recordStudents.ts";
 
 const search = ref("");
 const router = useRouter();
@@ -112,26 +112,4 @@ watchDebounced(
   },
   { debounce: 250, maxWait: 500 },
 );
-
-const studentsQuery = graphql(`
-  query recordStudents($search: String, $order: UserOrderBy, $offset: Int) {
-    users(filter: { role: [student], orderBy: $order }, search: $search, offset: $offset) {
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-      }
-      edges {
-        id
-        firstName
-        lastName
-        student {
-          id
-          birthday
-          grade
-          emoji
-        }
-      }
-    }
-  }
-`);
 </script>

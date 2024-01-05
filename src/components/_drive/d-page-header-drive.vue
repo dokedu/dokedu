@@ -25,9 +25,8 @@ import DButton from "@/components/d-button/d-button.vue";
 import { FolderPlus, Plus } from "lucide-vue-next";
 import { useFileDialog } from "@vueuse/core";
 import { toRefs } from "vue";
-import { useMutation } from "@urql/vue";
-import { graphql } from "@/gql";
-import { FilePermission } from "@/gql/graphql";
+import { useCreateFolderMutation } from "@/gql/mutations/files/createFolder.ts";
+import { FilePermission } from "@/gql/schema.ts";
 
 export interface Props {
   title: string;
@@ -73,13 +72,5 @@ async function addFolder() {
   }
 }
 
-const { executeMutation: createFolder } = useMutation(
-  graphql(`
-    mutation createFolder($input: CreateFolderInput!) {
-      createFolder(input: $input) {
-        id
-      }
-    }
-  `),
-);
+const { executeMutation: createFolder } = useCreateFolderMutation();
 </script>

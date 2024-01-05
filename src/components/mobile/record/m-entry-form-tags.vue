@@ -40,13 +40,12 @@ import DTag from "@/components/d-tag/d-tag.vue";
 import { useVModel, useWindowSize } from "@vueuse/core";
 import { Plus, Check } from "lucide-vue-next";
 import { computed, ref } from "vue";
-import { graphql } from "@/gql";
-import { useMutation, useQuery } from "@urql/vue";
-import deleteEntryTagMutation from "@/queries/deleteEntryTag.mutation.ts";
-import createEntryTagMutation from "@/queries/createEntryTag.mutation.ts";
+import { useDeleteEntryTagInputMutation } from "@/gql/mutations/entries/deleteEntryTag.ts";
+import { useCreateEntryTagMutation } from "@/gql/mutations/entries/createEntryTag.ts";
+import { useTagLimitedQuery } from "@/gql/queries/tags/tags.ts";
 
-const { executeMutation: deleteEntryTag } = useMutation(deleteEntryTagMutation);
-const { executeMutation: createEntryTag } = useMutation(createEntryTagMutation);
+const { executeMutation: deleteEntryTag } = useDeleteEntryTagInputMutation();
+const { executeMutation: createEntryTag } = useCreateEntryTagMutation();
 
 const sheetOpen = ref(false);
 
@@ -65,19 +64,7 @@ const emit = defineEmits(["update:modelValue"]);
 
 const tags = useVModel(props, "modelValue", emit);
 
-const { data } = useQuery({
-  query: graphql(`
-    query tags {
-      tags(limit: 50) {
-        edges {
-          id
-          name
-          color
-        }
-      }
-    }
-  `),
-});
+const { data } = useTagLimitedQuery({});
 
 async function toggleTag(tag: any) {
   if (tags.value.find((p: any) => p.id === tag.id)) {

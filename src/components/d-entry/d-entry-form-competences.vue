@@ -50,17 +50,16 @@ import { computed, ref, toRef } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { onKeyStroke } from "@vueuse/core";
 import DCompetenceLevel from "@/components/d-competence/d-competence-level.vue";
-import { Entry, Competence } from "@/gql/graphql";
 import DCompetence from "@/components/d-competence/d-competence.vue";
 import DCompetenceSearch from "@/components/d-competence-search/d-competence-search.vue";
-import { useMutation } from "@urql/vue";
-import deleteEntryCompetenceMutation from "@/queries/deleteEntryCompetence.mutation.ts";
-import updateEntryUserCompetenceMutation from "@/queries/updateEntryUserCompetence.mutation.ts";
-import createEntryCompetenceMutation from "@/queries/createEntryCompetence.mutation.ts";
+import { useDeleteEntryCompetenceInputMutation } from "@/gql/mutations/entries/deleteEntryCompetence.ts";
+import { useCreateEntryCompetenceMutation } from "@/gql/mutations/entries/createEntryCompetence.ts";
+import { useUpdateEntryUserCompetenceLevelMutation } from "@/gql/mutations/entries/updateEntryUserCompetence.ts";
+import { Competence, Entry } from "@/gql/schema.ts";
 
-const { executeMutation: deleteEntryCompetence } = useMutation(deleteEntryCompetenceMutation);
-const { executeMutation: createEntryCompetence } = useMutation(createEntryCompetenceMutation);
-const { executeMutation: updateEntryUserCompetenceLevel } = useMutation(updateEntryUserCompetenceMutation);
+const { executeMutation: deleteEntryCompetence } = useDeleteEntryCompetenceInputMutation();
+const { executeMutation: createEntryCompetence } = useCreateEntryCompetenceMutation();
+const { executeMutation: updateEntryUserCompetenceLevel } = useUpdateEntryUserCompetenceLevelMutation();
 
 const dialog = ref(null);
 const dialogOpen = ref(false);

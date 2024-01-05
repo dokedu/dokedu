@@ -117,7 +117,7 @@ const getSortIcon = (column: Column) => {
 };
 
 const table = ref<HTMLElement>();
-const columns = toRef(props, "columns");
+const columns = computed(() => props.columns);
 const selectedRows = ref<{ id: string }[]>([]);
 
 const isSelected = (row: { id: string }) => {

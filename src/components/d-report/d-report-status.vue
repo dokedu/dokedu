@@ -6,10 +6,9 @@
 
 <script lang="ts" setup>
 import { computed } from "vue";
-import { ReportStatus } from "@/gql/graphql.ts";
 import { toRef } from "vue";
-
 import i18n from "@/i18n.ts";
+import { ReportStatus } from "@/gql/schema.ts";
 
 export interface Props {
   status: ReportStatus;

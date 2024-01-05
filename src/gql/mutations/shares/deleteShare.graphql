@@ -1,0 +1,7 @@
+mutation deleteShare($input: DeleteShareInput!) {
+    deleteShare(input: $input) {
+        user {
+            id
+        }
+    }
+}

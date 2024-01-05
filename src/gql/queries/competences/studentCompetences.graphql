@@ -1,0 +1,14 @@
+query studentCompetences($userId: ID!) {
+    competences(filter: { type: subject }, limit: 100, sort: { field: sort_order, order: asc }) {
+        edges {
+            id
+            name
+            grades
+            tendency(userId: $userId) {
+                tendency
+                countChildCompetences
+                countLearnedCompetences
+            }
+        }
+    }
+}

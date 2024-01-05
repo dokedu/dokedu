@@ -37,8 +37,8 @@
             parent.color && parent.color.length > 0
               ? `bg-${parent.color}-50 !text-${parent.color}-700`
               : index === 0
-              ? 'border border-neutral-200'
-              : '',
+                ? 'border border-neutral-200'
+                : '',
           ]"
         >
           {{ parent.name }}
@@ -51,8 +51,8 @@
 
 <script lang="ts" setup>
 import { toRef } from "vue";
-import { Competence } from "@/gql/graphql";
 import { Folder } from "lucide-vue-next";
+import { Competence } from "@/gql/schema.ts";
 
 export interface Props {
   competence: Pick<Competence, "grades" | "name" | "parents" | "type" | "tendency">;

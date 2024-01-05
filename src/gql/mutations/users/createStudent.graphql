@@ -1,0 +1,14 @@
+mutation createStudent($student: CreateStudentInput!) {
+    createStudent(input: $student) {
+        id
+        firstName
+        lastName
+        student {
+            id
+            birthday
+            grade
+            leftAt
+            joinedAt
+        }
+    }
+}

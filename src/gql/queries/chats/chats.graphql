@@ -1,0 +1,9 @@
+query chats {
+    chats {
+        edges {
+            id
+            name
+            lastMessage
+        }
+    }
+}

@@ -1,0 +1,10 @@
+query exportEvents($input: ExportEventsInput!) {
+    exportEvents(input: $input) {
+        id
+        title
+        body
+        startsAt
+        endsAt
+        subjects
+    }
+}

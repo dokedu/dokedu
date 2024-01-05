@@ -1,4 +1,4 @@
-import { FunctionalComponent, computed } from "vue";
+import { computed } from "vue";
 
 import {
   Globe,
@@ -19,13 +19,14 @@ import {
   Wrench,
   TimerIcon,
   MessageCircle,
+  Icon as LucideIcon,
 } from "lucide-vue-next";
 
 import type { RouteNamedMap } from "vue-router/auto/routes";
 import i18n from "@/i18n.ts";
 
 export interface AppLink {
-  icon: FunctionalComponent;
+  icon: LucideIcon;
   name: string;
   route: keyof RouteNamedMap;
 }
@@ -36,7 +37,7 @@ export interface App {
   id: string;
   beta?: boolean;
   allowedUserRoles: UserRole[];
-  icon: FunctionalComponent;
+  icon: LucideIcon;
   name: string;
   links: AppLink[];
 }

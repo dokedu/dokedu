@@ -22,7 +22,7 @@
       :search="search"
       :columns="columns"
       objectName="domains"
-      :query="domainsQuery"
+      :query="DomainsDocument"
       @row-click="goToDomain"
     >
     </DTable>
@@ -36,11 +36,11 @@ import PageHeader from "@/components/page-header.vue";
 import PageWrapper from "@/components/page-wrapper.vue";
 import { Plus } from "lucide-vue-next";
 import { ref } from "vue";
-import { graphql } from "@/gql";
 import DTable from "@/components/d-table/d-table.vue";
 import type { PageVariables } from "@/types/types.ts";
 import { useRouter } from "vue-router/auto";
 import { watchDebounced } from "@vueuse/core";
+import { DomainsDocument } from "@/gql/queries/domains/domains.ts";
 
 const router = useRouter();
 const search = ref("");
@@ -79,23 +79,6 @@ watchDebounced(
   },
   { debounce: 250, maxWait: 500 },
 );
-
-const domainsQuery = graphql(`
-  query domains {
-    domains {
-      edges {
-        id
-        name
-        createdAt
-      }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-      }
-    }
-  }
-`);
-
 const goToDomain = <Type extends { id: string }>(row: Type) => {
   router.push({ name: "/admin/domains/[id]", params: { id: row.id } });
 };

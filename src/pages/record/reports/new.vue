@@ -41,15 +41,15 @@ import { Save } from "lucide-vue-next";
 import dButton from "@/components/d-button/d-button.vue";
 import ReportTypeList from "@/components/d-report/d-report-type-list.vue";
 import ReportTagList from "@/components/d-report/d-report-tag-list.vue";
-import { Tag } from "@/gql/graphql";
+import { Tag } from "@/gql/schema.ts";
 import { computed, reactive, ref } from "vue";
 import dInput from "@/components/d-input/d-input.vue";
-import { useMutation, useQuery } from "@urql/vue";
-import { graphql } from "@/gql";
 import { useRouter } from "vue-router/auto";
 import DSelect from "@/components/d-select/d-select.vue";
 import { createNotification } from "@/composables/useToast.ts";
 import { array, date, object, string } from "yup";
+import { useCreateReportMutation } from "@/gql/mutations/reports/createReport.ts";
+import { useGetEntryFilterStudentsQuery } from "@/gql/queries/users/getEntryFilterStudents.ts";
 
 const router = useRouter();
 
@@ -59,29 +59,10 @@ const to = ref<string>("");
 const type = ref("entries");
 const tags = ref<Tag[]>();
 
-const { executeMutation: createReportMutation } = useMutation(
-  graphql(`
-    mutation createReport($input: CreateReportInput!) {
-      createReport(input: $input) {
-        id
-      }
-    }
-  `),
-);
+const { executeMutation: createReportMutation } = useCreateReportMutation();
 
 const studentSearch = ref("");
-const { data: studentData } = useQuery({
-  query: graphql(`
-    query getEntryFilterStudents($search: String) {
-      users(filter: { role: [student] }, limit: 200, search: $search) {
-        edges {
-          id
-          firstName
-          lastName
-        }
-      }
-    }
-  `),
+const { data: studentData } = useGetEntryFilterStudentsQuery({
   variables: reactive({
     search: studentSearch,
   }),

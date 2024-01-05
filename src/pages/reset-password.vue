@@ -56,17 +56,16 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
-import { useMutation } from "@urql/vue";
-import resetPasswordMutation from "@/queries/resetPasswordMutation";
 import { useRoute, useRouter } from "vue-router/auto";
 import { useI18n } from "vue-i18n";
+import { useResetPasswordMutation } from "@/gql/queries/auth/resetPasswordMutation.ts";
 
 const { t } = useI18n();
 
 const route = useRoute();
 const router = useRouter();
 
-const { executeMutation: passwordReset } = useMutation(resetPasswordMutation);
+const { executeMutation: passwordReset } = useResetPasswordMutation();
 
 const password = ref("");
 const passwordConfirm = ref("");

@@ -18,34 +18,17 @@
 </template>
 
 <script lang="ts" setup>
-import { useQuery } from "@urql/vue";
-import { graphql } from "@/gql";
 import DCompetence from "@/components/d-competence/d-competence.vue";
-import { Competence } from "@/gql/graphql";
+import { Competence } from "@/gql/schema.ts";
 import { useRoute } from "vue-router/auto";
 import { reactive } from "vue";
+import { useStudentCompetencesQuery } from "@/gql/queries/competences/studentCompetences.ts";
 
 const route = useRoute("/record/students/[id]/competences/");
 
-const { data } = useQuery({
-  query: graphql(`
-    query studentCompetences($userId: ID!) {
-      competences(filter: { type: subject }, limit: 100, sort: { field: sort_order, order: asc }) {
-        edges {
-          id
-          name
-          grades
-          tendency(userId: $userId) {
-            tendency
-            countChildCompetences
-            countLearnedCompetences
-          }
-        }
-      }
-    }
-  `),
+const { data } = useStudentCompetencesQuery({
   variables: reactive({
-    userId: route.params.id,
+    userId: route.params.id as unknown as string,
   }),
 });
 </script>

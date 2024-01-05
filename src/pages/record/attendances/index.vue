@@ -78,13 +78,14 @@
 </template>
 
 <script lang="ts" setup>
-import { useMutation, useQuery } from "@urql/vue";
-import { graphql } from "@/gql";
 import { computed, reactive, ref } from "vue";
-import { UserAttendanceState } from "@/gql/graphql.ts";
 import { ChevronRight, ChevronLeft } from "lucide-vue-next";
 import PageHeader from "@/components/page-header.vue";
 import PageWrapper from "@/components/page-wrapper.vue";
+import { useUpdateDailyAttendanceMutation } from "@/gql/mutations/attendances/updateDailyAttendance.ts";
+import { useSetUserAttendanceStateMutation } from "@/gql/mutations/attendances/setUserAttendanceState.ts";
+import { useUserAttendanceOverviewQuery } from "@/gql/queries/attendances/userAttendanceOverview.ts";
+import { UserAttendanceState } from "@/gql/schema.ts";
 
 const search = ref("");
 
@@ -110,57 +111,12 @@ function nextDate() {
   date.value = new Date(date.value.getTime() + 24 * 60 * 60 * 1000 + 1);
 }
 
-const { executeMutation: updateDailyAttendance } = useMutation(
-  graphql(`
-    mutation updateDailyAttendance($date: Time!, $state: UserAttendanceState!) {
-      updateDailyAttendance(date: $date, state: $state) {
-        id
-        date
-        state
-        user {
-          id
-          firstName
-          lastName
-        }
-      }
-    }
-  `),
-);
+const { executeMutation: updateDailyAttendance } = useUpdateDailyAttendanceMutation();
+const { executeMutation: setUserAttendanceState } = useSetUserAttendanceStateMutation();
 
-const { executeMutation: setUserAttendanceState } = useMutation(
-  graphql(`
-    mutation setUserAttendanceState($state: UserAttendanceState!, $date: Time!, $userId: ID!) {
-      setUserAttendanceState(state: $state, date: $date, userId: $userId) {
-        id
-        date
-        state
-        user {
-          id
-          firstName
-          lastName
-        }
-      }
-    }
-  `),
-);
-
-const { data, executeQuery: refresh } = useQuery({
-  query: graphql(`
-    query userAttendanceOverview($date: Time!) {
-      userAttendanceOverview(date: $date) {
-        id
-        date
-        state
-        user {
-          id
-          firstName
-          lastName
-        }
-      }
-    }
-  `),
+const { data, executeQuery: refresh } = useUserAttendanceOverviewQuery({
   variables: reactive({
-    date: date,
+    date: date as unknown as never,
   }),
   context: {
     additionalTypenames: ["UserAttendance"],

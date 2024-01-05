@@ -4,13 +4,11 @@
 
 <script lang="ts" setup>
 import DUserForm from "@/components/d-user-form.vue";
-import { User, UserRole } from "@/gql/graphql";
 import { reactive } from "vue";
-import { useMutation } from "@urql/vue";
-import { graphql } from "@/gql";
 import { createNotification } from "@/composables/useToast";
 import { useRouter } from "vue-router/auto";
-import { CreateUserInput } from "@/gql/graphql";
+import { useCreateUserMutation } from "@/gql/mutations/users/createUser.ts";
+import { CreateUserInput, User, UserRole } from "@/gql/schema.ts";
 
 const router = useRouter();
 
@@ -21,17 +19,7 @@ const user = reactive<CreateUserInput>({
   role: UserRole.Admin,
 });
 
-const { executeMutation: createUser } = useMutation(
-  graphql(`
-    mutation createUser($user: CreateUserInput!) {
-      createUser(input: $user) {
-        id
-        firstName
-        lastName
-      }
-    }
-  `),
-);
+const { executeMutation: createUser } = useCreateUserMutation();
 
 const onCreateUser = async () => {
   if (!user.firstName) {

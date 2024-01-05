@@ -1,0 +1,6 @@
+mutation deleteEmailGroup($id: ID!) {
+    deleteEmailGroup(id: $id) {
+        id
+        name
+    }
+}

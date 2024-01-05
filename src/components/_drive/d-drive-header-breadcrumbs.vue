@@ -35,11 +35,12 @@
 </template>
 
 <script lang="ts" setup>
-import { graphql } from "@/gql";
-import { useMutation, useQuery } from "@urql/vue";
 import { computed, reactive, ref } from "vue";
 import { useRoute } from "vue-router/auto";
 import { useI18n } from "vue-i18n";
+import { useMoveFileMutation } from "@/gql/mutations/files/moveFile.ts";
+import { useFileByIdQuery } from "@/gql/queries/files/fileById.ts";
+import { useBucketByIdQuery } from "@/gql/mutations/buckets/bucketById.ts";
 
 const { t } = useI18n();
 
@@ -94,18 +95,7 @@ async function drop(event: DragEvent, row: any) {
   dragoverItem.value = null;
 }
 
-const { executeMutation: moveFile } = useMutation(
-  graphql(`
-    mutation moveFile($input: MoveFileInput!) {
-      moveFile(input: $input) {
-        id
-        parent {
-          id
-        }
-      }
-    }
-  `),
-);
+const { executeMutation: moveFile } = useMoveFileMutation();
 
 const folderId = computed(() => {
   if (route.name === routeNameSharedDrive) {
@@ -125,19 +115,7 @@ const bucketId = computed(() => {
   }
 });
 
-const { data: folder } = useQuery({
-  query: graphql(`
-    query fileById($id: ID!) {
-      file(id: $id) {
-        id
-        name
-        parents {
-          id
-          name
-        }
-      }
-    }
-  `),
+const { data: folder } = useFileByIdQuery({
   variables: reactive({
     id: folderId,
   }),
@@ -146,15 +124,7 @@ const { data: folder } = useQuery({
   }),
 });
 
-const { data: bucket } = useQuery({
-  query: graphql(`
-    query bucketById($id: ID!) {
-      bucket(id: $id) {
-        id
-        name
-      }
-    }
-  `),
+const { data: bucket } = useBucketByIdQuery({
   variables: reactive({
     id: bucketId,
   }),

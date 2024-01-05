@@ -36,33 +36,16 @@
 import DContextMenu from "@/components/d-context-menu/d-context-menu.vue";
 import { ContextMenuAlignment } from "@/components/d-context-menu/d-context-menu.vue";
 import { ref } from "vue";
-import { useQuery } from "@urql/vue";
-import { graphql } from "@/gql";
 import { Check } from "lucide-vue-next";
-import { User } from "@/gql/graphql.ts";
+import { useStudentsQuery } from "@/gql/queries/users/students.ts";
+import { User } from "@/gql/schema.ts";
 
 const emit = defineEmits(["update"]);
 
 const contextMenuOpen = ref(false);
 const selectedStudent = ref<User>();
 
-const { data } = useQuery({
-  query: graphql(`
-    query students {
-      users(filter: { role: [student] }, limit: 1000) {
-        edges {
-          id
-          firstName
-          lastName
-          student {
-            id
-          }
-        }
-      }
-    }
-  `),
-});
-
+const { data } = useStudentsQuery({});
 function selectStudent(student: User) {
   selectedStudent.value = student;
   emit("update", selectedStudent.value);

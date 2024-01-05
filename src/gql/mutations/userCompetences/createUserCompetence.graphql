@@ -1,0 +1,6 @@
+mutation createUserCompetence($input: CreateUserCompetenceInput!) {
+    createUserCompetence(input: $input) {
+        id
+        level
+    }
+}

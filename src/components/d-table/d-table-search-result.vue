@@ -38,10 +38,10 @@
 </template>
 
 <script lang="ts" setup>
-import { graphql } from "@/gql";
-import { useMutation, useQuery } from "@urql/vue";
 import { ref, watch, toRef } from "vue";
-import { File } from "@/gql/graphql.ts";
+import { useMoveFileMutation } from "@/gql/mutations/files/moveFile.ts";
+import { File } from "@/gql/schema.ts";
+import { useQuery } from "@urql/vue";
 
 const props = defineProps([
   "query",
@@ -108,18 +108,7 @@ const { data, fetching } = useQuery({
   },
 });
 
-const { executeMutation: moveFile } = useMutation(
-  graphql(`
-    mutation moveFile($input: MoveFileInput!) {
-      moveFile(input: $input) {
-        id
-        parent {
-          id
-        }
-      }
-    }
-  `),
-);
+const { executeMutation: moveFile } = useMoveFileMutation();
 
 watch(data, () => {
   if (!data.value) return;
