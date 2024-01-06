@@ -1,0 +1,100 @@
+<template>
+  <div class="text-sm flex h-screen w-full">
+    <div class="flex flex-col w-[300px] border-r bg-neutral-100 h-full">
+      <div class="px-2 pt-2">
+        <app-switcher2 />
+      </div>
+      <div class="px-2 mb-1.5 pt-3 flex justify-between gap-1 items-center">
+        <d-input class="w-full h-9" v-model="search" name="search" type="text" placeholder="Search"></d-input>
+        <d-new-chat />
+      </div>
+      <div class="flex-1 overflow-auto">
+        <div v-show="tab === 'chats'">
+          <div class="p-2" bg-red-400>
+            <d-tabs>
+              <d-tab active>All</d-tab>
+              <d-tab>Friends</d-tab>
+              <d-tab>Family</d-tab>
+              <d-tab>Work</d-tab>
+              <d-tab>Bots</d-tab>
+            </d-tabs>
+          </div>
+          <div class="flex flex-col overflow-scroll flex-1">
+            <router-link
+              :to="`/chat/chats/` + chat?.id"
+              class="px-4 py-2.5 flex gap-4 items-center border-b border-neutral-900/5"
+              v-for="chat in chatList?.chats?.edges"
+              :key="chat?.id"
+              :class="chat?.id === route.params.id ? `bg-neutral-900/10` : `hover:bg-neutral-900/5`"
+            >
+              <div class="h-12 w-12 rounded-full bg-neutral-900/10"></div>
+              <div class="flex-1 w-full">
+                <div class="font-semibold mb-1">{{ chat?.name }}</div>
+                <div class="text-neutral-500 text-xs line-clamp-2 h-[2rem]">
+                  {{ chat?.lastMessage ? chat?.lastMessage : `No messages yet` }}
+                </div>
+              </div>
+            </router-link>
+          </div>
+        </div>
+        <div v-show="tab === 'contacts'">
+          <pre>{{ users }}</pre>
+        </div>
+      </div>
+      <div class="p-2 flex justify-center">
+        <d-tabs>
+          <d-tab
+            class="flex items-center gap-1"
+            v-for="(sidebar, _) in sidebars"
+            :key="_"
+            :active="sidebar.id === tab"
+            :to="`/chat/${sidebar.id}/${chat}`"
+          >
+            <component class="size-5" :is="sidebar.icon" />
+            {{ sidebar.name }}
+          </d-tab>
+        </d-tabs>
+      </div>
+    </div>
+
+    <div class="w-full flex-1">
+      <router-view></router-view>
+    </div>
+  </div>
+</template>
+
+<route lang="json">
+{
+  "meta": {
+    "layout": "chat"
+  }
+}
+</route>
+
+<script setup lang="ts">
+import { useRoute } from "vue-router/auto"
+import AppSwitcher2 from "@/components/AppSwitcher2.vue"
+import DNewChat from "@/components/_chat/d-new-chat.vue"
+import DInput from "@/components/d-input/d-input.vue"
+import DTabs from "@/components/d-tabs/d-tabs.vue"
+import DTab from "@/components/d-tabs/d-tab.vue"
+import { MessageCircle, BookUser } from "lucide-vue-next"
+import { useRouteParams } from "@vueuse/router"
+
+import { useChatsQuery } from "@/gql/queries/chats/chats"
+import { useUsersQuery } from "@/gql/queries/users/users"
+import { ref } from "vue"
+
+const tab = useRouteParams("tab", "chats")
+const chat = useRouteParams("id", "")
+const route = useRoute("/chat/[tab]")
+const search = ref("")
+
+const sidebars = [
+  { id: "chats", name: "Chats", icon: MessageCircle },
+  { id: "contacts", name: "Contacts", icon: BookUser }
+]
+
+const { data: chatList } = useChatsQuery({})
+const { data: users } = useUsersQuery({})
+</script>

@@ -1,12 +1,11 @@
 <template>
-  <div class="text-neutral-600 p-1.5 bg-neutral-200 hover:bg-neutral-300 rounded-md" @click="createNewChat">
-    <PenSquare :size="20" />
-  </div>
+  <d-icon-button :icon="PenSquare" size="lg" @click="createNewChat"></d-icon-button>
 </template>
 
 <script lang="ts" setup>
 import { PenSquare } from "lucide-vue-next"
 import { useCreateChatMutation } from "@/gql/mutations/chats/createChat"
+import DIconButton from "@/components/d-icon-button/d-icon-button.vue"
 
 const { executeMutation: createChat } = useCreateChatMutation()
 

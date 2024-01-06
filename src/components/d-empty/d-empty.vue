@@ -11,8 +11,16 @@
 </template>
 
 <script setup lang="ts">
-import { PropType } from "@vue/runtime-dom"
-import type { Icon } from "lucide-vue-next"
+import type { PropType } from "vue"
+
+import type { FunctionalComponent, SVGAttributes } from "vue"
+
+interface SVGProps extends Partial<SVGAttributes> {
+  size?: 24 | number
+  strokeWidth?: number | string
+  absoluteStrokeWidth?: boolean
+}
+type Icon = FunctionalComponent<SVGProps>
 
 defineProps({
   icon: {

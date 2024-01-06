@@ -5,12 +5,20 @@
 </template>
 
 <script lang="ts" setup>
-import { Icon } from "lucide-vue-next"
+import type { FunctionalComponent, SVGAttributes } from "vue"
+
+interface SVGProps extends Partial<SVGAttributes> {
+  size?: 24 | number
+  strokeWidth?: number | string
+  absoluteStrokeWidth?: boolean
+}
+type Icon = FunctionalComponent<SVGProps>
+
 import { computed, toRef } from "vue"
 
 export interface Props {
   icon: Icon
-  size: "xs" | "sm" | "md"
+  size: "xs" | "sm" | "md" | "lg"
 }
 
 const props = defineProps<Props>()
@@ -29,6 +37,9 @@ const classNames = computed(() => {
       break
     case "md":
       classes.push("p-1.5")
+      break
+    case "lg":
+      classes.push("p-2")
       break
   }
 
