@@ -7,8 +7,9 @@ export type UpdateEntryUserCompetenceLevelMutationVariables = Types.Exact<{
   input: Types.UpdateEntryUserCompetenceLevel
 }>
 
-export type UpdateEntryUserCompetenceLevelMutation = { __typename?: "Mutation" } & {
-  updateEntryUserCompetenceLevel: { __typename?: "Entry" } & Pick<Types.Entry, "id">
+export type UpdateEntryUserCompetenceLevelMutation = {
+  __typename?: "Mutation"
+  updateEntryUserCompetenceLevel: { __typename?: "Entry"; id: string }
 }
 
 export const UpdateEntryUserCompetenceLevelDocument = gql`

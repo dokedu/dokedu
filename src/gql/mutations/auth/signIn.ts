@@ -8,11 +8,15 @@ export type SignInMutationVariables = Types.Exact<{
   password: Types.Scalars["String"]["input"]
 }>
 
-export type SignInMutation = { __typename?: "Mutation" } & {
-  signIn: { __typename?: "SignInPayload" } & Pick<
-    Types.SignInPayload,
-    "token" | "enabled_apps" | "language" | "setupComplete"
-  >
+export type SignInMutation = {
+  __typename?: "Mutation"
+  signIn: {
+    __typename?: "SignInPayload"
+    token: string
+    enabled_apps: Array<string>
+    language: string
+    setupComplete: boolean
+  }
 }
 
 export const SignInDocument = gql`

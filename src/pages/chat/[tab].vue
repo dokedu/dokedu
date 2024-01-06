@@ -4,13 +4,13 @@
       <div class="px-2 pt-2">
         <app-switcher2 />
       </div>
-      <div class="px-2 mb-1.5 pt-3 flex justify-between gap-1 items-center">
+      <div class="p-2 flex justify-between gap-1 items-center border-b">
         <d-input class="w-full h-9" v-model="search" name="search" type="text" placeholder="Search"></d-input>
         <d-new-chat />
       </div>
-      <div class="flex-1 overflow-auto">
-        <div v-show="tab === 'chats'">
-          <div class="p-2" bg-red-400>
+      <div class="flex-1 overflow-auto flex flex-col">
+        <div class="h-full flex flex-col" v-show="tab === 'chats'">
+          <div class="pt-2 px-2">
             <d-tabs>
               <d-tab active>All</d-tab>
               <d-tab>Friends</d-tab>
@@ -19,7 +19,7 @@
               <d-tab>Bots</d-tab>
             </d-tabs>
           </div>
-          <div class="flex flex-col overflow-scroll flex-1">
+          <div class="flex flex-col overflow-scroll flex-1 pt-2">
             <router-link
               :to="`/chat/chats/` + chat?.id"
               class="px-4 py-2.5 flex gap-4 items-center border-b border-neutral-900/5"
@@ -48,7 +48,7 @@
           </div>
         </div>
       </div>
-      <div class="p-2 flex justify-center">
+      <div class="p-2 flex justify-center border-t">
         <d-tabs>
           <d-tab
             class="flex items-center gap-1"
@@ -89,7 +89,7 @@ import { MessageCircle, BookUser } from "lucide-vue-next"
 import { useRouteParams } from "@vueuse/router"
 
 import { useChatsQuery } from "@/gql/queries/chats/chats"
-import { useUsersQuery } from "@/gql/queries/users/users"
+import { useChatUsersQuery } from "@/gql/queries/chats/chatUsers"
 import { ref } from "vue"
 import { useAddUserToChatMutation } from "@/gql/mutations/chats/addUserToChat"
 import { useCreateChatMutation } from "@/gql/mutations/chats/createChat"
@@ -124,9 +124,10 @@ async function createChatWithUser(user: User) {
       userId: user.id
     }
   })
+  if (!addUserResult.data?.addUserToChat?.chat?.id) return
   router.push({ name: "/chat/[tab]/[id]/", params: { tab: "chats", id: addUserResult.data?.addUserToChat?.chat?.id } })
 }
 
 const { data: chatList } = useChatsQuery({})
-const { data: users } = useUsersQuery({})
+const { data: users } = useChatUsersQuery({})
 </script>

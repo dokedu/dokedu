@@ -7,12 +7,24 @@ export type CompetencePathQueryVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type CompetencePathQuery = { __typename?: "Query" } & {
-  competence: { __typename?: "Competence" } & Pick<Types.Competence, "id" | "name" | "type" | "color" | "grades"> & {
-      parents: Array<
-        { __typename?: "Competence" } & Pick<Types.Competence, "id" | "name" | "type" | "grades" | "color">
-      >
-    }
+export type CompetencePathQuery = {
+  __typename?: "Query"
+  competence: {
+    __typename?: "Competence"
+    id: string
+    name: string
+    type: Types.CompetenceType
+    color: string
+    grades: Array<number>
+    parents: Array<{
+      __typename?: "Competence"
+      id: string
+      name: string
+      type: Types.CompetenceType
+      grades: Array<number>
+      color: string
+    }>
+  }
 }
 
 export const CompetencePathDocument = gql`

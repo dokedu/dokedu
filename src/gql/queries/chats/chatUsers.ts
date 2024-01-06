@@ -3,11 +3,11 @@ import type * as Types from "../../schema"
 import gql from "graphql-tag"
 import * as Urql from "@urql/vue"
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
-export type UserListQueryVariables = Types.Exact<{
+export type ChatUsersQueryVariables = Types.Exact<{
   search?: Types.InputMaybe<Types.Scalars["String"]["input"]>
 }>
 
-export type UserListQuery = {
+export type ChatUsersQuery = {
   __typename?: "Query"
   users: {
     __typename?: "UserConnection"
@@ -21,9 +21,9 @@ export type UserListQuery = {
   }
 }
 
-export const UserListDocument = gql`
-  query userList($search: String) {
-    users(search: $search) {
+export const ChatUsersDocument = gql`
+  query chatUsers($search: String) {
+    users(search: $search, limit: 1000) {
       edges {
         id
         firstName
@@ -34,6 +34,6 @@ export const UserListDocument = gql`
   }
 `
 
-export function useUserListQuery(options: Omit<Urql.UseQueryArgs<never, UserListQueryVariables>, "query">) {
-  return Urql.useQuery<UserListQuery, UserListQueryVariables>({ query: UserListDocument, ...options })
+export function useChatUsersQuery(options: Omit<Urql.UseQueryArgs<never, ChatUsersQueryVariables>, "query">) {
+  return Urql.useQuery<ChatUsersQuery, ChatUsersQueryVariables>({ query: ChatUsersDocument, ...options })
 }

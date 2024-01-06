@@ -7,9 +7,7 @@ export type CreateEntryTagMutationVariables = Types.Exact<{
   input: Types.CreateEntryTagInput
 }>
 
-export type CreateEntryTagMutation = { __typename?: "Mutation" } & {
-  createEntryTag: { __typename?: "Entry" } & Pick<Types.Entry, "id">
-}
+export type CreateEntryTagMutation = { __typename?: "Mutation"; createEntryTag: { __typename?: "Entry"; id: string } }
 
 export const CreateEntryTagDocument = gql`
   mutation createEntryTag($input: CreateEntryTagInput!) {

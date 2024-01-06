@@ -7,11 +7,19 @@ export type CreateEventMutationVariables = Types.Exact<{
   input: Types.CreateEventInput
 }>
 
-export type CreateEventMutation = { __typename?: "Mutation" } & {
-  createEvent: { __typename?: "Event" } & Pick<
-    Types.Event,
-    "id" | "title" | "body" | "startsAt" | "endsAt" | "recurrence" | "createdAt"
-  > & { image?: Types.Maybe<{ __typename?: "File" } & Pick<Types.File, "id">> }
+export type CreateEventMutation = {
+  __typename?: "Mutation"
+  createEvent: {
+    __typename?: "Event"
+    id: string
+    title: string
+    body?: string | null
+    startsAt: never
+    endsAt: never
+    recurrence?: Array<string | null> | null
+    createdAt: never
+    image?: { __typename?: "File"; id: string } | null
+  }
 }
 
 export const CreateEventDocument = gql`

@@ -8,8 +8,9 @@ export type UpdateUserStudentGradeMutationVariables = Types.Exact<{
   grade: Types.Scalars["Int"]["input"]
 }>
 
-export type UpdateUserStudentGradeMutation = { __typename?: "Mutation" } & {
-  updateUserStudentGrade: { __typename?: "UserStudentGrades" } & Pick<Types.UserStudentGrades, "id" | "grade">
+export type UpdateUserStudentGradeMutation = {
+  __typename?: "Mutation"
+  updateUserStudentGrade: { __typename?: "UserStudentGrades"; id: string; grade: number }
 }
 
 export const UpdateUserStudentGradeDocument = gql`

@@ -9,20 +9,24 @@ export type RecordStudentsQueryVariables = Types.Exact<{
   offset?: Types.InputMaybe<Types.Scalars["Int"]["input"]>
 }>
 
-export type RecordStudentsQuery = { __typename?: "Query" } & {
-  users: { __typename?: "UserConnection" } & {
-    pageInfo: { __typename?: "PageInfo" } & Pick<Types.PageInfo, "hasNextPage" | "hasPreviousPage">
-    edges?: Types.Maybe<
-      Array<
-        Types.Maybe<
-          { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName"> & {
-              student?: Types.Maybe<
-                { __typename?: "UserStudent" } & Pick<Types.UserStudent, "id" | "birthday" | "grade" | "emoji">
-              >
-            }
-        >
-      >
-    >
+export type RecordStudentsQuery = {
+  __typename?: "Query"
+  users: {
+    __typename?: "UserConnection"
+    pageInfo: { __typename?: "PageInfo"; hasNextPage: boolean; hasPreviousPage: boolean }
+    edges?: Array<{
+      __typename?: "User"
+      id: string
+      firstName: string
+      lastName: string
+      student?: {
+        __typename?: "UserStudent"
+        id: string
+        birthday?: never | null
+        grade: number
+        emoji?: string | null
+      } | null
+    } | null> | null
   }
 }
 

@@ -5,7 +5,7 @@ import * as Urql from "@urql/vue"
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 export type MeBucketShareQueryVariables = Types.Exact<{ [key: string]: never }>
 
-export type MeBucketShareQuery = { __typename?: "Query" } & { me: { __typename?: "User" } & Pick<Types.User, "id"> }
+export type MeBucketShareQuery = { __typename?: "Query"; me: { __typename?: "User"; id: string } }
 
 export const MeBucketShareDocument = gql`
   query meBucketShare {

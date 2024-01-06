@@ -7,9 +7,7 @@ export type CreateFolderMutationVariables = Types.Exact<{
   input: Types.CreateFolderInput
 }>
 
-export type CreateFolderMutation = { __typename?: "Mutation" } & {
-  createFolder: { __typename?: "File" } & Pick<Types.File, "id">
-}
+export type CreateFolderMutation = { __typename?: "Mutation"; createFolder: { __typename?: "File"; id: string } }
 
 export const CreateFolderDocument = gql`
   mutation createFolder($input: CreateFolderInput!) {

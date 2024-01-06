@@ -7,8 +7,9 @@ export type UpdateChatMutationVariables = Types.Exact<{
   input: Types.UpdateChatInput
 }>
 
-export type UpdateChatMutation = { __typename?: "Mutation" } & {
-  updateChat: { __typename?: "Chat" } & Pick<Types.Chat, "id" | "name">
+export type UpdateChatMutation = {
+  __typename?: "Mutation"
+  updateChat: { __typename?: "Chat"; id: string; name?: string | null }
 }
 
 export const UpdateChatDocument = gql`

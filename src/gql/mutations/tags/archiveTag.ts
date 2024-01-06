@@ -7,8 +7,16 @@ export type ArchiveTagMutationVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type ArchiveTagMutation = { __typename?: "Mutation" } & {
-  archiveTag: { __typename?: "Tag" } & Pick<Types.Tag, "id" | "name" | "color" | "deletedAt" | "createdAt">
+export type ArchiveTagMutation = {
+  __typename?: "Mutation"
+  archiveTag: {
+    __typename?: "Tag"
+    id: string
+    name: string
+    color: string
+    deletedAt?: never | null
+    createdAt: never
+  }
 }
 
 export const ArchiveTagDocument = gql`

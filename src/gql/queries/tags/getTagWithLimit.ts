@@ -8,12 +8,19 @@ export type GetTagWithLimitQueryVariables = Types.Exact<{
   offset?: Types.InputMaybe<Types.Scalars["Int"]["input"]>
 }>
 
-export type GetTagWithLimitQuery = { __typename?: "Query" } & {
-  tags: { __typename?: "TagConnection" } & {
-    pageInfo: { __typename?: "PageInfo" } & Pick<Types.PageInfo, "hasNextPage" | "hasPreviousPage">
-    edges?: Types.Maybe<
-      Array<Types.Maybe<{ __typename?: "Tag" } & Pick<Types.Tag, "id" | "name" | "color" | "deletedAt" | "createdAt">>>
-    >
+export type GetTagWithLimitQuery = {
+  __typename?: "Query"
+  tags: {
+    __typename?: "TagConnection"
+    pageInfo: { __typename?: "PageInfo"; hasNextPage: boolean; hasPreviousPage: boolean }
+    edges?: Array<{
+      __typename?: "Tag"
+      id: string
+      name: string
+      color: string
+      deletedAt?: never | null
+      createdAt: never
+    } | null> | null
   }
 }
 

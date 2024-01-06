@@ -7,8 +7,16 @@ export type ArchiveUserMutationVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type ArchiveUserMutation = { __typename?: "Mutation" } & {
-  archiveUser: { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName" | "email" | "role">
+export type ArchiveUserMutation = {
+  __typename?: "Mutation"
+  archiveUser: {
+    __typename?: "User"
+    id: string
+    firstName: string
+    lastName: string
+    email?: string | null
+    role: Types.UserRole
+  }
 }
 
 export const ArchiveUserDocument = gql`

@@ -7,14 +7,15 @@ export type CreateEmailGroupMutationVariables = Types.Exact<{
   input: Types.CreateEmailGroupInput
 }>
 
-export type CreateEmailGroupMutation = { __typename?: "Mutation" } & {
-  createEmailGroup?: Types.Maybe<
-    { __typename?: "EmailAccount" } & Pick<Types.EmailAccount, "id" | "name" | "description"> & {
-        members?: Types.Maybe<
-          Array<Types.Maybe<{ __typename?: "EmailGroupMember" } & Pick<Types.EmailGroupMember, "name">>>
-        >
-      }
-  >
+export type CreateEmailGroupMutation = {
+  __typename?: "Mutation"
+  createEmailGroup?: {
+    __typename?: "EmailAccount"
+    id: string
+    name: string
+    description?: string | null
+    members?: Array<{ __typename?: "EmailGroupMember"; name: string } | null> | null
+  } | null
 }
 
 export const CreateEmailGroupDocument = gql`

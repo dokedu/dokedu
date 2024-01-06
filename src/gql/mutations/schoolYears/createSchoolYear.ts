@@ -7,8 +7,9 @@ export type CreateSchoolYearMutationVariables = Types.Exact<{
   year: Types.Scalars["Int"]["input"]
 }>
 
-export type CreateSchoolYearMutation = { __typename?: "Mutation" } & {
-  createSchoolYear: { __typename?: "SchoolYear" } & Pick<Types.SchoolYear, "id" | "year" | "description">
+export type CreateSchoolYearMutation = {
+  __typename?: "Mutation"
+  createSchoolYear: { __typename?: "SchoolYear"; id: string; year: number; description: string }
 }
 
 export const CreateSchoolYearDocument = gql`

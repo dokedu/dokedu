@@ -7,8 +7,9 @@ export type CreateEntryEventMutationVariables = Types.Exact<{
   input: Types.CreateEntryEventInput
 }>
 
-export type CreateEntryEventMutation = { __typename?: "Mutation" } & {
-  createEntryEvent: { __typename?: "Entry" } & Pick<Types.Entry, "id">
+export type CreateEntryEventMutation = {
+  __typename?: "Mutation"
+  createEntryEvent: { __typename?: "Entry"; id: string }
 }
 
 export const CreateEntryEventDocument = gql`

@@ -7,10 +7,9 @@ export type SendMessageMutationVariables = Types.Exact<{
   input: Types.SendMessageInput
 }>
 
-export type SendMessageMutation = { __typename?: "Mutation" } & {
-  sendMessage: { __typename?: "ChatMessage" } & Pick<Types.ChatMessage, "id"> & {
-      chat: { __typename?: "Chat" } & Pick<Types.Chat, "id">
-    }
+export type SendMessageMutation = {
+  __typename?: "Mutation"
+  sendMessage: { __typename?: "ChatMessage"; id: string; chat: { __typename?: "Chat"; id: string } }
 }
 
 export const SendMessageDocument = gql`

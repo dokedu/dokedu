@@ -7,14 +7,20 @@ export type UserStudentGradeQueryVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type UserStudentGradeQuery = { __typename?: "Query" } & {
-  userStudentGrade: { __typename?: "UserStudentGrades" } & Pick<Types.UserStudentGrades, "id" | "grade"> & {
-      student: { __typename?: "UserStudent" } & Pick<Types.UserStudent, "id"> & {
-          user: { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName">
-        }
-      subject: { __typename?: "Subject" } & Pick<Types.Subject, "id" | "name">
-      schoolYear: { __typename?: "SchoolYear" } & Pick<Types.SchoolYear, "id" | "year" | "description">
+export type UserStudentGradeQuery = {
+  __typename?: "Query"
+  userStudentGrade: {
+    __typename?: "UserStudentGrades"
+    id: string
+    grade: number
+    student: {
+      __typename?: "UserStudent"
+      id: string
+      user: { __typename?: "User"; id: string; firstName: string; lastName: string }
     }
+    subject: { __typename?: "Subject"; id: string; name: string }
+    schoolYear: { __typename?: "SchoolYear"; id: string; year: number; description: string }
+  }
 }
 
 export const UserStudentGradeDocument = gql`

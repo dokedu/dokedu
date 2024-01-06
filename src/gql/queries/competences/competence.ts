@@ -10,21 +10,27 @@ export type CompetenceQueryVariables = Types.Exact<{
   filter?: Types.InputMaybe<Types.CompetenceFilterInput>
 }>
 
-export type CompetenceQuery = { __typename?: "Query" } & {
-  competences: { __typename?: "CompetenceConnection" } & {
-    pageInfo: { __typename?: "PageInfo" } & Pick<Types.PageInfo, "hasNextPage" | "hasPreviousPage">
-    edges?: Types.Maybe<
-      Array<
-        Types.Maybe<
-          { __typename?: "Competence" } & Pick<
-            Types.Competence,
-            "id" | "name" | "type" | "grades" | "color" | "sortOrder"
-          > & {
-              parents: Array<{ __typename?: "Competence" } & Pick<Types.Competence, "id" | "name" | "type" | "grades">>
-            }
-        >
-      >
-    >
+export type CompetenceQuery = {
+  __typename?: "Query"
+  competences: {
+    __typename?: "CompetenceConnection"
+    pageInfo: { __typename?: "PageInfo"; hasNextPage: boolean; hasPreviousPage: boolean }
+    edges?: Array<{
+      __typename?: "Competence"
+      id: string
+      name: string
+      type: Types.CompetenceType
+      grades: Array<number>
+      color: string
+      sortOrder: number
+      parents: Array<{
+        __typename?: "Competence"
+        id: string
+        name: string
+        type: Types.CompetenceType
+        grades: Array<number>
+      }>
+    } | null> | null
   }
 }
 

@@ -9,28 +9,21 @@
       <div></div>
     </router-link>
     <div ref="messageContainer" class="h-full flex-1 overflow-auto">
-      <div v-for="message in data?.chat.messages" class="p-4 w-full rounded-[inherit]" style="overflow: hidden scroll">
-        <div class="space-y-4">
-          <div
-            class="flex items-start space-x-2 max-w-[80%]"
-            :class="message.user.id === userData?.me?.id ? `justify-end ml-auto` : `justify-start`"
-          >
-            <div class="flex flex-col">
-              <div class="text-sm text-neutral-500">{{ fullName(message.user) }}</div>
-              <div
-                class="bg-neutral-100 rounded-lg p-2 w-fit whitespace-pre-wrap"
-                :class="message.user.id === userData?.me?.id ? `self-end` : `bg-neutral-100`"
-              >
-                <d-markdown :source="message.message"></d-markdown>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div v-for="(group, _) in groupedMessages" :key="_" class="my-4 flex flex-col gap-1">
+        <d-chat-message
+          v-for="message in group"
+          :key="message.id"
+          :message="message"
+          :me="message.user.id === userData?.me?.id"
+          type="GROUP"
+        ></d-chat-message>
       </div>
       <div v-if="data?.chat.messages.length === 0" class="h-full">
-        <div class="text-center text-neutral-500 text-sm p-4 flex justify-center items-center h-full">
-          No messages yet
-        </div>
+        <d-empty
+          :icon="MessageCircle"
+          title="Looks like you don't have any messages yet"
+          text="Be the first to say hi!"
+        ></d-empty>
       </div>
     </div>
     <footer class="w-full px-2 pb-2">
@@ -57,15 +50,17 @@
 
 <script setup lang="ts">
 import { useRoute } from "vue-router/auto"
-import { computed, nextTick, reactive, ref, watch } from "vue"
-import DMarkdown from "@/components/d-markdown/d-markdown.vue"
+import { computed, nextTick, onMounted, reactive, ref, watch } from "vue"
 import { useTextareaAutosize } from "@vueuse/core"
 import { useChatQuery } from "@/gql/queries/chats/chat"
 import { useMeQuery } from "@/gql/queries/auth/me"
 import { useSendMessageMutation } from "@/gql/mutations/chats/sendMessage"
 import { useMessageAddedSubscription } from "@/gql/subscriptions/messageAdded"
+import DEmpty from "@/components/d-empty/d-empty.vue"
+import DChatMessage from "@/components/_chat/d-chat-message.vue"
+import { MessageCircle } from "lucide-vue-next"
 
-const route = useRoute("/chat/chats/[id]/")
+const route = useRoute("/chat/[tab]/[id]/")
 
 const id = computed(() => route.params.id)
 const messageContainer = ref<HTMLElement>()
@@ -80,9 +75,33 @@ const { data, executeQuery: refresh } = useChatQuery({
 
 const { data: userData } = useMeQuery({})
 
-function fullName(user: { firstName: string; lastName: string }) {
-  return `${user.firstName} ${user.lastName}`
-}
+const groupedMessages = computed(() => {
+  let groups: any = []
+  // group messages if they are less than x minutes apart and from the same user
+  let timeApart = 1000 * 60 // 1 minute
+  data?.value?.chat?.messages?.forEach((message: any) => {
+    if (groups.length === 0) {
+      groups.push([message])
+    } else {
+      const lastGroup = groups[groups.length - 1]
+      const lastMessage = lastGroup[lastGroup.length - 1]
+      const lastMessageDate = new Date(lastMessage.createdAt)
+      const messageDate = new Date(message.createdAt)
+
+      // only group if the messages are from the same user
+      const sameUser = lastMessage.user.id === message.user.id
+      // only group if the messages are less than 2 minutes apart
+      const sameTimeFrame = messageDate.getTime() - lastMessageDate.getTime() < timeApart
+
+      if (sameUser && sameTimeFrame) {
+        lastGroup.push(message)
+      } else {
+        groups.push([message])
+      }
+    }
+  })
+  return groups
+})
 
 const { executeMutation: sendMessageMutation } = useSendMessageMutation()
 
@@ -117,6 +136,12 @@ useMessageAddedSubscription(
   },
   handleSubscription
 )
+
+onMounted(() => {
+  if (messageContainer.value) {
+    messageContainer.value.scrollTop = messageContainer.value.scrollHeight
+  }
+})
 
 watch(
   [data],

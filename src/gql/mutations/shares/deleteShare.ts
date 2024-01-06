@@ -7,8 +7,9 @@ export type DeleteShareMutationVariables = Types.Exact<{
   input: Types.DeleteShareInput
 }>
 
-export type DeleteShareMutation = { __typename?: "Mutation" } & {
-  deleteShare: { __typename?: "ShareUser" } & { user: { __typename?: "User" } & Pick<Types.User, "id"> }
+export type DeleteShareMutation = {
+  __typename?: "Mutation"
+  deleteShare: { __typename?: "ShareUser"; user: { __typename?: "User"; id: string } }
 }
 
 export const DeleteShareDocument = gql`

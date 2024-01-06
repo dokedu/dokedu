@@ -8,8 +8,9 @@ export type UpdateTagMutationVariables = Types.Exact<{
   input: Types.CreateTagInput
 }>
 
-export type UpdateTagMutation = { __typename?: "Mutation" } & {
-  updateTag: { __typename?: "Tag" } & Pick<Types.Tag, "id" | "name" | "color" | "deletedAt" | "createdAt">
+export type UpdateTagMutation = {
+  __typename?: "Mutation"
+  updateTag: { __typename?: "Tag"; id: string; name: string; color: string; deletedAt?: never | null; createdAt: never }
 }
 
 export const UpdateTagDocument = gql`

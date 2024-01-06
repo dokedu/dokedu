@@ -7,8 +7,9 @@ export type BucketByIdSharedQueryVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type BucketByIdSharedQuery = { __typename?: "Query" } & {
-  bucket: { __typename?: "Bucket" } & Pick<Types.Bucket, "id" | "permission">
+export type BucketByIdSharedQuery = {
+  __typename?: "Query"
+  bucket: { __typename?: "Bucket"; id: string; permission?: Types.FilePermission | null }
 }
 
 export const BucketByIdSharedDocument = gql`

@@ -5,15 +5,13 @@ import * as Urql from "@urql/vue"
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 export type DomainsQueryVariables = Types.Exact<{ [key: string]: never }>
 
-export type DomainsQuery = { __typename?: "Query" } & {
-  domains?: Types.Maybe<
-    { __typename?: "DomainConnection" } & {
-      edges?: Types.Maybe<
-        Array<Types.Maybe<{ __typename?: "Domain" } & Pick<Types.Domain, "id" | "name" | "createdAt">>>
-      >
-      pageInfo: { __typename?: "PageInfo" } & Pick<Types.PageInfo, "hasNextPage" | "hasPreviousPage">
-    }
-  >
+export type DomainsQuery = {
+  __typename?: "Query"
+  domains?: {
+    __typename?: "DomainConnection"
+    edges?: Array<{ __typename?: "Domain"; id: string; name: string; createdAt: string } | null> | null
+    pageInfo: { __typename?: "PageInfo"; hasNextPage: boolean; hasPreviousPage: boolean }
+  } | null
 }
 
 export const DomainsDocument = gql`

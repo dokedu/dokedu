@@ -7,8 +7,9 @@ export type DeleteEmailGroupMutationVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type DeleteEmailGroupMutation = { __typename?: "Mutation" } & {
-  deleteEmailGroup?: Types.Maybe<{ __typename?: "EmailAccount" } & Pick<Types.EmailAccount, "id" | "name">>
+export type DeleteEmailGroupMutation = {
+  __typename?: "Mutation"
+  deleteEmailGroup?: { __typename?: "EmailAccount"; id: string; name: string } | null
 }
 
 export const DeleteEmailGroupDocument = gql`

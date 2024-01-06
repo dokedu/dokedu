@@ -5,11 +5,18 @@ import * as Urql from "@urql/vue"
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 export type GetTagsQueryVariables = Types.Exact<{ [key: string]: never }>
 
-export type GetTagsQuery = { __typename?: "Query" } & {
-  tags: { __typename?: "TagConnection" } & {
-    edges?: Types.Maybe<
-      Array<Types.Maybe<{ __typename?: "Tag" } & Pick<Types.Tag, "id" | "name" | "color" | "deletedAt" | "createdAt">>>
-    >
+export type GetTagsQuery = {
+  __typename?: "Query"
+  tags: {
+    __typename?: "TagConnection"
+    edges?: Array<{
+      __typename?: "Tag"
+      id: string
+      name: string
+      color: string
+      deletedAt?: never | null
+      createdAt: never
+    } | null> | null
   }
 }
 

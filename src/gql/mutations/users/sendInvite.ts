@@ -7,7 +7,7 @@ export type SendInviteMutationVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type SendInviteMutation = { __typename?: "Mutation" } & Pick<Types.Mutation, "sendUserInvite">
+export type SendInviteMutation = { __typename?: "Mutation"; sendUserInvite: boolean }
 
 export const SendInviteDocument = gql`
   mutation sendInvite($id: ID!) {

@@ -7,11 +7,17 @@ export type AdminUserByIdQueryVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type AdminUserByIdQuery = { __typename?: "Query" } & {
-  user: { __typename?: "User" } & Pick<
-    Types.User,
-    "id" | "firstName" | "lastName" | "email" | "role" | "inviteAccepted"
-  >
+export type AdminUserByIdQuery = {
+  __typename?: "Query"
+  user: {
+    __typename?: "User"
+    id: string
+    firstName: string
+    lastName: string
+    email?: string | null
+    role: Types.UserRole
+    inviteAccepted: boolean
+  }
 }
 
 export const AdminUserByIdDocument = gql`

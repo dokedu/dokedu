@@ -7,8 +7,9 @@ export type DeleteSharedDriveMutationVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type DeleteSharedDriveMutation = { __typename?: "Mutation" } & {
-  deleteSharedDrive: { __typename?: "Bucket" } & Pick<Types.Bucket, "id">
+export type DeleteSharedDriveMutation = {
+  __typename?: "Mutation"
+  deleteSharedDrive: { __typename?: "Bucket"; id: string }
 }
 
 export const DeleteSharedDriveDocument = gql`

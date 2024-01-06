@@ -7,8 +7,9 @@ export type DeleteEntryEventInputMutationVariables = Types.Exact<{
   input: Types.DeleteEntryEventInput
 }>
 
-export type DeleteEntryEventInputMutation = { __typename?: "Mutation" } & {
-  deleteEntryEvent: { __typename?: "Entry" } & Pick<Types.Entry, "id">
+export type DeleteEntryEventInputMutation = {
+  __typename?: "Mutation"
+  deleteEntryEvent: { __typename?: "Entry"; id: string }
 }
 
 export const DeleteEntryEventInputDocument = gql`

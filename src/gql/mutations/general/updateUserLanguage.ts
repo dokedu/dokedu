@@ -7,8 +7,9 @@ export type UpdateUserLanguageMutationVariables = Types.Exact<{
   language: Types.UserLanguage
 }>
 
-export type UpdateUserLanguageMutation = { __typename?: "Mutation" } & {
-  updateUserLanguage: { __typename?: "User" } & Pick<Types.User, "id" | "language">
+export type UpdateUserLanguageMutation = {
+  __typename?: "Mutation"
+  updateUserLanguage: { __typename?: "User"; id: string; language?: Types.UserLanguage | null }
 }
 
 export const UpdateUserLanguageDocument = gql`

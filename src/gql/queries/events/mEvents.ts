@@ -7,9 +7,11 @@ export type MEventsQueryVariables = Types.Exact<{
   search?: Types.InputMaybe<Types.Scalars["String"]["input"]>
 }>
 
-export type MEventsQuery = { __typename?: "Query" } & {
-  events: { __typename?: "EventConnection" } & {
-    edges?: Types.Maybe<Array<Types.Maybe<{ __typename?: "Event" } & Pick<Types.Event, "id" | "title">>>>
+export type MEventsQuery = {
+  __typename?: "Query"
+  events: {
+    __typename?: "EventConnection"
+    edges?: Array<{ __typename?: "Event"; id: string; title: string } | null> | null
   }
 }
 
