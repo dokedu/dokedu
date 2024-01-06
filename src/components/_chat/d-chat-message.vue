@@ -2,19 +2,19 @@
   <div class="px-4 w-full rounded-[inherit] group" style="overflow: hidden scroll">
     <div class="flex items-start max-w-[80%]" :class="me ? `justify-end ml-auto` : `justify-start`">
       <div
-        class="bg-neutral-100 rounded-xl py-1 px-2 w-fit whitespace-pre-wrap flex"
+        class="bg-neutral-100 rounded-xl py-1 px-2 w-fit whitespace-pre-wrap flex flex-col relative"
         :class="`
-        ${me ? `self-end group-last:rounded-br-none` : `border bg-white group-last:rounded-bl-none`} 
-        ${stacked ? `flex-col justify-end` : `flex-row items-center gap-2`}`"
+          ${me ? `self-end group-last:rounded-br-none` : `border bg-white group-last:rounded-bl-none`} 
+        `"
       >
-        <div class="flex-1">
-          <div v-if="showName" class="group-first:block hidden text-xs font-medium text-blue-500">
-            {{ fullName(message.user) }}
-          </div>
-          <d-markdown :source="message.message" class=""></d-markdown>
+        <div v-if="showName" class="group-first:block hidden text-xs font-medium text-blue-500">
+          {{ fullName(message.user) }}
         </div>
-        <div class="text-xs text-subtle flex justify-end">
-          {{ formatTime(message.createdAt) }}
+        <div class="flex" :class="`${stacked ? `flex-col justify-end` : `flex-row items-baseline gap-2`}`">
+          <d-markdown :source="message.message" ref="messageText"></d-markdown>
+          <div class="text-xs text-subtle flex justify-end">
+            {{ formatTime(message.createdAt) }}
+          </div>
         </div>
       </div>
     </div>
@@ -23,7 +23,8 @@
 <script setup lang="ts">
 import type { ChatMessage } from "@/gql/schema"
 import DMarkdown from "@/components/d-markdown/d-markdown.vue"
-import { computed } from "vue"
+import { computed, ref } from "vue"
+import { useElementSize } from "@vueuse/core"
 
 type Props = {
   message: ChatMessage
@@ -32,14 +33,16 @@ type Props = {
 }
 
 const props = defineProps<Props>()
+const messageText = ref<HTMLElement | null>(null)
+const { height } = useElementSize(messageText)
 
 const showName = computed(() => {
   return (props.type === "GROUP" || props.type === "CHANNEL") && !props.me
 })
 
 const stacked = computed(() => {
-  // if message is too long to fit in one line, stack it
-  return props.message.message.length > 50
+  // stack if message is higher than 24px or longer than 50 chars
+  return height.value > 24 || props.message.message.length > 50
 })
 
 function fullName(user: { firstName: string; lastName: string }) {
