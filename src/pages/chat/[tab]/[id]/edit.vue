@@ -60,7 +60,7 @@ import { useUpdateChatMutation } from "@/gql/mutations/chats/updateChat"
 import { useRemoveUserFromChatMutation } from "@/gql/mutations/chats/removeUserFromChat"
 import { ChatType } from "@/gql/schema"
 
-const route = useRoute("/chat/chats/[id]/edit")
+const route = useRoute("/chat/[tab]/[id]/edit")
 
 const id = computed(() => route.params.id)
 

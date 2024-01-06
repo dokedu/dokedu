@@ -38,7 +38,14 @@
           </div>
         </div>
         <div v-show="tab === 'contacts'">
-          <pre>{{ users }}</pre>
+          <div v-for="user in users?.users?.edges" :key="user?.id" class="px-2" @click="createChatWithUser(user)">
+            <div class="p-2 hover:bg-black/5 flex items-center gap-2.5 rounded-xl">
+              <div class="size-10 rounded-full bg-neutral-900/10"></div>
+              <div class="flex-1 w-full">
+                <div class="font-semibold">{{ user?.firstName }} {{ user?.lastName }}</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="p-2 flex justify-center">
@@ -84,16 +91,41 @@ import { useRouteParams } from "@vueuse/router"
 import { useChatsQuery } from "@/gql/queries/chats/chats"
 import { useUsersQuery } from "@/gql/queries/users/users"
 import { ref } from "vue"
+import { useAddUserToChatMutation } from "@/gql/mutations/chats/addUserToChat"
+import { useCreateChatMutation } from "@/gql/mutations/chats/createChat"
+import { useRouter } from "vue-router/auto"
+
+import type { User } from "@/gql/schema"
 
 const tab = useRouteParams("tab", "chats")
 const chat = useRouteParams("id", "")
 const route = useRoute("/chat/[tab]")
 const search = ref("")
+const router = useRouter()
 
 const sidebars = [
   { id: "chats", name: "Chats", icon: MessageCircle },
   { id: "contacts", name: "Contacts", icon: BookUser }
 ]
+
+const { executeMutation: createChat } = useCreateChatMutation()
+const { executeMutation: addUserToChatMut } = useAddUserToChatMutation()
+
+async function createChatWithUser(user: User) {
+  const createChatResult = await createChat({
+    input: {
+      name: user.firstName + " " + user.lastName
+    }
+  })
+  if (!createChatResult.data?.createChat?.id) return
+  const addUserResult = await addUserToChatMut({
+    input: {
+      chatId: createChatResult.data?.createChat?.id,
+      userId: user.id
+    }
+  })
+  router.push({ name: "/chat/[tab]/[id]/", params: { tab: "chats", id: addUserResult.data?.addUserToChat?.chat?.id } })
+}
 
 const { data: chatList } = useChatsQuery({})
 const { data: users } = useUsersQuery({})
