@@ -4,14 +4,18 @@
       <div
         class="bg-neutral-100 rounded-xl py-1 px-2 w-fit whitespace-pre-wrap flex flex-col relative"
         :class="`
-          ${me ? `self-end group-last:rounded-br-none` : `border bg-white group-last:rounded-bl-none`} 
+          ${
+            me
+              ? `self-end group-last:rounded-br-none bg-inverted text-white`
+              : `border bg-white group-last:rounded-bl-none`
+          } 
         `"
       >
         <div v-if="showName" class="group-first:block hidden text-xs font-medium text-blue-500">
           {{ fullName(message.user) }}
         </div>
         <div class="flex" :class="`${stacked ? `flex-col justify-end` : `flex-row items-baseline gap-2`}`">
-          <d-markdown :source="message.message" ref="messageText"></d-markdown>
+          <d-markdown :inverted="me" :source="message.message" ref="messageText"></d-markdown>
           <div class="text-xs text-subtle flex justify-end">
             {{ formatTime(message.createdAt) }}
           </div>
