@@ -26,16 +26,28 @@
         ></d-empty>
       </div>
     </div>
-    <footer class="w-full px-2 pb-2">
+    <footer class="w-full flex gap-2 items-end px-4 border-t bg-white">
+      <div class="h-14 flex items-center gap-1">
+        <d-icon-button size="md" :icon="Paperclip"></d-icon-button>
+      </div>
       <textarea
         ref="textarea"
         v-model="input"
         type="text"
         placeholder="Write a message..."
-        class="w-full resize-none block rounded-md border-0 py-2 px-3 text-neutral-900 shadow-sm ring-1 ring-inset ring-neutral-200 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-neutral-950 text-sm leading-6"
+        class="w-full max-h-[40vh] resize-none block py-4 border-none h-full bg-transparent text-neutral-900 placeholder:text-neutral-400 ring-0 focus:outline-none focus:ring-0 text-sm leading-6"
         @keydown.enter.exact.prevent="onSubmit"
         @keydown.enter.shift.prevent="input += '\n'"
       />
+      <div class="h-14 flex items-center gap-1">
+        <d-icon-button size="lg" :icon="Smile"></d-icon-button>
+        <d-icon-button
+          size="lg"
+          :icon="SendHorizonal"
+          @click="onSubmit"
+          :type="input ? 'primary' : 'secondary'"
+        ></d-icon-button>
+      </div>
     </footer>
   </div>
 </template>
@@ -58,13 +70,12 @@ import { useSendMessageMutation } from "@/gql/mutations/chats/sendMessage"
 import { useMessageAddedSubscription } from "@/gql/subscriptions/messageAdded"
 import DEmpty from "@/components/d-empty/d-empty.vue"
 import DChatMessage from "@/components/_chat/d-chat-message.vue"
-import { MessageCircle } from "lucide-vue-next"
+import DIconButton from "@/components/d-icon-button/d-icon-button.vue"
+import { MessageCircle, Paperclip, SendHorizonal, Smile } from "lucide-vue-next"
 
 const route = useRoute("/chat/[tab]/[id]/")
-
 const id = computed(() => route.params.id)
 const messageContainer = ref<HTMLElement>()
-
 const { textarea, input } = useTextareaAutosize()
 
 const { data, executeQuery: refresh } = useChatQuery({

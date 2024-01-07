@@ -48,7 +48,7 @@
           </div>
         </div>
       </div>
-      <div class="p-2 flex justify-center border-t">
+      <div class="pb-2 px-2 flex justify-center">
         <d-tabs>
           <d-tab
             class="flex items-center gap-1"

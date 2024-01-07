@@ -19,15 +19,27 @@ import { computed, toRef } from "vue"
 export interface Props {
   icon: Icon
   size: "xs" | "sm" | "md" | "lg"
+  type: "primary" | "secondary"
 }
-
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  size: "md",
+  type: "secondary"
+})
 const icon = toRef(props, "icon")
 
 const classNames = computed(() => {
   const classes = [
-    "inline-flex text-sm items-center gap-2 select-none justify-center border h-fit relative transition-all rounded-lg overflow-hidden hover:bg-neutral-50"
+    "inline-flex text-sm items-center gap-2 select-none justify-center border h-fit relative transition-all rounded-lg overflow-hidden "
   ]
+
+  switch (props.type) {
+    case "primary":
+      classes.push("hover:bg-neutral-700 bg-inverted text-inverted")
+      break
+    case "secondary":
+      classes.push("hover:bg-neutral-100")
+      break
+  }
 
   switch (props.size) {
     case "xs":
