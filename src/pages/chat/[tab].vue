@@ -20,21 +20,27 @@
             </d-tabs>
           </div>
           <div class="flex flex-col overflow-scroll flex-1 pt-2">
-            <router-link
-              :to="`/chat/chats/` + chat?.id"
-              class="px-4 py-2.5 flex gap-4 items-center border-b border-neutral-900/5"
-              v-for="chat in chatList?.chats?.edges"
-              :key="chat?.id"
-              :class="chat?.id === route.params.id ? `bg-neutral-900/10` : `hover:bg-neutral-900/5`"
-            >
-              <div class="h-12 w-12 rounded-full bg-neutral-900/10"></div>
-              <div class="flex-1 w-full">
-                <div class="font-semibold mb-1">{{ chat?.name }}</div>
-                <div class="text-neutral-500 text-xs line-clamp-2 h-[2rem]">
-                  {{ chat?.lastMessage ? chat?.lastMessage : `No messages yet` }}
-                </div>
-              </div>
-            </router-link>
+            <d-chat
+              v-for="_chat in chatList?.chats?.edges"
+              :chat="_chat"
+              :active="_chat?.id === chat"
+              :key="_chat?.id"
+            ></d-chat>
+            <!-- <router-link -->
+            <!--   :to="`/chat/chats/` + _chat?.id" -->
+            <!--   class="px-4 py-2.5 flex gap-4 items-center border-b border-neutral-900/5" -->
+            <!--   v-for="_chat in chatList?.chats?.edges" -->
+            <!--   :key="_chat?.id" -->
+            <!--   :class="_chat?.id === chat ? `bg-neutral-900/10` : `hover:bg-neutral-900/5`" -->
+            <!-- > -->
+            <!--   <div class="h-12 w-12 rounded-full bg-neutral-900/10"></div> -->
+            <!--   <div class="flex-1 w-full"> -->
+            <!--     <div class="font-semibold mb-1">{{ _chat?.name }}</div> -->
+            <!--     <div class="text-neutral-500 text-xs line-clamp-2 h-[2rem]"> -->
+            <!--       {{ _chat?.lastMessage ? _chat?.lastMessage : `No messages yet` }} -->
+            <!--     </div> -->
+            <!--   </div> -->
+            <!-- </router-link> -->
           </div>
         </div>
         <div v-show="tab === 'contacts'">
@@ -49,9 +55,9 @@
         </div>
       </div>
       <div class="pb-2 px-2 flex justify-center">
-        <d-tabs>
+        <d-tabs class="w-full">
           <d-tab
-            class="flex items-center gap-1"
+            class="flex items-center gap-1 flex-1 justify-center"
             v-for="(sidebar, _) in sidebars"
             :key="_"
             :active="sidebar.id === tab"
@@ -85,6 +91,7 @@ import DNewChat from "@/components/_chat/d-new-chat.vue"
 import DInput from "@/components/d-input/d-input.vue"
 import DTabs from "@/components/d-tabs/d-tabs.vue"
 import DTab from "@/components/d-tabs/d-tab.vue"
+import DChat from "@/components/_chat/d-chat.vue"
 import { MessageCircle, BookUser } from "lucide-vue-next"
 import { useRouteParams } from "@vueuse/router"
 
