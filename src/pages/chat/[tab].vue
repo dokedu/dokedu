@@ -53,9 +53,24 @@
         </d-tabs>
       </div>
     </div>
-
     <div class="w-full flex-1">
-      <router-view></router-view>
+      <div v-if="chat" class="w-full flex-1">
+        <router-view></router-view>
+      </div>
+      <!-- show start state-->
+      <div v-else class="w-full flex-1">
+        <d-empty
+          title="Chats"
+          text="In chats you can communicate with the whole organization."
+          :icon="MessageCircle"
+          :center="false"
+        >
+          <template #actions>
+            <d-button size="sm" type="outline" :icon-left="BookUser" @click="navigateToContacts">Contacts</d-button>
+            <d-button size="sm" :icon-left="Plus" @click="createNewGroup">Create Group</d-button>
+          </template>
+        </d-empty>
+      </div>
     </div>
   </div>
 </template>
@@ -77,9 +92,10 @@ import DTabs from "@/components/d-tabs/d-tabs.vue"
 import DTab from "@/components/d-tabs/d-tab.vue"
 import DChat from "@/components/_chat/d-chat.vue"
 import DContact from "@/components/_chat/d-contact.vue"
-import { MessageCircle, BookUser } from "lucide-vue-next"
+import DEmpty from "@/components/d-empty/d-empty.vue"
+import DButton from "@/components/d-button/d-button.vue"
+import { MessageCircle, BookUser, Plus } from "lucide-vue-next"
 import { useRouteParams } from "@vueuse/router"
-
 import { useChatsQuery } from "@/gql/queries/chats/chats"
 import { useChatUsersQuery } from "@/gql/queries/chats/chatUsers"
 import { ref } from "vue"
@@ -118,6 +134,19 @@ async function createChatWithUser(user: User) {
   })
   if (!addUserResult.data?.addUserToChat?.chat?.id) return
   router.push({ name: "/chat/[tab]/[id]/", params: { tab: "chats", id: addUserResult.data?.addUserToChat?.chat?.id } })
+}
+
+async function createNewGroup() {
+  const createResult = await createChat({
+    input: {
+      name: "New group"
+    }
+  })
+  router.push("/chat/chats/" + createResult.data?.createChat.id)
+}
+
+function navigateToContacts() {
+  router.push({ name: "/chat/[tab]", params: { tab: "contacts" } })
 }
 
 const { data: chatList } = useChatsQuery({})
