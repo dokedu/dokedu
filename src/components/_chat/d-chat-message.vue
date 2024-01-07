@@ -11,7 +11,6 @@
           } 
         `"
       >
-        <pre>{{ me }}</pre>
         <div v-if="showName" class="group-first:block hidden text-xs font-medium text-blue-500">
           {{ fullName(message.user) }}
         </div>
