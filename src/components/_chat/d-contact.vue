@@ -14,8 +14,8 @@ import { UserRound } from "lucide-vue-next"
 import DAvatar from "@/components/d-avatar/d-avatar.vue"
 
 type Props = {
-  firstname: string
-  lastname: string
+  firstname: string | undefined
+  lastname: string | undefined
 }
 
 const props = defineProps<Props>()
