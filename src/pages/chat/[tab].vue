@@ -26,21 +26,6 @@
               :active="_chat?.id === chat"
               :key="_chat?.id"
             ></d-chat>
-            <!-- <router-link -->
-            <!--   :to="`/chat/chats/` + _chat?.id" -->
-            <!--   class="px-4 py-2.5 flex gap-4 items-center border-b border-neutral-900/5" -->
-            <!--   v-for="_chat in chatList?.chats?.edges" -->
-            <!--   :key="_chat?.id" -->
-            <!--   :class="_chat?.id === chat ? `bg-neutral-900/10` : `hover:bg-neutral-900/5`" -->
-            <!-- > -->
-            <!--   <div class="h-12 w-12 rounded-full bg-neutral-900/10"></div> -->
-            <!--   <div class="flex-1 w-full"> -->
-            <!--     <div class="font-semibold mb-1">{{ _chat?.name }}</div> -->
-            <!--     <div class="text-neutral-500 text-xs line-clamp-2 h-[2rem]"> -->
-            <!--       {{ _chat?.lastMessage ? _chat?.lastMessage : `No messages yet` }} -->
-            <!--     </div> -->
-            <!--   </div> -->
-            <!-- </router-link> -->
           </div>
         </div>
         <div v-show="tab === 'contacts'">
