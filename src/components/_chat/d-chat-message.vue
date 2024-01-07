@@ -2,7 +2,7 @@
   <div class="px-4 w-full rounded-[inherit] group" style="overflow: hidden scroll">
     <div class="flex items-start max-w-[80%]" :class="me ? `justify-end ml-auto` : `justify-start`">
       <div
-        class="bg-neutral-100 rounded-xl py-1 px-2 w-fit whitespace-pre-wrap flex flex-col relative"
+        class="rounded-xl py-1 px-2 w-fit whitespace-pre-wrap flex flex-col relative"
         :class="`
           ${
             me
@@ -11,6 +11,7 @@
           } 
         `"
       >
+        <pre>{{ me }}</pre>
         <div v-if="showName" class="group-first:block hidden text-xs font-medium text-blue-500">
           {{ fullName(message.user) }}
         </div>
