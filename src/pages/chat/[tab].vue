@@ -44,14 +44,13 @@
           </div>
         </div>
         <div v-show="tab === 'contacts'">
-          <div v-for="user in users?.users?.edges" :key="user?.id" class="px-2" @click="createChatWithUser(user)">
-            <div class="p-2 hover:bg-black/5 flex items-center gap-2.5 rounded-xl">
-              <div class="size-10 rounded-full bg-neutral-900/10"></div>
-              <div class="flex-1 w-full">
-                <div class="font-semibold">{{ user?.firstName }} {{ user?.lastName }}</div>
-              </div>
-            </div>
-          </div>
+          <d-contact
+            v-for="user in users?.users?.edges"
+            :key="user?.id"
+            @click="createChatWithUser(user)"
+            :firstname="user?.firstName"
+            :lastname="user?.lastName"
+          ></d-contact>
         </div>
       </div>
       <div class="pb-2 px-2 flex justify-center">
@@ -92,6 +91,7 @@ import DInput from "@/components/d-input/d-input.vue"
 import DTabs from "@/components/d-tabs/d-tabs.vue"
 import DTab from "@/components/d-tabs/d-tab.vue"
 import DChat from "@/components/_chat/d-chat.vue"
+import DContact from "@/components/_chat/d-contact.vue"
 import { MessageCircle, BookUser } from "lucide-vue-next"
 import { useRouteParams } from "@vueuse/router"
 
