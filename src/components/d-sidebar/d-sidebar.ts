@@ -21,7 +21,7 @@ import {
   MessageCircle
 } from "lucide-vue-next"
 
-import type { Icon as LucideIcon } from "lucide-vue-next"
+import type { Icon as LucideIcon } from "@/types/types"
 
 import type { RouteNamedMap } from "vue-router/auto/routes"
 import i18n from "@/i18n"
