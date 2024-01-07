@@ -1,5 +1,5 @@
 <template>
-  <div class="relative">
+  <div class="relative" ref="popover">
     <d-icon-button
       :icon="PenSquare"
       size="lg"
@@ -7,7 +7,7 @@
       :type="popoverOpen ? 'primary' : 'secondary'"
     ></d-icon-button>
     <Transition name="popover">
-      <d-popover ref="popover" v-if="popoverOpen" class="top-[calc(100%+4px)]">
+      <d-popover v-if="popoverOpen" class="top-[calc(100%+4px)]">
         <d-popover-item @click="createNewGroup">
           <UsersRound class="size-5" />
           <span>New group</span>

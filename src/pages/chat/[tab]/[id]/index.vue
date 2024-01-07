@@ -4,8 +4,16 @@
       :to="`/chat/chats/${route.params.id}/edit`"
       class="px-4 border-b shadow-sm w-full grid grid-cols-3 h-16 justify-between items-center"
     >
+      <div class="flex gap-2.5">
+        <d-avatar :initials="useInitials(data?.chat.name)" :icon="UserRound"></d-avatar>
+        <div>
+          <div class="text-md font-medium">
+            {{ data?.chat.name ? data?.chat.name : `Unnamed chat` }}
+          </div>
+          <div class="text-xs text-neutral-400">last seen 1 minute ago</div>
+        </div>
+      </div>
       <div></div>
-      <div class="font-semibold text-center">{{ data?.chat.name ? data?.chat.name : `Unnamed chat` }}</div>
       <div></div>
     </router-link>
     <div ref="messageContainer" class="h-full flex-1 overflow-auto">
@@ -71,8 +79,9 @@ import { useMessageAddedSubscription } from "@/gql/subscriptions/messageAdded"
 import DEmpty from "@/components/d-empty/d-empty.vue"
 import DChatMessage from "@/components/_chat/d-chat-message.vue"
 import DIconButton from "@/components/d-icon-button/d-icon-button.vue"
-import { MessageCircle, Paperclip, SendHorizonal, Smile } from "lucide-vue-next"
-
+import DAvatar from "@/components/d-avatar/d-avatar.vue"
+import { MessageCircle, Paperclip, SendHorizonal, Smile, UserRound } from "lucide-vue-next"
+import useInitials from "@/composables/useInitials"
 const route = useRoute("/chat/[tab]/[id]/")
 const id = computed(() => route.params.id)
 const messageContainer = ref<HTMLElement>()
