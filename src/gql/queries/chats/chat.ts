@@ -7,14 +7,20 @@ export type ChatQueryVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type ChatQuery = { __typename?: "Query" } & {
-  chat: { __typename?: "Chat" } & Pick<Types.Chat, "id" | "name"> & {
-      messages: Array<
-        { __typename?: "ChatMessage" } & Pick<Types.ChatMessage, "id" | "message" | "createdAt"> & {
-            user: { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName">
-          }
-      >
-    }
+export type ChatQuery = {
+  __typename?: "Query"
+  chat: {
+    __typename?: "Chat"
+    id: string
+    name?: string | null
+    messages: Array<{
+      __typename?: "ChatMessage"
+      id: string
+      message: string
+      createdAt: never
+      user: { __typename?: "User"; id: string; firstName: string; lastName: string }
+    }>
+  }
 }
 
 export const ChatDocument = gql`

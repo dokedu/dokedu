@@ -10,12 +10,18 @@ export type AdminUsersQueryVariables = Types.Exact<{
   showDeleted?: Types.InputMaybe<Types.Scalars["Boolean"]["input"]>
 }>
 
-export type AdminUsersQuery = { __typename?: "Query" } & {
-  users: { __typename?: "UserConnection" } & {
-    pageInfo: { __typename?: "PageInfo" } & Pick<Types.PageInfo, "hasNextPage" | "hasPreviousPage">
-    edges?: Types.Maybe<
-      Array<Types.Maybe<{ __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName" | "email">>>
-    >
+export type AdminUsersQuery = {
+  __typename?: "Query"
+  users: {
+    __typename?: "UserConnection"
+    pageInfo: { __typename?: "PageInfo"; hasNextPage: boolean; hasPreviousPage: boolean }
+    edges?: Array<{
+      __typename?: "User"
+      id: string
+      firstName: string
+      lastName: string
+      email?: string | null
+    } | null> | null
   }
 }
 

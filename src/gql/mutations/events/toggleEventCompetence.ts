@@ -7,8 +7,9 @@ export type ToggleEventCompetenceMutationVariables = Types.Exact<{
   input: Types.AddEventCompetenceInput
 }>
 
-export type ToggleEventCompetenceMutation = { __typename?: "Mutation" } & {
-  toggleEventCompetence: { __typename?: "Event" } & Pick<Types.Event, "id">
+export type ToggleEventCompetenceMutation = {
+  __typename?: "Mutation"
+  toggleEventCompetence: { __typename?: "Event"; id: string }
 }
 
 export const ToggleEventCompetenceDocument = gql`

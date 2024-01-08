@@ -8,19 +8,26 @@ export type CompetenceSearchQueryVariables = Types.Exact<{
   filter?: Types.InputMaybe<Types.CompetenceFilterInput>
 }>
 
-export type CompetenceSearchQuery = { __typename?: "Query" } & {
-  competences: { __typename?: "CompetenceConnection" } & {
-    edges?: Types.Maybe<
-      Array<
-        Types.Maybe<
-          { __typename?: "Competence" } & Pick<Types.Competence, "id" | "name" | "type" | "color" | "grades"> & {
-              parents: Array<
-                { __typename?: "Competence" } & Pick<Types.Competence, "id" | "name" | "type" | "grades" | "color">
-              >
-            }
-        >
-      >
-    >
+export type CompetenceSearchQuery = {
+  __typename?: "Query"
+  competences: {
+    __typename?: "CompetenceConnection"
+    edges?: Array<{
+      __typename?: "Competence"
+      id: string
+      name: string
+      type: Types.CompetenceType
+      color: string
+      grades: Array<number>
+      parents: Array<{
+        __typename?: "Competence"
+        id: string
+        name: string
+        type: Types.CompetenceType
+        grades: Array<number>
+        color: string
+      }>
+    } | null> | null
   }
 }
 

@@ -7,13 +7,18 @@ export type SubjectsDataQueryVariables = Types.Exact<{
   search?: Types.InputMaybe<Types.Scalars["String"]["input"]>
 }>
 
-export type SubjectsDataQuery = { __typename?: "Query" } & {
-  competences: { __typename?: "CompetenceConnection" } & {
-    edges?: Types.Maybe<
-      Array<
-        Types.Maybe<{ __typename?: "Competence" } & Pick<Types.Competence, "id" | "name" | "type" | "color" | "grades">>
-      >
-    >
+export type SubjectsDataQuery = {
+  __typename?: "Query"
+  competences: {
+    __typename?: "CompetenceConnection"
+    edges?: Array<{
+      __typename?: "Competence"
+      id: string
+      name: string
+      type: Types.CompetenceType
+      color: string
+      grades: Array<number>
+    } | null> | null
   }
 }
 

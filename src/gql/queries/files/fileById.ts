@@ -7,10 +7,14 @@ export type FileByIdQueryVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type FileByIdQuery = { __typename?: "Query" } & {
-  file: { __typename?: "File" } & Pick<Types.File, "id" | "name"> & {
-      parents: Array<{ __typename?: "File" } & Pick<Types.File, "id" | "name">>
-    }
+export type FileByIdQuery = {
+  __typename?: "Query"
+  file: {
+    __typename?: "File"
+    id: string
+    name: string
+    parents: Array<{ __typename?: "File"; id: string; name: string }>
+  }
 }
 
 export const FileByIdDocument = gql`

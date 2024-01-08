@@ -7,29 +7,40 @@ export type EntryById2QueryVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type EntryById2Query = { __typename?: "Query" } & {
-  entry: { __typename?: "Entry" } & Pick<Types.Entry, "id" | "date" | "body" | "deletedAt" | "createdAt"> & {
-      user: { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName">
-      tags: Array<{ __typename?: "Tag" } & Pick<Types.Tag, "id" | "name" | "color">>
-      events: Array<{ __typename?: "Event" } & Pick<Types.Event, "id" | "title">>
-      users: Array<
-        { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName"> & {
-            student?: Types.Maybe<{ __typename?: "UserStudent" } & Pick<Types.UserStudent, "id" | "emoji">>
-          }
-      >
-      userCompetences: Array<
-        { __typename?: "UserCompetence" } & Pick<Types.UserCompetence, "id" | "level"> & {
-            competence: { __typename?: "Competence" } & Pick<
-              Types.Competence,
-              "id" | "name" | "color" | "type" | "grades"
-            > & {
-                parents: Array<
-                  { __typename?: "Competence" } & Pick<Types.Competence, "id" | "name" | "grades" | "color">
-                >
-              }
-          }
-      >
-    }
+export type EntryById2Query = {
+  __typename?: "Query"
+  entry: {
+    __typename?: "Entry"
+    id: string
+    date: string
+    body?: string | null
+    deletedAt?: never | null
+    createdAt: never
+    user: { __typename?: "User"; id: string; firstName: string; lastName: string }
+    tags: Array<{ __typename?: "Tag"; id: string; name: string; color: string }>
+    events: Array<{ __typename?: "Event"; id: string; title: string }>
+    users: Array<{
+      __typename?: "User"
+      id: string
+      firstName: string
+      lastName: string
+      student?: { __typename?: "UserStudent"; id: string; emoji?: string | null } | null
+    }>
+    userCompetences: Array<{
+      __typename?: "UserCompetence"
+      id: string
+      level: number
+      competence: {
+        __typename?: "Competence"
+        id: string
+        name: string
+        color: string
+        type: Types.CompetenceType
+        grades: Array<number>
+        parents: Array<{ __typename?: "Competence"; id: string; name: string; grades: Array<number>; color: string }>
+      }
+    }>
+  }
 }
 
 export const EntryById2Document = gql`

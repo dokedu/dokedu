@@ -9,14 +9,19 @@ export type MGetEntriesQueryVariables = Types.Exact<{
   offset?: Types.InputMaybe<Types.Scalars["Int"]["input"]>
 }>
 
-export type MGetEntriesQuery = { __typename?: "Query" } & {
-  entries: { __typename?: "EntryConnection" } & {
-    pageInfo: { __typename?: "PageInfo" } & Pick<Types.PageInfo, "hasNextPage" | "hasPreviousPage">
-    edges: Array<
-      { __typename?: "Entry" } & Pick<Types.Entry, "id" | "date" | "body" | "createdAt"> & {
-          user: { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName">
-        }
-    >
+export type MGetEntriesQuery = {
+  __typename?: "Query"
+  entries: {
+    __typename?: "EntryConnection"
+    pageInfo: { __typename?: "PageInfo"; hasNextPage: boolean; hasPreviousPage: boolean }
+    edges: Array<{
+      __typename?: "Entry"
+      id: string
+      date: string
+      body?: string | null
+      createdAt: never
+      user: { __typename?: "User"; id: string; firstName: string; lastName: string }
+    }>
   }
 }
 

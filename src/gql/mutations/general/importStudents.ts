@@ -7,11 +7,14 @@ export type ImportStudentsMutationVariables = Types.Exact<{
   input: Types.ImportStudentsInput
 }>
 
-export type ImportStudentsMutation = { __typename?: "Mutation" } & {
-  importStudents: { __typename?: "ImportStudentsPayload" } & Pick<
-    Types.ImportStudentsPayload,
-    "usersCreated" | "usersExisted" | "errors"
-  >
+export type ImportStudentsMutation = {
+  __typename?: "Mutation"
+  importStudents: {
+    __typename?: "ImportStudentsPayload"
+    usersCreated: number
+    usersExisted: number
+    errors: Array<Types.ImportStudentsError>
+  }
 }
 
 export const ImportStudentsDocument = gql`

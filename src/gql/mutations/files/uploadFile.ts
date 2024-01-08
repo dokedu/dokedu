@@ -7,9 +7,7 @@ export type UploadFileMutationVariables = Types.Exact<{
   input: Types.FileUploadInput
 }>
 
-export type UploadFileMutation = { __typename?: "Mutation" } & {
-  uploadFile: { __typename?: "File" } & Pick<Types.File, "id">
-}
+export type UploadFileMutation = { __typename?: "Mutation"; uploadFile: { __typename?: "File"; id: string } }
 
 export const UploadFileDocument = gql`
   mutation uploadFile($input: FileUploadInput!) {

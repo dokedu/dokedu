@@ -2,6 +2,7 @@
   <div
     v-html="md"
     class="prose-pre:p-0 prose-pre:rounded-xl prose-code:text-sm prose prose-neutral prose-sm whitespace-normal prose-pre:bg-[#0d1117]"
+    :class="inverted ? 'prose-invert' : ''"
   ></div>
 </template>
 
@@ -19,6 +20,7 @@ import "highlight.js/styles/github-dark.css" // Import the desired highlight.js 
 
 interface Props {
   source: string
+  inverted?: boolean
 }
 
 const props = defineProps<Props>()

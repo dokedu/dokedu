@@ -7,15 +7,24 @@ export type UpdateStudentMutationVariables = Types.Exact<{
   student: Types.UpdateUserInput
 }>
 
-export type UpdateStudentMutation = { __typename?: "Mutation" } & {
-  updateUser: { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName" | "role"> & {
-      student?: Types.Maybe<
-        { __typename?: "UserStudent" } & Pick<
-          Types.UserStudent,
-          "id" | "birthday" | "grade" | "leftAt" | "joinedAt" | "emoji"
-        >
-      >
-    }
+export type UpdateStudentMutation = {
+  __typename?: "Mutation"
+  updateUser: {
+    __typename?: "User"
+    id: string
+    firstName: string
+    lastName: string
+    role: Types.UserRole
+    student?: {
+      __typename?: "UserStudent"
+      id: string
+      birthday?: never | null
+      grade: number
+      leftAt?: never | null
+      joinedAt?: never | null
+      emoji?: string | null
+    } | null
+  }
 }
 
 export const UpdateStudentDocument = gql`

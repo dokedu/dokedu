@@ -7,8 +7,9 @@ export type RenameSharedDriveMutationVariables = Types.Exact<{
   input: Types.RenameSharedDriveInput
 }>
 
-export type RenameSharedDriveMutation = { __typename?: "Mutation" } & {
-  renameSharedDrive: { __typename?: "Bucket" } & Pick<Types.Bucket, "id" | "name">
+export type RenameSharedDriveMutation = {
+  __typename?: "Mutation"
+  renameSharedDrive: { __typename?: "Bucket"; id: string; name: string }
 }
 
 export const RenameSharedDriveDocument = gql`

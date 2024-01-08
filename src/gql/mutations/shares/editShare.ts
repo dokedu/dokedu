@@ -7,10 +7,13 @@ export type EditShareMutationVariables = Types.Exact<{
   input: Types.CreateShareInput
 }>
 
-export type EditShareMutation = { __typename?: "Mutation" } & {
-  editShare: { __typename?: "ShareUser" } & Pick<Types.ShareUser, "permission"> & {
-      user: { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName">
-    }
+export type EditShareMutation = {
+  __typename?: "Mutation"
+  editShare: {
+    __typename?: "ShareUser"
+    permission: Types.FilePermission
+    user: { __typename?: "User"; id: string; firstName: string; lastName: string }
+  }
 }
 
 export const EditShareDocument = gql`

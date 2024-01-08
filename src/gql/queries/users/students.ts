@@ -5,17 +5,17 @@ import * as Urql from "@urql/vue"
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 export type StudentsQueryVariables = Types.Exact<{ [key: string]: never }>
 
-export type StudentsQuery = { __typename?: "Query" } & {
-  users: { __typename?: "UserConnection" } & {
-    edges?: Types.Maybe<
-      Array<
-        Types.Maybe<
-          { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName"> & {
-              student?: Types.Maybe<{ __typename?: "UserStudent" } & Pick<Types.UserStudent, "id">>
-            }
-        >
-      >
-    >
+export type StudentsQuery = {
+  __typename?: "Query"
+  users: {
+    __typename?: "UserConnection"
+    edges?: Array<{
+      __typename?: "User"
+      id: string
+      firstName: string
+      lastName: string
+      student?: { __typename?: "UserStudent"; id: string } | null
+    } | null> | null
   }
 }
 

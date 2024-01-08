@@ -7,8 +7,9 @@ export type PreviewFileMutationVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type PreviewFileMutation = { __typename?: "Mutation" } & {
-  previewFile: { __typename?: "PreviewFilePayload" } & Pick<Types.PreviewFilePayload, "url">
+export type PreviewFileMutation = {
+  __typename?: "Mutation"
+  previewFile: { __typename?: "PreviewFilePayload"; url: string }
 }
 
 export const PreviewFileDocument = gql`

@@ -8,31 +8,36 @@ export type StudentCompetenceQueryVariables = Types.Exact<{
   user: Types.Scalars["ID"]["input"]
 }>
 
-export type StudentCompetenceQuery = { __typename?: "Query" } & {
-  competence: { __typename?: "Competence" } & Pick<Types.Competence, "id" | "name"> & {
-      parents: Array<{ __typename?: "Competence" } & Pick<Types.Competence, "id" | "name">>
-      competences: Array<
-        Types.Maybe<
-          { __typename?: "Competence" } & Pick<Types.Competence, "type" | "id" | "name" | "grades"> & {
-              parents: Array<{ __typename?: "Competence" } & Pick<Types.Competence, "id" | "name">>
-              tendency?: Types.Maybe<
-                { __typename?: "CompetenceTendency" } & Pick<
-                  Types.CompetenceTendency,
-                  "tendency" | "countChildCompetences" | "countLearnedCompetences"
-                >
-              >
-              userCompetences: Array<
-                Types.Maybe<
-                  { __typename?: "UserCompetence" } & Pick<Types.UserCompetence, "id" | "level" | "createdAt"> & {
-                      entry?: Types.Maybe<{ __typename?: "Entry" } & Pick<Types.Entry, "id">>
-                      createdBy?: Types.Maybe<{ __typename?: "User" } & Pick<Types.User, "firstName" | "lastName">>
-                    }
-                >
-              >
-            }
-        >
-      >
-    }
+export type StudentCompetenceQuery = {
+  __typename?: "Query"
+  competence: {
+    __typename?: "Competence"
+    id: string
+    name: string
+    parents: Array<{ __typename?: "Competence"; id: string; name: string }>
+    competences: Array<{
+      __typename?: "Competence"
+      type: Types.CompetenceType
+      id: string
+      name: string
+      grades: Array<number>
+      parents: Array<{ __typename?: "Competence"; id: string; name: string }>
+      tendency?: {
+        __typename?: "CompetenceTendency"
+        tendency: number
+        countChildCompetences: number
+        countLearnedCompetences: number
+      } | null
+      userCompetences: Array<{
+        __typename?: "UserCompetence"
+        id: string
+        level: number
+        createdAt: never
+        entry?: { __typename?: "Entry"; id: string } | null
+        createdBy?: { __typename?: "User"; firstName: string; lastName: string } | null
+      } | null>
+    } | null>
+  }
 }
 
 export const StudentCompetenceDocument = gql`

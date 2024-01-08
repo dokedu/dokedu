@@ -8,7 +8,7 @@
 
 <script lang="ts" setup>
 import { computed } from "vue"
-import { Icon } from "lucide-vue-next"
+import type { Icon } from "@/types/types"
 
 export interface Props {
   type?: "transparent" | "outline" | "primary"
@@ -50,7 +50,7 @@ const buttonClasses = computed(() => {
   const sizeClasses = {
     xs: ["px-1", "py-0.5", "text-sm"],
     sm: ["px-2", "py-1", "text-sm"],
-    md: ["px-4", "py-1.5", "text-sm"]
+    md: ["px-3", "py-1.5", "text-sm"]
   }
 
   return [...baseClasses, ...typeClasses[props.type || ""], ...sizeClasses[props.size || ""]]

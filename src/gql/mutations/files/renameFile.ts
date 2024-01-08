@@ -7,8 +7,9 @@ export type RenameFileMutationVariables = Types.Exact<{
   input: Types.RenameFileInput
 }>
 
-export type RenameFileMutation = { __typename?: "Mutation" } & {
-  renameFile: { __typename?: "File" } & Pick<Types.File, "id" | "name">
+export type RenameFileMutation = {
+  __typename?: "Mutation"
+  renameFile: { __typename?: "File"; id: string; name: string }
 }
 
 export const RenameFileDocument = gql`

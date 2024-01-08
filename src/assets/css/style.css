@@ -16,6 +16,17 @@ body {
   opacity: 0;
 }
 
+.popover-enter-from,
+.popover-leave-to {
+  transform: translateY(-10px);
+  opacity: 0;
+}
+
+.popover-enter-active,
+.popover-leave-active {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @layer utilities {
   /* Hide scrollbar for Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {

@@ -21,7 +21,7 @@ import {
   MessageCircle
 } from "lucide-vue-next"
 
-import type { Icon as LucideIcon } from "lucide-vue-next"
+import type { Icon as LucideIcon } from "@/types/types"
 
 import type { RouteNamedMap } from "vue-router/auto/routes"
 import i18n from "@/i18n"
@@ -30,6 +30,7 @@ export interface AppLink {
   icon: LucideIcon
   name: string
   route: keyof RouteNamedMap
+  params?: Record<string, string | number>
 }
 
 export type UserRole = "owner" | "admin" | "teacher" | "student"
@@ -234,7 +235,8 @@ export const apps = computed<App[]>(() => [
       {
         icon: MessageCircle,
         name: i18n.global.t("chat"),
-        route: "/chat/chats"
+        route: "/chat/[tab]",
+        params: { tab: "chats" }
       }
     ]
   }

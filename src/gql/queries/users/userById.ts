@@ -7,15 +7,25 @@ export type UserByIdQueryVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type UserByIdQuery = { __typename?: "Query" } & {
-  user: { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName"> & {
-      student?: Types.Maybe<
-        { __typename?: "UserStudent" } & Pick<
-          Types.UserStudent,
-          "id" | "grade" | "joinedAt" | "leftAt" | "entriesCount" | "competencesCount" | "eventsCount" | "emoji"
-        >
-      >
-    }
+export type UserByIdQuery = {
+  __typename?: "Query"
+  user: {
+    __typename?: "User"
+    id: string
+    firstName: string
+    lastName: string
+    student?: {
+      __typename?: "UserStudent"
+      id: string
+      grade: number
+      joinedAt?: never | null
+      leftAt?: never | null
+      entriesCount: number
+      competencesCount: number
+      eventsCount: number
+      emoji?: string | null
+    } | null
+  }
 }
 
 export const UserByIdDocument = gql`

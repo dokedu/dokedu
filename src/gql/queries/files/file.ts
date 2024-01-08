@@ -7,8 +7,17 @@ export type FileQueryVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type FileQuery = { __typename?: "Query" } & {
-  file: { __typename?: "File" } & Pick<Types.File, "id" | "name" | "fileType" | "MIMEType" | "size" | "createdAt">
+export type FileQuery = {
+  __typename?: "Query"
+  file: {
+    __typename?: "File"
+    id: string
+    name: string
+    fileType: Types.FileType
+    MIMEType: string
+    size: number
+    createdAt: never
+  }
 }
 
 export const FileDocument = gql`

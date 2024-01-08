@@ -7,8 +7,9 @@ export type CreateUserMutationVariables = Types.Exact<{
   user: Types.CreateUserInput
 }>
 
-export type CreateUserMutation = { __typename?: "Mutation" } & {
-  createUser: { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName">
+export type CreateUserMutation = {
+  __typename?: "Mutation"
+  createUser: { __typename?: "User"; id: string; firstName: string; lastName: string }
 }
 
 export const CreateUserDocument = gql`

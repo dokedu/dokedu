@@ -7,9 +7,7 @@ export type ArchiveEntryMutationVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type ArchiveEntryMutation = { __typename?: "Mutation" } & {
-  archiveEntry: { __typename?: "Entry" } & Pick<Types.Entry, "id">
-}
+export type ArchiveEntryMutation = { __typename?: "Mutation"; archiveEntry: { __typename?: "Entry"; id: string } }
 
 export const ArchiveEntryDocument = gql`
   mutation archiveEntry($id: ID!) {

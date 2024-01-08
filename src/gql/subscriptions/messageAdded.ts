@@ -7,11 +7,15 @@ export type MessageAddedSubscriptionVariables = Types.Exact<{
   chatId: Types.Scalars["ID"]["input"]
 }>
 
-export type MessageAddedSubscription = { __typename?: "Subscription" } & {
-  messageAdded: { __typename?: "ChatMessage" } & Pick<Types.ChatMessage, "id" | "message"> & {
-      chat: { __typename?: "Chat" } & Pick<Types.Chat, "id" | "lastMessage">
-      user: { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName">
-    }
+export type MessageAddedSubscription = {
+  __typename?: "Subscription"
+  messageAdded: {
+    __typename?: "ChatMessage"
+    id: string
+    message: string
+    chat: { __typename?: "Chat"; id: string; lastMessage?: string | null }
+    user: { __typename?: "User"; id: string; firstName: string; lastName: string }
+  }
 }
 
 export const MessageAddedDocument = gql`

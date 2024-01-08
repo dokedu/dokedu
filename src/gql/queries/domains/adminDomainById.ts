@@ -7,8 +7,9 @@ export type AdminDomainByIdQueryVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type AdminDomainByIdQuery = { __typename?: "Query" } & {
-  domain?: Types.Maybe<{ __typename?: "Domain" } & Pick<Types.Domain, "id" | "name" | "createdAt">>
+export type AdminDomainByIdQuery = {
+  __typename?: "Query"
+  domain?: { __typename?: "Domain"; id: string; name: string; createdAt: string } | null
 }
 
 export const AdminDomainByIdDocument = gql`

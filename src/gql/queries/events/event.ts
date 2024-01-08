@@ -7,16 +7,32 @@ export type EventQueryVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type EventQuery = { __typename?: "Query" } & {
-  event: { __typename?: "Event" } & Pick<Types.Event, "id" | "title" | "body" | "createdAt" | "startsAt" | "endsAt"> & {
-      competences: Array<
-        { __typename?: "Competence" } & Pick<Types.Competence, "id" | "name" | "type" | "grades"> & {
-            parents: Array<
-              { __typename?: "Competence" } & Pick<Types.Competence, "id" | "name" | "type" | "grades" | "color">
-            >
-          }
-      >
-    }
+export type EventQuery = {
+  __typename?: "Query"
+  event: {
+    __typename?: "Event"
+    id: string
+    title: string
+    body?: string | null
+    createdAt: never
+    startsAt: never
+    endsAt: never
+    competences: Array<{
+      __typename?: "Competence"
+      id: string
+      name: string
+      type: Types.CompetenceType
+      grades: Array<number>
+      parents: Array<{
+        __typename?: "Competence"
+        id: string
+        name: string
+        type: Types.CompetenceType
+        grades: Array<number>
+        color: string
+      }>
+    }>
+  }
 }
 
 export const EventDocument = gql`

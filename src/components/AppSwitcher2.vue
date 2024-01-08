@@ -19,7 +19,8 @@
     <div ref="appSwitcher" v-show="visibleAppSwitcher" class="absolute right-[-160px] z-[100] p-1 w-[200px]">
       <div class="flex w-full flex-col gap-1 rounded-lg bg-white p-1 shadow-md">
         <div
-          v-for="_app in enabledApps"
+          v-for="(_app, _) in enabledApps"
+          :key="_"
           class="flex items-center gap-3 rounded-lg border border-white p-2 text-sm hover:bg-neutral-100"
           :class="(activeApp as string) === _app.id ? `!border-neutral-200 bg-neutral-100 hover:!bg-neutral-100` : ''"
           @click="switchApp(_app.id)"
@@ -38,7 +39,8 @@
 import { Grip } from "lucide-vue-next"
 import { computed, ref } from "vue"
 import useActiveApp from "@/composables/useActiveApp"
-import { apps, UserRole } from "@/components/d-sidebar/d-sidebar"
+import { apps } from "@/components/d-sidebar/d-sidebar"
+import type { UserRole } from "@/components/d-sidebar/d-sidebar"
 import { onClickOutside, useStorage } from "@vueuse/core"
 import { useRouter } from "vue-router/auto"
 import { useMeQuery } from "@/gql/queries/auth/me"
@@ -66,7 +68,7 @@ function switchApp(appId: string | null = null) {
     // Reroute to first link of app
     const app = apps.value.find((el) => el.id === appId)
     if (app) {
-      router.push({ name: app.links[0].route })
+      router.push({ name: app.links[0].route, params: app.links[0].params || "" })
     }
     return
   }

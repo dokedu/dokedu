@@ -7,8 +7,9 @@ export type ForgotPasswordMutationVariables = Types.Exact<{
   input: Types.ForgotPasswordInput
 }>
 
-export type ForgotPasswordMutation = { __typename?: "Mutation" } & {
-  forgotPassword: { __typename?: "ForgotPasswordPayload" } & Pick<Types.ForgotPasswordPayload, "success">
+export type ForgotPasswordMutation = {
+  __typename?: "Mutation"
+  forgotPassword: { __typename?: "ForgotPasswordPayload"; success: boolean }
 }
 
 export const ForgotPasswordDocument = gql`

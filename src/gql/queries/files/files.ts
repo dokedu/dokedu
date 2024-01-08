@@ -9,12 +9,20 @@ export type FilesQueryVariables = Types.Exact<{
   filter?: Types.InputMaybe<Types.FilesFilterInput>
 }>
 
-export type FilesQuery = { __typename?: "Query" } & {
-  files: { __typename?: "FileConnection" } & {
-    pageInfo: { __typename?: "PageInfo" } & Pick<Types.PageInfo, "hasNextPage" | "hasPreviousPage">
-    edges: Array<
-      { __typename?: "File" } & Pick<Types.File, "id" | "name" | "fileType" | "MIMEType" | "size" | "createdAt">
-    >
+export type FilesQuery = {
+  __typename?: "Query"
+  files: {
+    __typename?: "FileConnection"
+    pageInfo: { __typename?: "PageInfo"; hasNextPage: boolean; hasPreviousPage: boolean }
+    edges: Array<{
+      __typename?: "File"
+      id: string
+      name: string
+      fileType: Types.FileType
+      MIMEType: string
+      size: number
+      createdAt: never
+    }>
   }
 }
 
