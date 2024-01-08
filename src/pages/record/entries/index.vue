@@ -66,7 +66,15 @@
                 </div>
               </div>
             </div>
-            <div v-if="item.tags.length > 3">
+            <div v-for="parent in item.subjects" class="flex gap-2">
+              <DTag :color="parent.color" class="w-1/4 p-2">
+                <div class="flex items-center gap-2">
+                  <div class="size-2 rounded" :class="`bg-${parent.color}-500`"></div>
+                  {{ parent.name }}
+                </div>
+              </DTag>
+            </div>
+            <div v-if="item.tags.length > 5">
               <DTag color="neutral" class="w-1/4 p-2">{{ item.tags.length }} {{ $t("label", 2) }}</DTag>
             </div>
             <div v-else v-for="tag in item.tags" :key="tag.id" class="flex gap-1">

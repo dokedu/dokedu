@@ -24,7 +24,7 @@
       @row-click="goToCompetence"
     >
       <template #name-data="{ item }">
-        <Folder v-if="item.type !== 'competence'" :size="16" class="fill-neutral-700 stroke-neutral-700" />
+        <Folder v-if="item.type !== 'competence'" :size="16" class="fill-neutral-700 stroke-neutral-700 mr-2.5" />
         <DTag :color="item.color">{{ item.name }}</DTag>
       </template>
       <template #grade-data="{ item }">

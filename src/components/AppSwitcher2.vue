@@ -1,36 +1,55 @@
 <template>
   <div class="w-full relative">
-    <div class="group flex flex-1 justify-between rounded-md p-1 transition-colors">
+    <div
+      class="group flex flex-1 justify-between rounded-xl p-1 transition-colors hover:bg-strong user-select-none"
+      @click="visibleAppSwitcher = !visibleAppSwitcher"
+      :class="visibleAppSwitcher ? 'bg-strong' : ''"
+      ref="appSwitcher"
+    >
       <div class="flex items-center gap-3">
-        <div class="rounded-lg bg-neutral-200 p-1.5">
-          <component v-if="app" :is="app.icon" class="fill-neutral-500 stroke-neutral-500" :size="16" />
+        <div class="rounded-lg size-7 grid place-items-center bg-muted border text-white group-hover:shadow-md">
+          <component v-if="app" :is="app.icon" class="fill-neutral-900 stroke-neutral-900" :size="16" />
         </div>
         <div class="text-sm text-neutral-700 transition-all duration-100 hover:text-neutral-950">
           {{ app?.name }} <span v-if="app?.beta" class="text-xs font-medium uppercase text-blue-700">Beta</span>
         </div>
       </div>
-      <div
-        class="rounded-md p-1.5 transition-all hover:bg-neutral-300"
-        @click="visibleAppSwitcher = !visibleAppSwitcher"
-      >
-        <Grip :size="20" class="stroke-neutral-500" />
-      </div>
+      <d-icon-button :icon="Grip"></d-icon-button>
     </div>
-    <div ref="appSwitcher" v-show="visibleAppSwitcher" class="absolute right-[-160px] z-[100] p-1 w-[200px]">
-      <div class="flex w-full flex-col gap-1 rounded-lg bg-white p-1 shadow-md">
-        <div
-          v-for="_app in enabledApps"
-          class="flex items-center gap-3 rounded-lg border border-white p-2 text-sm hover:bg-neutral-100"
-          :class="(activeApp as string) === _app.id ? `!border-neutral-200 bg-neutral-100 hover:!bg-neutral-100` : ''"
+    <transition name="popover">
+      <d-popover :padding="false" v-show="visibleAppSwitcher" class="w-full min-w-[300px] top-[calc(100%+4px)]">
+        <div class="py-2 px-2.5 text-xs text-subtle">
+          <div class="font-medium">{{ userData?.me?.firstName }} {{ userData?.me?.lastName }}</div>
+          <div>{{ userData?.me?.email }}</div>
+        </div>
+        <d-popover-item
+          mode="slim"
+          v-for="(_app, _) in enabledApps"
+          :key="_"
+          :active="(activeApp as string) === _app.id"
           @click="switchApp(_app.id)"
         >
-          <component :is="_app.icon" class="fill-neutral-500 stroke-neutral-500" :size="20" />
+          <div
+            class="size-7 rounded-md grid place-items-center border"
+            :class="(activeApp as string) === _app.id ? 'bg-white border-transparent text-white shadow-md' : 'bg-muted'"
+          >
+            <component
+              :is="_app.icon"
+              class=""
+              :class="(activeApp as string) === _app.id ? 'fill-neutral-900 stroke-neutral-900' : 'bg-muted'"
+              :size="16"
+            />
+          </div>
           <span class="text-neutral-500" :class="activeApp === _app.id ? `!text-neutral-900` : ''">{{
             _app.name
           }}</span>
+        </d-popover-item>
+        <div class="bg-subtle flex flex-col py-1">
+          <d-popover-item mode="slim" to="/settings/profile">{{ $t("settings") }}</d-popover-item>
+          <d-popover-item mode="slim" @click="loggingOut">{{ $t("log_out") }}</d-popover-item>
         </div>
-      </div>
-    </div>
+      </d-popover>
+    </transition>
   </div>
 </template>
 
@@ -38,10 +57,15 @@
 import { Grip } from "lucide-vue-next"
 import { computed, ref } from "vue"
 import useActiveApp from "@/composables/useActiveApp"
-import { apps, UserRole } from "@/components/d-sidebar/d-sidebar"
+import { apps } from "@/components/d-sidebar/d-sidebar"
+import type { UserRole } from "@/components/d-sidebar/d-sidebar"
 import { onClickOutside, useStorage } from "@vueuse/core"
 import { useRouter } from "vue-router/auto"
-import { useMeQuery } from "@/gql/queries/auth/me"
+import { useMeWithInfoQuery } from "@/gql/queries/auth/meWithInfo"
+import DPopover from "@/components/d-popover/d-popover.vue"
+import DPopoverItem from "@/components/d-popover/d-popover-item.vue"
+import DIconButton from "@/components/d-icon-button/d-icon-button.vue"
+import { useAuth } from "@/composables/auth"
 
 const visibleAppSwitcher = ref<boolean>(false)
 const app = computed(() => apps.value.find((el) => el.id === activeApp.value) || null)
@@ -56,7 +80,7 @@ onClickOutside(appSwitcher, () => {
 })
 
 const enabledAppList = useStorage<string[]>("enabled_apps", [])
-const { data: userData } = useMeQuery({})
+const { data: userData } = useMeWithInfoQuery({})
 
 function switchApp(appId: string | null = null) {
   if (appId) {
@@ -66,7 +90,7 @@ function switchApp(appId: string | null = null) {
     // Reroute to first link of app
     const app = apps.value.find((el) => el.id === appId)
     if (app) {
-      router.push({ name: app.links[0].route })
+      router.push({ name: app.links[0].route, params: app.links[0].params || "" })
     }
     return
   }
@@ -80,6 +104,10 @@ const enabledApps = computed(() => {
   const role = userData.value?.me?.role
   return enabled.filter((el: { allowedUserRoles: UserRole[] }) => el.allowedUserRoles.includes(role as UserRole))
 })
+
+async function loggingOut() {
+  await useAuth().signOut()
+}
 
 // code here
 </script>

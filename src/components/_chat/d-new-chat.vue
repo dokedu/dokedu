@@ -1,20 +1,64 @@
 <template>
-  <div class="text-neutral-600 p-1.5 bg-neutral-200 hover:bg-neutral-300 rounded-md" @click="createNewChat">
-    <PenSquare :size="20" />
+  <div class="relative" ref="popover">
+    <d-icon-button
+      :icon="PenSquare"
+      size="md"
+      @click="popoverOpen = !popoverOpen"
+      :type="popoverOpen ? 'primary' : 'outline'"
+    ></d-icon-button>
+    <Transition name="popover">
+      <d-popover v-if="popoverOpen" class="top-[calc(100%+4px)]">
+        <d-popover-item @click="createNewGroup">
+          <UsersRound class="size-5" />
+          <span>New group</span>
+        </d-popover-item>
+        <d-popover-item>
+          <Megaphone class="size-5" />
+          <span>New Channel</span>
+        </d-popover-item>
+        <d-popover-item @click="navigateToContacts">
+          <BookUser class="size-5" />
+          <span>Contacts</span>
+        </d-popover-item>
+      </d-popover>
+    </Transition>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { PenSquare } from "lucide-vue-next"
+import { PenSquare, UsersRound, Megaphone, BookUser } from "lucide-vue-next"
 import { useCreateChatMutation } from "@/gql/mutations/chats/createChat"
+import DIconButton from "@/components/d-icon-button/d-icon-button.vue"
+import DPopover from "@/components/d-popover/d-popover.vue"
+import DPopoverItem from "@/components/d-popover/d-popover-item.vue"
+import { ref } from "vue"
+import { useRouteParams } from "@vueuse/router"
+import router from "@/router/router"
+import { onClickOutside } from "@vueuse/core"
 
 const { executeMutation: createChat } = useCreateChatMutation()
+const popoverOpen = ref(false)
 
-async function createNewChat() {
-  await createChat({
+const chat = useRouteParams("id", "")
+const popover = ref(null)
+
+function navigateToContacts() {
+  popoverOpen.value = false
+
+  router.push({ name: "/chat/[tab]/[id]/", params: { tab: "contacts", id: chat.value } })
+}
+
+async function createNewGroup() {
+  const createResult = await createChat({
     input: {
-      name: "New chat"
+      name: "New group"
     }
   })
+  popoverOpen.value = false
+  router.push("/chat/chats/" + createResult.data?.createChat.id)
 }
+
+onClickOutside(popover, () => {
+  popoverOpen.value = false
+})
 </script>
