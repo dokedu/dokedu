@@ -1,36 +1,28 @@
-import type * as Types from "../../schema"
+import type * as Types from '../../schema';
 
-import gql from "graphql-tag"
-import * as Urql from "@urql/vue"
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
+import gql from 'graphql-tag';
+import * as Urql from '@urql/vue';
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type ArchiveTagMutationVariables = Types.Exact<{
-  id: Types.Scalars["ID"]["input"]
-}>
+  id: Types.Scalars['ID']['input'];
+}>;
 
-export type ArchiveTagMutation = {
-  __typename?: "Mutation"
-  archiveTag: {
-    __typename?: "Tag"
-    id: string
-    name: string
-    color: string
-    deletedAt?: never | null
-    createdAt: never
-  }
-}
+
+export type ArchiveTagMutation = { __typename?: 'Mutation', archiveTag: { __typename?: 'Tag', id: string, name: string, color: string, deletedAt?: never | null, createdAt: never } };
+
 
 export const ArchiveTagDocument = gql`
-  mutation archiveTag($id: ID!) {
-    archiveTag(id: $id) {
-      id
-      name
-      color
-      deletedAt
-      createdAt
-    }
+    mutation archiveTag($id: ID!) {
+  archiveTag(id: $id) {
+    id
+    name
+    color
+    deletedAt
+    createdAt
   }
-`
+}
+    `;
 
 export function useArchiveTagMutation() {
-  return Urql.useMutation<ArchiveTagMutation, ArchiveTagMutationVariables>(ArchiveTagDocument)
-}
+  return Urql.useMutation<ArchiveTagMutation, ArchiveTagMutationVariables>(ArchiveTagDocument);
+};

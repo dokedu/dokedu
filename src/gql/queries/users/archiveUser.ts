@@ -1,36 +1,28 @@
-import type * as Types from "../../schema"
+import type * as Types from '../../schema';
 
-import gql from "graphql-tag"
-import * as Urql from "@urql/vue"
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
+import gql from 'graphql-tag';
+import * as Urql from '@urql/vue';
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type ArchiveUserMutationVariables = Types.Exact<{
-  id: Types.Scalars["ID"]["input"]
-}>
+  id: Types.Scalars['ID']['input'];
+}>;
 
-export type ArchiveUserMutation = {
-  __typename?: "Mutation"
-  archiveUser: {
-    __typename?: "User"
-    id: string
-    firstName: string
-    lastName: string
-    email?: string | null
-    role: Types.UserRole
-  }
-}
+
+export type ArchiveUserMutation = { __typename?: 'Mutation', archiveUser: { __typename?: 'User', id: string, firstName: string, lastName: string, email?: string | null, role: Types.UserRole } };
+
 
 export const ArchiveUserDocument = gql`
-  mutation archiveUser($id: ID!) {
-    archiveUser(id: $id) {
-      id
-      firstName
-      lastName
-      email
-      role
-    }
+    mutation archiveUser($id: ID!) {
+  archiveUser(id: $id) {
+    id
+    firstName
+    lastName
+    email
+    role
   }
-`
+}
+    `;
 
 export function useArchiveUserMutation() {
-  return Urql.useMutation<ArchiveUserMutation, ArchiveUserMutationVariables>(ArchiveUserDocument)
-}
+  return Urql.useMutation<ArchiveUserMutation, ArchiveUserMutationVariables>(ArchiveUserDocument);
+};

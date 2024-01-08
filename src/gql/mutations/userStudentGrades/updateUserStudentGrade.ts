@@ -1,29 +1,26 @@
-import type * as Types from "../../schema"
+import type * as Types from '../../schema';
 
-import gql from "graphql-tag"
-import * as Urql from "@urql/vue"
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
+import gql from 'graphql-tag';
+import * as Urql from '@urql/vue';
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type UpdateUserStudentGradeMutationVariables = Types.Exact<{
-  id: Types.Scalars["ID"]["input"]
-  grade: Types.Scalars["Int"]["input"]
-}>
+  id: Types.Scalars['ID']['input'];
+  grade: Types.Scalars['Int']['input'];
+}>;
 
-export type UpdateUserStudentGradeMutation = {
-  __typename?: "Mutation"
-  updateUserStudentGrade: { __typename?: "UserStudentGrades"; id: string; grade: number }
-}
+
+export type UpdateUserStudentGradeMutation = { __typename?: 'Mutation', updateUserStudentGrade: { __typename?: 'UserStudentGrades', id: string, grade: number } };
+
 
 export const UpdateUserStudentGradeDocument = gql`
-  mutation updateUserStudentGrade($id: ID!, $grade: Int!) {
-    updateUserStudentGrade(input: { id: $id, grade: $grade }) {
-      id
-      grade
-    }
+    mutation updateUserStudentGrade($id: ID!, $grade: Int!) {
+  updateUserStudentGrade(input: {id: $id, grade: $grade}) {
+    id
+    grade
   }
-`
+}
+    `;
 
 export function useUpdateUserStudentGradeMutation() {
-  return Urql.useMutation<UpdateUserStudentGradeMutation, UpdateUserStudentGradeMutationVariables>(
-    UpdateUserStudentGradeDocument
-  )
-}
+  return Urql.useMutation<UpdateUserStudentGradeMutation, UpdateUserStudentGradeMutationVariables>(UpdateUserStudentGradeDocument);
+};

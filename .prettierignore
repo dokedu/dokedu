@@ -1,2 +1,4 @@
 public
 dist
+typed-router.d.ts
+src/gql/**/*.ts
