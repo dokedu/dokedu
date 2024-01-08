@@ -51,7 +51,7 @@ import { Plus } from "lucide-vue-next"
 import { useRouter } from "vue-router/auto"
 import { useMGetEntriesQuery } from "@/gql/queries/entries/mGetEntries"
 import { useCreateEntryDraftMutation } from "@/gql/mutations/entries/createEntryDraft"
-import type { EntrySortBy } from "@/gql/schema"
+import { EntrySortBy } from "@/gql/schema"
 
 const { executeMutation: createEntryDraft } = useCreateEntryDraftMutation()
 
