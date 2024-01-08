@@ -84,7 +84,6 @@
 </route>
 
 <script setup lang="ts">
-import { useRoute } from "vue-router/auto"
 import AppSwitcher2 from "@/components/AppSwitcher2.vue"
 import DNewChat from "@/components/_chat/d-new-chat.vue"
 import DInput from "@/components/d-input/d-input.vue"
@@ -107,7 +106,6 @@ import type { User } from "@/gql/schema"
 
 const tab = useRouteParams("tab", "chats")
 const chat = useRouteParams("id", "")
-const route = useRoute("/chat/[tab]")
 const search = ref("")
 const router = useRouter()
 
