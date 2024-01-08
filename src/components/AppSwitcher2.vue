@@ -45,8 +45,8 @@
           }}</span>
         </d-popover-item>
         <div class="bg-subtle flex flex-col py-1">
-          <d-popover-item mode="slim" to="/settings/profile">Settings</d-popover-item>
-          <d-popover-item mode="slim" @click="loggingOut">Logout</d-popover-item>
+          <d-popover-item mode="slim" to="/settings/profile">{{ $t("settings") }}</d-popover-item>
+          <d-popover-item mode="slim" @click="loggingOut">{{ $t("log_out") }}</d-popover-item>
         </div>
       </d-popover>
     </transition>
