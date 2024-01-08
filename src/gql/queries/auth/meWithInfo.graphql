@@ -1,0 +1,9 @@
+query meWithInfo {
+  me {
+    id
+    role
+    email
+    firstName
+    lastName
+  }
+}
