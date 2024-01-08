@@ -7,62 +7,38 @@
         <app-switcher2 />
       </div>
       <div class="flex flex-col gap-0.5 p-3 pt-2.5">
-        <router-link
-          v-for="link in app?.links"
+        <d-sidebar-link
+          v-for="(link, _) in app?.links"
+          :key="_"
           :to="link.route"
-          class="flex items-center gap-3 rounded-md px-3 py-1.5 text-neutral-500 transition-all duration-100 hover:bg-neutral-100 hover:text-neutral-950"
-          active-class=""
-          :class="{ '!bg-neutral-200 text-neutral-900': isLinkActive(link) }"
+          :active="isLinkActive(link)"
+          :icon="link.icon"
         >
-          <component
-            :is="link.icon"
-            class="stroke-neutral-500"
-            :size="18"
-            :class="{ '!stroke-neutral-900': isLinkActive(link) }"
-          />
-          <div class="text-sm">{{ link.name }}</div>
-        </router-link>
+          {{ link.name }}
+        </d-sidebar-link>
       </div>
     </div>
     <div class="px-1 py-4">
-      <a
-        href="https://dokedu.org/hilfe"
-        target="_blank"
-        class="flex items-center gap-3 rounded-md p-1 px-3 text-neutral-500 transition-all duration-100 hover:bg-neutral-100 hover:text-neutral-950"
-      >
-        <HelpCircle class="stroke-neutral-500" :size="18" />
-        <div class="text-sm">{{ $t("support") }}</div>
-      </a>
-      <router-link
-        to="/settings/profile"
-        class="flex items-center gap-3 rounded-md p-1 px-3 text-neutral-500 transition-all duration-100 hover:bg-neutral-100 hover:text-neutral-950"
-      >
-        <Settings class="stroke-neutral-500" :size="18" />
-        <div class="text-sm">{{ $t("settings") }}</div>
-      </router-link>
-
-      <div
-        class="flex items-center gap-3 rounded-md p-1 px-3 text-neutral-500 transition-all duration-100 hover:bg-neutral-100 hover:text-neutral-950"
-      >
-        <globe class="stroke-neutral-500" :size="18" />
+      <d-sidebar-link href="https://dokedu.org/hilfe" :icon="HelpCircle">
+        {{ $t("support") }}
+      </d-sidebar-link>
+      <d-sidebar-link to="/settings/profile" :icon="Settings">
+        {{ $t("settings") }}
+      </d-sidebar-link>
+      <d-sidebar-link :icon="Globe">
         <select
           name="language"
           id="lang"
-          class="block w-full rounded-lg border border-neutral-200 bg-neutral-50 px-2 py-1 text-sm"
+          class="block w-full rounded-lg border border-neutral-200 bg-neutral-50 px-2 py-1 text-sm flex-1"
           v-model="language"
         >
           <option value="en">English</option>
           <option value="de">Deutsch</option>
         </select>
-      </div>
-
-      <div
-        class="flex items-center gap-3 rounded-md p-1 px-3 text-neutral-500 transition-all duration-100 hover:bg-neutral-100 hover:text-neutral-950"
-        @click="loggingOut"
-      >
-        <log-out class="stroke-neutral-500" :size="18" />
-        <div class="text-sm">{{ $t("log_out") }}</div>
-      </div>
+      </d-sidebar-link>
+      <d-sidebar-link @click="loggingOut" :icon="LogOut">
+        {{ $t("log_out") }}
+      </d-sidebar-link>
     </div>
   </header>
 </template>
@@ -77,6 +53,7 @@ import i18n from "@/i18n"
 import { useAuth } from "@/composables/auth"
 import useActiveApp from "@/composables/useActiveApp"
 import AppSwitcher2 from "@/components/AppSwitcher2.vue"
+import DSidebarLink from "@/components/d-sidebar/d-sidebar-link.vue"
 import { useUpdateUserLanguageMutation } from "@/gql/mutations/general/updateUserLanguage"
 import { UserLanguage } from "@/gql/schema"
 
