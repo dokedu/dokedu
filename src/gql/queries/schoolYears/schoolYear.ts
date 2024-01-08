@@ -7,8 +7,9 @@ export type SchoolYearQueryVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type SchoolYearQuery = { __typename?: "Query" } & {
-  schoolYear: { __typename?: "SchoolYear" } & Pick<Types.SchoolYear, "id" | "year" | "description">
+export type SchoolYearQuery = {
+  __typename?: "Query"
+  schoolYear: { __typename?: "SchoolYear"; id: string; year: number; description: string }
 }
 
 export const SchoolYearDocument = gql`

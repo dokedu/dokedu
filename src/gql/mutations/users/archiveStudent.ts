@@ -7,12 +7,22 @@ export type ArchiveStudentMutationVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type ArchiveStudentMutation = { __typename?: "Mutation" } & {
-  archiveUser: { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName" | "role"> & {
-      student?: Types.Maybe<
-        { __typename?: "UserStudent" } & Pick<Types.UserStudent, "birthday" | "grade" | "leftAt" | "joinedAt">
-      >
-    }
+export type ArchiveStudentMutation = {
+  __typename?: "Mutation"
+  archiveUser: {
+    __typename?: "User"
+    id: string
+    firstName: string
+    lastName: string
+    role: Types.UserRole
+    student?: {
+      __typename?: "UserStudent"
+      birthday?: never | null
+      grade: number
+      leftAt?: never | null
+      joinedAt?: never | null
+    } | null
+  }
 }
 
 export const ArchiveStudentDocument = gql`

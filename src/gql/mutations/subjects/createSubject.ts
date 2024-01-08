@@ -7,8 +7,9 @@ export type CreateSubjectMutationVariables = Types.Exact<{
   name: Types.Scalars["String"]["input"]
 }>
 
-export type CreateSubjectMutation = { __typename?: "Mutation" } & {
-  createSubject: { __typename?: "Subject" } & Pick<Types.Subject, "id" | "name">
+export type CreateSubjectMutation = {
+  __typename?: "Mutation"
+  createSubject: { __typename?: "Subject"; id: string; name: string }
 }
 
 export const CreateSubjectDocument = gql`

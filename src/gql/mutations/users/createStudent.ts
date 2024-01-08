@@ -7,12 +7,22 @@ export type CreateStudentMutationVariables = Types.Exact<{
   student: Types.CreateStudentInput
 }>
 
-export type CreateStudentMutation = { __typename?: "Mutation" } & {
-  createStudent: { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName"> & {
-      student?: Types.Maybe<
-        { __typename?: "UserStudent" } & Pick<Types.UserStudent, "id" | "birthday" | "grade" | "leftAt" | "joinedAt">
-      >
-    }
+export type CreateStudentMutation = {
+  __typename?: "Mutation"
+  createStudent: {
+    __typename?: "User"
+    id: string
+    firstName: string
+    lastName: string
+    student?: {
+      __typename?: "UserStudent"
+      id: string
+      birthday?: never | null
+      grade: number
+      leftAt?: never | null
+      joinedAt?: never | null
+    } | null
+  }
 }
 
 export const CreateStudentDocument = gql`

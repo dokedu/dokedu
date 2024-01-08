@@ -7,12 +7,17 @@ export type AddUserToChatMutationVariables = Types.Exact<{
   input: Types.AddUserToChatInput
 }>
 
-export type AddUserToChatMutation = { __typename?: "Mutation" } & {
-  addUserToChat: { __typename?: "ChatUser" } & Pick<Types.ChatUser, "id"> & {
-      chat: { __typename?: "Chat" } & Pick<Types.Chat, "id"> & {
-          users: Array<{ __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "email">>
-        }
+export type AddUserToChatMutation = {
+  __typename?: "Mutation"
+  addUserToChat: {
+    __typename?: "ChatUser"
+    id: string
+    chat: {
+      __typename?: "Chat"
+      id: string
+      users: Array<{ __typename?: "User"; id: string; firstName: string; email?: string | null }>
     }
+  }
 }
 
 export const AddUserToChatDocument = gql`

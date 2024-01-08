@@ -7,8 +7,9 @@ export type DeleteEntryCompetenceInputMutationVariables = Types.Exact<{
   input: Types.DeleteEntryCompetenceInput
 }>
 
-export type DeleteEntryCompetenceInputMutation = { __typename?: "Mutation" } & {
-  deleteEntryCompetence: { __typename?: "Entry" } & Pick<Types.Entry, "id">
+export type DeleteEntryCompetenceInputMutation = {
+  __typename?: "Mutation"
+  deleteEntryCompetence: { __typename?: "Entry"; id: string }
 }
 
 export const DeleteEntryCompetenceInputDocument = gql`

@@ -1,8 +1,8 @@
 <template>
   <div class="flex h-full flex-col">
-    <div class="mb-4 flex h-fit gap-2 text-sm text-subtle px-6 pt-4">
+    <div class="mb-2 flex h-fit gap-2 text-sm text-subtle px-6 pt-4">
       <router-link :to="{ name: '/record/students/[id]/competences/' }">{{ $t("subject", 2) }}</router-link>
-      <template v-for="parent in data?.competence.parents">
+      <template v-for="parent in data?.competence.parents" :key="parent?.id">
         <span>{{ ">" }}</span>
         <router-link
           :to="{ name: '/record/students/[id]/competences/[cid]', params: { id: route.params.id, cid: parent?.id } }"
@@ -21,16 +21,18 @@
       </router-link>
     </div>
 
-    <div class="flex flex-1 flex-col gap-2 overflow-auto px-6 pb-4">
+    <div class="flex flex-1 flex-col gap-2 overflow-auto px-6 pb-4 divide-y">
       <component
         v-for="competence in data?.competence?.competences as Competence[]"
+        :key="competence?.id"
         :is="competence?.type !== 'competence' ? 'router-link' : 'div'"
         :to="{
           name: '/record/students/[id]/competences/[cid]',
           params: { id: route.params.id, cid: competence?.id }
         }"
+        class="pt-2"
       >
-        <DCompetence v-if="competence" :competence="competence">
+        <DCompetence class="border-0 hover:bg-neutral-100 rounded-md" v-if="competence" :competence="competence">
           <DCompetenceLevel
             :id="competence.userCompetences[0]?.id as string"
             :level="getLevel(competence)"

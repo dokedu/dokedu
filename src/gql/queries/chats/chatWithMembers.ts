@@ -7,10 +7,15 @@ export type ChatWithMembersQueryVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type ChatWithMembersQuery = { __typename?: "Query" } & {
-  chat: { __typename?: "Chat" } & Pick<Types.Chat, "id" | "name" | "type"> & {
-      users: Array<{ __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName" | "email">>
-    }
+export type ChatWithMembersQuery = {
+  __typename?: "Query"
+  chat: {
+    __typename?: "Chat"
+    id: string
+    name?: string | null
+    type: Types.ChatType
+    users: Array<{ __typename?: "User"; id: string; firstName: string; lastName: string; email?: string | null }>
+  }
 }
 
 export const ChatWithMembersDocument = gql`

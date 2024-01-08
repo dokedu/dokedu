@@ -7,9 +7,7 @@ export type CreateReportMutationVariables = Types.Exact<{
   input: Types.CreateReportInput
 }>
 
-export type CreateReportMutation = { __typename?: "Mutation" } & {
-  createReport: { __typename?: "Report" } & Pick<Types.Report, "id">
-}
+export type CreateReportMutation = { __typename?: "Mutation"; createReport: { __typename?: "Report"; id: string } }
 
 export const CreateReportDocument = gql`
   mutation createReport($input: CreateReportInput!) {

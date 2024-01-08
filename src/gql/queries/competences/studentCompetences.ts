@@ -7,22 +7,22 @@ export type StudentCompetencesQueryVariables = Types.Exact<{
   userId: Types.Scalars["ID"]["input"]
 }>
 
-export type StudentCompetencesQuery = { __typename?: "Query" } & {
-  competences: { __typename?: "CompetenceConnection" } & {
-    edges?: Types.Maybe<
-      Array<
-        Types.Maybe<
-          { __typename?: "Competence" } & Pick<Types.Competence, "id" | "name" | "grades"> & {
-              tendency?: Types.Maybe<
-                { __typename?: "CompetenceTendency" } & Pick<
-                  Types.CompetenceTendency,
-                  "tendency" | "countChildCompetences" | "countLearnedCompetences"
-                >
-              >
-            }
-        >
-      >
-    >
+export type StudentCompetencesQuery = {
+  __typename?: "Query"
+  competences: {
+    __typename?: "CompetenceConnection"
+    edges?: Array<{
+      __typename?: "Competence"
+      id: string
+      name: string
+      grades: Array<number>
+      tendency?: {
+        __typename?: "CompetenceTendency"
+        tendency: number
+        countChildCompetences: number
+        countLearnedCompetences: number
+      } | null
+    } | null> | null
   }
 }
 

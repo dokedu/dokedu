@@ -1,29 +1,26 @@
 <template>
-  <div class="flex items-start gap-2">
-    <div class="mt-2 w-20 text-sm font-medium text-strong">{{ $t("type") }}</div>
-    <div class="w-full">
-      <DSelect :options="typeOptions" :label="$t('type')" multiple v-model="type" class="w-full">
-        <template #display>
-          <div v-if="type">
-            <div class="mb-1 text-sm font-medium">{{ types.find((t) => t.kind === type)?.label }}</div>
-            <div class="text-xs text-neutral-500">
-              {{ types.find((t) => t.kind === type)?.description }}
-            </div>
+  <div class="w-full">
+    <DSelect :options="typeOptions" :label="$t('type')" multiple v-model="type" class="w-full">
+      <template #display>
+        <div v-if="type">
+          <div class="mb-1 text-sm font-medium">{{ types.find((t) => t.kind === type)?.label }}</div>
+          <div class="text-xs text-neutral-500">
+            {{ types.find((t) => t.kind === type)?.description }}
           </div>
-          <div v-else class="text-sm">
-            {{ $t("select_type") }}
+        </div>
+        <div v-else class="text-sm">
+          {{ $t("select_type") }}
+        </div>
+      </template>
+      <template v-slot="{ option }">
+        <div>
+          <div class="mb-1 font-medium">{{ option.label }}</div>
+          <div class="text-xs text-neutral-500">
+            {{ types.find((t) => t.kind === option.value)?.description }}
           </div>
-        </template>
-        <template v-slot="{ option }">
-          <div>
-            <div class="mb-1 font-medium">{{ option.label }}</div>
-            <div class="text-xs text-neutral-500">
-              {{ types.find((t) => t.kind === option.value)?.description }}
-            </div>
-          </div>
-        </template>
-      </DSelect>
-    </div>
+        </div>
+      </template>
+    </DSelect>
   </div>
 </template>
 

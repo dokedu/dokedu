@@ -7,14 +7,15 @@ export type AdminGroupByIdQueryVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type AdminGroupByIdQuery = { __typename?: "Query" } & {
-  emailAccount?: Types.Maybe<
-    { __typename?: "EmailAccount" } & Pick<Types.EmailAccount, "id" | "name" | "description"> & {
-        members?: Types.Maybe<
-          Array<Types.Maybe<{ __typename?: "EmailGroupMember" } & Pick<Types.EmailGroupMember, "name">>>
-        >
-      }
-  >
+export type AdminGroupByIdQuery = {
+  __typename?: "Query"
+  emailAccount?: {
+    __typename?: "EmailAccount"
+    id: string
+    name: string
+    description?: string | null
+    members?: Array<{ __typename?: "EmailGroupMember"; name: string } | null> | null
+  } | null
 }
 
 export const AdminGroupByIdDocument = gql`

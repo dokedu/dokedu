@@ -7,10 +7,9 @@ export type EditEmailGroupMutationVariables = Types.Exact<{
   input: Types.UpdateEmailGroupInput
 }>
 
-export type EditEmailGroupMutation = { __typename?: "Mutation" } & {
-  updateEmailGroup?: Types.Maybe<
-    { __typename?: "EmailAccount" } & Pick<Types.EmailAccount, "id" | "name" | "description">
-  >
+export type EditEmailGroupMutation = {
+  __typename?: "Mutation"
+  updateEmailGroup?: { __typename?: "EmailAccount"; id: string; name: string; description?: string | null } | null
 }
 
 export const EditEmailGroupDocument = gql`

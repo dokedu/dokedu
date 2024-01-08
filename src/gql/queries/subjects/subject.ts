@@ -7,9 +7,7 @@ export type SubjectQueryVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type SubjectQuery = { __typename?: "Query" } & {
-  subject: { __typename?: "Subject" } & Pick<Types.Subject, "id" | "name">
-}
+export type SubjectQuery = { __typename?: "Query"; subject: { __typename?: "Subject"; id: string; name: string } }
 
 export const SubjectDocument = gql`
   query subject($id: ID!) {

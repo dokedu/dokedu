@@ -7,15 +7,17 @@ export type ExportEventsQueryVariables = Types.Exact<{
   input: Types.ExportEventsInput
 }>
 
-export type ExportEventsQuery = { __typename?: "Query" } & {
-  exportEvents: Array<
-    Types.Maybe<
-      { __typename?: "ExportEventsPayload" } & Pick<
-        Types.ExportEventsPayload,
-        "id" | "title" | "body" | "startsAt" | "endsAt" | "subjects"
-      >
-    >
-  >
+export type ExportEventsQuery = {
+  __typename?: "Query"
+  exportEvents: Array<{
+    __typename?: "ExportEventsPayload"
+    id: string
+    title: string
+    body: string
+    startsAt: string
+    endsAt: string
+    subjects: string
+  } | null>
 }
 
 export const ExportEventsDocument = gql`

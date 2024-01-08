@@ -10,16 +10,20 @@ export type EventWithSearchQueryVariables = Types.Exact<{
   filter?: Types.InputMaybe<Types.EventFilterInput>
 }>
 
-export type EventWithSearchQuery = { __typename?: "Query" } & {
-  events: { __typename?: "EventConnection" } & {
-    pageInfo: { __typename?: "PageInfo" } & Pick<Types.PageInfo, "hasNextPage" | "hasPreviousPage">
-    edges?: Types.Maybe<
-      Array<
-        Types.Maybe<
-          { __typename?: "Event" } & Pick<Types.Event, "id" | "title" | "body" | "createdAt" | "startsAt" | "endsAt">
-        >
-      >
-    >
+export type EventWithSearchQuery = {
+  __typename?: "Query"
+  events: {
+    __typename?: "EventConnection"
+    pageInfo: { __typename?: "PageInfo"; hasNextPage: boolean; hasPreviousPage: boolean }
+    edges?: Array<{
+      __typename?: "Event"
+      id: string
+      title: string
+      body?: string | null
+      createdAt: never
+      startsAt: never
+      endsAt: never
+    } | null> | null
   }
 }
 

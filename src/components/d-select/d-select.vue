@@ -1,7 +1,7 @@
 <template>
   <div class="relative select-none" ref="select" v-bind="$attrs" @focusin="open = true">
     <div
-      class="min-w-[120px] items-center rounded-lg border border-neutral-200 shadow-sm focus:!outline-none"
+      class="min-w-[120px] items-center rounded-lg border border-neutral-300 shadow-sm focus:!outline-none"
       :class="{ 'border-transparent py-0.5': type === 'borderless' }"
       tabindex="0"
       ref="toggle"
@@ -24,7 +24,7 @@
       <div
         v-if="open"
         ref="container"
-        class="absolute z-20 max-h-[200px] w-full min-w-[240px] divide-y divide-neutral-200 overflow-hidden rounded-md border border-neutral-200 bg-white shadow transition-all duration-200 ease-in-out"
+        class="absolute z-20 max-h-[200px] w-full min-w-[240px] divide-y divide-neutral-200 overflow-hidden rounded-md border border-neutral-300 bg-white shadow transition-all duration-200 ease-in-out"
         style="transform-origin: top"
         :style="{ top: toggle.offsetHeight + 4 + 'px' }"
       >

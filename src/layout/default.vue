@@ -23,7 +23,6 @@ import DButton from "@/components/d-button/d-button.vue"
 import { useAuth } from "@/composables/auth"
 import { onMounted } from "vue"
 import { useMeQuery } from "@/gql/queries/auth/me"
-
 const { width } = useWindowSize()
 
 async function onLogOut() {

@@ -8,10 +8,12 @@ export type SubjectsQueryVariables = Types.Exact<{
   offset?: Types.InputMaybe<Types.Scalars["Int"]["input"]>
 }>
 
-export type SubjectsQuery = { __typename?: "Query" } & {
-  subjects: { __typename?: "SubjectConnection" } & {
-    edges: Array<{ __typename?: "Subject" } & Pick<Types.Subject, "id" | "name">>
-    pageInfo: { __typename?: "PageInfo" } & Pick<Types.PageInfo, "hasNextPage" | "hasPreviousPage">
+export type SubjectsQuery = {
+  __typename?: "Query"
+  subjects: {
+    __typename?: "SubjectConnection"
+    edges: Array<{ __typename?: "Subject"; id: string; name: string }>
+    pageInfo: { __typename?: "PageInfo"; hasNextPage: boolean; hasPreviousPage: boolean }
   }
 }
 

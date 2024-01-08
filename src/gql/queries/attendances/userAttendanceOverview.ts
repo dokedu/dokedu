@@ -7,12 +7,15 @@ export type UserAttendanceOverviewQueryVariables = Types.Exact<{
   date: Types.Scalars["Time"]["input"]
 }>
 
-export type UserAttendanceOverviewQuery = { __typename?: "Query" } & {
-  userAttendanceOverview: Array<
-    { __typename?: "UserAttendance" } & Pick<Types.UserAttendance, "id" | "date" | "state"> & {
-        user: { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName">
-      }
-  >
+export type UserAttendanceOverviewQuery = {
+  __typename?: "Query"
+  userAttendanceOverview: Array<{
+    __typename?: "UserAttendance"
+    id: string
+    date: never
+    state: Types.UserAttendanceState
+    user: { __typename?: "User"; id: string; firstName: string; lastName: string }
+  }>
 }
 
 export const UserAttendanceOverviewDocument = gql`

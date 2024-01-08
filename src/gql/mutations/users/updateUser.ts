@@ -7,8 +7,16 @@ export type UpdateUserMutationVariables = Types.Exact<{
   input: Types.UpdateUserInput
 }>
 
-export type UpdateUserMutation = { __typename?: "Mutation" } & {
-  updateUser: { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName" | "email" | "role">
+export type UpdateUserMutation = {
+  __typename?: "Mutation"
+  updateUser: {
+    __typename?: "User"
+    id: string
+    firstName: string
+    lastName: string
+    email?: string | null
+    role: Types.UserRole
+  }
 }
 
 export const UpdateUserDocument = gql`

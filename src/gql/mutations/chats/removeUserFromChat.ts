@@ -7,12 +7,17 @@ export type RemoveUserFromChatMutationVariables = Types.Exact<{
   input: Types.RemoveUserFromChatInput
 }>
 
-export type RemoveUserFromChatMutation = { __typename?: "Mutation" } & {
-  removeUserFromChat: { __typename?: "ChatUser" } & Pick<Types.ChatUser, "id"> & {
-      chat: { __typename?: "Chat" } & Pick<Types.Chat, "id"> & {
-          users: Array<{ __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName" | "email">>
-        }
+export type RemoveUserFromChatMutation = {
+  __typename?: "Mutation"
+  removeUserFromChat: {
+    __typename?: "ChatUser"
+    id: string
+    chat: {
+      __typename?: "Chat"
+      id: string
+      users: Array<{ __typename?: "User"; id: string; firstName: string; lastName: string; email?: string | null }>
     }
+  }
 }
 
 export const RemoveUserFromChatDocument = gql`

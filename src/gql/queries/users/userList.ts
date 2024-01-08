@@ -7,11 +7,17 @@ export type UserListQueryVariables = Types.Exact<{
   search?: Types.InputMaybe<Types.Scalars["String"]["input"]>
 }>
 
-export type UserListQuery = { __typename?: "Query" } & {
-  users: { __typename?: "UserConnection" } & {
-    edges?: Types.Maybe<
-      Array<Types.Maybe<{ __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName" | "email">>>
-    >
+export type UserListQuery = {
+  __typename?: "Query"
+  users: {
+    __typename?: "UserConnection"
+    edges?: Array<{
+      __typename?: "User"
+      id: string
+      firstName: string
+      lastName: string
+      email?: string | null
+    } | null> | null
   }
 }
 

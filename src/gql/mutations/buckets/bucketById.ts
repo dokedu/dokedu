@@ -7,9 +7,7 @@ export type BucketByIdQueryVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type BucketByIdQuery = { __typename?: "Query" } & {
-  bucket: { __typename?: "Bucket" } & Pick<Types.Bucket, "id" | "name">
-}
+export type BucketByIdQuery = { __typename?: "Query"; bucket: { __typename?: "Bucket"; id: string; name: string } }
 
 export const BucketByIdDocument = gql`
   query bucketById($id: ID!) {

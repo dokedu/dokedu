@@ -8,18 +8,23 @@ export type UserStudentGradesQueryVariables = Types.Exact<{
   offset?: Types.InputMaybe<Types.Scalars["Int"]["input"]>
 }>
 
-export type UserStudentGradesQuery = { __typename?: "Query" } & {
-  userStudentGrades: { __typename?: "UserStudentGradesConnection" } & {
-    edges: Array<
-      { __typename?: "UserStudentGrades" } & Pick<Types.UserStudentGrades, "id" | "grade"> & {
-          student: { __typename?: "UserStudent" } & Pick<Types.UserStudent, "id"> & {
-              user: { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName">
-            }
-          subject: { __typename?: "Subject" } & Pick<Types.Subject, "id" | "name">
-          schoolYear: { __typename?: "SchoolYear" } & Pick<Types.SchoolYear, "id" | "year" | "description">
-        }
-    >
-    pageInfo: { __typename?: "PageInfo" } & Pick<Types.PageInfo, "hasNextPage" | "hasPreviousPage">
+export type UserStudentGradesQuery = {
+  __typename?: "Query"
+  userStudentGrades: {
+    __typename?: "UserStudentGradesConnection"
+    edges: Array<{
+      __typename?: "UserStudentGrades"
+      id: string
+      grade: number
+      student: {
+        __typename?: "UserStudent"
+        id: string
+        user: { __typename?: "User"; id: string; firstName: string; lastName: string }
+      }
+      subject: { __typename?: "Subject"; id: string; name: string }
+      schoolYear: { __typename?: "SchoolYear"; id: string; year: number; description: string }
+    }>
+    pageInfo: { __typename?: "PageInfo"; hasNextPage: boolean; hasPreviousPage: boolean }
   }
 }
 

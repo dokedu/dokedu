@@ -7,8 +7,9 @@ export type DeleteDomainMutationVariables = Types.Exact<{
   input: Types.DeleteDomainInput
 }>
 
-export type DeleteDomainMutation = { __typename?: "Mutation" } & {
-  deleteDomain?: Types.Maybe<{ __typename?: "Domain" } & Pick<Types.Domain, "name" | "createdAt">>
+export type DeleteDomainMutation = {
+  __typename?: "Mutation"
+  deleteDomain?: { __typename?: "Domain"; name: string; createdAt: string } | null
 }
 
 export const DeleteDomainDocument = gql`

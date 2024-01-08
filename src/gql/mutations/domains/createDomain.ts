@@ -7,8 +7,9 @@ export type CreateDomainMutationVariables = Types.Exact<{
   input: Types.CreateDomainInput
 }>
 
-export type CreateDomainMutation = { __typename?: "Mutation" } & {
-  createDomain?: Types.Maybe<{ __typename?: "Domain" } & Pick<Types.Domain, "id" | "name" | "createdAt">>
+export type CreateDomainMutation = {
+  __typename?: "Mutation"
+  createDomain?: { __typename?: "Domain"; id: string; name: string; createdAt: string } | null
 }
 
 export const CreateDomainDocument = gql`

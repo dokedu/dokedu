@@ -5,8 +5,9 @@ import * as Urql from "@urql/vue"
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 export type OrganisationQueryVariables = Types.Exact<{ [key: string]: never }>
 
-export type OrganisationQuery = { __typename?: "Query" } & {
-  organisation?: Types.Maybe<{ __typename?: "Organisation" } & Pick<Types.Organisation, "id" | "name" | "legalName">>
+export type OrganisationQuery = {
+  __typename?: "Query"
+  organisation?: { __typename?: "Organisation"; id: string; name: string; legalName: string } | null
 }
 
 export const OrganisationDocument = gql`

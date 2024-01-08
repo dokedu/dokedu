@@ -5,24 +5,26 @@ import * as Urql from "@urql/vue"
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 export type ReportsQueryVariables = Types.Exact<{ [key: string]: never }>
 
-export type ReportsQuery = { __typename?: "Query" } & {
-  reports: { __typename?: "ReportConnection" } & Pick<Types.ReportConnection, "totalCount"> & {
-      pageInfo: { __typename?: "PageInfo" } & Pick<Types.PageInfo, "hasNextPage" | "hasPreviousPage">
-      edges?: Types.Maybe<
-        Array<
-          Types.Maybe<
-            { __typename?: "Report" } & Pick<
-              Types.Report,
-              "id" | "status" | "format" | "kind" | "from" | "to" | "createdAt"
-            > & {
-                studentUser: { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName">
-                user: { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName">
-                file?: Types.Maybe<{ __typename?: "File" } & Pick<Types.File, "id">>
-              }
-          >
-        >
-      >
-    }
+export type ReportsQuery = {
+  __typename?: "Query"
+  reports: {
+    __typename?: "ReportConnection"
+    totalCount: number
+    pageInfo: { __typename?: "PageInfo"; hasNextPage: boolean; hasPreviousPage: boolean }
+    edges?: Array<{
+      __typename?: "Report"
+      id: string
+      status: Types.ReportStatus
+      format: Types.ReportFormat
+      kind: Types.ReportKind
+      from: never
+      to: never
+      createdAt: never
+      studentUser: { __typename?: "User"; id: string; firstName: string; lastName: string }
+      user: { __typename?: "User"; id: string; firstName: string; lastName: string }
+      file?: { __typename?: "File"; id: string } | null
+    } | null> | null
+  }
 }
 
 export const ReportsDocument = gql`

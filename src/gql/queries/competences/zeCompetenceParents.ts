@@ -7,10 +7,22 @@ export type ZeCompetenceParentsQueryVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type ZeCompetenceParentsQuery = { __typename?: "Query" } & {
-  competence: { __typename?: "Competence" } & Pick<Types.Competence, "id" | "name" | "type" | "grades"> & {
-      parents: Array<{ __typename?: "Competence" } & Pick<Types.Competence, "id" | "name" | "type" | "grades">>
-    }
+export type ZeCompetenceParentsQuery = {
+  __typename?: "Query"
+  competence: {
+    __typename?: "Competence"
+    id: string
+    name: string
+    type: Types.CompetenceType
+    grades: Array<number>
+    parents: Array<{
+      __typename?: "Competence"
+      id: string
+      name: string
+      type: Types.CompetenceType
+      grades: Array<number>
+    }>
+  }
 }
 
 export const ZeCompetenceParentsDocument = gql`

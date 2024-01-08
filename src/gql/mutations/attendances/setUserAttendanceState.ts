@@ -9,10 +9,15 @@ export type SetUserAttendanceStateMutationVariables = Types.Exact<{
   userId: Types.Scalars["ID"]["input"]
 }>
 
-export type SetUserAttendanceStateMutation = { __typename?: "Mutation" } & {
-  setUserAttendanceState: { __typename?: "UserAttendance" } & Pick<Types.UserAttendance, "id" | "date" | "state"> & {
-      user: { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName">
-    }
+export type SetUserAttendanceStateMutation = {
+  __typename?: "Mutation"
+  setUserAttendanceState: {
+    __typename?: "UserAttendance"
+    id: string
+    date: never
+    state: Types.UserAttendanceState
+    user: { __typename?: "User"; id: string; firstName: string; lastName: string }
+  }
 }
 
 export const SetUserAttendanceStateDocument = gql`

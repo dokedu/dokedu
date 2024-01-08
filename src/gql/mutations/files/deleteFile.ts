@@ -7,10 +7,9 @@ export type DeleteFileMutationVariables = Types.Exact<{
   id: Types.Scalars["ID"]["input"]
 }>
 
-export type DeleteFileMutation = { __typename?: "Mutation" } & {
-  deleteFile: { __typename?: "DeleteFilePayload" } & Pick<Types.DeleteFilePayload, "success"> & {
-      file: { __typename?: "File" } & Pick<Types.File, "id">
-    }
+export type DeleteFileMutation = {
+  __typename?: "Mutation"
+  deleteFile: { __typename?: "DeleteFilePayload"; success: boolean; file: { __typename?: "File"; id: string } }
 }
 
 export const DeleteFileDocument = gql`

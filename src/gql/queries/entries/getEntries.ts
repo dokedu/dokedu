@@ -10,17 +10,22 @@ export type GetEntriesQueryVariables = Types.Exact<{
   offset?: Types.InputMaybe<Types.Scalars["Int"]["input"]>
 }>
 
-export type GetEntriesQuery = { __typename?: "Query" } & {
-  entries: { __typename?: "EntryConnection" } & {
-    pageInfo: { __typename?: "PageInfo" } & Pick<Types.PageInfo, "hasNextPage" | "hasPreviousPage">
-    edges: Array<
-      { __typename?: "Entry" } & Pick<Types.Entry, "id" | "date" | "body" | "createdAt"> & {
-          user: { __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName">
-          events: Array<{ __typename?: "Event" } & Pick<Types.Event, "id" | "title">>
-          tags: Array<{ __typename?: "Tag" } & Pick<Types.Tag, "id" | "name" | "color">>
-          subjects: Array<{ __typename?: "Competence" } & Pick<Types.Competence, "id" | "name" | "color">>
-        }
-    >
+export type GetEntriesQuery = {
+  __typename?: "Query"
+  entries: {
+    __typename?: "EntryConnection"
+    pageInfo: { __typename?: "PageInfo"; hasNextPage: boolean; hasPreviousPage: boolean }
+    edges: Array<{
+      __typename?: "Entry"
+      id: string
+      date: string
+      body?: string | null
+      createdAt: never
+      user: { __typename?: "User"; id: string; firstName: string; lastName: string }
+      events: Array<{ __typename?: "Event"; id: string; title: string }>
+      tags: Array<{ __typename?: "Tag"; id: string; name: string; color: string }>
+      subjects: Array<{ __typename?: "Competence"; id: string; name: string; color: string }>
+    }>
   }
 }
 

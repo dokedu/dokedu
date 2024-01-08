@@ -7,9 +7,11 @@ export type GetEntryFilterTeachersQueryVariables = Types.Exact<{
   search?: Types.InputMaybe<Types.Scalars["String"]["input"]>
 }>
 
-export type GetEntryFilterTeachersQuery = { __typename?: "Query" } & {
-  users: { __typename?: "UserConnection" } & {
-    edges?: Types.Maybe<Array<Types.Maybe<{ __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName">>>>
+export type GetEntryFilterTeachersQuery = {
+  __typename?: "Query"
+  users: {
+    __typename?: "UserConnection"
+    edges?: Array<{ __typename?: "User"; id: string; firstName: string; lastName: string } | null> | null
   }
 }
 

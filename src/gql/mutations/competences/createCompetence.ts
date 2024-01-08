@@ -7,15 +7,24 @@ export type CreateCompetenceMutationVariables = Types.Exact<{
   input: Types.CreateCompetenceInput
 }>
 
-export type CreateCompetenceMutation = { __typename?: "Mutation" } & {
-  createCompetence: { __typename?: "Competence" } & Pick<
-    Types.Competence,
-    "id" | "name" | "type" | "grades" | "color"
-  > & {
-      parents: Array<
-        { __typename?: "Competence" } & Pick<Types.Competence, "id" | "name" | "type" | "grades" | "color">
-      >
-    }
+export type CreateCompetenceMutation = {
+  __typename?: "Mutation"
+  createCompetence: {
+    __typename?: "Competence"
+    id: string
+    name: string
+    type: Types.CompetenceType
+    grades: Array<number>
+    color: string
+    parents: Array<{
+      __typename?: "Competence"
+      id: string
+      name: string
+      type: Types.CompetenceType
+      grades: Array<number>
+      color: string
+    }>
+  }
 }
 
 export const CreateCompetenceDocument = gql`

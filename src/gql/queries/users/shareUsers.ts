@@ -5,9 +5,11 @@ import * as Urql from "@urql/vue"
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 export type ShareUsersQueryVariables = Types.Exact<{ [key: string]: never }>
 
-export type ShareUsersQuery = { __typename?: "Query" } & {
-  users: { __typename?: "UserConnection" } & {
-    edges?: Types.Maybe<Array<Types.Maybe<{ __typename?: "User" } & Pick<Types.User, "id" | "firstName" | "lastName">>>>
+export type ShareUsersQuery = {
+  __typename?: "Query"
+  users: {
+    __typename?: "UserConnection"
+    edges?: Array<{ __typename?: "User"; id: string; firstName: string; lastName: string } | null> | null
   }
 }
 

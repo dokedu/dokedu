@@ -7,8 +7,9 @@ export type CreateSharedDriveMutationVariables = Types.Exact<{
   name: Types.Scalars["String"]["input"]
 }>
 
-export type CreateSharedDriveMutation = { __typename?: "Mutation" } & {
-  createSharedDrive: { __typename?: "Bucket" } & Pick<Types.Bucket, "id" | "name">
+export type CreateSharedDriveMutation = {
+  __typename?: "Mutation"
+  createSharedDrive: { __typename?: "Bucket"; id: string; name: string }
 }
 
 export const CreateSharedDriveDocument = gql`

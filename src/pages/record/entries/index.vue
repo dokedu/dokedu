@@ -55,7 +55,7 @@
             <div v-if="item.events?.length > 3">
               <DTag color="neutral" class="w-1/4 p-2">{{ item.events?.length }} {{ $t("project", 2) }} </DTag>
             </div>
-            <div v-else v-for="event in item.events" class="flex gap-1">
+            <div v-else v-for="event in item.events" :key="event.id" class="flex gap-1">
               <div
                 @click.stop="goToProject(event.id)"
                 class="line-clamp-1 inline-flex h-7 max-w-[120px] items-center gap-1.5 text-ellipsis whitespace-nowrap rounded-full border bg-default px-3 py-1 transition-all duration-150 ease-linear hover:max-w-[250px] hover:bg-subtle"
@@ -66,14 +66,23 @@
                 </div>
               </div>
             </div>
-            <div v-for="parent in item.subjects" class="flex gap-2">
-              <DTag :color="parent.color" class="w-1/4 p-2">{{ parent.name }}</DTag>
-            </div>
-            <div v-if="item.tags.length > 5">
+            <div v-if="item.tags.length > 3">
               <DTag color="neutral" class="w-1/4 p-2">{{ item.tags.length }} {{ $t("label", 2) }}</DTag>
             </div>
-            <div v-else v-for="tag in item.tags" class="flex gap-1">
+            <div v-else v-for="tag in item.tags" :key="tag.id" class="flex gap-1">
               <DTag :color="tag.color" class="w-1/4 p-2">{{ tag.name }}</DTag>
+            </div>
+            <div v-if="item.subjects.length > 3">
+              <DTag color="neutral" class="w-1/4 p-2 flex">
+                <BadgeCheckIcon :size="18" />
+                {{ item.subjects.length }} {{ $t("subject", 2) }}
+              </DTag>
+            </div>
+            <div v-else v-for="parent in item.subjects" :key="parent.id" class="flex gap-2">
+              <DTag :color="parent.color" class="w-1/4 p-2 flex">
+                <BadgeCheckIcon :size="18" />
+                {{ parent.name }}
+              </DTag>
             </div>
           </div>
         </div>
@@ -85,7 +94,7 @@
       </template>
       <template #subjects-data="{ column }">
         <div class="flex h-full items-center">
-          <div v-for="parent in column" class="flex gap-2">
+          <div v-for="parent in column" :key="parent.id" class="flex gap-2">
             <DTag color="neutral" class="w-1/4 p-2">{{ parent.name }}</DTag>
           </div>
         </div>
@@ -118,22 +127,20 @@
 import PageHeader from "@/components/page-header.vue"
 import PageWrapper from "@/components/page-wrapper.vue"
 import DButton from "@/components/d-button/d-button.vue"
-import { Plus } from "lucide-vue-next"
-import { ref, computed, reactive } from "vue"
-import DTag from "@/components/d-tag/d-tag.vue"
-import { useI18n } from "vue-i18n"
-import { watch } from "vue"
-import { LayoutGrid } from "lucide-vue-next"
-import DTable from "@/components/d-table/d-table.vue"
-import { useRouter } from "vue-router/auto"
+import { ref, computed, reactive, watch } from "vue"
 import { type PageVariables } from "@/types/types"
-import DSelect from "@/components/d-select/d-select.vue"
 import { useSessionStorage } from "@vueuse/core"
-import { GetEntriesDocument } from "@/gql/queries/entries/getEntries"
+import { useRouter } from "vue-router/auto"
+import { useI18n } from "vue-i18n"
+import DSelect from "@/components/d-select/d-select.vue"
+import DTable from "@/components/d-table/d-table.vue"
+import DTag from "@/components/d-tag/d-tag.vue"
+import { LayoutGrid, BadgeCheckIcon, Plus } from "lucide-vue-next"
 import { useGetEntryFilterTeachersQuery } from "@/gql/queries/users/getEntryFilterTeachers"
-import { useTagLimitedQuery } from "@/gql/queries/tags/tags"
 import { useGetEntryFilterStudentsQuery } from "@/gql/queries/users/getEntryFilterStudents"
 import { useCreateEntryDraftMutation } from "@/gql/mutations/entries/createEntryDraft"
+import { GetEntriesDocument } from "@/gql/queries/entries/getEntries"
+import { useTagLimitedQuery } from "@/gql/queries/tags/tags"
 import { EntrySortBy } from "@/gql/schema"
 
 const i18nLocale = useI18n()

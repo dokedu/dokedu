@@ -95,6 +95,11 @@ export const apps = computed<App[]>(() => [
         route: "/record/competences/"
       },
       {
+        icon: TimerIcon,
+        name: i18n.global.t("attendance", 2),
+        route: "/record/attendances/"
+      },
+      {
         icon: PieChart,
         name: i18n.global.t("report", 2),
         route: "/record/reports/"
@@ -103,11 +108,6 @@ export const apps = computed<App[]>(() => [
         icon: Tag,
         name: i18n.global.t("tag", 2),
         route: "/record/tags/"
-      },
-      {
-        icon: TimerIcon,
-        name: i18n.global.t("attendance", 2),
-        route: "/record/attendances/"
       }
     ]
   },

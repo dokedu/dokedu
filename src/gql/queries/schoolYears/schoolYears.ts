@@ -8,10 +8,12 @@ export type SchoolYearsQueryVariables = Types.Exact<{
   offset?: Types.InputMaybe<Types.Scalars["Int"]["input"]>
 }>
 
-export type SchoolYearsQuery = { __typename?: "Query" } & {
-  schoolYears: { __typename?: "SchoolYearConnection" } & {
-    edges: Array<{ __typename?: "SchoolYear" } & Pick<Types.SchoolYear, "id" | "year" | "description">>
-    pageInfo: { __typename?: "PageInfo" } & Pick<Types.PageInfo, "hasNextPage" | "hasPreviousPage">
+export type SchoolYearsQuery = {
+  __typename?: "Query"
+  schoolYears: {
+    __typename?: "SchoolYearConnection"
+    edges: Array<{ __typename?: "SchoolYear"; id: string; year: number; description: string }>
+    pageInfo: { __typename?: "PageInfo"; hasNextPage: boolean; hasPreviousPage: boolean }
   }
 }
 

@@ -7,9 +7,11 @@ export type TagLimitedQueryVariables = Types.Exact<{
   search?: Types.InputMaybe<Types.Scalars["String"]["input"]>
 }>
 
-export type TagLimitedQuery = { __typename?: "Query" } & {
-  tags: { __typename?: "TagConnection" } & {
-    edges?: Types.Maybe<Array<Types.Maybe<{ __typename?: "Tag" } & Pick<Types.Tag, "id" | "name" | "color">>>>
+export type TagLimitedQuery = {
+  __typename?: "Query"
+  tags: {
+    __typename?: "TagConnection"
+    edges?: Array<{ __typename?: "Tag"; id: string; name: string; color: string } | null> | null
   }
 }
 

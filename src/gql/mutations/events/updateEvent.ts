@@ -7,11 +7,19 @@ export type UpdateEventMutationVariables = Types.Exact<{
   input: Types.UpdateEventInput
 }>
 
-export type UpdateEventMutation = { __typename?: "Mutation" } & {
-  updateEvent: { __typename?: "Event" } & Pick<
-    Types.Event,
-    "id" | "title" | "body" | "startsAt" | "endsAt" | "recurrence" | "createdAt"
-  > & { image?: Types.Maybe<{ __typename?: "File" } & Pick<Types.File, "id">> }
+export type UpdateEventMutation = {
+  __typename?: "Mutation"
+  updateEvent: {
+    __typename?: "Event"
+    id: string
+    title: string
+    body?: string | null
+    startsAt: never
+    endsAt: never
+    recurrence?: Array<string | null> | null
+    createdAt: never
+    image?: { __typename?: "File"; id: string } | null
+  }
 }
 
 export const UpdateEventDocument = gql`

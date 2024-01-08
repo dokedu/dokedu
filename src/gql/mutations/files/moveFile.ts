@@ -7,10 +7,9 @@ export type MoveFileMutationVariables = Types.Exact<{
   input: Types.MoveFileInput
 }>
 
-export type MoveFileMutation = { __typename?: "Mutation" } & {
-  moveFile: { __typename?: "File" } & Pick<Types.File, "id"> & {
-      parent?: Types.Maybe<{ __typename?: "File" } & Pick<Types.File, "id">>
-    }
+export type MoveFileMutation = {
+  __typename?: "Mutation"
+  moveFile: { __typename?: "File"; id: string; parent?: { __typename?: "File"; id: string } | null }
 }
 
 export const MoveFileDocument = gql`

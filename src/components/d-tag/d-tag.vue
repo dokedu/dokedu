@@ -1,10 +1,10 @@
 <template>
   <div
-    class="flex w-fit select-none items-center rounded-full px-2.5 py-1 text-sm"
+    class="flex w-max select-none items-center rounded-full px-2.5 py-1 text-sm"
     :class="`bg-${color}-50 text-${color}-700`"
   >
     <div class="flex items-center justify-between gap-2">
-      <p class="line-clamp-1">
+      <p class="line-clamp-1 flex items-center gap-1">
         <slot />
       </p>
       <X

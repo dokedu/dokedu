@@ -7,8 +7,9 @@ export type UpdateOrganisationMutationVariables = Types.Exact<{
   input: Types.UpdateOrganisationInput
 }>
 
-export type UpdateOrganisationMutation = { __typename?: "Mutation" } & {
-  updateOrganisation: { __typename?: "Organisation" } & Pick<Types.Organisation, "id" | "name" | "legalName">
+export type UpdateOrganisationMutation = {
+  __typename?: "Mutation"
+  updateOrganisation: { __typename?: "Organisation"; id: string; name: string; legalName: string }
 }
 
 export const UpdateOrganisationDocument = gql`
