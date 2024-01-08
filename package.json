@@ -9,7 +9,7 @@
     "build": "vite build",
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "format": "prettier --write src/",
+    "format": "bunx prettier --config .prettierrc.json --write .",
     "codegen": "graphql-codegen"
   },
   "devDependencies": {
