@@ -14,6 +14,9 @@ SET organisation_id = new_org.id
 FROM new_org
 WHERE users.id = (SELECT id FROM new_user);
 
+INSERT INTO users (role, first_name, last_name, organisation_id, password, email)
+VALUES ('owner', 'Max', 'Never', 'u2wHWUbnWUaUUjBeNvQ4u', crypt('password', gen_salt('bf')), 'max@dokedu.org');
+
 -- English
 INSERT INTO competences (id, name, organisation_id, competence_type, competence_id, grades)
 VALUES ('QjJvFJlceWxOzEcv3zPP5', 'English', 'u2wHWUbnWUaUUjBeNvQ4u', 'subject', NULL, '{1,2,3}');

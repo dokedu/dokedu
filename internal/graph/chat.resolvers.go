@@ -147,6 +147,7 @@ func (r *chatMessageResolver) Chat(ctx context.Context, obj *db.ChatMessage) (*d
 	err = r.DB.NewSelect().
 		Model(&chat).
 		Where("id = ?", obj.ChatID).
+		Join("LEFT JOIN chat_users ON chat_users.chat_id = chat.id").
 		Where("organisation_id = ?", currentUser.OrganisationID).
 		Scan(ctx)
 	if err != nil {
@@ -249,7 +250,33 @@ func (r *mutationResolver) CreateChat(ctx context.Context, input model.CreateCha
 
 // DeleteChat is the resolver for the deleteChat field.
 func (r *mutationResolver) DeleteChat(ctx context.Context, input model.DeleteChatInput) (*db.Chat, error) {
-	panic(fmt.Errorf("not implemented: DeleteChat - deleteChat"))
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	var chat db.Chat
+	err = r.DB.NewSelect().
+		Model(&chat).
+		Where("id = ?", input.ID).
+		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if err != nil {
+		return nil, errors.New("chat not found")
+	}
+
+	err = r.DB.NewDelete().
+		Model(&chat).
+		Where("id = ?", input.ID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Returning("*").
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &chat, nil
 }
 
 // AddUserToChat is the resolver for the addUserToChat field.
@@ -259,26 +286,19 @@ func (r *mutationResolver) AddUserToChat(ctx context.Context, input model.AddUse
 		return nil, nil
 	}
 
+	if input.UserID == currentUser.ID {
+		return nil, errors.New("you cannot add yourself to a chat")
+	}
+
 	var chat db.Chat
 	err = r.DB.NewSelect().
 		Model(&chat).
 		Where("id = ?", input.ChatID).
+		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
 		Where("organisation_id = ?", currentUser.OrganisationID).
 		Scan(ctx)
 	if err != nil {
-		return nil, err
-	}
-
-	// is user participant of chat
-	var chatUser db.ChatUser
-	err = r.DB.NewSelect().
-		Model(&chatUser).
-		Where("chat_id = ?", input.ChatID).
-		Where("user_id = ?", currentUser.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-	if err != nil {
-		return nil, err
+		return nil, errors.New("chat not found")
 	}
 
 	var user db.User
@@ -321,30 +341,16 @@ func (r *mutationResolver) RemoveUserFromChat(ctx context.Context, input model.R
 	err = r.DB.NewSelect().
 		Model(&chat).
 		Where("id = ?", input.ChatID).
+		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
 		Where("organisation_id = ?", currentUser.OrganisationID).
 		Scan(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("chat not found")
 	}
 
-	// is user participant of chat
 	var chatUser db.ChatUser
-	err = r.DB.NewSelect().
-		Model(&chatUser).
-		Where("chat_id = ?", input.ChatID).
-		Where("user_id = ?", currentUser.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, errors.New("you are not authorised to remove users from this chat")
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	var chatUser2 db.ChatUser
 	err = r.DB.NewDelete().
-		Model(&chatUser2).
+		Model(&chatUser).
 		Where("chat_id = ?", input.ChatID).
 		Where("user_id = ?", input.UserID).
 		Where("organisation_id = ?", currentUser.OrganisationID).
@@ -354,7 +360,7 @@ func (r *mutationResolver) RemoveUserFromChat(ctx context.Context, input model.R
 		return nil, err
 	}
 
-	return &chatUser2, nil
+	return &chatUser, nil
 }
 
 // SendMessage is the resolver for the sendMessage field.
@@ -373,22 +379,11 @@ func (r *mutationResolver) SendMessage(ctx context.Context, input model.SendMess
 	err = r.DB.NewSelect().
 		Model(&chat).
 		Where("id = ?", input.ChatID).
+		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
 		Where("organisation_id = ?", currentUser.OrganisationID).
 		Scan(ctx)
 	if err != nil {
-		return nil, err
-	}
-
-	// is user participant of chat
-	var chatUser db.ChatUser
-	err = r.DB.NewSelect().
-		Model(&chatUser).
-		Where("chat_id = ?", input.ChatID).
-		Where("user_id = ?", currentUser.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-	if err != nil {
-		return nil, err
+		return nil, errors.New("chat not found")
 	}
 
 	var chatMessage db.ChatMessage
@@ -424,25 +419,11 @@ func (r *mutationResolver) UpdateChat(ctx context.Context, input model.UpdateCha
 	err = r.DB.NewSelect().
 		Model(&chat).
 		Where("id = ?", input.ID).
+		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
 		Where("organisation_id = ?", currentUser.OrganisationID).
 		Scan(ctx)
 	if err != nil {
-		return nil, err
-	}
-
-	// is user participant of chat
-	var chatUser db.ChatUser
-	err = r.DB.NewSelect().
-		Model(&chatUser).
-		Where("chat_id = ?", input.ID).
-		Where("user_id = ?", currentUser.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, errors.New("you are not authorised to update this chat")
-	}
-	if err != nil {
-		return nil, err
+		return nil, errors.New("chat not found")
 	}
 
 	chat.Name = sql.NullString{
@@ -473,11 +454,12 @@ func (r *queryResolver) Chat(ctx context.Context, id string) (*db.Chat, error) {
 	var chat db.Chat
 	err = r.DB.NewSelect().
 		Model(&chat).
-		Where("id = ?", id).
-		Where("organisation_id = ?", currentUser.OrganisationID).
+		Where("chat.id = ?", id).
+		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
+		Where("chat.organisation_id = ?", currentUser.OrganisationID).
 		Scan(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("chat not found")
 	}
 
 	return &chat, nil
