@@ -1,21 +1,35 @@
 <template>
-  <div tabindex="1" :class="buttonClasses">
+  <component :is="componentType" tabindex="1" :class="buttonClasses">
     <component v-if="iconLeft" :is="iconLeft" :size="18" :class="iconLeftClasses" />
     <slot />
     <component v-if="iconRight" :is="iconRight" :size="18" />
-  </div>
+  </component>
 </template>
 
 <script lang="ts" setup>
 import { computed } from "vue"
 import type { Icon } from "@/types/types"
 
+import type { RouteLocationRaw } from "vue-router/auto"
+
 export interface Props {
   type?: "transparent" | "outline" | "primary"
   size?: "xs" | "sm" | "md"
+  to?: RouteLocationRaw
+  submit?: boolean
   iconLeft?: Icon
   iconRight?: Icon
 }
+
+const componentType = computed(() => {
+  if (props.to) {
+    return "router-link"
+  }
+  if (props.submit) {
+    return "button"
+  }
+  return "div"
+})
 
 const props = withDefaults(defineProps<Props>(), {
   type: "primary",

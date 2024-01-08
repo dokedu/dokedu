@@ -30,13 +30,9 @@
           {{ error?.graphQLErrors[0].message }}
         </div>
       </div>
-      <button
-        class="block rounded-md bg-neutral-950 px-2.5 py-2.5 text-sm font-medium leading-none text-white shadow-sm hover:bg-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950"
-        type="submit"
-        data-umami-event="login"
-      >
+      <d-button submit type="primary" data-umami-event="login">
         {{ $t("log_in") }}
-      </button>
+      </d-button>
       <router-link
         class="mx-auto block w-fit rounded-md text-center text-xs font-medium leading-none text-muted hover:text-default focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950"
         to="/forgot-password"
@@ -63,6 +59,7 @@ import i18n from "@/i18n"
 import { useWindowSize } from "@vueuse/core"
 import { useSignInMutation } from "@/gql/mutations/auth/signIn"
 import DInput from "@/components/d-input/d-input.vue"
+import DButton from "@/components/d-button/d-button.vue"
 
 const router = useRouter()
 
