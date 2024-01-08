@@ -1,11 +1,11 @@
 <template>
   <div class="text-sm flex h-screen w-full">
-    <div class="flex flex-col w-[300px] border-r bg-neutral-100 h-full">
+    <div class="flex flex-col w-[300px] border-r bg-neutral-50 h-full">
       <div class="px-2 pt-2">
         <app-switcher2 />
       </div>
-      <div class="p-2 flex justify-between gap-1 items-center border-b">
-        <d-input class="w-full h-9" v-model="search" name="search" type="text" placeholder="Search"></d-input>
+      <div class="p-2 flex justify-between gap-1 border-b">
+        <d-input class="w-full" v-model="search" name="search" type="text" placeholder="Search"></d-input>
         <d-new-chat />
       </div>
       <div class="flex-1 overflow-auto flex flex-col">
