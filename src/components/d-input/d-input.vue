@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col">
-    <label v-if="label" class="mb-1 text-sm text-neutral-500" :for="name">{{ label }}</label>
+    <label v-if="label" class="mb-1 text-xs text-neutral-500" :for="name">{{ label }}</label>
     <input
       :value="modelValue"
       :type="type"
