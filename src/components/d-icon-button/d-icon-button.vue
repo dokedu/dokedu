@@ -19,11 +19,11 @@ import { computed, toRef } from "vue"
 export interface Props {
   icon: Icon
   size: "xs" | "sm" | "md" | "lg"
-  type: "primary" | "secondary"
+  type: "primary" | "outline" | "transparent"
 }
 const props = withDefaults(defineProps<Props>(), {
   size: "md",
-  type: "secondary"
+  type: "outline"
 })
 const icon = toRef(props, "icon")
 
@@ -34,24 +34,34 @@ const classNames = computed(() => {
 
   switch (props.type) {
     case "primary":
-      classes.push("hover:bg-neutral-700 bg-inverted text-inverted")
+      classes.push(
+        "hover:bg-neutral-700 bg-inverted text-inverted border-transparent bg-gradient-to-t from-neutral-950 to-neutral-800 hover:shadow-md hover:from-neutral-900 hover:to-neutral-600 active:from-neutral-700 active:to-neutral-900"
+      )
       break
-    case "secondary":
-      classes.push("hover:bg-neutral-100")
+    case "outline":
+      classes.push(
+        "hover:bg-neutral-100 active:shadow-none active:bg-gradient-to-t active:from-neutral-50 active:to-neutral-200"
+      )
       break
+    case "transparent":
+      classes.push(
+        "border-transparent  hover:bg-neutral-100 hover:text-neutral-950 active:bg-gradient-to-t active:from-neutral-50 active:to-neutral-100"
+      )
   }
 
+  ;["px-3 py-1.5 text-sm"]
   switch (props.size) {
     case "xs":
-      break
-    case "sm":
       classes.push("p-1")
       break
-    case "md":
+    case "sm":
       classes.push("p-1.5")
       break
-    case "lg":
+    case "md":
       classes.push("p-2")
+      break
+    case "lg":
+      classes.push("p-2.5")
       break
   }
 

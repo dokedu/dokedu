@@ -4,7 +4,7 @@
       :icon="PenSquare"
       size="lg"
       @click="popoverOpen = !popoverOpen"
-      :type="popoverOpen ? 'primary' : 'secondary'"
+      :type="popoverOpen ? 'primary' : 'outline'"
     ></d-icon-button>
     <Transition name="popover">
       <d-popover v-if="popoverOpen" class="top-[calc(100%+4px)]">

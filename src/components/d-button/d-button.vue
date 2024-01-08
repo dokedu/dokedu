@@ -24,33 +24,25 @@ const props = withDefaults(defineProps<Props>(), {
 
 const buttonClasses = computed(() => {
   const baseClasses = [
-    "focus-visible:outline",
-    "focus-visible:outline-2",
-    "focus-visible:outline-offset-2",
-    "focus-visible:outline-neutral-950",
-    "transition-color",
-    "group",
-    "relative",
-    "inline-flex",
-    "select-none",
-    "items-center",
-    "justify-center",
-    "gap-2",
-    "overflow-hidden",
-    "rounded-lg",
-    "border"
+    "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950 transition-color group relative inline-flex select-none items-center justify-center gap-2 overflow-hidden rounded-lg border"
   ]
 
   const typeClasses = {
-    primary: ["shadow-sm", "border-transparent", "bg-neutral-950", "text-white", "hover:bg-neutral-700"],
-    outline: ["shadow-sm", "border", "border-neutral-200", "text-neutral-700", "hover:bg-neutral-100"],
-    transparent: ["border-transparent", "text-neutral-700", "hover:bg-neutral-100", "hover:text-neutral-950"]
+    primary: [
+      "shadow-sm border-transparent bg-gradient-to-t from-neutral-950 to-neutral-800 text-white hover:shadow-md hover:from-neutral-900 hover:to-neutral-600 active:from-neutral-700 active:to-neutral-900"
+    ],
+    outline: [
+      "shadow-sm border border-neutral-200 text-neutral-700 hover:bg-neutral-100 active:shadow-none active:bg-gradient-to-t active:from-neutral-50 active:to-neutral-200"
+    ],
+    transparent: [
+      "border-transparent text-neutral-700 hover:bg-neutral-100 hover:text-neutral-950 active:bg-gradient-to-t active:from-neutral-50 active:to-neutral-100"
+    ]
   }
 
   const sizeClasses = {
-    xs: ["px-1", "py-0.5", "text-sm"],
-    sm: ["px-2", "py-1", "text-sm"],
-    md: ["px-3", "py-1.5", "text-sm"]
+    xs: ["px-1 py-0.5 text-sm"],
+    sm: ["px-2 py-1 text-sm"],
+    md: ["px-3 py-1.5 text-sm"]
   }
 
   return [...baseClasses, ...typeClasses[props.type || ""], ...sizeClasses[props.size || ""]]

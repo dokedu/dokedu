@@ -53,7 +53,7 @@
           size="lg"
           :icon="SendHorizonal"
           @click="onSubmit"
-          :type="input ? 'primary' : 'secondary'"
+          :type="input ? 'primary' : 'outline'"
         ></d-icon-button>
       </div>
     </footer>
