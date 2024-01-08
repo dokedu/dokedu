@@ -157,6 +157,11 @@ export const en = {
   domain_required: "Domain is required",
   name_spaces: "Name cannot contain spaces",
 
+  dokedu_welcome: "Welcome to Dokedu",
+  login_info: "Login to your account",
+  problems_logging_in: "Problems logging in?",
+  contact_us_at: "Contact us at:",
+
   send_invite: "Send invite",
   reset_password: "Reset password",
   user_already_accepted: "User has already accepted their invite",

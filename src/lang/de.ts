@@ -155,6 +155,11 @@ export const de = {
   domain_required: "Domain ist erforderlich",
   name_spaces: "Name darf keine Leerzeichen enthalten",
 
+  dokedu_welcome: "Willkommen bei Dokedu",
+  login_info: "Melde dich in dein Konto ein",
+  problems_logging_in: "Probleme bei der Anmeldung?",
+  contact_us_at: "Kontaktiere uns unter:",
+
   send_invite: "Einladung senden",
   reset_password: "Passwort zurücksetzen",
   user_already_accepted: "Der Nutzer hat seine Einladung bereits angenommen",
