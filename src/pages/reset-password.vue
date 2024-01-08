@@ -1,41 +1,30 @@
 <template>
   <div class="select-none text-sm">
     <form @submit.prevent="onSubmit" class="mx-auto flex max-w-xs flex-col gap-2 py-24 text-strong">
-      <div class="flex flex-col gap-4">
-        <img height="67" width="100" class="mx-auto mb-4 w-2/5" src="/dokedu-logo.svg" alt="dokedu logo" />
-        <div class="flex flex-col">
-          <label class="mb-1 text-xs text-neutral-500" for="password">{{ $t("password") }}</label>
-          <input
-            v-model="password"
-            type="password"
-            name="password"
-            id="password"
-            required
-            min="8"
-            class="block w-full rounded-md border-0 py-2 text-neutral-900 shadow-sm ring-1 ring-inset ring-neutral-300 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-neutral-950 sm:text-sm sm:leading-6"
-            :placeholder="$t('your_new_password')"
-          />
-        </div>
-        <div class="flex flex-col">
-          <label class="mb-1 text-xs text-neutral-500" for="password">{{ $t("confirm_password") }}</label>
-          <input
-            v-model="passwordConfirm"
-            type="password"
-            name="confirm-password"
-            id="confirm-password"
-            required
-            min="8"
-            class="block w-full rounded-md border-0 py-2 text-neutral-900 shadow-sm ring-1 ring-inset ring-neutral-300 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-neutral-950 sm:text-sm sm:leading-6"
-            :placeholder="$t('confirm_your_new_password')"
-          />
-        </div>
-      </div>
-      <button
-        class="block rounded-md bg-neutral-950 px-2.5 py-2.5 text-sm font-medium leading-none text-white shadow-sm hover:bg-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950"
-        type="submit"
-      >
+      <img height="67" width="100" class="mx-auto mb-4 w-2/5" src="/dokedu-logo.svg" alt="dokedu logo" />
+      <d-input
+        :label="$t('password')"
+        v-model="password"
+        type="password"
+        name="password"
+        id="password"
+        required
+        :min="8"
+        :placeholder="$t('your_new_password')"
+      ></d-input>
+      <d-input
+        :label="$t('confirm_password')"
+        v-model="passwordConfirm"
+        type="password"
+        name="confirm-password"
+        id="confirm-password"
+        required
+        :min="8"
+        :placeholder="$t('confirm_your_new_password')"
+      ></d-input>
+      <d-button type="primary" submit>
         {{ $t("reset_password") }}
-      </button>
+      </d-button>
       <router-link
         class="mx-auto mt-2 block w-fit rounded-md text-center text-xs font-medium leading-none text-muted hover:text-default focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950"
         to="/login"
@@ -59,6 +48,8 @@ import { ref } from "vue"
 import { useRoute, useRouter } from "vue-router/auto"
 import { useI18n } from "vue-i18n"
 import { useResetPasswordMutation } from "@/gql/queries/auth/resetPasswordMutation"
+import DInput from "@/components/d-input/d-input.vue"
+import DButton from "@/components/d-button/d-button.vue"
 
 const { t } = useI18n()
 
