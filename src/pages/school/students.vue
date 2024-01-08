@@ -127,7 +127,7 @@ watchDebounced(
       {
         search: search.value,
         order: lastPage.order,
-        limit: 50,
+        limit: 500,
         offset: 0,
         nextPage: undefined,
         showDeleted: lastPage.showDeleted
