@@ -1,34 +1,30 @@
 <template>
   <div class="select-none text-sm">
     <form @submit.prevent="onSubmit" class="mx-auto flex max-w-xs flex-col gap-4 py-24 text-strong">
-      <div class="flex flex-col">
-        <img height="67" width="100" class="mx-auto mb-8 w-2/5" src="/dokedu-logo.svg" alt="dokedu logo" />
-        <d-input
-          :label="$t('email')"
-          v-model="email"
-          type="email"
-          name="email"
-          id="email"
-          required
-          autocomplete="email"
-          :placeholder="$t('your_email')"
-        ></d-input>
-      </div>
-      <div class="flex flex-col">
-        <d-input
-          :label="$t('password')"
-          v-model="password"
-          type="password"
-          name="password"
-          id="password"
-          required
-          :min="8"
-          autocomplete="current-password"
-          :placeholder="$t('your_password')"
-        ></d-input>
-        <div class="mt-1 text-xs text-red-500">
-          {{ error?.graphQLErrors[0].message }}
-        </div>
+      <img height="67" width="100" class="mx-auto mb-8 w-2/5" src="/dokedu-logo.svg" alt="dokedu logo" />
+      <d-input
+        :label="$t('email')"
+        v-model="email"
+        type="email"
+        name="email"
+        id="email"
+        required
+        autocomplete="email"
+        :placeholder="$t('your_email')"
+      ></d-input>
+      <d-input
+        :label="$t('password')"
+        v-model="password"
+        type="password"
+        name="password"
+        id="password"
+        required
+        :min="8"
+        autocomplete="current-password"
+        :placeholder="$t('your_password')"
+      ></d-input>
+      <div class="mt-1 text-xs text-red-500">
+        {{ error?.graphQLErrors[0].message }}
       </div>
       <d-button submit type="primary" data-umami-event="login">
         {{ $t("log_in") }}
