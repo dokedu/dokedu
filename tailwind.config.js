@@ -46,7 +46,7 @@ export default {
           inverted: colors.white
         }
       },
-      border: {
+      borderColor: {
         strong: colors.neutral[400],
         default: colors.neutral[200],
         subtle: colors.neutral[100],

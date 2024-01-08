@@ -2,7 +2,7 @@
   <div class="relative" ref="popover">
     <d-icon-button
       :icon="PenSquare"
-      size="lg"
+      size="md"
       @click="popoverOpen = !popoverOpen"
       :type="popoverOpen ? 'primary' : 'outline'"
     ></d-icon-button>
