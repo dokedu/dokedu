@@ -378,7 +378,9 @@ input DownloadFilesInput {
 }
 
 type DownloadFilesPayload {
-  """The url to download a zip file containing all the files."""
+  """
+  The url to download a zip file containing all the files.
+  """
   url: String!
 }
 
@@ -768,7 +770,13 @@ type Query {
   chat(id: ID!): Chat!
   chats(limit: Int, offset: Int): ChatConnection!
   competence(id: ID!): Competence!
-  competences(filter: CompetenceFilterInput, limit: Int, offset: Int, search: String, sort: CompetenceSort): CompetenceConnection!
+  competences(
+    filter: CompetenceFilterInput
+    limit: Int
+    offset: Int
+    search: String
+    sort: CompetenceSort
+  ): CompetenceConnection!
   domain(id: ID!): Domain
   domains: DomainConnection
   email(id: ID!): Email
