@@ -47,14 +47,11 @@
 
 <script lang="ts" setup>
 import { ref } from "vue"
-import { useI18n } from "vue-i18n"
 import { useForgotPasswordMutation } from "@/gql/mutations/auth/forgotPassword"
 import DInput from "@/components/d-input/d-input.vue"
 import DButton from "@/components/d-button/d-button.vue"
 import DAuthContainer from "@/components/_auth/d-auth-container.vue"
 import DBanner from "@/components/d-banner/d-banner.vue"
-
-const { t } = useI18n()
 
 const email = ref("")
 const successBanner = ref(false)
