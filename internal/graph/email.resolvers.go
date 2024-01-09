@@ -316,16 +316,17 @@ func (r *mutationResolver) CreateDomain(ctx context.Context, input model.CreateD
 		return nil, errors.New("no permission")
 	}
 
-	domain := db.Domain{
-		Name:           input.Name,
-		OrganisationID: currentUser.OrganisationID,
-	}
-	err = r.DB.NewInsert().Model(&domain).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &domain, nil
+	return nil, errors.New("you are not allowed to create a domain")
+	//domain := db.Domain{
+	//	Name:           input.Name,
+	//	OrganisationID: currentUser.OrganisationID,
+	//}
+	//err = r.DB.NewInsert().Model(&domain).Scan(ctx)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//return &domain, nil
 }
 
 // DeleteDomain is the resolver for the deleteDomain field.
@@ -338,19 +339,21 @@ func (r *mutationResolver) DeleteDomain(ctx context.Context, input model.DeleteD
 		return nil, errors.New("no permission")
 	}
 
-	var domain db.Domain
-	err = r.DB.NewSelect().Model(&domain).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
+	return nil, errors.New("you are not allowed to create a domain")
 
-	// TODO instead of hard delete use soft delete
-	err = r.DB.NewDelete().Model(&domain).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &domain, nil
+	//var domain db.Domain
+	//err = r.DB.NewSelect().Model(&domain).Where("id = ?", input.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//// TODO instead of hard delete use soft delete
+	//err = r.DB.NewDelete().Model(&domain).Scan(ctx)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//return &domain, nil
 }
 
 // CreateEmailGroup is the resolver for the createEmailGroup field.
