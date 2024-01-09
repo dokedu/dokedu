@@ -9,7 +9,7 @@
     :class="{ '!bg-strong text-strong': active }"
   >
     <component :is="icon" class="stroke-neutral-500" :size="18" :class="{ '!stroke-neutral-900': active }" />
-    <div class="text-sm w-full">
+    <div class="text-sm w-full flex-1">
       <slot />
     </div>
   </component>

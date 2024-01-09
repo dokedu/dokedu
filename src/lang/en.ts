@@ -176,6 +176,7 @@ export const en = {
   your_password: "Your password",
   log_in: "Log in",
   forgot_password: "Forgot password?",
+  forgot_password_description: "Enter your email address and we'll send you a link to reset your password.",
 
   success: "Success",
   check_your_email_password_reset: "Check your email for a link to reset your password.",

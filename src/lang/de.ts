@@ -174,6 +174,8 @@ export const de = {
   your_password: "Dein Passwort",
   log_in: "Anmelden",
   forgot_password: "Passwort vergessen?",
+  forgot_password_description:
+    "Gib deine E-Mail-Adresse ein, um eine E-Mail zum Zurücksetzen deines Passworts zu erhalten",
 
   success: "Erfolg",
   check_your_email_password_reset: "In deiner E-Mail findest du einen Link zum Zurücksetzen deines Passworts.",

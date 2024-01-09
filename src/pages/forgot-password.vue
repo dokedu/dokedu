@@ -1,5 +1,5 @@
 <template>
-  <d-auth-container title="Forgot password?" subtitle="Enter your email below to start reset">
+  <d-auth-container :title="$t('forgot_password')" :subtitle="$t('forgot_password_description')">
     <template #banner>
       <d-banner
         v-if="successBanner"
