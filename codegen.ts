@@ -28,6 +28,9 @@ const config: CodegenConfig = {
     },
     "src/gql/introspection.ts": {
       plugins: ["urql-introspection"]
+    },
+    "src/gql/schema.graphql": {
+      plugins: ["schema-ast"]
     }
   }
 }
