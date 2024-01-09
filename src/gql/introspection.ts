@@ -2030,6 +2030,46 @@ export default {
       },
       {
         "kind": "OBJECT",
+        "name": "InviteDetailsPayload",
+        "fields": [
+          {
+            "name": "email",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "firstName",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "lastName",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "MoveFilesPayload",
         "fields": [
           {
@@ -4837,6 +4877,29 @@ export default {
                 "type": {
                   "kind": "SCALAR",
                   "name": "Any"
+                }
+              }
+            ]
+          },
+          {
+            "name": "inviteDetails",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "InviteDetailsPayload",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "token",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
                 }
               }
             ]

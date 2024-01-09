@@ -155,8 +155,15 @@ export const de = {
   domain_required: "Domain ist erforderlich",
   name_spaces: "Name darf keine Leerzeichen enthalten",
 
+  dokedu_welcome: "Willkommen bei Dokedu",
+  welcome: "Willkommen",
+  login_info: "Melde dich in deinem Konto an",
+  problems_logging_in: "Probleme bei der Anmeldung?",
+  contact_us_at: "Kontaktiere uns unter:",
+
   send_invite: "Einladung senden",
   reset_password: "Passwort zurücksetzen",
+  reset_password_description: "Setze dein Passwort zurück, um dich in dein Konto einzuloggen",
   user_already_accepted: "Der Nutzer hat seine Einladung bereits angenommen",
   invite_sent: "Einladung gesendet",
   user_invite_sent: "{firstName} {lastName} hat eine Einladung erhalten",
@@ -167,6 +174,8 @@ export const de = {
   your_password: "Dein Passwort",
   log_in: "Anmelden",
   forgot_password: "Passwort vergessen?",
+  forgot_password_description:
+    "Gib deine E-Mail-Adresse ein, um eine E-Mail zum Zurücksetzen deines Passworts zu erhalten",
 
   success: "Erfolg",
   check_your_email_password_reset: "In deiner E-Mail findest du einen Link zum Zurücksetzen deines Passworts.",
@@ -175,7 +184,10 @@ export const de = {
 
   your_new_password: "Dein neues Passwort",
   confirm_your_new_password: "Bestätige dein neues Passwort",
+  confirm_your_password: "Bestätige dein Passwort",
   create_account: "Konto erstellen",
+  create_account_description: "Setze ein Passwort, um dein Konto zu erstellen.",
+  your_login_mail: "Mit dieser E-Mail-Adresse meldest du dich an",
   passwords_dont_match: "Passwörter stimmen nicht überein",
   invalid_token: "Ungültiges Token",
   password_too_short: "Passwort zu kurz",

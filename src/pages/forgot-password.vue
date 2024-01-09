@@ -1,38 +1,40 @@
 <template>
-  <div class="select-none text-sm">
-    <form @submit.prevent="onSubmit" class="mx-auto flex max-w-xs flex-col gap-2 py-24 text-strong">
-      <div class="flex flex-col">
-        <img height="67" width="100" class="mx-auto mb-8 w-2/5" src="/dokedu-logo.svg" alt="dokedu logo" />
-        <div v-if="successBanner" class="mb-4 rounded-lg bg-green-100 p-2 text-green-800">
-          <div>
-            <span class="text-green-950">{{ $t("success") }}!</span> {{ $t("check_your_email_password_reset") }}
-          </div>
+  <d-auth-container :title="$t('forgot_password')" :subtitle="$t('forgot_password_description')">
+    <template #banner>
+      <d-banner
+        v-if="successBanner"
+        type="success"
+        :title="$t('success')"
+        :subtitle="$t('check_your_email_password_reset')"
+      ></d-banner>
+      <d-banner v-if="errorBanner" type="error" :title="$t('error')" :subtitle="$t('something_went_wrong')"></d-banner>
+    </template>
+    <template #form>
+      <form @submit.prevent="onSubmit" class="flex flex-col gap-5">
+        <div class="flex flex-col">
+          <d-input
+            size="sm"
+            :label="$t('email')"
+            v-model="email"
+            type="email"
+            name="email"
+            id="email"
+            required
+            :placeholder="$t('your_email')"
+          ></d-input>
         </div>
-        <label class="mb-1 text-xs text-neutral-500" for="email">{{ $t("email") }}</label>
-        <input
-          v-model="email"
-          type="email"
-          name="email"
-          id="email"
-          required
-          class="block w-full rounded-md border-0 py-2 text-neutral-900 shadow-sm ring-1 ring-inset ring-neutral-300 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-neutral-950 sm:text-sm sm:leading-6"
-          :placeholder="$t('your_email')"
-        />
-      </div>
-      <button
-        class="block rounded-md bg-neutral-950 px-2.5 py-2.5 text-sm font-medium leading-none text-white shadow-sm hover:bg-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950"
-        type="submit"
-      >
-        {{ $t("send_password_reset") }}
-      </button>
-      <router-link
-        class="mx-auto mt-2 block w-fit rounded-md text-center text-xs font-medium leading-none text-muted hover:text-default focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950"
-        to="/login"
-      >
-        {{ $t("back_to_login") }}
-      </router-link>
-    </form>
-  </div>
+        <d-button type="primary" submit>
+          {{ $t("send_password_reset") }}
+        </d-button>
+        <router-link
+          class="mx-auto mt-2 block w-fit rounded-md text-center text-xs font-medium leading-none text-muted hover:text-default focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950"
+          to="/login"
+        >
+          {{ $t("back_to_login") }}
+        </router-link>
+      </form>
+    </template>
+  </d-auth-container>
 </template>
 
 <route lang="json">
@@ -45,13 +47,15 @@
 
 <script lang="ts" setup>
 import { ref } from "vue"
-import { useI18n } from "vue-i18n"
 import { useForgotPasswordMutation } from "@/gql/mutations/auth/forgotPassword"
-
-const { t } = useI18n()
+import DInput from "@/components/d-input/d-input.vue"
+import DButton from "@/components/d-button/d-button.vue"
+import DAuthContainer from "@/components/_auth/d-auth-container.vue"
+import DBanner from "@/components/d-banner/d-banner.vue"
 
 const email = ref("")
 const successBanner = ref(false)
+const errorBanner = ref(false)
 
 const { executeMutation: forgotPassword } = useForgotPasswordMutation()
 
@@ -64,9 +68,11 @@ async function onSubmit() {
 
   if (data?.forgotPassword.success) {
     successBanner.value = true
+    errorBanner.value = false
     email.value = ""
   } else {
-    alert(t("something_went_wrong"))
+    successBanner.value = false
+    errorBanner.value = true
   }
 }
 </script>

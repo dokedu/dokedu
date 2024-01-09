@@ -61,7 +61,7 @@ import { apps } from "@/components/d-sidebar/d-sidebar"
 import type { UserRole } from "@/components/d-sidebar/d-sidebar"
 import { onClickOutside, useStorage } from "@vueuse/core"
 import { useRouter } from "vue-router/auto"
-import { useMeWithInfoQuery } from "@/gql/queries/auth/meWithInfo"
+import { useMeQuery } from "@/gql/queries/auth/me"
 import DPopover from "@/components/d-popover/d-popover.vue"
 import DPopoverItem from "@/components/d-popover/d-popover-item.vue"
 import DIconButton from "@/components/d-icon-button/d-icon-button.vue"
@@ -80,7 +80,7 @@ onClickOutside(appSwitcher, () => {
 })
 
 const enabledAppList = useStorage<string[]>("enabled_apps", [])
-const { data: userData } = useMeWithInfoQuery({})
+const { data: userData } = useMeQuery({})
 
 function switchApp(appId: string | null = null) {
   if (appId) {

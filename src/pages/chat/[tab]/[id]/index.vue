@@ -48,9 +48,9 @@
         @keydown.enter.shift.prevent="input += '\n'"
       />
       <div class="h-14 flex items-center gap-1">
-        <d-icon-button size="lg" :icon="Smile"></d-icon-button>
+        <d-icon-button size="md" :icon="Smile"></d-icon-button>
         <d-icon-button
-          size="lg"
+          size="md"
           :icon="SendHorizonal"
           @click="onSubmit"
           :type="input ? 'primary' : 'outline'"

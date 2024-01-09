@@ -1,6 +1,8 @@
 <template>
-  <div class="px-4">
-    <router-view />
+  <div class="px-4 bg-subtle h-dvh">
+    <div class="flex justify-center w-full py-24">
+      <router-view />
+    </div>
   </div>
 </template>
 

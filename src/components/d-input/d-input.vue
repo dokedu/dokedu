@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col">
-    <label v-if="label" class="mb-1 text-sm text-neutral-500" :for="name">{{ label }}</label>
+    <label v-if="label" class="mb-1 text-xs text-neutral-500" :for="name">{{ label }}</label>
     <input
       :value="modelValue"
       :type="type"
@@ -12,51 +12,55 @@
       :placeholder="placeholder"
       :required="required"
       :disabled="disabled"
-      class="block w-full rounded-lg border border-default py-[6px] text-sm leading-none text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-strong focus:shadow-sm focus:ring-0 sm:text-sm"
-      :class="[{ '!cursor-not-allowed bg-neutral-50 opacity-75': disabled }]"
+      :autocomplete="autocomplete"
+      class="block w-full rounded-lg border border-default text-sm leading-none text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-strong focus:shadow-sm focus:ring-0 sm:text-sm"
+      :class="[{ '!cursor-not-allowed bg-neutral-50 opacity-75': disabled }, sizes[size]]"
     />
+    <span class="text-xs mt-1" :class="messageColors[messageColor]" v-if="message">{{ message }}</span>
   </div>
 </template>
 
 <script lang="ts" setup>
-defineProps({
-  modelValue: {
-    type: [String, Number, Date],
-    required: true
-  },
-  label: {
-    type: String,
-    default: ""
-  },
-  type: {
-    type: String,
-    default: "text"
-  },
-  name: {
-    type: String,
-    required: true
-  },
-  max: {
-    type: Number,
-    default: null
-  },
-  min: {
-    type: Number,
-    default: null
-  },
-  placeholder: {
-    type: String,
-    default: ""
-  },
-  required: {
-    type: Boolean,
-    default: false
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  }
+type Props = {
+  modelValue: string | number | Date | undefined
+  label?: string
+  type: "text" | "email" | "password" | "number" | "date" | "time"
+  name: string
+  max?: number
+  min?: number
+  message?: string
+  messageColor: "default" | "success" | "warning" | "error" | "info"
+  placeholder?: string
+  required: boolean
+  disabled: boolean
+  autocomplete: string
+  size: "sm" | "md" | "lg"
+}
+
+withDefaults(defineProps<Props>(), {
+  label: "",
+  type: "text",
+  placeholder: "",
+  required: false,
+  disabled: false,
+  autocomplete: "off",
+  size: "md",
+  messageColor: "default"
 })
+
+const sizes = {
+  sm: "py-[4px]",
+  md: "py-[6px]",
+  lg: "py-[8px]"
+}
+
+const messageColors = {
+  default: "text-subtle",
+  success: "text-green-700",
+  warning: "text-orange-700",
+  error: "text-red-700",
+  info: "text-blue-700"
+}
 
 const emit = defineEmits(["update:modelValue"])
 

@@ -157,8 +157,15 @@ export const en = {
   domain_required: "Domain is required",
   name_spaces: "Name cannot contain spaces",
 
+  dokedu_welcome: "Welcome to Dokedu",
+  welcome: "Welcome",
+  login_info: "Login to your account",
+  problems_logging_in: "Problems logging in?",
+  contact_us_at: "Contact us at:",
+
   send_invite: "Send invite",
   reset_password: "Reset password",
+  reset_password_description: "Reset your password to log back in to your account",
   user_already_accepted: "User has already accepted their invite",
   invite_sent: "Invite sent",
   user_invite_sent: "{firstName} {lastName} was sent an invite",
@@ -169,6 +176,7 @@ export const en = {
   your_password: "Your password",
   log_in: "Log in",
   forgot_password: "Forgot password?",
+  forgot_password_description: "Enter your email address and we'll send you a link to reset your password.",
 
   success: "Success",
   check_your_email_password_reset: "Check your email for a link to reset your password.",
@@ -177,7 +185,11 @@ export const en = {
 
   your_new_password: "Your new password",
   confirm_your_new_password: "Confirm your new password",
+  confirm_your_password: "Confirm your password",
   create_account: "Create account",
+  create_account_description: "Set a password for your account",
+
+  your_login_mail: "This is the email address you will use to log in",
   passwords_dont_match: "Passwords don't match",
   invalid_token: "Invalid token",
   password_too_short: "Password too short",

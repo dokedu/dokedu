@@ -679,6 +679,13 @@ export type ImportStudentsPayload = {
   usersExisted: Scalars['Int']['output'];
 };
 
+export type InviteDetailsPayload = {
+  __typename?: 'InviteDetailsPayload';
+  email: Scalars['String']['output'];
+  firstName: Scalars['String']['output'];
+  lastName: Scalars['String']['output'];
+};
+
 export type MoveFileInput = {
   id: Scalars['ID']['input'];
   targetId?: InputMaybe<Scalars['ID']['input']>;
@@ -1295,6 +1302,7 @@ export type Query = {
   exportEvents: Array<Maybe<ExportEventsPayload>>;
   file: File;
   files: FileConnection;
+  inviteDetails: InviteDetailsPayload;
   me: User;
   organisation?: Maybe<Organisation>;
   report: Report;
@@ -1425,6 +1433,11 @@ export type QueryFilesArgs = {
   input?: InputMaybe<FilesFilterInput>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryInviteDetailsArgs = {
+  token: Scalars['String']['input'];
 };
 
 
@@ -1967,6 +1980,7 @@ export type GraphCacheKeysConfig = {
   FileConnection?: (data: WithTypename<FileConnection>) => null | string,
   ForgotPasswordPayload?: (data: WithTypename<ForgotPasswordPayload>) => null | string,
   ImportStudentsPayload?: (data: WithTypename<ImportStudentsPayload>) => null | string,
+  InviteDetailsPayload?: (data: WithTypename<InviteDetailsPayload>) => null | string,
   MoveFilesPayload?: (data: WithTypename<MoveFilesPayload>) => null | string,
   Organisation?: (data: WithTypename<Organisation>) => null | string,
   PageInfo?: (data: WithTypename<PageInfo>) => null | string,
@@ -2019,6 +2033,7 @@ export type GraphCacheResolvers = {
     exportEvents?: GraphCacheResolver<WithTypename<Query>, QueryExportEventsArgs, Array<WithTypename<ExportEventsPayload> | string>>,
     file?: GraphCacheResolver<WithTypename<Query>, QueryFileArgs, WithTypename<File> | string>,
     files?: GraphCacheResolver<WithTypename<Query>, QueryFilesArgs, WithTypename<FileConnection> | string>,
+    inviteDetails?: GraphCacheResolver<WithTypename<Query>, QueryInviteDetailsArgs, WithTypename<InviteDetailsPayload> | string>,
     me?: GraphCacheResolver<WithTypename<Query>, Record<string, never>, WithTypename<User> | string>,
     organisation?: GraphCacheResolver<WithTypename<Query>, Record<string, never>, WithTypename<Organisation> | string>,
     report?: GraphCacheResolver<WithTypename<Query>, QueryReportArgs, WithTypename<Report> | string>,
@@ -2251,6 +2266,11 @@ export type GraphCacheResolvers = {
     errors?: GraphCacheResolver<WithTypename<ImportStudentsPayload>, Record<string, never>, Array<ImportStudentsError | string>>,
     usersCreated?: GraphCacheResolver<WithTypename<ImportStudentsPayload>, Record<string, never>, Scalars['Int'] | string>,
     usersExisted?: GraphCacheResolver<WithTypename<ImportStudentsPayload>, Record<string, never>, Scalars['Int'] | string>
+  },
+  InviteDetailsPayload?: {
+    email?: GraphCacheResolver<WithTypename<InviteDetailsPayload>, Record<string, never>, Scalars['String'] | string>,
+    firstName?: GraphCacheResolver<WithTypename<InviteDetailsPayload>, Record<string, never>, Scalars['String'] | string>,
+    lastName?: GraphCacheResolver<WithTypename<InviteDetailsPayload>, Record<string, never>, Scalars['String'] | string>
   },
   MoveFilesPayload?: {
     files?: GraphCacheResolver<WithTypename<MoveFilesPayload>, Record<string, never>, Array<WithTypename<File> | string>>
@@ -2534,6 +2554,7 @@ export type GraphCacheUpdaters = {
     exportEvents?: GraphCacheUpdateResolver<{ exportEvents: Array<WithTypename<ExportEventsPayload>> }, QueryExportEventsArgs>,
     file?: GraphCacheUpdateResolver<{ file: WithTypename<File> }, QueryFileArgs>,
     files?: GraphCacheUpdateResolver<{ files: WithTypename<FileConnection> }, QueryFilesArgs>,
+    inviteDetails?: GraphCacheUpdateResolver<{ inviteDetails: WithTypename<InviteDetailsPayload> }, QueryInviteDetailsArgs>,
     me?: GraphCacheUpdateResolver<{ me: WithTypename<User> }, Record<string, never>>,
     organisation?: GraphCacheUpdateResolver<{ organisation: Maybe<WithTypename<Organisation>> }, Record<string, never>>,
     report?: GraphCacheUpdateResolver<{ report: WithTypename<Report> }, QueryReportArgs>,
@@ -2862,6 +2883,11 @@ export type GraphCacheUpdaters = {
     errors?: GraphCacheUpdateResolver<Maybe<WithTypename<ImportStudentsPayload>>, Record<string, never>>,
     usersCreated?: GraphCacheUpdateResolver<Maybe<WithTypename<ImportStudentsPayload>>, Record<string, never>>,
     usersExisted?: GraphCacheUpdateResolver<Maybe<WithTypename<ImportStudentsPayload>>, Record<string, never>>
+  },
+  InviteDetailsPayload?: {
+    email?: GraphCacheUpdateResolver<Maybe<WithTypename<InviteDetailsPayload>>, Record<string, never>>,
+    firstName?: GraphCacheUpdateResolver<Maybe<WithTypename<InviteDetailsPayload>>, Record<string, never>>,
+    lastName?: GraphCacheUpdateResolver<Maybe<WithTypename<InviteDetailsPayload>>, Record<string, never>>
   },
   MoveFilesPayload?: {
     files?: GraphCacheUpdateResolver<Maybe<WithTypename<MoveFilesPayload>>, Record<string, never>>

@@ -1,54 +1,48 @@
 <template>
-  <div class="select-none text-sm">
-    <form @submit.prevent="onSubmit" class="mx-auto flex max-w-xs flex-col gap-4 py-24 text-strong">
-      <div class="flex flex-col">
-        <img height="67" width="100" class="mx-auto mb-8 w-2/5" src="/dokedu-logo.svg" alt="dokedu logo" />
-        <label class="mb-1 text-xs text-neutral-500" for="email">{{ $t("email") }}</label>
-        <input
-          v-model="email"
-          type="email"
-          name="email"
-          id="email"
-          required
-          autocomplete="email"
-          class="block text-sm w-full rounded-md border-0 py-2 text-neutral-900 shadow-sm ring-1 ring-inset ring-neutral-300 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-neutral-950 sm:text-sm sm:leading-6"
-          :placeholder="$t('your_email')"
-        />
-      </div>
-      <div class="flex flex-col">
-        <label class="mb-1 text-xs text-neutral-500" for="password">{{ $t("password") }}</label>
-        <input
-          v-model="password"
-          type="password"
-          name="password"
-          id="password"
-          required
-          min="8"
-          autocomplete="current-password"
-          class="block text-sm w-full rounded-md border-0 py-2 text-neutral-900 shadow-sm ring-1 ring-inset ring-neutral-300 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-neutral-950 sm:text-sm sm:leading-6"
-          :placeholder="$t('your_password')"
-        />
-
-        <div class="mt-1 text-xs text-red-500">
-          {{ error?.graphQLErrors[0].message }}
+  <d-auth-container :title="$t('dokedu_welcome')" :subtitle="$t('login_info')">
+    <template #banner>
+      <d-banner v-if="error" type="error" :title="error?.graphQLErrors[0].message"></d-banner>
+    </template>
+    <template #form>
+      <form @submit.prevent="onSubmit" class="flex flex-col gap-5">
+        <div class="flex flex-col gap-3">
+          <d-input
+            size="sm"
+            :label="$t('email')"
+            v-model="email"
+            type="email"
+            name="email"
+            id="email"
+            required
+            autocomplete="email"
+            :placeholder="$t('your_email')"
+          ></d-input>
+          <d-input
+            size="sm"
+            :label="$t('password')"
+            v-model="password"
+            type="password"
+            name="password"
+            id="password"
+            required
+            :min="8"
+            autocomplete="current-password"
+            :placeholder="$t('your_password')"
+          ></d-input>
         </div>
-      </div>
-      <button
-        class="block rounded-md bg-neutral-950 px-2.5 py-2.5 text-sm font-medium leading-none text-white shadow-sm hover:bg-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950"
-        type="submit"
-        data-umami-event="login"
-      >
-        {{ $t("log_in") }}
-      </button>
-      <router-link
-        class="mx-auto block w-fit rounded-md text-center text-xs font-medium leading-none text-muted hover:text-default focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950"
-        to="/forgot-password"
-        data-umami-event="forgot-password"
-      >
-        {{ $t("forgot_password") }}
-      </router-link>
-    </form>
-  </div>
+        <d-button submit type="primary" data-umami-event="login">
+          {{ $t("log_in") }}
+        </d-button>
+        <router-link
+          class="mx-auto block w-fit rounded-md text-center text-xs font-medium leading-none text-muted hover:text-default focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950"
+          to="/forgot-password"
+          data-umami-event="forgot-password"
+        >
+          {{ $t("forgot_password") }}
+        </router-link>
+      </form>
+    </template>
+  </d-auth-container>
 </template>
 
 <route lang="json">
@@ -65,6 +59,10 @@ import { useRouter } from "vue-router/auto"
 import i18n from "@/i18n"
 import { useWindowSize } from "@vueuse/core"
 import { useSignInMutation } from "@/gql/mutations/auth/signIn"
+import DInput from "@/components/d-input/d-input.vue"
+import DButton from "@/components/d-button/d-button.vue"
+import DAuthContainer from "@/components/_auth/d-auth-container.vue"
+import DBanner from "@/components/d-banner/d-banner.vue"
 
 const router = useRouter()
 
@@ -83,7 +81,6 @@ async function onSubmit() {
   })
 
   if (!data?.signIn.token) {
-    alert("Invalid credentials")
     return
   }
 
