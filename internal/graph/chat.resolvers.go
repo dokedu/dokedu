@@ -146,12 +146,12 @@ func (r *chatMessageResolver) Chat(ctx context.Context, obj *db.ChatMessage) (*d
 	var chat db.Chat
 	err = r.DB.NewSelect().
 		Model(&chat).
-		Where("id = ?", obj.ChatID).
+		Where("chat.id = ?", obj.ChatID).
 		Join("LEFT JOIN chat_users ON chat_users.chat_id = chat.id").
-		Where("organisation_id = ?", currentUser.OrganisationID).
+		Where("chat.organisation_id = ?", currentUser.OrganisationID).
 		Scan(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("chat not found")
 	}
 
 	return &chat, nil
@@ -258,9 +258,9 @@ func (r *mutationResolver) DeleteChat(ctx context.Context, input model.DeleteCha
 	var chat db.Chat
 	err = r.DB.NewSelect().
 		Model(&chat).
-		Where("id = ?", input.ID).
+		Where("chat.id = ?", input.ID).
 		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
+		Where("chat.organisation_id = ?", currentUser.OrganisationID).
 		Scan(ctx)
 	if err != nil {
 		return nil, errors.New("chat not found")
@@ -293,9 +293,9 @@ func (r *mutationResolver) AddUserToChat(ctx context.Context, input model.AddUse
 	var chat db.Chat
 	err = r.DB.NewSelect().
 		Model(&chat).
-		Where("id = ?", input.ChatID).
+		Where("chat.id = ?", input.ChatID).
 		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
+		Where("chat.organisation_id = ?", currentUser.OrganisationID).
 		Scan(ctx)
 	if err != nil {
 		return nil, errors.New("chat not found")
@@ -340,9 +340,9 @@ func (r *mutationResolver) RemoveUserFromChat(ctx context.Context, input model.R
 	var chat db.Chat
 	err = r.DB.NewSelect().
 		Model(&chat).
-		Where("id = ?", input.ChatID).
+		Where("chat.id = ?", input.ChatID).
 		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
+		Where("chat.organisation_id = ?", currentUser.OrganisationID).
 		Scan(ctx)
 	if err != nil {
 		return nil, errors.New("chat not found")
@@ -378,9 +378,9 @@ func (r *mutationResolver) SendMessage(ctx context.Context, input model.SendMess
 	var chat db.Chat
 	err = r.DB.NewSelect().
 		Model(&chat).
-		Where("id = ?", input.ChatID).
+		Where("chat.id = ?", input.ChatID).
 		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
+		Where("chat.organisation_id = ?", currentUser.OrganisationID).
 		Scan(ctx)
 	if err != nil {
 		return nil, errors.New("chat not found")
@@ -418,9 +418,9 @@ func (r *mutationResolver) UpdateChat(ctx context.Context, input model.UpdateCha
 	var chat db.Chat
 	err = r.DB.NewSelect().
 		Model(&chat).
-		Where("id = ?", input.ID).
+		Where("chat.id = ?", input.ID).
 		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
+		Where("chat.organisation_id = ?", currentUser.OrganisationID).
 		Scan(ctx)
 	if err != nil {
 		return nil, errors.New("chat not found")
