@@ -32,13 +32,13 @@
 </template>
 
 <script lang="ts" setup>
-import PageHeader from "@/components/page-header.vue"
-import PageWrapper from "@/components/page-wrapper.vue"
+import { useResetPasswordMutation } from "@/gql/mutations/auth/resetPasswordMutation"
 import DButton from "@/components/d-button/d-button.vue"
+import PageWrapper from "@/components/page-wrapper.vue"
+import PageHeader from "@/components/page-header.vue"
 import DInput from "@/components/d-input/d-input.vue"
-import { ref } from "vue"
 import { useI18n } from "vue-i18n"
-import { useResetPasswordMutation } from "@/gql/queries/auth/resetPasswordMutation"
+import { ref } from "vue"
 
 const { t } = useI18n()
 
