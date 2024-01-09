@@ -1209,6 +1209,25 @@ func (r *queryResolver) UserStudent(ctx context.Context, id string) (*db.UserStu
 	return &userStudent, nil
 }
 
+// InviteDetails is the resolver for the inviteDetails field.
+func (r *queryResolver) InviteDetails(ctx context.Context, token string) (*model.InviteDetailsPayload, error) {
+	var user db.User
+	err := r.DB.NewSelect().Model(&user).Where("recovery_token = ?", token).Scan(ctx)
+	if err != nil {
+		return nil, errors.New("invalid token")
+	}
+
+	if user.RecoverySentAt.Before(time.Now().Add(-time.Hour * 24)) {
+		return nil, errors.New("token expired")
+	}
+
+	return &model.InviteDetailsPayload{
+		Email:     user.Email.String,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+	}, nil
+}
+
 // Color is the resolver for the color field.
 func (r *tagResolver) Color(ctx context.Context, obj *db.Tag) (string, error) {
 	if obj.Color.Valid {

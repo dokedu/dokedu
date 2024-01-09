@@ -428,6 +428,12 @@ type ImportStudentsPayload struct {
 	Errors       []ImportStudentsError `json:"errors"`
 }
 
+type InviteDetailsPayload struct {
+	Email     string `json:"email"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+}
+
 type MoveFileInput struct {
 	ID       string  `json:"id"`
 	TargetID *string `json:"targetId,omitempty"`

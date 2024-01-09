@@ -319,6 +319,12 @@ type ComplexityRoot struct {
 		UsersExisted func(childComplexity int) int
 	}
 
+	InviteDetailsPayload struct {
+		Email     func(childComplexity int) int
+		FirstName func(childComplexity int) int
+		LastName  func(childComplexity int) int
+	}
+
 	MoveFilesPayload struct {
 		Files func(childComplexity int) int
 	}
@@ -460,6 +466,7 @@ type ComplexityRoot struct {
 		ExportEvents           func(childComplexity int, input model.ExportEventsInput) int
 		File                   func(childComplexity int, id string) int
 		Files                  func(childComplexity int, input *model.FilesFilterInput, limit *int, offset *int) int
+		InviteDetails          func(childComplexity int, token string) int
 		Me                     func(childComplexity int) int
 		Organisation           func(childComplexity int) int
 		Report                 func(childComplexity int, id string) int
@@ -858,6 +865,7 @@ type QueryResolver interface {
 	Tags(ctx context.Context, limit *int, offset *int, search *string) (*model.TagConnection, error)
 	UserStudents(ctx context.Context, limit *int, offset *int) (*model.UserStudentConnection, error)
 	UserStudent(ctx context.Context, id string) (*db.UserStudent, error)
+	InviteDetails(ctx context.Context, token string) (*model.InviteDetailsPayload, error)
 	Subjects(ctx context.Context, limit *int, offset *int) (*model.SubjectConnection, error)
 	Subject(ctx context.Context, id string) (*db.Subject, error)
 	SchoolYears(ctx context.Context, limit *int, offset *int) (*model.SchoolYearConnection, error)
@@ -1991,6 +1999,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ImportStudentsPayload.UsersExisted(childComplexity), true
+
+	case "InviteDetailsPayload.email":
+		if e.complexity.InviteDetailsPayload.Email == nil {
+			break
+		}
+
+		return e.complexity.InviteDetailsPayload.Email(childComplexity), true
+
+	case "InviteDetailsPayload.firstName":
+		if e.complexity.InviteDetailsPayload.FirstName == nil {
+			break
+		}
+
+		return e.complexity.InviteDetailsPayload.FirstName(childComplexity), true
+
+	case "InviteDetailsPayload.lastName":
+		if e.complexity.InviteDetailsPayload.LastName == nil {
+			break
+		}
+
+		return e.complexity.InviteDetailsPayload.LastName(childComplexity), true
 
 	case "MoveFilesPayload.files":
 		if e.complexity.MoveFilesPayload.Files == nil {
@@ -3406,6 +3435,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Files(childComplexity, args["input"].(*model.FilesFilterInput), args["limit"].(*int), args["offset"].(*int)), true
+
+	case "Query.inviteDetails":
+		if e.complexity.Query.InviteDetails == nil {
+			break
+		}
+
+		args, err := ec.field_Query_inviteDetails_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.InviteDetails(childComplexity, args["token"].(string)), true
 
 	case "Query.me":
 		if e.complexity.Query.Me == nil {
@@ -6456,6 +6497,21 @@ func (ec *executionContext) field_Query_files_args(ctx context.Context, rawArgs 
 		}
 	}
 	args["offset"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_inviteDetails_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["token"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["token"] = arg0
 	return args, nil
 }
 
@@ -14208,6 +14264,138 @@ func (ec *executionContext) fieldContext_ImportStudentsPayload_errors(ctx contex
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type ImportStudentsError does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _InviteDetailsPayload_email(ctx context.Context, field graphql.CollectedField, obj *model.InviteDetailsPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_InviteDetailsPayload_email(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Email, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_InviteDetailsPayload_email(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "InviteDetailsPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _InviteDetailsPayload_firstName(ctx context.Context, field graphql.CollectedField, obj *model.InviteDetailsPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_InviteDetailsPayload_firstName(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FirstName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_InviteDetailsPayload_firstName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "InviteDetailsPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _InviteDetailsPayload_lastName(ctx context.Context, field graphql.CollectedField, obj *model.InviteDetailsPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_InviteDetailsPayload_lastName(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LastName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_InviteDetailsPayload_lastName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "InviteDetailsPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -23409,6 +23597,69 @@ func (ec *executionContext) fieldContext_Query_userStudent(ctx context.Context, 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_userStudent_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_inviteDetails(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_inviteDetails(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().InviteDetails(rctx, fc.Args["token"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.InviteDetailsPayload)
+	fc.Result = res
+	return ec.marshalNInviteDetailsPayload2ᚖexampleᚋinternalᚋgraphᚋmodelᚐInviteDetailsPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_inviteDetails(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "email":
+				return ec.fieldContext_InviteDetailsPayload_email(ctx, field)
+			case "firstName":
+				return ec.fieldContext_InviteDetailsPayload_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_InviteDetailsPayload_lastName(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type InviteDetailsPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_inviteDetails_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -37593,6 +37844,55 @@ func (ec *executionContext) _ImportStudentsPayload(ctx context.Context, sel ast.
 	return out
 }
 
+var inviteDetailsPayloadImplementors = []string{"InviteDetailsPayload"}
+
+func (ec *executionContext) _InviteDetailsPayload(ctx context.Context, sel ast.SelectionSet, obj *model.InviteDetailsPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, inviteDetailsPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("InviteDetailsPayload")
+		case "email":
+			out.Values[i] = ec._InviteDetailsPayload_email(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "firstName":
+			out.Values[i] = ec._InviteDetailsPayload_firstName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "lastName":
+			out.Values[i] = ec._InviteDetailsPayload_lastName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var moveFilesPayloadImplementors = []string{"MoveFilesPayload"}
 
 func (ec *executionContext) _MoveFilesPayload(ctx context.Context, sel ast.SelectionSet, obj *model.MoveFilesPayload) graphql.Marshaler {
@@ -39187,6 +39487,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_userStudent(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "inviteDetails":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_inviteDetails(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -43009,6 +43331,20 @@ func (ec *executionContext) marshalNInt2ᚕintᚄ(ctx context.Context, sel ast.S
 	}
 
 	return ret
+}
+
+func (ec *executionContext) marshalNInviteDetailsPayload2exampleᚋinternalᚋgraphᚋmodelᚐInviteDetailsPayload(ctx context.Context, sel ast.SelectionSet, v model.InviteDetailsPayload) graphql.Marshaler {
+	return ec._InviteDetailsPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNInviteDetailsPayload2ᚖexampleᚋinternalᚋgraphᚋmodelᚐInviteDetailsPayload(ctx context.Context, sel ast.SelectionSet, v *model.InviteDetailsPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._InviteDetailsPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNMoveFileInput2exampleᚋinternalᚋgraphᚋmodelᚐMoveFileInput(ctx context.Context, v interface{}) (model.MoveFileInput, error) {

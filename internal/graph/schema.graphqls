@@ -197,6 +197,12 @@ input CompetenceSort {
     order: SortDirection!
 }
 
+type InviteDetailsPayload {
+    email: String!
+    firstName: String!
+    lastName: String!
+}
+
 type Query
 
 type Mutation
@@ -214,6 +220,8 @@ extend type Query {
 
     userStudents(limit: Int, offset: Int): UserStudentConnection!
     userStudent(id: ID!): UserStudent!
+
+    inviteDetails(token: String!): InviteDetailsPayload!
 }
 
 input CreateUserInput {
