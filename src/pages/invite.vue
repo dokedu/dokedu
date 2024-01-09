@@ -1,15 +1,23 @@
 <template>
-  <d-auth-container :title="$t('create_account')" :subtitle="$t('create_account_description')">
+  <d-auth-container
+    :title="`${$t('welcome')}, ${computedInviteDetails?.firstName} ${computedInviteDetails?.lastName} `"
+    :subtitle="$t('create_account_description')"
+  >
     <template #banner>
       <d-banner v-if="successBanner" type="success" :title="t('password_set_successfully')"></d-banner>
       <d-banner v-if="errorBanner" type="error" :title="errorTitle"></d-banner>
     </template>
     <template #form>
-      <pre>
-        {{ inviteDetails?.inviteDetails }}
-      </pre>
       <form @submit.prevent="onSubmit" class="flex flex-col gap-5">
         <div class="flex flex-col gap-3">
+          <d-input
+            :label="$t('email')"
+            type="email"
+            name="email"
+            :disabled="true"
+            :modelValue="computedInviteDetails?.email"
+            :message="$t('your_login_mail')"
+          ></d-input>
           <d-input
             size="sm"
             :label="$t('password')"
@@ -56,7 +64,7 @@
 </route>
 
 <script lang="ts" setup>
-import { onMounted, ref } from "vue"
+import { computed, reactive, ref } from "vue"
 import { useRoute, useRouter } from "vue-router/auto"
 import { useI18n } from "vue-i18n"
 import { useResetPasswordMutation } from "@/gql/mutations/auth/resetPasswordMutation"
@@ -74,8 +82,12 @@ const router = useRouter()
 const { executeMutation: passwordReset } = useResetPasswordMutation()
 
 const { data: inviteDetails } = useInviteDetailsQuery({
-  token: route.hash.slice(1).split("&")[0].split("=")[1]
+  variables: reactive({
+    token: route.hash.slice(1).split("&")[0].split("=")[1]
+  })
 })
+
+const computedInviteDetails = computed(() => inviteDetails?.value?.inviteDetails)
 
 const password = ref("")
 const passwordConfirm = ref("")
