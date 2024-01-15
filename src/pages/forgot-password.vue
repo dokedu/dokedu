@@ -13,7 +13,7 @@
       <form @submit.prevent="onSubmit" class="flex flex-col gap-5">
         <div class="flex flex-col">
           <d-input
-            size="sm"
+            size="md"
             :label="$t('email')"
             v-model="email"
             type="email"

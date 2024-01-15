@@ -3,10 +3,10 @@
     class="flex h-screen w-full max-w-[230px] select-none flex-col justify-between border-r border-neutral-100 bg-neutral-50 print:hidden"
   >
     <div class="relative flex flex-col">
-      <div class="flex items-center justify-between px-3 py-3 pb-1">
+      <div class="flex items-center justify-between px-2 py-3 pb-1">
         <app-switcher2 />
       </div>
-      <div class="flex flex-col gap-0.5 p-3 pt-2.5">
+      <div class="flex flex-col gap-0.5 p-2 pt-2.5">
         <d-sidebar-link
           v-for="(link, _) in app?.links"
           :key="_"
@@ -18,7 +18,7 @@
         </d-sidebar-link>
       </div>
     </div>
-    <div class="px-1 py-4">
+    <div class="px-2 py-4">
       <d-sidebar-link href="https://dokedu.org/hilfe" :icon="HelpCircle">
         {{ $t("support") }}
       </d-sidebar-link>

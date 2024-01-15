@@ -38,7 +38,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const buttonClasses = computed(() => {
   const baseClasses = [
-    "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950 transition-color group relative inline-flex select-none items-center justify-center gap-2 overflow-hidden rounded-lg border"
+    "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 transition-color group relative inline-flex select-none items-center justify-center gap-2 overflow-hidden rounded-lg border"
   ]
 
   const typeClasses = {

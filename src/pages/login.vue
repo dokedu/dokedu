@@ -7,7 +7,7 @@
       <form @submit.prevent="onSubmit" class="flex flex-col gap-5">
         <div class="flex flex-col gap-3">
           <d-input
-            size="sm"
+            size="md"
             :label="$t('email')"
             v-model="email"
             type="email"
@@ -16,9 +16,9 @@
             required
             autocomplete="email"
             :placeholder="$t('your_email')"
-          ></d-input>
+          />
           <d-input
-            size="sm"
+            size="md"
             :label="$t('password')"
             v-model="password"
             type="password"
@@ -28,15 +28,14 @@
             :min="8"
             autocomplete="current-password"
             :placeholder="$t('your_password')"
-          ></d-input>
+          />
         </div>
-        <d-button submit type="primary" data-umami-event="login">
+        <d-button submit type="primary">
           {{ $t("log_in") }}
         </d-button>
         <router-link
           class="mx-auto block w-fit rounded-md text-center text-xs font-medium leading-none text-muted hover:text-default focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950"
           to="/forgot-password"
-          data-umami-event="forgot-password"
         >
           {{ $t("forgot_password") }}
         </router-link>

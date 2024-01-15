@@ -1,7 +1,7 @@
 <template>
   <div class="w-full relative">
     <div
-      class="group flex flex-1 justify-between rounded-xl p-1 transition-colors hover:bg-strong user-select-none"
+      class="group flex flex-1 justify-between rounded-md p-1 transition-colors hover:bg-strong user-select-none"
       @click="visibleAppSwitcher = !visibleAppSwitcher"
       :class="visibleAppSwitcher ? 'bg-strong' : ''"
       ref="appSwitcher"

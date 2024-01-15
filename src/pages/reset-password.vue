@@ -19,7 +19,7 @@
             :message="$t('your_login_mail')"
           ></d-input>
           <d-input
-            size="sm"
+            size="md"
             :label="$t('password')"
             v-model="password"
             type="password"
@@ -30,7 +30,7 @@
             :placeholder="$t('your_new_password')"
           ></d-input>
           <d-input
-            size="sm"
+            size="md"
             :label="$t('confirm_password')"
             v-model="passwordConfirm"
             type="password"
