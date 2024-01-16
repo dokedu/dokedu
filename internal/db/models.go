@@ -206,7 +206,7 @@ type EntryFile struct {
 	FileID         string       `json:"file_id"`
 	OrganisationID string       `json:"organisation_id"`
 	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
-	DeletedAt      bun.NullTime `json:"deleted_at"`
+	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
 type EntryTag struct {

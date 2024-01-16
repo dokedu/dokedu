@@ -134,4 +134,7 @@ extend type Mutation {
     deleteEntryCompetence(input: DeleteEntryCompetenceInput!): Entry!
 
     updateEntryUserCompetenceLevel(input: UpdateEntryUserCompetenceLevel!): Entry!
+
+    uploadFileToEntry(entryId: ID!, file: Upload!): Entry!
+    removeFileFromEntry(entryId: ID!, fileId: ID!): File!
 }

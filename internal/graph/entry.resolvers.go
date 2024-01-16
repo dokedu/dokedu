@@ -12,9 +12,12 @@ import (
 	"example/internal/graph/model"
 	"example/internal/helper"
 	"example/internal/middleware"
-	"fmt"
+	"mime"
+	"path/filepath"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql"
+	minio "github.com/minio/minio-go/v7"
 	"github.com/uptrace/bun"
 )
 
@@ -94,7 +97,21 @@ func (r *entryResolver) Events(ctx context.Context, obj *db.Entry) ([]*db.Event,
 
 // Files is the resolver for the files field.
 func (r *entryResolver) Files(ctx context.Context, obj *db.Entry) ([]*db.File, error) {
-	panic(fmt.Errorf("not implemented: Files - files"))
+	var files []*db.File
+	err := r.DB.NewSelect().
+		Model(&files).
+		ColumnExpr("file.*").
+		Join("JOIN entry_files ef on file.id = ef.file_id").
+		Join("JOIN entries e on ef.entry_id = e.id").
+		Where("ef.deleted_at is NULL").
+		Where("file.organisation_id = ?", obj.OrganisationID).
+		Where("e.id = ?", obj.ID).
+		Scan(ctx)
+	if err != nil {
+		return nil, errors.New("failed to get files")
+	}
+
+	return files, nil
 }
 
 // Tags is the resolver for the tags field.
@@ -822,6 +839,136 @@ func (r *mutationResolver) UpdateEntryUserCompetenceLevel(ctx context.Context, i
 	}
 
 	return &entry, nil
+}
+
+// UploadFileToEntry is the resolver for the uploadFileToEntry field.
+func (r *mutationResolver) UploadFileToEntry(ctx context.Context, entryID string, file graphql.Upload) (*db.Entry, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	var entry db.Entry
+	err = r.DB.NewSelect().Model(&entry).Where("id = ?", entryID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	if err != nil {
+		return nil, errors.New("entry not found")
+	}
+
+	var f db.File
+	f.Name = file.Filename
+	f.FileType = "blob"
+	f.OrganisationID = currentUser.OrganisationID
+	f.Size = file.Size
+
+	mimeFileType := mime.TypeByExtension(filepath.Ext(file.Filename))
+	f.MimeType = mimeFileType
+
+	var bucket db.Bucket
+	err = r.DB.NewSelect().
+		Model(&bucket).
+		Where("name = ?", "entries").
+		Where("shared = false").
+		Where("user_id IS NULL").
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if errors.Is(err, sql.ErrNoRows) {
+		//	create bucket
+		bucket.Name = "entries"
+		bucket.Shared = false
+		bucket.OrganisationID = currentUser.OrganisationID
+		err = r.DB.NewInsert().Model(&bucket).Returning("*").Scan(ctx)
+		if err != nil {
+			return nil, errors.New("failed to create bucket")
+		}
+
+		err = r.MinioClient.MakeBucket(ctx, bucket.ID, minio.MakeBucketOptions{})
+		if err != nil {
+			return nil, errors.New("failed to create minio bucket")
+		}
+	}
+	if err != nil {
+		return nil, errors.New("failed to find bucket")
+	}
+
+	f.BucketID = bucket.ID
+
+	err = r.DB.NewInsert().Model(&f).Returning("*").Scan(ctx)
+	if err != nil {
+		return nil, errors.New("failed to create file")
+	}
+
+	var entryFile db.EntryFile
+	entryFile.EntryID = entry.ID
+	entryFile.FileID = f.ID
+	entryFile.OrganisationID = currentUser.OrganisationID
+	err = r.DB.NewInsert().Model(&entryFile).Returning("*").Scan(ctx)
+	if err != nil {
+		return nil, errors.New("failed to create entry file")
+	}
+
+	// Upload the file to specific bucket with the file id
+	_, err = r.MinioClient.PutObject(ctx, bucket.ID, f.ID, file.File, f.Size, minio.PutObjectOptions{
+		ContentType: file.ContentType,
+	})
+	if err != nil {
+		return nil, errors.New("failed to upload file")
+	}
+
+	return &entry, nil
+}
+
+// RemoveFileFromEntry is the resolver for the removeFileFromEntry field.
+func (r *mutationResolver) RemoveFileFromEntry(ctx context.Context, entryID string, fileID string) (*db.File, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	var entry db.Entry
+	err = r.DB.NewSelect().
+		Model(&entry).
+		Where("id = ?", entryID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if err != nil {
+		return nil, errors.New("entry not found")
+	}
+
+	var entryFile db.EntryFile
+	err = r.DB.NewSelect().
+		Model(&entryFile).
+		Where("entry_id = ?", entryID).
+		Where("file_id = ?", fileID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if err != nil {
+		return nil, errors.New("entry file not found")
+	}
+
+	err = r.DB.NewDelete().
+		Model(&entryFile).
+		Where("entry_id = ?", entryID).
+		Where("file_id = ?", fileID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Returning("*").
+		Scan(ctx)
+	if errors.Is(err, sql.ErrNoRows) {
+		//
+	} else if err != nil {
+		return nil, errors.New("failed to delete entry file")
+	}
+
+	var file db.File
+	err = r.DB.NewSelect().
+		Model(&file).
+		Where("id = ?", fileID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if err != nil {
+		return nil, errors.New("file not found")
+	}
+
+	return &file, nil
 }
 
 // Entry is the resolver for the entry field.

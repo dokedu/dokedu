@@ -391,6 +391,7 @@ type ComplexityRoot struct {
 		MoveFile                       func(childComplexity int, input model.MoveFileInput) int
 		MoveFiles                      func(childComplexity int, input model.MoveFilesInput) int
 		PreviewFile                    func(childComplexity int, input model.PreviewFileInput) int
+		RemoveFileFromEntry            func(childComplexity int, entryID string, fileID string) int
 		RemoveFileShare                func(childComplexity int, input string) int
 		RemoveUserFromChat             func(childComplexity int, input model.RemoveUserFromChatInput) int
 		RenameFile                     func(childComplexity int, input model.RenameFileInput) int
@@ -420,6 +421,7 @@ type ComplexityRoot struct {
 		UpdateUserLanguage             func(childComplexity int, language db.UserLanguage) int
 		UpdateUserStudentGrade         func(childComplexity int, input model.UpdateUserStudentGradesInput) int
 		UploadFile                     func(childComplexity int, input model.FileUploadInput) int
+		UploadFileToEntry              func(childComplexity int, entryID string, file graphql.Upload) int
 		UploadFiles                    func(childComplexity int, input model.FileUploadInput) int
 	}
 
@@ -791,6 +793,8 @@ type MutationResolver interface {
 	DeleteEntryEvent(ctx context.Context, input model.DeleteEntryEventInput) (*db.Entry, error)
 	DeleteEntryCompetence(ctx context.Context, input model.DeleteEntryCompetenceInput) (*db.Entry, error)
 	UpdateEntryUserCompetenceLevel(ctx context.Context, input model.UpdateEntryUserCompetenceLevel) (*db.Entry, error)
+	UploadFileToEntry(ctx context.Context, entryID string, file graphql.Upload) (*db.Entry, error)
+	RemoveFileFromEntry(ctx context.Context, entryID string, fileID string) (*db.File, error)
 	CreateEvent(ctx context.Context, input model.CreateEventInput) (*db.Event, error)
 	UpdateEvent(ctx context.Context, input model.UpdateEventInput) (*db.Event, error)
 	ToggleEventCompetence(ctx context.Context, input model.AddEventCompetenceInput) (*db.Event, error)
@@ -2755,6 +2759,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.PreviewFile(childComplexity, args["input"].(model.PreviewFileInput)), true
 
+	case "Mutation.removeFileFromEntry":
+		if e.complexity.Mutation.RemoveFileFromEntry == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_removeFileFromEntry_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RemoveFileFromEntry(childComplexity, args["entryId"].(string), args["fileId"].(string)), true
+
 	case "Mutation.removeFileShare":
 		if e.complexity.Mutation.RemoveFileShare == nil {
 			break
@@ -3097,6 +3113,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UploadFile(childComplexity, args["input"].(model.FileUploadInput)), true
+
+	case "Mutation.uploadFileToEntry":
+		if e.complexity.Mutation.UploadFileToEntry == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_uploadFileToEntry_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UploadFileToEntry(childComplexity, args["entryId"].(string), args["file"].(graphql.Upload)), true
 
 	case "Mutation.uploadFiles":
 		if e.complexity.Mutation.UploadFiles == nil {
@@ -5567,6 +5595,30 @@ func (ec *executionContext) field_Mutation_previewFile_args(ctx context.Context,
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_removeFileFromEntry_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["entryId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("entryId"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["entryId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["fileId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileId"))
+		arg1, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["fileId"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_removeFileShare_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -6014,6 +6066,30 @@ func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, 
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_uploadFileToEntry_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["entryId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("entryId"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["entryId"] = arg0
+	var arg1 graphql.Upload
+	if tmp, ok := rawArgs["file"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
+		arg1, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["file"] = arg1
 	return args, nil
 }
 
@@ -18495,6 +18571,166 @@ func (ec *executionContext) fieldContext_Mutation_updateEntryUserCompetenceLevel
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updateEntryUserCompetenceLevel_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_uploadFileToEntry(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_uploadFileToEntry(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UploadFileToEntry(rctx, fc.Args["entryId"].(string), fc.Args["file"].(graphql.Upload))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.Entry)
+	fc.Result = res
+	return ec.marshalNEntry2ᚖexampleᚋinternalᚋdbᚐEntry(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_uploadFileToEntry(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Entry_id(ctx, field)
+			case "date":
+				return ec.fieldContext_Entry_date(ctx, field)
+			case "body":
+				return ec.fieldContext_Entry_body(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
+			case "user":
+				return ec.fieldContext_Entry_user(ctx, field)
+			case "users":
+				return ec.fieldContext_Entry_users(ctx, field)
+			case "events":
+				return ec.fieldContext_Entry_events(ctx, field)
+			case "files":
+				return ec.fieldContext_Entry_files(ctx, field)
+			case "tags":
+				return ec.fieldContext_Entry_tags(ctx, field)
+			case "userCompetences":
+				return ec.fieldContext_Entry_userCompetences(ctx, field)
+			case "subjects":
+				return ec.fieldContext_Entry_subjects(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_uploadFileToEntry_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_removeFileFromEntry(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_removeFileFromEntry(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RemoveFileFromEntry(rctx, fc.Args["entryId"].(string), fc.Args["fileId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.File)
+	fc.Result = res
+	return ec.marshalNFile2ᚖexampleᚋinternalᚋdbᚐFile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_removeFileFromEntry(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_File_id(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "fileType":
+				return ec.fieldContext_File_fileType(ctx, field)
+			case "MIMEType":
+				return ec.fieldContext_File_MIMEType(ctx, field)
+			case "size":
+				return ec.fieldContext_File_size(ctx, field)
+			case "bucket":
+				return ec.fieldContext_File_bucket(ctx, field)
+			case "parent":
+				return ec.fieldContext_File_parent(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_File_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_File_parents(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_removeFileFromEntry_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -38304,6 +38540,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "updateEntryUserCompetenceLevel":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateEntryUserCompetenceLevel(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "uploadFileToEntry":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_uploadFileToEntry(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "removeFileFromEntry":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_removeFileFromEntry(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
