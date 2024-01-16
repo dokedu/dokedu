@@ -701,6 +701,7 @@ type Mutation {
   moveFile(input: MoveFileInput!): File!
   moveFiles(input: MoveFilesInput!): MoveFilesPayload!
   previewFile(input: PreviewFileInput!): PreviewFilePayload!
+  removeFileFromEntry(entryId: ID!, fileId: ID!): Entry!
   removeFileShare(input: ID!): File!
   removeUserFromChat(input: RemoveUserFromChatInput!): ChatUser!
   renameFile(input: RenameFileInput!): File!
@@ -730,6 +731,7 @@ type Mutation {
   updateUserLanguage(language: UserLanguage!): User!
   updateUserStudentGrade(input: UpdateUserStudentGradesInput!): UserStudentGrades!
   uploadFile(input: FileUploadInput!): File!
+  uploadFileToEntry(entryId: ID!, file: Upload!): Entry!
   uploadFiles(input: FileUploadInput!): UploadFilesPayload!
 }
 

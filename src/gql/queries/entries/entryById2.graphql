@@ -1,3 +1,12 @@
+fragment FileFragement on File {
+  id
+  name
+  fileType
+  MIMEType
+  size
+  createdAt
+}
+
 query entryById2($id: ID!) {
   entry(id: $id) {
     id
@@ -44,6 +53,9 @@ query entryById2($id: ID!) {
           color
         }
       }
+    }
+    files {
+      ...FileFragement
     }
   }
 }

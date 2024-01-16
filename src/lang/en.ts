@@ -96,7 +96,7 @@ export const en = {
   prepare_annual_reports: "Prepare annual reports",
   report: "Report | Reports",
   hour: "Hour | Hours",
-  no_file: "No file",
+  no_file: "No file | No files",
   download: "Download",
   downloading_file: "Downloading file...",
   create_report: "Create report",
@@ -109,6 +109,7 @@ export const en = {
   select_type: "Select type",
   type: "Type | Types",
   file: "File | Files",
+  upload_file: "Upload file",
 
   // Tags
   create_tag: "Create tag",

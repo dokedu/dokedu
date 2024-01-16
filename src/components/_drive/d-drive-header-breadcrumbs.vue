@@ -64,7 +64,6 @@ function dragover(_: DragEvent, item: any) {
     return
   }
   if (item.route.params.id === dragoverItem.value) return
-  console.log("Dragover", item.route.params.id)
   dragoverItem.value = item.route.params.id
 }
 
@@ -74,13 +73,6 @@ async function drop(event: DragEvent, row: any) {
 
   if (!id) return
   if (id === targetId) return
-
-  console.log(row)
-
-  console.log({
-    id: id,
-    targetId: targetId
-  })
 
   await moveFile({
     input: {

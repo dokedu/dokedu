@@ -11,7 +11,10 @@
             class="block w-full resize-none border-none border-transparent p-8 text-base text-neutral-900 placeholder:text-neutral-400 focus:ring-0"
           />
         </div>
-        <EntryFormCompetences :entry="entry" />
+        <div class="flex flex-col gap-4">
+          <EntryFormCompetences :entry="entry" />
+          <EntryFormFiles :entry="entry" />
+        </div>
       </div>
     </div>
     <div
@@ -42,6 +45,7 @@ import EntryFormCompetences from "./d-entry-form-competences.vue"
 import EntryFormProjects from "./d-entry-form-projects.vue"
 import EntryFormLabels from "./d-entry-form-labels.vue"
 import EntryFormStudents from "./d-entry-form-students.vue"
+import EntryFormFiles from "./d-entry-form-files.vue"
 import { useArchiveEntryMutation } from "@/gql/mutations/entries/archiveEntry"
 import { useUpdateEntryMutation } from "@/gql/mutations/entries/updateEntry"
 import type { Entry } from "@/gql/schema"
@@ -78,6 +82,7 @@ const formattedDate = computed({
 })
 
 async function archive() {
+  if (!entry.value.id) return alert("This entry is missing an ID and cannot be archived.")
   await archiveEntryMut({ id: entry.value.id })
   emit("archived")
 }

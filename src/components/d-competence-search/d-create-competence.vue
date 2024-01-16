@@ -63,8 +63,6 @@ const { value: name } = useField("name")
 const { value: parentId } = useField<string>("parentId")
 
 const onSubmit = handleSubmit(async (values) => {
-  console.log(values)
-
   const { data, error } = await createCompetence({
     input: values as { name: string; parentId: string }
   })

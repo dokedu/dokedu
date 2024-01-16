@@ -21,7 +21,6 @@ const dropZoneRef = ref<HTMLDivElement>()
 
 async function onDrop(files: File[] | null) {
   if (!files) return
-  console.log(files)
 
   // ensure files length is 1
   const file = files[0]

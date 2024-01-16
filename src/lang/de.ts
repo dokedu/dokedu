@@ -92,7 +92,7 @@ export const de = {
   prepare_annual_reports: "Erstellung von Jahresberichten",
   report: "Bericht | Berichte",
   hour: "Uhr | Uhr",
-  no_file: "Keine Datei",
+  no_file: "Keine Datei | Keine Dateien",
   download: "Herunterladen",
   downloading_file: "Herunterladen der Datei...",
   create_report: "Bericht erstellen",
@@ -105,6 +105,7 @@ export const de = {
   select_type: "Art auswählen",
   type: "Art | Arten",
   file: "Datei | Dateien",
+  upload_file: "Datei hochladen",
 
   // Tags
   create_tag: "Tag erstellen",

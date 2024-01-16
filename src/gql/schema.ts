@@ -764,6 +764,7 @@ export type Mutation = {
   moveFile: File;
   moveFiles: MoveFilesPayload;
   previewFile: PreviewFilePayload;
+  removeFileFromEntry: Entry;
   removeFileShare: File;
   removeUserFromChat: ChatUser;
   renameFile: File;
@@ -793,6 +794,7 @@ export type Mutation = {
   updateUserLanguage: User;
   updateUserStudentGrade: UserStudentGrades;
   uploadFile: File;
+  uploadFileToEntry: Entry;
   uploadFiles: UploadFilesPayload;
 };
 
@@ -1098,6 +1100,12 @@ export type MutationPreviewFileArgs = {
 };
 
 
+export type MutationRemoveFileFromEntryArgs = {
+  entryId: Scalars['ID']['input'];
+  fileId: Scalars['ID']['input'];
+};
+
+
 export type MutationRemoveFileShareArgs = {
   input: Scalars['ID']['input'];
 };
@@ -1240,6 +1248,12 @@ export type MutationUpdateUserStudentGradeArgs = {
 
 export type MutationUploadFileArgs = {
   input: FileUploadInput;
+};
+
+
+export type MutationUploadFileToEntryArgs = {
+  entryId: Scalars['ID']['input'];
+  file: Scalars['Upload']['input'];
 };
 
 
@@ -2497,6 +2511,7 @@ export type GraphCacheOptimisticUpdaters = {
   moveFile?: GraphCacheOptimisticMutationResolver<MutationMoveFileArgs, WithTypename<File>>,
   moveFiles?: GraphCacheOptimisticMutationResolver<MutationMoveFilesArgs, WithTypename<MoveFilesPayload>>,
   previewFile?: GraphCacheOptimisticMutationResolver<MutationPreviewFileArgs, WithTypename<PreviewFilePayload>>,
+  removeFileFromEntry?: GraphCacheOptimisticMutationResolver<MutationRemoveFileFromEntryArgs, WithTypename<Entry>>,
   removeFileShare?: GraphCacheOptimisticMutationResolver<MutationRemoveFileShareArgs, WithTypename<File>>,
   removeUserFromChat?: GraphCacheOptimisticMutationResolver<MutationRemoveUserFromChatArgs, WithTypename<ChatUser>>,
   renameFile?: GraphCacheOptimisticMutationResolver<MutationRenameFileArgs, WithTypename<File>>,
@@ -2526,6 +2541,7 @@ export type GraphCacheOptimisticUpdaters = {
   updateUserLanguage?: GraphCacheOptimisticMutationResolver<MutationUpdateUserLanguageArgs, WithTypename<User>>,
   updateUserStudentGrade?: GraphCacheOptimisticMutationResolver<MutationUpdateUserStudentGradeArgs, WithTypename<UserStudentGrades>>,
   uploadFile?: GraphCacheOptimisticMutationResolver<MutationUploadFileArgs, WithTypename<File>>,
+  uploadFileToEntry?: GraphCacheOptimisticMutationResolver<MutationUploadFileToEntryArgs, WithTypename<Entry>>,
   uploadFiles?: GraphCacheOptimisticMutationResolver<MutationUploadFilesArgs, WithTypename<UploadFilesPayload>>
 };
 
@@ -2636,6 +2652,7 @@ export type GraphCacheUpdaters = {
     moveFile?: GraphCacheUpdateResolver<{ moveFile: WithTypename<File> }, MutationMoveFileArgs>,
     moveFiles?: GraphCacheUpdateResolver<{ moveFiles: WithTypename<MoveFilesPayload> }, MutationMoveFilesArgs>,
     previewFile?: GraphCacheUpdateResolver<{ previewFile: WithTypename<PreviewFilePayload> }, MutationPreviewFileArgs>,
+    removeFileFromEntry?: GraphCacheUpdateResolver<{ removeFileFromEntry: WithTypename<Entry> }, MutationRemoveFileFromEntryArgs>,
     removeFileShare?: GraphCacheUpdateResolver<{ removeFileShare: WithTypename<File> }, MutationRemoveFileShareArgs>,
     removeUserFromChat?: GraphCacheUpdateResolver<{ removeUserFromChat: WithTypename<ChatUser> }, MutationRemoveUserFromChatArgs>,
     renameFile?: GraphCacheUpdateResolver<{ renameFile: WithTypename<File> }, MutationRenameFileArgs>,
@@ -2665,6 +2682,7 @@ export type GraphCacheUpdaters = {
     updateUserLanguage?: GraphCacheUpdateResolver<{ updateUserLanguage: WithTypename<User> }, MutationUpdateUserLanguageArgs>,
     updateUserStudentGrade?: GraphCacheUpdateResolver<{ updateUserStudentGrade: WithTypename<UserStudentGrades> }, MutationUpdateUserStudentGradeArgs>,
     uploadFile?: GraphCacheUpdateResolver<{ uploadFile: WithTypename<File> }, MutationUploadFileArgs>,
+    uploadFileToEntry?: GraphCacheUpdateResolver<{ uploadFileToEntry: WithTypename<Entry> }, MutationUploadFileToEntryArgs>,
     uploadFiles?: GraphCacheUpdateResolver<{ uploadFiles: WithTypename<UploadFilesPayload> }, MutationUploadFilesArgs>
   },
   Subscription?: {

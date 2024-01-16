@@ -8,7 +8,7 @@
     <div
       ref="menu"
       v-if="open"
-      class="absolute -top-[1px] right-8 w-52 rounded-md border border-neutral-200 bg-white shadow-md"
+      class="absolute z-10 -top-[1px] right-8 w-52 rounded-md border border-neutral-200 bg-white shadow-md"
     >
       <div class="flex flex-col border-b p-1">
         <div

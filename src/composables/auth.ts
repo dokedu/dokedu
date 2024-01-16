@@ -10,7 +10,7 @@ async function signOut() {
   try {
     await signOutMutation()
   } catch (e) {
-    console.log(e)
+    console.error(e)
   }
 
   localStorage.removeItem("setupComplete")

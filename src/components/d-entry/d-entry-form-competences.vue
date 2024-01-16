@@ -3,9 +3,9 @@
     <div>
       <header class="mb-2 flex items-center justify-between">
         <div class="text-neutral-500">{{ $t("competence", 2) }}</div>
-        <div class="rounded-md p-1 hover:bg-neutral-100" @click="dialogOpen = true">
-          <Plus :size="20" class="stroke-neutral-500" />
-        </div>
+        <d-button @click="dialogOpen = true" size="xs" type="transparent" :icon-left="Plus">
+          {{ $t("add_competence") }}
+        </d-button>
       </header>
       <div class="mb-2 flex flex-col gap-2">
         <d-competence v-for="competence in competences" :key="competence.id" :competence="competence">
@@ -19,15 +19,6 @@
             <X :size="20" class="stroke-neutral-500" />
           </div>
         </d-competence>
-      </div>
-      <div
-        class="flex w-fit select-none items-center gap-2 rounded-md p-1 hover:bg-neutral-100"
-        @click="dialogOpen = true"
-      >
-        <div class="rounded-md">
-          <Plus :size="20" class="stroke-neutral-500" />
-        </div>
-        <span class="pr-2 text-neutral-500">{{ $t("add_competence") }}</span>
       </div>
     </div>
   </div>
@@ -52,6 +43,7 @@ import { onKeyStroke } from "@vueuse/core"
 import DCompetenceLevel from "@/components/d-competence/d-competence-level.vue"
 import DCompetence from "@/components/d-competence/d-competence.vue"
 import DCompetenceSearch from "@/components/d-competence-search/d-competence-search.vue"
+import DButton from "../d-button/d-button.vue"
 import { useDeleteEntryCompetenceInputMutation } from "@/gql/mutations/entries/deleteEntryCompetence"
 import { useCreateEntryCompetenceMutation } from "@/gql/mutations/entries/createEntryCompetence"
 import { useUpdateEntryUserCompetenceLevelMutation } from "@/gql/mutations/entries/updateEntryUserCompetence"

@@ -116,7 +116,6 @@ onClickOutside(dFileList, () => {
 })
 
 async function clickRow(item: any) {
-  console.log("click row", item)
   const isSelected = selected.value.find((f) => f.id === item.id)
   if (!isSelected) return
 

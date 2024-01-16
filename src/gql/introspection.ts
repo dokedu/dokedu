@@ -3464,6 +3464,39 @@ export default {
             ]
           },
           {
+            "name": "removeFileFromEntry",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Entry",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "entryId",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              },
+              {
+                "name": "fileId",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
             "name": "removeFileShare",
             "type": {
               "kind": "NON_NULL",
@@ -4159,6 +4192,39 @@ export default {
             "args": [
               {
                 "name": "input",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "uploadFileToEntry",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Entry",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "entryId",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              },
+              {
+                "name": "file",
                 "type": {
                   "kind": "NON_NULL",
                   "ofType": {

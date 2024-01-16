@@ -139,7 +139,6 @@ watchDebounced(
 
 watch(showDeleted, () => {
   // Get last page and set it as only with the search
-  console.log("showDeleted", showDeleted.value)
   const lastPage = pageVariables.value[pageVariables.value.length - 1]
   pageVariables.value = [
     {
