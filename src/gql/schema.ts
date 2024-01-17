@@ -764,7 +764,7 @@ export type Mutation = {
   moveFile: File;
   moveFiles: MoveFilesPayload;
   previewFile: PreviewFilePayload;
-  removeFileFromEntry: Entry;
+  removeFileFromEntry: File;
   removeFileShare: File;
   removeUserFromChat: ChatUser;
   renameFile: File;
@@ -1669,6 +1669,7 @@ export type SignInPayload = {
   language: Scalars['String']['output'];
   setupComplete: Scalars['Boolean']['output'];
   token: Scalars['String']['output'];
+  user: User;
 };
 
 export type SignUpInput = {
@@ -1836,6 +1837,7 @@ export type User = {
   inviteAccepted: Scalars['Boolean']['output'];
   language?: Maybe<UserLanguage>;
   lastName: Scalars['String']['output'];
+  organisationId: Scalars['ID']['output'];
   role: UserRole;
   student?: Maybe<UserStudent>;
 };
@@ -2350,7 +2352,8 @@ export type GraphCacheResolvers = {
     enabled_apps?: GraphCacheResolver<WithTypename<SignInPayload>, Record<string, never>, Array<Scalars['String'] | string>>,
     language?: GraphCacheResolver<WithTypename<SignInPayload>, Record<string, never>, Scalars['String'] | string>,
     setupComplete?: GraphCacheResolver<WithTypename<SignInPayload>, Record<string, never>, Scalars['Boolean'] | string>,
-    token?: GraphCacheResolver<WithTypename<SignInPayload>, Record<string, never>, Scalars['String'] | string>
+    token?: GraphCacheResolver<WithTypename<SignInPayload>, Record<string, never>, Scalars['String'] | string>,
+    user?: GraphCacheResolver<WithTypename<SignInPayload>, Record<string, never>, WithTypename<User> | string>
   },
   Subject?: {
     id?: GraphCacheResolver<WithTypename<Subject>, Record<string, never>, Scalars['ID'] | string>,
@@ -2386,6 +2389,7 @@ export type GraphCacheResolvers = {
     inviteAccepted?: GraphCacheResolver<WithTypename<User>, Record<string, never>, Scalars['Boolean'] | string>,
     language?: GraphCacheResolver<WithTypename<User>, Record<string, never>, UserLanguage | string>,
     lastName?: GraphCacheResolver<WithTypename<User>, Record<string, never>, Scalars['String'] | string>,
+    organisationId?: GraphCacheResolver<WithTypename<User>, Record<string, never>, Scalars['ID'] | string>,
     role?: GraphCacheResolver<WithTypename<User>, Record<string, never>, UserRole | string>,
     student?: GraphCacheResolver<WithTypename<User>, Record<string, never>, WithTypename<UserStudent> | string>
   },
@@ -2511,7 +2515,7 @@ export type GraphCacheOptimisticUpdaters = {
   moveFile?: GraphCacheOptimisticMutationResolver<MutationMoveFileArgs, WithTypename<File>>,
   moveFiles?: GraphCacheOptimisticMutationResolver<MutationMoveFilesArgs, WithTypename<MoveFilesPayload>>,
   previewFile?: GraphCacheOptimisticMutationResolver<MutationPreviewFileArgs, WithTypename<PreviewFilePayload>>,
-  removeFileFromEntry?: GraphCacheOptimisticMutationResolver<MutationRemoveFileFromEntryArgs, WithTypename<Entry>>,
+  removeFileFromEntry?: GraphCacheOptimisticMutationResolver<MutationRemoveFileFromEntryArgs, WithTypename<File>>,
   removeFileShare?: GraphCacheOptimisticMutationResolver<MutationRemoveFileShareArgs, WithTypename<File>>,
   removeUserFromChat?: GraphCacheOptimisticMutationResolver<MutationRemoveUserFromChatArgs, WithTypename<ChatUser>>,
   renameFile?: GraphCacheOptimisticMutationResolver<MutationRenameFileArgs, WithTypename<File>>,
@@ -2652,7 +2656,7 @@ export type GraphCacheUpdaters = {
     moveFile?: GraphCacheUpdateResolver<{ moveFile: WithTypename<File> }, MutationMoveFileArgs>,
     moveFiles?: GraphCacheUpdateResolver<{ moveFiles: WithTypename<MoveFilesPayload> }, MutationMoveFilesArgs>,
     previewFile?: GraphCacheUpdateResolver<{ previewFile: WithTypename<PreviewFilePayload> }, MutationPreviewFileArgs>,
-    removeFileFromEntry?: GraphCacheUpdateResolver<{ removeFileFromEntry: WithTypename<Entry> }, MutationRemoveFileFromEntryArgs>,
+    removeFileFromEntry?: GraphCacheUpdateResolver<{ removeFileFromEntry: WithTypename<File> }, MutationRemoveFileFromEntryArgs>,
     removeFileShare?: GraphCacheUpdateResolver<{ removeFileShare: WithTypename<File> }, MutationRemoveFileShareArgs>,
     removeUserFromChat?: GraphCacheUpdateResolver<{ removeUserFromChat: WithTypename<ChatUser> }, MutationRemoveUserFromChatArgs>,
     renameFile?: GraphCacheUpdateResolver<{ renameFile: WithTypename<File> }, MutationRenameFileArgs>,
@@ -2971,7 +2975,8 @@ export type GraphCacheUpdaters = {
     enabled_apps?: GraphCacheUpdateResolver<Maybe<WithTypename<SignInPayload>>, Record<string, never>>,
     language?: GraphCacheUpdateResolver<Maybe<WithTypename<SignInPayload>>, Record<string, never>>,
     setupComplete?: GraphCacheUpdateResolver<Maybe<WithTypename<SignInPayload>>, Record<string, never>>,
-    token?: GraphCacheUpdateResolver<Maybe<WithTypename<SignInPayload>>, Record<string, never>>
+    token?: GraphCacheUpdateResolver<Maybe<WithTypename<SignInPayload>>, Record<string, never>>,
+    user?: GraphCacheUpdateResolver<Maybe<WithTypename<SignInPayload>>, Record<string, never>>
   },
   Subject?: {
     id?: GraphCacheUpdateResolver<Maybe<WithTypename<Subject>>, Record<string, never>>,
@@ -3007,6 +3012,7 @@ export type GraphCacheUpdaters = {
     inviteAccepted?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>,
     language?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>,
     lastName?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>,
+    organisationId?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>,
     role?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>,
     student?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>
   },

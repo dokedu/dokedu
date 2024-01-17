@@ -3469,7 +3469,7 @@ export default {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "Entry",
+                "name": "File",
                 "ofType": null
               }
             },
@@ -5845,6 +5845,18 @@ export default {
               }
             },
             "args": []
+          },
+          {
+            "name": "user",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "User",
+                "ofType": null
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -6168,6 +6180,17 @@ export default {
           },
           {
             "name": "lastName",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "organisationId",
             "type": {
               "kind": "NON_NULL",
               "ofType": {

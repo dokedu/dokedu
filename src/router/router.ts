@@ -4,7 +4,7 @@ import useActiveApp from "@/composables/useActiveApp"
 import type { RouteRecordName } from "vue-router/auto"
 import { useStorage, useWindowSize } from "@vueuse/core"
 import { computed, nextTick } from "vue"
-import { $posthog } from "@/plugins/posthog"
+import { $posthog, identifyUser } from "@/plugins/posthog"
 
 const router = createRouter({
   history: createWebHistory()
@@ -25,6 +25,8 @@ router.beforeEach(async (to) => {
   if (loggedIn) {
     const setupComplete = localStorage.getItem("setupComplete")
     const setupIncomplete = setupComplete === "false"
+
+    identifyUser(null)
 
     if (setupIncomplete && to.name !== "/setup/") {
       return { name: "/setup/" }

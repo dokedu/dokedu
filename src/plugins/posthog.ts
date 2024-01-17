@@ -1,3 +1,4 @@
+import type { UserFragment } from "@/gql/fragments/user";
 import posthog from "posthog-js";
 
 function newClient() {

@@ -701,7 +701,7 @@ type Mutation {
   moveFile(input: MoveFileInput!): File!
   moveFiles(input: MoveFilesInput!): MoveFilesPayload!
   previewFile(input: PreviewFileInput!): PreviewFilePayload!
-  removeFileFromEntry(entryId: ID!, fileId: ID!): Entry!
+  removeFileFromEntry(entryId: ID!, fileId: ID!): File!
   removeFileShare(input: ID!): File!
   removeUserFromChat(input: RemoveUserFromChatInput!): ChatUser!
   renameFile(input: RenameFileInput!): File!
@@ -925,6 +925,7 @@ type SignInPayload {
   language: String!
   setupComplete: Boolean!
   token: String!
+  user: User!
 }
 
 input SignUpInput {
@@ -1084,6 +1085,7 @@ type User {
   inviteAccepted: Boolean!
   language: UserLanguage
   lastName: String!
+  organisationId: ID!
   role: UserRole!
   student: UserStudent
 }

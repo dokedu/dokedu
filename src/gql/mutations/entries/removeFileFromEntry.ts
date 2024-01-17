@@ -9,7 +9,7 @@ export type RemoveFileFromEntryMutationVariables = Types.Exact<{
 }>;
 
 
-export type RemoveFileFromEntryMutation = { __typename?: 'Mutation', removeFileFromEntry: { __typename?: 'Entry', id: string } };
+export type RemoveFileFromEntryMutation = { __typename?: 'Mutation', removeFileFromEntry: { __typename?: 'File', id: string } };
 
 
 export const RemoveFileFromEntryDocument = gql`

@@ -1,7 +1,7 @@
 <template>
   <d-auth-container :title="$t('dokedu_welcome')" :subtitle="$t('login_info')">
     <template #banner>
-      <d-banner v-if="error" type="error" :title="error?.graphQLErrors[0].message"></d-banner>
+      <d-banner v-if="error" type="error" :title="error.message"></d-banner>
     </template>
     <template #form>
       <form @submit.prevent="onSubmit" class="flex flex-col gap-5">
@@ -53,64 +53,26 @@
 </route>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue"
-import { useRouter } from "vue-router/auto"
-import i18n from "@/i18n"
-import { useWindowSize } from "@vueuse/core"
-import { useSignInMutation } from "@/gql/mutations/auth/signIn"
+import { ref } from "vue"
 import DInput from "@/components/d-input/d-input.vue"
 import DButton from "@/components/d-button/d-button.vue"
 import DAuthContainer from "@/components/_auth/d-auth-container.vue"
 import DBanner from "@/components/d-banner/d-banner.vue"
+import { useAuth } from "@/composables/auth"
 
-const router = useRouter()
+const { signIn } = useAuth()
 
 const email = ref("")
 const password = ref("")
-
-const { width } = useWindowSize()
-const isMobile = computed(() => width.value <= 900)
-
-const { executeMutation: signIn, error } = useSignInMutation()
+const error = ref<Error | null>(null)
 
 async function onSubmit() {
-  const { data } = await signIn({
+  const { error } = await signIn({
     email: email.value,
     password: password.value
   })
-
-  if (!data?.signIn.token) {
-    return
-  }
-
-  const { enabled_apps, token, setupComplete, language } = data.signIn
-
-  localStorage.setItem("enabled_apps", JSON.stringify(enabled_apps))
-  localStorage.setItem("authorization", token)
-  localStorage.setItem("language", language)
-  localStorage.setItem("setupComplete", setupComplete.toString())
-
-  // Set the i18n locale to the user's language
-  i18n.global.locale.value = language as unknown as any
-
-  if (setupComplete === false) {
-    await router.push({ name: "/setup/" })
-    return
-  }
-
-  // enabled_apps
-  if (enabled_apps.includes("record")) {
-    if (isMobile.value) {
-      await router.push({ name: "/m/record/entries/" })
-    } else {
-      await router.push({ name: "/record/entries/" })
-    }
-  } else if (enabled_apps.includes("drive")) {
-    await router.push({ name: "/drive/my-drive/" })
-    return
-  } else {
-    await router.push({ name: "/settings/profile" })
-    return
+  if (error) {
+    return error
   }
 }
 </script>

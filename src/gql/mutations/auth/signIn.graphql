@@ -4,5 +4,8 @@ mutation signIn($email: String!, $password: String!) {
     enabled_apps
     language
     setupComplete
+    user {
+      ...user
+    }
   }
 }
