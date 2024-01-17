@@ -542,6 +542,7 @@ type SignInPayload struct {
 	EnabledApps   []string `json:"enabled_apps"`
 	Language      string   `json:"language"`
 	SetupComplete bool     `json:"setupComplete"`
+	User          *db.User `json:"user"`
 }
 
 type SignUpInput struct {

@@ -195,6 +195,7 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 		EnabledApps:   organisation.EnabledApps,
 		Language:      string(user.Language),
 		SetupComplete: organisation.SetupComplete,
+		User:          &user,
 	}, nil
 }
 

@@ -541,6 +541,7 @@ type ComplexityRoot struct {
 		Language      func(childComplexity int) int
 		SetupComplete func(childComplexity int) int
 		Token         func(childComplexity int) int
+		User          func(childComplexity int) int
 	}
 
 	Subject struct {
@@ -586,6 +587,7 @@ type ComplexityRoot struct {
 		InviteAccepted func(childComplexity int) int
 		Language       func(childComplexity int) int
 		LastName       func(childComplexity int) int
+		OrganisationID func(childComplexity int) int
 		Role           func(childComplexity int) int
 		Student        func(childComplexity int) int
 	}
@@ -900,6 +902,7 @@ type UserResolver interface {
 	Student(ctx context.Context, obj *db.User) (*db.UserStudent, error)
 
 	DeletedAt(ctx context.Context, obj *db.User) (*time.Time, error)
+
 	InviteAccepted(ctx context.Context, obj *db.User) (bool, error)
 	EmailAccounts(ctx context.Context, obj *db.User) ([]*db.EmailAccount, error)
 }
@@ -3913,6 +3916,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SignInPayload.Token(childComplexity), true
 
+	case "SignInPayload.user":
+		if e.complexity.SignInPayload.User == nil {
+			break
+		}
+
+		return e.complexity.SignInPayload.User(childComplexity), true
+
 	case "Subject.id":
 		if e.complexity.Subject.ID == nil {
 			break
@@ -4085,6 +4095,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.LastName(childComplexity), true
+
+	case "User.organisationId":
+		if e.complexity.User.OrganisationID == nil {
+			break
+		}
+
+		return e.complexity.User.OrganisationID(childComplexity), true
 
 	case "User.role":
 		if e.complexity.User.Role == nil {
@@ -7119,6 +7136,8 @@ func (ec *executionContext) fieldContext_Bucket_user(ctx context.Context, field 
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -7668,6 +7687,8 @@ func (ec *executionContext) fieldContext_Chat_users(ctx context.Context, field g
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -8223,6 +8244,8 @@ func (ec *executionContext) fieldContext_ChatMessage_user(ctx context.Context, f
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -8485,6 +8508,8 @@ func (ec *executionContext) fieldContext_ChatUser_user(ctx context.Context, fiel
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -10646,6 +10671,8 @@ func (ec *executionContext) fieldContext_EmailAccount_user(ctx context.Context, 
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -11975,6 +12002,8 @@ func (ec *executionContext) fieldContext_Entry_user(ctx context.Context, field g
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -12043,6 +12072,8 @@ func (ec *executionContext) fieldContext_Entry_users(ctx context.Context, field 
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -19244,6 +19275,8 @@ func (ec *executionContext) fieldContext_Mutation_signIn(ctx context.Context, fi
 				return ec.fieldContext_SignInPayload_language(ctx, field)
 			case "setupComplete":
 				return ec.fieldContext_SignInPayload_setupComplete(ctx, field)
+			case "user":
+				return ec.fieldContext_SignInPayload_user(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type SignInPayload", field.Name)
 		},
@@ -19479,6 +19512,8 @@ func (ec *executionContext) fieldContext_Mutation_acceptInvite(ctx context.Conte
 				return ec.fieldContext_SignInPayload_language(ctx, field)
 			case "setupComplete":
 				return ec.fieldContext_SignInPayload_setupComplete(ctx, field)
+			case "user":
+				return ec.fieldContext_SignInPayload_user(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type SignInPayload", field.Name)
 		},
@@ -19554,6 +19589,8 @@ func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -19633,6 +19670,8 @@ func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -19712,6 +19751,8 @@ func (ec *executionContext) fieldContext_Mutation_archiveUser(ctx context.Contex
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -19791,6 +19832,8 @@ func (ec *executionContext) fieldContext_Mutation_updateUserLanguage(ctx context
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -19925,6 +19968,8 @@ func (ec *executionContext) fieldContext_Mutation_createStudent(ctx context.Cont
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -21355,6 +21400,8 @@ func (ec *executionContext) fieldContext_Organisation_owner(ctx context.Context,
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -23329,6 +23376,8 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -23408,6 +23457,8 @@ func (ec *executionContext) fieldContext_Query_me(ctx context.Context, field gra
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -24820,6 +24871,8 @@ func (ec *executionContext) fieldContext_Report_user(ctx context.Context, field 
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -24888,6 +24941,8 @@ func (ec *executionContext) fieldContext_Report_studentUser(ctx context.Context,
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -25771,6 +25826,8 @@ func (ec *executionContext) fieldContext_ShareUser_user(ctx context.Context, fie
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -25997,6 +26054,76 @@ func (ec *executionContext) fieldContext_SignInPayload_setupComplete(ctx context
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SignInPayload_user(ctx context.Context, field graphql.CollectedField, obj *model.SignInPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SignInPayload_user(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.User, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖexampleᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SignInPayload_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SignInPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "student":
+				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "emailAccounts":
+				return ec.fieldContext_User_emailAccounts(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
 	}
 	return fc, nil
@@ -27165,6 +27292,50 @@ func (ec *executionContext) fieldContext_User_deletedAt(ctx context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _User_organisationId(ctx context.Context, field graphql.CollectedField, obj *db.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_organisationId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.OrganisationID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_organisationId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _User_inviteAccepted(ctx context.Context, field graphql.CollectedField, obj *db.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_inviteAccepted(ctx, field)
 	if err != nil {
@@ -27371,6 +27542,8 @@ func (ec *executionContext) fieldContext_UserAttendance_user(ctx context.Context
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -27750,6 +27923,8 @@ func (ec *executionContext) fieldContext_UserCompetence_user(ctx context.Context
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -27815,6 +27990,8 @@ func (ec *executionContext) fieldContext_UserCompetence_createdBy(ctx context.Co
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -28077,6 +28254,8 @@ func (ec *executionContext) fieldContext_UserConnection_edges(ctx context.Contex
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -28792,6 +28971,8 @@ func (ec *executionContext) fieldContext_UserStudent_user(ctx context.Context, f
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "emailAccounts":
@@ -40460,6 +40641,11 @@ func (ec *executionContext) _SignInPayload(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "user":
+			out.Values[i] = ec._SignInPayload_user(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -40936,6 +41122,11 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "organisationId":
+			out.Values[i] = ec._User_organisationId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		case "inviteAccepted":
 			field := field
 

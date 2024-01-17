@@ -31,6 +31,8 @@ type User {
     createdAt: Time!
     deletedAt: Time
 
+    organisationId: ID!
+
     inviteAccepted: Boolean!
 }
 
@@ -95,6 +97,7 @@ type SignInPayload {
     enabled_apps: [String!]!
     language: String!
     setupComplete: Boolean!
+    user: User!
 }
 
 input SignUpInput {
