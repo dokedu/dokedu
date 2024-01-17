@@ -3,7 +3,7 @@ import { publicRoutes } from "./publicRoutes"
 import useActiveApp from "@/composables/useActiveApp"
 import type { RouteRecordName } from "vue-router/auto"
 import { useStorage, useWindowSize } from "@vueuse/core"
-import { computed } from "vue"
+import { computed, nextTick } from "vue"
 
 const router = createRouter({
   history: createWebHistory()
@@ -57,6 +57,16 @@ router.afterEach((to) => {
 
   // Save last opened page
   lastOpenedPage.value = to.path as string
+
+  try {
+    nextTick(() => {
+      posthog.capture("$pageview", {
+        $current_url: to.fullPath,
+      });
+    });
+  } catch (error) {
+    console.log(error);
+  }
 })
 
 export default router
