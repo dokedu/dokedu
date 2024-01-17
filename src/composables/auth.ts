@@ -8,7 +8,14 @@ import i18n from "@/i18n"
 import { $posthog } from "@/plugins/posthog"
 import type { UserFragment } from "@/gql/fragments/user"
 
-export const user = useStorage<UserFragment | null>("user", null)
+export const user = useStorage<UserFragment | null>("user", null,
+  undefined,
+  {
+    serializer: {
+      read: (v: any) => v ? JSON.parse(v) : null,
+      write: (v: any) => JSON.stringify(v),
+    },
+  })
 export const token = useStorage<null | string>("authorization", null)
 export const setupComplete = useStorage("setupComplete", false)
 export const enabledApps = useStorage<string[]>("enabled_apps", [])
