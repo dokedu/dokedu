@@ -61,7 +61,11 @@ router.afterEach((to) => {
 
   try {
     nextTick(() => {
-      $posthog?.capture("$pageview", {
+      if (!$posthog) {
+        console.log("Posthog not initialized");
+        return;
+      }
+      $posthog.capture("$pageview", {
         $current_url: to.fullPath,
       });
     });
