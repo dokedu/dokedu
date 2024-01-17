@@ -19,7 +19,7 @@ export const user = useStorage<UserFragment | null>("user", null,
 export const token = useStorage<null | string>("authorization", null)
 export const setupComplete = useStorage("setupComplete", false)
 export const enabledApps = useStorage<string[]>("enabled_apps", [])
-export const language = useStorage("language", "en")
+export const language = useStorage<string>("language", "en")
 
 const { width } = useWindowSize()
 const isMobile = computed(() => width.value <= 900)
@@ -59,7 +59,7 @@ async function signIn({ email, password }: SignInInput): Promise<{ error?: Error
   language.value = data.signIn.language
 
   // Set the i18n locale to the user's language
-  i18n.global.locale.value = language as unknown as any
+  i18n.global.locale.value = language.value as unknown as any
 
   identifyUser()
 
@@ -76,8 +76,9 @@ export function identifyUser() {
     $posthog.identify(
       user.value.id,  // Replace 'distinct_id' with your user's unique identifier
       {
-        email: user.value.email, name:
-          user.value.firstName + " " + user.value.lastName
+        id: user.value.id,
+        email: user.value.email,
+        name: user.value.firstName + " " + user.value.lastName
       } // optional: set additional user properties
     );
     $posthog.group('company', user.value.organisationId)
