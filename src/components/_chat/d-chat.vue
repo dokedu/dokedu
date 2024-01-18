@@ -9,7 +9,7 @@
         <div class="flex mb-1">
           <div class="font-semibold flex-1">{{ chat?.name }}</div>
           <!-- TODO: implement real time based on lastMessage -->
-          <div class="text-xs" :class="active ? 'text-white' : 'text-subtle'">
+          <div v-if="chat?.lastMessage" class="text-xs" :class="active ? 'text-white' : 'text-subtle'">
             {{ useTime(chat?.lastMessage?.createdAt) }}
           </div>
         </div>

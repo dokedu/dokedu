@@ -260,6 +260,7 @@ export const en = {
   amount_group_members: "{amount} members",
   last_seen: "last seen {time} ago",
   online: "online",
+  delete_chat_confirmation: "Are you sure you want to delete this chat?",
 
   // Time
   second: "second | seconds",

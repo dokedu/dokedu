@@ -126,7 +126,7 @@ async function createChatWithUser(user: User) {
 async function createNewGroup() {
   const createResult = await createChat({
     input: {
-      name: "New group"
+      name: ""
     }
   })
   router.push("/chat/chats/" + createResult.data?.createChat.id)

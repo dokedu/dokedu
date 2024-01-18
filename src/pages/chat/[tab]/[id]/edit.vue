@@ -61,6 +61,7 @@ import { useRemoveUserFromChatMutation } from "@/gql/mutations/chats/removeUserF
 import { ChatType } from "@/gql/schema"
 import { useDeleteChatMutation } from "@/gql/mutations/chats/deleteChat"
 import { useRouter } from "vue-router/auto"
+import i18n from "@/i18n"
 
 const route = useRoute("/chat/[tab]/[id]/edit")
 const router = useRouter()
@@ -106,7 +107,7 @@ async function removeUserFromChat(userId: string) {
 }
 
 async function deleteChat() {
-  const a = confirm("Are you sure you want to remove this user from the chat?")
+  const a = confirm(i18n.global.t("delete_chat_confirmation"))
   if (!a) return
   await deleteChatMut({
     input: {

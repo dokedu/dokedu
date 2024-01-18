@@ -259,6 +259,7 @@ export const de = {
   amount_group_members: "{amount} Mitglieder",
   last_seen: "Zuletzt gesehen vor {time}",
   online: "Online",
+  delete_chat_confirmation: "Willst du diesen Chat wirklich löschen?",
 
   // Time
   second: "Sekunde | Sekunden",
