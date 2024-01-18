@@ -648,6 +648,7 @@ func (r *queryResolver) Chats(ctx context.Context, limit *int, offset *int) (*mo
 		Limit(pageLimit).
 		Offset(pageOffset).
 		Group("chat.id").
+		OrderExpr("CASE WHEN MAX(cm.created_at) IS NULL THEN 1 ELSE 0 END").
 		Order("last_message_at DESC").
 		ScanAndCount(ctx)
 	if errors.Is(err, sql.ErrNoRows) {
