@@ -10,7 +10,7 @@
       </div>
       <div class="flex-1 overflow-auto flex flex-col">
         <div class="h-full flex flex-col" v-show="tab === 'chats'">
-          <div class="pt-2 px-2">
+          <div v-if="false" class="pt-2 px-2">
             <d-tabs>
               <d-tab active>All</d-tab>
               <d-tab>Friends</d-tab>
