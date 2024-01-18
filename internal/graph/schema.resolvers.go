@@ -16,6 +16,7 @@ import (
 	"example/internal/middleware"
 	meili "example/internal/modules/meilisearch"
 	"fmt"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -1296,6 +1297,14 @@ func (r *userResolver) InviteAccepted(ctx context.Context, obj *db.User) (bool, 
 	}
 
 	return false, nil
+}
+
+// LastSeenAt is the resolver for the lastSeenAt field.
+func (r *userResolver) LastSeenAt(ctx context.Context, obj *db.User) (*time.Time, error) {
+	randomTime := rand.Int63n(time.Now().Unix()-94608000) + 94608000
+	randomNow := time.Unix(randomTime, 0)
+
+	return &randomNow, nil
 }
 
 // Competence is the resolver for the competence field.

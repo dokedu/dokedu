@@ -592,6 +592,7 @@ type ComplexityRoot struct {
 		InviteAccepted func(childComplexity int) int
 		Language       func(childComplexity int) int
 		LastName       func(childComplexity int) int
+		LastSeenAt     func(childComplexity int) int
 		OrganisationID func(childComplexity int) int
 		Role           func(childComplexity int) int
 		Student        func(childComplexity int) int
@@ -915,6 +916,7 @@ type UserResolver interface {
 	DeletedAt(ctx context.Context, obj *db.User) (*time.Time, error)
 
 	InviteAccepted(ctx context.Context, obj *db.User) (bool, error)
+	LastSeenAt(ctx context.Context, obj *db.User) (*time.Time, error)
 	EmailAccounts(ctx context.Context, obj *db.User) ([]*db.EmailAccount, error)
 }
 type UserAttendanceResolver interface {
@@ -4152,6 +4154,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.LastName(childComplexity), true
 
+	case "User.lastSeenAt":
+		if e.complexity.User.LastSeenAt == nil {
+			break
+		}
+
+		return e.complexity.User.LastSeenAt(childComplexity), true
+
 	case "User.organisationId":
 		if e.complexity.User.OrganisationID == nil {
 			break
@@ -7227,6 +7236,8 @@ func (ec *executionContext) fieldContext_Bucket_user(ctx context.Context, field 
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -7778,6 +7789,8 @@ func (ec *executionContext) fieldContext_Chat_users(ctx context.Context, field g
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -8447,6 +8460,8 @@ func (ec *executionContext) fieldContext_ChatMessage_user(ctx context.Context, f
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -8759,6 +8774,8 @@ func (ec *executionContext) fieldContext_ChatUser_user(ctx context.Context, fiel
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -10922,6 +10939,8 @@ func (ec *executionContext) fieldContext_EmailAccount_user(ctx context.Context, 
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -12253,6 +12272,8 @@ func (ec *executionContext) fieldContext_Entry_user(ctx context.Context, field g
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -12323,6 +12344,8 @@ func (ec *executionContext) fieldContext_Entry_users(ctx context.Context, field 
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -20000,6 +20023,8 @@ func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -20081,6 +20106,8 @@ func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -20162,6 +20189,8 @@ func (ec *executionContext) fieldContext_Mutation_archiveUser(ctx context.Contex
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -20243,6 +20272,8 @@ func (ec *executionContext) fieldContext_Mutation_updateUserLanguage(ctx context
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -20379,6 +20410,8 @@ func (ec *executionContext) fieldContext_Mutation_createStudent(ctx context.Cont
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -21811,6 +21844,8 @@ func (ec *executionContext) fieldContext_Organisation_owner(ctx context.Context,
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -23791,6 +23826,8 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -23872,6 +23909,8 @@ func (ec *executionContext) fieldContext_Query_me(ctx context.Context, field gra
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -25286,6 +25325,8 @@ func (ec *executionContext) fieldContext_Report_user(ctx context.Context, field 
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -25356,6 +25397,8 @@ func (ec *executionContext) fieldContext_Report_studentUser(ctx context.Context,
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -26241,6 +26284,8 @@ func (ec *executionContext) fieldContext_ShareUser_user(ctx context.Context, fie
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -26531,6 +26576,8 @@ func (ec *executionContext) fieldContext_SignInPayload_user(ctx context.Context,
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -27793,6 +27840,47 @@ func (ec *executionContext) fieldContext_User_inviteAccepted(ctx context.Context
 	return fc, nil
 }
 
+func (ec *executionContext) _User_lastSeenAt(ctx context.Context, field graphql.CollectedField, obj *db.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_lastSeenAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.User().LastSeenAt(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_lastSeenAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _User_emailAccounts(ctx context.Context, field graphql.CollectedField, obj *db.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_emailAccounts(ctx, field)
 	if err != nil {
@@ -27959,6 +28047,8 @@ func (ec *executionContext) fieldContext_UserAttendance_user(ctx context.Context
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -28340,6 +28430,8 @@ func (ec *executionContext) fieldContext_UserCompetence_user(ctx context.Context
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -28407,6 +28499,8 @@ func (ec *executionContext) fieldContext_UserCompetence_createdBy(ctx context.Co
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -28671,6 +28765,8 @@ func (ec *executionContext) fieldContext_UserConnection_edges(ctx context.Contex
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -29388,6 +29484,8 @@ func (ec *executionContext) fieldContext_UserStudent_user(ctx context.Context, f
 				return ec.fieldContext_User_organisationId(ctx, field)
 			case "inviteAccepted":
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
 			case "emailAccounts":
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
@@ -41713,6 +41811,39 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "lastSeenAt":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_lastSeenAt(ctx, field, obj)
 				return res
 			}
 

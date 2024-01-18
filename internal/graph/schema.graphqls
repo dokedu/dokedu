@@ -34,6 +34,8 @@ type User {
     organisationId: ID!
 
     inviteAccepted: Boolean!
+
+    lastSeenAt: Time
 }
 
 enum CompetenceType {
