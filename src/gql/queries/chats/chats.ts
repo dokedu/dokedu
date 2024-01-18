@@ -6,7 +6,7 @@ export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type ChatsQueryVariables = Types.Exact<{ [key: string]: never; }>;
 
 
-export type ChatsQuery = { __typename?: 'Query', chats: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'Chat', id: string, name?: string | null, lastMessage?: string | null } | null> | null } };
+export type ChatsQuery = { __typename?: 'Query', chats: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'Chat', id: string, name?: string | null, lastMessage?: string | null, unreadMessagesCount: number } | null> | null } };
 
 
 export const ChatsDocument = gql`
@@ -16,6 +16,7 @@ export const ChatsDocument = gql`
       id
       name
       lastMessage
+      unreadMessagesCount
     }
   }
 }

@@ -236,6 +236,17 @@ export default {
             "args": []
           },
           {
+            "name": "unreadMessagesCount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "users",
             "type": {
               "kind": "NON_NULL",
@@ -327,6 +338,17 @@ export default {
           },
           {
             "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "isEdited",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3309,6 +3331,29 @@ export default {
               "ofType": {
                 "kind": "OBJECT",
                 "name": "DownloadFilesPayload",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "input",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "editChatMessage",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ChatMessage",
                 "ofType": null
               }
             },

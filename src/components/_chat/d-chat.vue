@@ -10,9 +10,11 @@
           <div class="font-semibold flex-1">{{ chat?.name }}</div>
           <div class="text-xs" :class="active ? 'text-white' : 'text-subtle'">6:20 PM</div>
         </div>
-
-        <div class="text-xs line-clamp-1" :class="active ? 'text-white' : 'text-subtle'">
-          {{ chat?.lastMessage ? chat?.lastMessage : `No messages yet` }}
+        <div class="flex">
+          <div class="text-xs line-clamp-1 flex-1" :class="active ? 'text-white' : 'text-subtle'">
+            {{ chat?.lastMessage ? chat?.lastMessage : `No messages yet` }}
+          </div>
+          <d-notification-circle :amount="chat.unreadMessagesCount" :inverted="active"></d-notification-circle>
         </div>
       </div>
     </div>
@@ -24,6 +26,7 @@ import type { Chat } from "@/gql/schema"
 import DAvatar from "@/components/d-avatar/d-avatar.vue"
 import { UserRound } from "lucide-vue-next"
 import useInitials from "@/composables/useInitials"
+import DNotificationCircle from "@/components/_chat/d-notification-circle.vue"
 
 type Props = {
   chat: Chat

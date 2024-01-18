@@ -4,6 +4,7 @@ query chats {
       id
       name
       lastMessage
+      unreadMessagesCount
     }
   }
 }
