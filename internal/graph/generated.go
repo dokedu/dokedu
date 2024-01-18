@@ -90,14 +90,15 @@ type ComplexityRoot struct {
 	}
 
 	Chat struct {
-		CreatedAt   func(childComplexity int) int
-		DeletedAt   func(childComplexity int) int
-		ID          func(childComplexity int) int
-		LastMessage func(childComplexity int) int
-		Messages    func(childComplexity int) int
-		Name        func(childComplexity int) int
-		Type        func(childComplexity int) int
-		Users       func(childComplexity int) int
+		CreatedAt           func(childComplexity int) int
+		DeletedAt           func(childComplexity int) int
+		ID                  func(childComplexity int) int
+		LastMessage         func(childComplexity int) int
+		Messages            func(childComplexity int) int
+		Name                func(childComplexity int) int
+		Type                func(childComplexity int) int
+		UnreadMessagesCount func(childComplexity int) int
+		Users               func(childComplexity int) int
 	}
 
 	ChatConnection struct {
@@ -110,6 +111,7 @@ type ComplexityRoot struct {
 		Chat      func(childComplexity int) int
 		CreatedAt func(childComplexity int) int
 		ID        func(childComplexity int) int
+		IsEdited  func(childComplexity int) int
 		Message   func(childComplexity int) int
 		User      func(childComplexity int) int
 	}
@@ -385,6 +387,7 @@ type ComplexityRoot struct {
 		DeleteSubject                  func(childComplexity int, id string) int
 		DownloadFile                   func(childComplexity int, input model.DownloadFileInput) int
 		DownloadFiles                  func(childComplexity int, input model.DownloadFilesInput) int
+		EditChatMessage                func(childComplexity int, input model.EditChatMessageInput) int
 		EditShare                      func(childComplexity int, input model.CreateShareInput) int
 		ForgotPassword                 func(childComplexity int, input model.ForgotPasswordInput) int
 		ImportStudents                 func(childComplexity int, input model.ImportStudentsInput) int
@@ -674,10 +677,13 @@ type ChatResolver interface {
 	LastMessage(ctx context.Context, obj *db.Chat) (*string, error)
 
 	DeletedAt(ctx context.Context, obj *db.Chat) (*time.Time, error)
+	UnreadMessagesCount(ctx context.Context, obj *db.Chat) (int, error)
 }
 type ChatMessageResolver interface {
 	Chat(ctx context.Context, obj *db.ChatMessage) (*db.Chat, error)
 	User(ctx context.Context, obj *db.ChatMessage) (*db.User, error)
+
+	IsEdited(ctx context.Context, obj *db.ChatMessage) (bool, error)
 }
 type ChatUserResolver interface {
 	Chat(ctx context.Context, obj *db.ChatUser) (*db.Chat, error)
@@ -745,6 +751,7 @@ type MutationResolver interface {
 	AddUserToChat(ctx context.Context, input model.AddUserToChatInput) (*db.ChatUser, error)
 	RemoveUserFromChat(ctx context.Context, input model.RemoveUserFromChatInput) (*db.ChatUser, error)
 	SendMessage(ctx context.Context, input model.SendMessageInput) (*db.ChatMessage, error)
+	EditChatMessage(ctx context.Context, input model.EditChatMessageInput) (*db.ChatMessage, error)
 	UpdateChat(ctx context.Context, input model.UpdateChatInput) (*db.Chat, error)
 	UploadFile(ctx context.Context, input model.FileUploadInput) (*db.File, error)
 	UploadFiles(ctx context.Context, input model.FileUploadInput) (*model.UploadFilesPayload, error)
@@ -1082,6 +1089,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Chat.Type(childComplexity), true
 
+	case "Chat.unreadMessagesCount":
+		if e.complexity.Chat.UnreadMessagesCount == nil {
+			break
+		}
+
+		return e.complexity.Chat.UnreadMessagesCount(childComplexity), true
+
 	case "Chat.users":
 		if e.complexity.Chat.Users == nil {
 			break
@@ -1130,6 +1144,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ChatMessage.ID(childComplexity), true
+
+	case "ChatMessage.isEdited":
+		if e.complexity.ChatMessage.IsEdited == nil {
+			break
+		}
+
+		return e.complexity.ChatMessage.IsEdited(childComplexity), true
 
 	case "ChatMessage.message":
 		if e.complexity.ChatMessage.Message == nil {
@@ -2689,6 +2710,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DownloadFiles(childComplexity, args["input"].(model.DownloadFilesInput)), true
+
+	case "Mutation.editChatMessage":
+		if e.complexity.Mutation.EditChatMessage == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_editChatMessage_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.EditChatMessage(childComplexity, args["input"].(model.EditChatMessageInput)), true
 
 	case "Mutation.editShare":
 		if e.complexity.Mutation.EditShare == nil {
@@ -4466,6 +4499,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputDeleteShareInput,
 		ec.unmarshalInputDownloadFileInput,
 		ec.unmarshalInputDownloadFilesInput,
+		ec.unmarshalInputEditChatMessageInput,
 		ec.unmarshalInputEmailAccountFilter,
 		ec.unmarshalInputEntryFilterInput,
 		ec.unmarshalInputEventFilterInput,
@@ -5514,6 +5548,21 @@ func (ec *executionContext) field_Mutation_downloadFiles_args(ctx context.Contex
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNDownloadFilesInput2exampleᚋinternalᚋgraphᚋmodelᚐDownloadFilesInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_editChatMessage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.EditChatMessageInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNEditChatMessageInput2exampleᚋinternalᚋgraphᚋmodelᚐEditChatMessageInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -7791,6 +7840,8 @@ func (ec *executionContext) fieldContext_Chat_messages(ctx context.Context, fiel
 				return ec.fieldContext_ChatMessage_user(ctx, field)
 			case "message":
 				return ec.fieldContext_ChatMessage_message(ctx, field)
+			case "isEdited":
+				return ec.fieldContext_ChatMessage_isEdited(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_ChatMessage_createdAt(ctx, field)
 			}
@@ -7926,6 +7977,50 @@ func (ec *executionContext) fieldContext_Chat_deletedAt(ctx context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _Chat_unreadMessagesCount(ctx context.Context, field graphql.CollectedField, obj *db.Chat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Chat_unreadMessagesCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Chat().UnreadMessagesCount(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Chat_unreadMessagesCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Chat",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _ChatConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.ChatConnection) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_ChatConnection_edges(ctx, field)
 	if err != nil {
@@ -7978,6 +8073,8 @@ func (ec *executionContext) fieldContext_ChatConnection_edges(ctx context.Contex
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
+			case "unreadMessagesCount":
+				return ec.fieldContext_Chat_unreadMessagesCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -8180,6 +8277,8 @@ func (ec *executionContext) fieldContext_ChatMessage_chat(ctx context.Context, f
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
+			case "unreadMessagesCount":
+				return ec.fieldContext_Chat_unreadMessagesCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -8296,6 +8395,50 @@ func (ec *executionContext) fieldContext_ChatMessage_message(ctx context.Context
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ChatMessage_isEdited(ctx context.Context, field graphql.CollectedField, obj *db.ChatMessage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ChatMessage_isEdited(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ChatMessage().IsEdited(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ChatMessage_isEdited(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ChatMessage",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -8444,6 +8587,8 @@ func (ec *executionContext) fieldContext_ChatUser_chat(ctx context.Context, fiel
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
+			case "unreadMessagesCount":
+				return ec.fieldContext_Chat_unreadMessagesCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -14761,6 +14906,8 @@ func (ec *executionContext) fieldContext_Mutation_createChat(ctx context.Context
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
+			case "unreadMessagesCount":
+				return ec.fieldContext_Chat_unreadMessagesCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -14834,6 +14981,8 @@ func (ec *executionContext) fieldContext_Mutation_deleteChat(ctx context.Context
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
+			case "unreadMessagesCount":
+				return ec.fieldContext_Chat_unreadMessagesCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -15033,6 +15182,8 @@ func (ec *executionContext) fieldContext_Mutation_sendMessage(ctx context.Contex
 				return ec.fieldContext_ChatMessage_user(ctx, field)
 			case "message":
 				return ec.fieldContext_ChatMessage_message(ctx, field)
+			case "isEdited":
+				return ec.fieldContext_ChatMessage_isEdited(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_ChatMessage_createdAt(ctx, field)
 			}
@@ -15047,6 +15198,75 @@ func (ec *executionContext) fieldContext_Mutation_sendMessage(ctx context.Contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_sendMessage_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_editChatMessage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_editChatMessage(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().EditChatMessage(rctx, fc.Args["input"].(model.EditChatMessageInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.ChatMessage)
+	fc.Result = res
+	return ec.marshalNChatMessage2ᚖexampleᚋinternalᚋdbᚐChatMessage(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_editChatMessage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ChatMessage_id(ctx, field)
+			case "chat":
+				return ec.fieldContext_ChatMessage_chat(ctx, field)
+			case "user":
+				return ec.fieldContext_ChatMessage_user(ctx, field)
+			case "message":
+				return ec.fieldContext_ChatMessage_message(ctx, field)
+			case "isEdited":
+				return ec.fieldContext_ChatMessage_isEdited(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_ChatMessage_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ChatMessage", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_editChatMessage_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -15108,6 +15328,8 @@ func (ec *executionContext) fieldContext_Mutation_updateChat(ctx context.Context
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
+			case "unreadMessagesCount":
+				return ec.fieldContext_Chat_unreadMessagesCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -21709,6 +21931,8 @@ func (ec *executionContext) fieldContext_Query_chat(ctx context.Context, field g
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
+			case "unreadMessagesCount":
+				return ec.fieldContext_Chat_unreadMessagesCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -26424,6 +26648,8 @@ func (ec *executionContext) fieldContext_Subscription_messageAdded(ctx context.C
 				return ec.fieldContext_ChatMessage_user(ctx, field)
 			case "message":
 				return ec.fieldContext_ChatMessage_message(ctx, field)
+			case "isEdited":
+				return ec.fieldContext_ChatMessage_isEdited(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_ChatMessage_createdAt(ctx, field)
 			}
@@ -33261,6 +33487,44 @@ func (ec *executionContext) unmarshalInputDownloadFilesInput(ctx context.Context
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputEditChatMessageInput(ctx context.Context, obj interface{}) (model.EditChatMessageInput, error) {
+	var it model.EditChatMessageInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "message"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "message":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("message"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Message = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputEmailAccountFilter(ctx context.Context, obj interface{}) (model.EmailAccountFilter, error) {
 	var it model.EmailAccountFilter
 	asMap := map[string]interface{}{}
@@ -35557,6 +35821,42 @@ func (ec *executionContext) _Chat(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "unreadMessagesCount":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Chat_unreadMessagesCount(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -35719,6 +36019,42 @@ func (ec *executionContext) _ChatMessage(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "isEdited":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ChatMessage_isEdited(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "createdAt":
 			out.Values[i] = ec._ChatMessage_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -38413,6 +38749,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "sendMessage":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_sendMessage(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "editChatMessage":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_editChatMessage(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -43202,6 +43545,11 @@ func (ec *executionContext) marshalNDownloadFilesPayload2ᚖexampleᚋinternal�
 		return graphql.Null
 	}
 	return ec._DownloadFilesPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNEditChatMessageInput2exampleᚋinternalᚋgraphᚋmodelᚐEditChatMessageInput(ctx context.Context, v interface{}) (model.EditChatMessageInput, error) {
+	res, err := ec.unmarshalInputEditChatMessageInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNEmailAccountType2exampleᚋinternalᚋdbᚐEmailAccountType(ctx context.Context, v interface{}) (db.EmailAccountType, error) {

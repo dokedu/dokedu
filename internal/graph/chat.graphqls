@@ -13,6 +13,7 @@ type Chat {
     lastMessage: String
     createdAt: Time!
     deletedAt: Time
+    unreadMessagesCount: Int!
 }
 
 type ChatUser {
@@ -28,6 +29,7 @@ type ChatMessage {
     chat: Chat!
     user: User!
     message: String!
+    isEdited: Boolean!
     createdAt: Time!
 }
 
@@ -70,12 +72,21 @@ input UpdateChatInput {
     name: String
 }
 
+
+input EditChatMessageInput {
+    id: ID!
+    message: String!
+}
+
 extend type Mutation {
     createChat(input: CreateChatInput!): Chat!
     deleteChat(input: DeleteChatInput!): Chat!
+
     addUserToChat(input: AddUserToChatInput!): ChatUser!
     removeUserFromChat(input: RemoveUserFromChatInput!): ChatUser!
+
     sendMessage(input: SendMessageInput!): ChatMessage!
+    editChatMessage(input: EditChatMessageInput!): ChatMessage!
     updateChat(input: UpdateChatInput!): Chat!
 }
 

@@ -14,8 +14,11 @@ import (
 	"example/internal/helper"
 	"example/internal/middleware"
 	"fmt"
+	"math/rand"
 	"strings"
 	"time"
+
+	"github.com/uptrace/bun"
 )
 
 // Name is the resolver for the name field.
@@ -136,6 +139,12 @@ func (r *chatResolver) DeletedAt(ctx context.Context, obj *db.Chat) (*time.Time,
 	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
 }
 
+// UnreadMessagesCount is the resolver for the unreadMessagesCount field.
+func (r *chatResolver) UnreadMessagesCount(ctx context.Context, obj *db.Chat) (int, error) {
+	// TODO: implement
+	return rand.Int() % 200, nil
+}
+
 // Chat is the resolver for the chat field.
 func (r *chatMessageResolver) Chat(ctx context.Context, obj *db.ChatMessage) (*db.Chat, error) {
 	currentUser, err := middleware.GetUser(ctx)
@@ -165,6 +174,15 @@ func (r *chatMessageResolver) User(ctx context.Context, obj *db.ChatMessage) (*d
 	}
 
 	return dataloaders.GetUser(ctx, obj.UserID, currentUser)
+}
+
+// IsEdited is the resolver for the isEdited field.
+func (r *chatMessageResolver) IsEdited(ctx context.Context, obj *db.ChatMessage) (bool, error) {
+	if obj.UpdatedAt.IsZero() {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 // Chat is the resolver for the chat field.
@@ -404,6 +422,46 @@ func (r *mutationResolver) SendMessage(ctx context.Context, input model.SendMess
 	// background handling of sending message to other users
 	go r.SubscriptionHandler.PublishMessage(&chatMessage)
 	go r.ChatMessageProcessor.NewMessage(chatMessage)
+
+	return &chatMessage, nil
+}
+
+// EditChatMessage is the resolver for the editChatMessage field.
+func (r *mutationResolver) EditChatMessage(ctx context.Context, input model.EditChatMessageInput) (*db.ChatMessage, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	var chatMessage db.ChatMessage
+	err = r.DB.NewSelect().
+		Model(&chatMessage).
+		Where("id = ?", input.ID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if err != nil {
+		return nil, errors.New("message not found")
+	}
+
+	// check that the message is less than 4096 characters
+	if len(input.Message) > 4096 {
+		return nil, errors.New("message too long, max 4096 characters")
+	}
+
+	chatMessage.Message = input.Message
+	chatMessage.UpdatedAt = bun.NullTime{Time: time.Now()}
+
+	err = r.DB.NewUpdate().
+		Model(&chatMessage).
+		Where("id = ?", input.ID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Returning("*").
+		Scan(ctx)
+	if err != nil {
+		return nil, errors.New("unable to update message")
+	}
+
+	go r.SubscriptionHandler.PublishMessage(&chatMessage)
 
 	return &chatMessage, nil
 }

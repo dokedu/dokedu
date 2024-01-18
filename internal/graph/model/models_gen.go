@@ -315,6 +315,11 @@ type DownloadFilesPayload struct {
 	URL string `json:"url"`
 }
 
+type EditChatMessageInput struct {
+	ID      string `json:"id"`
+	Message string `json:"message"`
+}
+
 type EmailAccountConnection struct {
 	Edges      []*db.EmailAccount `json:"edges,omitempty"`
 	PageInfo   *PageInfo          `json:"pageInfo"`
