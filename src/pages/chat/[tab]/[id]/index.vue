@@ -21,11 +21,13 @@
       </div>
     </router-link>
     <div ref="messageContainer" class="h-full flex-1 overflow-auto">
-      <div v-for="(group, _) in groupedMessages" :key="_" class="my-4 flex flex-col gap-1">
+      <div ref="root" v-for="(group, _) in groupedMessages" :key="_" class="my-4 flex flex-col gap-1">
         <d-chat-message
           v-for="message in group"
           :key="message.id"
           :message="message"
+          :data-message-id="message.id"
+          :data-message-seen="message.isSeen"
           :me="message.user.id === userData?.me?.id"
           type="GROUP"
         ></d-chat-message>
@@ -90,6 +92,39 @@ const route = useRoute("/chat/[tab]/[id]/")
 const id = computed(() => route.params.id)
 const messageContainer = ref<HTMLElement>()
 const { textarea, input } = useTextareaAutosize()
+import { useIntersectionObserver } from "@vueuse/core"
+import { useMarkMessageAsReadMutation } from "@/gql/mutations/chats/markMessageAsRead"
+
+const root = ref(null)
+
+const props = defineProps<{
+  refreshChat: () => Promise<void>
+}>()
+
+const { executeMutation: markAsRead } = useMarkMessageAsReadMutation()
+
+useIntersectionObserver(root, async ([{ isIntersecting, target }]) => {
+  let promises = []
+
+  for (const child of target.children) {
+    if (child.getAttribute("data-message-id")) {
+      const messageId = child.getAttribute("data-message-id")
+      const seen = (child.getAttribute("data-message-seen") === "true" ? true : false) || false
+      if (seen) continue
+      if (!messageId) continue
+      promises.push(markAsRead({ messageId: messageId }))
+    }
+  }
+
+  const wilLRefresh = isIntersecting && promises.length > 0
+
+  await Promise.all(promises)
+
+  if (wilLRefresh) {
+    await refresh()
+    await props.refreshChat()
+  }
+})
 
 const { data, executeQuery: refresh } = useChatQuery({
   variables: reactive({
@@ -198,14 +233,7 @@ function getLastSeenMinutes(user: any) {
   return minutes
 }
 
-useMessageAddedSubscription(
-  {
-    variables: reactive({
-      chatId: id
-    })
-  },
-  handleSubscription
-)
+useMessageAddedSubscription({}, handleSubscription)
 
 onMounted(() => {
   if (messageContainer.value) {

@@ -54,16 +54,16 @@
       </div>
     </div>
     <div class="w-full flex-1">
-      <div v-if="chat" class="w-full flex-1">
-        <router-view></router-view>
+      <div v-show="chat" class="w-full flex-1">
+        <router-view :refresh-chat="refresh"></router-view>
       </div>
       <!-- show start state-->
-      <div v-else class="w-full flex-1">
+      <div v-show="!chat" class="w-full flex-1">
         <d-empty :title="$t('chats')" :text="$t('chats_empty_description')" :icon="MessageCircle" :center="false">
           <template #actions>
-            <d-button size="sm" type="outline" :icon-left="BookUser" @click="navigateToContacts">{{
-              $t("contacts")
-            }}</d-button>
+            <d-button size="sm" type="outline" :icon-left="BookUser" @click="navigateToContacts">
+              {{ $t("contacts") }}
+            </d-button>
             <d-button size="sm" :icon-left="Plus" @click="createNewGroup">{{ $t("create_group") }}</d-button>
           </template>
         </d-empty>
@@ -100,6 +100,7 @@ import { useRouter } from "vue-router/auto"
 import i18n from "@/i18n"
 import type { User } from "@/gql/schema"
 import { useCreatePrivatChatMutation } from "@/gql/mutations/chats/createPrivatChat"
+import { useMessageAddedSubscription } from "@/gql/subscriptions/messageAdded"
 
 const tab = useRouteParams("tab", "chats")
 const chat = useRouteParams("id", "")
@@ -123,6 +124,12 @@ async function createChatWithUser(user: User) {
   router.push({ name: "/chat/[tab]/[id]/", params: { tab: "chats", id: data?.createPrivatChat.id } })
 }
 
+async function handleSubscription() {
+  await refresh()
+}
+
+useMessageAddedSubscription({}, handleSubscription)
+
 async function createNewGroup() {
   const createResult = await createChat({
     input: {
@@ -136,6 +143,8 @@ function navigateToContacts() {
   router.push({ name: "/chat/[tab]", params: { tab: "contacts" } })
 }
 
-const { data: chatList } = useChatsQuery({})
+const { data: chatList, executeQuery: refresh } = useChatsQuery({
+  requestPolicy: "network-only"
+})
 const { data: users } = useChatUsersQuery({})
 </script>

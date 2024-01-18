@@ -1,8 +1,9 @@
-subscription messageAdded($chatId: ID!) {
-  messageAdded(chatId: $chatId) {
+subscription messageAdded {
+  messageAdded {
     id
     chat {
       id
+      unreadMessageCount
       lastMessage {
         id
         message

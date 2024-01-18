@@ -37,6 +37,7 @@ type Props = {
   message: ChatMessageFragment
   me?: boolean
   type: "PRIVATE" | "GROUP" | "CHANNEL"
+  target: HTMLElement | null
 }
 
 const props = defineProps<Props>()

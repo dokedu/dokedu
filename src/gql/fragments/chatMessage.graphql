@@ -8,5 +8,6 @@ fragment chatMessage on ChatMessage {
     email
   }
   isEdited
+  isSeen
   createdAt
 }

@@ -9,7 +9,7 @@ export type ChatQueryVariables = Types.Exact<{
 }>;
 
 
-export type ChatQuery = { __typename?: 'Query', chat: { __typename?: 'Chat', id: string, name?: string | null, type: Types.ChatType, userCount: number, messages: Array<{ __typename?: 'ChatMessage', id: string, message: string, isEdited: boolean, createdAt: never, user: { __typename?: 'User', id: string, firstName: string, lastName: string, email?: string | null } }>, users: Array<{ __typename?: 'User', id: string, firstName: string, lastSeenAt?: never | null }> } };
+export type ChatQuery = { __typename?: 'Query', chat: { __typename?: 'Chat', id: string, name?: string | null, unreadMessageCount: number, type: Types.ChatType, userCount: number, messages: Array<{ __typename?: 'ChatMessage', id: string, message: string, isEdited: boolean, isSeen: boolean, createdAt: never, user: { __typename?: 'User', id: string, firstName: string, lastName: string, email?: string | null } }>, users: Array<{ __typename?: 'User', id: string, firstName: string, lastSeenAt?: never | null }> } };
 
 
 export const ChatDocument = gql`
@@ -20,6 +20,7 @@ export const ChatDocument = gql`
     messages {
       ...chatMessage
     }
+    unreadMessageCount
     type
     userCount
     users {

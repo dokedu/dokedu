@@ -31,11 +31,13 @@ import { UserRound } from "lucide-vue-next"
 import useInitials from "@/composables/useInitials"
 import DNotificationCircle from "@/components/_chat/d-notification-circle.vue"
 import useTime from "@/composables/useTime"
+import { toRef } from "vue"
 
 type Props = {
   chat: Chat
   active: boolean
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
+const chat = toRef(props, "chat")
 </script>

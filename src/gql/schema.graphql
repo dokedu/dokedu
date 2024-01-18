@@ -58,6 +58,7 @@ type ChatMessage {
   createdAt: Time!
   id: ID!
   isEdited: Boolean!
+  isSeen: Boolean!
   message: String!
   user: User!
 }
@@ -708,6 +709,7 @@ type Mutation {
   editShare(input: CreateShareInput!): ShareUser!
   forgotPassword(input: ForgotPasswordInput!): ForgotPasswordPayload!
   importStudents(input: ImportStudentsInput!): ImportStudentsPayload!
+  markMessageAsRead(messageId: ID!): ChatMessage!
   moveFile(input: MoveFileInput!): File!
   moveFiles(input: MoveFilesInput!): MoveFilesPayload!
   previewFile(input: PreviewFileInput!): PreviewFilePayload!
@@ -967,7 +969,7 @@ type SubjectConnection {
 }
 
 type Subscription {
-  messageAdded(chatId: ID!): ChatMessage!
+  messageAdded: ChatMessage!
 }
 
 type Tag {

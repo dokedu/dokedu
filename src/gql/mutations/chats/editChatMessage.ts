@@ -9,7 +9,7 @@ export type EditChatMessageMutationVariables = Types.Exact<{
 }>;
 
 
-export type EditChatMessageMutation = { __typename?: 'Mutation', editChatMessage: { __typename?: 'ChatMessage', id: string, message: string, isEdited: boolean, createdAt: never, user: { __typename?: 'User', id: string, firstName: string, lastName: string, email?: string | null } } };
+export type EditChatMessageMutation = { __typename?: 'Mutation', editChatMessage: { __typename?: 'ChatMessage', id: string, message: string, isEdited: boolean, isSeen: boolean, createdAt: never, user: { __typename?: 'User', id: string, firstName: string, lastName: string, email?: string | null } } };
 
 
 export const EditChatMessageDocument = gql`

@@ -371,6 +371,17 @@ export default {
             "args": []
           },
           {
+            "name": "isSeen",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "message",
             "type": {
               "kind": "NON_NULL",
@@ -3475,6 +3486,29 @@ export default {
             ]
           },
           {
+            "name": "markMessageAsRead",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ChatMessage",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "messageId",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
             "name": "moveFile",
             "type": {
               "kind": "NON_NULL",
@@ -6032,18 +6066,7 @@ export default {
                 "ofType": null
               }
             },
-            "args": [
-              {
-                "name": "chatId",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Any"
-                  }
-                }
-              }
-            ]
+            "args": []
           }
         ],
         "interfaces": []
