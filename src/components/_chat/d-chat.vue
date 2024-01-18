@@ -9,7 +9,9 @@
         <div class="flex mb-1">
           <div class="font-semibold flex-1">{{ chat?.name }}</div>
           <!-- TODO: implement real time based on lastMessage -->
-          <div class="text-xs" :class="active ? 'text-white' : 'text-subtle'">6:30</div>
+          <div class="text-xs" :class="active ? 'text-white' : 'text-subtle'">
+            {{ useTime(chat?.lastMessage?.createdAt) }}
+          </div>
         </div>
         <div class="flex">
           <div class="text-xs line-clamp-1 flex-1" :class="active ? 'text-white' : 'text-subtle'">
@@ -28,6 +30,7 @@ import DAvatar from "@/components/d-avatar/d-avatar.vue"
 import { UserRound } from "lucide-vue-next"
 import useInitials from "@/composables/useInitials"
 import DNotificationCircle from "@/components/_chat/d-notification-circle.vue"
+import useTime from "@/composables/useTime"
 
 type Props = {
   chat: Chat
