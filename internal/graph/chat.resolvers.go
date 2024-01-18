@@ -129,13 +129,26 @@ func (r *chatResolver) DeletedAt(ctx context.Context, obj *db.Chat) (*time.Time,
 	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
 }
 
-// UnreadMessagesCount is the resolver for the unreadMessagesCount field.
-func (r *chatResolver) UnreadMessagesCount(ctx context.Context, obj *db.Chat) (int, error) {
+// UnreadMessageCount is the resolver for the unreadMessageCount field.
+func (r *chatResolver) UnreadMessageCount(ctx context.Context, obj *db.Chat) (int, error) {
 	if (rand.Int() % 100) < 70 {
 		return 0, nil
 	} else {
 		return rand.Int() % 200, nil
 	}
+}
+
+// UserCount is the resolver for the userCount field.
+func (r *chatResolver) UserCount(ctx context.Context, obj *db.Chat) (int, error) {
+	count, err := r.DB.NewSelect().
+		Model(&db.ChatUser{}).
+		Where("chat_id = ?", obj.ID).
+		Count(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }
 
 // Chat is the resolver for the chat field.
@@ -610,13 +623,6 @@ func (r *queryResolver) Chat(ctx context.Context, id string) (*db.Chat, error) {
 	return &chat, nil
 }
 
-type ChatWithLastMessage struct {
-	bun.BaseModel `bun:"table:chats"`
-
-	*db.Chat
-	LastMessage time.Time `bun:"last_message_at"`
-}
-
 // Chats is the resolver for the chats field.
 func (r *queryResolver) Chats(ctx context.Context, limit *int, offset *int) (*model.ChatConnection, error) {
 	currentUser, err := middleware.GetUser(ctx)
@@ -638,6 +644,7 @@ func (r *queryResolver) Chats(ctx context.Context, limit *int, offset *int) (*mo
 		TableExpr("chats AS chat").
 		Where("chat_users.user_id = ?", currentUser.ID).
 		Where("chat.organisation_id = ?", currentUser.OrganisationID).
+		Where("chat.deleted_at IS NULL").
 		Limit(pageLimit).
 		Offset(pageOffset).
 		Group("chat.id").
@@ -714,3 +721,10 @@ type chatResolver struct{ *Resolver }
 type chatMessageResolver struct{ *Resolver }
 type chatUserResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
+
+type ChatWithLastMessage struct {
+	bun.BaseModel `bun:"table:chats"`
+
+	*db.Chat
+	LastMessage time.Time `bun:"last_message_at"`
+}

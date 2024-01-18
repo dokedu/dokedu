@@ -90,15 +90,16 @@ type ComplexityRoot struct {
 	}
 
 	Chat struct {
-		CreatedAt           func(childComplexity int) int
-		DeletedAt           func(childComplexity int) int
-		ID                  func(childComplexity int) int
-		LastMessage         func(childComplexity int) int
-		Messages            func(childComplexity int) int
-		Name                func(childComplexity int) int
-		Type                func(childComplexity int) int
-		UnreadMessagesCount func(childComplexity int) int
-		Users               func(childComplexity int) int
+		CreatedAt          func(childComplexity int) int
+		DeletedAt          func(childComplexity int) int
+		ID                 func(childComplexity int) int
+		LastMessage        func(childComplexity int) int
+		Messages           func(childComplexity int) int
+		Name               func(childComplexity int) int
+		Type               func(childComplexity int) int
+		UnreadMessageCount func(childComplexity int) int
+		UserCount          func(childComplexity int) int
+		Users              func(childComplexity int) int
 	}
 
 	ChatConnection struct {
@@ -678,7 +679,8 @@ type ChatResolver interface {
 	LastMessage(ctx context.Context, obj *db.Chat) (*db.ChatMessage, error)
 
 	DeletedAt(ctx context.Context, obj *db.Chat) (*time.Time, error)
-	UnreadMessagesCount(ctx context.Context, obj *db.Chat) (int, error)
+	UnreadMessageCount(ctx context.Context, obj *db.Chat) (int, error)
+	UserCount(ctx context.Context, obj *db.Chat) (int, error)
 }
 type ChatMessageResolver interface {
 	Chat(ctx context.Context, obj *db.ChatMessage) (*db.Chat, error)
@@ -1091,12 +1093,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Chat.Type(childComplexity), true
 
-	case "Chat.unreadMessagesCount":
-		if e.complexity.Chat.UnreadMessagesCount == nil {
+	case "Chat.unreadMessageCount":
+		if e.complexity.Chat.UnreadMessageCount == nil {
 			break
 		}
 
-		return e.complexity.Chat.UnreadMessagesCount(childComplexity), true
+		return e.complexity.Chat.UnreadMessageCount(childComplexity), true
+
+	case "Chat.userCount":
+		if e.complexity.Chat.UserCount == nil {
+			break
+		}
+
+		return e.complexity.Chat.UserCount(childComplexity), true
 
 	case "Chat.users":
 		if e.complexity.Chat.Users == nil {
@@ -8020,8 +8029,8 @@ func (ec *executionContext) fieldContext_Chat_deletedAt(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Chat_unreadMessagesCount(ctx context.Context, field graphql.CollectedField, obj *db.Chat) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Chat_unreadMessagesCount(ctx, field)
+func (ec *executionContext) _Chat_unreadMessageCount(ctx context.Context, field graphql.CollectedField, obj *db.Chat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Chat_unreadMessageCount(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -8034,7 +8043,7 @@ func (ec *executionContext) _Chat_unreadMessagesCount(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Chat().UnreadMessagesCount(rctx, obj)
+		return ec.resolvers.Chat().UnreadMessageCount(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8051,7 +8060,51 @@ func (ec *executionContext) _Chat_unreadMessagesCount(ctx context.Context, field
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Chat_unreadMessagesCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Chat_unreadMessageCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Chat",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Chat_userCount(ctx context.Context, field graphql.CollectedField, obj *db.Chat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Chat_userCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Chat().UserCount(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Chat_userCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Chat",
 		Field:      field,
@@ -8116,8 +8169,10 @@ func (ec *executionContext) fieldContext_ChatConnection_edges(ctx context.Contex
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
-			case "unreadMessagesCount":
-				return ec.fieldContext_Chat_unreadMessagesCount(ctx, field)
+			case "unreadMessageCount":
+				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
+			case "userCount":
+				return ec.fieldContext_Chat_userCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -8320,8 +8375,10 @@ func (ec *executionContext) fieldContext_ChatMessage_chat(ctx context.Context, f
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
-			case "unreadMessagesCount":
-				return ec.fieldContext_Chat_unreadMessagesCount(ctx, field)
+			case "unreadMessageCount":
+				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
+			case "userCount":
+				return ec.fieldContext_Chat_userCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -8630,8 +8687,10 @@ func (ec *executionContext) fieldContext_ChatUser_chat(ctx context.Context, fiel
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
-			case "unreadMessagesCount":
-				return ec.fieldContext_Chat_unreadMessagesCount(ctx, field)
+			case "unreadMessageCount":
+				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
+			case "userCount":
+				return ec.fieldContext_Chat_userCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -14949,8 +15008,10 @@ func (ec *executionContext) fieldContext_Mutation_createChat(ctx context.Context
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
-			case "unreadMessagesCount":
-				return ec.fieldContext_Chat_unreadMessagesCount(ctx, field)
+			case "unreadMessageCount":
+				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
+			case "userCount":
+				return ec.fieldContext_Chat_userCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -15024,8 +15085,10 @@ func (ec *executionContext) fieldContext_Mutation_deleteChat(ctx context.Context
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
-			case "unreadMessagesCount":
-				return ec.fieldContext_Chat_unreadMessagesCount(ctx, field)
+			case "unreadMessageCount":
+				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
+			case "userCount":
+				return ec.fieldContext_Chat_userCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -15099,8 +15162,10 @@ func (ec *executionContext) fieldContext_Mutation_createPrivatChat(ctx context.C
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
-			case "unreadMessagesCount":
-				return ec.fieldContext_Chat_unreadMessagesCount(ctx, field)
+			case "unreadMessageCount":
+				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
+			case "userCount":
+				return ec.fieldContext_Chat_userCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -15446,8 +15511,10 @@ func (ec *executionContext) fieldContext_Mutation_updateChat(ctx context.Context
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
-			case "unreadMessagesCount":
-				return ec.fieldContext_Chat_unreadMessagesCount(ctx, field)
+			case "unreadMessageCount":
+				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
+			case "userCount":
+				return ec.fieldContext_Chat_userCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -22049,8 +22116,10 @@ func (ec *executionContext) fieldContext_Query_chat(ctx context.Context, field g
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
-			case "unreadMessagesCount":
-				return ec.fieldContext_Chat_unreadMessagesCount(ctx, field)
+			case "unreadMessageCount":
+				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
+			case "userCount":
+				return ec.fieldContext_Chat_userCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -35939,7 +36008,7 @@ func (ec *executionContext) _Chat(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "unreadMessagesCount":
+		case "unreadMessageCount":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -35948,7 +36017,43 @@ func (ec *executionContext) _Chat(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Chat_unreadMessagesCount(ctx, field, obj)
+				res = ec._Chat_unreadMessageCount(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "userCount":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Chat_userCount(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}

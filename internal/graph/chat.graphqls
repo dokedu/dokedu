@@ -13,7 +13,8 @@ type Chat {
     lastMessage: ChatMessage
     createdAt: Time!
     deletedAt: Time
-    unreadMessagesCount: Int!
+    unreadMessageCount: Int!
+    userCount: Int!
 }
 
 type ChatUser {
