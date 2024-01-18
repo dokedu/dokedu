@@ -28,11 +28,13 @@ import DAvatar from "@/components/d-avatar/d-avatar.vue"
 import { UserRound } from "lucide-vue-next"
 import useInitials from "@/composables/useInitials"
 import DNotificationCircle from "@/components/_chat/d-notification-circle.vue"
+import { toRef } from "vue"
 
 type Props = {
   chat: Chat
   active: boolean
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
+const chat = toRef(props, "chat")
 </script>

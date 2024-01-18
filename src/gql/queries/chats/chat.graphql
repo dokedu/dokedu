@@ -5,6 +5,7 @@ query chat($id: ID!) {
     messages {
       ...chatMessage
     }
+    unreadMessageCount
     type
     userCount
   }

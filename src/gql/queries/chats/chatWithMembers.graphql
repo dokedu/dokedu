@@ -3,6 +3,7 @@ query chatWithMembers($id: ID!) {
     id
     name
     type
+    unreadMessageCount
     users {
       id
       firstName

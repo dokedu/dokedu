@@ -8,7 +8,7 @@ export type ChatWithMembersQueryVariables = Types.Exact<{
 }>;
 
 
-export type ChatWithMembersQuery = { __typename?: 'Query', chat: { __typename?: 'Chat', id: string, name?: string | null, type: Types.ChatType, users: Array<{ __typename?: 'User', id: string, firstName: string, lastName: string, email?: string | null }> } };
+export type ChatWithMembersQuery = { __typename?: 'Query', chat: { __typename?: 'Chat', id: string, name?: string | null, type: Types.ChatType, unreadMessageCount: number, users: Array<{ __typename?: 'User', id: string, firstName: string, lastName: string, email?: string | null }> } };
 
 
 export const ChatWithMembersDocument = gql`
@@ -17,6 +17,7 @@ export const ChatWithMembersDocument = gql`
     id
     name
     type
+    unreadMessageCount
     users {
       id
       firstName
