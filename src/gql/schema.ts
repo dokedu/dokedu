@@ -76,6 +76,7 @@ export type ChatMessage = {
   chat: Chat;
   createdAt: Scalars['Time']['output'];
   id: Scalars['ID']['output'];
+  isEdited: Scalars['Boolean']['output'];
   message: Scalars['String']['output'];
   user: User;
 };
@@ -430,6 +431,11 @@ export type DownloadFilesPayload = {
   url: Scalars['String']['output'];
 };
 
+export type EditChatMessageInput = {
+  id: Scalars['ID']['input'];
+  message: Scalars['String']['input'];
+};
+
 export type Email = {
   __typename?: 'Email';
   address: Scalars['String']['output'];
@@ -758,6 +764,7 @@ export type Mutation = {
   deleteSubject: Subject;
   downloadFile: DownloadFilePayload;
   downloadFiles: DownloadFilesPayload;
+  editChatMessage: ChatMessage;
   editShare: ShareUser;
   forgotPassword: ForgotPasswordPayload;
   importStudents: ImportStudentsPayload;
@@ -1067,6 +1074,11 @@ export type MutationDownloadFileArgs = {
 
 export type MutationDownloadFilesArgs = {
   input: DownloadFilesInput;
+};
+
+
+export type MutationEditChatMessageArgs = {
+  input: EditChatMessageInput;
 };
 
 
@@ -2103,6 +2115,7 @@ export type GraphCacheResolvers = {
     chat?: GraphCacheResolver<WithTypename<ChatMessage>, Record<string, never>, WithTypename<Chat> | string>,
     createdAt?: GraphCacheResolver<WithTypename<ChatMessage>, Record<string, never>, Scalars['Time'] | string>,
     id?: GraphCacheResolver<WithTypename<ChatMessage>, Record<string, never>, Scalars['ID'] | string>,
+    isEdited?: GraphCacheResolver<WithTypename<ChatMessage>, Record<string, never>, Scalars['Boolean'] | string>,
     message?: GraphCacheResolver<WithTypename<ChatMessage>, Record<string, never>, Scalars['String'] | string>,
     user?: GraphCacheResolver<WithTypename<ChatMessage>, Record<string, never>, WithTypename<User> | string>
   },
@@ -2509,6 +2522,7 @@ export type GraphCacheOptimisticUpdaters = {
   deleteSubject?: GraphCacheOptimisticMutationResolver<MutationDeleteSubjectArgs, WithTypename<Subject>>,
   downloadFile?: GraphCacheOptimisticMutationResolver<MutationDownloadFileArgs, WithTypename<DownloadFilePayload>>,
   downloadFiles?: GraphCacheOptimisticMutationResolver<MutationDownloadFilesArgs, WithTypename<DownloadFilesPayload>>,
+  editChatMessage?: GraphCacheOptimisticMutationResolver<MutationEditChatMessageArgs, WithTypename<ChatMessage>>,
   editShare?: GraphCacheOptimisticMutationResolver<MutationEditShareArgs, WithTypename<ShareUser>>,
   forgotPassword?: GraphCacheOptimisticMutationResolver<MutationForgotPasswordArgs, WithTypename<ForgotPasswordPayload>>,
   importStudents?: GraphCacheOptimisticMutationResolver<MutationImportStudentsArgs, WithTypename<ImportStudentsPayload>>,
@@ -2650,6 +2664,7 @@ export type GraphCacheUpdaters = {
     deleteSubject?: GraphCacheUpdateResolver<{ deleteSubject: WithTypename<Subject> }, MutationDeleteSubjectArgs>,
     downloadFile?: GraphCacheUpdateResolver<{ downloadFile: WithTypename<DownloadFilePayload> }, MutationDownloadFileArgs>,
     downloadFiles?: GraphCacheUpdateResolver<{ downloadFiles: WithTypename<DownloadFilesPayload> }, MutationDownloadFilesArgs>,
+    editChatMessage?: GraphCacheUpdateResolver<{ editChatMessage: WithTypename<ChatMessage> }, MutationEditChatMessageArgs>,
     editShare?: GraphCacheUpdateResolver<{ editShare: WithTypename<ShareUser> }, MutationEditShareArgs>,
     forgotPassword?: GraphCacheUpdateResolver<{ forgotPassword: WithTypename<ForgotPasswordPayload> }, MutationForgotPasswordArgs>,
     importStudents?: GraphCacheUpdateResolver<{ importStudents: WithTypename<ImportStudentsPayload> }, MutationImportStudentsArgs>,
@@ -2726,6 +2741,7 @@ export type GraphCacheUpdaters = {
     chat?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatMessage>>, Record<string, never>>,
     createdAt?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatMessage>>, Record<string, never>>,
     id?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatMessage>>, Record<string, never>>,
+    isEdited?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatMessage>>, Record<string, never>>,
     message?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatMessage>>, Record<string, never>>,
     user?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatMessage>>, Record<string, never>>
   },

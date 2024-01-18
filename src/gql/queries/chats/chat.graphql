@@ -3,14 +3,7 @@ query chat($id: ID!) {
     id
     name
     messages {
-      id
-      message
-      user {
-        id
-        firstName
-        lastName
-      }
-      createdAt
+      ...chatMessage
     }
   }
 }

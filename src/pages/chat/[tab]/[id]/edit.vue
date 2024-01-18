@@ -27,7 +27,7 @@
       <div class="px-4 flex justify-center gap-4">
         <d-button-add-chat-user :chat-id="route.params.id" />
         <d-button type="outline" @click="soon">Leave</d-button>
-        <d-button type="outline" @click="soon">Delete</d-button>
+        <d-button type="outline" @click="deleteChat">Delete</d-button>
       </div>
       <div class="px-4 divide-y">
         <div class="group p-2 flex justify-between items-center" v-for="user in data?.chat.users" :key="user.id">
@@ -59,8 +59,11 @@ import { useChatWithMembersQuery } from "@/gql/queries/chats/chatWithMembers"
 import { useUpdateChatMutation } from "@/gql/mutations/chats/updateChat"
 import { useRemoveUserFromChatMutation } from "@/gql/mutations/chats/removeUserFromChat"
 import { ChatType } from "@/gql/schema"
+import { useDeleteChatMutation } from "@/gql/mutations/chats/deleteChat"
+import { useRouter } from "vue-router/auto"
 
 const route = useRoute("/chat/[tab]/[id]/edit")
+const router = useRouter()
 
 const id = computed(() => route.params.id)
 
@@ -71,6 +74,7 @@ const { data } = useChatWithMembersQuery({
 })
 
 const { executeMutation } = useUpdateChatMutation()
+const { executeMutation: deleteChatMut } = useDeleteChatMutation()
 
 async function updateChat() {
   await executeMutation({
@@ -99,6 +103,17 @@ async function removeUserFromChat(userId: string) {
       userId: userId
     }
   })
+}
+
+async function deleteChat() {
+  const a = confirm("Are you sure you want to remove this user from the chat?")
+  if (!a) return
+  await deleteChatMut({
+    input: {
+      id: id.value
+    }
+  })
+  await router.push("/chat/chats")
 }
 
 function soon() {

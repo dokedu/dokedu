@@ -55,6 +55,7 @@ type ChatMessage {
   chat: Chat!
   createdAt: Time!
   id: ID!
+  isEdited: Boolean!
   message: String!
   user: User!
 }
@@ -382,6 +383,11 @@ type DownloadFilesPayload {
   url: String!
 }
 
+input EditChatMessageInput {
+  id: ID!
+  message: String!
+}
+
 type Email {
   address: String!
   createdAt: String!
@@ -695,6 +701,7 @@ type Mutation {
   deleteSubject(id: ID!): Subject!
   downloadFile(input: DownloadFileInput!): DownloadFilePayload!
   downloadFiles(input: DownloadFilesInput!): DownloadFilesPayload!
+  editChatMessage(input: EditChatMessageInput!): ChatMessage!
   editShare(input: CreateShareInput!): ShareUser!
   forgotPassword(input: ForgotPasswordInput!): ForgotPasswordPayload!
   importStudents(input: ImportStudentsInput!): ImportStudentsPayload!
