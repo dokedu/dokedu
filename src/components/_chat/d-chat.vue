@@ -12,7 +12,7 @@
         </div>
 
         <div class="text-xs line-clamp-1" :class="active ? 'text-white' : 'text-subtle'">
-          {{ chat?.lastMessage ? chat?.lastMessage : `No messages yet` }}
+          {{ chat?.lastMessage ? chat?.lastMessage.message : `No messages yet` }}
         </div>
       </div>
     </div>

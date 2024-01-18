@@ -57,10 +57,11 @@ export type Chat = {
   createdAt: Scalars['Time']['output'];
   deletedAt?: Maybe<Scalars['Time']['output']>;
   id: Scalars['ID']['output'];
-  lastMessage?: Maybe<Scalars['String']['output']>;
+  lastMessage?: Maybe<ChatMessage>;
   messages: Array<ChatMessage>;
   name?: Maybe<Scalars['String']['output']>;
   type: ChatType;
+  unreadMessagesCount: Scalars['Int']['output'];
   users: Array<User>;
 };
 
@@ -735,6 +736,7 @@ export type Mutation = {
   createEntryUser: Entry;
   createEvent: Event;
   createFolder: File;
+  createPrivatChat: Chat;
   createReport: Report;
   createSchoolYear: SchoolYear;
   createShare: ShareUser;
@@ -929,6 +931,11 @@ export type MutationCreateEventArgs = {
 
 export type MutationCreateFolderArgs = {
   input: CreateFolderInput;
+};
+
+
+export type MutationCreatePrivatChatArgs = {
+  userId: Scalars['ID']['input'];
 };
 
 
@@ -2100,10 +2107,11 @@ export type GraphCacheResolvers = {
     createdAt?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Scalars['Time'] | string>,
     deletedAt?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Scalars['Time'] | string>,
     id?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Scalars['ID'] | string>,
-    lastMessage?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Scalars['String'] | string>,
+    lastMessage?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, WithTypename<ChatMessage> | string>,
     messages?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Array<WithTypename<ChatMessage> | string>>,
     name?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Scalars['String'] | string>,
     type?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, ChatType | string>,
+    unreadMessagesCount?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Scalars['Int'] | string>,
     users?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Array<WithTypename<User> | string>>
   },
   ChatConnection?: {
@@ -2493,6 +2501,7 @@ export type GraphCacheOptimisticUpdaters = {
   createEntryUser?: GraphCacheOptimisticMutationResolver<MutationCreateEntryUserArgs, WithTypename<Entry>>,
   createEvent?: GraphCacheOptimisticMutationResolver<MutationCreateEventArgs, WithTypename<Event>>,
   createFolder?: GraphCacheOptimisticMutationResolver<MutationCreateFolderArgs, WithTypename<File>>,
+  createPrivatChat?: GraphCacheOptimisticMutationResolver<MutationCreatePrivatChatArgs, WithTypename<Chat>>,
   createReport?: GraphCacheOptimisticMutationResolver<MutationCreateReportArgs, WithTypename<Report>>,
   createSchoolYear?: GraphCacheOptimisticMutationResolver<MutationCreateSchoolYearArgs, WithTypename<SchoolYear>>,
   createShare?: GraphCacheOptimisticMutationResolver<MutationCreateShareArgs, WithTypename<ShareUser>>,
@@ -2635,6 +2644,7 @@ export type GraphCacheUpdaters = {
     createEntryUser?: GraphCacheUpdateResolver<{ createEntryUser: WithTypename<Entry> }, MutationCreateEntryUserArgs>,
     createEvent?: GraphCacheUpdateResolver<{ createEvent: WithTypename<Event> }, MutationCreateEventArgs>,
     createFolder?: GraphCacheUpdateResolver<{ createFolder: WithTypename<File> }, MutationCreateFolderArgs>,
+    createPrivatChat?: GraphCacheUpdateResolver<{ createPrivatChat: WithTypename<Chat> }, MutationCreatePrivatChatArgs>,
     createReport?: GraphCacheUpdateResolver<{ createReport: WithTypename<Report> }, MutationCreateReportArgs>,
     createSchoolYear?: GraphCacheUpdateResolver<{ createSchoolYear: WithTypename<SchoolYear> }, MutationCreateSchoolYearArgs>,
     createShare?: GraphCacheUpdateResolver<{ createShare: WithTypename<ShareUser> }, MutationCreateShareArgs>,
@@ -2730,6 +2740,7 @@ export type GraphCacheUpdaters = {
     messages?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>,
     name?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>,
     type?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>,
+    unreadMessagesCount?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>,
     users?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>
   },
   ChatConnection?: {

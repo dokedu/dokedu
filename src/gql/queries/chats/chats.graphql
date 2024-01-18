@@ -3,7 +3,10 @@ query chats {
     edges {
       id
       name
-      lastMessage
+      lastMessage {
+        id
+        message
+      }
     }
   }
 }

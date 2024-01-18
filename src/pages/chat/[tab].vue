@@ -98,11 +98,11 @@ import { useRouteParams } from "@vueuse/router"
 import { useChatsQuery } from "@/gql/queries/chats/chats"
 import { useChatUsersQuery } from "@/gql/queries/chats/chatUsers"
 import { ref } from "vue"
-import { useAddUserToChatMutation } from "@/gql/mutations/chats/addUserToChat"
 import { useCreateChatMutation } from "@/gql/mutations/chats/createChat"
 import { useRouter } from "vue-router/auto"
 
 import type { User } from "@/gql/schema"
+import { useCreatePrivatChatMutation } from "@/gql/mutations/chats/createPrivatChat"
 
 const tab = useRouteParams("tab", "chats")
 const chat = useRouteParams("id", "")
@@ -115,23 +115,15 @@ const sidebars = [
 ]
 
 const { executeMutation: createChat } = useCreateChatMutation()
-const { executeMutation: addUserToChatMut } = useAddUserToChatMutation()
+const { executeMutation: createPrivatChat } = useCreatePrivatChatMutation()
 
 async function createChatWithUser(user: User) {
-  const createChatResult = await createChat({
-    input: {
-      name: user.firstName + " " + user.lastName
-    }
+  const { data } = await createPrivatChat({
+    userId: user.id
   })
-  if (!createChatResult.data?.createChat?.id) return
-  const addUserResult = await addUserToChatMut({
-    input: {
-      chatId: createChatResult.data?.createChat?.id,
-      userId: user.id
-    }
-  })
-  if (!addUserResult.data?.addUserToChat?.chat?.id) return
-  router.push({ name: "/chat/[tab]/[id]/", params: { tab: "chats", id: addUserResult.data?.addUserToChat?.chat?.id } })
+
+  if (!data?.createPrivatChat.id) return
+  router.push({ name: "/chat/[tab]/[id]/", params: { tab: "chats", id: data?.createPrivatChat.id } })
 }
 
 async function createNewGroup() {

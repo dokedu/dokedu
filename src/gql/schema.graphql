@@ -38,10 +38,11 @@ type Chat {
   createdAt: Time!
   deletedAt: Time
   id: ID!
-  lastMessage: String
+  lastMessage: ChatMessage
   messages: [ChatMessage!]!
   name: String
   type: ChatType!
+  unreadMessagesCount: Int!
   users: [User!]!
 }
 
@@ -672,6 +673,7 @@ type Mutation {
   createEntryUser(input: CreateEntryUserInput!): Entry!
   createEvent(input: CreateEventInput!): Event!
   createFolder(input: CreateFolderInput!): File!
+  createPrivatChat(userId: ID!): Chat!
   createReport(input: CreateReportInput!): Report!
   createSchoolYear(input: CreateSchoolYearInput!): SchoolYear!
   createShare(input: CreateShareInput!): ShareUser!
