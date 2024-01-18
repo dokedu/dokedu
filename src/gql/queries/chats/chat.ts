@@ -1,6 +1,7 @@
 import type * as Types from '../../schema';
 
 import gql from 'graphql-tag';
+import { ChatMessageFragmentDoc } from '../../fragments/chatMessage';
 import * as Urql from '@urql/vue';
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type ChatQueryVariables = Types.Exact<{
@@ -8,7 +9,7 @@ export type ChatQueryVariables = Types.Exact<{
 }>;
 
 
-export type ChatQuery = { __typename?: 'Query', chat: { __typename?: 'Chat', id: string, name?: string | null, messages: Array<{ __typename?: 'ChatMessage', id: string, message: string, createdAt: never, user: { __typename?: 'User', id: string, firstName: string, lastName: string } }> } };
+export type ChatQuery = { __typename?: 'Query', chat: { __typename?: 'Chat', id: string, name?: string | null, messages: Array<{ __typename?: 'ChatMessage', id: string, message: string, isEdited: boolean, createdAt: never, user: { __typename?: 'User', id: string, firstName: string, lastName: string, email?: string | null } }> } };
 
 
 export const ChatDocument = gql`
@@ -17,18 +18,11 @@ export const ChatDocument = gql`
     id
     name
     messages {
-      id
-      message
-      user {
-        id
-        firstName
-        lastName
-      }
-      createdAt
+      ...chatMessage
     }
   }
 }
-    `;
+    ${ChatMessageFragmentDoc}`;
 
 export function useChatQuery(options: Omit<Urql.UseQueryArgs<never, ChatQueryVariables>, 'query'>) {
   return Urql.useQuery<ChatQuery, ChatQueryVariables>({ query: ChatDocument, ...options });
