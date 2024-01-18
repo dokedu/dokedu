@@ -100,7 +100,7 @@ func (r *chatResolver) Messages(ctx context.Context, obj *db.Chat) ([]*db.ChatMe
 }
 
 // LastMessage is the resolver for the lastMessage field.
-func (r *chatResolver) LastMessage(ctx context.Context, obj *db.Chat) (*string, error) {
+func (r *chatResolver) LastMessage(ctx context.Context, obj *db.Chat) (*db.ChatMessage, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, nil
@@ -121,17 +121,7 @@ func (r *chatResolver) LastMessage(ctx context.Context, obj *db.Chat) (*string, 
 		return nil, err
 	}
 
-	// chatMessage.Message is the last message
-	var msgPreview string
-
-	// only return the first 50 chars of the message
-	if len(chatMessage.Message) > 100 {
-		msgPreview = chatMessage.Message[:100] + "..."
-	} else {
-		msgPreview = chatMessage.Message
-	}
-
-	return &msgPreview, nil
+	return &chatMessage, nil
 }
 
 // DeletedAt is the resolver for the deletedAt field.
@@ -300,6 +290,99 @@ func (r *mutationResolver) DeleteChat(ctx context.Context, input model.DeleteCha
 	return &chat, nil
 }
 
+// CreatePrivatChat is the resolver for the createPrivatChat field.
+func (r *mutationResolver) CreatePrivatChat(ctx context.Context, userID string) (*db.Chat, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	// check if a privat chat already exists
+	var existingChat db.Chat
+	err = r.DB.NewSelect().
+		Model(&existingChat).
+		Where("chat.type = ?", db.ChatTypePrivate).
+		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
+		Join("INNER JOIN chat_users AS chat_users2 ON chat_users2.chat_id = chat.id AND chat_users2.user_id = ?", userID).
+		Where("chat.organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if err == nil {
+		return &existingChat, nil
+	}
+
+	t, err := r.DB.BeginTx(ctx, nil)
+
+	var user db.User
+	err = t.NewSelect().
+		Model(&user).
+		Where("id = ?", userID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if err != nil {
+		_ = t.Rollback()
+		return nil, errors.New("user not found")
+	}
+
+	var chat db.Chat
+	chat.Type = db.ChatTypePrivate
+	chat.OrganisationID = currentUser.OrganisationID
+
+	err = t.NewInsert().
+		Model(&chat).
+		Returning("*").
+		Scan(ctx)
+	if err != nil {
+		_ = t.Rollback()
+		return nil, errors.New("unable to create chat")
+	}
+
+	var chatUser1 db.ChatUser
+	chatUser1.ChatID = chat.ID
+	chatUser1.UserID = currentUser.ID
+	chatUser1.OrganisationID = currentUser.OrganisationID
+
+	err = t.NewInsert().
+		Model(&chatUser1).
+		Returning("*").
+		Scan(ctx)
+	if err != nil {
+		_ = t.Rollback()
+		return nil, errors.New("unable to create chat")
+	}
+
+	var user2 db.User
+	err = t.NewSelect().
+		Model(&user2).
+		Where("id = ?", userID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if err != nil {
+		_ = t.Rollback()
+		return nil, errors.New("other user not found")
+	}
+
+	var chatUser2 db.ChatUser
+	chatUser2.ChatID = chat.ID
+	chatUser2.UserID = user2.ID
+	chatUser2.OrganisationID = currentUser.OrganisationID
+
+	err = t.NewInsert().
+		Model(&chatUser2).
+		Returning("*").
+		Scan(ctx)
+	if err != nil {
+		_ = t.Rollback()
+		return nil, errors.New("unable to create chat")
+	}
+
+	err = t.Commit()
+	if err != nil {
+		return nil, errors.New("unable to create chat - commit failed")
+	}
+
+	return &chat, nil
+}
+
 // AddUserToChat is the resolver for the addUserToChat field.
 func (r *mutationResolver) AddUserToChat(ctx context.Context, input model.AddUserToChatInput) (*db.ChatUser, error) {
 	currentUser, err := middleware.GetUser(ctx)
@@ -440,6 +523,7 @@ func (r *mutationResolver) EditChatMessage(ctx context.Context, input model.Edit
 	err = r.DB.NewSelect().
 		Model(&chatMessage).
 		Where("id = ?", input.ID).
+		Where("user_id = ?", currentUser.ID).
 		Where("organisation_id = ?", currentUser.OrganisationID).
 		Scan(ctx)
 	if err != nil {
@@ -526,6 +610,13 @@ func (r *queryResolver) Chat(ctx context.Context, id string) (*db.Chat, error) {
 	return &chat, nil
 }
 
+type ChatWithLastMessage struct {
+	bun.BaseModel `bun:"table:chats"`
+
+	*db.Chat
+	LastMessage time.Time `bun:"last_message_at"`
+}
+
 // Chats is the resolver for the chats field.
 func (r *queryResolver) Chats(ctx context.Context, limit *int, offset *int) (*model.ChatConnection, error) {
 	currentUser, err := middleware.GetUser(ctx)
@@ -536,15 +627,21 @@ func (r *queryResolver) Chats(ctx context.Context, limit *int, offset *int) (*mo
 	pageLimit, pageOffset := helper.SetPageLimits(limit, offset)
 
 	var count int
-	var chats []*db.Chat
-	count, err = r.DB.NewSelect().
+	var chats []*ChatWithLastMessage
+	count, err = r.DB.
+		NewSelect().
 		Model(&chats).
+		ColumnExpr("chat.*").
+		ColumnExpr("MAX(cm.created_at) as last_message_at").
 		Join("LEFT JOIN chat_users ON chat_users.chat_id = chat.id").
+		Join("LEFT JOIN chat_messages cm ON cm.chat_id = chat.id").
+		TableExpr("chats AS chat").
 		Where("chat_users.user_id = ?", currentUser.ID).
 		Where("chat.organisation_id = ?", currentUser.OrganisationID).
 		Limit(pageLimit).
 		Offset(pageOffset).
-		Order("created_at DESC").
+		Group("chat.id").
+		Order("last_message_at DESC").
 		ScanAndCount(ctx)
 	if errors.Is(err, sql.ErrNoRows) {
 		return &model.ChatConnection{}, nil
@@ -558,8 +655,13 @@ func (r *queryResolver) Chats(ctx context.Context, limit *int, offset *int) (*mo
 		return nil, err
 	}
 
+	var returnChats []*db.Chat
+	for _, chat := range chats {
+		returnChats = append(returnChats, chat.Chat)
+	}
+
 	return &model.ChatConnection{
-		Edges:      chats,
+		Edges:      returnChats,
 		TotalCount: count,
 		PageInfo:   pageInfo,
 	}, nil

@@ -10,7 +10,7 @@ type Chat {
     users: [User!]!
     type: ChatType!
     messages: [ChatMessage!]!
-    lastMessage: String
+    lastMessage: ChatMessage
     createdAt: Time!
     deletedAt: Time
     unreadMessagesCount: Int!
@@ -81,6 +81,8 @@ input EditChatMessageInput {
 extend type Mutation {
     createChat(input: CreateChatInput!): Chat!
     deleteChat(input: DeleteChatInput!): Chat!
+
+    createPrivatChat(userId: ID!): Chat!
 
     addUserToChat(input: AddUserToChatInput!): ChatUser!
     removeUserFromChat(input: RemoveUserFromChatInput!): ChatUser!

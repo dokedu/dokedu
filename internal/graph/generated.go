@@ -358,6 +358,7 @@ type ComplexityRoot struct {
 		CreateEntryUser                func(childComplexity int, input model.CreateEntryUserInput) int
 		CreateEvent                    func(childComplexity int, input model.CreateEventInput) int
 		CreateFolder                   func(childComplexity int, input model.CreateFolderInput) int
+		CreatePrivatChat               func(childComplexity int, userID string) int
 		CreateReport                   func(childComplexity int, input model.CreateReportInput) int
 		CreateSchoolYear               func(childComplexity int, input model.CreateSchoolYearInput) int
 		CreateShare                    func(childComplexity int, input model.CreateShareInput) int
@@ -674,7 +675,7 @@ type ChatResolver interface {
 	Users(ctx context.Context, obj *db.Chat) ([]*db.User, error)
 	Type(ctx context.Context, obj *db.Chat) (db.ChatType, error)
 	Messages(ctx context.Context, obj *db.Chat) ([]*db.ChatMessage, error)
-	LastMessage(ctx context.Context, obj *db.Chat) (*string, error)
+	LastMessage(ctx context.Context, obj *db.Chat) (*db.ChatMessage, error)
 
 	DeletedAt(ctx context.Context, obj *db.Chat) (*time.Time, error)
 	UnreadMessagesCount(ctx context.Context, obj *db.Chat) (int, error)
@@ -748,6 +749,7 @@ type MutationResolver interface {
 	UpdateDailyAttendance(ctx context.Context, date time.Time, state db.UserAttendanceState) ([]*db.UserAttendance, error)
 	CreateChat(ctx context.Context, input model.CreateChatInput) (*db.Chat, error)
 	DeleteChat(ctx context.Context, input model.DeleteChatInput) (*db.Chat, error)
+	CreatePrivatChat(ctx context.Context, userID string) (*db.Chat, error)
 	AddUserToChat(ctx context.Context, input model.AddUserToChatInput) (*db.ChatUser, error)
 	RemoveUserFromChat(ctx context.Context, input model.RemoveUserFromChatInput) (*db.ChatUser, error)
 	SendMessage(ctx context.Context, input model.SendMessageInput) (*db.ChatMessage, error)
@@ -2362,6 +2364,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateFolder(childComplexity, args["input"].(model.CreateFolderInput)), true
+
+	case "Mutation.createPrivatChat":
+		if e.complexity.Mutation.CreatePrivatChat == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createPrivatChat_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreatePrivatChat(childComplexity, args["userId"].(string)), true
 
 	case "Mutation.createReport":
 		if e.complexity.Mutation.CreateReport == nil {
@@ -5121,6 +5135,21 @@ func (ec *executionContext) field_Mutation_createFolder_args(ctx context.Context
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_createPrivatChat_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["userId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userId"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createReport_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -7874,9 +7903,9 @@ func (ec *executionContext) _Chat_lastMessage(ctx context.Context, field graphql
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*db.ChatMessage)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOChatMessage2ᚖexampleᚋinternalᚋdbᚐChatMessage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Chat_lastMessage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7886,7 +7915,21 @@ func (ec *executionContext) fieldContext_Chat_lastMessage(ctx context.Context, f
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ChatMessage_id(ctx, field)
+			case "chat":
+				return ec.fieldContext_ChatMessage_chat(ctx, field)
+			case "user":
+				return ec.fieldContext_ChatMessage_user(ctx, field)
+			case "message":
+				return ec.fieldContext_ChatMessage_message(ctx, field)
+			case "isEdited":
+				return ec.fieldContext_ChatMessage_isEdited(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_ChatMessage_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ChatMessage", field.Name)
 		},
 	}
 	return fc, nil
@@ -14995,6 +15038,81 @@ func (ec *executionContext) fieldContext_Mutation_deleteChat(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_deleteChat_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createPrivatChat(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createPrivatChat(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreatePrivatChat(rctx, fc.Args["userId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.Chat)
+	fc.Result = res
+	return ec.marshalNChat2ᚖexampleᚋinternalᚋdbᚐChat(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createPrivatChat(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Chat_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Chat_name(ctx, field)
+			case "users":
+				return ec.fieldContext_Chat_users(ctx, field)
+			case "type":
+				return ec.fieldContext_Chat_type(ctx, field)
+			case "messages":
+				return ec.fieldContext_Chat_messages(ctx, field)
+			case "lastMessage":
+				return ec.fieldContext_Chat_lastMessage(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Chat_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Chat_deletedAt(ctx, field)
+			case "unreadMessagesCount":
+				return ec.fieldContext_Chat_unreadMessagesCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createPrivatChat_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -38732,6 +38850,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "createPrivatChat":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createPrivatChat(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "addUserToChat":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_addUserToChat(ctx, field)
@@ -45493,6 +45618,13 @@ func (ec *executionContext) marshalOChat2ᚖexampleᚋinternalᚋdbᚐChat(ctx c
 		return graphql.Null
 	}
 	return ec._Chat(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOChatMessage2ᚖexampleᚋinternalᚋdbᚐChatMessage(ctx context.Context, sel ast.SelectionSet, v *db.ChatMessage) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ChatMessage(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOCompetence2ᚕᚖexampleᚋinternalᚋdbᚐCompetence(ctx context.Context, sel ast.SelectionSet, v []*db.Competence) graphql.Marshaler {
