@@ -193,8 +193,9 @@ export default {
           {
             "name": "lastMessage",
             "type": {
-              "kind": "SCALAR",
-              "name": "Any"
+              "kind": "OBJECT",
+              "name": "ChatMessage",
+              "ofType": null
             },
             "args": []
           },
@@ -236,7 +237,18 @@ export default {
             "args": []
           },
           {
-            "name": "unreadMessagesCount",
+            "name": "unreadMessageCount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "userCount",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -2688,6 +2700,29 @@ export default {
             "args": [
               {
                 "name": "input",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "createPrivatChat",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Chat",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "userId",
                 "type": {
                   "kind": "NON_NULL",
                   "ofType": {

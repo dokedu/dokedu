@@ -3,7 +3,10 @@ subscription messageAdded($chatId: ID!) {
     id
     chat {
       id
-      lastMessage
+      lastMessage {
+        id
+        message
+      }
     }
     user {
       id

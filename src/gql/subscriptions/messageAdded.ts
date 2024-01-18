@@ -8,7 +8,7 @@ export type MessageAddedSubscriptionVariables = Types.Exact<{
 }>;
 
 
-export type MessageAddedSubscription = { __typename?: 'Subscription', messageAdded: { __typename?: 'ChatMessage', id: string, message: string, chat: { __typename?: 'Chat', id: string, lastMessage?: string | null }, user: { __typename?: 'User', id: string, firstName: string, lastName: string } } };
+export type MessageAddedSubscription = { __typename?: 'Subscription', messageAdded: { __typename?: 'ChatMessage', id: string, message: string, chat: { __typename?: 'Chat', id: string, lastMessage?: { __typename?: 'ChatMessage', id: string, message: string } | null }, user: { __typename?: 'User', id: string, firstName: string, lastName: string } } };
 
 
 export const MessageAddedDocument = gql`
@@ -17,7 +17,10 @@ export const MessageAddedDocument = gql`
     id
     chat {
       id
-      lastMessage
+      lastMessage {
+        id
+        message
+      }
     }
     user {
       id

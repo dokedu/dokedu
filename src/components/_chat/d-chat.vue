@@ -13,7 +13,7 @@
         </div>
         <div class="flex">
           <div class="text-xs line-clamp-1 flex-1" :class="active ? 'text-white' : 'text-subtle'">
-            {{ chat?.lastMessage ? chat?.lastMessage : $t("no_messages_yet") }}
+            {{ chat?.lastMessage ? chat?.lastMessage.message : `No messages yet` }}
           </div>
           <d-notification-circle :amount="chat.unreadMessagesCount" :inverted="active"></d-notification-circle>
         </div>
