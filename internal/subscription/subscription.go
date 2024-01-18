@@ -1,39 +1,43 @@
 package subscription
 
 import (
+	"context"
 	"example/internal/db"
+	"github.com/uptrace/bun"
 	"sync"
 )
 
 type Handler struct {
-	mutex     sync.Mutex
-	ChatRooms map[string][]chan *db.ChatMessage
+	mutex       sync.Mutex
+	db          *bun.DB
+	UserChannel map[string][]chan *db.ChatMessage
 }
 
-func NewHandler() *Handler {
+func NewHandler(database *bun.DB) *Handler {
 	return &Handler{
-		ChatRooms: make(map[string][]chan *db.ChatMessage),
+		UserChannel: make(map[string][]chan *db.ChatMessage),
+		db:          database,
 	}
 }
 
-func (h *Handler) AddChatChannel(chatId string) error {
+func (h *Handler) AddUserChannel(userId string) error {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 
 	userChannel := make(chan *db.ChatMessage)
-	h.ChatRooms[chatId] = append(h.ChatRooms[chatId], userChannel)
+	h.UserChannel[userId] = append(h.UserChannel[userId], userChannel)
 
 	return nil
 }
 
-func (h *Handler) RemoveChatChannel(chatId string, userChannel chan *db.ChatMessage) error {
+func (h *Handler) RemoveChatChannel(userId string, userChannel chan *db.ChatMessage) error {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 
-	if channels, ok := h.ChatRooms[chatId]; ok {
+	if channels, ok := h.UserChannel[userId]; ok {
 		for i, c := range channels {
 			if c == userChannel {
-				h.ChatRooms[chatId] = append(channels[:i], channels[i+1:]...)
+				h.UserChannel[userId] = append(channels[:i], channels[i+1:]...)
 				close(userChannel)
 				break
 			}
@@ -44,8 +48,24 @@ func (h *Handler) RemoveChatChannel(chatId string, userChannel chan *db.ChatMess
 }
 
 func (h *Handler) PublishMessage(message *db.ChatMessage) error {
+	ctx := context.Background()
+	var chatUsers []*db.ChatUser
+
+	_ = h.db.NewSelect().
+		Model(&chatUsers).
+		Where("chat_id = ?", message.ChatID).
+		Scan(ctx)
+
+	for _, chatUser := range chatUsers {
+		h.PublishMessageToUser(message, chatUser.UserID)
+	}
+
+	return nil
+}
+
+func (h *Handler) PublishMessageToUser(message *db.ChatMessage, id string) {
 	h.mutex.Lock()
-	channels, ok := h.ChatRooms[message.ChatID]
+	channels, ok := h.UserChannel[id]
 	h.mutex.Unlock() // Unlock as soon as possible, assuming sending on channels is safe concurrently
 
 	if ok {
@@ -53,6 +73,4 @@ func (h *Handler) PublishMessage(message *db.ChatMessage) error {
 			userChannel <- message
 		}
 	}
-
-	return nil
 }

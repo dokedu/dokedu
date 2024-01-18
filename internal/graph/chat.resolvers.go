@@ -14,7 +14,6 @@ import (
 	"example/internal/helper"
 	"example/internal/middleware"
 	"fmt"
-	"math/rand"
 	"strings"
 	"time"
 
@@ -131,11 +130,24 @@ func (r *chatResolver) DeletedAt(ctx context.Context, obj *db.Chat) (*time.Time,
 
 // UnreadMessageCount is the resolver for the unreadMessageCount field.
 func (r *chatResolver) UnreadMessageCount(ctx context.Context, obj *db.Chat) (int, error) {
-	if (rand.Int() % 100) < 70 {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
 		return 0, nil
-	} else {
-		return rand.Int() % 200, nil
 	}
+
+	chatMessageViewCount, err := r.DB.NewSelect().
+		Model(&db.ChatMessage{}).
+		Where("chat_message.chat_id = ?", obj.ID).
+		Where("chat_message.user_id <> ?", currentUser.ID).
+		Where("chat_message.organisation_id = ?", currentUser.OrganisationID).
+		Where("cmv.chat_message_id IS NULL").
+		Join("LEFT JOIN chat_message_views cmv ON cmv.chat_message_id = chat_message.id AND cmv.user_id = ?", currentUser.ID).
+		Count(ctx)
+	if err != nil {
+		return 0, errors.New("unable to get unread message count")
+	}
+
+	return chatMessageViewCount, nil
 }
 
 // UserCount is the resolver for the userCount field.
@@ -186,6 +198,30 @@ func (r *chatMessageResolver) User(ctx context.Context, obj *db.ChatMessage) (*d
 func (r *chatMessageResolver) IsEdited(ctx context.Context, obj *db.ChatMessage) (bool, error) {
 	if obj.UpdatedAt.IsZero() {
 		return false, nil
+	}
+
+	return true, nil
+}
+
+// IsSeen is the resolver for the isSeen field.
+func (r *chatMessageResolver) IsSeen(ctx context.Context, obj *db.ChatMessage) (bool, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return false, nil
+	}
+
+	var chatMessageView db.ChatMessageView
+	err = r.DB.NewSelect().
+		Model(&chatMessageView).
+		Where("chat_message_id = ?", obj.ID).
+		Where("user_id = ?", currentUser.ID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+	if err != nil {
+		return false, errors.New("unable to get chat message view")
 	}
 
 	return true, nil
@@ -602,6 +638,54 @@ func (r *mutationResolver) UpdateChat(ctx context.Context, input model.UpdateCha
 	return &chat, nil
 }
 
+// MarkMessageAsRead is the resolver for the markMessageAsRead field.
+func (r *mutationResolver) MarkMessageAsRead(ctx context.Context, messageID string) (*db.ChatMessage, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	var chatMessage db.ChatMessage
+	err = r.DB.NewSelect().
+		Model(&chatMessage).
+		Where("id = ?", messageID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if err != nil {
+		return nil, errors.New("chat not found")
+	}
+
+	var chat db.Chat
+	err = r.DB.NewSelect().
+		Model(&chat).
+		Where("chat.id = ?", chatMessage.ChatID).
+		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
+		Where("chat.organisation_id = ?", currentUser.OrganisationID).
+		Scan(ctx)
+	if err != nil {
+		return nil, errors.New("chat not found")
+	}
+
+	var chatMessageView db.ChatMessageView
+	chatMessageView.ChatID = chat.ID
+	chatMessageView.UserID = currentUser.ID
+	chatMessageView.ChatMessageID = chatMessage.ID
+	chatMessageView.OrganisationID = currentUser.OrganisationID
+	err = r.DB.NewInsert().
+		Model(&chatMessageView).
+		Returning("*").
+		On("CONFLICT (chat_id, user_id, chat_message_id) DO NOTHING").
+		Scan(ctx)
+	if errors.Is(err, sql.ErrNoRows) {
+		return &chatMessage, nil
+	}
+	if err != nil {
+		return nil, errors.New("unable to mark message as read")
+	}
+
+	return &chatMessage, nil
+}
+
 // Chat is the resolver for the chat field.
 func (r *queryResolver) Chat(ctx context.Context, id string) (*db.Chat, error) {
 	currentUser, err := middleware.GetUser(ctx)
@@ -676,31 +760,19 @@ func (r *queryResolver) Chats(ctx context.Context, limit *int, offset *int) (*mo
 }
 
 // MessageAdded is the resolver for the messageAdded field.
-func (r *subscriptionResolver) MessageAdded(ctx context.Context, chatID string) (<-chan *db.ChatMessage, error) {
+func (r *subscriptionResolver) MessageAdded(ctx context.Context) (<-chan *db.ChatMessage, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, nil
 	}
 
-	// check if user is participant of chat
-	var chatUser db.ChatUser
-	err = r.DB.NewSelect().
-		Model(&chatUser).
-		Where("chat_id = ?", chatID).
-		Where("user_id = ?", currentUser.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
+	_ = r.SubscriptionHandler.AddUserChannel(currentUser.ID)
 
-	_ = r.SubscriptionHandler.AddChatChannel(chatID)
-
-	channel := r.SubscriptionHandler.ChatRooms[chatID][len(r.SubscriptionHandler.ChatRooms[chatID])-1]
+	channel := r.SubscriptionHandler.UserChannel[currentUser.ID][len(r.SubscriptionHandler.UserChannel[currentUser.ID])-1]
 
 	go func() {
 		<-ctx.Done()
-		_ = r.SubscriptionHandler.RemoveChatChannel(chatID, channel)
+		_ = r.SubscriptionHandler.RemoveChatChannel(currentUser.ID, channel)
 	}()
 
 	return channel, nil

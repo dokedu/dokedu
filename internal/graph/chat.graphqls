@@ -30,8 +30,9 @@ type ChatMessage {
     chat: Chat!
     user: User!
     message: String!
-    isEdited: Boolean!
     createdAt: Time!
+    isEdited: Boolean!
+    isSeen: Boolean!
 }
 
 type ChatConnection {
@@ -91,8 +92,10 @@ extend type Mutation {
     sendMessage(input: SendMessageInput!): ChatMessage!
     editChatMessage(input: EditChatMessageInput!): ChatMessage!
     updateChat(input: UpdateChatInput!): Chat!
+
+    markMessageAsRead(messageId: ID!): ChatMessage!
 }
 
 type Subscription {
-    messageAdded(chatId: ID!): ChatMessage!
+    messageAdded: ChatMessage!
 }

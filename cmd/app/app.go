@@ -50,7 +50,7 @@ func main() {
 
 	// TODO: REFACTOR THIS INTO A SERVICE
 	chatMessageChan := make(chan *db.Chat)
-	subscriptionHandler := subscription.NewHandler()
+	subscriptionHandler := subscription.NewHandler(dbClient)
 
 	chatMessageProcessor := chat_message_processor.NewChatMessageProcessor(dbClient, subscriptionHandler, chatMessageChan)
 
