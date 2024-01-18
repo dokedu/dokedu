@@ -141,8 +141,11 @@ func (r *chatResolver) DeletedAt(ctx context.Context, obj *db.Chat) (*time.Time,
 
 // UnreadMessagesCount is the resolver for the unreadMessagesCount field.
 func (r *chatResolver) UnreadMessagesCount(ctx context.Context, obj *db.Chat) (int, error) {
-	// TODO: implement
-	return rand.Int() % 200, nil
+	if (rand.Int() % 100) < 70 {
+		return 0, nil
+	} else {
+		return rand.Int() % 200, nil
+	}
 }
 
 // Chat is the resolver for the chat field.
