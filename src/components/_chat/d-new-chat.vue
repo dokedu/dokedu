@@ -12,7 +12,7 @@
           <UsersRound class="size-5" />
           <span>New group</span>
         </d-popover-item>
-        <d-popover-item>
+        <d-popover-item v-if="false">
           <Megaphone class="size-5" />
           <span>New Channel</span>
         </d-popover-item>
