@@ -1095,6 +1095,7 @@ type User {
   inviteAccepted: Boolean!
   language: UserLanguage
   lastName: String!
+  lastSeenAt: Time
   organisationId: ID!
   role: UserRole!
   student: UserStudent

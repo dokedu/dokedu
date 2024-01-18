@@ -259,6 +259,7 @@ export const en = {
   message_input_placeholder: "Write a message...",
   amount_group_members: "{amount} members",
   last_seen: "last seen {time} ago",
+  online: "online",
 
   // Time
   second: "second | seconds",

@@ -6270,6 +6270,14 @@ export default {
             "args": []
           },
           {
+            "name": "lastSeenAt",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
             "name": "organisationId",
             "type": {
               "kind": "NON_NULL",

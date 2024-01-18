@@ -7,5 +7,10 @@ query chat($id: ID!) {
     }
     type
     userCount
+    users {
+      id
+      firstName
+      lastSeenAt
+    }
   }
 }

@@ -1857,6 +1857,7 @@ export type User = {
   inviteAccepted: Scalars['Boolean']['output'];
   language?: Maybe<UserLanguage>;
   lastName: Scalars['String']['output'];
+  lastSeenAt?: Maybe<Scalars['Time']['output']>;
   organisationId: Scalars['ID']['output'];
   role: UserRole;
   student?: Maybe<UserStudent>;
@@ -2412,6 +2413,7 @@ export type GraphCacheResolvers = {
     inviteAccepted?: GraphCacheResolver<WithTypename<User>, Record<string, never>, Scalars['Boolean'] | string>,
     language?: GraphCacheResolver<WithTypename<User>, Record<string, never>, UserLanguage | string>,
     lastName?: GraphCacheResolver<WithTypename<User>, Record<string, never>, Scalars['String'] | string>,
+    lastSeenAt?: GraphCacheResolver<WithTypename<User>, Record<string, never>, Scalars['Time'] | string>,
     organisationId?: GraphCacheResolver<WithTypename<User>, Record<string, never>, Scalars['ID'] | string>,
     role?: GraphCacheResolver<WithTypename<User>, Record<string, never>, UserRole | string>,
     student?: GraphCacheResolver<WithTypename<User>, Record<string, never>, WithTypename<UserStudent> | string>
@@ -3042,6 +3044,7 @@ export type GraphCacheUpdaters = {
     inviteAccepted?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>,
     language?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>,
     lastName?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>,
+    lastSeenAt?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>,
     organisationId?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>,
     role?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>,
     student?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>
