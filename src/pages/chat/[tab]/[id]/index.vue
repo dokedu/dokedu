@@ -10,12 +10,12 @@
           <div class="text-md font-medium">
             {{ data?.chat.name ? data?.chat.name : $t("unnamed_chat") }}
           </div>
-          <div v-if="data?.chat.type === 'PRIVATE'" class="text-xs text-neutral-400">
+          <div v-if="false" v-show="data?.chat.type === 'PRIVATE'" class="text-xs text-neutral-400">
             <!-- TODO: add actual last seen time -->
             {{ $t("last_seen", { time: `3 ${$t("minute", 2)}` }) }}
           </div>
-          <div v-if="data?.chat.type === 'GROUP'" class="text-xs text-neutral-400">
-            {{ $t("amount_group_members", { amount: 2 }) }}
+          <div v-if="data?.chat.type === 'GROUP' && data?.chat.userCount > 1" class="text-xs text-neutral-400">
+            {{ $t("amount_group_members", { amount: data?.chat.userCount }) }}
           </div>
         </div>
       </div>

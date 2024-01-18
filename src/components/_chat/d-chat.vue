@@ -5,7 +5,7 @@
       :class="active ? `bg-inverted text-white` : `hover:bg-neutral-900/5`"
     >
       <d-avatar :initials="chat?.name ? useInitials(chat.name) : ''" :inverted="active" :icon="UserRound" />
-      <div class="flex-1 w-full">
+      <div class="flex-1 w-full min-w-0">
         <div class="flex mb-1">
           <div class="font-semibold flex-1">{{ chat?.name }}</div>
           <!-- TODO: implement real time based on lastMessage -->
@@ -15,7 +15,7 @@
           <div class="text-xs line-clamp-1 flex-1" :class="active ? 'text-white' : 'text-subtle'">
             {{ chat?.lastMessage ? chat?.lastMessage.message : `No messages yet` }}
           </div>
-          <d-notification-circle :amount="chat.unreadMessagesCount" :inverted="active"></d-notification-circle>
+          <d-notification-circle :amount="chat.unreadMessageCount" :inverted="active"></d-notification-circle>
         </div>
       </div>
     </div>
