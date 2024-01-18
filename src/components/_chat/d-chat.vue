@@ -8,7 +8,8 @@
       <div class="flex-1 w-full">
         <div class="flex mb-1">
           <div class="font-semibold flex-1">{{ chat?.name }}</div>
-          <div class="text-xs" :class="active ? 'text-white' : 'text-subtle'">6:20 PM</div>
+          <!-- TODO: implement real time based on lastMessage -->
+          <div class="text-xs" :class="active ? 'text-white' : 'text-subtle'">6:30</div>
         </div>
         <div class="flex">
           <div class="text-xs line-clamp-1 flex-1" :class="active ? 'text-white' : 'text-subtle'">
