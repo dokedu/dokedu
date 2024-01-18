@@ -24,7 +24,7 @@
       </template>
     </div>
     <div class="max-w-lg pt-4 flex flex-col gap-4 mx-auto w-full">
-      <div class="px-4 flex justify-center gap-4">
+      <div v-if="data?.chat.type == ChatType['Group']" class="px-4 flex justify-center gap-4">
         <d-button-add-chat-user :chat-id="route.params.id" />
         <d-button type="outline" @click="soon">Leave</d-button>
         <d-button type="outline" @click="deleteChat">Delete</d-button>

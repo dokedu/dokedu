@@ -237,7 +237,18 @@ export default {
             "args": []
           },
           {
-            "name": "unreadMessagesCount",
+            "name": "unreadMessageCount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "userCount",
             "type": {
               "kind": "NON_NULL",
               "ofType": {

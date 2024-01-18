@@ -42,7 +42,8 @@ type Chat {
   messages: [ChatMessage!]!
   name: String
   type: ChatType!
-  unreadMessagesCount: Int!
+  unreadMessageCount: Int!
+  userCount: Int!
   users: [User!]!
 }
 

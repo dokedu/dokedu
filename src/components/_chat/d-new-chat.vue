@@ -10,15 +10,15 @@
       <d-popover v-if="popoverOpen" class="top-[calc(100%+4px)]">
         <d-popover-item @click="createNewGroup">
           <UsersRound class="size-5" />
-          <span>New group</span>
+          <span>{{ $t("new_group") }}</span>
         </d-popover-item>
-        <d-popover-item>
+        <d-popover-item v-if="false">
           <Megaphone class="size-5" />
-          <span>New Channel</span>
+          <span>{{ $t("new_channel") }}</span>
         </d-popover-item>
         <d-popover-item @click="navigateToContacts">
           <BookUser class="size-5" />
-          <span>Contacts</span>
+          <span>{{ $t("contacts") }}</span>
         </d-popover-item>
       </d-popover>
     </Transition>

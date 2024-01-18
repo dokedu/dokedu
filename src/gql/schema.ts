@@ -61,7 +61,8 @@ export type Chat = {
   messages: Array<ChatMessage>;
   name?: Maybe<Scalars['String']['output']>;
   type: ChatType;
-  unreadMessagesCount: Scalars['Int']['output'];
+  unreadMessageCount: Scalars['Int']['output'];
+  userCount: Scalars['Int']['output'];
   users: Array<User>;
 };
 
@@ -2111,7 +2112,8 @@ export type GraphCacheResolvers = {
     messages?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Array<WithTypename<ChatMessage> | string>>,
     name?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Scalars['String'] | string>,
     type?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, ChatType | string>,
-    unreadMessagesCount?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Scalars['Int'] | string>,
+    unreadMessageCount?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Scalars['Int'] | string>,
+    userCount?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Scalars['Int'] | string>,
     users?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Array<WithTypename<User> | string>>
   },
   ChatConnection?: {
@@ -2740,7 +2742,8 @@ export type GraphCacheUpdaters = {
     messages?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>,
     name?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>,
     type?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>,
-    unreadMessagesCount?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>,
+    unreadMessageCount?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>,
+    userCount?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>,
     users?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>
   },
   ChatConnection?: {

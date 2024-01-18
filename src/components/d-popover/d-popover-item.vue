@@ -1,7 +1,7 @@
 <template>
   <component :is="to ? 'router-link' : 'div'" class="px-1" :to="to">
     <div
-      class="rounded-lg border text-sm items-center gap-2.5 inline-flex hover:text-strong font-medium text-subtle min-w-max w-full"
+      class="rounded-md border text-sm items-center gap-2.5 inline-flex hover:text-strong font-medium text-subtle min-w-max w-full"
       :class="`${active ? 'bg-subtle text-strong border-default ' : 'border-transparent hover:bg-black/5'} ${
         modeClasses[mode]
       }`"

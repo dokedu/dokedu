@@ -95,7 +95,7 @@ export const en = {
   created_at: "Created at",
   prepare_annual_reports: "Prepare annual reports",
   report: "Report | Reports",
-  hour: "Hour | Hours",
+  o_clock: "",
   no_file: "No file | No files",
   download: "Download",
   downloading_file: "Downloading file...",
@@ -243,5 +243,25 @@ export const en = {
   enter_password: "Enter password",
   password_incorrect_try_again: "Password incorrect. Please try again.",
 
-  attendance: "Attendance"
+  attendance: "Attendance",
+
+  // Chats
+  chats: "Chats",
+  chats_empty_description: "In chats you can communicate with the whole organization.",
+  contacts: "Contacts",
+  create_group: "Create group",
+  no_messages_yet: "No messages yet",
+  new_group: "New group",
+  new_channel: "New channel",
+  unnamed_chat: "Unnamed chat",
+  empty_chat_title: "Looks like you don't have any messages yet",
+  empty_chat_description: "Be the first to say hi!",
+  message_input_placeholder: "Write a message...",
+  amount_group_members: "{amount} members",
+  last_seen: "last seen {time} ago",
+
+  // Time
+  second: "second | seconds",
+  minute: "minute | minutes",
+  hour: "hour | hours"
 }

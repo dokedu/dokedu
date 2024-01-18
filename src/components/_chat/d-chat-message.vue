@@ -18,7 +18,7 @@
           <d-markdown :inverted="me" :source="message.message" ref="messageText" class="select-text"></d-markdown>
           <div v-show="message.isEdited" class="text-subtle text-xs text-right italic">edited</div>
           <div class="text-xs text-subtle flex justify-end italic">
-            {{ formatTime(message.createdAt) }}
+            {{ useTime(message.createdAt) }}
           </div>
         </div>
       </div>
@@ -31,6 +31,7 @@ import { computed, ref } from "vue"
 import { useElementSize } from "@vueuse/core"
 import { useEditChatMessageMutation } from "@/gql/mutations/chats/editChatMessage"
 import type { ChatMessageFragment } from "@/gql/fragments/chatMessage"
+import useTime from "@/composables/useTime"
 
 type Props = {
   message: ChatMessageFragment
@@ -53,11 +54,6 @@ const stacked = computed(() => {
 
 function fullName(user: { firstName: string; lastName: string }) {
   return `${user.firstName} ${user.lastName}`
-}
-
-function formatTime(dateString: string) {
-  const date = new Date(dateString)
-  return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "numeric" })
 }
 
 const { executeMutation: editChatMessageMut } = useEditChatMessageMutation()
