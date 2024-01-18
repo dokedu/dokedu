@@ -26,7 +26,7 @@
         {{ `${item.user?.firstName} ${item.user?.lastName}` }}
       </template>
       <template #createdAt-data="{ column }">
-        {{ formatDate(new Date(column), "DD.MM.YYYY HH:ss") }} {{ $t("hour") }}
+        {{ formatDate(new Date(column), "DD.MM.YYYY HH:ss") }} {{ $t("o_clock") }}
       </template>
       <template #file-data="{ item }">
         <div

@@ -59,15 +59,12 @@
       </div>
       <!-- show start state-->
       <div v-else class="w-full flex-1">
-        <d-empty
-          title="Chats"
-          text="In chats you can communicate with the whole organization."
-          :icon="MessageCircle"
-          :center="false"
-        >
+        <d-empty :title="$t('chats')" :text="$t('chats_empty_description')" :icon="MessageCircle" :center="false">
           <template #actions>
-            <d-button size="sm" type="outline" :icon-left="BookUser" @click="navigateToContacts">Contacts</d-button>
-            <d-button size="sm" :icon-left="Plus" @click="createNewGroup">Create Group</d-button>
+            <d-button size="sm" type="outline" :icon-left="BookUser" @click="navigateToContacts">{{
+              $t("contacts")
+            }}</d-button>
+            <d-button size="sm" :icon-left="Plus" @click="createNewGroup">{{ $t("create_group") }}</d-button>
           </template>
         </d-empty>
       </div>
@@ -101,7 +98,7 @@ import { ref } from "vue"
 import { useAddUserToChatMutation } from "@/gql/mutations/chats/addUserToChat"
 import { useCreateChatMutation } from "@/gql/mutations/chats/createChat"
 import { useRouter } from "vue-router/auto"
-
+import i18n from "@/i18n"
 import type { User } from "@/gql/schema"
 
 const tab = useRouteParams("tab", "chats")
@@ -110,8 +107,8 @@ const search = ref("")
 const router = useRouter()
 
 const sidebars = [
-  { id: "chats", name: "Chats", icon: MessageCircle },
-  { id: "contacts", name: "Contacts", icon: BookUser }
+  { id: "chats", name: i18n.global.t("chats"), icon: MessageCircle },
+  { id: "contacts", name: i18n.global.t("contacts"), icon: BookUser }
 ]
 
 const { executeMutation: createChat } = useCreateChatMutation()

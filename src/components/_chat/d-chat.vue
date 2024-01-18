@@ -1,7 +1,7 @@
 <template>
   <router-link :to="`/chat/chats/` + chat?.id" class="px-2 py-px">
     <div
-      class="p-3 flex items-center gap-2.5 rounded-xl"
+      class="p-3 flex items-center gap-2.5 rounded-md"
       :class="active ? `bg-inverted text-white` : `hover:bg-neutral-900/5`"
     >
       <d-avatar :initials="chat?.name ? useInitials(chat.name) : ''" :inverted="active" :icon="UserRound" />
@@ -13,7 +13,7 @@
         </div>
         <div class="flex">
           <div class="text-xs line-clamp-1 flex-1" :class="active ? 'text-white' : 'text-subtle'">
-            {{ chat?.lastMessage ? chat?.lastMessage : `No messages yet` }}
+            {{ chat?.lastMessage ? chat?.lastMessage : $t("no_messages_yet") }}
           </div>
           <d-notification-circle :amount="chat.unreadMessagesCount" :inverted="active"></d-notification-circle>
         </div>

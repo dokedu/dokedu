@@ -5,5 +5,6 @@ query chat($id: ID!) {
     messages {
       ...chatMessage
     }
+    type
   }
 }

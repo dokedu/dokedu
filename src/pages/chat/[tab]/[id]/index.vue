@@ -8,9 +8,15 @@
         <d-avatar :initials="useInitials(data?.chat.name)" :icon="UserRound"></d-avatar>
         <div>
           <div class="text-md font-medium">
-            {{ data?.chat.name ? data?.chat.name : `Unnamed chat` }}
+            {{ data?.chat.name ? data?.chat.name : $t("unnamed_chat") }}
           </div>
-          <div class="text-xs text-neutral-400">last seen 1 minute ago</div>
+          <div v-if="data?.chat.type === 'PRIVATE'" class="text-xs text-neutral-400">
+            <!-- TODO: add actual last seen time -->
+            {{ $t("last_seen", { time: `3 ${$t("minute", 2)}` }) }}
+          </div>
+          <div v-if="data?.chat.type === 'GROUP'" class="text-xs text-neutral-400">
+            {{ $t("amount_group_members", { amount: 2 }) }}
+          </div>
         </div>
       </div>
       <div></div>
@@ -27,11 +33,7 @@
         ></d-chat-message>
       </div>
       <div v-if="data?.chat.messages.length === 0" class="h-full">
-        <d-empty
-          :icon="MessageCircle"
-          title="Looks like you don't have any messages yet"
-          text="Be the first to say hi!"
-        ></d-empty>
+        <d-empty :icon="MessageCircle" :title="$t('empty_chat_title')" :text="$t('empty_chat_description')"></d-empty>
       </div>
     </div>
     <footer class="w-full flex gap-2 items-end px-4 border-t bg-white">
@@ -42,7 +44,7 @@
         ref="textarea"
         v-model="input"
         type="text"
-        placeholder="Write a message..."
+        :placeholder="$t('message_input_placeholder')"
         class="w-full max-h-[40vh] resize-none block py-4 border-none h-full bg-transparent text-neutral-900 placeholder:text-neutral-400 ring-0 focus:outline-none focus:ring-0 text-sm leading-6"
         @keydown.enter.exact.prevent="onSubmit"
         @keydown.enter.shift.prevent="input += '\n'"
