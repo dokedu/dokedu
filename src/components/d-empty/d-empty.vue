@@ -1,7 +1,7 @@
 <template>
   <div class="flex w-full mt-20 items-center justify-center gap-3 px-8 py-3">
     <div
-      class="flex rounded-xl shadow select-none flex-col bg-muted p-8 max-w-[450px]"
+      class="flex rounded-xl border border-subtle select-none flex-col bg-muted p-8 max-w-[450px]"
       :class="center ? 'items-center text-center' : ''"
     >
       <div class="mb-4 w-fit rounded-xl bg-strong p-2.5">
