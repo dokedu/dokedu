@@ -261,6 +261,8 @@ export const en = {
   last_seen: "last seen {time} ago",
   online: "online",
   delete_chat_confirmation: "Are you sure you want to delete this chat?",
+  edit: "Edit",
+  edit_message: "Edit Message",
 
   // Time
   second: "second | seconds",
