@@ -263,6 +263,7 @@ export const en = {
   delete_chat_confirmation: "Are you sure you want to delete this chat?",
   edit: "Edit",
   edit_message: "Edit Message",
+  copy_text: "Copy Text",
 
   // Time
   second: "second | seconds",
