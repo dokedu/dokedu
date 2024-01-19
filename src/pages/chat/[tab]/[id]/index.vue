@@ -215,6 +215,10 @@ const { executeMutation: sendMessageMutation } = useSendMessageMutation()
 async function onSubmit() {
   await sendMessage(input.value.replace(/^\s+|\s+$/g, ""))
   input.value = ""
+
+  if (messageContainer.value) {
+    messageContainer.value.scrollTop = messageContainer.value.scrollHeight
+  }
 }
 
 async function sendMessage(message: string) {
