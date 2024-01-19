@@ -22,26 +22,30 @@
     </router-link>
     <div ref="messageContainer" class="h-full flex-1 overflow-auto">
       <div ref="root" v-for="(group, _) in groupedMessages" :key="_" class="my-4 flex flex-col gap-1">
-        <d-chat-message
-          v-for="message in group"
-          :target="root"
-          :key="message.id"
-          :message="message"
+        <div
           :data-message-id="message.id"
           :data-message-seen="message.isSeen"
-          :me="message.user.id === userData?.me?.id"
-          @edit="
-            (message) => {
-              startEditMessage(message)
-            }
-          "
-          @delete="
-            (message) => {
-              deleteMessage(message)
-            }
-          "
-          type="GROUP"
-        ></d-chat-message>
+          :data-message-me="message.user.id === userData?.me?.id"
+          :key="message.id"
+          ref="target"
+          v-for="message in group"
+        >
+          <d-chat-message
+            :message="message"
+            :me="message.user.id === userData?.me?.id"
+            @edit="
+              (message) => {
+                startEditMessage(message)
+              }
+            "
+            @delete="
+              (message) => {
+                deleteMessage(message)
+              }
+            "
+            type="GROUP"
+          ></d-chat-message>
+        </div>
       </div>
       <div v-if="data?.chat.messages.length === 0" class="h-full">
         <d-empty :icon="MessageCircle" :title="$t('empty_chat_title')" :text="$t('empty_chat_description')"></d-empty>
@@ -151,28 +155,40 @@ onKeyStroke("Escape", () => {
 
 const { executeMutation: markAsRead } = useMarkMessageAsReadMutation()
 
-useIntersectionObserver(root, async ([{ isIntersecting, target }]) => {
-  let promises = []
+const target = ref(null)
 
-  for (const child of target.children) {
-    if (child.getAttribute("data-message-id")) {
-      const messageId = child.getAttribute("data-message-id")
-      const seen = (child.getAttribute("data-message-seen") === "true" ? true : false) || false
-      if (seen) continue
-      if (!messageId) continue
-      promises.push(markAsRead({ messageId: messageId }))
+useIntersectionObserver(
+  target,
+  async (entries) => {
+    let promises = []
+
+    let isIntersecting = false
+
+    for (const entry of entries) {
+      let me = entry.target.getAttribute("data-message-me") === "true"
+      isIntersecting = entry.intersectionRatio > 0
+
+      if (isIntersecting && entry.target.getAttribute("data-message-id") && !me) {
+        const messageId = entry.target.getAttribute("data-message-id")
+        const seen = (entry.target.getAttribute("data-message-seen") === "true" ? true : false) || false
+        if (seen) continue
+        if (!messageId) continue
+        promises.push(markAsRead({ messageId: messageId }))
+      }
     }
-  }
+    const willRefresh = isIntersecting && promises.length > 0
 
-  const wilLRefresh = isIntersecting && promises.length > 0
+    await Promise.all(promises)
 
-  await Promise.all(promises)
+    if (willRefresh) {
+      console.log("refresh")
 
-  if (wilLRefresh) {
-    await refresh()
-    await props.refreshChat()
-  }
-})
+      await refresh()
+      await props.refreshChat()
+    }
+  },
+  { root: messageContainer }
+)
 
 const { data, executeQuery: refresh } = useChatQuery({
   variables: reactive({

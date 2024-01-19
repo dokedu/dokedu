@@ -1,6 +1,10 @@
 <template>
   <ContextMenuRoot>
-    <ContextMenuTrigger class="px-4 w-full select-none rounded-[inherit] group" style="overflow: hidden scroll">
+    <ContextMenuTrigger
+      class="px-4 w-full select-none rounded-[inherit] group"
+      style="overflow: hidden scroll"
+      as-child
+    >
       <div class="flex items-start max-w-[80%]" :class="me ? `justify-end ml-auto` : `justify-start`">
         <div
           class="rounded-xl py-1 px-2 w-fit whitespace-pre-wrap flex flex-col relative"
@@ -59,7 +63,6 @@ type Props = {
   message: ChatMessageFragment
   me?: boolean
   type: "PRIVATE" | "GROUP" | "CHANNEL"
-  target: HTMLElement | null
 }
 const props = defineProps<Props>()
 
