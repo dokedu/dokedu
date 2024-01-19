@@ -43,7 +43,7 @@
                 deleteMessage(message)
               }
             "
-            type="GROUP"
+            :type="data?.chat?.type"
           ></d-chat-message>
         </div>
       </div>

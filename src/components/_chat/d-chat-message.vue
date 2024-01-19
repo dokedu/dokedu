@@ -53,16 +53,17 @@ import { computed, ref } from "vue"
 import { useElementSize } from "@vueuse/core"
 import type { ChatMessageFragment } from "@/gql/fragments/chatMessage"
 import useTime from "@/composables/useTime"
-import { ContextMenuRoot, ContextMenuTrigger, ContextMenuPortal, ContextMenuContent } from "radix-vue"
+import { ContextMenuRoot, ContextMenuTrigger, ContextMenuPortal } from "radix-vue"
 import DContextItem from "@/components/d-context-next/d-context-item.vue"
 import DContextContent from "@/components/d-context-next/d-context-content.vue"
 import { PenSquare, Trash2, Copy } from "lucide-vue-next"
 import { useClipboard } from "@vueuse/core"
+import type { ChatType } from "@/gql/schema"
 
 type Props = {
   message: ChatMessageFragment
   me?: boolean
-  type: "PRIVATE" | "GROUP" | "CHANNEL"
+  type: ChatType | undefined
 }
 const props = defineProps<Props>()
 
@@ -74,7 +75,7 @@ defineEmits<Emit>()
 
 const messageText = ref<HTMLElement | null>(null)
 const { height } = useElementSize(messageText)
-const { copy, copied, isSupported } = useClipboard({ source: props.message.message })
+const { copy, isSupported } = useClipboard({ source: props.message.message })
 
 const showName = computed(() => {
   return (props.type === "GROUP" || props.type === "CHANNEL") && !props.me
