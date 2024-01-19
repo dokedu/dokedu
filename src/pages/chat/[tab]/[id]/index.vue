@@ -62,7 +62,6 @@
           </div>
         </div>
         <div class="flex gap-2 items-end w-full">
-          <!--TODO: make escape work-->
           <textarea
             ref="textareaEdit"
             v-model="inputEditMessage"
@@ -71,7 +70,6 @@
             class="w-full max-h-[40vh] resize-none block py-4 border-none h-full bg-transparent text-neutral-900 placeholder:text-neutral-400 ring-0 focus:outline-none focus:ring-0 text-sm leading-6"
             @keydown.enter.exact.prevent="submitEditMessage"
             @keydown.enter.shift.prevent="inputEditMessage += '\n'"
-            @keydowm.esc="cancelEditMessage"
           />
           <div class="h-14 flex items-center gap-1">
             <d-icon-button size="md" :icon="Check" @click="submitEditMessage" type="primary"></d-icon-button>
@@ -112,7 +110,7 @@
 <script setup lang="ts">
 import { useRoute } from "vue-router/auto"
 import { computed, nextTick, onMounted, reactive, ref, watch } from "vue"
-import { useTextareaAutosize } from "@vueuse/core"
+import { onKeyStroke, useTextareaAutosize } from "@vueuse/core"
 import { useChatQuery } from "@/gql/queries/chats/chat"
 import { useMeQuery } from "@/gql/queries/auth/me"
 import { useSendMessageMutation } from "@/gql/mutations/chats/sendMessage"
@@ -148,6 +146,10 @@ const root = ref(null)
 const props = defineProps<{
   refreshChat: () => Promise<void>
 }>()
+
+onKeyStroke("Escape", () => {
+  cancelEditMessage()
+})
 
 const { executeMutation: markAsRead } = useMarkMessageAsReadMutation()
 
