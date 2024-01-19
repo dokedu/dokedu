@@ -55,7 +55,7 @@ async function createNewGroup() {
     }
   })
   popoverOpen.value = false
-  router.push("/chat/chats/" + createResult.data?.createChat.id)
+  router.push("/chat/chats/" + createResult.data?.createChat.id + "/edit")
 }
 
 onClickOutside(popover, () => {

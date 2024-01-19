@@ -259,6 +259,10 @@ export const en = {
   message_input_placeholder: "Write a message...",
   amount_group_members: "{amount} members",
   last_seen: "last seen {time} ago",
+  online: "online",
+  delete_chat_confirmation: "Are you sure you want to delete this chat?",
+  edit: "Edit",
+  edit_message: "Edit Message",
 
   // Time
   second: "second | seconds",

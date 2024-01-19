@@ -8,5 +8,10 @@ query chat($id: ID!) {
     unreadMessageCount
     type
     userCount
+    users {
+      id
+      firstName
+      lastSeenAt
+    }
   }
 }
