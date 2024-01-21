@@ -131,7 +131,6 @@ import { useIntersectionObserver } from "@vueuse/core"
 import { useMarkMessageAsReadMutation } from "@/gql/mutations/chats/markMessageAsRead"
 import type { ChatMessageFragment } from "@/gql/fragments/chatMessage"
 import { useEditChatMessageMutation } from "@/gql/mutations/chats/editChatMessage"
-// import { useDeleteChatMessageMutation } from "@/gql/mutations/chats/deleteChatMessage"
 
 const route = useRoute("/chat/[tab]/[id]/")
 const id = computed(() => route.params.id)
@@ -145,9 +144,9 @@ const currentEditMessage = ref<ChatMessageFragment | null>(null)
 
 const root = ref(null)
 
-const props = defineProps<{
-  refreshChat: () => Promise<void>
-}>()
+onMounted(() => {
+  scrollToBottomConditionally()
+})
 
 onKeyStroke("Escape", () => {
   cancelEditMessage()
@@ -184,7 +183,6 @@ useIntersectionObserver(
       console.log("refresh")
 
       await refresh()
-      await props.refreshChat()
     }
   },
   { root: messageContainer }
@@ -299,7 +297,6 @@ async function handleSubscription() {
 }
 
 function getOtherUser(): User | null {
-  // filter out me and return the only other user
   return data?.value?.chat?.users?.filter((user: any) => user.id !== userData?.value?.me?.id)[0]
 }
 

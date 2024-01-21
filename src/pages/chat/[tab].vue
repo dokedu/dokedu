@@ -55,7 +55,7 @@
     </div>
     <div class="w-full flex-1">
       <div v-show="chat" class="w-full flex-1">
-        <router-view :refresh-chat="refresh"></router-view>
+        <router-view />
       </div>
       <!-- show start state-->
       <div v-show="!chat" class="w-full flex-1">
@@ -124,11 +124,7 @@ async function createChatWithUser(user: User) {
   router.push({ name: "/chat/[tab]/[id]/", params: { tab: "chats", id: data?.createPrivatChat.id } })
 }
 
-async function handleSubscription() {
-  await refresh()
-}
-
-useMessageAddedSubscription({}, handleSubscription)
+useMessageAddedSubscription({})
 
 async function createNewGroup() {
   const createResult = await createChat({
@@ -143,8 +139,6 @@ function navigateToContacts() {
   router.push({ name: "/chat/[tab]", params: { tab: "contacts" } })
 }
 
-const { data: chatList, executeQuery: refresh } = useChatsQuery({
-  requestPolicy: "network-only"
-})
+const { data: chatList } = useChatsQuery({})
 const { data: users } = useChatUsersQuery({})
 </script>
