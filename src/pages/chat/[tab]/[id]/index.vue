@@ -22,26 +22,30 @@
     </router-link>
     <div ref="messageContainer" class="h-full flex-1 overflow-auto">
       <div ref="root" v-for="(group, _) in groupedMessages" :key="_" class="my-4 flex flex-col gap-1">
-        <d-chat-message
-          v-for="message in group"
-          :target="root"
-          :key="message.id"
-          :message="message"
+        <div
           :data-message-id="message.id"
           :data-message-seen="message.isSeen"
-          :me="message.user.id === userData?.me?.id"
-          @edit="
-            (message) => {
-              startEditMessage(message)
-            }
-          "
-          @delete="
-            (message) => {
-              deleteMessage(message)
-            }
-          "
-          type="GROUP"
-        ></d-chat-message>
+          :data-message-me="message.user.id === userData?.me?.id"
+          :key="message.id"
+          ref="target"
+          v-for="message in group"
+        >
+          <d-chat-message
+            :message="message"
+            :me="message.user.id === userData?.me?.id"
+            @edit="
+              (message) => {
+                startEditMessage(message)
+              }
+            "
+            @delete="
+              (message) => {
+                deleteMessage(message)
+              }
+            "
+            :type="data?.chat?.type"
+          ></d-chat-message>
+        </div>
       </div>
       <div v-if="data?.chat.messages.length === 0" class="h-full">
         <d-empty :icon="MessageCircle" :title="$t('empty_chat_title')" :text="$t('empty_chat_description')"></d-empty>
@@ -62,7 +66,6 @@
           </div>
         </div>
         <div class="flex gap-2 items-end w-full">
-          <!--TODO: make escape work-->
           <textarea
             ref="textareaEdit"
             v-model="inputEditMessage"
@@ -70,8 +73,6 @@
             :placeholder="$t('message_input_placeholder')"
             class="w-full max-h-[40vh] resize-none block py-4 border-none h-full bg-transparent text-neutral-900 placeholder:text-neutral-400 ring-0 focus:outline-none focus:ring-0 text-sm leading-6"
             @keydown.enter.exact.prevent="submitEditMessage"
-            @keydown.enter.shift.prevent="inputEditMessage += '\n'"
-            @keydowm.esc="cancelEditMessage"
           />
           <div class="h-14 flex items-center gap-1">
             <d-icon-button size="md" :icon="Check" @click="submitEditMessage" type="primary"></d-icon-button>
@@ -86,7 +87,6 @@
           :placeholder="$t('message_input_placeholder')"
           class="w-full max-h-[40vh] resize-none block py-4 border-none h-full bg-transparent text-neutral-900 placeholder:text-neutral-400 ring-0 focus:outline-none focus:ring-0 text-sm leading-6"
           @keydown.enter.exact.prevent="onSubmit"
-          @keydown.enter.shift.prevent="input += '\n'"
         />
         <div class="h-14 flex items-center gap-1">
           <d-icon-button
@@ -112,7 +112,7 @@
 <script setup lang="ts">
 import { useRoute } from "vue-router/auto"
 import { computed, nextTick, onMounted, reactive, ref, watch } from "vue"
-import { useTextareaAutosize } from "@vueuse/core"
+import { onKeyStroke, useTextareaAutosize } from "@vueuse/core"
 import { useChatQuery } from "@/gql/queries/chats/chat"
 import { useMeQuery } from "@/gql/queries/auth/me"
 import { useSendMessageMutation } from "@/gql/mutations/chats/sendMessage"
@@ -149,30 +149,46 @@ const props = defineProps<{
   refreshChat: () => Promise<void>
 }>()
 
+onKeyStroke("Escape", () => {
+  cancelEditMessage()
+})
+
 const { executeMutation: markAsRead } = useMarkMessageAsReadMutation()
 
-useIntersectionObserver(root, async ([{ isIntersecting, target }]) => {
-  let promises = []
+const target = ref(null)
 
-  for (const child of target.children) {
-    if (child.getAttribute("data-message-id")) {
-      const messageId = child.getAttribute("data-message-id")
-      const seen = (child.getAttribute("data-message-seen") === "true" ? true : false) || false
-      if (seen) continue
-      if (!messageId) continue
-      promises.push(markAsRead({ messageId: messageId }))
+useIntersectionObserver(
+  target,
+  async (entries) => {
+    let promises = []
+
+    let isIntersecting = false
+
+    for (const entry of entries) {
+      let me = entry.target.getAttribute("data-message-me") === "true"
+      isIntersecting = entry.intersectionRatio > 0
+
+      if (isIntersecting && entry.target.getAttribute("data-message-id") && !me) {
+        const messageId = entry.target.getAttribute("data-message-id")
+        const seen = (entry.target.getAttribute("data-message-seen") === "true" ? true : false) || false
+        if (seen) continue
+        if (!messageId) continue
+        promises.push(markAsRead({ messageId: messageId }))
+      }
     }
-  }
+    const willRefresh = isIntersecting && promises.length > 0
 
-  const wilLRefresh = isIntersecting && promises.length > 0
+    await Promise.all(promises)
 
-  await Promise.all(promises)
+    if (willRefresh) {
+      console.log("refresh")
 
-  if (wilLRefresh) {
-    await refresh()
-    await props.refreshChat()
-  }
-})
+      await refresh()
+      await props.refreshChat()
+    }
+  },
+  { root: messageContainer }
+)
 
 const { data, executeQuery: refresh } = useChatQuery({
   variables: reactive({
@@ -215,6 +231,10 @@ const { executeMutation: sendMessageMutation } = useSendMessageMutation()
 async function onSubmit() {
   await sendMessage(input.value.replace(/^\s+|\s+$/g, ""))
   input.value = ""
+
+  if (messageContainer.value) {
+    messageContainer.value.scrollTop = messageContainer.value.scrollHeight
+  }
 }
 
 async function sendMessage(message: string) {

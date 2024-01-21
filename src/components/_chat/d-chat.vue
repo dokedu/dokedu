@@ -13,7 +13,7 @@
             {{ useTime(chat?.lastMessage?.createdAt) }}
           </div>
         </div>
-        <div class="flex">
+        <div class="flex gap-2">
           <div class="text-xs line-clamp-1 flex-1" :class="active ? 'text-white' : 'text-subtle'">
             {{ chat?.lastMessage ? chat?.lastMessage.message : `No messages yet` }}
           </div>
