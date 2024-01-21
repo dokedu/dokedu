@@ -97,6 +97,13 @@ type Chat struct {
 	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
 }
 
+type ChatWithLastMessage struct {
+	bun.BaseModel `bun:"table:chats"`
+
+	*Chat
+	LastMessage time.Time `bun:"last_message_at"`
+}
+
 type ChatMessage struct {
 	bun.BaseModel
 

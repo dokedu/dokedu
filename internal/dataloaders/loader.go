@@ -19,8 +19,9 @@ type Reader struct {
 
 // Loaders wrap your data loaders to inject via middleware
 type Loaders struct {
-	CompetenceLoader *dataloader.Loader
-	UserLoader       *dataloader.Loader
+	CompetenceLoader  *dataloader.Loader
+	UserLoader        *dataloader.Loader
+	ChatMessageLoader *dataloader.Loader
 }
 
 // NewLoaders instantiates data loaders for the middleware
@@ -28,8 +29,9 @@ func NewLoaders(conn *bun.DB) *Loaders {
 	// define the data loader
 	reader := &Reader{conn: conn}
 	loaders := &Loaders{
-		CompetenceLoader: dataloader.NewBatchedLoader(reader.GetCompetenceParents),
-		UserLoader:       dataloader.NewBatchedLoader(reader.GetUser),
+		CompetenceLoader:  dataloader.NewBatchedLoader(reader.GetCompetenceParents),
+		UserLoader:        dataloader.NewBatchedLoader(reader.GetUser),
+		ChatMessageLoader: dataloader.NewBatchedLoader(reader.getChatMessageView),
 	}
 	return loaders
 }

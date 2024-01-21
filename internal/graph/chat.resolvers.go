@@ -205,23 +205,12 @@ func (r *chatMessageResolver) IsEdited(ctx context.Context, obj *db.ChatMessage)
 
 // IsSeen is the resolver for the isSeen field.
 func (r *chatMessageResolver) IsSeen(ctx context.Context, obj *db.ChatMessage) (bool, error) {
-	currentUser, err := middleware.GetUser(ctx)
+	messageView, err := dataloaders.GetChatMessageView(ctx, obj.ID)
 	if err != nil {
-		return false, nil
+		return false, err
 	}
-
-	var chatMessageView db.ChatMessageView
-	err = r.DB.NewSelect().
-		Model(&chatMessageView).
-		Where("chat_message_id = ?", obj.ID).
-		Where("user_id = ?", currentUser.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-	if errors.Is(err, sql.ErrNoRows) {
+	if messageView == nil {
 		return false, nil
-	}
-	if err != nil {
-		return false, errors.New("unable to get chat message view")
 	}
 
 	return true, nil
@@ -717,7 +706,7 @@ func (r *queryResolver) Chats(ctx context.Context, limit *int, offset *int) (*mo
 	pageLimit, pageOffset := helper.SetPageLimits(limit, offset)
 
 	var count int
-	var chats []*ChatWithLastMessage
+	var chats []*db.ChatWithLastMessage
 	count, err = r.DB.
 		NewSelect().
 		Model(&chats).
@@ -794,16 +783,3 @@ type chatResolver struct{ *Resolver }
 type chatMessageResolver struct{ *Resolver }
 type chatUserResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//     it when you're done.
-//   - You have helper methods in this file. Move them out to keep these resolver files clean.
-type ChatWithLastMessage struct {
-	bun.BaseModel `bun:"table:chats"`
-
-	*db.Chat
-	LastMessage time.Time `bun:"last_message_at"`
-}
