@@ -29,6 +29,7 @@ function makeClient() {
     url,
     requestPolicy: "cache-and-network",
     exchanges: [
+      cacheExchange,
       authExchange(async (utils) => {
         return {
           addAuthToOperation(operation) {
