@@ -28,38 +28,42 @@
 
             <ReportTypeList v-model="type" />
 
-            <div class="bg-blue-100 rounded-md flex gap-2.5 p-2.5">
-              <div>
-                <Info class="text-blue-900" :size="20" />
-              </div>
-              <div class="text-blue-900 text-sm">Wenn kein Fach ausgewählt ist, werden alle Fächer berücksichtigt.</div>
-            </div>
-
-            <DSelect
-              searchable
-              :options="tagOptions"
-              :label="$t('subject')"
-              v-model="competence"
-              v-model:search="competenceSearch"
-            >
-              <template #display>
-                <div v-if="competence">
-                  <d-tag :color="competenceData?.competences.edges?.find((el: any) => el.id === competence)?.color">
-                    {{ competenceData?.competences.edges?.find((el: any) => el.id === competence)?.name }}
-                  </d-tag>
-                  <!-- <div class="mb-1 text-sm font-medium">{{ types.find((t) => t.kind === type)?.label }}</div> -->
-                  <!-- <div class="text-xs text-neutral-500"> -->
-                  <!-- {{ types.find((t) => t.kind === type)?.description }} -->
-                  <!-- </div> -->
+            <template v-if="false">
+              <div class="bg-blue-100 rounded-md flex gap-2.5 p-2.5">
+                <div>
+                  <Info class="text-blue-900" :size="20" />
                 </div>
-                <div v-else class="text-sm text-neutral-600 p-1">Wähle ein Fach aus</div>
-              </template>
-              <template v-slot="{ option }">
-                <d-tag :color="competenceData?.competences.edges?.find((el: any) => el.id === option.value)?.color">
-                  {{ option.label }}
-                </d-tag>
-              </template>
-            </DSelect>
+                <div class="text-blue-900 text-sm">
+                  Wenn kein Fach ausgewählt ist, werden alle Fächer berücksichtigt.
+                </div>
+              </div>
+
+              <DSelect
+                searchable
+                :options="tagOptions"
+                :label="$t('subject')"
+                v-model="competence"
+                v-model:search="competenceSearch"
+              >
+                <template #display>
+                  <div v-if="competence">
+                    <d-tag :color="competenceData?.competences.edges?.find((el: any) => el.id === competence)?.color">
+                      {{ competenceData?.competences.edges?.find((el: any) => el.id === competence)?.name }}
+                    </d-tag>
+                    <!-- <div class="mb-1 text-sm font-medium">{{ types.find((t) => t.kind === type)?.label }}</div> -->
+                    <!-- <div class="text-xs text-neutral-500"> -->
+                    <!-- {{ types.find((t) => t.kind === type)?.description }} -->
+                    <!-- </div> -->
+                  </div>
+                  <div v-else class="text-sm text-neutral-600 p-1">Wähle ein Fach aus</div>
+                </template>
+                <template v-slot="{ option }">
+                  <d-tag :color="competenceData?.competences.edges?.find((el: any) => el.id === option.value)?.color">
+                    {{ option.label }}
+                  </d-tag>
+                </template>
+              </DSelect>
+            </template>
           </div>
         </div>
       </div>
@@ -119,10 +123,10 @@ const { data: studentData } = useGetEntryFilterStudentsQuery({
 })
 
 const studentOptions = computed(() => [
-  {
-    label: "Alle",
-    value: "-1"
-  },
+  // {
+  //   label: "Alle",
+  //   value: "-1"
+  // },
   ...(studentData?.value?.users?.edges?.map((edge: any) => ({
     label: `${edge.firstName} ${edge.lastName}`,
     value: edge.id
