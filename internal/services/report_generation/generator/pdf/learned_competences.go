@@ -29,8 +29,6 @@ func (g *Generator) LearnedCompetencesReportData(report db.Report) (*Competences
 	data.StudentName = fmt.Sprintf("%s %s", student.FirstName, student.LastName)
 	data.StudentBirthday = userStudent.Birthday.Format("02.01.2006")
 
-	// a school year is from 1st of August to 31st of July and is 2006/06
-
 	date := report.CreatedAt
 	if date.Month() < 8 {
 		date = date.AddDate(-1, 0, 0)
@@ -85,11 +83,25 @@ Outer:
 		return nil, err
 	}
 
+	var allCompetences []db.Competence
+	err = g.cfg.DB.NewSelect().
+		Model(&allCompetences).
+		Where("organisation_id = ?", report.OrganisationID).
+		Order("sort_order").Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var allCompetencesMap = make(map[string][]db.Competence)
+	for _, c := range allCompetences {
+		allCompetencesMap[c.ID] = append(allCompetencesMap[c.ID], c)
+	}
+
 	// for each competence, get the parent competence
 	// recursively get all parent competences until the parent competence is nil
 	// append the parent competence to the competences slice if it doesn't exist yet
 	for i := range competences {
-		parents, err := g.getParentCompetences(report, competences[i])
+		parents, err := g.getParentCompetences(competences[i], allCompetencesMap)
 		if err != nil {
 			return nil, err
 		}
@@ -151,13 +163,17 @@ Outer:
 	return &data, nil
 }
 
-func (g *Generator) getParentCompetences(report db.Report, competence db.Competence) ([]db.Competence, error) {
-	query := `SELECT * FROM get_competence_tree_reverse(?);`
-
+func (g *Generator) getParentCompetences(competence db.Competence, competenceMap map[string][]db.Competence) ([]db.Competence, error) {
 	var parents []db.Competence
-	err := g.cfg.DB.NewRaw(query, competence.ID).Scan(context.Background(), &parents)
-	if err != nil {
-		return nil, err
+
+	competenceID := competence.CompetenceID.String
+	for competenceID != "" {
+		competence, ok := competenceMap[competenceID]
+		if !ok {
+			return nil, fmt.Errorf("competence with id %s not found", competenceID)
+		}
+		parents = append(parents, competence[0])
+		competenceID = competence[0].CompetenceID.String
 	}
 
 	return parents, nil
