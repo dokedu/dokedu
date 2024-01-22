@@ -3,7 +3,6 @@ package pdf
 import (
 	"context"
 	"example/internal/db"
-	"fmt"
 )
 
 type Competence struct {
@@ -15,9 +14,13 @@ type Competence struct {
 }
 
 type CompetencesTemplateData struct {
-	OrganisationName string
-	StudentName      string
-	Competences      []Competence
+	OrganisationName    string
+	OrganisationAddress string
+	OrganisationLogoURL string
+	StudentName         string
+	StudentBirthday     string
+	SchoolYear          string
+	Competences         []Competence
 }
 
 func (g *Generator) CompetencesReportData(report db.Report) (*CompetencesTemplateData, error) {
@@ -31,8 +34,6 @@ func (g *Generator) CompetencesReportData(report db.Report) (*CompetencesTemplat
 		return nil, err
 	}
 
-	data.StudentName = fmt.Sprintf("%s %s", student.FirstName, student.LastName)
-
 	var organisation db.Organisation
 	err = g.cfg.DB.NewSelect().Model(&organisation).Where("id = ?", report.OrganisationID).Scan(ctx)
 	if err != nil {
@@ -40,6 +41,7 @@ func (g *Generator) CompetencesReportData(report db.Report) (*CompetencesTemplat
 	}
 
 	data.OrganisationName = organisation.Name
+	data.OrganisationAddress = organisation.Address
 
 	var competences []db.Competence
 	err = g.cfg.DB.NewSelect().

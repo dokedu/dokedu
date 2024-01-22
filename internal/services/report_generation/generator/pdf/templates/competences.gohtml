@@ -1,3 +1,7 @@
+{{ define "pagebreak" }}
+    <div class="pagebreak" style="page-break-after: always;"></div>
+{{ end }}
+
 {{ define "level" }}
     <div class="flex items-center justify-center rounded-lg p-1">
         <div class="flex h-[16px] w-[16px] items-end space-x-0.5">
@@ -48,12 +52,24 @@
     {{ end }}
 {{ end }}
 
-<div class="pt-32 text-center mx-auto">
-    <div class="text-5xl mb-8 font-semibold">{{ .OrganisationName }}</div>
-    <div class="text-2xl font-medium">{{ .StudentName }}</div>
+<div class="mx-auto pt-4 text-center">
+    <div class="mb-16">
+        <img src="{{ .OrganisationLogoURL }}" alt="Logo" class="mx-auto" width="200">
+    </div>
+    <div class="mb-24">
+        <div class="mb-3 text-2xl font-bold">{{ .OrganisationName }}</div>
+        <div class="text-sm">{{ .OrganisationAddress }}</div>
+    </div>
+    <div class="mb-24">
+        <div class="mb-2 text-5xl font-bold">{{ .StudentName }}</div>
+        <div class="text-xl">geb. am {{ .StudentBirthday }}</div>
+    </div>
+    <div class="text-xl mb-2">Schuljahr {{ .SchoolYear }}</div>
+    <div class="text-lg">1. Halbjahr</div>
 </div>
 
-<div class="pagebreak" style="page-break-after: always;"></div>
+
+{{ template "pagebreak" }}
 
 {{ range .Competences }}
     <table class="w-full border-collapse border-{{ .Color }}-200 text-sm mb-4">
@@ -68,5 +84,5 @@
         </tbody>
     </table>
 
-    <div class="pagebreak" style="page-break-after: always;"></div>
+    {{ template "pagebreak" }}
 {{ end }}

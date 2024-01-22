@@ -20,6 +20,25 @@ func (g *Generator) LearnedCompetencesReportData(report db.Report) (*Competences
 
 	data.StudentName = fmt.Sprintf("%s %s", student.FirstName, student.LastName)
 
+	var userStudent db.UserStudent
+	err = g.cfg.DB.NewSelect().Model(&userStudent).Where("user_id = ?", report.StudentUserID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	data.StudentName = fmt.Sprintf("%s %s", student.FirstName, student.LastName)
+	data.StudentBirthday = userStudent.Birthday.Format("02.01.2006")
+
+	// a school year is from 1st of August to 31st of July and is 2006/06
+
+	date := report.CreatedAt
+	if date.Month() < 8 {
+		date = date.AddDate(-1, 0, 0)
+	}
+	lastTwoDigitsOfNextYear := (date.Year() + 1) % 100
+
+	data.SchoolYear = fmt.Sprintf("%d/%d", date.Year(), lastTwoDigitsOfNextYear)
+
 	var organisation db.Organisation
 	err = g.cfg.DB.NewSelect().Model(&organisation).Where("id = ?", report.OrganisationID).Scan(ctx)
 	if err != nil {
@@ -27,6 +46,8 @@ func (g *Generator) LearnedCompetencesReportData(report db.Report) (*Competences
 	}
 
 	data.OrganisationName = organisation.Name
+	data.OrganisationAddress = organisation.Address
+	data.OrganisationLogoURL = organisation.LogoURL
 
 	var userCompetences []db.UserCompetence
 	err = g.cfg.DB.NewSelect().

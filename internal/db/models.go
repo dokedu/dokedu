@@ -315,6 +315,8 @@ type Organisation struct {
 	Phone          string       `json:"phone"`
 	OwnerID        string       `json:"owner_id"`
 	SetupComplete  bool         `json:"setup_complete"`
+	Address        string       `json:"address"`
+	LogoURL        string       `json:"logo_url"`
 	AllowedDomains []string     `bun:",array" json:"allowed_domains"`
 	EnabledApps    []string     `bun:",array" json:"enabled_apps"`
 	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
