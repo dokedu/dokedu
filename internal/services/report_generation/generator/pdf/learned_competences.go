@@ -124,18 +124,20 @@ Outer:
 	subjects := Subjects(competences)
 
 	for i := range subjects {
+		subject := subjects[i]
+
 		if data.Competences == nil {
 			data.Competences = make([]Competence, len(subjects))
 		}
-		data.Competences[i].Name = subjects[i].Name
+		data.Competences[i].Name = subject.Name
 
-		data.Competences[i].Color = subjects[i].Color.String
+		data.Competences[i].Color = subject.Color.String
 
-		if len(data.Competences[i].Color) == 0 {
+		if !subject.Color.Valid {
 			data.Competences[i].Color = "stone"
 		}
 
-		competences, err := g.populateCompetences(report, subjects[i], competencesMap, userCompetencesMap, data.Competences[i].Color)
+		competences, err := g.populateCompetences(report, subject, competencesMap, userCompetencesMap, subject.Color.String)
 		if err != nil {
 			return nil, err
 		}
