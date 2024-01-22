@@ -215,7 +215,7 @@ func (r *queryResolver) UserAttendanceOverview(ctx context.Context, date time.Ti
 		Join("JOIN users ON users.id = user_attendance.user_id").
 		Order("users.first_name ASC").
 		Order("users.last_name ASC").
-		Where("organisation_id = ?", currentUser.OrganisationID).
+		Where("user_attendance.organisation_id = ?", currentUser.OrganisationID).
 		Scan(ctx)
 	if err != nil {
 		return nil, err
