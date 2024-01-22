@@ -137,7 +137,7 @@ Outer:
 			data.Competences[i].Color = "stone"
 		}
 
-		competences, err := g.populateCompetences(report, subject, competencesMap, userCompetencesMap, subject.Color.String)
+		competences, err := g.populateCompetences(report, subject, competencesMap, userCompetencesMap, data.Competences[i].Color)
 		if err != nil {
 			return nil, err
 		}
