@@ -8,8 +8,6 @@
       <div>
         <div class="p-4">
           <div class="flex gap-2" :class="{ 'items-start': description, 'items-center': !description }">
-            <component v-if="icon" :icon="icon" class="h-4 w-4"></component>
-
             <div class="w-0 flex-1 text-sm font-medium text-strong">
               <p>
                 {{ title }}
@@ -23,9 +21,7 @@
               </div>
             </div>
             <div class="flex flex-shrink-0 items-center gap-3">
-              <button @click.stop="onClose">
-                <component :is="closeIcon" class="h-4 w-4"></component>
-              </button>
+              <d-icon-button :icon="XIcon" @click.prevent.stop="onClose" />
             </div>
           </div>
         </div>
@@ -36,32 +32,24 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, onUnmounted, watchEffect, type FunctionalComponent, type SVGAttributes } from "vue"
+import { ref, computed, onMounted, onUnmounted, watchEffect } from "vue"
+import DIconButton from "../d-icon-button/d-icon-button.vue"
 import { useTimer } from "@/composables/useTimer"
-import { X } from "lucide-vue-next"
+import { XIcon } from "lucide-vue-next"
 import { useSlots } from "vue"
-
-interface SVGProps extends Partial<SVGAttributes> {
-  size?: 24 | number
-  strokeWidth?: number | string
-  absoluteStrokeWidth?: boolean
-}
-
-type Icon = FunctionalComponent<SVGProps>
 
 const slots = useSlots()
 
 export interface Props {
   title: string
   description: string
-  icon?: Icon
-  closeIcon?: Icon
+  icon?: any
+  closeIcon?: any
   timeout?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
   icon: undefined,
-  closeIcon: X,
   timeout: 5000
 })
 
