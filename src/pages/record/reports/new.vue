@@ -7,7 +7,6 @@ import dButton from "@/components/d-button/d-button.vue"
 import ReportTypeList from "@/components/d-report/d-report-type-list.vue"
 import { computed, reactive, ref } from "vue"
 import dInput from "@/components/d-input/d-input.vue"
-import DCheckbox from "@/components/d-checkbox/d-checkbox.vue"
 import { useRouter } from "vue-router/auto"
 import DSelect from "@/components/d-select/d-select.vue"
 import { createNotification } from "@/composables/useToast"
@@ -26,8 +25,6 @@ const to = useRouteQuery<string>("to")
 const type = useRouteQuery<string>("type", "entries")
 const competence = useRouteQuery<string>("competence")
 const competenceSearch = ref<string>("")
-
-const allUsers = ref(false)
 
 const { executeMutation: createReportMutation } = useCreateReportMutation()
 
@@ -64,7 +61,7 @@ const studentOptions = computed(() => [
 ])
 
 const createReportInput = object({
-  studentUser: string(),
+  studentUser: string().optional(),
   allUsers: boolean().required(),
   from: date().required(),
   to: date().required(),
@@ -74,7 +71,7 @@ const createReportInput = object({
 })
 
 async function createReport() {
-  const scope = student.value === "-1" ? { allUsers: true } : { studentUser: student.value }
+  const scope = student.value === "-1" ? { allUsers: true } : { studentUser: student.value, allUsers: false }
 
   const value = {
     from: from.value.slice(0, 10),
@@ -98,6 +95,7 @@ async function createReport() {
   const { error } = await createReportMutation({ input })
 
   if (error) {
+    console.error(error)
     return createNotification({
       title: "Beim Erstellen des Berichts ist ein Fehler aufgetreten",
       description: error.message
