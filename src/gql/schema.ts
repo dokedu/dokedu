@@ -265,11 +265,12 @@ export type CreateFolderInput = {
 };
 
 export type CreateReportInput = {
+  allUsers?: InputMaybe<Scalars['Boolean']['input']>;
   filterTags: Array<Scalars['ID']['input']>;
   format: ReportFormat;
   from: Scalars['Time']['input'];
   kind: ReportKind;
-  studentUser: Scalars['ID']['input'];
+  studentUser?: InputMaybe<Scalars['ID']['input']>;
   to: Scalars['Time']['input'];
 };
 
@@ -739,7 +740,7 @@ export type Mutation = {
   createEvent: Event;
   createFolder: File;
   createPrivatChat: Chat;
-  createReport: Report;
+  createReport: Array<Maybe<Report>>;
   createSchoolYear: SchoolYear;
   createShare: ShareUser;
   createSharedDrive: Bucket;
@@ -1732,6 +1733,7 @@ export type SubjectConnection = {
 export type Subscription = {
   __typename?: 'Subscription';
   messageAdded: ChatMessage;
+  reportCreatedOrUpdated: Report;
 };
 
 export type Tag = {
@@ -1836,6 +1838,8 @@ export type UpdateUserInput = {
   joinedAt?: InputMaybe<Scalars['Time']['input']>;
   lastName: Scalars['String']['input'];
   leftAt?: InputMaybe<Scalars['Time']['input']>;
+  missedHours?: InputMaybe<Scalars['Int']['input']>;
+  missedHoursExcused?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type UpdateUserStudentGradesInput = {
@@ -1956,6 +1960,8 @@ export type UserStudent = {
   id: Scalars['ID']['output'];
   joinedAt?: Maybe<Scalars['Time']['output']>;
   leftAt?: Maybe<Scalars['Time']['output']>;
+  missedHours: Scalars['Int']['output'];
+  missedHoursExcused: Scalars['Int']['output'];
   nationality?: Maybe<Scalars['String']['output']>;
   user: User;
 };
@@ -2459,6 +2465,8 @@ export type GraphCacheResolvers = {
     id?: GraphCacheResolver<WithTypename<UserStudent>, Record<string, never>, Scalars['ID'] | string>,
     joinedAt?: GraphCacheResolver<WithTypename<UserStudent>, Record<string, never>, Scalars['Time'] | string>,
     leftAt?: GraphCacheResolver<WithTypename<UserStudent>, Record<string, never>, Scalars['Time'] | string>,
+    missedHours?: GraphCacheResolver<WithTypename<UserStudent>, Record<string, never>, Scalars['Int'] | string>,
+    missedHoursExcused?: GraphCacheResolver<WithTypename<UserStudent>, Record<string, never>, Scalars['Int'] | string>,
     nationality?: GraphCacheResolver<WithTypename<UserStudent>, Record<string, never>, Scalars['String'] | string>,
     user?: GraphCacheResolver<WithTypename<UserStudent>, Record<string, never>, WithTypename<User> | string>
   },
@@ -2509,7 +2517,7 @@ export type GraphCacheOptimisticUpdaters = {
   createEvent?: GraphCacheOptimisticMutationResolver<MutationCreateEventArgs, WithTypename<Event>>,
   createFolder?: GraphCacheOptimisticMutationResolver<MutationCreateFolderArgs, WithTypename<File>>,
   createPrivatChat?: GraphCacheOptimisticMutationResolver<MutationCreatePrivatChatArgs, WithTypename<Chat>>,
-  createReport?: GraphCacheOptimisticMutationResolver<MutationCreateReportArgs, WithTypename<Report>>,
+  createReport?: GraphCacheOptimisticMutationResolver<MutationCreateReportArgs, Array<WithTypename<Report>>>,
   createSchoolYear?: GraphCacheOptimisticMutationResolver<MutationCreateSchoolYearArgs, WithTypename<SchoolYear>>,
   createShare?: GraphCacheOptimisticMutationResolver<MutationCreateShareArgs, WithTypename<ShareUser>>,
   createSharedDrive?: GraphCacheOptimisticMutationResolver<MutationCreateSharedDriveArgs, WithTypename<Bucket>>,
@@ -2653,7 +2661,7 @@ export type GraphCacheUpdaters = {
     createEvent?: GraphCacheUpdateResolver<{ createEvent: WithTypename<Event> }, MutationCreateEventArgs>,
     createFolder?: GraphCacheUpdateResolver<{ createFolder: WithTypename<File> }, MutationCreateFolderArgs>,
     createPrivatChat?: GraphCacheUpdateResolver<{ createPrivatChat: WithTypename<Chat> }, MutationCreatePrivatChatArgs>,
-    createReport?: GraphCacheUpdateResolver<{ createReport: WithTypename<Report> }, MutationCreateReportArgs>,
+    createReport?: GraphCacheUpdateResolver<{ createReport: Array<WithTypename<Report>> }, MutationCreateReportArgs>,
     createSchoolYear?: GraphCacheUpdateResolver<{ createSchoolYear: WithTypename<SchoolYear> }, MutationCreateSchoolYearArgs>,
     createShare?: GraphCacheUpdateResolver<{ createShare: WithTypename<ShareUser> }, MutationCreateShareArgs>,
     createSharedDrive?: GraphCacheUpdateResolver<{ createSharedDrive: WithTypename<Bucket> }, MutationCreateSharedDriveArgs>,
@@ -2724,7 +2732,8 @@ export type GraphCacheUpdaters = {
     uploadFiles?: GraphCacheUpdateResolver<{ uploadFiles: WithTypename<UploadFilesPayload> }, MutationUploadFilesArgs>
   },
   Subscription?: {
-    messageAdded?: GraphCacheUpdateResolver<{ messageAdded: WithTypename<ChatMessage> }, Record<string, never>>
+    messageAdded?: GraphCacheUpdateResolver<{ messageAdded: WithTypename<ChatMessage> }, Record<string, never>>,
+    reportCreatedOrUpdated?: GraphCacheUpdateResolver<{ reportCreatedOrUpdated: WithTypename<Report> }, Record<string, never>>
   },
   Bucket?: {
     createdAt?: GraphCacheUpdateResolver<Maybe<WithTypename<Bucket>>, Record<string, never>>,
@@ -3093,6 +3102,8 @@ export type GraphCacheUpdaters = {
     id?: GraphCacheUpdateResolver<Maybe<WithTypename<UserStudent>>, Record<string, never>>,
     joinedAt?: GraphCacheUpdateResolver<Maybe<WithTypename<UserStudent>>, Record<string, never>>,
     leftAt?: GraphCacheUpdateResolver<Maybe<WithTypename<UserStudent>>, Record<string, never>>,
+    missedHours?: GraphCacheUpdateResolver<Maybe<WithTypename<UserStudent>>, Record<string, never>>,
+    missedHoursExcused?: GraphCacheUpdateResolver<Maybe<WithTypename<UserStudent>>, Record<string, never>>,
     nationality?: GraphCacheUpdateResolver<Maybe<WithTypename<UserStudent>>, Record<string, never>>,
     user?: GraphCacheUpdateResolver<Maybe<WithTypename<UserStudent>>, Record<string, never>>
   },

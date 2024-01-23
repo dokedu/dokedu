@@ -11,6 +11,8 @@ query adminStudentById($id: ID!) {
       joinedAt
       leftAt
       emoji
+      missedHours
+      missedHoursExcused
     }
   }
 }

@@ -267,5 +267,8 @@ export const de = {
   // Time
   second: "Sekunde | Sekunden",
   minute: "Minute | Minuten",
-  hour: "Stunde | Stunden"
+  hour: "Stunde | Stunden",
+
+  missed_hours: "Fehlstunden",
+  missed_hours_excused: "Fehlstunden entschuldigt",
 }

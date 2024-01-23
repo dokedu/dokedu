@@ -11,6 +11,8 @@ mutation updateStudent($student: UpdateUserInput!) {
       leftAt
       joinedAt
       emoji
+      missedHours
+      missedHoursExcused
     }
   }
 }

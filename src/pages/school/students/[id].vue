@@ -1,7 +1,7 @@
 <template>
   <div v-if="data?.user">
     <DStudentForm
-      :student="data.user as User"
+      :student="data.user"
       :title="$t('edit_student')"
       deletable
       @save="onEditStudent"
@@ -18,7 +18,6 @@ import { createNotification } from "@/composables/useToast"
 import { useAdminStudentByIdQuery } from "@/gql/queries/users/adminStudentById"
 import { useUpdateStudentMutation } from "@/gql/mutations/users/updateStudent"
 import { useArchiveStudentMutation } from "@/gql/mutations/users/archiveStudent"
-import type { User } from "@/gql/schema"
 
 const route = useRoute<"/school/students/[id]">()
 const router = useRouter()
@@ -60,7 +59,9 @@ const onEditStudent = async () => {
       birthday: student.value.student?.birthday,
       leftAt: student.value.student?.leftAt,
       joinedAt: student.value.student?.joinedAt,
-      emoji: student.value.student?.emoji
+      emoji: student.value.student?.emoji,
+      missedHours: student.value.student?.missedHours || 0,
+      missedHoursExcused: student.value.student?.missedHoursExcused || 0
     }
   })
 

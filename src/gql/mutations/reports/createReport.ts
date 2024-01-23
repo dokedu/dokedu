@@ -8,7 +8,7 @@ export type CreateReportMutationVariables = Types.Exact<{
 }>;
 
 
-export type CreateReportMutation = { __typename?: 'Mutation', createReport: { __typename?: 'Report', id: string } };
+export type CreateReportMutation = { __typename?: 'Mutation', createReport: Array<{ __typename?: 'Report', id: string } | null> };
 
 
 export const CreateReportDocument = gql`

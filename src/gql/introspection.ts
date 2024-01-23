@@ -2749,9 +2749,12 @@ export default {
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "OBJECT",
-                "name": "Report",
-                "ofType": null
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "Report",
+                  "ofType": null
+                }
               }
             },
             "args": [
@@ -6067,6 +6070,18 @@ export default {
               }
             },
             "args": []
+          },
+          {
+            "name": "reportCreatedOrUpdated",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Report",
+                "ofType": null
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -6667,6 +6682,28 @@ export default {
             "type": {
               "kind": "SCALAR",
               "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "missedHours",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "missedHoursExcused",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
             },
             "args": []
           },

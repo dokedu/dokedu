@@ -2,33 +2,45 @@
   <DSidebar :title="title" :delete="deletable" @cancel="onCancel" @delete="onDelete">
     <template #main>
       <div class="flex flex-col gap-2">
-        <DInput name="firstName" :label="$t('first_name')" v-model="student.firstName"></DInput>
-        <DInput name="lastName" :label="$t('last_name')" v-model="student.lastName"></DInput>
-        <DInput
-          type="number"
-          v-if="student.student"
-          :label="$t('grade')"
-          :min="0"
-          name="grade"
-          v-model="student.student.grade"
-        ></DInput>
-        <DInput type="date" :label="$t('birthday')" name="birthday" v-model="birthday"></DInput>
-        <DInput type="date" :label="$t('joined_at')" name="birthday" v-model="joinedAt"></DInput>
-        <DInput type="date" :label="$t('left_at')" name="birthday" v-model="leftAt"></DInput>
-        <div class="flex gap-2"></div>
-        <div class="flex items-end gap-2">
-          <DInput type="text" class="flex-1" disabled :label="$t('emoji')" name="emoji" v-model="emoji"></DInput>
-          <div class="relative">
-            <DButton size="md" type="outline" class="!h-10" :icon-left="Smile" @click="onToggleEmojiPicker"
-              >Select emoji
-            </DButton>
-            <div v-if="emojiPickerOpen" ref="emojiPickerContainer" class="absolute z-10 top-12 right-0">
-              <Picker color="black" :data="emojiIndex" set="apple" @select="showEmoji"></Picker>
+        <div class="px-2 py-2.5 flex flex-col gap-2 rounded-md bg-neutral-50">
+          <DInput name="firstName" :label="$t('first_name')" v-model="student.firstName"></DInput>
+          <DInput name="lastName" :label="$t('last_name')" v-model="student.lastName"></DInput>
+        </div>
+
+        <div class="px-2 py-2.5 flex flex-col gap-2 rounded-md bg-neutral-50">
+          <DInput
+            type="number"
+            v-if="student.student"
+            :label="$t('grade')"
+            :min="0"
+            name="grade"
+            v-model="student.student.grade"
+          />
+          <DInput type="date" :label="$t('birthday')" name="birthday" v-model="birthday" />
+        </div>
+
+        <div class="px-2 py-2.5 flex flex-col gap-2 rounded-md bg-neutral-50">
+          <DInput type="date" :label="$t('joined_at')" name="birthday" v-model="joinedAt" />
+          <DInput type="date" :label="$t('left_at')" name="birthday" v-model="leftAt" />
+        </div>
+
+        <div v-if="student.student?.id" class="px-2 py-2.5 flex flex-col gap-2 rounded-md bg-neutral-50">
+          <DInput type="number" :label="$t('missed_hours')" name="birthday" v-model="missedHours" />
+          <DInput type="number" :label="$t('missed_hours_excused')" name="birthday" v-model="missedHoursExcused" />
+        </div>
+
+        <div v-if="student.student?.id" class="px-2 py-2.5 flex flex-col gap-2 rounded-md bg-neutral-50">
+          <div class="flex gap-2 items-center justify-between">
+            <input type="text" v-model="emoji" class="hidden" />
+            <div>{{ emoji }}</div>
+            <div class="relative">
+              <DButton size="md" type="outline" :icon-left="Smile" @click="onToggleEmojiPicker"> Select emoji </DButton>
+              <div v-if="emojiPickerOpen" ref="emojiPickerContainer" class="absolute z-10 top-12 right-0">
+                <Picker color="black" :data="emojiIndex" set="apple" @select="showEmoji"></Picker>
+              </div>
             </div>
           </div>
         </div>
-
-        <div>{{ emojiOutput }}</div>
       </div>
     </template>
     <template #footer>
@@ -56,7 +68,6 @@ import data from "emoji-mart-vue-fast/data/apple.json"
 import type { User } from "@/gql/schema"
 
 let emojiIndex = new EmojiIndex(data)
-let emojiOutput = ref("")
 let emojiPickerOpen = ref(false)
 
 let emojiPickerContainer = ref(null)
@@ -87,6 +98,34 @@ export interface Props {
 const props = defineProps<Props>()
 const emit = defineEmits(["save", "delete"])
 const student = toRef(props, "student")
+
+const missedHours = computed({
+  get: () => {
+    if (student.value.student?.missedHours) {
+      return student.value.student.missedHours
+    }
+    return 0
+  },
+  set: (value) => {
+    if (student.value.student) {
+      student.value.student.missedHours = value
+    }
+  }
+})
+
+const missedHoursExcused = computed({
+  get: () => {
+    if (student.value.student?.missedHoursExcused) {
+      return student.value.student.missedHoursExcused
+    }
+    return 0
+  },
+  set: (value) => {
+    if (student.value.student) {
+      student.value.student.missedHoursExcused = value
+    }
+  }
+})
 
 const birthday = computed({
   get: () => {

@@ -268,5 +268,8 @@ export const en = {
   // Time
   second: "second | seconds",
   minute: "minute | minutes",
-  hour: "hour | hours"
+  hour: "hour | hours",
+
+  missed_hours: "Missed hours",
+  missed_hours_excused: "Missed hours excused",
 }

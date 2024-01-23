@@ -46,7 +46,7 @@ const buttonClasses = computed(() => {
       "shadow-sm border-transparent bg-gradient-to-t from-neutral-950 to-neutral-800 text-white hover:shadow-md hover:from-neutral-900 hover:to-neutral-600 active:from-neutral-700 active:to-neutral-900"
     ],
     outline: [
-      "shadow-sm border border-default text-neutral-700 hover:bg-neutral-100 active:shadow-none active:bg-gradient-to-t active:from-neutral-50 active:to-neutral-200"
+      "shadow-sm bg-white border border-default text-neutral-700 hover:bg-neutral-100 active:shadow-none active:bg-gradient-to-t active:from-neutral-50 active:to-neutral-200"
     ],
     transparent: [
       "border-transparent text-neutral-700 hover:bg-neutral-100 hover:text-neutral-950 active:bg-gradient-to-t active:from-neutral-50 active:to-neutral-100"

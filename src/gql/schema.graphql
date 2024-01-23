@@ -223,11 +223,12 @@ input CreateFolderInput {
 }
 
 input CreateReportInput {
+  allUsers: Boolean
   filterTags: [ID!]!
   format: ReportFormat!
   from: Time!
   kind: ReportKind!
-  studentUser: ID!
+  studentUser: ID
   to: Time!
 }
 
@@ -676,7 +677,7 @@ type Mutation {
   createEvent(input: CreateEventInput!): Event!
   createFolder(input: CreateFolderInput!): File!
   createPrivatChat(userId: ID!): Chat!
-  createReport(input: CreateReportInput!): Report!
+  createReport(input: CreateReportInput!): [Report]!
   createSchoolYear(input: CreateSchoolYearInput!): SchoolYear!
   createShare(input: CreateShareInput!): ShareUser!
   createSharedDrive(name: String!): Bucket!
@@ -970,6 +971,7 @@ type SubjectConnection {
 
 type Subscription {
   messageAdded: ChatMessage!
+  reportCreatedOrUpdated: Report!
 }
 
 type Tag {
@@ -1074,6 +1076,8 @@ input UpdateUserInput {
   joinedAt: Time
   lastName: String!
   leftAt: Time
+  missedHours: Int
+  missedHoursExcused: Int
 }
 
 input UpdateUserStudentGradesInput {
@@ -1189,6 +1193,8 @@ type UserStudent {
   id: ID!
   joinedAt: Time
   leftAt: Time
+  missedHours: Int!
+  missedHoursExcused: Int!
   nationality: String
   user: User!
 }

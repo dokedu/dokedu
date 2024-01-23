@@ -8,7 +8,7 @@ export type UpdateStudentMutationVariables = Types.Exact<{
 }>;
 
 
-export type UpdateStudentMutation = { __typename?: 'Mutation', updateUser: { __typename?: 'User', id: string, firstName: string, lastName: string, role: Types.UserRole, student?: { __typename?: 'UserStudent', id: string, birthday?: never | null, grade: number, leftAt?: never | null, joinedAt?: never | null, emoji?: string | null } | null } };
+export type UpdateStudentMutation = { __typename?: 'Mutation', updateUser: { __typename?: 'User', id: string, firstName: string, lastName: string, role: Types.UserRole, student?: { __typename?: 'UserStudent', id: string, birthday?: never | null, grade: number, leftAt?: never | null, joinedAt?: never | null, emoji?: string | null, missedHours: number, missedHoursExcused: number } | null } };
 
 
 export const UpdateStudentDocument = gql`
@@ -25,6 +25,8 @@ export const UpdateStudentDocument = gql`
       leftAt
       joinedAt
       emoji
+      missedHours
+      missedHoursExcused
     }
   }
 }

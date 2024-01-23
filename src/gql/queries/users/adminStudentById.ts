@@ -8,7 +8,7 @@ export type AdminStudentByIdQueryVariables = Types.Exact<{
 }>;
 
 
-export type AdminStudentByIdQuery = { __typename?: 'Query', user: { __typename?: 'User', id: string, firstName: string, lastName: string, role: Types.UserRole, student?: { __typename?: 'UserStudent', id: string, grade: number, birthday?: never | null, joinedAt?: never | null, leftAt?: never | null, emoji?: string | null } | null } };
+export type AdminStudentByIdQuery = { __typename?: 'Query', user: { __typename?: 'User', id: string, firstName: string, lastName: string, role: Types.UserRole, student?: { __typename?: 'UserStudent', id: string, grade: number, birthday?: never | null, joinedAt?: never | null, leftAt?: never | null, emoji?: string | null, missedHours: number, missedHoursExcused: number } | null } };
 
 
 export const AdminStudentByIdDocument = gql`
@@ -25,6 +25,8 @@ export const AdminStudentByIdDocument = gql`
       joinedAt
       leftAt
       emoji
+      missedHours
+      missedHoursExcused
     }
   }
 }
