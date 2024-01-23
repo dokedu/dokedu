@@ -146,6 +146,8 @@ type UserStudent {
     eventsCount: Int!
     emoji: String
     user: User!
+    missedHours: Int!
+    missedHoursExcused: Int!
 }
 
 type UserStudentConnection {
@@ -250,6 +252,8 @@ input UpdateUserInput {
     leftAt: Time
     joinedAt: Time
     emoji: String
+    missedHours: Int
+    missedHoursExcused: Int
 }
 
 input CreateStudentInput {

@@ -631,20 +631,22 @@ type ComplexityRoot struct {
 	}
 
 	UserStudent struct {
-		Birthday         func(childComplexity int) int
-		Comments         func(childComplexity int) int
-		CompetencesCount func(childComplexity int) int
-		CreatedAt        func(childComplexity int) int
-		DeletedAt        func(childComplexity int) int
-		Emoji            func(childComplexity int) int
-		EntriesCount     func(childComplexity int) int
-		EventsCount      func(childComplexity int) int
-		Grade            func(childComplexity int) int
-		ID               func(childComplexity int) int
-		JoinedAt         func(childComplexity int) int
-		LeftAt           func(childComplexity int) int
-		Nationality      func(childComplexity int) int
-		User             func(childComplexity int) int
+		Birthday           func(childComplexity int) int
+		Comments           func(childComplexity int) int
+		CompetencesCount   func(childComplexity int) int
+		CreatedAt          func(childComplexity int) int
+		DeletedAt          func(childComplexity int) int
+		Emoji              func(childComplexity int) int
+		EntriesCount       func(childComplexity int) int
+		EventsCount        func(childComplexity int) int
+		Grade              func(childComplexity int) int
+		ID                 func(childComplexity int) int
+		JoinedAt           func(childComplexity int) int
+		LeftAt             func(childComplexity int) int
+		MissedHours        func(childComplexity int) int
+		MissedHoursExcused func(childComplexity int) int
+		Nationality        func(childComplexity int) int
+		User               func(childComplexity int) int
 	}
 
 	UserStudentConnection struct {
@@ -4411,6 +4413,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.UserStudent.LeftAt(childComplexity), true
+
+	case "UserStudent.missedHours":
+		if e.complexity.UserStudent.MissedHours == nil {
+			break
+		}
+
+		return e.complexity.UserStudent.MissedHours(childComplexity), true
+
+	case "UserStudent.missedHoursExcused":
+		if e.complexity.UserStudent.MissedHoursExcused == nil {
+			break
+		}
+
+		return e.complexity.UserStudent.MissedHoursExcused(childComplexity), true
 
 	case "UserStudent.nationality":
 		if e.complexity.UserStudent.Nationality == nil {
@@ -24472,6 +24488,10 @@ func (ec *executionContext) fieldContext_Query_userStudent(ctx context.Context, 
 				return ec.fieldContext_UserStudent_emoji(ctx, field)
 			case "user":
 				return ec.fieldContext_UserStudent_user(ctx, field)
+			case "missedHours":
+				return ec.fieldContext_UserStudent_missedHours(ctx, field)
+			case "missedHoursExcused":
+				return ec.fieldContext_UserStudent_missedHoursExcused(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserStudent", field.Name)
 		},
@@ -27846,6 +27866,10 @@ func (ec *executionContext) fieldContext_User_student(ctx context.Context, field
 				return ec.fieldContext_UserStudent_emoji(ctx, field)
 			case "user":
 				return ec.fieldContext_UserStudent_user(ctx, field)
+			case "missedHours":
+				return ec.fieldContext_UserStudent_missedHours(ctx, field)
+			case "missedHoursExcused":
+				return ec.fieldContext_UserStudent_missedHoursExcused(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserStudent", field.Name)
 		},
@@ -29722,6 +29746,94 @@ func (ec *executionContext) fieldContext_UserStudent_user(ctx context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _UserStudent_missedHours(ctx context.Context, field graphql.CollectedField, obj *db.UserStudent) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserStudent_missedHours(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MissedHours, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserStudent_missedHours(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserStudent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserStudent_missedHoursExcused(ctx context.Context, field graphql.CollectedField, obj *db.UserStudent) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserStudent_missedHoursExcused(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MissedHoursExcused, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserStudent_missedHoursExcused(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserStudent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _UserStudentConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.UserStudentConnection) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UserStudentConnection_edges(ctx, field)
 	if err != nil {
@@ -29786,6 +29898,10 @@ func (ec *executionContext) fieldContext_UserStudentConnection_edges(ctx context
 				return ec.fieldContext_UserStudent_emoji(ctx, field)
 			case "user":
 				return ec.fieldContext_UserStudent_user(ctx, field)
+			case "missedHours":
+				return ec.fieldContext_UserStudent_missedHours(ctx, field)
+			case "missedHoursExcused":
+				return ec.fieldContext_UserStudent_missedHoursExcused(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserStudent", field.Name)
 		},
@@ -30000,6 +30116,10 @@ func (ec *executionContext) fieldContext_UserStudentGrades_student(ctx context.C
 				return ec.fieldContext_UserStudent_emoji(ctx, field)
 			case "user":
 				return ec.fieldContext_UserStudent_user(ctx, field)
+			case "missedHours":
+				return ec.fieldContext_UserStudent_missedHours(ctx, field)
+			case "missedHoursExcused":
+				return ec.fieldContext_UserStudent_missedHoursExcused(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserStudent", field.Name)
 		},
@@ -35619,7 +35739,7 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "firstName", "lastName", "email", "grade", "birthday", "leftAt", "joinedAt", "emoji"}
+	fieldsInOrder := [...]string{"id", "firstName", "lastName", "email", "grade", "birthday", "leftAt", "joinedAt", "emoji", "missedHours", "missedHoursExcused"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -35707,6 +35827,24 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 				return it, err
 			}
 			it.Emoji = data
+		case "missedHours":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("missedHours"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MissedHours = data
+		case "missedHoursExcused":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("missedHoursExcused"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MissedHoursExcused = data
 		}
 	}
 
@@ -42969,6 +43107,16 @@ func (ec *executionContext) _UserStudent(ctx context.Context, sel ast.SelectionS
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "missedHours":
+			out.Values[i] = ec._UserStudent_missedHours(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "missedHoursExcused":
+			out.Values[i] = ec._UserStudent_missedHoursExcused(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

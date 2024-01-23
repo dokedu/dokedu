@@ -435,6 +435,12 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 		if input.Emoji != nil {
 			student.Emoji = sql.NullString{String: *input.Emoji, Valid: true}
 		}
+		if input.MissedHours != nil {
+			student.MissedHours = int32(*input.MissedHours)
+		}
+		if input.MissedHoursExcused != nil {
+			student.MissedHoursExcused = int32(*input.MissedHoursExcused)
+		}
 
 		_, err = r.DB.NewUpdate().
 			Model(&student).

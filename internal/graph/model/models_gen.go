@@ -652,15 +652,17 @@ type UpdateUserCompetenceInput struct {
 }
 
 type UpdateUserInput struct {
-	ID        string     `json:"id"`
-	FirstName string     `json:"firstName"`
-	LastName  string     `json:"lastName"`
-	Email     *string    `json:"email,omitempty"`
-	Grade     *int       `json:"grade,omitempty"`
-	Birthday  *time.Time `json:"birthday,omitempty"`
-	LeftAt    *time.Time `json:"leftAt,omitempty"`
-	JoinedAt  *time.Time `json:"joinedAt,omitempty"`
-	Emoji     *string    `json:"emoji,omitempty"`
+	ID                 string     `json:"id"`
+	FirstName          string     `json:"firstName"`
+	LastName           string     `json:"lastName"`
+	Email              *string    `json:"email,omitempty"`
+	Grade              *int       `json:"grade,omitempty"`
+	Birthday           *time.Time `json:"birthday,omitempty"`
+	LeftAt             *time.Time `json:"leftAt,omitempty"`
+	JoinedAt           *time.Time `json:"joinedAt,omitempty"`
+	Emoji              *string    `json:"emoji,omitempty"`
+	MissedHours        *int       `json:"missedHours,omitempty"`
+	MissedHoursExcused *int       `json:"missedHoursExcused,omitempty"`
 }
 
 type UpdateUserStudentGradesInput struct {
