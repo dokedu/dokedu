@@ -213,14 +213,18 @@ func (g *Generator) generateHTML(report db.Report, data any) error {
 	}
 
 	header := new(bytes.Buffer)
-
 	err = t.ExecuteTemplate(header, "_header.gohtml", nil)
 	if err != nil {
 		return err
 	}
 
-	reports := new(bytes.Buffer)
+	footer := new(bytes.Buffer)
+	err = t.ExecuteTemplate(footer, "_footer.gohtml", nil)
+	if err != nil {
+		return err
+	}
 
+	reports := new(bytes.Buffer)
 	var reportTemplate db.ReportTemplate
 	err = g.cfg.DB.
 		NewSelect().
@@ -228,6 +232,9 @@ func (g *Generator) generateHTML(report db.Report, data any) error {
 		Where("name = ?", report.Kind).
 		Where("organisation_id = ?", report.OrganisationID).
 		Scan(context.Background())
+	if err != nil {
+		return err
+	}
 
 	tx, err := template.New(string(report.Kind) + ".gohtml").Parse(reportTemplate.Template)
 	if err != nil {
@@ -235,12 +242,6 @@ func (g *Generator) generateHTML(report db.Report, data any) error {
 	}
 
 	err = tx.Execute(reports, data)
-	if err != nil {
-		return err
-	}
-
-	footer := new(bytes.Buffer)
-	err = t.ExecuteTemplate(footer, "_footer.gohtml", nil)
 	if err != nil {
 		return err
 	}

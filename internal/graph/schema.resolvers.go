@@ -900,15 +900,15 @@ func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filt
 		if filter.OrderBy != nil {
 			switch *filter.OrderBy {
 			case model.UserOrderByFirstNameAsc:
-				query.OrderExpr("first_name ASC")
+				query.OrderExpr("first_name ASC, last_name ASC")
 			case model.UserOrderByFirstNameDesc:
-				query.OrderExpr("first_name DESC")
+				query.OrderExpr("first_name DESC, last_name DESC")
 			case model.UserOrderByLastNameAsc:
-				query.OrderExpr("last_name ASC")
+				query.OrderExpr("last_name ASC, first_name ASC")
 			case model.UserOrderByLastNameDesc:
-				query.OrderExpr("last_name DESC")
+				query.OrderExpr("last_name DESC, first_name DESC")
 			default:
-				query.OrderExpr("last_name ASC")
+				query.OrderExpr("last_name ASC, first_name ASC")
 			}
 		}
 		if filter.ShowDeleted != nil && *filter.ShowDeleted == true {
