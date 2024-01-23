@@ -45,7 +45,12 @@ type internData struct {
 func (g *Generator) preloadAllEntriesReportData(ctx context.Context, o db.Organisation) (*internData, error) {
 	var data internData
 
-	err := g.cfg.DB.NewSelect().Model(&data.Entries).Where("organisation_id = ?", o.ID).Scan(ctx)
+	err := g.cfg.DB.
+		NewSelect().
+		Model(&data.Entries).
+		Where("organisation_id = ?", o.ID).
+		Order("date ASC").
+		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}

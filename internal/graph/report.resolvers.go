@@ -72,12 +72,12 @@ func (r *mutationResolver) CreateReport(ctx context.Context, input model.CreateR
 		})
 	}
 
-	for _, report := range reports {
-		err = r.DB.NewInsert().Model(report).Returning("*").Scan(ctx)
-		if err != nil {
-			return nil, err
-		}
+	err = r.DB.NewInsert().Model(reports).Returning("*").Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
 
+	for _, report := range reports {
 		// Add the report to the queue for processing
 		err = r.ReportService.AddToQueue(report.ID)
 		if err != nil {
