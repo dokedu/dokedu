@@ -72,7 +72,7 @@ func (r *mutationResolver) CreateReport(ctx context.Context, input model.CreateR
 		})
 	}
 
-	err = r.DB.NewInsert().Model(reports).Returning("*").Scan(ctx)
+	err = r.DB.NewInsert().Model(&reports).Returning("*").Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
