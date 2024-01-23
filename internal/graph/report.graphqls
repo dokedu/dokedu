@@ -51,9 +51,14 @@ input CreateReportInput {
     from: Time!
     to: Time!
     filterTags: [ID!]!
-    studentUser: ID!
+    studentUser: ID
+    allUsers: Boolean
 }
 
 extend type Mutation {
-    createReport(input: CreateReportInput!): Report!
+    createReport(input: CreateReportInput!): [Report]!
+}
+
+extend type Subscription {
+    reportCreatedOrUpdated: Report!
 }

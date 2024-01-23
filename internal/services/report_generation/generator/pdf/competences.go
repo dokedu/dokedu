@@ -3,6 +3,8 @@ package pdf
 import (
 	"context"
 	"example/internal/db"
+	"fmt"
+	"strconv"
 )
 
 type Competence struct {
@@ -14,18 +16,19 @@ type Competence struct {
 }
 
 type CompetencesTemplateData struct {
-	OrganisationName    string
-	OrganisationAddress string
-	OrganisationLogoURL string
-	StudentName         string
-	StudentBirthday     string
-	SchoolYear          string
-	Competences         []Competence
+	OrganisationName          string
+	OrganisationAddress       string
+	OrganisationLogoURL       string
+	StudentName               string
+	StudentBirthday           string
+	StudentGrade              string
+	StudentMissedHours        string
+	StudentMissedHoursExcused string
+	SchoolYear                string
+	Competences               []Competence
 }
 
-func (g *Generator) CompetencesReportData(report db.Report) (*CompetencesTemplateData, error) {
-	ctx := context.Background()
-
+func (g *Generator) BaseCompetencesReportData(ctx context.Context, report db.Report) (*CompetencesTemplateData, error) {
 	var data CompetencesTemplateData
 
 	var student db.User
@@ -33,6 +36,18 @@ func (g *Generator) CompetencesReportData(report db.Report) (*CompetencesTemplat
 	if err != nil {
 		return nil, err
 	}
+
+	var userStudent db.UserStudent
+	err = g.cfg.DB.NewSelect().Model(&userStudent).Where("user_id = ?", report.StudentUserID).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	data.StudentName = fmt.Sprintf("%s %s", student.FirstName, student.LastName)
+	data.StudentBirthday = userStudent.Birthday.Format("02.01.2006")
+	data.StudentGrade = strconv.Itoa(int(userStudent.Grade))
+	data.StudentMissedHours = strconv.Itoa(int(userStudent.MissedHours))
+	data.StudentMissedHoursExcused = strconv.Itoa(int(userStudent.MissedHoursExcused))
 
 	var organisation db.Organisation
 	err = g.cfg.DB.NewSelect().Model(&organisation).Where("id = ?", report.OrganisationID).Scan(ctx)
@@ -42,12 +57,31 @@ func (g *Generator) CompetencesReportData(report db.Report) (*CompetencesTemplat
 
 	data.OrganisationName = organisation.Name
 	data.OrganisationAddress = organisation.Address
+	data.OrganisationLogoURL = organisation.LogoURL
+
+	date := report.CreatedAt
+	if date.Month() < 8 {
+		date = date.AddDate(-1, 0, 0)
+	}
+	lastTwoDigitsOfNextYear := (date.Year() + 1) % 100
+
+	data.SchoolYear = fmt.Sprintf("%d/%d", date.Year(), lastTwoDigitsOfNextYear)
+
+	return &data, nil
+}
+
+func (g *Generator) CompetencesReportData(report db.Report) (*CompetencesTemplateData, error) {
+	ctx := context.Background()
+
+	data, err := g.BaseCompetencesReportData(ctx, report)
 
 	var competences []db.Competence
 	err = g.cfg.DB.NewSelect().
 		Model(&competences).
 		Where("organisation_id = ?", report.OrganisationID).
-		Order("sort_order").Scan(ctx)
+		Order("sort_order").
+		Order("name").
+		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +99,6 @@ func (g *Generator) CompetencesReportData(report db.Report) (*CompetencesTemplat
 		return nil, err
 	}
 
-	// create a map with key competence.ParentID and value []db.Competence
 	var competencesMap = make(map[string][]db.Competence)
 	for _, c := range competences {
 		competencesMap[c.CompetenceID.String] = append(competencesMap[c.CompetenceID.String], c)
@@ -102,7 +135,7 @@ func (g *Generator) CompetencesReportData(report db.Report) (*CompetencesTemplat
 		data.Competences[i].Competences = competences
 	}
 
-	return &data, nil
+	return data, nil
 }
 
 func Subjects(competences []db.Competence) []db.Competence {

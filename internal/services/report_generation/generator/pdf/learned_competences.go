@@ -10,42 +10,7 @@ import (
 func (g *Generator) LearnedCompetencesReportData(report db.Report) (*CompetencesTemplateData, error) {
 	ctx := context.Background()
 
-	var data CompetencesTemplateData
-
-	var student db.User
-	err := g.cfg.DB.NewSelect().Model(&student).Where("id = ?", report.StudentUserID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	data.StudentName = fmt.Sprintf("%s %s", student.FirstName, student.LastName)
-
-	var userStudent db.UserStudent
-	err = g.cfg.DB.NewSelect().Model(&userStudent).Where("user_id = ?", report.StudentUserID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	data.StudentName = fmt.Sprintf("%s %s", student.FirstName, student.LastName)
-	data.StudentBirthday = userStudent.Birthday.Format("02.01.2006")
-
-	date := report.CreatedAt
-	if date.Month() < 8 {
-		date = date.AddDate(-1, 0, 0)
-	}
-	lastTwoDigitsOfNextYear := (date.Year() + 1) % 100
-
-	data.SchoolYear = fmt.Sprintf("%d/%d", date.Year(), lastTwoDigitsOfNextYear)
-
-	var organisation db.Organisation
-	err = g.cfg.DB.NewSelect().Model(&organisation).Where("id = ?", report.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	data.OrganisationName = organisation.Name
-	data.OrganisationAddress = organisation.Address
-	data.OrganisationLogoURL = organisation.LogoURL
+	data, err := g.BaseCompetencesReportData(ctx, report)
 
 	var userCompetences []db.UserCompetence
 	err = g.cfg.DB.NewSelect().
@@ -78,7 +43,9 @@ Outer:
 		Model(&competences).
 		Where("organisation_id = ?", report.OrganisationID).
 		Where("id IN (?)", bun.In(userCompetenceIds)).
-		Order("sort_order").Scan(ctx)
+		Order("sort_order").
+		Order("name").
+		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +127,7 @@ Outer:
 		data.Competences[i].Competences = competences
 	}
 
-	return &data, nil
+	return data, nil
 }
 
 func (g *Generator) getParentCompetences(competence db.Competence, competenceMap map[string][]db.Competence) ([]db.Competence, error) {

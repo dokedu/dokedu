@@ -207,7 +207,7 @@ func (g *Generator) pageContextData(report db.Report) (*CompetencesData, error) 
 }
 
 func (g *Generator) generateHTML(report db.Report, data any) error {
-	t, err := template.ParseFS(templateEmbeds, "templates/_header.gohtml", "templates/entries.gohtml", "templates/all_entries.gohtml", "templates/competences.gohtml", "templates/_footer.gohtml")
+	t, err := template.ParseFS(templateEmbeds, "templates/_header.gohtml", "templates/entries.gohtml", "templates/all_entries.gohtml", "templates/_footer.gohtml")
 	if err != nil {
 		return err
 	}
@@ -221,21 +221,22 @@ func (g *Generator) generateHTML(report db.Report, data any) error {
 
 	reports := new(bytes.Buffer)
 
-	switch report.Kind {
-	case db.ReportKindEntries:
-		err = t.ExecuteTemplate(reports, "entries.gohtml", data)
-		if err != nil {
-			return err
-		}
-	case db.ReportKindCompetences:
-		err = t.ExecuteTemplate(reports, "competences.gohtml", data)
-		if err != nil {
-			return err
-		}
-	case db.ReportKindLearnedCompetences:
-		err = t.ExecuteTemplate(reports, "competences.gohtml", data)
-	case db.ReportKindAllEntries:
-		err = t.ExecuteTemplate(reports, "all_entries.gohtml", data)
+	var reportTemplate db.ReportTemplate
+	err = g.cfg.DB.
+		NewSelect().
+		Model(&reportTemplate).
+		Where("name = ?", report.Kind).
+		Where("organisation_id = ?", report.OrganisationID).
+		Scan(context.Background())
+
+	tx, err := template.New(string(report.Kind) + ".gohtml").Parse(reportTemplate.Template)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Execute(reports, data)
+	if err != nil {
+		return err
 	}
 
 	footer := new(bytes.Buffer)

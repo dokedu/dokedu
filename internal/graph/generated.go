@@ -563,7 +563,8 @@ type ComplexityRoot struct {
 	}
 
 	Subscription struct {
-		MessageAdded func(childComplexity int) int
+		MessageAdded           func(childComplexity int) int
+		ReportCreatedOrUpdated func(childComplexity int) int
 	}
 
 	Tag struct {
@@ -818,7 +819,7 @@ type MutationResolver interface {
 	ToggleEventCompetence(ctx context.Context, input model.AddEventCompetenceInput) (*db.Event, error)
 	ArchiveEvent(ctx context.Context, id string) (*db.Event, error)
 	UpdateOrganisation(ctx context.Context, input model.UpdateOrganisationInput) (*db.Organisation, error)
-	CreateReport(ctx context.Context, input model.CreateReportInput) (*db.Report, error)
+	CreateReport(ctx context.Context, input model.CreateReportInput) ([]*db.Report, error)
 	SignIn(ctx context.Context, input model.SignInInput) (*model.SignInPayload, error)
 	ResetPassword(ctx context.Context, input model.ResetPasswordInput) (*model.ResetPasswordPayload, error)
 	ForgotPassword(ctx context.Context, input model.ForgotPasswordInput) (*model.ForgotPasswordPayload, error)
@@ -906,6 +907,7 @@ type ReportResolver interface {
 }
 type SubscriptionResolver interface {
 	MessageAdded(ctx context.Context) (<-chan *db.ChatMessage, error)
+	ReportCreatedOrUpdated(ctx context.Context) (<-chan *db.Report, error)
 }
 type TagResolver interface {
 	Color(ctx context.Context, obj *db.Tag) (string, error)
@@ -4045,6 +4047,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.MessageAdded(childComplexity), true
+
+	case "Subscription.reportCreatedOrUpdated":
+		if e.complexity.Subscription.ReportCreatedOrUpdated == nil {
+			break
+		}
+
+		return e.complexity.Subscription.ReportCreatedOrUpdated(childComplexity), true
 
 	case "Tag.color":
 		if e.complexity.Tag.Color == nil {
@@ -19742,9 +19751,9 @@ func (ec *executionContext) _Mutation_createReport(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*db.Report)
+	res := resTmp.([]*db.Report)
 	fc.Result = res
-	return ec.marshalNReport2ᚖexampleᚋinternalᚋdbᚐReport(ctx, field.Selections, res)
+	return ec.marshalNReport2ᚕᚖexampleᚋinternalᚋdbᚐReport(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createReport(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -27036,6 +27045,92 @@ func (ec *executionContext) fieldContext_Subscription_messageAdded(ctx context.C
 	return fc, nil
 }
 
+func (ec *executionContext) _Subscription_reportCreatedOrUpdated(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	fc, err := ec.fieldContext_Subscription_reportCreatedOrUpdated(ctx, field)
+	if err != nil {
+		return nil
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().ReportCreatedOrUpdated(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func(ctx context.Context) graphql.Marshaler {
+		select {
+		case res, ok := <-resTmp.(<-chan *db.Report):
+			if !ok {
+				return nil
+			}
+			return graphql.WriterFunc(func(w io.Writer) {
+				w.Write([]byte{'{'})
+				graphql.MarshalString(field.Alias).MarshalGQL(w)
+				w.Write([]byte{':'})
+				ec.marshalNReport2ᚖexampleᚋinternalᚋdbᚐReport(ctx, field.Selections, res).MarshalGQL(w)
+				w.Write([]byte{'}'})
+			})
+		case <-ctx.Done():
+			return nil
+		}
+	}
+}
+
+func (ec *executionContext) fieldContext_Subscription_reportCreatedOrUpdated(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Report_id(ctx, field)
+			case "status":
+				return ec.fieldContext_Report_status(ctx, field)
+			case "format":
+				return ec.fieldContext_Report_format(ctx, field)
+			case "kind":
+				return ec.fieldContext_Report_kind(ctx, field)
+			case "from":
+				return ec.fieldContext_Report_from(ctx, field)
+			case "to":
+				return ec.fieldContext_Report_to(ctx, field)
+			case "meta":
+				return ec.fieldContext_Report_meta(ctx, field)
+			case "filterTags":
+				return ec.fieldContext_Report_filterTags(ctx, field)
+			case "user":
+				return ec.fieldContext_Report_user(ctx, field)
+			case "studentUser":
+				return ec.fieldContext_Report_studentUser(ctx, field)
+			case "file":
+				return ec.fieldContext_Report_file(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Report_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Report_deletedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Report", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Tag_id(ctx context.Context, field graphql.CollectedField, obj *db.Tag) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Tag_id(ctx, field)
 	if err != nil {
@@ -32889,7 +32984,7 @@ func (ec *executionContext) unmarshalInputCreateReportInput(ctx context.Context,
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"format", "kind", "from", "to", "filterTags", "studentUser"}
+	fieldsInOrder := [...]string{"format", "kind", "from", "to", "filterTags", "studentUser", "allUsers"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -32945,11 +33040,20 @@ func (ec *executionContext) unmarshalInputCreateReportInput(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("studentUser"))
-			data, err := ec.unmarshalNID2string(ctx, v)
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.StudentUser = data
+		case "allUsers":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("allUsers"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AllUsers = data
 		}
 	}
 
@@ -41623,6 +41727,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 	switch fields[0].Name {
 	case "messageAdded":
 		return ec._Subscription_messageAdded(ctx, fields[0])
+	case "reportCreatedOrUpdated":
+		return ec._Subscription_reportCreatedOrUpdated(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -44756,6 +44862,44 @@ func (ec *executionContext) unmarshalNRenameSharedDriveInput2exampleᚋinternal�
 
 func (ec *executionContext) marshalNReport2exampleᚋinternalᚋdbᚐReport(ctx context.Context, sel ast.SelectionSet, v db.Report) graphql.Marshaler {
 	return ec._Report(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNReport2ᚕᚖexampleᚋinternalᚋdbᚐReport(ctx context.Context, sel ast.SelectionSet, v []*db.Report) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOReport2ᚖexampleᚋinternalᚋdbᚐReport(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
 }
 
 func (ec *executionContext) marshalNReport2ᚖexampleᚋinternalᚋdbᚐReport(ctx context.Context, sel ast.SelectionSet, v *db.Report) graphql.Marshaler {

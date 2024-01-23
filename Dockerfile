@@ -6,6 +6,9 @@ RUN wget 'https://fonts.google.com/download?family=Inter|Mali' -O googlefonts.zi
 RUN unzip googlefonts.zip -d /usr/share/fonts/googlefonts/
 RUN rm -f googlefonts.zip
 
+RUN wget 'https://storage.dokedu.org/public/klsunEvScZuDDQRWjPmNfN78XylqXiKE.ttf' -O mgdr.tff
+RUN mv mgdr.tff /usr/share/fonts/googlefonts/
+
 # refresh the font cache
 RUN fc-cache -fv
 

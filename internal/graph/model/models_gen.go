@@ -163,7 +163,8 @@ type CreateReportInput struct {
 	From        time.Time       `json:"from"`
 	To          time.Time       `json:"to"`
 	FilterTags  []string        `json:"filterTags"`
-	StudentUser string          `json:"studentUser"`
+	StudentUser *string         `json:"studentUser,omitempty"`
+	AllUsers    *bool           `json:"allUsers,omitempty"`
 }
 
 type CreateSchoolYearInput struct {

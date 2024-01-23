@@ -9,6 +9,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"example/internal/dataloaders"
 	"example/internal/db"
 	"example/internal/graph/model"
 	"example/internal/helper"
@@ -18,7 +19,7 @@ import (
 )
 
 // CreateReport is the resolver for the createReport field.
-func (r *mutationResolver) CreateReport(ctx context.Context, input model.CreateReportInput) (*db.Report, error) {
+func (r *mutationResolver) CreateReport(ctx context.Context, input model.CreateReportInput) ([]*db.Report, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, nil
@@ -27,30 +28,64 @@ func (r *mutationResolver) CreateReport(ctx context.Context, input model.CreateR
 	fromStartTime := input.From.AddDate(0, 0, 1).Truncate(24 * time.Hour)
 	toEndTime := input.To.AddDate(0, 0, 2).Truncate(24 * time.Hour).Add(-time.Nanosecond)
 
-	report := db.Report{
-		OrganisationID: currentUser.OrganisationID,
-		UserID:         currentUser.ID,
-		StudentUserID:  input.StudentUser,
-		From:           fromStartTime,
-		To:             toEndTime,
-		Format:         input.Format,
-		FilterTags:     input.FilterTags,
-		Kind:           input.Kind,
-		Status:         "pending",
+	var reports []*db.Report
+
+	if input.AllUsers != nil && *input.AllUsers {
+		var students []*db.User
+		err = r.DB.NewSelect().
+			Model(&students).
+			Where("organisation_id = ?", currentUser.OrganisationID).
+			Where("role = ?", db.UserRoleStudent).
+			Scan(ctx)
+		if err != nil {
+			return nil, errors.New("failed to get students")
+		}
+
+		for _, student := range students {
+			reports = append(reports, &db.Report{
+				OrganisationID: currentUser.OrganisationID,
+				UserID:         currentUser.ID,
+				StudentUserID:  student.ID,
+				From:           fromStartTime,
+				To:             toEndTime,
+				Format:         input.Format,
+				FilterTags:     input.FilterTags,
+				Kind:           input.Kind,
+				Status:         "pending",
+			})
+		}
+
+	} else {
+		if input.StudentUser == nil {
+			return nil, errors.New("studentUser is required")
+		}
+		reports = append(reports, &db.Report{
+			OrganisationID: currentUser.OrganisationID,
+			UserID:         currentUser.ID,
+			StudentUserID:  *input.StudentUser,
+			From:           fromStartTime,
+			To:             toEndTime,
+			Format:         input.Format,
+			FilterTags:     input.FilterTags,
+			Kind:           input.Kind,
+			Status:         "pending",
+		})
 	}
 
-	err = r.DB.NewInsert().Model(&report).Returning("*").Scan(ctx)
-	if err != nil {
-		return nil, err
+	for _, report := range reports {
+		err = r.DB.NewInsert().Model(report).Returning("*").Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		// Add the report to the queue for processing
+		err = r.ReportService.AddToQueue(report.ID)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	// Add the report to the queue for processing
-	err = r.ReportService.AddToQueue(report.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	return &report, nil
+	return reports, nil
 }
 
 // Report is the resolver for the report field.
@@ -125,13 +160,12 @@ func (r *reportResolver) User(ctx context.Context, obj *db.Report) (*db.User, er
 		return nil, nil
 	}
 
-	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).WhereAllWithDeleted().Scan(ctx)
+	user, err := dataloaders.GetUser(ctx, obj.UserID, currentUser)
 	if err != nil {
 		return nil, err
 	}
 
-	return &user, nil
+	return user, nil
 }
 
 // StudentUser is the resolver for the studentUser field.
@@ -177,6 +211,11 @@ func (r *reportResolver) File(ctx context.Context, obj *db.Report) (*db.File, er
 // DeletedAt is the resolver for the deletedAt field.
 func (r *reportResolver) DeletedAt(ctx context.Context, obj *db.Report) (*time.Time, error) {
 	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
+}
+
+// ReportCreatedOrUpdated is the resolver for the reportCreatedOrUpdated field.
+func (r *subscriptionResolver) ReportCreatedOrUpdated(ctx context.Context) (<-chan *db.Report, error) {
+	panic(fmt.Errorf("not implemented: ReportCreatedOrUpdated - reportCreatedOrUpdated"))
 }
 
 // Report returns ReportResolver implementation.

@@ -342,6 +342,20 @@ type Report struct {
 	DeletedAt      bun.NullTime    `bun:",soft_delete,nullzero"`
 }
 
+type ReportTemplate struct {
+	bun.BaseModel
+
+	ID             string          `bun:",nullzero,pk" json:"id"`
+	Name           string          `json:"name"`
+	Description    string          `json:"description"`
+	Format         ReportFormat    `json:"format"`
+	Template       string          `json:"template"`
+	Component      bool            `json:"component"`
+	Settings       json.RawMessage `json:"settings"`
+	OrganisationID string          `json:"organisation_id"`
+	CreatedAt      time.Time       `bun:",nullzero,notnull,default:now()" json:"created_at"`
+}
+
 type Share struct {
 	bun.BaseModel
 
@@ -400,19 +414,21 @@ type UserFiles struct {
 type UserStudent struct {
 	bun.BaseModel
 
-	ID             string         `bun:",nullzero,pk" json:"id"`
-	UserID         string         `json:"user_id"`
-	OrganisationID string         `json:"organisation_id"`
-	LeftAt         bun.NullTime   `bun:",nullzero" json:"left_at"`
-	Grade          int32          `json:"grade"`
-	Birthday       bun.NullTime   `bun:",nullzero" json:"birthday"`
-	Nationality    sql.NullString `json:"nationality"`
-	Comments       sql.NullString `json:"comments"`
-	JoinedAt       bun.NullTime   `bun:",nullzero" json:"joined_at"`
-	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
-	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
-	Birthplace     sql.NullString `json:"birthplace"`
-	Emoji          sql.NullString `json:"emoji"`
+	ID                 string         `bun:",nullzero,pk" json:"id"`
+	UserID             string         `json:"user_id"`
+	OrganisationID     string         `json:"organisation_id"`
+	LeftAt             bun.NullTime   `bun:",nullzero" json:"left_at"`
+	Grade              int32          `json:"grade"`
+	Birthday           bun.NullTime   `bun:",nullzero" json:"birthday"`
+	Nationality        sql.NullString `json:"nationality"`
+	Comments           sql.NullString `json:"comments"`
+	JoinedAt           bun.NullTime   `bun:",nullzero" json:"joined_at"`
+	MissedHours        int32          `json:"missed_hours"`
+	MissedHoursExcused int32          `json:"missed_hours_excused"`
+	CreatedAt          time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	DeletedAt          bun.NullTime   `bun:",soft_delete,nullzero"`
+	Birthplace         sql.NullString `json:"birthplace"`
+	Emoji              sql.NullString `json:"emoji"`
 }
 
 type Session struct {
