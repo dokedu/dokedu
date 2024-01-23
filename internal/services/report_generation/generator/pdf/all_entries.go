@@ -49,7 +49,7 @@ func (g *Generator) preloadAllEntriesReportData(ctx context.Context, o db.Organi
 		NewSelect().
 		Model(&data.Entries).
 		Where("organisation_id = ?", o.ID).
-		Order("date ASC").
+		Order("date DESC").
 		Scan(ctx)
 	if err != nil {
 		return nil, err

@@ -40,7 +40,7 @@ func (g *Generator) EntriesReportData(report db.Report) (*ReportData, error) {
 		Where("eu.user_id = ?", report.StudentUserID).
 		Where("date >= ?", report.From).
 		Where("date <= ?", report.To).
-		Order("date ASC").
+		Order("date DESC").
 		Scan(ctx)
 	if err != nil {
 		return nil, err
