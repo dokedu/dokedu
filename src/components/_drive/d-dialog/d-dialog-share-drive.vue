@@ -16,7 +16,8 @@
           <div class="text-subtle">{{ $t("shared_with") }}</div>
           <div class="h-[200px] space-y-2 overflow-y-auto">
             <div
-              v-for="share in shares?.value?.shares"
+              v-for="share in shares?.shares"
+              :key="share.user.id"
               class="flex items-center justify-between gap-2 rounded-md bg-neutral-50 px-3 py-2"
             >
               <div>{{ share.user.firstName }} {{ share.user.lastName }}</div>

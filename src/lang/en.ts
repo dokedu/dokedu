@@ -271,5 +271,5 @@ export const en = {
   hour: "hour | hours",
 
   missed_hours: "Missed hours",
-  missed_hours_excused: "Missed hours excused",
+  missed_hours_excused: "Missed hours unexcused",
 }

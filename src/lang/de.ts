@@ -270,5 +270,5 @@ export const de = {
   hour: "Stunde | Stunden",
 
   missed_hours: "Fehlstunden",
-  missed_hours_excused: "Fehlstunden entschuldigt",
+  missed_hours_excused: "Fehlstunden unentschuldigt",
 }

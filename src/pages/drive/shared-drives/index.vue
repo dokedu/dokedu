@@ -43,8 +43,8 @@
     </PageContent>
   </PageWrapper>
 
-  <DDialogShareDrive :open="shareOpen" :item="currentItem as Bucket" @close="shareOpen = false"></DDialogShareDrive>
-  <DDialogRenameDrive :open="renameOpen" :item="currentItem as Bucket" @close="renameOpen = false"></DDialogRenameDrive>
+  <DDialogShareDrive v-if="currentItem" :open="shareOpen" :item="currentItem" @close="shareOpen = false" />
+  <DDialogRenameDrive v-if="currentItem" :open="renameOpen" :item="currentItem" @close="renameOpen = false" />
 </template>
 
 <script setup lang="ts">
