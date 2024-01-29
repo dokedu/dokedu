@@ -1,0 +1,8 @@
+mutation sendMessage($input: SendMessageInput!) {
+  sendMessage(input: $input) {
+    id
+    chat {
+      id
+    }
+  }
+}

@@ -1,0 +1,5 @@
+mutation createFolder($input: CreateFolderInput!) {
+  createFolder(input: $input) {
+    id
+  }
+}

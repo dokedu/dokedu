@@ -1,0 +1,9 @@
+query getEntryFilterStudents($search: String) {
+  users(filter: { role: [student] }, limit: 200, search: $search) {
+    edges {
+      id
+      firstName
+      lastName
+    }
+  }
+}

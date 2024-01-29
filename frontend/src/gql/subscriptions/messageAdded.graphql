@@ -1,0 +1,19 @@
+subscription messageAdded {
+  messageAdded {
+    id
+    chat {
+      id
+      unreadMessageCount
+      lastMessage {
+        id
+        message
+      }
+    }
+    user {
+      id
+      firstName
+      lastName
+    }
+    message
+  }
+}

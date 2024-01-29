@@ -1,0 +1,18 @@
+query adminUsers($search: String, $order: UserOrderBy, $offset: Int, $showDeleted: Boolean) {
+  users(
+    filter: { role: [owner, admin, teacher], orderBy: $order, showDeleted: $showDeleted }
+    search: $search
+    offset: $offset
+  ) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+    }
+    edges {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+}

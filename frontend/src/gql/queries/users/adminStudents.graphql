@@ -1,0 +1,19 @@
+query adminStudents($search: String, $order: UserOrderBy, $offset: Int, $showDeleted: Boolean) {
+  users(filter: { role: [student], orderBy: $order, showDeleted: $showDeleted }, search: $search, offset: $offset) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+    }
+    edges {
+      id
+      firstName
+      lastName
+      student {
+        id
+        birthday
+        grade
+        emoji
+      }
+    }
+  }
+}

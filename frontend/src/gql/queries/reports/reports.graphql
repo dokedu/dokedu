@@ -1,0 +1,31 @@
+query reports {
+  reports(limit: 30) {
+    totalCount
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+    }
+    edges {
+      id
+      status
+      format
+      kind
+      from
+      to
+      createdAt
+      studentUser {
+        id
+        firstName
+        lastName
+      }
+      user {
+        id
+        firstName
+        lastName
+      }
+      file {
+        id
+      }
+    }
+  }
+}

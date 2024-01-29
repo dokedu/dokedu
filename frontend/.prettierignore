@@ -1,0 +1,5 @@
+public
+dist
+typed-router.d.ts
+src/gql/**/*.ts
+src/gql/schema.graphql

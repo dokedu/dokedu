@@ -1,0 +1,12 @@
+query students {
+  users(filter: { role: [student] }, limit: 1000) {
+    edges {
+      id
+      firstName
+      lastName
+      student {
+        id
+      }
+    }
+  }
+}

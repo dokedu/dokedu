@@ -1,7 +1,7 @@
 > [!WARNING]
-> This is an early beta version of the Dokedu backend. It is not ready for production use.
+> This is an early beta version of Dokedu. It is not ready for production use.
 
-# Dokedu / Backend
+# Dokedu
 
 The open source productivity suite
 

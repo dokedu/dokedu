@@ -1,0 +1,6 @@
+schema: src/gql/schema.graphql
+extensions:
+  endpoints:
+    Default GraphQL Endpoint:
+      url: http://localhost:1323/query
+      introspect: true

@@ -1,0 +1,17 @@
+query chat($id: ID!) {
+  chat(id: $id) {
+    id
+    name
+    messages {
+      ...chatMessage
+    }
+    unreadMessageCount
+    type
+    userCount
+    users {
+      id
+      firstName
+      lastSeenAt
+    }
+  }
+}

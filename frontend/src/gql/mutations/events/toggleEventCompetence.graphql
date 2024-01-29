@@ -1,0 +1,5 @@
+mutation toggleEventCompetence($input: AddEventCompetenceInput!) {
+  toggleEventCompetence(input: $input) {
+    id
+  }
+}

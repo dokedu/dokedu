@@ -1,0 +1,9 @@
+mutation archiveTag($id: ID!) {
+  archiveTag(id: $id) {
+    id
+    name
+    color
+    deletedAt
+    createdAt
+  }
+}

@@ -1,0 +1,19 @@
+query recordStudents($search: String, $order: UserOrderBy, $offset: Int) {
+  users(filter: { role: [student], orderBy: $order }, search: $search, offset: $offset) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+    }
+    edges {
+      id
+      firstName
+      lastName
+      student {
+        id
+        birthday
+        grade
+        emoji
+      }
+    }
+  }
+}

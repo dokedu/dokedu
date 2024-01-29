@@ -1,0 +1,9 @@
+mutation updateTag($id: ID!, $input: CreateTagInput!) {
+  updateTag(id: $id, input: $input) {
+    id
+    name
+    color
+    deletedAt
+    createdAt
+  }
+}
