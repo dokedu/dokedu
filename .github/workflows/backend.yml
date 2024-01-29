@@ -1,4 +1,4 @@
-name: Build production image
+name: Build latest backend image
 
 on:
   push:
@@ -34,7 +34,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: backend/
           file: Dockerfile
           build-args: |
           push: true # ${{ github.ref_type == 'tag' }}

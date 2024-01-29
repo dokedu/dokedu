@@ -122,7 +122,7 @@ async function signOut() {
   // localStorage.removeItem("authorizatio")
   user.value = null
   token.value = null
-  setupComplete.value = false
+  setupComplete.value = true
   enabledApps.value = []
 
   try {

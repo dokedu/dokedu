@@ -1,5 +1,5 @@
 > [!WARNING]
-> This is an early beta version of Dokedu. It is not ready for production use.
+> Dokedu is in production use, yet may undergo substantial updates. We aim for minimal changes pre-major release, but breaking changes may occur. Use at your own risk.
 
 # Dokedu
 

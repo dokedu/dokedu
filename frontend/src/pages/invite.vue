@@ -17,7 +17,7 @@
             :disabled="true"
             :modelValue="computedInviteDetails?.email"
             :message="$t('your_login_mail')"
-          ></d-input>
+          />
           <d-input
             size="sm"
             :label="$t('password')"
@@ -28,7 +28,7 @@
             required
             :min="8"
             :placeholder="$t('your_password')"
-          ></d-input>
+          />
           <d-input
             size="sm"
             :label="$t('confirm_password')"
@@ -39,7 +39,7 @@
             required
             :min="8"
             :placeholder="$t('confirm_your_password')"
-          ></d-input>
+          />
         </div>
         <d-button type="primary" submit>
           {{ $t("create_account") }}

@@ -59,6 +59,7 @@ func main() {
 		MinIO: minioClient,
 	}, ctx, 3)
 
+	// TODO: Extract this
 	go func() {
 		bgCtx := context.Background()
 		err := meili.GenerateCompetenceIndex(bgCtx, dbClient)

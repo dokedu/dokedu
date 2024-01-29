@@ -1,4 +1,4 @@
-name: Build production image
+name: Build latest frontend image
 
 on:
   push:
@@ -34,7 +34,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: frontend/
           file: Dockerfile
           build-args: |
             VITE_API_URL=https://api.dokedu.org/query
