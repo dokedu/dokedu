@@ -1,0 +1,14 @@
+query chatWithMembers($id: ID!) {
+  chat(id: $id) {
+    id
+    name
+    type
+    unreadMessageCount
+    users {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+}

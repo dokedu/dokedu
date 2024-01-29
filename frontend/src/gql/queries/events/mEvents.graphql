@@ -1,0 +1,8 @@
+query mEvents($search: String) {
+  events(search: $search, limit: 100) {
+    edges {
+      id
+      title
+    }
+  }
+}

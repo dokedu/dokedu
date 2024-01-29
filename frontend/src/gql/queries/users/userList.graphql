@@ -1,0 +1,10 @@
+query userList($search: String) {
+  users(search: $search) {
+    edges {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+}

@@ -1,0 +1,7 @@
+mutation createSchoolYear($year: Int!) {
+  createSchoolYear(input: { year: $year }) {
+    id
+    year
+    description
+  }
+}

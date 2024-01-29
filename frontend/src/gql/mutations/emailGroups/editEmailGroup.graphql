@@ -1,0 +1,7 @@
+mutation editEmailGroup($input: UpdateEmailGroupInput!) {
+  updateEmailGroup(input: $input) {
+    id
+    name
+    description
+  }
+}

@@ -1,0 +1,3 @@
+mutation sendInvite($id: ID!) {
+  sendUserInvite(id: $id)
+}

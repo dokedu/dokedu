@@ -1,0 +1,10 @@
+query chatUsers($search: String) {
+  users(search: $search, limit: 1000) {
+    edges {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+}

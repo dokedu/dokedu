@@ -1,0 +1,14 @@
+query chats {
+  chats {
+    edges {
+      id
+      name
+      lastMessage {
+        id
+        message
+        createdAt
+      }
+      unreadMessageCount
+    }
+  }
+}

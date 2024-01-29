@@ -1,0 +1,10 @@
+mutation createEmailGroup($input: CreateEmailGroupInput!) {
+  createEmailGroup(input: $input) {
+    id
+    name
+    description
+    members {
+      name
+    }
+  }
+}

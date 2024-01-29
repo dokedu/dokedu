@@ -1,0 +1,11 @@
+query getTags {
+  tags(limit: 1000) {
+    edges {
+      id
+      name
+      color
+      deletedAt
+      createdAt
+    }
+  }
+}

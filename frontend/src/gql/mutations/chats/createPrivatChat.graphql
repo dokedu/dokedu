@@ -1,0 +1,8 @@
+mutation createPrivatChat($userId: ID!) {
+  createPrivatChat(userId: $userId) {
+    id
+    name
+    type
+    createdAt
+  }
+}

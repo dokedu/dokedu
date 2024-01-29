@@ -1,0 +1,16 @@
+query eventWithSearch($search: String, $offset: Int, $order: EventOrderBy, $filter: EventFilterInput) {
+  events(search: $search, limit: 50, offset: $offset, order: $order, filter: $filter) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+    }
+    edges {
+      id
+      title
+      body
+      createdAt
+      startsAt
+      endsAt
+    }
+  }
+}
