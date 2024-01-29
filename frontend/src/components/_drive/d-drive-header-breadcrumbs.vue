@@ -1,13 +1,13 @@
 <template>
-  <div ref="wrapper" class="flex flex-1 items-center gap-2 overflow-hidden text-strong">
+  <div ref="wrapper" class="flex flex-1 items-center gap-1 overflow-hidden">
     <template v-for="(item, index) in items" :key="item.route">
-      <span v-if="index !== 0">/</span>
+      <ChevronRight v-if="index !== 0" :size="18" class="text-neutral-500" />
       <router-link
         v-if="index === 0"
         :to="item.route"
         @dragover.prevent="(event: DragEvent) => dragover(event, 0)"
         @drop="(event: DragEvent) => drop(event, 0)"
-        class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 font-medium hover:bg-neutral-100"
+        class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 text-neutral-600 hover:bg-neutral-100"
         :class="{
           ' border-blue-500 bg-blue-100': dragoverItem === 0
         }"
@@ -20,14 +20,14 @@
         @dragover.prevent="(event: DragEvent) => dragover(event, item)"
         @drop="(event: DragEvent) => drop(event, item)"
         @dragleave="dragoverItem = null"
-        class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 font-medium hover:bg-neutral-100"
+        class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 text-neutral-600 hover:bg-neutral-100"
         :class="{
           ' border-blue-500 bg-blue-100': dragoverItem === item.route.params.id
         }"
       >
         {{ item.title }}
       </router-link>
-      <div v-else class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5">
+      <div v-else class="line-clamp-1 text-ellipsis rounded-lg px-1 py-0.5 text-neutral-950">
         {{ item.title }}
       </div>
     </template>
@@ -41,6 +41,7 @@ import { useI18n } from "vue-i18n"
 import { useMoveFileMutation } from "@/gql/mutations/files/moveFile"
 import { useFileByIdQuery } from "@/gql/queries/files/fileById"
 import { useBucketByIdQuery } from "@/gql/mutations/buckets/bucketById"
+import { ChevronRight } from "lucide-vue-next"
 
 const { t } = useI18n()
 
