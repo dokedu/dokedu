@@ -44,8 +44,13 @@ const renderMarkdown = () => {
     if (!language) return
     if (language == "hljs") language = "code"
     language = language[0].toUpperCase() + language.slice(1)
-    const headerHtml = `<div class="px-4 py-2 flex mt-1 justify-between items-center bg-black/10 text-xs"><span class="uppercase">${language}</span><button class="copy-button rounded px-2 py-0.5 bg-black/10">Copy</button></div>`
-    codeBlock.insertAdjacentHTML("beforebegin", headerHtml)
+
+    const headerElement = document.createElement("div")
+    headerElement.className = "px-4 py-2 flex mt-1 justify-between items-center bg-black/10 text-xs"
+    headerElement.innerHTML = `<span class="uppercase"></span><button class="copy-button rounded px-2 py-0.5 bg-black/10">Copy</button>`
+    headerElement.children[0].textContent = language
+
+    codeBlock.insertAdjacentElement("beforebegin", headerElement)
 
     // add margin class to the codeblock y-2
     codeBlock.classList.add("mb-2")
