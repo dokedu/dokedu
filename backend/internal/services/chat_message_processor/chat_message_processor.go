@@ -4,13 +4,15 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"example/internal/db"
-	"example/internal/subscription"
-	"github.com/sashabaranov/go-openai"
-	"github.com/uptrace/bun"
 	"io"
 	"log"
 	"os"
+
+	"example/internal/db"
+	"example/internal/subscription"
+
+	"github.com/sashabaranov/go-openai"
+	"github.com/uptrace/bun"
 )
 
 type ChatMessageProcessor struct {
@@ -100,16 +102,19 @@ func (a *ChatMessageProcessor) NewMessage(msg db.ChatMessage) error {
 		}
 
 		// update the message with the response
-		err = a.updateMessage(ctx, chatMessage, response, err)
+		err = a.updateMessage(ctx, chatMessage, response)
 		if err != nil {
 			return err
 		}
 	}
 }
 
-func (a *ChatMessageProcessor) updateMessage(ctx context.Context, msg db.ChatMessage, response openai.ChatCompletionStreamResponse, err error) error {
+func (a *ChatMessageProcessor) updateMessage(ctx context.Context, msg db.ChatMessage, response openai.ChatCompletionStreamResponse) error {
 	var message db.ChatMessage
-	err = a.DB.NewSelect().Model(&message).Where("id = ?", msg.ID).Scan(ctx)
+	err := a.DB.NewSelect().Model(&message).Where("id = ?", msg.ID).Scan(ctx)
+	if err != nil {
+		return err
+	}
 
 	message.Message = message.Message + response.Choices[0].Delta.Content
 	err = a.DB.NewUpdate().Model(&message).Where("id = ?", message.ID).Returning("*").Scan(ctx)
@@ -117,7 +122,7 @@ func (a *ChatMessageProcessor) updateMessage(ctx context.Context, msg db.ChatMes
 		return err
 	}
 
-	a.subscriptionHandler.PublishMessage(&message)
+	_ = a.subscriptionHandler.PublishMessage(&message)
 	return nil
 }
 
@@ -206,7 +211,6 @@ func (a *ChatMessageProcessor) GenerateMessages(message db.ChatMessage) ([]opena
 				Content: userFullName + ": " + msg.Message,
 			})
 		}
-
 	}
 
 	if len(messages) == 0 {

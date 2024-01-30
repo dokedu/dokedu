@@ -9,6 +9,7 @@ import (
 	"example/internal/services/chat_message_processor"
 	"example/internal/services/report_generation"
 	"example/internal/subscription"
+
 	"github.com/minio/minio-go/v7"
 	"github.com/uptrace/bun"
 )

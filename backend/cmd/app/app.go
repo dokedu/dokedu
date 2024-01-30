@@ -2,6 +2,12 @@ package main
 
 import (
 	"context"
+	"log"
+	"log/slog"
+	"net/http"
+	"os"
+	"time"
+
 	"example/internal/database"
 	"example/internal/dataloaders"
 	"example/internal/db"
@@ -14,6 +20,7 @@ import (
 	"example/internal/services/report_generation"
 	"example/internal/services/report_generation/config"
 	"example/internal/subscription"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
@@ -22,9 +29,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	mware "github.com/labstack/echo/v4/middleware"
-	"log"
-	"net/http"
-	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -33,6 +37,9 @@ import (
 const defaultPort = "1323"
 
 func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
+
 	// Allows us to cancel the context when we want to stop the server
 	// And hence gracefully stop the server
 	ctx, cancel := context.WithCancel(context.Background())

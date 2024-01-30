@@ -2,9 +2,10 @@ package pdf
 
 import (
 	"context"
-	"example/internal/db"
 	"fmt"
 	"strconv"
+
+	"example/internal/db"
 )
 
 type Competence struct {
@@ -74,6 +75,9 @@ func (g *Generator) CompetencesReportData(report db.Report) (*CompetencesTemplat
 	ctx := context.Background()
 
 	data, err := g.BaseCompetencesReportData(ctx, report)
+	if err != nil {
+		return nil, err
+	}
 
 	var competences []db.Competence
 	err = g.cfg.DB.NewSelect().
@@ -161,10 +165,8 @@ func Subjects(competences []db.Competence) []db.Competence {
 
 func GetCompetenceByParent(competences map[string][]db.Competence, parent db.Competence) []db.Competence {
 	// find all competences with the given parent
-	var result []db.Competence
-	for _, c := range competences[parent.ID] {
-		result = append(result, c)
-	}
+	result := make([]db.Competence, len(competences[parent.ID]))
+	copy(result, competences[parent.ID])
 
 	// sort competences by sort_order
 	for i := range result {
@@ -179,10 +181,8 @@ func GetCompetenceByParent(competences map[string][]db.Competence, parent db.Com
 }
 
 func GetUserCompetencesByCompetenceId(userCompetences map[string][]db.UserCompetence, competence db.Competence) []db.UserCompetence {
-	var result []db.UserCompetence
-	for _, uc := range userCompetences[competence.ID] {
-		result = append(result, uc)
-	}
+	result := make([]db.UserCompetence, len(userCompetences[competence.ID]))
+	copy(result, userCompetences[competence.ID])
 
 	return result
 }

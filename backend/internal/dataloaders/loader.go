@@ -2,6 +2,7 @@ package dataloaders
 
 import (
 	"context"
+
 	"github.com/graph-gophers/dataloader"
 	"github.com/labstack/echo/v4"
 	"github.com/uptrace/bun"
@@ -39,7 +40,6 @@ func NewLoaders(conn *bun.DB) *Loaders {
 func Middleware(loaders *Loaders) func(echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-
 			ctx := context.WithValue(c.Request().Context(), loadersKey, loaders)
 			c.SetRequest(c.Request().WithContext(ctx))
 

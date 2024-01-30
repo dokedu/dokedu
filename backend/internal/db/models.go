@@ -3,8 +3,9 @@ package db
 import (
 	"database/sql"
 	"encoding/json"
-	"github.com/uptrace/bun"
 	"time"
+
+	"github.com/uptrace/bun"
 )
 
 type CompetenceType string

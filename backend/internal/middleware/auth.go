@@ -4,16 +4,21 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log/slog"
+	"time"
+
 	"example/internal/db"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/labstack/echo/v4"
 	"github.com/uptrace/bun"
 	"github.com/vektah/gqlparser/v2/gqlerror"
-	"time"
 )
 
-var userCtxKey = "user"
+type contextKey string
+
+var userCtxKey = contextKey("user")
 
 func Auth(bun *bun.DB) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
@@ -41,9 +46,11 @@ func Auth(bun *bun.DB) echo.MiddlewareFunc {
 			if session.CreatedAt.Add(12 * time.Hour).Before(time.Now()) {
 				// Delete the session
 				_, err = bun.NewUpdate().Model(&session).Set("deleted_at = ?", time.Now()).Where("id = ?", session.ID).Exec(c.Request().Context())
+				if err != nil {
+					slog.Error("unable to delete session for the database", "err", err)
+				}
 
 				return next(c)
-				//return c.JSON(http.StatusUnauthorized, "Session expired")
 			}
 
 			// Get the user
@@ -53,6 +60,10 @@ func Auth(bun *bun.DB) echo.MiddlewareFunc {
 				// Remove all sessions for this user if the user is deleted
 				var sessions []db.Session
 				_, err = bun.NewUpdate().Model(&sessions).Set("deleted_at = ?", time.Now()).Where("user_id = ?", session.UserID).Exec(c.Request().Context())
+				if err != nil {
+					slog.Error("unable to update sessions for deleted user", "err", err, "user_id", session.UserID)
+				}
+
 				return next(c)
 			}
 
@@ -90,6 +101,10 @@ func WebsocketInitFunc(bun *bun.DB) transport.WebsocketInitFunc {
 		if session.CreatedAt.Add(12 * time.Hour).Before(time.Now()) {
 			// Delete the session
 			_, err = bun.NewUpdate().Model(&session).Set("deleted_at = ?", time.Now()).Where("id = ?", session.ID).Exec(ctx)
+			if err != nil {
+				slog.Error("unable to delete session for the database", "err", err)
+			}
+
 			return ctx, nil, nil
 		}
 
@@ -100,6 +115,10 @@ func WebsocketInitFunc(bun *bun.DB) transport.WebsocketInitFunc {
 			// Remove all sessions for this user if the user is deleted
 			var sessions []db.Session
 			_, err = bun.NewUpdate().Model(&sessions).Set("deleted_at = ?", time.Now()).Where("user_id = ?", session.UserID).Exec(ctx)
+			if err != nil {
+				slog.Error("unable to update sessions for deleted user", "err", err, "user_id", session.UserID)
+			}
+
 			return ctx, nil, nil
 		}
 

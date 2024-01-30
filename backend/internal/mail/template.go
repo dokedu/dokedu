@@ -3,9 +3,9 @@ package mail
 import (
 	"bytes"
 	"embed"
-	"example/internal/db"
-	"fmt"
 	"html/template"
+
+	"example/internal/db"
 )
 
 //go:embed templates/*
@@ -32,7 +32,7 @@ func PasswordResetMailTemplate(name string, link string, language db.UserLanguag
 		return "", err
 	}
 
-	return fmt.Sprintf("%s", out), nil
+	return out.String(), nil
 }
 
 func InviteMailTemplate(name string, link string, organisation string, language db.UserLanguage) (string, error) {
@@ -58,5 +58,5 @@ func InviteMailTemplate(name string, link string, organisation string, language 
 		return "", err
 	}
 
-	return fmt.Sprintf("%s", out), nil
+	return out.String(), nil
 }

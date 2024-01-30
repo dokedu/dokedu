@@ -3,13 +3,14 @@ package report_generation
 import (
 	"container/list"
 	"context"
-	"example/internal/db"
-	"example/internal/services/report_generation/config"
-	"example/internal/services/report_generation/generator/pdf"
 	"fmt"
 	"net/http"
 	"os"
 	"sync"
+
+	"example/internal/db"
+	"example/internal/services/report_generation/config"
+	"example/internal/services/report_generation/generator/pdf"
 )
 
 type ReportGenerationService struct {
@@ -40,7 +41,6 @@ func (s *ReportGenerationService) loop(ctx context.Context) {
 			s.tryDequeue()
 		case <-ctx.Done():
 			return
-
 		}
 	}
 }

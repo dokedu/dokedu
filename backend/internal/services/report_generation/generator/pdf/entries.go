@@ -2,11 +2,13 @@ package pdf
 
 import (
 	"context"
-	"example/internal/db"
 	"fmt"
-	"github.com/uptrace/bun"
 	"strings"
 	"time"
+
+	"example/internal/db"
+
+	"github.com/uptrace/bun"
 )
 
 type ReportData struct {

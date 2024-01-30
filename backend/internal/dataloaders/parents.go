@@ -4,14 +4,16 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"example/internal/db"
-	"example/internal/middleware"
 	"fmt"
-	"github.com/graph-gophers/dataloader"
-	"github.com/uptrace/bun"
 	"log"
 	"strings"
 	"time"
+
+	"example/internal/db"
+	"example/internal/middleware"
+
+	"github.com/graph-gophers/dataloader"
+	"github.com/uptrace/bun"
 )
 
 type CompetenceParents struct {

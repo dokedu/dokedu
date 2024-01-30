@@ -2,17 +2,19 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
+	"log"
+	"os"
+	"strings"
+
 	"example/cmd/bun/migrations"
 	"example/cmd/bun/seed"
-	"fmt"
+
 	"github.com/joho/godotenv"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
 	"github.com/uptrace/bun/migrate"
-	"log"
-	"os"
-	"strings"
 
 	"github.com/urfave/cli/v2"
 
@@ -226,8 +228,4 @@ func newDBCommand(migrations *migrate.Migrations, db *bun.DB) *cli.Command {
 			},
 		},
 	}
-}
-
-func isServerClosed(err error) bool {
-	return err.Error() == "http: Server closed"
 }

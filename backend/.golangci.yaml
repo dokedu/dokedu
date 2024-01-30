@@ -1,0 +1,9 @@
+linters:
+  enable:
+    - goimports
+    - bodyclose
+    - prealloc
+    - whitespace
+linters-settings:
+  goimports:
+    local-prefixes: example

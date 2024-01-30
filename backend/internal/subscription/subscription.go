@@ -2,9 +2,11 @@ package subscription
 
 import (
 	"context"
-	"example/internal/db"
-	"github.com/uptrace/bun"
 	"sync"
+
+	"example/internal/db"
+
+	"github.com/uptrace/bun"
 )
 
 type Handler struct {
