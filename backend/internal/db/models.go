@@ -308,19 +308,21 @@ type File struct {
 type Organisation struct {
 	bun.BaseModel
 
-	ID             string       `bun:",nullzero,pk" json:"id"`
-	Name           string       `json:"name"`
-	LegalName      string       `json:"legal_name"`
-	Website        string       `json:"website"`
-	Phone          string       `json:"phone"`
-	OwnerID        string       `json:"owner_id"`
-	SetupComplete  bool         `json:"setup_complete"`
-	Address        string       `json:"address"`
-	LogoURL        string       `json:"logo_url"`
-	AllowedDomains []string     `bun:",array" json:"allowed_domains"`
-	EnabledApps    []string     `bun:",array" json:"enabled_apps"`
-	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
-	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
+	ID                   string         `bun:",nullzero,pk" json:"id"`
+	Name                 string         `json:"name"`
+	LegalName            string         `json:"legal_name"`
+	Website              string         `json:"website"`
+	Phone                string         `json:"phone"`
+	OwnerID              string         `json:"owner_id"`
+	SetupComplete        bool           `json:"setup_complete"`
+	Address              string         `json:"address"`
+	LogoURL              string         `json:"logo_url"`
+	StripeCustomerID     sql.NullString `json:"stripe_customer_id"`
+	StripeSubscriptionID sql.NullString `json:"stripe_subscription_id"`
+	AllowedDomains       []string       `bun:",array" json:"allowed_domains"`
+	EnabledApps          []string       `bun:",array" json:"enabled_apps"`
+	CreatedAt            time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	DeletedAt            bun.NullTime   `bun:",soft_delete,nullzero"`
 }
 
 type Report struct {
