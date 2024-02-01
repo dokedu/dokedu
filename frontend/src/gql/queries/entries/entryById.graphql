@@ -42,8 +42,7 @@ query entryById($id: ID!) {
       }
     }
     files {
-      id
-      name
+      ...FileFragement
     }
   }
 }

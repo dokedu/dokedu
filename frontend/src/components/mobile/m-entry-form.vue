@@ -13,6 +13,9 @@
     <MEntryFormTags :entry="entry" v-model="entry.tags" />
     <MEntryFormStudents :entry="entry" v-model="entry.users" />
     <MEntryFormDate v-model="entry.date" />
+    <div class="py-4">
+      <DEntryFormFiles :entry="entry" />
+    </div>
   </div>
 </template>
 
@@ -24,6 +27,7 @@ import MEntryFormCompetences from "@/components/mobile/record/m-entry-form-compe
 import MEntryFormDate from "@/components/mobile/record/m-entry-form-date.vue"
 import { useTextareaAutosize, useVModel, watchDebounced } from "@vueuse/core"
 import { useUpdateEntryMutation } from "@/gql/mutations/entries/updateEntry"
+import DEntryFormFiles from "../d-entry/d-entry-form-files.vue"
 
 const { executeMutation: updateEntry } = useUpdateEntryMutation()
 

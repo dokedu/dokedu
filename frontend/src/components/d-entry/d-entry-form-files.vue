@@ -1,5 +1,5 @@
 <template>
-  <div class="px-8 text-sm select-none">
+  <div class="px-4 text-sm select-none">
     <header class="mb-2 flex items-center justify-between">
       <div class="text-neutral-500">{{ $t("file", 2) }}</div>
       <d-button @click="open" size="xs" type="transparent" :icon-left="Upload">
@@ -15,8 +15,7 @@
         class="grid p-1 hover:bg-neutral-50 rounded-md gap-2 w-full items-center"
         :style="{
           gridTemplateColumns: '18px 1fr auto auto auto',
-          gridTemplateRows: 'auto',
-          gridTemplateAreas: '\'icon name size\''
+          gridTemplateRows: 'auto'
         }"
       >
         <component :is="useFileIcon(file)" :size="18" class="stroke-neutral-700" />

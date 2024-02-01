@@ -13,7 +13,9 @@
         </div>
         <div class="flex flex-col gap-4">
           <EntryFormCompetences :entry="entry" />
-          <EntryFormFiles :entry="entry" />
+          <div class="px-4">
+            <EntryFormFiles :entry="entry" />
+          </div>
         </div>
       </div>
     </div>

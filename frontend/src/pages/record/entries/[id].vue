@@ -1,6 +1,6 @@
 <template>
   <PageWrapper>
-    <EntryForm v-if="entry" :entry="entry.entry as any" @archived="archived" />
+    <EntryForm v-if="entry" :entry="entry.entry" @archived="archived" />
   </PageWrapper>
 </template>
 
