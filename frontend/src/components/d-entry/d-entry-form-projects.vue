@@ -3,15 +3,9 @@
     <label for="date" class="mt-2 min-w-[64px] text-neutral-500">{{ $t("project", 2) }}</label>
 
     <div class="flex w-full flex-col gap-4">
-      <DSelect
-        :options="eventOptions"
-        :label="$t('label', 2)"
-        multiple
-        v-model="selected"
-        v-model:search="eventSearch"
-        searchable
-        class="w-full"
-      >
+      <DComboBox :options="eventOptions" multiple v-model="selected"></DComboBox>
+      <DSelect :options="eventOptions" :label="$t('label', 2)" multiple v-model="selected" v-model:search="eventSearch"
+        searchable class="w-full">
         <template v-slot="{ option }">
           <DTag color="stone">
             {{ option.label }}
@@ -32,6 +26,7 @@
 import { computed, ref, toRef } from "vue"
 import DTag from "../d-tag/d-tag.vue"
 import DSelect from "@/components/d-select/d-select.vue"
+import DComboBox from '@/components/d-combobox/d-combobox.vue'
 import { useDeleteEntryEventInputMutation } from "@/gql/mutations/entries/deleteEntryEvent"
 import { useCreateEntryEventMutation } from "@/gql/mutations/entries/createEntryEvent"
 import { useEventsQuery } from "@/gql/queries/events/events"
