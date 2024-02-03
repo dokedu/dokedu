@@ -6,7 +6,7 @@ import (
 	"os"
 	"slices"
 
-	"example/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/db"
 
 	"github.com/meilisearch/meilisearch-go"
 	"github.com/uptrace/bun"

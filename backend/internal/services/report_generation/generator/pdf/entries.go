@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"example/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/db"
 
 	"github.com/uptrace/bun"
 )

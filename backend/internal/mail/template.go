@@ -5,7 +5,7 @@ import (
 	"embed"
 	"html/template"
 
-	"example/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/db"
 )
 
 //go:embed templates/*

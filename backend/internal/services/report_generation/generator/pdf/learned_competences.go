@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"example/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/db"
 
 	"github.com/uptrace/bun"
 )

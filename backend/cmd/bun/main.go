@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"example/cmd/bun/migrations"
-	"example/cmd/bun/seed"
+	"github.com/dokedu/dokedu/backend/cmd/bun/migrations"
+	"github.com/dokedu/dokedu/backend/cmd/bun/seed"
 
 	"github.com/joho/godotenv"
 	"github.com/uptrace/bun"

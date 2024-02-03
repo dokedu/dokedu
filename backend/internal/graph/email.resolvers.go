@@ -8,13 +8,14 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"example/internal/dataloaders"
-	"example/internal/db"
-	"example/internal/graph/model"
-	"example/internal/middleware"
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/dokedu/dokedu/backend/internal/dataloaders"
+	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/graph/model"
+	"github.com/dokedu/dokedu/backend/internal/middleware"
 )
 
 // CreatedAt is the resolver for the createdAt field.

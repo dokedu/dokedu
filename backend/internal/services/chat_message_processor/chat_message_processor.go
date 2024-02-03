@@ -8,8 +8,8 @@ import (
 	"log"
 	"os"
 
-	"example/internal/db"
-	"example/internal/subscription"
+	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/subscription"
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/uptrace/bun"

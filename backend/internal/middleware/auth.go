@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"time"
 
-	"example/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/db"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler/transport"

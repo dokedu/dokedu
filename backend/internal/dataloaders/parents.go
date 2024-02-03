@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"example/internal/db"
-	"example/internal/middleware"
+	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/middleware"
 
 	"github.com/graph-gophers/dataloader"
 	"github.com/uptrace/bun"

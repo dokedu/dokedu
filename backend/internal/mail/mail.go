@@ -6,7 +6,7 @@ import (
 	"os"
 	"strconv"
 
-	"example/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/db"
 
 	"github.com/labstack/gommon/log"
 )

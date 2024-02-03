@@ -6,4 +6,4 @@ linters:
     - whitespace
 linters-settings:
   goimports:
-    local-prefixes: example
+    local-prefixes: github.com/dokedu/dokedu/backend

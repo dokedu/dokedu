@@ -1,6 +1,6 @@
 package helper
 
-import "example/internal/graph/model"
+import "github.com/dokedu/dokedu/backend/internal/graph/model"
 
 var (
 	defaultLimit  = 50

@@ -10,8 +10,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"example/internal/db"
-	"example/internal/services/report_generation/config"
+	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/services/report_generation/config"
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/launcher"

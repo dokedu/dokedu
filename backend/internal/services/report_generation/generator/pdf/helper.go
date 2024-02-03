@@ -7,7 +7,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"example/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/db"
 )
 
 func (g *Generator) UpdateReportStatus(reportId string, status db.ReportStatus) error {
