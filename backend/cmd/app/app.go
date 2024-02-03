@@ -16,6 +16,7 @@ import (
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 	"github.com/dokedu/dokedu/backend/internal/modules/meilisearch"
 	"github.com/dokedu/dokedu/backend/internal/modules/minio"
+	"github.com/dokedu/dokedu/backend/internal/msg"
 	"github.com/dokedu/dokedu/backend/internal/services/chat_message_processor"
 	"github.com/dokedu/dokedu/backend/internal/services/report_generation"
 	"github.com/dokedu/dokedu/backend/internal/services/report_generation/config"
@@ -101,6 +102,7 @@ func main() {
 
 	var gb int64 = 1 << 30
 
+	srv.SetErrorPresenter(msg.ErrPresenter)
 	srv.AddTransport(transport.Websocket{
 		KeepAlivePingInterval: 10 * time.Second,
 		Upgrader: websocket.Upgrader{

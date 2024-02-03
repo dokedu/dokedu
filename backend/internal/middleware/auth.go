@@ -18,7 +18,7 @@ import (
 
 type contextKey string
 
-var userCtxKey = contextKey("user")
+var UserCtxKey = contextKey("user")
 
 func Auth(bun *bun.DB) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
@@ -127,7 +127,7 @@ func WebsocketInitFunc(bun *bun.DB) transport.WebsocketInitFunc {
 			session.Token,
 		}
 
-		ctx = context.WithValue(ctx, userCtxKey, &userContext)
+		ctx = context.WithValue(ctx, UserCtxKey, &userContext)
 
 		return ctx, &initPayload, nil
 	}
@@ -135,7 +135,7 @@ func WebsocketInitFunc(bun *bun.DB) transport.WebsocketInitFunc {
 
 // ForContext finds the user from the context. REQUIRES Middleware to have run.
 func ForContext(ctx context.Context) *UserContext {
-	raw, _ := ctx.Value(userCtxKey).(*UserContext)
+	raw, _ := ctx.Value(UserCtxKey).(*UserContext)
 	return raw
 }
 
