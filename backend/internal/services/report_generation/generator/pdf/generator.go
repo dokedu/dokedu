@@ -5,16 +5,18 @@ import (
 	"context"
 	"embed"
 	"errors"
-	"example/internal/db"
-	"example/internal/services/report_generation/config"
 	"fmt"
+	"html/template"
+	"os"
+	"path/filepath"
+
+	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/services/report_generation/config"
+
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/launcher"
 	"github.com/go-rod/rod/lib/proto"
 	"github.com/go-rod/rod/lib/utils"
-	"html/template"
-	"os"
-	"path/filepath"
 )
 
 //go:embed templates/*.gohtml
@@ -178,6 +180,9 @@ func (g *Generator) generatePDF(report db.Report, data *CompetencesData) error {
 	// read file
 	var pdfFile []byte
 	pdfFile, err = os.ReadFile(pdfPath)
+	if err != nil {
+		return err
+	}
 
 	err = g.UploadPDFToBucket(report, pdfFile)
 	if err != nil {
@@ -202,6 +207,9 @@ func (g *Generator) pageContextData(report db.Report) (*CompetencesData, error) 
 
 	var teacher db.User
 	err = g.cfg.DB.NewSelect().Model(&teacher).Where("id = ?", report.UserID).Scan(context.Background())
+	if err != nil {
+		return nil, err
+	}
 
 	return &CompetencesData{Student: student, Teacher: teacher, Report: report}, nil
 }
@@ -249,6 +257,10 @@ func (g *Generator) generateHTML(report db.Report, data any) error {
 	html := fmt.Sprintf("%s%s%s", header, reports, footer)
 
 	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
 	fileName := fmt.Sprintf("%s.html", report.ID)
 	path := filepath.Join(cwd, "tmp", "reports", fileName)
 	err = os.WriteFile(path, []byte(html), 0644)

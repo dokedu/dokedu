@@ -1,0 +1,18 @@
+version: '3'
+tasks:
+  lint:
+    cmds:
+      - golangci-lint run --fix
+  db-init:
+    cmds:
+      - go run ./cmd/bun db init
+  db-migrate:
+    cmds:
+      - go run ./cmd/bun db migrate
+  db-seed:
+    cmds:
+      - go run ./cmd/bun db seed
+  db-reset:
+    prompt: This will drop all tables and data. Are you sure?
+    cmds:
+      - go run ./cmd/bun db reset

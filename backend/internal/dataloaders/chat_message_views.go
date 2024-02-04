@@ -2,16 +2,14 @@ package dataloaders
 
 import (
 	"context"
-	"example/internal/db"
-	"example/internal/middleware"
+
+	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/middleware"
+
 	"github.com/graph-gophers/dataloader"
 	"github.com/labstack/gommon/log"
 	"github.com/uptrace/bun"
 )
-
-type ChatMessageViewReader struct {
-	conn *bun.DB
-}
 
 func (u *Reader) getChatMessageView(ctx context.Context, keys dataloader.Keys) []*dataloader.Result {
 	currentUser, err := middleware.GetUser(ctx)

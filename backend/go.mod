@@ -1,4 +1,4 @@
-module example
+module github.com/dokedu/dokedu/backend
 
 go 1.21
 

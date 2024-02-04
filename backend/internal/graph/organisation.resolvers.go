@@ -7,11 +7,11 @@ package graph
 import (
 	"context"
 	"errors"
-	"example/internal/db"
-	"example/internal/graph/model"
-	"example/internal/middleware"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/graph/model"
+	"github.com/dokedu/dokedu/backend/internal/middleware"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 

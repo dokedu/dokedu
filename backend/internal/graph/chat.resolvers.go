@@ -8,15 +8,15 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"example/internal/dataloaders"
-	"example/internal/db"
-	"example/internal/graph/model"
-	"example/internal/helper"
-	"example/internal/middleware"
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/dokedu/dokedu/backend/internal/dataloaders"
+	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/graph/model"
+	"github.com/dokedu/dokedu/backend/internal/helper"
+	"github.com/dokedu/dokedu/backend/internal/middleware"
 	"github.com/uptrace/bun"
 )
 

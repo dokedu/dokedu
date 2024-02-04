@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"context"
 	"database/sql"
-	"example/internal/db"
+
 	"github.com/minio/minio-go/v7"
-	"io"
+
+	"github.com/dokedu/dokedu/backend/internal/db"
 )
 
 func (g *Generator) UpdateReportStatus(reportId string, status db.ReportStatus) error {
@@ -47,8 +48,7 @@ func (g *Generator) UploadPDFToBucket(report db.Report, pdf []byte) error {
 		}
 	}
 
-	var ioReader io.Reader
-	ioReader = bytes.NewReader(pdf)
+	ioReader := bytes.NewReader(pdf)
 
 	// Upload the pdf to the bucket
 	_, err = g.cfg.MinIO.PutObject(ctx, bucket.ID, report.ID, ioReader, -1, minio.PutObjectOptions{

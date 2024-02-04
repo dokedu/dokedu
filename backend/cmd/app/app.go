@@ -2,18 +2,25 @@ package main
 
 import (
 	"context"
-	"example/internal/database"
-	"example/internal/dataloaders"
-	"example/internal/db"
-	"example/internal/graph"
-	"example/internal/mail"
-	"example/internal/middleware"
-	"example/internal/modules/meilisearch"
-	"example/internal/modules/minio"
-	"example/internal/services/chat_message_processor"
-	"example/internal/services/report_generation"
-	"example/internal/services/report_generation/config"
-	"example/internal/subscription"
+	"log"
+	"log/slog"
+	"net/http"
+	"os"
+	"time"
+
+	"github.com/dokedu/dokedu/backend/internal/database"
+	"github.com/dokedu/dokedu/backend/internal/dataloaders"
+	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/graph"
+	"github.com/dokedu/dokedu/backend/internal/mail"
+	"github.com/dokedu/dokedu/backend/internal/middleware"
+	"github.com/dokedu/dokedu/backend/internal/modules/meilisearch"
+	"github.com/dokedu/dokedu/backend/internal/modules/minio"
+	"github.com/dokedu/dokedu/backend/internal/services/chat_message_processor"
+	"github.com/dokedu/dokedu/backend/internal/services/report_generation"
+	"github.com/dokedu/dokedu/backend/internal/services/report_generation/config"
+	"github.com/dokedu/dokedu/backend/internal/subscription"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
@@ -22,9 +29,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	mware "github.com/labstack/echo/v4/middleware"
-	"log"
-	"net/http"
-	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -33,6 +37,9 @@ import (
 const defaultPort = "1323"
 
 func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
+
 	// Allows us to cancel the context when we want to stop the server
 	// And hence gracefully stop the server
 	ctx, cancel := context.WithCancel(context.Background())

@@ -3,12 +3,13 @@ package graph
 //go:generate go run github.com/99designs/gqlgen generate
 
 import (
-	"example/internal/db"
-	"example/internal/mail"
-	meili "example/internal/modules/meilisearch"
-	"example/internal/services/chat_message_processor"
-	"example/internal/services/report_generation"
-	"example/internal/subscription"
+	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/mail"
+	meili "github.com/dokedu/dokedu/backend/internal/modules/meilisearch"
+	"github.com/dokedu/dokedu/backend/internal/services/chat_message_processor"
+	"github.com/dokedu/dokedu/backend/internal/services/report_generation"
+	"github.com/dokedu/dokedu/backend/internal/subscription"
+
 	"github.com/minio/minio-go/v7"
 	"github.com/uptrace/bun"
 )

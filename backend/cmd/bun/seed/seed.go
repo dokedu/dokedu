@@ -2,6 +2,7 @@ package seed
 
 import (
 	"embed"
+
 	"github.com/uptrace/bun"
 )
 

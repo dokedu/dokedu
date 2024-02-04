@@ -2,8 +2,10 @@ package pdf
 
 import (
 	"context"
-	"example/internal/db"
 	"fmt"
+
+	"github.com/dokedu/dokedu/backend/internal/db"
+
 	"github.com/uptrace/bun"
 )
 
@@ -11,6 +13,9 @@ func (g *Generator) LearnedCompetencesReportData(report db.Report) (*Competences
 	ctx := context.Background()
 
 	data, err := g.BaseCompetencesReportData(ctx, report)
+	if err != nil {
+		return nil, err
+	}
 
 	var userCompetences []db.UserCompetence
 	err = g.cfg.DB.NewSelect().

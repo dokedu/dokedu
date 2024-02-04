@@ -3,12 +3,13 @@ package meilisearch
 import (
 	"context"
 	"database/sql"
-	"example/internal/db"
-	"fmt"
-	"github.com/meilisearch/meilisearch-go"
-	"github.com/uptrace/bun"
 	"os"
 	"slices"
+
+	"github.com/dokedu/dokedu/backend/internal/db"
+
+	"github.com/meilisearch/meilisearch-go"
+	"github.com/uptrace/bun"
 )
 
 type MeiliCompetence struct {
@@ -98,9 +99,6 @@ func (m MeiliClient) GenerateCompetenceIndex(ctx context.Context, conn *bun.DB) 
 		if err != nil {
 			return err
 		}
-
-		res, err := index.GetFilterableAttributes()
-		fmt.Println(res)
 	}
 
 	return nil
