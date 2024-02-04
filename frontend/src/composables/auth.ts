@@ -91,6 +91,8 @@ async function afterSignInHandleRedirect() {
     }
   } else if (enabledApps.value.includes("drive")) {
     return await router.push({ name: "/drive/my-drive/" })
+  } else if (enabledApps.value.includes("mail")) {
+    return await router.push({ name: "/mail/" })
   } else {
     return await router.push({ name: "/settings/profile" })
   }
