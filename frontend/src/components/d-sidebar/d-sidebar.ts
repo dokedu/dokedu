@@ -18,7 +18,9 @@ import {
   UserSquare,
   Wrench,
   TimerIcon,
-  MessageCircle
+  MessageCircle,
+  InboxIcon,
+  MailOpenIcon
 } from "lucide-vue-next"
 
 import type { Icon as LucideIcon } from "@/types/types"
@@ -237,6 +239,19 @@ export const apps = computed<App[]>(() => [
         name: i18n.global.t("chat"),
         route: "/chat/[tab]",
         params: { tab: "chats" }
+      }
+    ]
+  },
+  {
+    id: "mail",
+    icon: MailOpenIcon,
+    allowedUserRoles: ["owner", "admin", "teacher", "student"],
+    name: "Mail",
+    links: [
+      {
+        icon: InboxIcon,
+        name: i18n.global.t("inbox"),
+        route: "/mail/"
       }
     ]
   }

@@ -271,4 +271,7 @@ export const de = {
 
   missed_hours: "Fehlstunden",
   missed_hours_excused: "Fehlstunden unentschuldigt",
+
+  // Mail
+  inbox: "Posteingang"
 }

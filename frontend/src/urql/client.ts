@@ -63,7 +63,6 @@ function makeClient() {
             const route = router.currentRoute.value
             if (!route) return
             if (!publicRoutes.includes(route.name as string)) {
-              localStorage.removeItem("setupComplete")
               localStorage.removeItem("language")
               localStorage.removeItem("active_app")
               localStorage.removeItem("enabled_apps")

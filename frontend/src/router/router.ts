@@ -21,15 +21,7 @@ router.beforeEach(async (to) => {
   const loggedIn = token && token !== "null" && token !== "undefined"
   const outsideAllowedRoutes = !publicRoutes.includes(to.path as RouteRecordName)
 
-  // If user is logged in and setup is not complete, always redirect to setup
   if (loggedIn) {
-    const setupComplete = localStorage.getItem("setupComplete")
-    const setupIncomplete = setupComplete === "false"
-
-    if (setupIncomplete && to.name !== "/setup/") {
-      return { name: "/setup/" }
-    }
-
     if (to.path === "/") {
       // redirect to mobile app if enabled
       if (isMobile.value) {
@@ -61,14 +53,14 @@ router.afterEach((to) => {
 
   try {
     nextTick(() => {
-      if (!$posthog) return;
+      if (!$posthog) return
 
       $posthog.capture("$pageview", {
-        $current_url: to.fullPath,
-      });
-    });
+        $current_url: to.fullPath
+      })
+    })
   } catch (e) {
-    console.error(e);
+    console.error(e)
   }
 })
 

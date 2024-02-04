@@ -8,16 +8,13 @@ import i18n from "@/i18n"
 import { $posthog } from "@/plugins/posthog"
 import type { UserFragment } from "@/gql/fragments/user"
 
-export const user = useStorage<UserFragment | null>("user", null,
-  undefined,
-  {
-    serializer: {
-      read: (v: any) => v ? JSON.parse(v) : null,
-      write: (v: any) => JSON.stringify(v),
-    },
-  })
+export const user = useStorage<UserFragment | null>("user", null, undefined, {
+  serializer: {
+    read: (v: any) => (v ? JSON.parse(v) : null),
+    write: (v: any) => JSON.stringify(v)
+  }
+})
 export const token = useStorage<null | string>("authorization", null)
-export const setupComplete = useStorage("setupComplete", false)
 export const enabledApps = useStorage<string[]>("enabled_apps", [])
 export const language = useStorage<string>("language", "en")
 
@@ -37,7 +34,6 @@ function signInMutation({ email, password }: SignInInput) {
   return urqlClient.mutation(SignInDocument, { email, password })
 }
 
-
 async function signIn({ email, password }: SignInInput): Promise<{ error?: Error | undefined }> {
   const { data, error } = await signInMutation({
     email: email,
@@ -54,7 +50,6 @@ async function signIn({ email, password }: SignInInput): Promise<{ error?: Error
 
   user.value = data.signIn.user
   token.value = data.signIn.token
-  setupComplete.value = data.signIn.setupComplete
   enabledApps.value = data.signIn.enabled_apps
   language.value = data.signIn.language
 
@@ -69,32 +64,25 @@ async function signIn({ email, password }: SignInInput): Promise<{ error?: Error
 }
 
 export function identifyUser() {
-  if (!user.value) return;
-  if (!$posthog) return;
+  if (!user.value) return
+  if (!$posthog) return
 
   try {
     $posthog.identify(
-      user.value.id,  // Replace 'distinct_id' with your user's unique identifier
+      user.value.id, // Replace 'distinct_id' with your user's unique identifier
       {
         id: user.value.id,
         email: user.value.email,
         name: user.value.firstName + " " + user.value.lastName
       } // optional: set additional user properties
-    );
-    $posthog.group('company', user.value.organisationId)
+    )
+    $posthog.group("company", user.value.organisationId)
   } catch (e) {
     console.error(e)
   }
-
-
 }
 
-
 async function afterSignInHandleRedirect() {
-  if (!setupComplete.value) {
-    return await router.push({ name: "/setup/" })
-  }
-
   if (enabledApps.value.includes("record")) {
     if (isMobile.value) {
       return await router.push({ name: "/m/record/entries/" })
@@ -115,14 +103,8 @@ async function signOut() {
     console.error(e)
   }
 
-  // localStorage.removeItem("setupComplete")
-  // localStorage.removeItem("language")
-  // localStorage.removeItem("active_app")
-  // localStorage.removeItem("enabled_apps")
-  // localStorage.removeItem("authorizatio")
   user.value = null
   token.value = null
-  setupComplete.value = true
   enabledApps.value = []
 
   try {
