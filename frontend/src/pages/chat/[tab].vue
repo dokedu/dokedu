@@ -19,7 +19,7 @@
               <d-tab>Bots</d-tab>
             </d-tabs>
           </div>
-          <div class="flex flex-col overflow-scroll flex-1 pt-2">
+          <div class="flex flex-col overflow-auto flex-1 pt-2">
             <d-chat
               v-for="_chat in chatList?.chats?.edges"
               :chat="_chat"

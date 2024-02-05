@@ -24,7 +24,7 @@
         </slot>
       </div>
     </div>
-    <div ref="table" class="h-full w-full overflow-scroll">
+    <div ref="table" class="h-full w-full overflow-auto">
       <TableSearchResult
         v-for="(vars, i) in pageVariables"
         :key="i"
