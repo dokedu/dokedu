@@ -10,6 +10,38 @@ body {
   @apply !cursor-default;
 }
 
+@keyframes slideInAndFadeIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpAndFadeOut {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+}
+
+.combobox-content[data-state="open"] {
+  animation: slideInAndFadeIn 200ms ease-out;
+}
+
+.combobox-content[data-state="closed"] {
+  animation: slideUpAndFadeOut 200ms ease-out;
+}
+
 .slide-enter-from,
 .slide-leave-to {
   transform: scaleY(0);
@@ -28,14 +60,18 @@ body {
 }
 
 @layer utilities {
+
   /* Hide scrollbar for Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 }
 
@@ -43,9 +79,11 @@ body {
   animation-duration: 0.6s;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
+
 .ContextMenuContent[data-side="top"] {
   animation-name: slideUp;
 }
+
 .ContextMenuContent[data-side="bottom"] {
   animation-name: slideDown;
 }
@@ -55,6 +93,7 @@ body {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -66,6 +105,7 @@ body {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

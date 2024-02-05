@@ -1,19 +1,11 @@
 <template>
-  <div
-    class="flex w-max select-none items-center rounded-full px-2.5 py-1 text-sm"
-    :class="`bg-${color}-50 text-${color}-700`"
-  >
+  <div class="flex select-none items-center rounded-full px-2.5 py-1 text-sm" :class="`bg-${color}-50 text-${color}-700`">
     <div class="flex items-center justify-between gap-2">
-      <p class="line-clamp-1 flex items-center gap-1">
+      <p class="flex items-center gap-1">
         <slot />
       </p>
-      <X
-        class="h-5 w-5 shrink-0 rounded-full p-0.5"
-        :size="16"
-        :class="`hover:bg-${color}-100`"
-        v-if="removable"
-        @click="remove"
-      />
+      <X class="h-5 w-5 shrink-0 rounded-full p-0.5" :size="16" :class="`hover:bg-${color}-100`" v-if="removable"
+        @click="remove" />
     </div>
   </div>
 </template>
