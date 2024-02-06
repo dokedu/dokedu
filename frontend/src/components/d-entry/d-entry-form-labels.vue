@@ -3,21 +3,13 @@
     <label for="date" class="mt-2 min-w-[64px] text-neutral-500">{{ $t("label", 2) }}</label>
 
     <div class="flex w-full flex-col gap-4">
-      <DSelect
-        :options="tagOptions"
-        :label="$t('label', 2)"
-        multiple
-        v-model="selected"
-        v-model:search="tagSearch"
-        class="w-full"
-        searchable
-      >
+      <DCombobox :options="tagOptions" :placeholder="$t('label', 2)" multiple v-model="selected">
         <template v-slot="{ option }">
           <d-tag :color="tagsData?.tags.edges?.find((el: any) => el.id === option.value)?.color">
             {{ option.label }}
           </d-tag>
         </template>
-      </DSelect>
+      </DCombobox>
 
       <div class="flex flex-wrap gap-1.5">
         <d-tag v-for="tag in entry.tags" :color="tag.color" removable @remove="removeTag(tag)">
@@ -36,6 +28,8 @@ import { useDeleteEntryTagInputMutation } from "@/gql/mutations/entries/deleteEn
 import { useCreateEntryTagMutation } from "@/gql/mutations/entries/createEntryTag"
 import { useTagLimitedQuery } from "@/gql/queries/tags/tags"
 import type { Entry, Tag } from "@/gql/schema"
+import type { Option } from "@/components/d-combobox/d-combobox.vue"
+import DCombobox from "../d-combobox/d-combobox.vue"
 
 const { executeMutation: deleteEntryTag } = useDeleteEntryTagInputMutation()
 const { executeMutation: createEntryTag } = useCreateEntryTagMutation()
@@ -51,22 +45,24 @@ const { data: tagsData } = useTagLimitedQuery({})
 
 const selected = computed({
   get: () => {
-    return entry.value.tags?.map((el: any) => el.id) || []
+    return entry.value.tags?.map((el: any) => {
+      return { label: el.name, value: el.id }
+    }) || []
   },
-  set: async (value: string[]) => {
+  set: async (value: Option[]) => {
     // value contains all selected ids, we need to compare it to the existing ones
     // and if there are any differences, we need to create or delete the entryTag
     const existing = entry.value.tags?.map((el: any) => el.id) || []
 
-    const toDelete = existing.filter((el) => !value.includes(el))
-    const toCreate = value.filter((el) => !existing.includes(el))
+    const toDelete = existing.filter((el) => !value.map((el) => el.value).includes(el))
+    const toCreate = value.filter((el) => !existing.includes(el.value))
 
     for (const id of toDelete || []) {
       await deleteEntryTag({ input: { entryId: entry.value.id as string, tagId: id } })
     }
 
-    for (const id of toCreate || []) {
-      await createEntryTag({ input: { entryId: entry.value.id as string, tagId: id } })
+    for (const creatable of toCreate || []) {
+      await createEntryTag({ input: { entryId: entry.value.id as string, tagId: creatable.value } })
     }
   }
 })

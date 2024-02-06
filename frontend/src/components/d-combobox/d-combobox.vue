@@ -72,9 +72,11 @@ const displayedLabel = computed(() => {
         <ComboboxItem v-for="option in props.options" :key="option.value" @select="onSelect"
           class="rounded-md flex max-w-full justify-between items-center rounded-md px-1.5 py-1 relative select-none data-[disabled]:text-mauve8 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-stone-100"
           :value="option">
-          <span class="px-0.5 py-0.5 text-sm text-default truncate">
-            {{ option.label }}
-          </span>
+          <slot v-bind="{ option }">
+            <span class="px-0.5 py-0.5 text-sm text-default truncate">
+              {{ option.label }}
+            </span>
+          </slot>
           <div
             v-if="multiple ? (v as Option[]).find(e => e.value === option.value) : (v as Option).value === option.value"
             class="w-[25px] shrink-0 inline-flex items-center justify-center">

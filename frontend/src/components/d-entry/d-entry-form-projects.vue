@@ -5,7 +5,7 @@
     <div class="flex grow inline-block flex-col gap-4">
       <DComboBox :placeholder="$t('project', 2)" :options="eventOptions" multiple v-model="selected">
       </DComboBox>
-      <div v-if="entry.events?.length > 0" class="gap-1.5 flex flex-wrap">
+      <div v-if="entry.events && entry.events?.length > 0" class="gap-1.5 flex flex-wrap">
         <DTag v-for="event in entry.events" color="gray" removable @remove="removeEvent(event)">
           {{ event.title }}
         </DTag>

@@ -1,5 +1,6 @@
 <template>
-  <div class="flex select-none items-center rounded-full px-2.5 py-1 text-sm" :class="`bg-${color}-50 text-${color}-700`">
+  <div class="min-w-fit flex select-none items-center rounded-2xl px-2.5 py-1 text-sm"
+    :class="`bg-${color}-50 text-${color}-700`">
     <div class="flex items-center justify-between gap-2">
       <p class="flex items-center gap-1">
         <slot />
