@@ -6,13 +6,13 @@ import makeClient from "./urql/client"
 import urql from "@urql/vue"
 import i18n from "./i18n"
 import "emoji-mart-vue-fast/css/emoji-mart.css"
-import posthogPlugin from "./plugins/posthog";
+import posthogPlugin from "./plugins/posthog"
 
 const app = createApp(App)
 
 export const urqlClient = makeClient()
 
-app.use(posthogPlugin);
+app.use(posthogPlugin)
 app.use(router)
 app.use(urql, urqlClient)
 app.use(i18n)

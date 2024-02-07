@@ -3,13 +3,13 @@
 package model
 
 import (
-	"example/internal/db"
 	"fmt"
 	"io"
 	"strconv"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/dokedu/dokedu/backend/internal/db"
 )
 
 type AddEventCompetenceInput struct {

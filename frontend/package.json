@@ -45,7 +45,7 @@
     "markdown-it": "^14.0.0",
     "markdown-it-highlightjs": "^4.0.1",
     "postcss": "^8.4.33",
-    "posthog-js": "^1.100.0",
+    "posthog-js": "^1.104.4",
     "prettier": "^3.1.1",
     "radix-vue": "^1.4.2",
     "tailwindcss": "^3.4.0",

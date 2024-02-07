@@ -2,9 +2,10 @@ package pdf
 
 import (
 	"context"
-	"example/internal/db"
 	"fmt"
 	"time"
+
+	"github.com/dokedu/dokedu/backend/internal/db"
 )
 
 type CompetenceStruct struct {
@@ -227,7 +228,6 @@ func (g *Generator) AllEntriesReportData(report db.Report) (*AllReportData, erro
 	var reportData AllReportData
 
 	for i := range data.Entries {
-
 		ucStructs := make([]CompetenceStruct, len(data.CompetencesMapByEntry[data.Entries[i].ID]))
 		for i, item := range data.CompetencesMapByEntry[data.Entries[i].ID] {
 			grades := formatGrades(item.Grades)

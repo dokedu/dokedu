@@ -6,11 +6,12 @@ package graph
 
 import (
 	"context"
-	"example/internal/db"
-	"example/internal/graph/model"
-	"example/internal/helper"
-	"example/internal/middleware"
 	"time"
+
+	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/graph/model"
+	"github.com/dokedu/dokedu/backend/internal/helper"
+	"github.com/dokedu/dokedu/backend/internal/middleware"
 )
 
 // Image is the resolver for the image field.

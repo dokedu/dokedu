@@ -6,14 +6,14 @@ package graph
 
 import (
 	"context"
-	"example/internal/db"
-	"example/internal/graph/model"
-	"example/internal/helper"
-	"example/internal/middleware"
 	"fmt"
 	"slices"
 	"time"
 
+	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/graph/model"
+	"github.com/dokedu/dokedu/backend/internal/helper"
+	"github.com/dokedu/dokedu/backend/internal/middleware"
 	"github.com/uptrace/bun"
 	excelize "github.com/xuri/excelize/v2"
 )

@@ -2,16 +2,14 @@ package dataloaders
 
 import (
 	"context"
-	"example/internal/db"
-	"example/internal/middleware"
+	"log"
+
+	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/middleware"
+
 	"github.com/graph-gophers/dataloader"
 	"github.com/uptrace/bun"
-	"log"
 )
-
-type UserReader struct {
-	conn *bun.DB
-}
 
 func (u *Reader) GetUser(ctx context.Context, keys dataloader.Keys) []*dataloader.Result {
 	iDs := make([]string, len(keys))

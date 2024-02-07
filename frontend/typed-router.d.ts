@@ -67,6 +67,7 @@ declare module 'vue-router/auto/routes' {
     '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
     '/m/record/entries/': RouteRecordInfo<'/m/record/entries/', '/m/record/entries', Record<never, never>, Record<never, never>>,
     '/m/record/entries/[id]': RouteRecordInfo<'/m/record/entries/[id]', '/m/record/entries/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
+    '/mail/': RouteRecordInfo<'/mail/', '/mail', Record<never, never>, Record<never, never>>,
     '/record/attendances/': RouteRecordInfo<'/record/attendances/', '/record/attendances', Record<never, never>, Record<never, never>>,
     '/record/competences/': RouteRecordInfo<'/record/competences/', '/record/competences', Record<never, never>, Record<never, never>>,
     '/record/competences/[id]': RouteRecordInfo<'/record/competences/[id]', '/record/competences/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
@@ -100,7 +101,6 @@ declare module 'vue-router/auto/routes' {
     '/school/subjects/[id]': RouteRecordInfo<'/school/subjects/[id]', '/school/subjects/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/school/subjects/new': RouteRecordInfo<'/school/subjects/new', '/school/subjects/new', Record<never, never>, Record<never, never>>,
     '/settings/profile': RouteRecordInfo<'/settings/profile', '/settings/profile', Record<never, never>, Record<never, never>>,
-    '/setup/': RouteRecordInfo<'/setup/', '/setup', Record<never, never>, Record<never, never>>,
     '/ui/': RouteRecordInfo<'/ui/', '/ui', Record<never, never>, Record<never, never>>,
   }
 }

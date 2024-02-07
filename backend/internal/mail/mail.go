@@ -1,12 +1,14 @@
 package mail
 
 import (
-	"example/internal/db"
 	"fmt"
-	"github.com/labstack/gommon/log"
 	"net/smtp"
 	"os"
 	"strconv"
+
+	"github.com/dokedu/dokedu/backend/internal/db"
+
+	"github.com/labstack/gommon/log"
 )
 
 type Mailer struct {

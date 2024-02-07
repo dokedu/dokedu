@@ -8,10 +8,11 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"example/internal/dataloaders"
-	"example/internal/db"
-	"example/internal/middleware"
 	"time"
+
+	"github.com/dokedu/dokedu/backend/internal/dataloaders"
+	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/middleware"
 )
 
 // SetUserAttendanceState is the resolver for the setUserAttendanceState field.

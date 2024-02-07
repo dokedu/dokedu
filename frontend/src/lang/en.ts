@@ -272,4 +272,7 @@ export const en = {
 
   missed_hours: "Missed hours",
   missed_hours_excused: "Missed hours unexcused",
+
+  // Mail
+  inbox: "Inbox"
 }

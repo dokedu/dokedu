@@ -3,13 +3,15 @@ package report_generation
 import (
 	"container/list"
 	"context"
-	"example/internal/db"
-	"example/internal/services/report_generation/config"
-	"example/internal/services/report_generation/generator/pdf"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"sync"
+
+	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/services/report_generation/config"
+	"github.com/dokedu/dokedu/backend/internal/services/report_generation/generator/pdf"
 )
 
 type ReportGenerationService struct {
@@ -40,7 +42,6 @@ func (s *ReportGenerationService) loop(ctx context.Context) {
 			s.tryDequeue()
 		case <-ctx.Done():
 			return
-
 		}
 	}
 }
@@ -139,6 +140,7 @@ func NewReportGenerationService(cfg config.ReportGenerationConfig, ctx context.C
 	if _, err := os.Stat("tmp"); os.IsNotExist(err) {
 		err := os.Mkdir("tmp", 0755)
 		if err != nil {
+			slog.Error("unable to start the report generation service!", "error", err)
 			return nil
 		}
 	}
@@ -147,6 +149,7 @@ func NewReportGenerationService(cfg config.ReportGenerationConfig, ctx context.C
 	if _, err := os.Stat("tmp/reports"); os.IsNotExist(err) {
 		err := os.Mkdir("tmp/reports", 0755)
 		if err != nil {
+			slog.Error("unable to start the report generation service!", "error", err)
 			return nil
 		}
 	}
