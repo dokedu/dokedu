@@ -17,7 +17,7 @@
     :key="row.id"
     ref="items"
     :draggable="draggable"
-    class="group/row grid border transition-colors hover:bg-neutral-50"
+    class="group/row grid border-b transition-colors hover:bg-neutral-50"
     :class="
       dragoverItem === row.id && draggingItem !== row.id
         ? 'border-blue-500 bg-blue-100'
