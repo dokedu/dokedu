@@ -11,31 +11,35 @@ export type Option = {
 
 interface Props {
   options: Option[]
-  multiple: boolean
+  multiple?: boolean
+  searchable?: boolean
   placeholder: string
 }
 
 const props = defineProps<Props>()
-const v = defineModel<Option | Option[]>()
+const v = defineModel<string | string[]>()
+const search = defineModel<string>('search')
 
 const onSelect = (option: CustomEvent) => {
   if (props.multiple) {
     if (Array.isArray(v.value)) {
-      const index = v.value.findIndex((el) => el.value === option.detail.value.value)
+      const index = v.value.findIndex((el) => el === option.detail.value.value)
+
       if (index === -1) {
-        v.value = [...v.value, option.detail.value]
+        v.value = [...v.value, option.detail.value.value]
       } else {
-        v.value = v.value.filter((el) => el.value !== option.detail.value.value)
+        v.value = v.value.filter((el) => el !== option.detail.value.value)
       }
     } else {
-      v.value = [option.detail.value]
+      v.value = [option.detail.value.value]
     }
   } else {
-    v.value = option.detail.value
+    v.value = option.detail.value.value
   }
 }
 
-const filterFunction = (list: Option[], search: string) => {
+const filterFunction = (list: any[], search: string) => {
+  if (props.searchable) return list;
   return list.filter((el) => el.label.toLowerCase().includes(search.toLowerCase()))
 }
 
@@ -47,14 +51,15 @@ const displayedLabel = computed(() => {
     return v.value.length + ' ' + i18n.global.t('selected')
   }
 
-  const option = props.options.find((option) => option.value === (v.value as Option).value)
+  const option = props.options.find((option) => option.value === v.value)
   return option?.label
 })
 
 </script>
 
 <template>
-  <ComboboxRoot :filter-function="filterFunction" v-model="v" class="relative" :multiple="props.multiple">
+  <ComboboxRoot :filter-function="filterFunction" v-model="v" class="relative" :multiple="props.multiple"
+    v-model:search-term="search">
     <ComboboxAnchor
       class="min-w-[160px] w-full hover:bg-stone-100 transition-all shadow-sm ease-in-out inline-flex rounded-lg border border-neutral-300 items-center justify-between rounded px-2.5 text-sm leading-none h-[36px] gap-[5px] bg-white text-grass11 outline-none">
       <ComboboxInput
@@ -67,18 +72,17 @@ const displayedLabel = computed(() => {
 
     <ComboboxContent
       class="combobox-content absolute z-10 w-full mt-2 min-w-[160px] bg-white overflow-hidden rounded border border-stone-300 rounded-md shadow">
-      <ComboboxViewport class="p-[5px]">
+      <ComboboxViewport class="p-[5px] max-h-[200px] overflow-y-auto">
         <ComboboxEmpty class="text-mauve8 text-xs font-medium text-center py-2">{{ $t("no_results") }}</ComboboxEmpty>
         <ComboboxItem v-for="option in props.options" :key="option.value" @select="onSelect"
-          class="rounded-md flex max-w-full justify-between items-center rounded-md px-1.5 py-1 relative select-none data-[disabled]:text-mauve8 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-stone-100"
+          class="rounded-md flex max-w-full justify-between items-center rounded-md px-1.5 py-1 relative select-none data-[disabled]:text-mauve8 data-[disabled]:pointer-events-none data-[highlighted]:outline-none hover:bg-stone-100"
           :value="option">
           <slot v-bind="{ option }">
             <span class="px-0.5 py-0.5 text-sm text-default truncate">
               {{ option.label }}
             </span>
           </slot>
-          <div
-            v-if="multiple ? (v as Option[]).find(e => e.value === option.value) : (v as Option).value === option.value"
+          <div v-if="multiple ? (v as string[]).find(e => e === option.value) : (v as string) === option.value"
             class="w-[25px] shrink-0 inline-flex items-center justify-center">
             <Check class="h-4 w-4" />
           </div>

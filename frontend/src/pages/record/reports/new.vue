@@ -16,6 +16,7 @@ import { useGetEntryFilterStudentsQuery } from "@/gql/queries/users/getEntryFilt
 import { useRouteQuery } from "@vueuse/router"
 import DTag from "@/components/d-tag/d-tag.vue"
 import { useCompetenceSubjectsQuery } from "@/gql/queries/competences/competenceSubjects"
+import DCombobox from "@/components/d-combobox/d-combobox.vue"
 
 const router = useRouter()
 
@@ -121,13 +122,8 @@ async function createReport() {
       <div class="flex h-full">
         <div class="border-r h-full p-4 max-w-sm w-full">
           <div class="max-w-sm w-full space-y-4">
-            <DSelect
-              searchable
-              :options="studentOptions"
-              :label="$t('student')"
-              v-model:search="studentSearch"
-              v-model="student"
-            />
+            <DCombobox :options="studentOptions" :placeholder="$t('student')" v-model:search="studentSearch"
+              v-model="student" searchable />
 
             <div class="flex gap-2">
               <d-input class="w-full" type="date" name="from" v-model="from" />
@@ -146,13 +142,8 @@ async function createReport() {
                 </div>
               </div>
 
-              <DSelect
-                searchable
-                :options="tagOptions"
-                :label="$t('subject')"
-                v-model="competence"
-                v-model:search="competenceSearch"
-              >
+              <DSelect searchable :options="tagOptions" :label="$t('subject')" v-model="competence"
+                v-model:search="competenceSearch">
                 <template #display>
                   <div v-if="competence">
                     <d-tag :color="competenceData?.competences.edges?.find((el: any) => el.id === competence)?.color">

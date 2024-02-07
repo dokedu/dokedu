@@ -25,13 +25,13 @@
         </div>
         <div class="flex max-h-[160px] flex-col gap-1 overflow-y-auto p-1 text-sm" tabindex="-1">
           <div v-for="option in sortedOptions" @click="onSelect(option)"
-            class="grid grid-cols-2 items-center justify-center truncate gap-2 rounded-md px-1.5 py-1"
+            class="grid grid-cols-2 items-center justify-center gap-2 rounded-md px-1.5 py-1"
             style="grid-template-columns: 1fr 24px"
             :class="option === sortedOptions[focusedOptionIndex as number] ? 'bg-neutral-100' : 'bg-white'"
             @mouseover="focusedOptionIndex = sortedOptions.indexOf(option)"
             @focusin="focusedOptionIndex = sortedOptions.indexOf(option)">
             <slot name="default" :option="option">
-              <div class="px-0.5 py-0.5 text-sm text-default truncate">{{ option.label }}</div>
+              <div class="px-0.5 py-0.5 text-sm text-default">{{ option.label }}</div>
             </slot>
             <CheckIcon :size="16" class="mr-1 text-strong" v-if="isSelected(option)" />
           </div>
