@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { ComboboxAnchor, ComboboxContent, ComboboxEmpty, ComboboxPortal, ComboboxInput, ComboboxItem, ComboboxRoot, ComboboxTrigger, ComboboxViewport } from 'radix-vue'
+import { computed, ref } from 'vue'
+import { ComboboxAnchor, Label, ComboboxContent, ComboboxEmpty, ComboboxPortal, ComboboxInput, ComboboxItem, ComboboxRoot, ComboboxTrigger, ComboboxViewport } from 'radix-vue'
 import { ChevronDown, Check } from 'lucide-vue-next'
 import i18n from '@/i18n'
 
@@ -19,6 +19,7 @@ interface Props {
 const props = defineProps<Props>()
 const v = defineModel<string | string[]>()
 const search = defineModel<string>('search')
+const open = ref(false)
 
 const onSelect = (option: CustomEvent) => {
   if (props.multiple) {
@@ -35,6 +36,7 @@ const onSelect = (option: CustomEvent) => {
     }
   } else {
     v.value = option.detail.value.value
+    open.value = false
   }
 }
 
@@ -51,20 +53,39 @@ const displayedLabel = computed(() => {
     return v.value.length + ' ' + i18n.global.t('selected')
   }
 
-  const option = props.options.find((option) => option.value === v.value)
-  return option?.label
+  return getDisplayValue(v.value)
 })
+
+const getDisplayValue = (value: string | string[]) => {
+  const option = props.options.find((option) => option.value == value)
+  console.log('trigger', option, value, props.options)
+  if (!option) return value as string
+  return option.label
+}
+
+const onSearch = (searchTerm: string) => {
+  // Don't trigger graphql search if option gets selected
+  if (props.searchable && searchTerm == props.options.find((option) => option.label == searchTerm)?.label) {
+    return
+  }
+
+  if (searchTerm == v.value) return
+
+  search.value = searchTerm
+}
 
 </script>
 
 <template>
   <ComboboxRoot :filter-function="filterFunction" v-model="v" class="relative" :multiple="props.multiple"
-    v-model:search-term="search">
+    @update:search-term="onSearch" v-model:open="open" :display-value="(val) => getDisplayValue(val)">
     <ComboboxAnchor
       class="min-w-[160px] w-full hover:bg-stone-100 transition-all shadow-sm ease-in-out inline-flex rounded-lg border border-neutral-300 items-center justify-between rounded px-2.5 text-sm leading-none h-[36px] gap-[5px] bg-white text-grass11 outline-none">
-      <ComboboxInput
-        class="!bg-transparent focus:ring-0 w-full border-0 p-0 focus:outline-none h-full text-sm placeholder-neutral-700"
-        :placeholder="displayedLabel" />
+      <slot name="display" :displayedLabel="displayedLabel">
+        <ComboboxInput @click="open = true"
+          class="!bg-transparent focus:ring-0 w-full border-0 p-0 focus:outline-none h-full text-sm placeholder-neutral-700"
+          :placeholder="displayedLabel" />
+      </slot>
       <ComboboxTrigger>
         <ChevronDown class="h-4 w-4 text-grass11" />
       </ComboboxTrigger>
@@ -74,8 +95,8 @@ const displayedLabel = computed(() => {
       class="combobox-content absolute z-10 w-full mt-2 min-w-[160px] bg-white overflow-hidden rounded border border-stone-300 rounded-md shadow">
       <ComboboxViewport class="p-[5px] max-h-[200px] overflow-y-auto">
         <ComboboxEmpty class="text-mauve8 text-xs font-medium text-center py-2">{{ $t("no_results") }}</ComboboxEmpty>
-        <ComboboxItem v-for="option in props.options" :key="option.value" @select="onSelect"
-          class="rounded-md flex max-w-full justify-between items-center rounded-md px-1.5 py-1 relative select-none data-[disabled]:text-mauve8 data-[disabled]:pointer-events-none data-[highlighted]:outline-none hover:bg-stone-100"
+        <ComboboxItem v-for="option in props.options" :key="option.value" @select.prevent="onSelect"
+          class="rounded-md flex max-w-full justify-between items-center rounded-md px-1.5 py-1 relative select-none data-[disabled]:text-mauve8 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-stone-100 hover:bg-stone-100"
           :value="option">
           <slot v-bind="{ option }">
             <span class="px-0.5 py-0.5 text-sm text-default truncate">

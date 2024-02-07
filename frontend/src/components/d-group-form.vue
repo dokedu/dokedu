@@ -25,15 +25,8 @@
         </div>
         <div class="flex items-center gap-6">
           <p class="w-[100px] text-sm font-semibold text-neutral-600">{{ $t("user", 2) }}</p>
-          <d-select
-            v-model:search="userSearch"
-            :options="userOptions"
-            searchable
-            :label="$t('user', 2)"
-            multiple
-            v-model="members"
-            class="flex-1"
-          />
+          <d-select v-model:search="userSearch" :options="userOptions" searchable :label="$t('user', 2)" multiple
+            v-model="members" class="flex-1" />
         </div>
       </div>
     </template>
@@ -49,6 +42,7 @@
 <script lang="ts" setup>
 import DSidebar from "@/components/d-sidebar/d-sidebar.vue"
 import DSelect from "@/components/d-select/d-select.vue"
+import DCombobox from "./d-combobox/d-combobox.vue"
 import DInput from "@/components/d-input/d-input.vue"
 import DButton from "@/components/d-button/d-button.vue"
 import { computed, ref, toRef, watch } from "vue"
