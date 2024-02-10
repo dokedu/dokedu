@@ -31,7 +31,6 @@ import (
 	"github.com/labstack/echo/v4"
 	mware "github.com/labstack/echo/v4/middleware"
 
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -45,11 +44,6 @@ func main() {
 	// And hence gracefully stop the server
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 
 	mailer := mail.NewClient()
 	dbClient := database.NewClient()
