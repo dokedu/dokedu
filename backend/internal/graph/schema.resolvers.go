@@ -20,6 +20,8 @@ import (
 	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 	meili "github.com/dokedu/dokedu/backend/internal/modules/meilisearch"
+	"github.com/dokedu/dokedu/backend/internal/msg"
+
 	nanoid "github.com/matoous/go-nanoid/v2"
 	meilisearch "github.com/meilisearch/meilisearch-go"
 	"github.com/uptrace/bun"
@@ -156,22 +158,22 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 	var user db.User
 	err := r.DB.NewSelect().Model(&user).Where("email = ?", strings.ToLower(input.Email)).Scan(ctx)
 	if err != nil {
-		return nil, errors.New("invalid email or password")
+		return nil, msg.ErrInvalidEmailOrPassword
 	}
 
 	var organisation db.Organisation
 	err = r.DB.NewSelect().Model(&organisation).Where("id = ?", user.OrganisationID).Scan(ctx)
 	if err != nil {
-		return nil, errors.New("invalid email or password")
+		return nil, msg.ErrInvalidEmailOrPassword
 	}
 
 	// user.Password is a sql.NullString, so we need to check if it is valid
 	if !user.Password.Valid {
-		return nil, errors.New("invalid email or password")
+		return nil, msg.ErrInvalidEmailOrPassword
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password.String), []byte(input.Password)); err != nil {
-		return nil, errors.New("invalid email or password")
+		return nil, msg.ErrInvalidEmailOrPassword
 	}
 
 	// Generate a new token

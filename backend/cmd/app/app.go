@@ -16,6 +16,7 @@ import (
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 	"github.com/dokedu/dokedu/backend/internal/modules/meilisearch"
 	"github.com/dokedu/dokedu/backend/internal/modules/minio"
+	"github.com/dokedu/dokedu/backend/internal/msg"
 	"github.com/dokedu/dokedu/backend/internal/services/chat_message_processor"
 	"github.com/dokedu/dokedu/backend/internal/services/report_generation"
 	"github.com/dokedu/dokedu/backend/internal/services/report_generation/config"
@@ -30,7 +31,6 @@ import (
 	"github.com/labstack/echo/v4"
 	mware "github.com/labstack/echo/v4/middleware"
 
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -44,11 +44,6 @@ func main() {
 	// And hence gracefully stop the server
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 
 	mailer := mail.NewClient()
 	dbClient := database.NewClient()
@@ -101,6 +96,7 @@ func main() {
 
 	var gb int64 = 1 << 30
 
+	srv.SetErrorPresenter(msg.ErrPresenter)
 	srv.AddTransport(transport.Websocket{
 		KeepAlivePingInterval: 10 * time.Second,
 		Upgrader: websocket.Upgrader{
