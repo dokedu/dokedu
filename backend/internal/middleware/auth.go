@@ -8,12 +8,11 @@ import (
 	"time"
 
 	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/msg"
 
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/labstack/echo/v4"
 	"github.com/uptrace/bun"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 type contextKey string
@@ -34,12 +33,10 @@ func Auth(bun *bun.DB) echo.MiddlewareFunc {
 			var session db.Session
 			err := bun.NewSelect().Model(&session).Where("token = ?", header).Scan(c.Request().Context())
 			if errors.Is(err, sql.ErrNoRows) {
-				//return c.JSON(http.StatusUnauthorized, "{'error': 'Unauthorized'}")
 				return next(c)
 			}
 			if err != nil {
 				return next(c)
-				//return c.JSON(http.StatusUnauthorized, err)
 			}
 
 			// Check if created at is no longer than 12 hours ago
@@ -72,7 +69,7 @@ func Auth(bun *bun.DB) echo.MiddlewareFunc {
 				session.Token,
 			}
 
-			ctx := context.WithValue(c.Request().Context(), userCtxKey, &userContext)
+			ctx := context.WithValue(c.Request().Context(), UserCtxKey, &userContext)
 			c.SetRequest(c.Request().WithContext(ctx))
 
 			return next(c)
@@ -152,13 +149,7 @@ func (c UserContext) HasPermissionAdmin() bool {
 func GetUser(ctx context.Context) (*UserContext, error) {
 	currentUser := ForContext(ctx)
 	if currentUser == nil {
-		graphql.AddError(ctx, &gqlerror.Error{
-			Message: "no user found in the context",
-			Extensions: map[string]interface{}{
-				"code": "UNAUTHENTICATED",
-			},
-		})
-		return nil, errors.New("no user found in the context")
+		return nil, msg.ErrUnauthorized
 	}
 	return currentUser, nil
 }

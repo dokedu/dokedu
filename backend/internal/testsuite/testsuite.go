@@ -2,8 +2,10 @@ package testsuite
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 
+	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/uptrace/bun"
@@ -29,25 +31,15 @@ func New() (*TestSuite, error) {
 	minioClient := minio.NewClient()
 	meili := meilisearch.NewMeiliClient()
 
-	// TODO: We need to refactor this into a service anyway, so there is no need to make the tests compatible with this at the moment.
-	//chatMessageChan := make(chan *db.Chat)
-	//subscriptionHandler := subscription.NewHandler(dbClient)
-	//chatMessageProcessor := chat_message_processor.NewChatMessageProcessor(dbClient, subscriptionHandler, chatMessageChan)
-	//
-	//repGen := report_generation.NewReportGenerationService(config.ReportGenerationConfig{
-	//	DB:    dbClient,
-	//	MinIO: minioClient,
-	//}, context.Background(), 3)
+	// todo: currently, the testsuite does not support testing the reportService or the chatMessage service
+	// both are pending a refactor, and will be added to the testsuite once they are refactored
+	// potentially they are even moved to their own services, where they can be tested in isolation
 
 	resolver := &graph.Resolver{
 		DB:          dbClient,
 		MinioClient: minioClient,
 		Mailer:      mailer,
 		Meili:       meili,
-		//ReportService:        repGen,
-		//ChatMessageChan:      chatMessageChan,
-		//SubscriptionHandler:  subscriptionHandler,
-		//ChatMessageProcessor: chatMessageProcessor,
 	}
 
 	s := new(suite.Suite)
@@ -99,4 +91,32 @@ func (ts *TestSuite) CtxWithEmail(email string) context.Context {
 	}
 
 	return context.WithValue(ts.Ctx(), middleware.UserCtxKey, &userContext)
+}
+
+func (ts *TestSuite) UserByEmail(email string) *db.User {
+	var user db.User
+	err := ts.DB.NewSelect().Model(&user).Where("email = ?", email).Scan(context.Background())
+	ts.NoError(err)
+	return &user
+}
+
+func (ts *TestSuite) MockAdminForOrganisation(organisationID string) *db.User {
+	user := &db.User{
+		Role:           "admin",
+		Email:          sql.NullString{Valid: true, String: gonanoid.Must(32) + "@dokedu.org"},
+		Password:       sql.NullString{Valid: true, String: gonanoid.Must(32)},
+		FirstName:      gonanoid.Must(32),
+		LastName:       "tester",
+		OrganisationID: organisationID,
+	}
+
+	_, err := ts.DB.NewInsert().Model(user).Exec(context.Background())
+	ts.NoError(err)
+
+	return user
+}
+
+func (ts *TestSuite) DeleteUserByEmail(email string) {
+	_, err := ts.DB.NewDelete().Model(&db.User{}).Where("email = ?", email).Exec(context.Background())
+	ts.NoError(err)
 }
