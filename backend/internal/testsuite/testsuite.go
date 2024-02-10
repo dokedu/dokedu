@@ -104,7 +104,6 @@ func (ts *TestSuite) MockAdminForOrganisation(organisationID string) *db.User {
 	user := &db.User{
 		Role:           "admin",
 		Email:          sql.NullString{Valid: true, String: gonanoid.Must(32) + "@dokedu.org"},
-		Password:       sql.NullString{Valid: true, String: gonanoid.Must(32)},
 		FirstName:      gonanoid.Must(32),
 		LastName:       "tester",
 		OrganisationID: organisationID,
@@ -114,6 +113,45 @@ func (ts *TestSuite) MockAdminForOrganisation(organisationID string) *db.User {
 	ts.NoError(err)
 
 	return user
+}
+
+// MockOrganisationWithOwner creates a new organisation + owner user
+func (ts *TestSuite) MockOrganisationWithOwner() (org *db.Organisation, user *db.User) {
+	name := gonanoid.Must(12)
+	err := ts.DB.RunInTx(ts.Ctx(), nil, func(ctx context.Context, tx bun.Tx) error {
+		ownerID := gonanoid.Must(32)
+		org = &db.Organisation{
+			Name:           name,
+			LegalName:      name,
+			Website:        name,
+			Phone:          name,
+			OwnerID:        ownerID,
+			AllowedDomains: []string{},
+			EnabledApps:    []string{"drive", "admin", "record", "school", "chat"},
+		}
+		_, err := tx.NewInsert().Model(org).Exec(ctx)
+		if err != nil {
+			return err
+		}
+
+		user = &db.User{
+			ID:             ownerID,
+			Role:           "owner",
+			Email:          sql.NullString{Valid: true, String: ownerID + "@dokedu.org"},
+			FirstName:      gonanoid.Must(32),
+			LastName:       "tester",
+			OrganisationID: org.ID,
+		}
+		_, err = tx.NewInsert().Model(user).Exec(ctx)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	ts.NoError(err)
+
+	return org, user
 }
 
 func (ts *TestSuite) DeleteUserByEmail(email string) {

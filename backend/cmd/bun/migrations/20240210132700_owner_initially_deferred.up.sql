@@ -1,0 +1,2 @@
+alter table organisations
+alter constraint organisations_owner_id_fkey initially deferred;
