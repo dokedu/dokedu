@@ -15,14 +15,14 @@ func (ts *TestSuite) Test_SignIn() {
 		})
 	}
 
-	// trying to login with invalid credentials should return an error
+	// trying to log in with invalid credentials should return an error
 	_, err := login("invalid", "invalid")
 	ts.ErrorIs(err, msg.ErrInvalidEmailOrPassword)
 
 	_, err = login("max@dokedu.org", "invalid")
 	ts.ErrorIs(err, msg.ErrInvalidEmailOrPassword)
 
-	// trying to login with valid credentials should return a token
+	// trying to log in with valid credentials should return a token
 	res, err := login("max@dokedu.org", "password")
 	ts.NoError(err)
 	ts.NotEmpty(res.Token)

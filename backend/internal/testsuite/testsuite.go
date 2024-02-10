@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"testing"
 
+	"github.com/joho/godotenv"
+
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -53,6 +55,10 @@ func New() (*TestSuite, error) {
 }
 
 func NewFromT(t *testing.T) *TestSuite {
+	err := godotenv.Load("../../.env")
+	if err != nil {
+		panic("Error loading .env file")
+	}
 	ts, err := New()
 	assert.NoError(t, err)
 	return ts

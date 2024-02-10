@@ -1,2 +1,2 @@
-alter table organisations
-alter constraint organisations_owner_id_fkey initially deferred;
+ALTER TABLE organisations
+    ALTER CONSTRAINT organisations_owner_id_fkey INITIALLY DEFERRED;

@@ -15,7 +15,7 @@ import (
 	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 	"github.com/uptrace/bun"
-	excelize "github.com/xuri/excelize/v2"
+	"github.com/xuri/excelize/v2"
 )
 
 // CreateSubject is the resolver for the createSubject field.
