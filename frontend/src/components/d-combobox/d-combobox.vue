@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { ComboboxAnchor, Label, ComboboxContent, ComboboxEmpty, ComboboxPortal, ComboboxInput, ComboboxItem, ComboboxRoot, ComboboxTrigger, ComboboxViewport } from 'radix-vue'
-import { ChevronDown, Check } from 'lucide-vue-next'
+import { ChevronDown, Check, X } from 'lucide-vue-next'
 import i18n from '@/i18n'
 
 export type Option = {
@@ -14,14 +14,17 @@ interface Props {
   multiple?: boolean
   searchable?: boolean
   placeholder: string
+  clearable?: boolean
 }
 
 const props = defineProps<Props>()
+const emit = defineEmits(["select"])
 const v = defineModel<string | string[]>()
 const search = defineModel<string>('search')
 const open = ref(false)
 
 const onSelect = (option: CustomEvent) => {
+  emit('select', option.detail.value.value)
   if (props.multiple) {
     if (Array.isArray(v.value)) {
       const index = v.value.findIndex((el) => el === option.detail.value.value)
@@ -58,7 +61,6 @@ const displayedLabel = computed(() => {
 
 const getDisplayValue = (value: string | string[]) => {
   const option = props.options.find((option) => option.value == value)
-  console.log('trigger', option, value, props.options)
   if (!option) return value as string
   return option.label
 }
@@ -80,12 +82,14 @@ const onSearch = (searchTerm: string) => {
   <ComboboxRoot :filter-function="filterFunction" v-model="v" class="relative" :multiple="props.multiple"
     @update:search-term="onSearch" v-model:open="open" :display-value="(val) => getDisplayValue(val)">
     <ComboboxAnchor
-      class="min-w-[160px] w-full hover:bg-stone-100 transition-all shadow-sm ease-in-out inline-flex rounded-lg border border-neutral-300 items-center justify-between rounded px-2.5 text-sm leading-none h-[36px] gap-[5px] bg-white text-grass11 outline-none">
+      class="min-w-[160px] w-full hover:bg-stone-100 transition-all shadow-sm ease-in-out inline-flex rounded-lg border border-neutral-300 items-center justify-between rounded px-2.5 text-sm leading-none min-h-[36px] gap-[5px] bg-white text-grass11 outline-none">
       <slot name="display" :displayedLabel="displayedLabel">
         <ComboboxInput @click="open = true"
           class="!bg-transparent focus:ring-0 w-full border-0 p-0 focus:outline-none h-full text-sm placeholder-neutral-700"
           :placeholder="displayedLabel" />
       </slot>
+      <X v-show="clearable && v" @click="multiple ? v = [] : v = ''"
+        class="h-5 w-5 text-neutral-700 hover:text-neutral-900 cursor-pointer" />
       <ComboboxTrigger>
         <ChevronDown class="h-4 w-4 text-grass11" />
       </ComboboxTrigger>

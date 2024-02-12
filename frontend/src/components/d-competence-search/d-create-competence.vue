@@ -9,21 +9,17 @@
     <div>
       <input
         class="block text-sm w-full rounded-md border-0 py-2.5 px-3 text-neutral-900 shadow-sm ring-1 ring-inset ring-neutral-200 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-neutral-900"
-        placeholder="Name der Kompetenz"
-        name="name"
-        v-model="name"
-        type="text"
-      />
+        placeholder="Name der Kompetenz" name="name" v-model="name" type="text" />
       <div v-show="errors.name" class="text-red-500 mt-2">{{ errors.name }}</div>
     </div>
     <div>
-      <DSelect label="Fach" v-model="parentId" v-model:search="subjectSearch" searchable :options="subjectsOptions" />
+      <DCombobox placeholder="Fach" v-model="parentId" v-model:search="subjectSearch" searchable
+        :options="subjectsOptions" />
       <div v-show="errors.parentId" class="text-red-500 mt-2">{{ errors.parentId }}</div>
     </div>
     <button
       class="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950 transition-color group relative inline-flex h-fit select-none items-center justify-center gap-2 overflow-hidden rounded-lg border shadow-sm border-neutral-200 text-neutral-700 hover:bg-neutral-100 py-2 px-3 text-sm"
-      type="submit"
-    >
+      type="submit">
       Erstellen
     </button>
   </form>
@@ -31,7 +27,7 @@
 
 <script lang="ts" setup>
 import { Form, useForm, useField } from "vee-validate"
-import DSelect from "@/components/d-select/d-select.vue"
+import DCombobox from "../d-combobox/d-combobox.vue"
 import { computed, reactive, ref } from "vue"
 import { XIcon } from "lucide-vue-next"
 import * as yup from "yup"

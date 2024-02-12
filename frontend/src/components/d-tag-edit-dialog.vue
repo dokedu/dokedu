@@ -8,7 +8,7 @@
         </div>
         <div class="relative mt-4 flex items-center gap-4">
           <div class="min-w-16 text-sm text-neutral-400">{{ $t("color") }}</div>
-          <DSelect :options="colorOptions" :label="$t('tag', 2)" multiple v-model="tagColor" class="w-full">
+          <DCombobox :options="colorOptions" :placeholder="$t('tag', 2)" v-model="tagColor" class="w-full">
             <template #display="{ displayedLabel }">
               <d-tag :color="tag?.color">
                 {{ displayedLabel }}
@@ -19,7 +19,7 @@
                 {{ option.label }}
               </d-tag>
             </template>
-          </DSelect>
+          </DCombobox>
         </div>
       </div>
       <div v-if="error" class="text-xs font-semibold text-red-600">{{ error }}</div>
@@ -34,7 +34,7 @@
 <script setup lang="ts">
 import DDialog from "./d-dialog/d-dialog.vue"
 import DButton from "./d-button/d-button.vue"
-import DSelect from "@/components/d-select/d-select.vue"
+import DCombobox from "./d-combobox/d-combobox.vue"
 import { toRef, ref, computed } from "vue"
 import DInput from "./d-input/d-input.vue"
 import DTag from "./d-tag/d-tag.vue"

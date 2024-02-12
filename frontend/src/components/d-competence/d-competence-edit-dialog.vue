@@ -1,10 +1,6 @@
 <template>
-  <dialog
-    ref="dialog"
-    class="w-full max-w-sm rounded-lg p-4 text-sm backdrop:bg-neutral-900/90"
-    style="overflow: visible"
-    @close.prevent="$emit('close')"
-  >
+  <dialog ref="dialog" class="w-full max-w-sm rounded-lg p-4 text-sm backdrop:bg-neutral-900/90" style="overflow: visible"
+    @close.prevent="$emit('close')">
     <div class="mb-4 flex items-center justify-between">
       <div class="font-medium text-strong">{{ $t("edit_competence") }}</div>
       <button @click="onClose">
@@ -18,7 +14,7 @@
       </div>
       <div class="relative mt-4 flex items-center gap-4">
         <div class="min-w-16 text-neutral-400">{{ $t("color") }}</div>
-        <DSelect :options="colorOptions" :label="$t('tag', 2)" multiple v-model="color" class="w-full">
+        <DCombobox :options="colorOptions" :placeholder="$t('tag', 2)" v-model="color" class="w-full">
           <template #display="{ displayedLabel }">
             <d-tag :color="color">
               {{ displayedLabel }}
@@ -29,7 +25,7 @@
               {{ option.label }}
             </d-tag>
           </template>
-        </DSelect>
+        </DCombobox>
       </div>
     </div>
     <div v-if="error" class="text-xs font-semibold text-red-600">{{ error }}</div>
@@ -44,7 +40,7 @@
 
 <script setup lang="ts">
 import DButton from "@/components/d-button/d-button.vue"
-import DSelect from "@/components/d-select/d-select.vue"
+import DCombobox from "../d-combobox/d-combobox.vue"
 import DTag from "@/components/d-tag/d-tag.vue"
 import { X } from "lucide-vue-next"
 import { toRef, ref, onMounted } from "vue"

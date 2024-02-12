@@ -1,11 +1,11 @@
 <template>
   <div class="w-full">
-    <DSelect :options="typeOptions" :label="$t('type')" multiple v-model="type" class="w-full">
+    <DCombobox :options="typeOptions" :placeholder="$t('type')" v-model="type" class="w-full">
       <template #display>
-        <div v-if="type">
-          <div class="mb-1 text-sm font-medium">{{ types.find((t) => t.kind === type)?.label }}</div>
+        <div v-if="type" class="py-1">
+          <div class="mb-1 text-sm font-medium">{{ types.find((t) => t.value === type)?.label }}</div>
           <div class="text-xs text-neutral-500">
-            {{ types.find((t) => t.kind === type)?.description }}
+            {{ types.find((t) => t.value === type)?.description }}
           </div>
         </div>
         <div v-else class="text-sm">
@@ -16,18 +16,18 @@
         <div>
           <div class="mb-1 font-medium">{{ option.label }}</div>
           <div class="text-xs text-neutral-500">
-            {{ types.find((t) => t.kind === option.value)?.description }}
+            {{ types.find((t) => t.value === option.value)?.description }}
           </div>
         </div>
       </template>
-    </DSelect>
+    </DCombobox>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useI18n } from "vue-i18n"
-import DSelect from "@/components/d-select/d-select.vue"
+import DCombobox from "../d-combobox/d-combobox.vue"
 import { useVModel } from "@vueuse/core"
 
 const props = defineProps<{
@@ -46,16 +46,16 @@ export type ReportType = {
 const { t } = useI18n()
 
 const types = computed(() => [
-  { label: t("entry", 2), kind: "entries", format: "pdf", description: "Alle Einträge von dem ausgewählten Schüler" },
+  { label: t("entry", 2), value: "entries", format: "pdf", description: "Alle Einträge von dem ausgewählten Schüler" },
   {
     label: t("competence", 2),
-    kind: "competences",
+    value: "competences",
     format: "pdf",
     description: "Alle Kompetenzen von dem ausgewählten Schüler"
   },
   {
     label: t("learned_competences", 2),
-    kind: "learned_competences",
+    value: "learned_competences",
     format: "pdf",
     description: "Alle gelernten Kompetenzen von dem ausgewählten Schüler"
   }
@@ -65,7 +65,7 @@ const types = computed(() => [
 const typeOptions = computed(() =>
   types.value.map((t) => ({
     label: t.label,
-    value: t.kind
+    value: t.value
   }))
 )
 </script>

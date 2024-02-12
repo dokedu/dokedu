@@ -19,13 +19,13 @@
         <div class="flex items-center gap-6">
           <p class="w-[100px] text-sm font-semibold text-neutral-600">{{ $t("domain") }}</p>
           <div class="flex-1 space-y-1">
-            <d-select :options="domainOptions" :label="$t('domain')" v-model="domain" class="flex-1" />
+            <d-combobox :options="domainOptions" :placeholder="$t('domain')" v-model="domain" class="flex-1" />
             <p class="text-sm text-red-500" v-if="errors.domain">{{ errors.domain }}</p>
           </div>
         </div>
         <div class="flex items-center gap-6">
           <p class="w-[100px] text-sm font-semibold text-neutral-600">{{ $t("user", 2) }}</p>
-          <d-select v-model:search="userSearch" :options="userOptions" searchable :label="$t('user', 2)" multiple
+          <d-combobox v-model:search="userSearch" :options="userOptions" searchable :placeholder="$t('user', 2)" multiple
             v-model="members" class="flex-1" />
         </div>
       </div>
@@ -41,7 +41,6 @@
 
 <script lang="ts" setup>
 import DSidebar from "@/components/d-sidebar/d-sidebar.vue"
-import DSelect from "@/components/d-select/d-select.vue"
 import DCombobox from "./d-combobox/d-combobox.vue"
 import DInput from "@/components/d-input/d-input.vue"
 import DButton from "@/components/d-button/d-button.vue"
@@ -91,7 +90,7 @@ const userOptions = computed(() => {
   return userData?.value?.emailAccounts?.edges?.map((edge: any) => ({
     label: edge.name,
     value: edge.name
-  }))
+  })) || []
 })
 
 watch(

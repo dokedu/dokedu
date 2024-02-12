@@ -8,7 +8,6 @@ import ReportTypeList from "@/components/d-report/d-report-type-list.vue"
 import { computed, reactive, ref } from "vue"
 import dInput from "@/components/d-input/d-input.vue"
 import { useRouter } from "vue-router/auto"
-import DSelect from "@/components/d-select/d-select.vue"
 import { createNotification } from "@/composables/useToast"
 import { array, boolean, date, object, string } from "yup"
 import { useCreateReportMutation } from "@/gql/mutations/reports/createReport"
@@ -122,8 +121,8 @@ async function createReport() {
       <div class="flex h-full">
         <div class="border-r h-full p-4 max-w-sm w-full">
           <div class="max-w-sm w-full space-y-4">
-            <DCombobox :options="studentOptions" :placeholder="$t('student')" v-model:search="studentSearch"
-              v-model="student" searchable />
+            <DCombobox v-if="studentOptions.length > 1" :options="studentOptions" :placeholder="$t('student')"
+              v-model:search="studentSearch" v-model="student" searchable />
 
             <div class="flex gap-2">
               <d-input class="w-full" type="date" name="from" v-model="from" />
@@ -142,7 +141,7 @@ async function createReport() {
                 </div>
               </div>
 
-              <DSelect searchable :options="tagOptions" :label="$t('subject')" v-model="competence"
+              <DCombobox searchable :options="tagOptions" :placeholder="$t('subject')" v-model="competence"
                 v-model:search="competenceSearch">
                 <template #display>
                   <div v-if="competence">
@@ -157,7 +156,7 @@ async function createReport() {
                     {{ option.label }}
                   </d-tag>
                 </template>
-              </DSelect>
+              </DCombobox>
             </template>
           </div>
         </div>

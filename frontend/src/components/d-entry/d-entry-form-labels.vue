@@ -23,7 +23,6 @@
 <script lang="ts" setup>
 import { computed, ref, toRef } from "vue"
 import DTag from "../d-tag/d-tag.vue"
-import DSelect from "@/components/d-select/d-select.vue"
 import { useDeleteEntryTagInputMutation } from "@/gql/mutations/entries/deleteEntryTag"
 import { useCreateEntryTagMutation } from "@/gql/mutations/entries/createEntryTag"
 import { useTagLimitedQuery } from "@/gql/queries/tags/tags"
