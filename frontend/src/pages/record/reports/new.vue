@@ -121,8 +121,14 @@ async function createReport() {
       <div class="flex h-full">
         <div class="border-r h-full p-4 max-w-sm w-full">
           <div class="max-w-sm w-full space-y-4">
-            <DCombobox v-if="studentOptions.length > 1" :options="studentOptions" :placeholder="$t('student')"
-              v-model:search="studentSearch" v-model="student" searchable />
+            <DCombobox
+              v-if="studentOptions.length > 1"
+              :options="studentOptions"
+              :placeholder="$t('student')"
+              v-model:search="studentSearch"
+              v-model="student"
+              searchable
+            />
 
             <div class="flex gap-2">
               <d-input class="w-full" type="date" name="from" v-model="from" />
@@ -141,8 +147,13 @@ async function createReport() {
                 </div>
               </div>
 
-              <DCombobox searchable :options="tagOptions" :placeholder="$t('subject')" v-model="competence"
-                v-model:search="competenceSearch">
+              <DCombobox
+                searchable
+                :options="tagOptions"
+                :placeholder="$t('subject')"
+                v-model="competence"
+                v-model:search="competenceSearch"
+              >
                 <template #display>
                   <div v-if="competence">
                     <d-tag :color="competenceData?.competences.edges?.find((el: any) => el.id === competence)?.color">

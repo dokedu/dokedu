@@ -1,8 +1,19 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { ComboboxAnchor, Label, ComboboxContent, ComboboxEmpty, ComboboxPortal, ComboboxInput, ComboboxItem, ComboboxRoot, ComboboxTrigger, ComboboxViewport } from 'radix-vue'
-import { ChevronDown, Check, X } from 'lucide-vue-next'
-import i18n from '@/i18n'
+import { computed, ref } from "vue"
+import {
+  ComboboxAnchor,
+  Label,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxPortal,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxRoot,
+  ComboboxTrigger,
+  ComboboxViewport
+} from "radix-vue"
+import { ChevronDown, Check, X } from "lucide-vue-next"
+import i18n from "@/i18n"
 
 export type Option = {
   label: string
@@ -20,11 +31,11 @@ interface Props {
 const props = defineProps<Props>()
 const emit = defineEmits(["select"])
 const v = defineModel<string | string[]>()
-const search = defineModel<string>('search')
+const search = defineModel<string>("search")
 const open = ref(false)
 
 const onSelect = (option: CustomEvent) => {
-  emit('select', option.detail.value.value)
+  emit("select", option.detail.value.value)
   if (props.multiple) {
     if (Array.isArray(v.value)) {
       const index = v.value.findIndex((el) => el === option.detail.value.value)
@@ -44,7 +55,7 @@ const onSelect = (option: CustomEvent) => {
 }
 
 const filterFunction = (list: any[], search: string) => {
-  if (props.searchable) return list;
+  if (props.searchable) return list
   return list.filter((el) => el.label.toLowerCase().includes(search.toLowerCase()))
 }
 
@@ -53,7 +64,7 @@ const displayedLabel = computed(() => {
 
   if (props.multiple && Array.isArray(v.value)) {
     if (v.value.length === 0) return props.placeholder
-    return v.value.length + ' ' + i18n.global.t('selected')
+    return v.value.length + " " + i18n.global.t("selected")
   }
 
   return getDisplayValue(v.value)
@@ -75,45 +86,63 @@ const onSearch = (searchTerm: string) => {
 
   search.value = searchTerm
 }
-
 </script>
 
 <template>
-  <ComboboxRoot :filter-function="filterFunction" v-model="v" class="relative" :multiple="props.multiple"
-    @update:search-term="onSearch" v-model:open="open" :display-value="(val) => getDisplayValue(val)">
+  <ComboboxRoot
+    :filter-function="filterFunction"
+    v-model="v"
+    class="relative"
+    :multiple="props.multiple"
+    @update:search-term="onSearch"
+    v-model:open="open"
+    :display-value="(val) => getDisplayValue(val)"
+  >
     <ComboboxAnchor
-      class="min-w-[160px] w-full hover:bg-stone-100 transition-all shadow-sm ease-in-out inline-flex rounded-lg border border-neutral-300 items-center justify-between rounded px-2.5 text-sm leading-none min-h-[36px] gap-[5px] bg-white text-grass11 outline-none">
+      class="min-w-[160px] w-full hover:bg-stone-100 transition-all shadow-sm ease-in-out inline-flex rounded-lg border border-neutral-300 items-center justify-between rounded px-2.5 text-sm leading-none min-h-[36px] gap-[5px] bg-white text-grass11 outline-none"
+    >
       <slot name="display" :displayedLabel="displayedLabel">
-        <ComboboxInput @click="open = true"
+        <ComboboxInput
+          @click="open = true"
           class="!bg-transparent focus:ring-0 w-full border-0 p-0 focus:outline-none h-full text-sm placeholder-neutral-700"
-          :placeholder="displayedLabel" />
+          :placeholder="displayedLabel"
+        />
       </slot>
-      <X v-show="clearable && v" @click="multiple ? v = [] : v = ''"
-        class="h-5 w-5 text-neutral-700 hover:text-neutral-900 cursor-pointer" />
+      <X
+        v-show="clearable && v"
+        @click="multiple ? (v = []) : (v = '')"
+        class="h-5 w-5 text-neutral-700 hover:text-neutral-900 cursor-pointer"
+      />
       <ComboboxTrigger>
         <ChevronDown class="h-4 w-4 text-grass11" />
       </ComboboxTrigger>
     </ComboboxAnchor>
 
     <ComboboxContent
-      class="combobox-content absolute z-10 w-full mt-2 min-w-[160px] bg-white overflow-hidden rounded border border-stone-300 rounded-md shadow">
+      class="combobox-content absolute z-10 w-full mt-2 min-w-[160px] bg-white overflow-hidden rounded border border-stone-300 rounded-md shadow"
+    >
       <ComboboxViewport class="p-[5px] max-h-[200px] overflow-y-auto">
         <ComboboxEmpty class="text-mauve8 text-xs font-medium text-center py-2">{{ $t("no_results") }}</ComboboxEmpty>
-        <ComboboxItem v-for="option in props.options" :key="option.value" @select.prevent="onSelect"
+        <ComboboxItem
+          v-for="option in props.options"
+          :key="option.value"
+          @select.prevent="onSelect"
           class="rounded-md flex max-w-full justify-between items-center rounded-md px-1.5 py-1 relative select-none data-[disabled]:text-mauve8 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-stone-100 hover:bg-stone-100"
-          :value="option">
+          :value="option"
+        >
           <slot v-bind="{ option }">
             <span class="px-0.5 py-0.5 text-sm text-default truncate">
               {{ option.label }}
             </span>
           </slot>
-          <div v-if="multiple ? (v as string[]).find(e => e === option.value) : (v as string) === option.value"
-            class="w-[25px] shrink-0 inline-flex items-center justify-center">
+          <div
+            v-if="multiple ? (v as string[]).find((e) => e === option.value) : (v as string) === option.value"
+            class="w-[25px] shrink-0 inline-flex items-center justify-center"
+          >
             <Check class="h-4 w-4" />
           </div>
         </ComboboxItem>
       </ComboboxViewport>
     </ComboboxContent>
-
   </ComboboxRoot>
 </template>

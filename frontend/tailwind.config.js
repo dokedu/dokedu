@@ -51,8 +51,7 @@ export default {
         default: colors.neutral[200],
         subtle: colors.neutral[100],
         intense: colors.neutral[900]
-      },
-      
+      }
     }
   },
   plugins: [

@@ -4,8 +4,12 @@
       <EntryFormHeader @archive="archive" />
       <div class="mx-auto h-full w-full max-w-4xl overflow-scroll pb-8">
         <div>
-          <textarea ref="textarea" v-model="body" :placeholder="$t('entry_create_placeholder')"
-            class="block w-full resize-none border-none border-transparent p-8 text-base text-neutral-900 placeholder:text-neutral-400 focus:ring-0" />
+          <textarea
+            ref="textarea"
+            v-model="body"
+            :placeholder="$t('entry_create_placeholder')"
+            class="block w-full resize-none border-none border-transparent p-8 text-base text-neutral-900 placeholder:text-neutral-400 focus:ring-0"
+          />
         </div>
         <div class="flex flex-col gap-4">
           <EntryFormCompetences :entry="entry" />
@@ -16,11 +20,17 @@
       </div>
     </div>
     <div
-      class="flex min-h-full w-[400px] min-w-[400px] flex-col gap-4 overflow-auto border-l border-neutral-100 px-8 py-4">
+      class="flex min-h-full w-[400px] min-w-[400px] flex-col gap-4 overflow-auto border-l border-neutral-100 px-8 py-4"
+    >
       <div class="flex items-center gap-4">
         <label for="date" class="min-w-[64px] text-sm text-neutral-500">{{ $t("date") }}</label>
-        <input v-model="formattedDate" type="date" name="date" id="date"
-          class="rounded-lg border border-neutral-200 shadow-sm focus:!outline-none w-full text-sm transition-all hover:bg-neutral-100 focus:bg-neutral-100 focus:ring-2 focus:ring-neutral-950" />
+        <input
+          v-model="formattedDate"
+          type="date"
+          name="date"
+          id="date"
+          class="rounded-lg border border-neutral-200 shadow-sm focus:!outline-none w-full text-sm transition-all hover:bg-neutral-100 focus:bg-neutral-100 focus:ring-2 focus:ring-neutral-950"
+        />
       </div>
       <EntryFormProjects :entry="entry" />
       <EntryFormLabels :entry="entry" />

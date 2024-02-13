@@ -3,8 +3,7 @@
     <label for="date" class="mt-2 min-w-[64px] text-neutral-500">{{ $t("project", 2) }}</label>
 
     <div class="flex grow inline-block flex-col gap-4">
-      <DComboBox :placeholder="$t('project', 2)" :options="eventOptions" multiple v-model="selected">
-      </DComboBox>
+      <DComboBox :placeholder="$t('project', 2)" :options="eventOptions" multiple v-model="selected"> </DComboBox>
       <div v-if="entry.events && entry.events?.length > 0" class="gap-1.5 flex flex-wrap">
         <DTag v-for="event in entry.events" color="gray" removable @remove="removeEvent(event)">
           {{ event.title }}
@@ -17,7 +16,7 @@
 <script lang="ts" setup>
 import { computed, ref, toRef } from "vue"
 import DTag from "../d-tag/d-tag.vue"
-import DComboBox, { type Option } from '@/components/d-combobox/d-combobox.vue'
+import DComboBox, { type Option } from "@/components/d-combobox/d-combobox.vue"
 import { useDeleteEntryEventInputMutation } from "@/gql/mutations/entries/deleteEntryEvent"
 import { useCreateEntryEventMutation } from "@/gql/mutations/entries/createEntryEvent"
 import { useEventsQuery } from "@/gql/queries/events/events"

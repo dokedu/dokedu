@@ -25,8 +25,15 @@
         </div>
         <div class="flex items-center gap-6">
           <p class="w-[100px] text-sm font-semibold text-neutral-600">{{ $t("user", 2) }}</p>
-          <d-combobox v-model:search="userSearch" :options="userOptions" searchable :placeholder="$t('user', 2)" multiple
-            v-model="members" class="flex-1" />
+          <d-combobox
+            v-model:search="userSearch"
+            :options="userOptions"
+            searchable
+            :placeholder="$t('user', 2)"
+            multiple
+            v-model="members"
+            class="flex-1"
+          />
         </div>
       </div>
     </template>
@@ -87,10 +94,12 @@ const userSearch = ref("")
 const { data: userData } = useGroupUsersQuery({})
 
 const userOptions = computed(() => {
-  return userData?.value?.emailAccounts?.edges?.map((edge: any) => ({
-    label: edge.name,
-    value: edge.name
-  })) || []
+  return (
+    userData?.value?.emailAccounts?.edges?.map((edge: any) => ({
+      label: edge.name,
+      value: edge.name
+    })) || []
+  )
 })
 
 watch(
