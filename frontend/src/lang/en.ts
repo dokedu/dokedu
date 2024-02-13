@@ -274,5 +274,8 @@ export const en = {
   missed_hours_excused: "Missed hours unexcused",
 
   // Mail
-  inbox: "Inbox"
+  inbox: "Inbox",
+
+  // Login
+  invalid_credentials: "Invalid email or password",
 }

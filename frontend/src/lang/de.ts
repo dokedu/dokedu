@@ -273,5 +273,8 @@ export const de = {
   missed_hours_excused: "Fehlstunden unentschuldigt",
 
   // Mail
-  inbox: "Posteingang"
+  inbox: "Posteingang",
+
+  // Login
+  invalid_credentials: "Ungültige E-Mail oder ungültiges Passwort"
 }
