@@ -1,7 +1,7 @@
 <template>
   <d-auth-container :title="$t('dokedu_welcome')" :subtitle="$t('login_info')">
     <template #banner>
-      <d-banner v-if="error" type="error" :title="error.message"></d-banner>
+      <d-banner v-if="authError" type="error" :title="$t('invalid_credentials')"></d-banner>
     </template>
     <template #form>
       <form @submit.prevent="onSubmit" class="flex flex-col gap-5">
@@ -64,7 +64,7 @@ const { signIn } = useAuth()
 
 const email = ref("")
 const password = ref("")
-const error = ref<Error | null>(null)
+const authError = ref<Error | null>(null)
 
 async function onSubmit() {
   const { error } = await signIn({
@@ -72,7 +72,7 @@ async function onSubmit() {
     password: password.value
   })
   if (error) {
-    return error
+    authError.value = error
   }
 }
 </script>
