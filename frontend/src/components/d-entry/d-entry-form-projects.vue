@@ -40,7 +40,6 @@ const selected = computed({
     return entry.value.events?.map((el: any) => el.id) || []
   },
   set: async (value: string[]) => {
-    console.log(value)
     const existing = entry.value.events?.map((el: any) => el.id) || []
     const removables = existing.filter((el) => !value.includes(el))
     const creatables = value.filter((el) => !existing.includes(el))
