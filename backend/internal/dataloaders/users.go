@@ -8,21 +8,15 @@ import (
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 
 	"github.com/graph-gophers/dataloader"
-	"github.com/uptrace/bun"
 )
 
 func (u *Reader) GetUser(ctx context.Context, keys dataloader.Keys) []*dataloader.Result {
-	iDs := make([]string, len(keys))
+	ids := make([]string, len(keys))
 	for ix, key := range keys {
-		iDs[ix] = key.String()
+		ids[ix] = key.String()
 	}
 
-	var users []db.User
-	err := u.conn.NewSelect().
-		Model(&users).
-		Where("id IN (?)", bun.In(iDs)).
-		Scan(ctx)
-
+	users, err := u.conn.UsersByIds(ctx, ids)
 	if err != nil {
 		log.Fatal(err)
 	}

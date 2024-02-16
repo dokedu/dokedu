@@ -4,24 +4,24 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/dokedu/dokedu/backend/internal/database"
 	"io"
 	"log"
 	"os"
 
-	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/subscription"
 
 	"github.com/sashabaranov/go-openai"
-	"github.com/uptrace/bun"
 )
 
 type ChatMessageProcessor struct {
-	DB                  *bun.DB
+	DB                  *database.DB
 	ChatChannel         chan *db.Chat
 	subscriptionHandler *subscription.Handler
 }
 
-func NewChatMessageProcessor(db *bun.DB, subscriptionHandler *subscription.Handler, chatChan chan *db.Chat) *ChatMessageProcessor {
+func NewChatMessageProcessor(db *database.DB, subscriptionHandler *subscription.Handler, chatChan chan *db.Chat) *ChatMessageProcessor {
 	return &ChatMessageProcessor{
 		DB:                  db,
 		subscriptionHandler: subscriptionHandler,
@@ -32,38 +32,31 @@ func NewChatMessageProcessor(db *bun.DB, subscriptionHandler *subscription.Handl
 func (a *ChatMessageProcessor) NewMessage(msg db.ChatMessage) error {
 	ctx := context.Background()
 
-	var chat db.Chat
-	err := a.DB.NewSelect().Model(&chat).Where("id = ?", msg.ChatID).Scan(ctx)
+	chat, err := a.DB.ChatById(ctx, msg.ChatID)
 	if err != nil {
 		return err
 	}
 
-	var botUser db.User
-	err = a.DB.NewSelect().
-		Model(&botUser).
-		Join("JOIN chat_users ON chat_users.user_id = \"user\".id").
-		Where("chat_users.chat_id = ?", chat.ID).
-		Where("role = ?", db.UserRoleBot).
-		Where("\"user\".organisation_id = ?", chat.OrganisationID).
-		Limit(1).
-		Scan(ctx)
+	botUser, err := a.DB.BotUserByChatId(ctx, db.BotUserByChatIdParams{
+		ID:             chat.ID,
+		OrganisationID: chat.OrganisationID,
+	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return errors.New("bot user not found")
 	}
 	if err != nil {
 		return err
 	}
-	var chatMessage db.ChatMessage
-	chatMessage.UserID = botUser.ID
-	chatMessage.ChatID = chat.ID
-	chatMessage.OrganisationID = chat.OrganisationID
-	chatMessage.Message = ""
 
-	err = a.DB.NewInsert().Model(&chatMessage).Returning("*").Scan(ctx)
+	chatMessage, err := a.DB.CreateChatMessage(ctx, db.CreateChatMessageParams{
+		ChatID:         chat.ID,
+		UserID:         botUser.ID,
+		Message:        "",
+		OrganisationID: chat.OrganisationID,
+	})
 	if err != nil {
 		return err
 	}
-
 	_ = a.subscriptionHandler.PublishMessage(&chatMessage)
 
 	messages, _ := a.GenerateMessages(msg)
@@ -110,14 +103,15 @@ func (a *ChatMessageProcessor) NewMessage(msg db.ChatMessage) error {
 }
 
 func (a *ChatMessageProcessor) updateMessage(ctx context.Context, msg db.ChatMessage, response openai.ChatCompletionStreamResponse) error {
-	var message db.ChatMessage
-	err := a.DB.NewSelect().Model(&message).Where("id = ?", msg.ID).Scan(ctx)
+	message, err := a.DB.ChatMessageById(ctx, msg.ID)
 	if err != nil {
 		return err
 	}
 
-	message.Message = message.Message + response.Choices[0].Delta.Content
-	err = a.DB.NewUpdate().Model(&message).Where("id = ?", message.ID).Returning("*").Scan(ctx)
+	message, err = a.DB.UpdateChatMessageMessageWithoutOrg(ctx, db.UpdateChatMessageMessageWithoutOrgParams{
+		ID:      message.ID,
+		Message: message.Message + response.Choices[0].Delta.Content,
+	})
 	if err != nil {
 		return err
 	}
@@ -161,25 +155,12 @@ func chatCompletionRequest(messages []openai.ChatCompletionMessage, stream bool)
 func (a *ChatMessageProcessor) GenerateMessages(message db.ChatMessage) ([]openai.ChatCompletionMessage, error) {
 	var messages []openai.ChatCompletionMessage
 
-	var msgHistory []db.ChatMessage
-	err := a.DB.NewSelect().Model(&msgHistory).Where("chat_id = ?", message.ChatID).Scan(context.Background())
+	msgHistory, err := a.DB.ChatMessagesByChatIdWithoutOrg(context.Background(), message.ChatID)
 	if err != nil {
 		return messages, nil
 	}
 
-	var chatUsers []db.ChatUser
-	err = a.DB.NewSelect().Model(&chatUsers).Where("chat_id = ?", message.ChatID).Scan(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	ids := make([]string, len(chatUsers))
-	for i, chatUser := range chatUsers {
-		ids[i] = chatUser.UserID
-	}
-
-	var users []db.User
-	err = a.DB.NewSelect().Model(&users).Where("id IN (?)", bun.In(ids)).Scan(context.Background())
+	users, err := a.DB.UsersInChat(context.Background(), message.ChatID)
 	if err != nil {
 		return nil, err
 	}

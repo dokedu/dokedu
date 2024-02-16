@@ -2,15 +2,15 @@ package main
 
 import (
 	"context"
+	"github.com/dokedu/dokedu/backend/internal/database"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/dokedu/dokedu/backend/internal/database"
 	"github.com/dokedu/dokedu/backend/internal/dataloaders"
-	"github.com/dokedu/dokedu/backend/internal/db"
 	"github.com/dokedu/dokedu/backend/internal/graph"
 	"github.com/dokedu/dokedu/backend/internal/mail"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
@@ -45,12 +45,14 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	mailer := mail.NewClient()
 	dbClient := database.NewClient()
+	defer dbClient.DB.Close()
+
+	mailer := mail.NewClient()
 	minioClient := minio.NewClient()
 	meili := meilisearch.NewMeiliClient()
 
-	// TODO: REFACTOR THIS INTO A SERVICE
+	// TODO: refactor this into a service
 	chatMessageChan := make(chan *db.Chat)
 	subscriptionHandler := subscription.NewHandler(dbClient)
 

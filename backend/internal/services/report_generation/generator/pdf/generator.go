@@ -6,11 +6,11 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"html/template"
 	"os"
 	"path/filepath"
 
-	"github.com/dokedu/dokedu/backend/internal/db"
 	"github.com/dokedu/dokedu/backend/internal/services/report_generation/config"
 
 	"github.com/go-rod/rod"

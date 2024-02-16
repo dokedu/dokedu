@@ -3,13 +3,12 @@ package meilisearch
 import (
 	"context"
 	"database/sql"
+	"github.com/dokedu/dokedu/backend/internal/database"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"os"
 	"slices"
 
-	"github.com/dokedu/dokedu/backend/internal/db"
-
 	"github.com/meilisearch/meilisearch-go"
-	"github.com/uptrace/bun"
 )
 
 type MeiliCompetence struct {
@@ -17,7 +16,7 @@ type MeiliCompetence struct {
 	Name           string            `json:"name"`
 	CompetenceID   sql.NullString    `json:"competence_id"`
 	CompetenceType db.CompetenceType `json:"competence_type"`
-	Grades         []int             `json:"grades"`
+	Grades         []int32           `json:"grades"`
 	Parents        []string          `json:"parents"`
 	ParentNames    []string          `json:"parent_names"`
 }
@@ -42,9 +41,8 @@ func NewMeiliClient() *MeiliClient {
 	return &MeiliClient{Client: client}
 }
 
-func (m MeiliClient) GenerateCompetenceIndex(ctx context.Context, conn *bun.DB) error {
-	var organisations []db.Organisation
-	err := conn.NewSelect().Model(&organisations).Scan(ctx)
+func (m MeiliClient) GenerateCompetenceIndex(ctx context.Context, conn *database.DB) error {
+	organisations, err := conn.OrganisationList(ctx)
 	if err != nil {
 		return err
 	}
@@ -52,8 +50,7 @@ func (m MeiliClient) GenerateCompetenceIndex(ctx context.Context, conn *bun.DB) 
 	for _, organisation := range organisations {
 		var meiliCompetences []MeiliCompetence
 
-		var competences []db.Competence
-		err := conn.NewSelect().Model(&competences).Where("organisation_id = ?", organisation.ID).Scan(ctx)
+		competences, err := conn.CompetenceList(ctx, organisation.ID)
 		if err != nil {
 			return err
 		}
@@ -73,7 +70,7 @@ func (m MeiliClient) GenerateCompetenceIndex(ctx context.Context, conn *bun.DB) 
 			meiliCompetences = append(meiliCompetences, MeiliCompetence{
 				ID:             competence.ID,
 				Name:           competence.Name,
-				CompetenceID:   competence.CompetenceID,
+				CompetenceID:   sql.NullString(competence.CompetenceID),
 				CompetenceType: competence.CompetenceType,
 				Grades:         competence.Grades,
 				Parents:        parentIds,

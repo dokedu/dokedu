@@ -4,12 +4,12 @@ import (
 	"container/list"
 	"context"
 	"fmt"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"log/slog"
 	"net/http"
 	"os"
 	"sync"
 
-	"github.com/dokedu/dokedu/backend/internal/db"
 	"github.com/dokedu/dokedu/backend/internal/services/report_generation/config"
 	"github.com/dokedu/dokedu/backend/internal/services/report_generation/generator/pdf"
 )
@@ -72,13 +72,17 @@ func (s *ReportGenerationService) dequeue() string {
 }
 
 // Here, the report is processed and stuff is generated
-func (s *ReportGenerationService) process(request string) {
+func (s *ReportGenerationService) process(reportId string) {
+	ctx := context.Background()
+
 	defer s.replenish()
-	fmt.Println("Processing request: ", request)
+	fmt.Println("Processing request: ", reportId)
 
 	// Fetch the report from the database
-	var report db.Report
-	err := s.cfg.DB.NewSelect().Model(&report).Where("id = ?", request).Scan(context.Background())
+	//var report db.Report
+	//err := s.cfg.DB.NewSelect().Model(&report).Where("id = ?", reportId).Scan(context.Background())
+	report, err := s.cfg.DB.ReportById(ctx, reportId)
+
 	if err != nil {
 		fmt.Println("Error fetching report: ", err)
 		return
@@ -192,18 +196,17 @@ func (s *ReportGenerationService) scheduleUnprocessedReports() error {
 
 // unprocessedReports fetches the reports that are not processed yet
 func (s *ReportGenerationService) unprocessedReports() ([]db.Report, error) {
-	var reports []db.Report
-	err := s.cfg.DB.NewSelect().Model(&reports).Where("status = ?", db.ReportStatusPending).WhereOr("status = ? AND created_at <= now() - INTERVAL '5 minutes'", db.ReportStatusProcessing).Scan(context.Background())
+	reports, err := s.cfg.DB.ReportsByStatus(context.Background(), db.ReportStatusPending)
 	if err != nil {
 		return nil, err
 	}
-
-	// TODO: Also fetch the reports that are processing but have been stuck for a long time. This is to handle the case where the process crashes
 
 	return reports, nil
 }
 
 func (s *ReportGenerationService) updateReportStatus(reportId string, status db.ReportStatus) error {
-	_, err := s.cfg.DB.NewUpdate().Model(&db.Report{}).Set("status = ?", status).Where("id = ?", reportId).Exec(context.Background())
-	return err
+	return s.cfg.DB.UpdateReportStatus(context.Background(), db.UpdateReportStatusParams{
+		Status: status,
+		ID:     reportId,
+	})
 }

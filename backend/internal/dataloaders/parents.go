@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/dokedu/dokedu/backend/internal/db"
@@ -23,7 +22,6 @@ type CompetenceParents struct {
 	Parents      json.RawMessage `bun:",type:jsonb"`
 }
 
-// TODO: refactor this to optimise code readability and maintainability
 func (u *Reader) GetCompetenceParents(ctx context.Context, keys dataloader.Keys) []*dataloader.Result {
 	// read all requested competences in a single query
 	competenceIDs := make([]string, len(keys))
@@ -31,16 +29,9 @@ func (u *Reader) GetCompetenceParents(ctx context.Context, keys dataloader.Keys)
 		competenceIDs[ix] = key.String()
 	}
 
-	// id, id, id (each id joined with ", "
-	idStr := strings.Join(competenceIDs, "', '")
-
-	// TODO: use a stored procedure instead of raw query and use bun to call it
-	query := "SELECT * FROM get_competences_parents('" + idStr + "');"
-
-	var parents []CompetenceParents
-	err := u.conn.NewRaw(query).Scan(ctx, &parents)
+	parents, err := u.conn.CompetenceParentsList(ctx, competenceIDs)
 	if err != nil {
-		log.Fatal(err)
+		return nil
 	}
 
 	// return Competence records into a map by ID

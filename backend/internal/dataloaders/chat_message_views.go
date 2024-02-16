@@ -2,13 +2,12 @@ package dataloaders
 
 import (
 	"context"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 
-	"github.com/dokedu/dokedu/backend/internal/db"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 
 	"github.com/graph-gophers/dataloader"
 	"github.com/labstack/gommon/log"
-	"github.com/uptrace/bun"
 )
 
 func (u *Reader) getChatMessageView(ctx context.Context, keys dataloader.Keys) []*dataloader.Result {
@@ -22,17 +21,17 @@ func (u *Reader) getChatMessageView(ctx context.Context, keys dataloader.Keys) [
 		IDs[ix] = key.String()
 	}
 
-	var chatMessageViews []db.ChatMessageView
-	err = u.conn.NewSelect().
-		Model(&chatMessageViews).
-		Where("chat_message_id IN (?)", bun.In(IDs)).
-		Where("user_id = ?", currentUser.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	chatMessageViews, err := u.conn.ChatMessageViewsByChatMessageAndUser(ctx, db.ChatMessageViewsByChatMessageAndUserParams{
+		ChatMessageIds: IDs,
+		UserID:         currentUser.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil
+	}
 
 	// return users in the same order requested
 	output := make([]*dataloader.Result, len(keys))
-
 	for ix := range keys {
 		output[ix] = &dataloader.Result{Data: nil}
 	}

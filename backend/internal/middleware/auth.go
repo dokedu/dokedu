@@ -4,69 +4,30 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/dokedu/dokedu/backend/internal/database"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"log/slog"
 	"time"
 
-	"github.com/dokedu/dokedu/backend/internal/db"
 	"github.com/dokedu/dokedu/backend/internal/msg"
 
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/labstack/echo/v4"
-	"github.com/uptrace/bun"
 )
 
 type contextKey string
 
 var UserCtxKey = contextKey("user")
 
-func Auth(bun *bun.DB) echo.MiddlewareFunc {
+func Auth(conn *database.DB) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			header := c.Request().Header.Get("Authorization")
+			token := c.Request().Header.Get("Authorization")
+			reqContext := c.Request().Context()
 
-			// Allow unauthenticated users in
-			if header == "" {
+			userContext := AuthMiddlewareFunction(reqContext, conn, token)
+			if userContext == nil {
 				return next(c)
-			}
-
-			// Check if session token is valid
-			var session db.Session
-			err := bun.NewSelect().Model(&session).Where("token = ?", header).Scan(c.Request().Context())
-			if errors.Is(err, sql.ErrNoRows) {
-				return next(c)
-			}
-			if err != nil {
-				return next(c)
-			}
-
-			// Check if created at is no longer than 12 hours ago
-			if session.CreatedAt.Add(12 * time.Hour).Before(time.Now()) {
-				// Delete the session
-				_, err = bun.NewUpdate().Model(&session).Set("deleted_at = ?", time.Now()).Where("id = ?", session.ID).Exec(c.Request().Context())
-				if err != nil {
-					slog.Error("unable to delete session for the database", "err", err)
-				}
-
-				return next(c)
-			}
-
-			// Get the user
-			var user db.User
-			err = bun.NewSelect().Model(&user).Where("id = ?", session.UserID).Scan(c.Request().Context())
-			if errors.Is(err, sql.ErrNoRows) {
-				// Remove all sessions for this user if the user is deleted
-				var sessions []db.Session
-				_, err = bun.NewUpdate().Model(&sessions).Set("deleted_at = ?", time.Now()).Where("user_id = ?", session.UserID).Exec(c.Request().Context())
-				if err != nil {
-					slog.Error("unable to update sessions for deleted user", "err", err, "user_id", session.UserID)
-				}
-
-				return next(c)
-			}
-
-			userContext := UserContext{
-				user,
-				session.Token,
 			}
 
 			ctx := context.WithValue(c.Request().Context(), UserCtxKey, &userContext)
@@ -77,56 +38,57 @@ func Auth(bun *bun.DB) echo.MiddlewareFunc {
 	}
 }
 
-func WebsocketInitFunc(bun *bun.DB) transport.WebsocketInitFunc {
+func WebsocketInitFunc(conn *database.DB) transport.WebsocketInitFunc {
 	return func(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
 		// read the authorization header from the init payload
-		authorization := initPayload.Authorization()
+		token := initPayload.Authorization()
 
-		// if there is no authorization header, we can't authenticate the user
-		if authorization == "" {
+		userContext := AuthMiddlewareFunction(ctx, conn, token)
+		if userContext == nil {
 			return ctx, nil, nil
-		}
-
-		// check if the token is valid
-		var session db.Session
-		err := bun.NewSelect().Model(&session).Where("token = ?", authorization).Scan(ctx)
-		if errors.Is(err, sql.ErrNoRows) {
-			return ctx, nil, nil
-		}
-
-		// check if the session is expired
-		if session.CreatedAt.Add(12 * time.Hour).Before(time.Now()) {
-			// Delete the session
-			_, err = bun.NewUpdate().Model(&session).Set("deleted_at = ?", time.Now()).Where("id = ?", session.ID).Exec(ctx)
-			if err != nil {
-				slog.Error("unable to delete session for the database", "err", err)
-			}
-
-			return ctx, nil, nil
-		}
-
-		// Get the user
-		var user db.User
-		err = bun.NewSelect().Model(&user).Where("id = ?", session.UserID).Scan(ctx)
-		if errors.Is(err, sql.ErrNoRows) {
-			// Remove all sessions for this user if the user is deleted
-			var sessions []db.Session
-			_, err = bun.NewUpdate().Model(&sessions).Set("deleted_at = ?", time.Now()).Where("user_id = ?", session.UserID).Exec(ctx)
-			if err != nil {
-				slog.Error("unable to update sessions for deleted user", "err", err, "user_id", session.UserID)
-			}
-
-			return ctx, nil, nil
-		}
-
-		userContext := UserContext{
-			user,
-			session.Token,
 		}
 
 		ctx = context.WithValue(ctx, UserCtxKey, &userContext)
 
 		return ctx, &initPayload, nil
+	}
+}
+
+func AuthMiddlewareFunction(ctx context.Context, conn *database.DB, token string) *UserContext {
+	// Allow unauthenticated users in
+	if token == "" {
+		return nil
+	}
+
+	session, err := conn.SessionByToken(ctx, token)
+	if err != nil {
+		return nil
+	}
+
+	// Check if created at is no longer than 12 hours ago
+	if session.CreatedAt.Add(12 * time.Hour).Before(time.Now()) {
+		err := conn.DeleteExpiredSession(ctx)
+		if err != nil {
+			slog.Error("unable to delete session for the database", "err", err)
+		}
+
+		return nil
+	}
+
+	user, err := conn.UserById(ctx, session.UserID)
+	if errors.Is(err, sql.ErrNoRows) {
+		// Remove all sessions for this user if the user is deleted
+		err := conn.DeleteSessionsByUserID(ctx, session.UserID)
+		if err != nil {
+			slog.Error("unable to update sessions for deleted user", "err", err, "user_id", session.UserID)
+		}
+
+		return nil
+	}
+
+	return &UserContext{
+		user,
+		session.Token,
 	}
 }
 

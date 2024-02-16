@@ -2,20 +2,18 @@ package subscription
 
 import (
 	"context"
+	"github.com/dokedu/dokedu/backend/internal/database"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"sync"
-
-	"github.com/dokedu/dokedu/backend/internal/db"
-
-	"github.com/uptrace/bun"
 )
 
 type Handler struct {
 	mutex       sync.Mutex
-	db          *bun.DB
+	db          *database.DB
 	UserChannel map[string][]chan *db.ChatMessage
 }
 
-func NewHandler(database *bun.DB) *Handler {
+func NewHandler(database *database.DB) *Handler {
 	return &Handler{
 		UserChannel: make(map[string][]chan *db.ChatMessage),
 		db:          database,
@@ -51,12 +49,11 @@ func (h *Handler) RemoveChatChannel(userId string, userChannel chan *db.ChatMess
 
 func (h *Handler) PublishMessage(message *db.ChatMessage) error {
 	ctx := context.Background()
-	var chatUsers []*db.ChatUser
 
-	_ = h.db.NewSelect().
-		Model(&chatUsers).
-		Where("chat_id = ?", message.ChatID).
-		Scan(ctx)
+	chatUsers, err := h.db.ChatUserByChatId(ctx, message.ChatID)
+	if err != nil {
+		return err
+	}
 
 	for _, chatUser := range chatUsers {
 		h.PublishMessageToUser(message, chatUser.UserID)

@@ -2,10 +2,10 @@ package dataloaders
 
 import (
 	"context"
+	"github.com/dokedu/dokedu/backend/internal/database"
 
 	"github.com/graph-gophers/dataloader"
 	"github.com/labstack/echo/v4"
-	"github.com/uptrace/bun"
 )
 
 type ctxKey string
@@ -15,7 +15,7 @@ const (
 )
 
 type Reader struct {
-	conn *bun.DB
+	conn *database.DB
 }
 
 // Loaders wrap your data loaders to inject via middleware
@@ -26,7 +26,7 @@ type Loaders struct {
 }
 
 // NewLoaders instantiates data loaders for the middleware
-func NewLoaders(conn *bun.DB) *Loaders {
+func NewLoaders(conn *database.DB) *Loaders {
 	// define the data loader
 	reader := &Reader{conn: conn}
 	loaders := &Loaders{
