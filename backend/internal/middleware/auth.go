@@ -75,7 +75,7 @@ func AuthMiddlewareFunction(ctx context.Context, conn *database.DB, token string
 		return nil
 	}
 
-	user, err := conn.UserById(ctx, session.UserID)
+	user, err := conn.UserById_NORG(ctx, session.UserID)
 	if errors.Is(err, sql.ErrNoRows) {
 		// Remove all sessions for this user if the user is deleted
 		err := conn.DeleteSessionsByUserID(ctx, session.UserID)

@@ -32,7 +32,7 @@ func NewChatMessageProcessor(db *database.DB, subscriptionHandler *subscription.
 func (a *ChatMessageProcessor) NewMessage(msg db.ChatMessage) error {
 	ctx := context.Background()
 
-	chat, err := a.DB.ChatById(ctx, msg.ChatID)
+	chat, err := a.DB.ChatByIdWithoutOrg(ctx, msg.ChatID)
 	if err != nil {
 		return err
 	}

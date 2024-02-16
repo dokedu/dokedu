@@ -528,7 +528,7 @@ type Chat struct {
 	UpdatedAt      pgtype.Timestamptz `db:"updated_at"`
 	CreatedAt      time.Time          `db:"created_at"`
 	DeletedAt      pgtype.Timestamptz `db:"deleted_at"`
-	Type           pgtype.Text        `db:"type"`
+	Type           NullChatType       `db:"type"`
 }
 
 type ChatMessage struct {

@@ -16,7 +16,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -59,13 +59,13 @@ type ResolverRoot interface {
 	Organisation() OrganisationResolver
 	Query() QueryResolver
 	Report() ReportResolver
+	SchoolYear() SchoolYearResolver
 	Subscription() SubscriptionResolver
 	Tag() TagResolver
 	User() UserResolver
 	UserAttendance() UserAttendanceResolver
 	UserCompetence() UserCompetenceResolver
 	UserStudent() UserStudentResolver
-	UserStudentGrades() UserStudentGradesResolver
 }
 
 type DirectiveRoot struct {
@@ -119,11 +119,9 @@ type ComplexityRoot struct {
 	}
 
 	ChatUser struct {
-		Chat      func(childComplexity int) int
-		CreatedAt func(childComplexity int) int
-		DeletedAt func(childComplexity int) int
-		ID        func(childComplexity int) int
-		User      func(childComplexity int) int
+		Chat func(childComplexity int) int
+		ID   func(childComplexity int) int
+		User func(childComplexity int) int
 	}
 
 	Competence struct {
@@ -300,7 +298,7 @@ type ComplexityRoot struct {
 		FileType  func(childComplexity int) int
 		Files     func(childComplexity int) int
 		ID        func(childComplexity int) int
-		MimeType  func(childComplexity int) int
+		MIMEType  func(childComplexity int) int
 		Name      func(childComplexity int) int
 		Parent    func(childComplexity int) int
 		Parents   func(childComplexity int) int
@@ -425,7 +423,7 @@ type ComplexityRoot struct {
 		UpdateSubject                  func(childComplexity int, input model.UpdateSubjectInput) int
 		UpdateTag                      func(childComplexity int, id string, input model.CreateTagInput) int
 		UpdateUser                     func(childComplexity int, input model.UpdateUserInput) int
-		UpdateUserLanguage             func(childComplexity int, language db.UserLanguage) int
+		UpdateUserLanguage             func(childComplexity int, language model.UserLanguage) int
 		UpdateUserStudentGrade         func(childComplexity int, input model.UpdateUserStudentGradesInput) int
 		UploadFile                     func(childComplexity int, input model.FileUploadInput) int
 		UploadFileToEntry              func(childComplexity int, entryID string, file graphql.Upload) int
@@ -674,7 +672,7 @@ type BucketResolver interface {
 	User(ctx context.Context, obj *db.Bucket) (*db.User, error)
 
 	DeletedAt(ctx context.Context, obj *db.Bucket) (*time.Time, error)
-	Permission(ctx context.Context, obj *db.Bucket) (*model.FilePermission, error)
+	Permission(ctx context.Context, obj *db.Bucket) (*db.FilePermission, error)
 	Files(ctx context.Context, obj *db.Bucket) ([]*db.File, error)
 }
 type ChatResolver interface {
@@ -698,8 +696,6 @@ type ChatMessageResolver interface {
 type ChatUserResolver interface {
 	Chat(ctx context.Context, obj *db.ChatUser) (*db.Chat, error)
 	User(ctx context.Context, obj *db.ChatUser) (*db.User, error)
-	CreatedAt(ctx context.Context, obj *db.ChatUser) (*time.Time, error)
-	DeletedAt(ctx context.Context, obj *db.ChatUser) (*time.Time, error)
 }
 type CompetenceResolver interface {
 	Type(ctx context.Context, obj *db.Competence) (db.CompetenceType, error)
@@ -707,7 +703,7 @@ type CompetenceResolver interface {
 	Color(ctx context.Context, obj *db.Competence) (string, error)
 
 	Parents(ctx context.Context, obj *db.Competence) ([]*db.Competence, error)
-
+	SortOrder(ctx context.Context, obj *db.Competence) (int, error)
 	Competences(ctx context.Context, obj *db.Competence, search *string, sort *model.CompetenceSort) ([]*db.Competence, error)
 	UserCompetences(ctx context.Context, obj *db.Competence, userID *string) ([]*db.UserCompetence, error)
 	Tendency(ctx context.Context, obj *db.Competence, userID string) (*model.CompetenceTendency, error)
@@ -716,9 +712,14 @@ type DomainResolver interface {
 	CreatedAt(ctx context.Context, obj *db.Domain) (string, error)
 }
 type EmailResolver interface {
+	Type(ctx context.Context, obj *db.Email) (model.EmailType, error)
 	CreatedAt(ctx context.Context, obj *db.Email) (string, error)
 }
 type EmailAccountResolver interface {
+	Description(ctx context.Context, obj *db.EmailAccount) (*string, error)
+	Type(ctx context.Context, obj *db.EmailAccount) (model.EmailAccountType, error)
+	Quota(ctx context.Context, obj *db.EmailAccount) (*int, error)
+	Active(ctx context.Context, obj *db.EmailAccount) (*bool, error)
 	User(ctx context.Context, obj *db.EmailAccount) (*db.User, error)
 	CreatedAt(ctx context.Context, obj *db.EmailAccount) (string, error)
 	Members(ctx context.Context, obj *db.EmailAccount) ([]*db.EmailGroupMember, error)
@@ -730,6 +731,8 @@ type EmailGroupMemberResolver interface {
 	CreatedAt(ctx context.Context, obj *db.EmailGroupMember) (string, error)
 }
 type EntryResolver interface {
+	Date(ctx context.Context, obj *db.Entry) (string, error)
+
 	DeletedAt(ctx context.Context, obj *db.Entry) (*time.Time, error)
 	User(ctx context.Context, obj *db.Entry) (*db.User, error)
 	Users(ctx context.Context, obj *db.Entry) ([]*db.User, error)
@@ -746,6 +749,8 @@ type EventResolver interface {
 	Competences(ctx context.Context, obj *db.Event) ([]*db.Competence, error)
 }
 type FileResolver interface {
+	MIMEType(ctx context.Context, obj *db.File) (string, error)
+
 	Bucket(ctx context.Context, obj *db.File) (*db.Bucket, error)
 	Parent(ctx context.Context, obj *db.File) (*db.File, error)
 
@@ -830,7 +835,7 @@ type MutationResolver interface {
 	CreateUser(ctx context.Context, input model.CreateUserInput) (*db.User, error)
 	UpdateUser(ctx context.Context, input model.UpdateUserInput) (*db.User, error)
 	ArchiveUser(ctx context.Context, id string) (*db.User, error)
-	UpdateUserLanguage(ctx context.Context, language db.UserLanguage) (*db.User, error)
+	UpdateUserLanguage(ctx context.Context, language model.UserLanguage) (*db.User, error)
 	SendUserInvite(ctx context.Context, id string) (bool, error)
 	CreateStudent(ctx context.Context, input model.CreateStudentInput) (*db.User, error)
 	CreateUserCompetence(ctx context.Context, input model.CreateUserCompetenceInput) (*db.UserCompetence, error)
@@ -848,7 +853,7 @@ type MutationResolver interface {
 	CreateSchoolYear(ctx context.Context, input model.CreateSchoolYearInput) (*db.SchoolYear, error)
 	UpdateSchoolYear(ctx context.Context, input model.UpdateSchoolYearInput) (*db.SchoolYear, error)
 	DeleteSchoolYear(ctx context.Context, id string) (*db.SchoolYear, error)
-	UpdateUserStudentGrade(ctx context.Context, input model.UpdateUserStudentGradesInput) (*db.UserStudentGrades, error)
+	UpdateUserStudentGrade(ctx context.Context, input model.UpdateUserStudentGradesInput) (*model.UserStudentGrades, error)
 	ImportStudents(ctx context.Context, input model.ImportStudentsInput) (*model.ImportStudentsPayload, error)
 }
 type OrganisationResolver interface {
@@ -896,7 +901,7 @@ type QueryResolver interface {
 	SchoolYears(ctx context.Context, limit *int, offset *int) (*model.SchoolYearConnection, error)
 	SchoolYear(ctx context.Context, id string) (*db.SchoolYear, error)
 	UserStudentGrades(ctx context.Context, limit *int, offset *int) (*model.UserStudentGradesConnection, error)
-	UserStudentGrade(ctx context.Context, id string) (*db.UserStudentGrades, error)
+	UserStudentGrade(ctx context.Context, id string) (*model.UserStudentGrades, error)
 }
 type ReportResolver interface {
 	Meta(ctx context.Context, obj *db.Report) (string, error)
@@ -906,6 +911,9 @@ type ReportResolver interface {
 	File(ctx context.Context, obj *db.Report) (*db.File, error)
 
 	DeletedAt(ctx context.Context, obj *db.Report) (*time.Time, error)
+}
+type SchoolYearResolver interface {
+	Description(ctx context.Context, obj *db.SchoolYear) (string, error)
 }
 type SubscriptionResolver interface {
 	MessageAdded(ctx context.Context) (<-chan *db.ChatMessage, error)
@@ -920,6 +928,7 @@ type UserResolver interface {
 	Email(ctx context.Context, obj *db.User) (*string, error)
 
 	Student(ctx context.Context, obj *db.User) (*db.UserStudent, error)
+	Language(ctx context.Context, obj *db.User) (*model.UserLanguage, error)
 
 	DeletedAt(ctx context.Context, obj *db.User) (*time.Time, error)
 
@@ -929,6 +938,8 @@ type UserResolver interface {
 }
 type UserAttendanceResolver interface {
 	User(ctx context.Context, obj *db.UserAttendance) (*db.User, error)
+
+	Date(ctx context.Context, obj *db.UserAttendance) (*time.Time, error)
 }
 type UserCompetenceResolver interface {
 	Competence(ctx context.Context, obj *db.UserCompetence) (*db.Competence, error)
@@ -950,12 +961,8 @@ type UserStudentResolver interface {
 	EventsCount(ctx context.Context, obj *db.UserStudent) (int, error)
 	Emoji(ctx context.Context, obj *db.UserStudent) (*string, error)
 	User(ctx context.Context, obj *db.UserStudent) (*db.User, error)
-}
-type UserStudentGradesResolver interface {
-	Student(ctx context.Context, obj *db.UserStudentGrades) (*db.UserStudent, error)
-	Subject(ctx context.Context, obj *db.UserStudentGrades) (*db.Subject, error)
-
-	SchoolYear(ctx context.Context, obj *db.UserStudentGrades) (*db.SchoolYear, error)
+	MissedHours(ctx context.Context, obj *db.UserStudent) (int, error)
+	MissedHoursExcused(ctx context.Context, obj *db.UserStudent) (int, error)
 }
 
 type executableSchema struct {
@@ -1200,20 +1207,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ChatUser.Chat(childComplexity), true
-
-	case "ChatUser.createdAt":
-		if e.complexity.ChatUser.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.ChatUser.CreatedAt(childComplexity), true
-
-	case "ChatUser.deletedAt":
-		if e.complexity.ChatUser.DeletedAt == nil {
-			break
-		}
-
-		return e.complexity.ChatUser.DeletedAt(childComplexity), true
 
 	case "ChatUser.id":
 		if e.complexity.ChatUser.ID == nil {
@@ -1973,11 +1966,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.File.ID(childComplexity), true
 
 	case "File.MIMEType":
-		if e.complexity.File.MimeType == nil {
+		if e.complexity.File.MIMEType == nil {
 			break
 		}
 
-		return e.complexity.File.MimeType(childComplexity), true
+		return e.complexity.File.MIMEType(childComplexity), true
 
 	case "File.name":
 		if e.complexity.File.Name == nil {
@@ -3176,7 +3169,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateUserLanguage(childComplexity, args["language"].(db.UserLanguage)), true
+		return e.complexity.Mutation.UpdateUserLanguage(childComplexity, args["language"].(model.UserLanguage)), true
 
 	case "Mutation.updateUserStudentGrade":
 		if e.complexity.Mutation.UpdateUserStudentGrade == nil {
@@ -5919,7 +5912,7 @@ func (ec *executionContext) field_Mutation_setUserAttendanceState_args(ctx conte
 	var arg2 db.UserAttendanceState
 	if tmp, ok := rawArgs["state"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("state"))
-		arg2, err = ec.unmarshalNUserAttendanceState2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserAttendanceState(ctx, tmp)
+		arg2, err = ec.unmarshalNUserAttendanceState2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserAttendanceState(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -6018,7 +6011,7 @@ func (ec *executionContext) field_Mutation_updateDailyAttendance_args(ctx contex
 	var arg1 db.UserAttendanceState
 	if tmp, ok := rawArgs["state"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("state"))
-		arg1, err = ec.unmarshalNUserAttendanceState2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserAttendanceState(ctx, tmp)
+		arg1, err = ec.unmarshalNUserAttendanceState2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserAttendanceState(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -6198,10 +6191,10 @@ func (ec *executionContext) field_Mutation_updateTag_args(ctx context.Context, r
 func (ec *executionContext) field_Mutation_updateUserLanguage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 db.UserLanguage
+	var arg0 model.UserLanguage
 	if tmp, ok := rawArgs["language"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("language"))
-		arg0, err = ec.unmarshalNUserLanguage2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserLanguage(ctx, tmp)
+		arg0, err = ec.unmarshalNUserLanguage2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUserLanguage(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -7246,7 +7239,7 @@ func (ec *executionContext) _Bucket_user(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Bucket_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7442,9 +7435,9 @@ func (ec *executionContext) _Bucket_permission(ctx context.Context, field graphq
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.FilePermission)
+	res := resTmp.(*db.FilePermission)
 	fc.Result = res
-	return ec.marshalOFilePermission2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFilePermission(ctx, field.Selections, res)
+	return ec.marshalOFilePermission2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Bucket_permission(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7488,7 +7481,7 @@ func (ec *executionContext) _Bucket_files(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.([]*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFileᚄ(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Bucket_files(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7556,7 +7549,7 @@ func (ec *executionContext) _BucketConnection_edges(ctx context.Context, field g
 	}
 	res := resTmp.([]*db.Bucket)
 	fc.Result = res
-	return ec.marshalNBucket2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐBucketᚄ(ctx, field.Selections, res)
+	return ec.marshalNBucket2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucketᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_BucketConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7799,7 +7792,7 @@ func (ec *executionContext) _Chat_users(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.([]*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserᚄ(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Chat_users(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7871,7 +7864,7 @@ func (ec *executionContext) _Chat_type(ctx context.Context, field graphql.Collec
 	}
 	res := resTmp.(db.ChatType)
 	fc.Result = res
-	return ec.marshalNChatType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChatType(ctx, field.Selections, res)
+	return ec.marshalNChatType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Chat_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7915,7 +7908,7 @@ func (ec *executionContext) _Chat_messages(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.([]*db.ChatMessage)
 	fc.Result = res
-	return ec.marshalNChatMessage2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChatMessageᚄ(ctx, field.Selections, res)
+	return ec.marshalNChatMessage2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatMessageᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Chat_messages(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7972,7 +7965,7 @@ func (ec *executionContext) _Chat_lastMessage(ctx context.Context, field graphql
 	}
 	res := resTmp.(*db.ChatMessage)
 	fc.Result = res
-	return ec.marshalOChatMessage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChatMessage(ctx, field.Selections, res)
+	return ec.marshalOChatMessage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatMessage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Chat_lastMessage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -8202,7 +8195,7 @@ func (ec *executionContext) _ChatConnection_edges(ctx context.Context, field gra
 	}
 	res := resTmp.([]*db.Chat)
 	fc.Result = res
-	return ec.marshalOChat2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChat(ctx, field.Selections, res)
+	return ec.marshalOChat2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChat(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_ChatConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -8408,7 +8401,7 @@ func (ec *executionContext) _ChatMessage_chat(ctx context.Context, field graphql
 	}
 	res := resTmp.(*db.Chat)
 	fc.Result = res
-	return ec.marshalNChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChat(ctx, field.Selections, res)
+	return ec.marshalNChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChat(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_ChatMessage_chat(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -8474,7 +8467,7 @@ func (ec *executionContext) _ChatMessage_user(ctx context.Context, field graphql
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_ChatMessage_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -8766,7 +8759,7 @@ func (ec *executionContext) _ChatUser_chat(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*db.Chat)
 	fc.Result = res
-	return ec.marshalNChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChat(ctx, field.Selections, res)
+	return ec.marshalNChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChat(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_ChatUser_chat(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -8832,7 +8825,7 @@ func (ec *executionContext) _ChatUser_user(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_ChatUser_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -8871,91 +8864,6 @@ func (ec *executionContext) fieldContext_ChatUser_user(ctx context.Context, fiel
 				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ChatUser_createdAt(ctx context.Context, field graphql.CollectedField, obj *db.ChatUser) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ChatUser_createdAt(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ChatUser().CreatedAt(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*time.Time)
-	fc.Result = res
-	return ec.marshalNTime2ᚖtimeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ChatUser_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ChatUser",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ChatUser_deletedAt(ctx context.Context, field graphql.CollectedField, obj *db.ChatUser) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ChatUser_deletedAt(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ChatUser().DeletedAt(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*time.Time)
-	fc.Result = res
-	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ChatUser_deletedAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ChatUser",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
 		},
 	}
 	return fc, nil
@@ -9077,7 +8985,7 @@ func (ec *executionContext) _Competence_type(ctx context.Context, field graphql.
 	}
 	res := resTmp.(db.CompetenceType)
 	fc.Result = res
-	return ec.marshalNCompetenceType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetenceType(ctx, field.Selections, res)
+	return ec.marshalNCompetenceType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetenceType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Competence_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -9119,9 +9027,9 @@ func (ec *executionContext) _Competence_grades(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]int)
+	res := resTmp.([]int32)
 	fc.Result = res
-	return ec.marshalNInt2ᚕintᚄ(ctx, field.Selections, res)
+	return ec.marshalNInt2ᚕint32ᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Competence_grades(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -9253,7 +9161,7 @@ func (ec *executionContext) _Competence_parents(ctx context.Context, field graph
 	}
 	res := resTmp.([]*db.Competence)
 	fc.Result = res
-	return ec.marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetenceᚄ(ctx, field.Selections, res)
+	return ec.marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetenceᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Competence_parents(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -9307,7 +9215,7 @@ func (ec *executionContext) _Competence_sortOrder(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.SortOrder, nil
+		return ec.resolvers.Competence().SortOrder(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -9328,8 +9236,8 @@ func (ec *executionContext) fieldContext_Competence_sortOrder(ctx context.Contex
 	fc = &graphql.FieldContext{
 		Object:     "Competence",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
 		},
@@ -9365,7 +9273,7 @@ func (ec *executionContext) _Competence_competences(ctx context.Context, field g
 	}
 	res := resTmp.([]*db.Competence)
 	fc.Result = res
-	return ec.marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetence(ctx, field.Selections, res)
+	return ec.marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetence(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Competence_competences(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -9444,7 +9352,7 @@ func (ec *executionContext) _Competence_userCompetences(ctx context.Context, fie
 	}
 	res := resTmp.([]*db.UserCompetence)
 	fc.Result = res
-	return ec.marshalNUserCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserCompetence(ctx, field.Selections, res)
+	return ec.marshalNUserCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserCompetence(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Competence_userCompetences(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -9572,7 +9480,7 @@ func (ec *executionContext) _CompetenceConnection_edges(ctx context.Context, fie
 	}
 	res := resTmp.([]*db.Competence)
 	fc.Result = res
-	return ec.marshalOCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetence(ctx, field.Selections, res)
+	return ec.marshalOCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetence(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_CompetenceConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -9868,7 +9776,7 @@ func (ec *executionContext) _CopyFilesPayload_files(ctx context.Context, field g
 	}
 	res := resTmp.([]*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFileᚄ(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_CopyFilesPayload_files(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -9980,7 +9888,7 @@ func (ec *executionContext) _DeleteFilePayload_file(ctx context.Context, field g
 	}
 	res := resTmp.(*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFile(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_DeleteFilePayload_file(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -10092,7 +10000,7 @@ func (ec *executionContext) _DeleteFilesPayload_files(ctx context.Context, field
 	}
 	res := resTmp.([]*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFileᚄ(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_DeleteFilesPayload_files(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -10289,7 +10197,7 @@ func (ec *executionContext) _DomainConnection_edges(ctx context.Context, field g
 	}
 	res := resTmp.([]*db.Domain)
 	fc.Result = res
-	return ec.marshalODomain2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐDomain(ctx, field.Selections, res)
+	return ec.marshalODomain2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐDomain(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_DomainConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -10643,7 +10551,7 @@ func (ec *executionContext) _Email_type(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Type, nil
+		return ec.resolvers.Email().Type(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10655,17 +10563,17 @@ func (ec *executionContext) _Email_type(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.(db.EmailType)
+	res := resTmp.(model.EmailType)
 	fc.Result = res
-	return ec.marshalNEmailType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailType(ctx, field.Selections, res)
+	return ec.marshalNEmailType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Email_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Email",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type EmailType does not have child fields")
 		},
@@ -10819,7 +10727,7 @@ func (ec *executionContext) _EmailAccount_description(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Description, nil
+		return ec.resolvers.EmailAccount().Description(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10828,17 +10736,17 @@ func (ec *executionContext) _EmailAccount_description(ctx context.Context, field
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EmailAccount_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "EmailAccount",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -10860,7 +10768,7 @@ func (ec *executionContext) _EmailAccount_type(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Type, nil
+		return ec.resolvers.EmailAccount().Type(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10872,17 +10780,17 @@ func (ec *executionContext) _EmailAccount_type(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(db.EmailAccountType)
+	res := resTmp.(model.EmailAccountType)
 	fc.Result = res
-	return ec.marshalNEmailAccountType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccountType(ctx, field.Selections, res)
+	return ec.marshalNEmailAccountType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EmailAccount_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "EmailAccount",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type EmailAccountType does not have child fields")
 		},
@@ -10904,7 +10812,7 @@ func (ec *executionContext) _EmailAccount_quota(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Quota, nil
+		return ec.resolvers.EmailAccount().Quota(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10913,17 +10821,17 @@ func (ec *executionContext) _EmailAccount_quota(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(*int)
 	fc.Result = res
-	return ec.marshalOInt2int(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EmailAccount_quota(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "EmailAccount",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
 		},
@@ -10945,7 +10853,7 @@ func (ec *executionContext) _EmailAccount_active(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Active, nil
+		return ec.resolvers.EmailAccount().Active(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10954,17 +10862,17 @@ func (ec *executionContext) _EmailAccount_active(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(*bool)
 	fc.Result = res
-	return ec.marshalOBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EmailAccount_active(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "EmailAccount",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
 		},
@@ -10997,7 +10905,7 @@ func (ec *executionContext) _EmailAccount_user(ctx context.Context, field graphq
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EmailAccount_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -11110,7 +11018,7 @@ func (ec *executionContext) _EmailAccount_members(ctx context.Context, field gra
 	}
 	res := resTmp.([]*db.EmailGroupMember)
 	fc.Result = res
-	return ec.marshalOEmailGroupMember2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailGroupMember(ctx, field.Selections, res)
+	return ec.marshalOEmailGroupMember2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailGroupMember(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EmailAccount_members(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -11161,7 +11069,7 @@ func (ec *executionContext) _EmailAccountConnection_edges(ctx context.Context, f
 	}
 	res := resTmp.([]*db.EmailAccount)
 	fc.Result = res
-	return ec.marshalOEmailAccount2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccount(ctx, field.Selections, res)
+	return ec.marshalOEmailAccount2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EmailAccountConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -11318,7 +11226,7 @@ func (ec *executionContext) _EmailConnection_edges(ctx context.Context, field gr
 	}
 	res := resTmp.([]*db.Email)
 	fc.Result = res
-	return ec.marshalOEmail2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmail(ctx, field.Selections, res)
+	return ec.marshalOEmail2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmail(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EmailConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -11643,7 +11551,7 @@ func (ec *executionContext) _EmailForwardingConnection_edges(ctx context.Context
 	}
 	res := resTmp.([]*db.EmailForwarding)
 	fc.Result = res
-	return ec.marshalOEmailForwarding2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailForwarding(ctx, field.Selections, res)
+	return ec.marshalOEmailForwarding2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailForwarding(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EmailForwardingConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -11966,7 +11874,7 @@ func (ec *executionContext) _EmailGroupMemberConnection_edges(ctx context.Contex
 	}
 	res := resTmp.([]*db.EmailGroupMember)
 	fc.Result = res
-	return ec.marshalOEmailGroupMember2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailGroupMember(ctx, field.Selections, res)
+	return ec.marshalOEmailGroupMember2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailGroupMember(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EmailGroupMemberConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -12146,7 +12054,7 @@ func (ec *executionContext) _Entry_date(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Date, nil
+		return ec.resolvers.Entry().Date(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -12167,8 +12075,8 @@ func (ec *executionContext) fieldContext_Entry_date(ctx context.Context, field g
 	fc = &graphql.FieldContext{
 		Object:     "Entry",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -12330,7 +12238,7 @@ func (ec *executionContext) _Entry_user(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Entry_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -12402,7 +12310,7 @@ func (ec *executionContext) _Entry_users(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.([]*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserᚄ(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Entry_users(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -12474,7 +12382,7 @@ func (ec *executionContext) _Entry_events(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.([]*db.Event)
 	fc.Result = res
-	return ec.marshalNEvent2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEventᚄ(ctx, field.Selections, res)
+	return ec.marshalNEvent2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEventᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Entry_events(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -12540,7 +12448,7 @@ func (ec *executionContext) _Entry_files(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.([]*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFileᚄ(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Entry_files(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -12608,7 +12516,7 @@ func (ec *executionContext) _Entry_tags(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.([]*db.Tag)
 	fc.Result = res
-	return ec.marshalNTag2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐTagᚄ(ctx, field.Selections, res)
+	return ec.marshalNTag2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐTagᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Entry_tags(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -12664,7 +12572,7 @@ func (ec *executionContext) _Entry_userCompetences(ctx context.Context, field gr
 	}
 	res := resTmp.([]*db.UserCompetence)
 	fc.Result = res
-	return ec.marshalNUserCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserCompetenceᚄ(ctx, field.Selections, res)
+	return ec.marshalNUserCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserCompetenceᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Entry_userCompetences(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -12724,7 +12632,7 @@ func (ec *executionContext) _Entry_subjects(ctx context.Context, field graphql.C
 	}
 	res := resTmp.([]*db.Competence)
 	fc.Result = res
-	return ec.marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetenceᚄ(ctx, field.Selections, res)
+	return ec.marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetenceᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Entry_subjects(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -12792,7 +12700,7 @@ func (ec *executionContext) _EntryConnection_edges(ctx context.Context, field gr
 	}
 	res := resTmp.([]*db.Entry)
 	fc.Result = res
-	return ec.marshalNEntry2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntryᚄ(ctx, field.Selections, res)
+	return ec.marshalNEntry2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntryᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EntryConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -13043,7 +12951,7 @@ func (ec *executionContext) _Event_image(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*db.File)
 	fc.Result = res
-	return ec.marshalOFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFile(ctx, field.Selections, res)
+	return ec.marshalOFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Event_image(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -13366,7 +13274,7 @@ func (ec *executionContext) _Event_competences(ctx context.Context, field graphq
 	}
 	res := resTmp.([]*db.Competence)
 	fc.Result = res
-	return ec.marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetenceᚄ(ctx, field.Selections, res)
+	return ec.marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetenceᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Event_competences(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -13431,7 +13339,7 @@ func (ec *executionContext) _EventConnection_edges(ctx context.Context, field gr
 	}
 	res := resTmp.([]*db.Event)
 	fc.Result = res
-	return ec.marshalOEvent2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEvent(ctx, field.Selections, res)
+	return ec.marshalOEvent2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEvent(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EventConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -13945,7 +13853,7 @@ func (ec *executionContext) _File_fileType(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(db.FileType)
 	fc.Result = res
-	return ec.marshalNFileType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFileType(ctx, field.Selections, res)
+	return ec.marshalNFileType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_File_fileType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -13975,7 +13883,7 @@ func (ec *executionContext) _File_MIMEType(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.MimeType, nil
+		return ec.resolvers.File().MIMEType(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -13996,8 +13904,8 @@ func (ec *executionContext) fieldContext_File_MIMEType(ctx context.Context, fiel
 	fc = &graphql.FieldContext{
 		Object:     "File",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -14077,7 +13985,7 @@ func (ec *executionContext) _File_bucket(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*db.Bucket)
 	fc.Result = res
-	return ec.marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐBucket(ctx, field.Selections, res)
+	return ec.marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucket(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_File_bucket(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -14136,7 +14044,7 @@ func (ec *executionContext) _File_parent(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*db.File)
 	fc.Result = res
-	return ec.marshalOFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFile(ctx, field.Selections, res)
+	return ec.marshalOFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_File_parent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -14289,7 +14197,7 @@ func (ec *executionContext) _File_parents(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.([]*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFileᚄ(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_File_parents(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -14357,7 +14265,7 @@ func (ec *executionContext) _File_files(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.([]*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFileᚄ(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_File_files(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -14425,7 +14333,7 @@ func (ec *executionContext) _FileConnection_edges(ctx context.Context, field gra
 	}
 	res := resTmp.([]*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFileᚄ(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_FileConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -14897,7 +14805,7 @@ func (ec *executionContext) _MoveFilesPayload_files(ctx context.Context, field g
 	}
 	res := resTmp.([]*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFileᚄ(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_MoveFilesPayload_files(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -14965,7 +14873,7 @@ func (ec *executionContext) _Mutation_setUserAttendanceState(ctx context.Context
 	}
 	res := resTmp.(*db.UserAttendance)
 	fc.Result = res
-	return ec.marshalNUserAttendance2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserAttendance(ctx, field.Selections, res)
+	return ec.marshalNUserAttendance2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserAttendance(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_setUserAttendanceState(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -15030,7 +14938,7 @@ func (ec *executionContext) _Mutation_updateDailyAttendance(ctx context.Context,
 	}
 	res := resTmp.([]*db.UserAttendance)
 	fc.Result = res
-	return ec.marshalNUserAttendance2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserAttendanceᚄ(ctx, field.Selections, res)
+	return ec.marshalNUserAttendance2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserAttendanceᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateDailyAttendance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -15095,7 +15003,7 @@ func (ec *executionContext) _Mutation_createChat(ctx context.Context, field grap
 	}
 	res := resTmp.(*db.Chat)
 	fc.Result = res
-	return ec.marshalNChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChat(ctx, field.Selections, res)
+	return ec.marshalNChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChat(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createChat(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -15172,7 +15080,7 @@ func (ec *executionContext) _Mutation_deleteChat(ctx context.Context, field grap
 	}
 	res := resTmp.(*db.Chat)
 	fc.Result = res
-	return ec.marshalNChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChat(ctx, field.Selections, res)
+	return ec.marshalNChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChat(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteChat(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -15249,7 +15157,7 @@ func (ec *executionContext) _Mutation_createPrivatChat(ctx context.Context, fiel
 	}
 	res := resTmp.(*db.Chat)
 	fc.Result = res
-	return ec.marshalNChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChat(ctx, field.Selections, res)
+	return ec.marshalNChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChat(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createPrivatChat(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -15326,7 +15234,7 @@ func (ec *executionContext) _Mutation_addUserToChat(ctx context.Context, field g
 	}
 	res := resTmp.(*db.ChatUser)
 	fc.Result = res
-	return ec.marshalNChatUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChatUser(ctx, field.Selections, res)
+	return ec.marshalNChatUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_addUserToChat(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -15343,10 +15251,6 @@ func (ec *executionContext) fieldContext_Mutation_addUserToChat(ctx context.Cont
 				return ec.fieldContext_ChatUser_chat(ctx, field)
 			case "user":
 				return ec.fieldContext_ChatUser_user(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_ChatUser_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_ChatUser_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ChatUser", field.Name)
 		},
@@ -15393,7 +15297,7 @@ func (ec *executionContext) _Mutation_removeUserFromChat(ctx context.Context, fi
 	}
 	res := resTmp.(*db.ChatUser)
 	fc.Result = res
-	return ec.marshalNChatUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChatUser(ctx, field.Selections, res)
+	return ec.marshalNChatUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_removeUserFromChat(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -15410,10 +15314,6 @@ func (ec *executionContext) fieldContext_Mutation_removeUserFromChat(ctx context
 				return ec.fieldContext_ChatUser_chat(ctx, field)
 			case "user":
 				return ec.fieldContext_ChatUser_user(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_ChatUser_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_ChatUser_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ChatUser", field.Name)
 		},
@@ -15460,7 +15360,7 @@ func (ec *executionContext) _Mutation_sendMessage(ctx context.Context, field gra
 	}
 	res := resTmp.(*db.ChatMessage)
 	fc.Result = res
-	return ec.marshalNChatMessage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChatMessage(ctx, field.Selections, res)
+	return ec.marshalNChatMessage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatMessage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_sendMessage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -15531,7 +15431,7 @@ func (ec *executionContext) _Mutation_editChatMessage(ctx context.Context, field
 	}
 	res := resTmp.(*db.ChatMessage)
 	fc.Result = res
-	return ec.marshalNChatMessage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChatMessage(ctx, field.Selections, res)
+	return ec.marshalNChatMessage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatMessage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_editChatMessage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -15602,7 +15502,7 @@ func (ec *executionContext) _Mutation_updateChat(ctx context.Context, field grap
 	}
 	res := resTmp.(*db.Chat)
 	fc.Result = res
-	return ec.marshalNChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChat(ctx, field.Selections, res)
+	return ec.marshalNChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChat(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateChat(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -15679,7 +15579,7 @@ func (ec *executionContext) _Mutation_markMessageAsRead(ctx context.Context, fie
 	}
 	res := resTmp.(*db.ChatMessage)
 	fc.Result = res
-	return ec.marshalNChatMessage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChatMessage(ctx, field.Selections, res)
+	return ec.marshalNChatMessage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatMessage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_markMessageAsRead(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -15750,7 +15650,7 @@ func (ec *executionContext) _Mutation_uploadFile(ctx context.Context, field grap
 	}
 	res := resTmp.(*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFile(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_uploadFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -15888,7 +15788,7 @@ func (ec *executionContext) _Mutation_createFolder(ctx context.Context, field gr
 	}
 	res := resTmp.(*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFile(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createFolder(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -15967,7 +15867,7 @@ func (ec *executionContext) _Mutation_renameFile(ctx context.Context, field grap
 	}
 	res := resTmp.(*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFile(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_renameFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -16046,7 +15946,7 @@ func (ec *executionContext) _Mutation_moveFile(ctx context.Context, field graphq
 	}
 	res := resTmp.(*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFile(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_moveFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -16184,7 +16084,7 @@ func (ec *executionContext) _Mutation_copyFile(ctx context.Context, field graphq
 	}
 	res := resTmp.(*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFile(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_copyFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -16621,7 +16521,7 @@ func (ec *executionContext) _Mutation_addFileShare(ctx context.Context, field gr
 	}
 	res := resTmp.(*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFile(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_addFileShare(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -16700,7 +16600,7 @@ func (ec *executionContext) _Mutation_removeFileShare(ctx context.Context, field
 	}
 	res := resTmp.(*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFile(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_removeFileShare(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -16779,7 +16679,7 @@ func (ec *executionContext) _Mutation_createSharedDrive(ctx context.Context, fie
 	}
 	res := resTmp.(*db.Bucket)
 	fc.Result = res
-	return ec.marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐBucket(ctx, field.Selections, res)
+	return ec.marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucket(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createSharedDrive(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -16852,7 +16752,7 @@ func (ec *executionContext) _Mutation_renameSharedDrive(ctx context.Context, fie
 	}
 	res := resTmp.(*db.Bucket)
 	fc.Result = res
-	return ec.marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐBucket(ctx, field.Selections, res)
+	return ec.marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucket(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_renameSharedDrive(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -16925,7 +16825,7 @@ func (ec *executionContext) _Mutation_deleteSharedDrive(ctx context.Context, fie
 	}
 	res := resTmp.(*db.Bucket)
 	fc.Result = res
-	return ec.marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐBucket(ctx, field.Selections, res)
+	return ec.marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucket(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteSharedDrive(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17178,7 +17078,7 @@ func (ec *executionContext) _Mutation_createEmailAccount(ctx context.Context, fi
 	}
 	res := resTmp.(*db.EmailAccount)
 	fc.Result = res
-	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccount(ctx, field.Selections, res)
+	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createEmailAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17250,7 +17150,7 @@ func (ec *executionContext) _Mutation_updateEmailAccount(ctx context.Context, fi
 	}
 	res := resTmp.(*db.EmailAccount)
 	fc.Result = res
-	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccount(ctx, field.Selections, res)
+	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateEmailAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17322,7 +17222,7 @@ func (ec *executionContext) _Mutation_deleteEmailAccount(ctx context.Context, fi
 	}
 	res := resTmp.(*db.EmailAccount)
 	fc.Result = res
-	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccount(ctx, field.Selections, res)
+	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteEmailAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17394,7 +17294,7 @@ func (ec *executionContext) _Mutation_createEmailGroupMember(ctx context.Context
 	}
 	res := resTmp.(*db.EmailGroupMember)
 	fc.Result = res
-	return ec.marshalOEmailGroupMember2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailGroupMember(ctx, field.Selections, res)
+	return ec.marshalOEmailGroupMember2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailGroupMember(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createEmailGroupMember(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17456,7 +17356,7 @@ func (ec *executionContext) _Mutation_deleteEmailGroupMember(ctx context.Context
 	}
 	res := resTmp.(*db.EmailGroupMember)
 	fc.Result = res
-	return ec.marshalOEmailGroupMember2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailGroupMember(ctx, field.Selections, res)
+	return ec.marshalOEmailGroupMember2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailGroupMember(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteEmailGroupMember(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17518,7 +17418,7 @@ func (ec *executionContext) _Mutation_createEmail(ctx context.Context, field gra
 	}
 	res := resTmp.(*db.Email)
 	fc.Result = res
-	return ec.marshalOEmail2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmail(ctx, field.Selections, res)
+	return ec.marshalOEmail2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmail(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createEmail(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17582,7 +17482,7 @@ func (ec *executionContext) _Mutation_deleteEmail(ctx context.Context, field gra
 	}
 	res := resTmp.(*db.Email)
 	fc.Result = res
-	return ec.marshalOEmail2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmail(ctx, field.Selections, res)
+	return ec.marshalOEmail2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmail(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteEmail(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17646,7 +17546,7 @@ func (ec *executionContext) _Mutation_createEmailForwarding(ctx context.Context,
 	}
 	res := resTmp.(*db.EmailForwarding)
 	fc.Result = res
-	return ec.marshalOEmailForwarding2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailForwarding(ctx, field.Selections, res)
+	return ec.marshalOEmailForwarding2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailForwarding(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createEmailForwarding(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17708,7 +17608,7 @@ func (ec *executionContext) _Mutation_deleteEmailForwarding(ctx context.Context,
 	}
 	res := resTmp.(*db.EmailForwarding)
 	fc.Result = res
-	return ec.marshalOEmailForwarding2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailForwarding(ctx, field.Selections, res)
+	return ec.marshalOEmailForwarding2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailForwarding(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteEmailForwarding(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17770,7 +17670,7 @@ func (ec *executionContext) _Mutation_createDomain(ctx context.Context, field gr
 	}
 	res := resTmp.(*db.Domain)
 	fc.Result = res
-	return ec.marshalODomain2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐDomain(ctx, field.Selections, res)
+	return ec.marshalODomain2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐDomain(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createDomain(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17830,7 +17730,7 @@ func (ec *executionContext) _Mutation_deleteDomain(ctx context.Context, field gr
 	}
 	res := resTmp.(*db.Domain)
 	fc.Result = res
-	return ec.marshalODomain2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐDomain(ctx, field.Selections, res)
+	return ec.marshalODomain2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐDomain(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteDomain(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17890,7 +17790,7 @@ func (ec *executionContext) _Mutation_createEmailGroup(ctx context.Context, fiel
 	}
 	res := resTmp.(*db.EmailAccount)
 	fc.Result = res
-	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccount(ctx, field.Selections, res)
+	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createEmailGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17962,7 +17862,7 @@ func (ec *executionContext) _Mutation_updateEmailGroup(ctx context.Context, fiel
 	}
 	res := resTmp.(*db.EmailAccount)
 	fc.Result = res
-	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccount(ctx, field.Selections, res)
+	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateEmailGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -18034,7 +17934,7 @@ func (ec *executionContext) _Mutation_deleteEmailGroup(ctx context.Context, fiel
 	}
 	res := resTmp.(*db.EmailAccount)
 	fc.Result = res
-	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccount(ctx, field.Selections, res)
+	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteEmailGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -18109,7 +18009,7 @@ func (ec *executionContext) _Mutation_createEntry(ctx context.Context, field gra
 	}
 	res := resTmp.(*db.Entry)
 	fc.Result = res
-	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx, field.Selections, res)
+	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createEntry(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -18179,7 +18079,7 @@ func (ec *executionContext) _Mutation_updateEntry(ctx context.Context, field gra
 	}
 	res := resTmp.(*db.Entry)
 	fc.Result = res
-	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx, field.Selections, res)
+	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateEntry(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -18260,7 +18160,7 @@ func (ec *executionContext) _Mutation_archiveEntry(ctx context.Context, field gr
 	}
 	res := resTmp.(*db.Entry)
 	fc.Result = res
-	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx, field.Selections, res)
+	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_archiveEntry(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -18341,7 +18241,7 @@ func (ec *executionContext) _Mutation_createEntryTag(ctx context.Context, field 
 	}
 	res := resTmp.(*db.Entry)
 	fc.Result = res
-	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx, field.Selections, res)
+	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createEntryTag(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -18422,7 +18322,7 @@ func (ec *executionContext) _Mutation_createEntryFile(ctx context.Context, field
 	}
 	res := resTmp.(*db.Entry)
 	fc.Result = res
-	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx, field.Selections, res)
+	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createEntryFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -18503,7 +18403,7 @@ func (ec *executionContext) _Mutation_createEntryUser(ctx context.Context, field
 	}
 	res := resTmp.(*db.Entry)
 	fc.Result = res
-	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx, field.Selections, res)
+	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createEntryUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -18584,7 +18484,7 @@ func (ec *executionContext) _Mutation_createEntryEvent(ctx context.Context, fiel
 	}
 	res := resTmp.(*db.Entry)
 	fc.Result = res
-	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx, field.Selections, res)
+	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createEntryEvent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -18665,7 +18565,7 @@ func (ec *executionContext) _Mutation_createEntryCompetence(ctx context.Context,
 	}
 	res := resTmp.(*db.Entry)
 	fc.Result = res
-	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx, field.Selections, res)
+	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createEntryCompetence(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -18746,7 +18646,7 @@ func (ec *executionContext) _Mutation_deleteEntryTag(ctx context.Context, field 
 	}
 	res := resTmp.(*db.Entry)
 	fc.Result = res
-	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx, field.Selections, res)
+	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteEntryTag(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -18827,7 +18727,7 @@ func (ec *executionContext) _Mutation_deleteEntryFile(ctx context.Context, field
 	}
 	res := resTmp.(*db.Entry)
 	fc.Result = res
-	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx, field.Selections, res)
+	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteEntryFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -18908,7 +18808,7 @@ func (ec *executionContext) _Mutation_deleteEntryUser(ctx context.Context, field
 	}
 	res := resTmp.(*db.Entry)
 	fc.Result = res
-	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx, field.Selections, res)
+	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteEntryUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -18989,7 +18889,7 @@ func (ec *executionContext) _Mutation_deleteEntryEvent(ctx context.Context, fiel
 	}
 	res := resTmp.(*db.Entry)
 	fc.Result = res
-	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx, field.Selections, res)
+	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteEntryEvent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -19070,7 +18970,7 @@ func (ec *executionContext) _Mutation_deleteEntryCompetence(ctx context.Context,
 	}
 	res := resTmp.(*db.Entry)
 	fc.Result = res
-	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx, field.Selections, res)
+	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteEntryCompetence(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -19151,7 +19051,7 @@ func (ec *executionContext) _Mutation_updateEntryUserCompetenceLevel(ctx context
 	}
 	res := resTmp.(*db.Entry)
 	fc.Result = res
-	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx, field.Selections, res)
+	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateEntryUserCompetenceLevel(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -19232,7 +19132,7 @@ func (ec *executionContext) _Mutation_uploadFileToEntry(ctx context.Context, fie
 	}
 	res := resTmp.(*db.Entry)
 	fc.Result = res
-	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx, field.Selections, res)
+	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_uploadFileToEntry(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -19313,7 +19213,7 @@ func (ec *executionContext) _Mutation_removeFileFromEntry(ctx context.Context, f
 	}
 	res := resTmp.(*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFile(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_removeFileFromEntry(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -19392,7 +19292,7 @@ func (ec *executionContext) _Mutation_createEvent(ctx context.Context, field gra
 	}
 	res := resTmp.(*db.Event)
 	fc.Result = res
-	return ec.marshalNEvent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEvent(ctx, field.Selections, res)
+	return ec.marshalNEvent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEvent(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createEvent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -19469,7 +19369,7 @@ func (ec *executionContext) _Mutation_updateEvent(ctx context.Context, field gra
 	}
 	res := resTmp.(*db.Event)
 	fc.Result = res
-	return ec.marshalNEvent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEvent(ctx, field.Selections, res)
+	return ec.marshalNEvent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEvent(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateEvent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -19546,7 +19446,7 @@ func (ec *executionContext) _Mutation_toggleEventCompetence(ctx context.Context,
 	}
 	res := resTmp.(*db.Event)
 	fc.Result = res
-	return ec.marshalNEvent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEvent(ctx, field.Selections, res)
+	return ec.marshalNEvent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEvent(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_toggleEventCompetence(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -19623,7 +19523,7 @@ func (ec *executionContext) _Mutation_archiveEvent(ctx context.Context, field gr
 	}
 	res := resTmp.(*db.Event)
 	fc.Result = res
-	return ec.marshalNEvent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEvent(ctx, field.Selections, res)
+	return ec.marshalNEvent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEvent(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_archiveEvent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -19700,7 +19600,7 @@ func (ec *executionContext) _Mutation_updateOrganisation(ctx context.Context, fi
 	}
 	res := resTmp.(*db.Organisation)
 	fc.Result = res
-	return ec.marshalNOrganisation2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐOrganisation(ctx, field.Selections, res)
+	return ec.marshalNOrganisation2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐOrganisation(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateOrganisation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -19769,7 +19669,7 @@ func (ec *executionContext) _Mutation_createReport(ctx context.Context, field gr
 	}
 	res := resTmp.([]*db.Report)
 	fc.Result = res
-	return ec.marshalNReport2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReport(ctx, field.Selections, res)
+	return ec.marshalNReport2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReport(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createReport(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -20156,7 +20056,7 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -20239,7 +20139,7 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -20322,7 +20222,7 @@ func (ec *executionContext) _Mutation_archiveUser(ctx context.Context, field gra
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_archiveUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -20391,7 +20291,7 @@ func (ec *executionContext) _Mutation_updateUserLanguage(ctx context.Context, fi
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateUserLanguage(rctx, fc.Args["language"].(db.UserLanguage))
+		return ec.resolvers.Mutation().UpdateUserLanguage(rctx, fc.Args["language"].(model.UserLanguage))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -20405,7 +20305,7 @@ func (ec *executionContext) _Mutation_updateUserLanguage(ctx context.Context, fi
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateUserLanguage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -20543,7 +20443,7 @@ func (ec *executionContext) _Mutation_createStudent(ctx context.Context, field g
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createStudent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -20626,7 +20526,7 @@ func (ec *executionContext) _Mutation_createUserCompetence(ctx context.Context, 
 	}
 	res := resTmp.(*db.UserCompetence)
 	fc.Result = res
-	return ec.marshalNUserCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserCompetence(ctx, field.Selections, res)
+	return ec.marshalNUserCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserCompetence(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createUserCompetence(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -20697,7 +20597,7 @@ func (ec *executionContext) _Mutation_archiveUserCompetence(ctx context.Context,
 	}
 	res := resTmp.(*db.UserCompetence)
 	fc.Result = res
-	return ec.marshalNUserCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserCompetence(ctx, field.Selections, res)
+	return ec.marshalNUserCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserCompetence(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_archiveUserCompetence(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -20768,7 +20668,7 @@ func (ec *executionContext) _Mutation_createTag(ctx context.Context, field graph
 	}
 	res := resTmp.(*db.Tag)
 	fc.Result = res
-	return ec.marshalNTag2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐTag(ctx, field.Selections, res)
+	return ec.marshalNTag2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐTag(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createTag(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -20835,7 +20735,7 @@ func (ec *executionContext) _Mutation_archiveTag(ctx context.Context, field grap
 	}
 	res := resTmp.(*db.Tag)
 	fc.Result = res
-	return ec.marshalNTag2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐTag(ctx, field.Selections, res)
+	return ec.marshalNTag2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐTag(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_archiveTag(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -20902,7 +20802,7 @@ func (ec *executionContext) _Mutation_updateTag(ctx context.Context, field graph
 	}
 	res := resTmp.(*db.Tag)
 	fc.Result = res
-	return ec.marshalNTag2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐTag(ctx, field.Selections, res)
+	return ec.marshalNTag2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐTag(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateTag(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -21024,7 +20924,7 @@ func (ec *executionContext) _Mutation_updateCompetence(ctx context.Context, fiel
 	}
 	res := resTmp.(*db.Competence)
 	fc.Result = res
-	return ec.marshalNCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetence(ctx, field.Selections, res)
+	return ec.marshalNCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetence(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateCompetence(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -21103,7 +21003,7 @@ func (ec *executionContext) _Mutation_updateCompetenceSorting(ctx context.Contex
 	}
 	res := resTmp.([]*db.Competence)
 	fc.Result = res
-	return ec.marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetence(ctx, field.Selections, res)
+	return ec.marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetence(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateCompetenceSorting(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -21182,7 +21082,7 @@ func (ec *executionContext) _Mutation_createCompetence(ctx context.Context, fiel
 	}
 	res := resTmp.(*db.Competence)
 	fc.Result = res
-	return ec.marshalNCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetence(ctx, field.Selections, res)
+	return ec.marshalNCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetence(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createCompetence(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -21261,7 +21161,7 @@ func (ec *executionContext) _Mutation_createSubject(ctx context.Context, field g
 	}
 	res := resTmp.(*db.Subject)
 	fc.Result = res
-	return ec.marshalNSubject2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSubject(ctx, field.Selections, res)
+	return ec.marshalNSubject2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSubject(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createSubject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -21322,7 +21222,7 @@ func (ec *executionContext) _Mutation_updateSubject(ctx context.Context, field g
 	}
 	res := resTmp.(*db.Subject)
 	fc.Result = res
-	return ec.marshalNSubject2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSubject(ctx, field.Selections, res)
+	return ec.marshalNSubject2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSubject(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateSubject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -21383,7 +21283,7 @@ func (ec *executionContext) _Mutation_deleteSubject(ctx context.Context, field g
 	}
 	res := resTmp.(*db.Subject)
 	fc.Result = res
-	return ec.marshalNSubject2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSubject(ctx, field.Selections, res)
+	return ec.marshalNSubject2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSubject(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteSubject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -21444,7 +21344,7 @@ func (ec *executionContext) _Mutation_createSchoolYear(ctx context.Context, fiel
 	}
 	res := resTmp.(*db.SchoolYear)
 	fc.Result = res
-	return ec.marshalNSchoolYear2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSchoolYear(ctx, field.Selections, res)
+	return ec.marshalNSchoolYear2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSchoolYear(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createSchoolYear(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -21507,7 +21407,7 @@ func (ec *executionContext) _Mutation_updateSchoolYear(ctx context.Context, fiel
 	}
 	res := resTmp.(*db.SchoolYear)
 	fc.Result = res
-	return ec.marshalNSchoolYear2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSchoolYear(ctx, field.Selections, res)
+	return ec.marshalNSchoolYear2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSchoolYear(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateSchoolYear(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -21570,7 +21470,7 @@ func (ec *executionContext) _Mutation_deleteSchoolYear(ctx context.Context, fiel
 	}
 	res := resTmp.(*db.SchoolYear)
 	fc.Result = res
-	return ec.marshalNSchoolYear2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSchoolYear(ctx, field.Selections, res)
+	return ec.marshalNSchoolYear2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSchoolYear(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteSchoolYear(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -21631,9 +21531,9 @@ func (ec *executionContext) _Mutation_updateUserStudentGrade(ctx context.Context
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*db.UserStudentGrades)
+	res := resTmp.(*model.UserStudentGrades)
 	fc.Result = res
-	return ec.marshalNUserStudentGrades2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserStudentGrades(ctx, field.Selections, res)
+	return ec.marshalNUserStudentGrades2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUserStudentGrades(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateUserStudentGrade(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -21977,7 +21877,7 @@ func (ec *executionContext) _Organisation_owner(ctx context.Context, field graph
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Organisation_owner(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -22225,7 +22125,7 @@ func (ec *executionContext) _Query_userAttendanceOverview(ctx context.Context, f
 	}
 	res := resTmp.([]*db.UserAttendance)
 	fc.Result = res
-	return ec.marshalNUserAttendance2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserAttendanceᚄ(ctx, field.Selections, res)
+	return ec.marshalNUserAttendance2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserAttendanceᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_userAttendanceOverview(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -22290,7 +22190,7 @@ func (ec *executionContext) _Query_chat(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(*db.Chat)
 	fc.Result = res
-	return ec.marshalNChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChat(ctx, field.Selections, res)
+	return ec.marshalNChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChat(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_chat(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -22493,7 +22393,7 @@ func (ec *executionContext) _Query_bucket(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(*db.Bucket)
 	fc.Result = res
-	return ec.marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐBucket(ctx, field.Selections, res)
+	return ec.marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucket(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_bucket(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -22566,7 +22466,7 @@ func (ec *executionContext) _Query_file(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFile(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_file(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -22823,7 +22723,7 @@ func (ec *executionContext) _Query_emailAccount(ctx context.Context, field graph
 	}
 	res := resTmp.(*db.EmailAccount)
 	fc.Result = res
-	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccount(ctx, field.Selections, res)
+	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_emailAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -22944,7 +22844,7 @@ func (ec *executionContext) _Query_EmailGroupMember(ctx context.Context, field g
 	}
 	res := resTmp.(*db.EmailGroupMember)
 	fc.Result = res
-	return ec.marshalOEmailGroupMember2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailGroupMember(ctx, field.Selections, res)
+	return ec.marshalOEmailGroupMember2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailGroupMember(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_EmailGroupMember(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -23055,7 +22955,7 @@ func (ec *executionContext) _Query_email(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*db.Email)
 	fc.Result = res
-	return ec.marshalOEmail2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmail(ctx, field.Selections, res)
+	return ec.marshalOEmail2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmail(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_email(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -23168,7 +23068,7 @@ func (ec *executionContext) _Query_emailForwarding(ctx context.Context, field gr
 	}
 	res := resTmp.(*db.EmailForwarding)
 	fc.Result = res
-	return ec.marshalOEmailForwarding2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailForwarding(ctx, field.Selections, res)
+	return ec.marshalOEmailForwarding2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailForwarding(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_emailForwarding(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -23279,7 +23179,7 @@ func (ec *executionContext) _Query_domain(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(*db.Domain)
 	fc.Result = res
-	return ec.marshalODomain2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐDomain(ctx, field.Selections, res)
+	return ec.marshalODomain2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐDomain(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_domain(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -23342,7 +23242,7 @@ func (ec *executionContext) _Query_entry(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*db.Entry)
 	fc.Result = res
-	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx, field.Selections, res)
+	return ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_entry(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -23486,7 +23386,7 @@ func (ec *executionContext) _Query_event(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*db.Event)
 	fc.Result = res
-	return ec.marshalNEvent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEvent(ctx, field.Selections, res)
+	return ec.marshalNEvent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEvent(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_event(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -23692,7 +23592,7 @@ func (ec *executionContext) _Query_organisation(ctx context.Context, field graph
 	}
 	res := resTmp.(*db.Organisation)
 	fc.Result = res
-	return ec.marshalOOrganisation2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐOrganisation(ctx, field.Selections, res)
+	return ec.marshalOOrganisation2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐOrganisation(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_organisation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -23750,7 +23650,7 @@ func (ec *executionContext) _Query_report(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(*db.Report)
 	fc.Result = res
-	return ec.marshalNReport2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReport(ctx, field.Selections, res)
+	return ec.marshalNReport2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReport(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_report(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -23959,7 +23859,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -24042,7 +23942,7 @@ func (ec *executionContext) _Query_me(ctx context.Context, field graphql.Collect
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_me(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -24114,7 +24014,7 @@ func (ec *executionContext) _Query_competence(ctx context.Context, field graphql
 	}
 	res := resTmp.(*db.Competence)
 	fc.Result = res
-	return ec.marshalNCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetence(ctx, field.Selections, res)
+	return ec.marshalNCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetence(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_competence(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -24256,7 +24156,7 @@ func (ec *executionContext) _Query_tag(ctx context.Context, field graphql.Collec
 	}
 	res := resTmp.(*db.Tag)
 	fc.Result = res
-	return ec.marshalNTag2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐTag(ctx, field.Selections, res)
+	return ec.marshalNTag2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐTag(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_tag(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -24449,7 +24349,7 @@ func (ec *executionContext) _Query_userStudent(ctx context.Context, field graphq
 	}
 	res := resTmp.(*db.UserStudent)
 	fc.Result = res
-	return ec.marshalNUserStudent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserStudent(ctx, field.Selections, res)
+	return ec.marshalNUserStudent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserStudent(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_userStudent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -24664,7 +24564,7 @@ func (ec *executionContext) _Query_subject(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*db.Subject)
 	fc.Result = res
-	return ec.marshalNSubject2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSubject(ctx, field.Selections, res)
+	return ec.marshalNSubject2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSubject(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_subject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -24788,7 +24688,7 @@ func (ec *executionContext) _Query_schoolYear(ctx context.Context, field graphql
 	}
 	res := resTmp.(*db.SchoolYear)
 	fc.Result = res
-	return ec.marshalNSchoolYear2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSchoolYear(ctx, field.Selections, res)
+	return ec.marshalNSchoolYear2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSchoolYear(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_schoolYear(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -24912,9 +24812,9 @@ func (ec *executionContext) _Query_userStudentGrade(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*db.UserStudentGrades)
+	res := resTmp.(*model.UserStudentGrades)
 	fc.Result = res
-	return ec.marshalNUserStudentGrades2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserStudentGrades(ctx, field.Selections, res)
+	return ec.marshalNUserStudentGrades2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUserStudentGrades(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_userStudentGrade(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -25154,7 +25054,7 @@ func (ec *executionContext) _Report_status(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(db.ReportStatus)
 	fc.Result = res
-	return ec.marshalNReportStatus2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReportStatus(ctx, field.Selections, res)
+	return ec.marshalNReportStatus2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReportStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Report_status(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -25198,7 +25098,7 @@ func (ec *executionContext) _Report_format(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(db.ReportFormat)
 	fc.Result = res
-	return ec.marshalNReportFormat2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReportFormat(ctx, field.Selections, res)
+	return ec.marshalNReportFormat2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReportFormat(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Report_format(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -25242,7 +25142,7 @@ func (ec *executionContext) _Report_kind(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(db.ReportKind)
 	fc.Result = res
-	return ec.marshalNReportKind2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReportKind(ctx, field.Selections, res)
+	return ec.marshalNReportKind2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReportKind(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Report_kind(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -25462,7 +25362,7 @@ func (ec *executionContext) _Report_user(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Report_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -25534,7 +25434,7 @@ func (ec *executionContext) _Report_studentUser(ctx context.Context, field graph
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Report_studentUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -25603,7 +25503,7 @@ func (ec *executionContext) _Report_file(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*db.File)
 	fc.Result = res
-	return ec.marshalOFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFile(ctx, field.Selections, res)
+	return ec.marshalOFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Report_file(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -25753,7 +25653,7 @@ func (ec *executionContext) _ReportConnection_edges(ctx context.Context, field g
 	}
 	res := resTmp.([]*db.Report)
 	fc.Result = res
-	return ec.marshalOReport2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReport(ctx, field.Selections, res)
+	return ec.marshalOReport2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReport(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_ReportConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -26183,9 +26083,9 @@ func (ec *executionContext) _SchoolYear_year(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(int32)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_SchoolYear_year(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -26215,7 +26115,7 @@ func (ec *executionContext) _SchoolYear_description(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Description, nil
+		return ec.resolvers.SchoolYear().Description(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -26236,8 +26136,8 @@ func (ec *executionContext) fieldContext_SchoolYear_description(ctx context.Cont
 	fc = &graphql.FieldContext{
 		Object:     "SchoolYear",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -26273,7 +26173,7 @@ func (ec *executionContext) _SchoolYearConnection_edges(ctx context.Context, fie
 	}
 	res := resTmp.([]*db.SchoolYear)
 	fc.Result = res
-	return ec.marshalNSchoolYear2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSchoolYearᚄ(ctx, field.Selections, res)
+	return ec.marshalNSchoolYear2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSchoolYearᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_SchoolYearConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -26421,7 +26321,7 @@ func (ec *executionContext) _ShareUser_user(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_ShareUser_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -26491,9 +26391,9 @@ func (ec *executionContext) _ShareUser_permission(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.FilePermission)
+	res := resTmp.(db.FilePermission)
 	fc.Result = res
-	return ec.marshalNFilePermission2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFilePermission(ctx, field.Selections, res)
+	return ec.marshalNFilePermission2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_ShareUser_permission(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -26713,7 +26613,7 @@ func (ec *executionContext) _SignInPayload_user(ctx context.Context, field graph
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_SignInPayload_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -26873,7 +26773,7 @@ func (ec *executionContext) _SubjectConnection_edges(ctx context.Context, field 
 	}
 	res := resTmp.([]*db.Subject)
 	fc.Result = res
-	return ec.marshalNSubject2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSubjectᚄ(ctx, field.Selections, res)
+	return ec.marshalNSubject2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSubjectᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_SubjectConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -27027,7 +26927,7 @@ func (ec *executionContext) _Subscription_messageAdded(ctx context.Context, fiel
 				w.Write([]byte{'{'})
 				graphql.MarshalString(field.Alias).MarshalGQL(w)
 				w.Write([]byte{':'})
-				ec.marshalNChatMessage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChatMessage(ctx, field.Selections, res).MarshalGQL(w)
+				ec.marshalNChatMessage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatMessage(ctx, field.Selections, res).MarshalGQL(w)
 				w.Write([]byte{'}'})
 			})
 		case <-ctx.Done():
@@ -27101,7 +27001,7 @@ func (ec *executionContext) _Subscription_reportCreatedOrUpdated(ctx context.Con
 				w.Write([]byte{'{'})
 				graphql.MarshalString(field.Alias).MarshalGQL(w)
 				w.Write([]byte{':'})
-				ec.marshalNReport2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReport(ctx, field.Selections, res).MarshalGQL(w)
+				ec.marshalNReport2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReport(ctx, field.Selections, res).MarshalGQL(w)
 				w.Write([]byte{'}'})
 			})
 		case <-ctx.Done():
@@ -27393,7 +27293,7 @@ func (ec *executionContext) _TagConnection_edges(ctx context.Context, field grap
 	}
 	res := resTmp.([]*db.Tag)
 	fc.Result = res
-	return ec.marshalOTag2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐTag(ctx, field.Selections, res)
+	return ec.marshalOTag2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐTag(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_TagConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -27545,7 +27445,7 @@ func (ec *executionContext) _UploadFilesPayload_files(ctx context.Context, field
 	}
 	res := resTmp.([]*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFileᚄ(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UploadFilesPayload_files(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -27698,7 +27598,7 @@ func (ec *executionContext) _User_role(ctx context.Context, field graphql.Collec
 	}
 	res := resTmp.(db.UserRole)
 	fc.Result = res
-	return ec.marshalNUserRole2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserRole(ctx, field.Selections, res)
+	return ec.marshalNUserRole2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserRole(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_role(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -27827,7 +27727,7 @@ func (ec *executionContext) _User_student(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(*db.UserStudent)
 	fc.Result = res
-	return ec.marshalOUserStudent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserStudent(ctx, field.Selections, res)
+	return ec.marshalOUserStudent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserStudent(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_student(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -27891,7 +27791,7 @@ func (ec *executionContext) _User_language(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Language, nil
+		return ec.resolvers.User().Language(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -27900,17 +27800,17 @@ func (ec *executionContext) _User_language(ctx context.Context, field graphql.Co
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(db.UserLanguage)
+	res := resTmp.(*model.UserLanguage)
 	fc.Result = res
-	return ec.marshalOUserLanguage2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserLanguage(ctx, field.Selections, res)
+	return ec.marshalOUserLanguage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUserLanguage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_language(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type UserLanguage does not have child fields")
 		},
@@ -28157,7 +28057,7 @@ func (ec *executionContext) _User_emailAccounts(ctx context.Context, field graph
 	}
 	res := resTmp.([]*db.EmailAccount)
 	fc.Result = res
-	return ec.marshalOEmailAccount2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccount(ctx, field.Selections, res)
+	return ec.marshalOEmailAccount2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_emailAccounts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -28265,7 +28165,7 @@ func (ec *executionContext) _UserAttendance_user(ctx context.Context, field grap
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserAttendance_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -28337,7 +28237,7 @@ func (ec *executionContext) _UserAttendance_state(ctx context.Context, field gra
 	}
 	res := resTmp.(db.UserAttendanceState)
 	fc.Result = res
-	return ec.marshalNUserAttendanceState2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserAttendanceState(ctx, field.Selections, res)
+	return ec.marshalNUserAttendanceState2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserAttendanceState(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserAttendance_state(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -28367,7 +28267,7 @@ func (ec *executionContext) _UserAttendance_date(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Date, nil
+		return ec.resolvers.UserAttendance().Date(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -28379,17 +28279,17 @@ func (ec *executionContext) _UserAttendance_date(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(time.Time)
+	res := resTmp.(*time.Time)
 	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+	return ec.marshalNTime2ᚖtimeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserAttendance_date(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserAttendance",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Time does not have child fields")
 		},
@@ -28467,9 +28367,9 @@ func (ec *executionContext) _UserCompetence_level(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(int32)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserCompetence_level(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -28513,7 +28413,7 @@ func (ec *executionContext) _UserCompetence_competence(ctx context.Context, fiel
 	}
 	res := resTmp.(*db.Competence)
 	fc.Result = res
-	return ec.marshalNCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetence(ctx, field.Selections, res)
+	return ec.marshalNCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetence(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserCompetence_competence(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -28578,7 +28478,7 @@ func (ec *executionContext) _UserCompetence_entry(ctx context.Context, field gra
 	}
 	res := resTmp.(*db.Entry)
 	fc.Result = res
-	return ec.marshalOEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx, field.Selections, res)
+	return ec.marshalOEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserCompetence_entry(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -28648,7 +28548,7 @@ func (ec *executionContext) _UserCompetence_user(ctx context.Context, field grap
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserCompetence_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -28717,7 +28617,7 @@ func (ec *executionContext) _UserCompetence_createdBy(ctx context.Context, field
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserCompetence_createdBy(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -28830,7 +28730,7 @@ func (ec *executionContext) _UserCompetenceConnection_edges(ctx context.Context,
 	}
 	res := resTmp.([]*db.UserCompetence)
 	fc.Result = res
-	return ec.marshalOUserCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserCompetence(ctx, field.Selections, res)
+	return ec.marshalOUserCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserCompetence(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserCompetenceConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -28983,7 +28883,7 @@ func (ec *executionContext) _UserConnection_edges(ctx context.Context, field gra
 	}
 	res := resTmp.([]*db.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -29702,7 +29602,7 @@ func (ec *executionContext) _UserStudent_user(ctx context.Context, field graphql
 	}
 	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserStudent_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -29760,7 +29660,7 @@ func (ec *executionContext) _UserStudent_missedHours(ctx context.Context, field 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.MissedHours, nil
+		return ec.resolvers.UserStudent().MissedHours(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -29772,17 +29672,17 @@ func (ec *executionContext) _UserStudent_missedHours(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int32)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNInt2int32(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserStudent_missedHours(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserStudent",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
 		},
@@ -29804,7 +29704,7 @@ func (ec *executionContext) _UserStudent_missedHoursExcused(ctx context.Context,
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.MissedHoursExcused, nil
+		return ec.resolvers.UserStudent().MissedHoursExcused(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -29816,17 +29716,17 @@ func (ec *executionContext) _UserStudent_missedHoursExcused(ctx context.Context,
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int32)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNInt2int32(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserStudent_missedHoursExcused(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserStudent",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
 		},
@@ -29859,7 +29759,7 @@ func (ec *executionContext) _UserStudentConnection_edges(ctx context.Context, fi
 	}
 	res := resTmp.([]*db.UserStudent)
 	fc.Result = res
-	return ec.marshalOUserStudent2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserStudent(ctx, field.Selections, res)
+	return ec.marshalOUserStudent2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserStudent(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserStudentConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -30005,7 +29905,7 @@ func (ec *executionContext) fieldContext_UserStudentConnection_totalCount(ctx co
 	return fc, nil
 }
 
-func (ec *executionContext) _UserStudentGrades_id(ctx context.Context, field graphql.CollectedField, obj *db.UserStudentGrades) (ret graphql.Marshaler) {
+func (ec *executionContext) _UserStudentGrades_id(ctx context.Context, field graphql.CollectedField, obj *model.UserStudentGrades) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UserStudentGrades_id(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -30049,7 +29949,7 @@ func (ec *executionContext) fieldContext_UserStudentGrades_id(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _UserStudentGrades_student(ctx context.Context, field graphql.CollectedField, obj *db.UserStudentGrades) (ret graphql.Marshaler) {
+func (ec *executionContext) _UserStudentGrades_student(ctx context.Context, field graphql.CollectedField, obj *model.UserStudentGrades) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UserStudentGrades_student(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -30063,7 +29963,7 @@ func (ec *executionContext) _UserStudentGrades_student(ctx context.Context, fiel
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.UserStudentGrades().Student(rctx, obj)
+		return obj.Student, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -30077,15 +29977,15 @@ func (ec *executionContext) _UserStudentGrades_student(ctx context.Context, fiel
 	}
 	res := resTmp.(*db.UserStudent)
 	fc.Result = res
-	return ec.marshalNUserStudent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserStudent(ctx, field.Selections, res)
+	return ec.marshalNUserStudent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserStudent(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserStudentGrades_student(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserStudentGrades",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -30127,7 +30027,7 @@ func (ec *executionContext) fieldContext_UserStudentGrades_student(ctx context.C
 	return fc, nil
 }
 
-func (ec *executionContext) _UserStudentGrades_subject(ctx context.Context, field graphql.CollectedField, obj *db.UserStudentGrades) (ret graphql.Marshaler) {
+func (ec *executionContext) _UserStudentGrades_subject(ctx context.Context, field graphql.CollectedField, obj *model.UserStudentGrades) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UserStudentGrades_subject(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -30141,7 +30041,7 @@ func (ec *executionContext) _UserStudentGrades_subject(ctx context.Context, fiel
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.UserStudentGrades().Subject(rctx, obj)
+		return obj.Subject, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -30155,15 +30055,15 @@ func (ec *executionContext) _UserStudentGrades_subject(ctx context.Context, fiel
 	}
 	res := resTmp.(*db.Subject)
 	fc.Result = res
-	return ec.marshalNSubject2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSubject(ctx, field.Selections, res)
+	return ec.marshalNSubject2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSubject(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserStudentGrades_subject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserStudentGrades",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -30177,7 +30077,7 @@ func (ec *executionContext) fieldContext_UserStudentGrades_subject(ctx context.C
 	return fc, nil
 }
 
-func (ec *executionContext) _UserStudentGrades_grade(ctx context.Context, field graphql.CollectedField, obj *db.UserStudentGrades) (ret graphql.Marshaler) {
+func (ec *executionContext) _UserStudentGrades_grade(ctx context.Context, field graphql.CollectedField, obj *model.UserStudentGrades) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UserStudentGrades_grade(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -30221,7 +30121,7 @@ func (ec *executionContext) fieldContext_UserStudentGrades_grade(ctx context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _UserStudentGrades_schoolYear(ctx context.Context, field graphql.CollectedField, obj *db.UserStudentGrades) (ret graphql.Marshaler) {
+func (ec *executionContext) _UserStudentGrades_schoolYear(ctx context.Context, field graphql.CollectedField, obj *model.UserStudentGrades) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UserStudentGrades_schoolYear(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -30235,7 +30135,7 @@ func (ec *executionContext) _UserStudentGrades_schoolYear(ctx context.Context, f
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.UserStudentGrades().SchoolYear(rctx, obj)
+		return obj.SchoolYear, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -30249,15 +30149,15 @@ func (ec *executionContext) _UserStudentGrades_schoolYear(ctx context.Context, f
 	}
 	res := resTmp.(*db.SchoolYear)
 	fc.Result = res
-	return ec.marshalNSchoolYear2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSchoolYear(ctx, field.Selections, res)
+	return ec.marshalNSchoolYear2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSchoolYear(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserStudentGrades_schoolYear(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserStudentGrades",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -30299,9 +30199,9 @@ func (ec *executionContext) _UserStudentGradesConnection_edges(ctx context.Conte
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*db.UserStudentGrades)
+	res := resTmp.([]*model.UserStudentGrades)
 	fc.Result = res
-	return ec.marshalNUserStudentGrades2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserStudentGradesᚄ(ctx, field.Selections, res)
+	return ec.marshalNUserStudentGrades2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUserStudentGradesᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserStudentGradesConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -32321,7 +32221,7 @@ func (ec *executionContext) unmarshalInputCompetenceFilterInput(ctx context.Cont
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-			data, err := ec.unmarshalOCompetenceType2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetenceType(ctx, v)
+			data, err := ec.unmarshalOCompetenceType2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetenceType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -32596,7 +32496,7 @@ func (ec *executionContext) unmarshalInputCreateEmailAccountInput(ctx context.Co
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-			data, err := ec.unmarshalNEmailAccountType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccountType(ctx, v)
+			data, err := ec.unmarshalNEmailAccountType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -32775,7 +32675,7 @@ func (ec *executionContext) unmarshalInputCreateEmailInput(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-			data, err := ec.unmarshalNEmailType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailType(ctx, v)
+			data, err := ec.unmarshalNEmailType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -33115,7 +33015,7 @@ func (ec *executionContext) unmarshalInputCreateReportInput(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("format"))
-			data, err := ec.unmarshalNReportFormat2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReportFormat(ctx, v)
+			data, err := ec.unmarshalNReportFormat2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReportFormat(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -33124,7 +33024,7 @@ func (ec *executionContext) unmarshalInputCreateReportInput(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("kind"))
-			data, err := ec.unmarshalNReportKind2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReportKind(ctx, v)
+			data, err := ec.unmarshalNReportKind2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReportKind(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -33254,7 +33154,7 @@ func (ec *executionContext) unmarshalInputCreateShareInput(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("permission"))
-			data, err := ec.unmarshalNFilePermission2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFilePermission(ctx, v)
+			data, err := ec.unmarshalNFilePermission2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -33507,7 +33407,7 @@ func (ec *executionContext) unmarshalInputCreateUserInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
-			data, err := ec.unmarshalNUserRole2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserRole(ctx, v)
+			data, err := ec.unmarshalNUserRole2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserRole(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -34184,7 +34084,7 @@ func (ec *executionContext) unmarshalInputEmailAccountFilter(ctx context.Context
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-			data, err := ec.unmarshalOEmailAccountType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccountType(ctx, v)
+			data, err := ec.unmarshalOEmailAccountType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -34922,7 +34822,7 @@ func (ec *executionContext) unmarshalInputShareFileInput(ctx context.Context, ob
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("permission"))
-			data, err := ec.unmarshalNFilePermission2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFilePermission(ctx, v)
+			data, err := ec.unmarshalNFilePermission2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -35282,7 +35182,7 @@ func (ec *executionContext) unmarshalInputUpdateEmailAccountInput(ctx context.Co
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-			data, err := ec.unmarshalOEmailAccountType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccountType(ctx, v)
+			data, err := ec.unmarshalOEmailAccountType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -35974,7 +35874,7 @@ func (ec *executionContext) unmarshalInputUserFilterInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
-			data, err := ec.unmarshalOUserRole2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserRole(ctx, v)
+			data, err := ec.unmarshalOUserRole2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserRole(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -36902,75 +36802,6 @@ func (ec *executionContext) _ChatUser(ctx context.Context, sel ast.SelectionSet,
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "createdAt":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._ChatUser_createdAt(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "deletedAt":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._ChatUser_deletedAt(ctx, field, obj)
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -37134,10 +36965,41 @@ func (ec *executionContext) _Competence(ctx context.Context, sel ast.SelectionSe
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "sortOrder":
-			out.Values[i] = ec._Competence_sortOrder(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Competence_sortOrder(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "competences":
 			field := field
 
@@ -37719,10 +37581,41 @@ func (ec *executionContext) _Email(ctx context.Context, sel ast.SelectionSet, ob
 				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "type":
-			out.Values[i] = ec._Email_type(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Email_type(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "createdAt":
 			field := field
 
@@ -37804,16 +37697,140 @@ func (ec *executionContext) _EmailAccount(ctx context.Context, sel ast.Selection
 				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "description":
-			out.Values[i] = ec._EmailAccount_description(ctx, field, obj)
-		case "type":
-			out.Values[i] = ec._EmailAccount_type(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._EmailAccount_description(ctx, field, obj)
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "type":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._EmailAccount_type(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "quota":
-			out.Values[i] = ec._EmailAccount_quota(ctx, field, obj)
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._EmailAccount_quota(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "active":
-			out.Values[i] = ec._EmailAccount_active(ctx, field, obj)
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._EmailAccount_active(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "user":
 			field := field
 
@@ -38310,10 +38327,41 @@ func (ec *executionContext) _Entry(ctx context.Context, sel ast.SelectionSet, ob
 				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "date":
-			out.Values[i] = ec._Entry_date(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Entry_date(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "body":
 			out.Values[i] = ec._Entry_body(ctx, field, obj)
 		case "createdAt":
@@ -38980,10 +39028,41 @@ func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj
 				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "MIMEType":
-			out.Values[i] = ec._File_MIMEType(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._File_MIMEType(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "size":
 			out.Values[i] = ec._File_size(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -41570,18 +41649,49 @@ func (ec *executionContext) _SchoolYear(ctx context.Context, sel ast.SelectionSe
 		case "id":
 			out.Values[i] = ec._SchoolYear_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "year":
 			out.Values[i] = ec._SchoolYear_year(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "description":
-			out.Values[i] = ec._SchoolYear_description(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SchoolYear_description(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -42173,7 +42283,38 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "language":
-			out.Values[i] = ec._User_language(ctx, field, obj)
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_language(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "createdAt":
 			out.Values[i] = ec._User_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -42400,10 +42541,41 @@ func (ec *executionContext) _UserAttendance(ctx context.Context, sel ast.Selecti
 				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "date":
-			out.Values[i] = ec._UserAttendance_date(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UserAttendance_date(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -43108,15 +43280,77 @@ func (ec *executionContext) _UserStudent(ctx context.Context, sel ast.SelectionS
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "missedHours":
-			out.Values[i] = ec._UserStudent_missedHours(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UserStudent_missedHours(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "missedHoursExcused":
-			out.Values[i] = ec._UserStudent_missedHoursExcused(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UserStudent_missedHoursExcused(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -43188,7 +43422,7 @@ func (ec *executionContext) _UserStudentConnection(ctx context.Context, sel ast.
 
 var userStudentGradesImplementors = []string{"UserStudentGrades"}
 
-func (ec *executionContext) _UserStudentGrades(ctx context.Context, sel ast.SelectionSet, obj *db.UserStudentGrades) graphql.Marshaler {
+func (ec *executionContext) _UserStudentGrades(ctx context.Context, sel ast.SelectionSet, obj *model.UserStudentGrades) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, userStudentGradesImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -43200,121 +43434,28 @@ func (ec *executionContext) _UserStudentGrades(ctx context.Context, sel ast.Sele
 		case "id":
 			out.Values[i] = ec._UserStudentGrades_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
 		case "student":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._UserStudentGrades_student(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._UserStudentGrades_student(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
 			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "subject":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._UserStudentGrades_subject(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._UserStudentGrades_subject(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
 			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "grade":
 			out.Values[i] = ec._UserStudentGrades_grade(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
 		case "schoolYear":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._UserStudentGrades_schoolYear(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._UserStudentGrades_schoolYear(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
 			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -43738,11 +43879,11 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNBucket2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐBucket(ctx context.Context, sel ast.SelectionSet, v db.Bucket) graphql.Marshaler {
+func (ec *executionContext) marshalNBucket2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucket(ctx context.Context, sel ast.SelectionSet, v db.Bucket) graphql.Marshaler {
 	return ec._Bucket(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNBucket2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐBucketᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.Bucket) graphql.Marshaler {
+func (ec *executionContext) marshalNBucket2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucketᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.Bucket) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -43766,7 +43907,7 @@ func (ec *executionContext) marshalNBucket2ᚕᚖgithubᚗcomᚋdokeduᚋdokedu�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐBucket(ctx, sel, v[i])
+			ret[i] = ec.marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucket(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -43786,7 +43927,7 @@ func (ec *executionContext) marshalNBucket2ᚕᚖgithubᚗcomᚋdokeduᚋdokedu�
 	return ret
 }
 
-func (ec *executionContext) marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐBucket(ctx context.Context, sel ast.SelectionSet, v *db.Bucket) graphql.Marshaler {
+func (ec *executionContext) marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucket(ctx context.Context, sel ast.SelectionSet, v *db.Bucket) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -43810,11 +43951,11 @@ func (ec *executionContext) marshalNBucketConnection2ᚖgithubᚗcomᚋdokeduᚋ
 	return ec._BucketConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNChat2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChat(ctx context.Context, sel ast.SelectionSet, v db.Chat) graphql.Marshaler {
+func (ec *executionContext) marshalNChat2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChat(ctx context.Context, sel ast.SelectionSet, v db.Chat) graphql.Marshaler {
 	return ec._Chat(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChat(ctx context.Context, sel ast.SelectionSet, v *db.Chat) graphql.Marshaler {
+func (ec *executionContext) marshalNChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChat(ctx context.Context, sel ast.SelectionSet, v *db.Chat) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -43838,11 +43979,11 @@ func (ec *executionContext) marshalNChatConnection2ᚖgithubᚗcomᚋdokeduᚋdo
 	return ec._ChatConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNChatMessage2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChatMessage(ctx context.Context, sel ast.SelectionSet, v db.ChatMessage) graphql.Marshaler {
+func (ec *executionContext) marshalNChatMessage2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatMessage(ctx context.Context, sel ast.SelectionSet, v db.ChatMessage) graphql.Marshaler {
 	return ec._ChatMessage(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNChatMessage2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChatMessageᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.ChatMessage) graphql.Marshaler {
+func (ec *executionContext) marshalNChatMessage2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatMessageᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.ChatMessage) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -43866,7 +44007,7 @@ func (ec *executionContext) marshalNChatMessage2ᚕᚖgithubᚗcomᚋdokeduᚋdo
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNChatMessage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChatMessage(ctx, sel, v[i])
+			ret[i] = ec.marshalNChatMessage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatMessage(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -43886,7 +44027,7 @@ func (ec *executionContext) marshalNChatMessage2ᚕᚖgithubᚗcomᚋdokeduᚋdo
 	return ret
 }
 
-func (ec *executionContext) marshalNChatMessage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChatMessage(ctx context.Context, sel ast.SelectionSet, v *db.ChatMessage) graphql.Marshaler {
+func (ec *executionContext) marshalNChatMessage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatMessage(ctx context.Context, sel ast.SelectionSet, v *db.ChatMessage) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -43896,13 +44037,13 @@ func (ec *executionContext) marshalNChatMessage2ᚖgithubᚗcomᚋdokeduᚋdoked
 	return ec._ChatMessage(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNChatType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChatType(ctx context.Context, v interface{}) (db.ChatType, error) {
+func (ec *executionContext) unmarshalNChatType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatType(ctx context.Context, v interface{}) (db.ChatType, error) {
 	tmp, err := graphql.UnmarshalString(v)
 	res := db.ChatType(tmp)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNChatType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChatType(ctx context.Context, sel ast.SelectionSet, v db.ChatType) graphql.Marshaler {
+func (ec *executionContext) marshalNChatType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatType(ctx context.Context, sel ast.SelectionSet, v db.ChatType) graphql.Marshaler {
 	res := graphql.MarshalString(string(v))
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -43912,11 +44053,11 @@ func (ec *executionContext) marshalNChatType2githubᚗcomᚋdokeduᚋdokeduᚋba
 	return res
 }
 
-func (ec *executionContext) marshalNChatUser2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChatUser(ctx context.Context, sel ast.SelectionSet, v db.ChatUser) graphql.Marshaler {
+func (ec *executionContext) marshalNChatUser2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatUser(ctx context.Context, sel ast.SelectionSet, v db.ChatUser) graphql.Marshaler {
 	return ec._ChatUser(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNChatUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChatUser(ctx context.Context, sel ast.SelectionSet, v *db.ChatUser) graphql.Marshaler {
+func (ec *executionContext) marshalNChatUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatUser(ctx context.Context, sel ast.SelectionSet, v *db.ChatUser) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -43926,11 +44067,11 @@ func (ec *executionContext) marshalNChatUser2ᚖgithubᚗcomᚋdokeduᚋdokedu�
 	return ec._ChatUser(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNCompetence2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetence(ctx context.Context, sel ast.SelectionSet, v db.Competence) graphql.Marshaler {
+func (ec *executionContext) marshalNCompetence2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetence(ctx context.Context, sel ast.SelectionSet, v db.Competence) graphql.Marshaler {
 	return ec._Competence(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetence(ctx context.Context, sel ast.SelectionSet, v []*db.Competence) graphql.Marshaler {
+func (ec *executionContext) marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetence(ctx context.Context, sel ast.SelectionSet, v []*db.Competence) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -43954,7 +44095,7 @@ func (ec *executionContext) marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdok
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetence(ctx, sel, v[i])
+			ret[i] = ec.marshalOCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetence(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -43968,7 +44109,7 @@ func (ec *executionContext) marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdok
 	return ret
 }
 
-func (ec *executionContext) marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetenceᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.Competence) graphql.Marshaler {
+func (ec *executionContext) marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetenceᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.Competence) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -43992,7 +44133,7 @@ func (ec *executionContext) marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdok
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetence(ctx, sel, v[i])
+			ret[i] = ec.marshalNCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetence(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -44012,7 +44153,7 @@ func (ec *executionContext) marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdok
 	return ret
 }
 
-func (ec *executionContext) marshalNCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetence(ctx context.Context, sel ast.SelectionSet, v *db.Competence) graphql.Marshaler {
+func (ec *executionContext) marshalNCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetence(ctx context.Context, sel ast.SelectionSet, v *db.Competence) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -44046,13 +44187,13 @@ func (ec *executionContext) marshalNCompetenceSortField2githubᚗcomᚋdokeduᚋ
 	return v
 }
 
-func (ec *executionContext) unmarshalNCompetenceType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetenceType(ctx context.Context, v interface{}) (db.CompetenceType, error) {
+func (ec *executionContext) unmarshalNCompetenceType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetenceType(ctx context.Context, v interface{}) (db.CompetenceType, error) {
 	tmp, err := graphql.UnmarshalString(v)
 	res := db.CompetenceType(tmp)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNCompetenceType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetenceType(ctx context.Context, sel ast.SelectionSet, v db.CompetenceType) graphql.Marshaler {
+func (ec *executionContext) marshalNCompetenceType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetenceType(ctx context.Context, sel ast.SelectionSet, v db.CompetenceType) graphql.Marshaler {
 	res := graphql.MarshalString(string(v))
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -44342,43 +44483,31 @@ func (ec *executionContext) unmarshalNEditChatMessageInput2githubᚗcomᚋdokedu
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNEmailAccountType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccountType(ctx context.Context, v interface{}) (db.EmailAccountType, error) {
-	tmp, err := graphql.UnmarshalString(v)
-	res := db.EmailAccountType(tmp)
+func (ec *executionContext) unmarshalNEmailAccountType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountType(ctx context.Context, v interface{}) (model.EmailAccountType, error) {
+	var res model.EmailAccountType
+	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNEmailAccountType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccountType(ctx context.Context, sel ast.SelectionSet, v db.EmailAccountType) graphql.Marshaler {
-	res := graphql.MarshalString(string(v))
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
+func (ec *executionContext) marshalNEmailAccountType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountType(ctx context.Context, sel ast.SelectionSet, v model.EmailAccountType) graphql.Marshaler {
+	return v
 }
 
-func (ec *executionContext) unmarshalNEmailType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailType(ctx context.Context, v interface{}) (db.EmailType, error) {
-	tmp, err := graphql.UnmarshalString(v)
-	res := db.EmailType(tmp)
+func (ec *executionContext) unmarshalNEmailType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailType(ctx context.Context, v interface{}) (model.EmailType, error) {
+	var res model.EmailType
+	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNEmailType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailType(ctx context.Context, sel ast.SelectionSet, v db.EmailType) graphql.Marshaler {
-	res := graphql.MarshalString(string(v))
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
+func (ec *executionContext) marshalNEmailType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailType(ctx context.Context, sel ast.SelectionSet, v model.EmailType) graphql.Marshaler {
+	return v
 }
 
-func (ec *executionContext) marshalNEntry2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx context.Context, sel ast.SelectionSet, v db.Entry) graphql.Marshaler {
+func (ec *executionContext) marshalNEntry2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx context.Context, sel ast.SelectionSet, v db.Entry) graphql.Marshaler {
 	return ec._Entry(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNEntry2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntryᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.Entry) graphql.Marshaler {
+func (ec *executionContext) marshalNEntry2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntryᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.Entry) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -44402,7 +44531,7 @@ func (ec *executionContext) marshalNEntry2ᚕᚖgithubᚗcomᚋdokeduᚋdokedu�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx, sel, v[i])
+			ret[i] = ec.marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -44422,7 +44551,7 @@ func (ec *executionContext) marshalNEntry2ᚕᚖgithubᚗcomᚋdokeduᚋdokedu�
 	return ret
 }
 
-func (ec *executionContext) marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx context.Context, sel ast.SelectionSet, v *db.Entry) graphql.Marshaler {
+func (ec *executionContext) marshalNEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx context.Context, sel ast.SelectionSet, v *db.Entry) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -44446,11 +44575,11 @@ func (ec *executionContext) marshalNEntryConnection2ᚖgithubᚗcomᚋdokeduᚋd
 	return ec._EntryConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNEvent2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEvent(ctx context.Context, sel ast.SelectionSet, v db.Event) graphql.Marshaler {
+func (ec *executionContext) marshalNEvent2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEvent(ctx context.Context, sel ast.SelectionSet, v db.Event) graphql.Marshaler {
 	return ec._Event(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNEvent2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEventᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.Event) graphql.Marshaler {
+func (ec *executionContext) marshalNEvent2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEventᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.Event) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -44474,7 +44603,7 @@ func (ec *executionContext) marshalNEvent2ᚕᚖgithubᚗcomᚋdokeduᚋdokedu�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNEvent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEvent(ctx, sel, v[i])
+			ret[i] = ec.marshalNEvent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEvent(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -44494,7 +44623,7 @@ func (ec *executionContext) marshalNEvent2ᚕᚖgithubᚗcomᚋdokeduᚋdokedu�
 	return ret
 }
 
-func (ec *executionContext) marshalNEvent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEvent(ctx context.Context, sel ast.SelectionSet, v *db.Event) graphql.Marshaler {
+func (ec *executionContext) marshalNEvent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEvent(ctx context.Context, sel ast.SelectionSet, v *db.Event) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -44561,11 +44690,11 @@ func (ec *executionContext) marshalNExportEventsPayload2ᚕᚖgithubᚗcomᚋdok
 	return ret
 }
 
-func (ec *executionContext) marshalNFile2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFile(ctx context.Context, sel ast.SelectionSet, v db.File) graphql.Marshaler {
+func (ec *executionContext) marshalNFile2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx context.Context, sel ast.SelectionSet, v db.File) graphql.Marshaler {
 	return ec._File(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFileᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.File) graphql.Marshaler {
+func (ec *executionContext) marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.File) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -44589,7 +44718,7 @@ func (ec *executionContext) marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFile(ctx, sel, v[i])
+			ret[i] = ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -44609,7 +44738,7 @@ func (ec *executionContext) marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFile(ctx context.Context, sel ast.SelectionSet, v *db.File) graphql.Marshaler {
+func (ec *executionContext) marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx context.Context, sel ast.SelectionSet, v *db.File) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -44633,23 +44762,29 @@ func (ec *executionContext) marshalNFileConnection2ᚖgithubᚗcomᚋdokeduᚋdo
 	return ec._FileConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNFilePermission2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFilePermission(ctx context.Context, v interface{}) (model.FilePermission, error) {
-	var res model.FilePermission
-	err := res.UnmarshalGQL(v)
+func (ec *executionContext) unmarshalNFilePermission2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx context.Context, v interface{}) (db.FilePermission, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	res := db.FilePermission(tmp)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNFilePermission2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFilePermission(ctx context.Context, sel ast.SelectionSet, v model.FilePermission) graphql.Marshaler {
-	return v
+func (ec *executionContext) marshalNFilePermission2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx context.Context, sel ast.SelectionSet, v db.FilePermission) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
 }
 
-func (ec *executionContext) unmarshalNFileType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFileType(ctx context.Context, v interface{}) (db.FileType, error) {
+func (ec *executionContext) unmarshalNFileType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileType(ctx context.Context, v interface{}) (db.FileType, error) {
 	tmp, err := graphql.UnmarshalString(v)
 	res := db.FileType(tmp)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNFileType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFileType(ctx context.Context, sel ast.SelectionSet, v db.FileType) graphql.Marshaler {
+func (ec *executionContext) marshalNFileType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileType(ctx context.Context, sel ast.SelectionSet, v db.FileType) graphql.Marshaler {
 	res := graphql.MarshalString(string(v))
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -44880,16 +45015,16 @@ func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) unmarshalNInt2ᚕintᚄ(ctx context.Context, v interface{}) ([]int, error) {
+func (ec *executionContext) unmarshalNInt2ᚕint32ᚄ(ctx context.Context, v interface{}) ([]int32, error) {
 	var vSlice []interface{}
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
 	var err error
-	res := make([]int, len(vSlice))
+	res := make([]int32, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNInt2int(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNInt2int32(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -44897,10 +45032,10 @@ func (ec *executionContext) unmarshalNInt2ᚕintᚄ(ctx context.Context, v inter
 	return res, nil
 }
 
-func (ec *executionContext) marshalNInt2ᚕintᚄ(ctx context.Context, sel ast.SelectionSet, v []int) graphql.Marshaler {
+func (ec *executionContext) marshalNInt2ᚕint32ᚄ(ctx context.Context, sel ast.SelectionSet, v []int32) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	for i := range v {
-		ret[i] = ec.marshalNInt2int(ctx, sel, v[i])
+		ret[i] = ec.marshalNInt2int32(ctx, sel, v[i])
 	}
 
 	for _, e := range ret {
@@ -44950,11 +45085,11 @@ func (ec *executionContext) marshalNMoveFilesPayload2ᚖgithubᚗcomᚋdokeduᚋ
 	return ec._MoveFilesPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNOrganisation2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐOrganisation(ctx context.Context, sel ast.SelectionSet, v db.Organisation) graphql.Marshaler {
+func (ec *executionContext) marshalNOrganisation2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐOrganisation(ctx context.Context, sel ast.SelectionSet, v db.Organisation) graphql.Marshaler {
 	return ec._Organisation(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNOrganisation2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐOrganisation(ctx context.Context, sel ast.SelectionSet, v *db.Organisation) graphql.Marshaler {
+func (ec *executionContext) marshalNOrganisation2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐOrganisation(ctx context.Context, sel ast.SelectionSet, v *db.Organisation) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -45008,11 +45143,11 @@ func (ec *executionContext) unmarshalNRenameSharedDriveInput2githubᚗcomᚋdoke
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNReport2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReport(ctx context.Context, sel ast.SelectionSet, v db.Report) graphql.Marshaler {
+func (ec *executionContext) marshalNReport2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReport(ctx context.Context, sel ast.SelectionSet, v db.Report) graphql.Marshaler {
 	return ec._Report(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNReport2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReport(ctx context.Context, sel ast.SelectionSet, v []*db.Report) graphql.Marshaler {
+func (ec *executionContext) marshalNReport2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReport(ctx context.Context, sel ast.SelectionSet, v []*db.Report) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -45036,7 +45171,7 @@ func (ec *executionContext) marshalNReport2ᚕᚖgithubᚗcomᚋdokeduᚋdokedu�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOReport2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReport(ctx, sel, v[i])
+			ret[i] = ec.marshalOReport2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReport(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -45050,7 +45185,7 @@ func (ec *executionContext) marshalNReport2ᚕᚖgithubᚗcomᚋdokeduᚋdokedu�
 	return ret
 }
 
-func (ec *executionContext) marshalNReport2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReport(ctx context.Context, sel ast.SelectionSet, v *db.Report) graphql.Marshaler {
+func (ec *executionContext) marshalNReport2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReport(ctx context.Context, sel ast.SelectionSet, v *db.Report) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -45074,13 +45209,13 @@ func (ec *executionContext) marshalNReportConnection2ᚖgithubᚗcomᚋdokeduᚋ
 	return ec._ReportConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNReportFormat2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReportFormat(ctx context.Context, v interface{}) (db.ReportFormat, error) {
+func (ec *executionContext) unmarshalNReportFormat2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReportFormat(ctx context.Context, v interface{}) (db.ReportFormat, error) {
 	tmp, err := graphql.UnmarshalString(v)
 	res := db.ReportFormat(tmp)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNReportFormat2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReportFormat(ctx context.Context, sel ast.SelectionSet, v db.ReportFormat) graphql.Marshaler {
+func (ec *executionContext) marshalNReportFormat2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReportFormat(ctx context.Context, sel ast.SelectionSet, v db.ReportFormat) graphql.Marshaler {
 	res := graphql.MarshalString(string(v))
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -45090,13 +45225,13 @@ func (ec *executionContext) marshalNReportFormat2githubᚗcomᚋdokeduᚋdokedu�
 	return res
 }
 
-func (ec *executionContext) unmarshalNReportKind2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReportKind(ctx context.Context, v interface{}) (db.ReportKind, error) {
+func (ec *executionContext) unmarshalNReportKind2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReportKind(ctx context.Context, v interface{}) (db.ReportKind, error) {
 	tmp, err := graphql.UnmarshalString(v)
 	res := db.ReportKind(tmp)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNReportKind2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReportKind(ctx context.Context, sel ast.SelectionSet, v db.ReportKind) graphql.Marshaler {
+func (ec *executionContext) marshalNReportKind2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReportKind(ctx context.Context, sel ast.SelectionSet, v db.ReportKind) graphql.Marshaler {
 	res := graphql.MarshalString(string(v))
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -45106,13 +45241,13 @@ func (ec *executionContext) marshalNReportKind2githubᚗcomᚋdokeduᚋdokeduᚋ
 	return res
 }
 
-func (ec *executionContext) unmarshalNReportStatus2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReportStatus(ctx context.Context, v interface{}) (db.ReportStatus, error) {
+func (ec *executionContext) unmarshalNReportStatus2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReportStatus(ctx context.Context, v interface{}) (db.ReportStatus, error) {
 	tmp, err := graphql.UnmarshalString(v)
 	res := db.ReportStatus(tmp)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNReportStatus2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReportStatus(ctx context.Context, sel ast.SelectionSet, v db.ReportStatus) graphql.Marshaler {
+func (ec *executionContext) marshalNReportStatus2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReportStatus(ctx context.Context, sel ast.SelectionSet, v db.ReportStatus) graphql.Marshaler {
 	res := graphql.MarshalString(string(v))
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -45141,11 +45276,11 @@ func (ec *executionContext) marshalNResetPasswordPayload2ᚖgithubᚗcomᚋdoked
 	return ec._ResetPasswordPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNSchoolYear2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSchoolYear(ctx context.Context, sel ast.SelectionSet, v db.SchoolYear) graphql.Marshaler {
+func (ec *executionContext) marshalNSchoolYear2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSchoolYear(ctx context.Context, sel ast.SelectionSet, v db.SchoolYear) graphql.Marshaler {
 	return ec._SchoolYear(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSchoolYear2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSchoolYearᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.SchoolYear) graphql.Marshaler {
+func (ec *executionContext) marshalNSchoolYear2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSchoolYearᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.SchoolYear) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -45169,7 +45304,7 @@ func (ec *executionContext) marshalNSchoolYear2ᚕᚖgithubᚗcomᚋdokeduᚋdok
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNSchoolYear2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSchoolYear(ctx, sel, v[i])
+			ret[i] = ec.marshalNSchoolYear2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSchoolYear(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -45189,7 +45324,7 @@ func (ec *executionContext) marshalNSchoolYear2ᚕᚖgithubᚗcomᚋdokeduᚋdok
 	return ret
 }
 
-func (ec *executionContext) marshalNSchoolYear2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSchoolYear(ctx context.Context, sel ast.SelectionSet, v *db.SchoolYear) graphql.Marshaler {
+func (ec *executionContext) marshalNSchoolYear2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSchoolYear(ctx context.Context, sel ast.SelectionSet, v *db.SchoolYear) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -45340,11 +45475,11 @@ func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel
 	return ret
 }
 
-func (ec *executionContext) marshalNSubject2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSubject(ctx context.Context, sel ast.SelectionSet, v db.Subject) graphql.Marshaler {
+func (ec *executionContext) marshalNSubject2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSubject(ctx context.Context, sel ast.SelectionSet, v db.Subject) graphql.Marshaler {
 	return ec._Subject(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSubject2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSubjectᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.Subject) graphql.Marshaler {
+func (ec *executionContext) marshalNSubject2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSubjectᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.Subject) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -45368,7 +45503,7 @@ func (ec *executionContext) marshalNSubject2ᚕᚖgithubᚗcomᚋdokeduᚋdokedu
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNSubject2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSubject(ctx, sel, v[i])
+			ret[i] = ec.marshalNSubject2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSubject(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -45388,7 +45523,7 @@ func (ec *executionContext) marshalNSubject2ᚕᚖgithubᚗcomᚋdokeduᚋdokedu
 	return ret
 }
 
-func (ec *executionContext) marshalNSubject2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐSubject(ctx context.Context, sel ast.SelectionSet, v *db.Subject) graphql.Marshaler {
+func (ec *executionContext) marshalNSubject2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSubject(ctx context.Context, sel ast.SelectionSet, v *db.Subject) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -45412,11 +45547,11 @@ func (ec *executionContext) marshalNSubjectConnection2ᚖgithubᚗcomᚋdokedu�
 	return ec._SubjectConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNTag2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐTag(ctx context.Context, sel ast.SelectionSet, v db.Tag) graphql.Marshaler {
+func (ec *executionContext) marshalNTag2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐTag(ctx context.Context, sel ast.SelectionSet, v db.Tag) graphql.Marshaler {
 	return ec._Tag(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTag2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐTagᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.Tag) graphql.Marshaler {
+func (ec *executionContext) marshalNTag2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐTagᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.Tag) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -45440,7 +45575,7 @@ func (ec *executionContext) marshalNTag2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋb
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNTag2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐTag(ctx, sel, v[i])
+			ret[i] = ec.marshalNTag2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐTag(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -45460,7 +45595,7 @@ func (ec *executionContext) marshalNTag2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋb
 	return ret
 }
 
-func (ec *executionContext) marshalNTag2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐTag(ctx context.Context, sel ast.SelectionSet, v *db.Tag) graphql.Marshaler {
+func (ec *executionContext) marshalNTag2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐTag(ctx context.Context, sel ast.SelectionSet, v *db.Tag) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -45614,11 +45749,11 @@ func (ec *executionContext) marshalNUploadFilesPayload2ᚖgithubᚗcomᚋdokedu�
 	return ec._UploadFilesPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx context.Context, sel ast.SelectionSet, v db.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx context.Context, sel ast.SelectionSet, v db.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.User) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -45642,7 +45777,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, sel, v[i])
+			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -45662,7 +45797,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx context.Context, sel ast.SelectionSet, v *db.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx context.Context, sel ast.SelectionSet, v *db.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -45672,11 +45807,11 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbac
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNUserAttendance2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserAttendance(ctx context.Context, sel ast.SelectionSet, v db.UserAttendance) graphql.Marshaler {
+func (ec *executionContext) marshalNUserAttendance2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserAttendance(ctx context.Context, sel ast.SelectionSet, v db.UserAttendance) graphql.Marshaler {
 	return ec._UserAttendance(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUserAttendance2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserAttendanceᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.UserAttendance) graphql.Marshaler {
+func (ec *executionContext) marshalNUserAttendance2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserAttendanceᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.UserAttendance) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -45700,7 +45835,7 @@ func (ec *executionContext) marshalNUserAttendance2ᚕᚖgithubᚗcomᚋdokedu�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUserAttendance2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserAttendance(ctx, sel, v[i])
+			ret[i] = ec.marshalNUserAttendance2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserAttendance(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -45720,7 +45855,7 @@ func (ec *executionContext) marshalNUserAttendance2ᚕᚖgithubᚗcomᚋdokedu�
 	return ret
 }
 
-func (ec *executionContext) marshalNUserAttendance2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserAttendance(ctx context.Context, sel ast.SelectionSet, v *db.UserAttendance) graphql.Marshaler {
+func (ec *executionContext) marshalNUserAttendance2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserAttendance(ctx context.Context, sel ast.SelectionSet, v *db.UserAttendance) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -45730,13 +45865,13 @@ func (ec *executionContext) marshalNUserAttendance2ᚖgithubᚗcomᚋdokeduᚋdo
 	return ec._UserAttendance(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNUserAttendanceState2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserAttendanceState(ctx context.Context, v interface{}) (db.UserAttendanceState, error) {
+func (ec *executionContext) unmarshalNUserAttendanceState2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserAttendanceState(ctx context.Context, v interface{}) (db.UserAttendanceState, error) {
 	tmp, err := graphql.UnmarshalString(v)
 	res := db.UserAttendanceState(tmp)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUserAttendanceState2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserAttendanceState(ctx context.Context, sel ast.SelectionSet, v db.UserAttendanceState) graphql.Marshaler {
+func (ec *executionContext) marshalNUserAttendanceState2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserAttendanceState(ctx context.Context, sel ast.SelectionSet, v db.UserAttendanceState) graphql.Marshaler {
 	res := graphql.MarshalString(string(v))
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -45746,11 +45881,11 @@ func (ec *executionContext) marshalNUserAttendanceState2githubᚗcomᚋdokeduᚋ
 	return res
 }
 
-func (ec *executionContext) marshalNUserCompetence2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserCompetence(ctx context.Context, sel ast.SelectionSet, v db.UserCompetence) graphql.Marshaler {
+func (ec *executionContext) marshalNUserCompetence2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserCompetence(ctx context.Context, sel ast.SelectionSet, v db.UserCompetence) graphql.Marshaler {
 	return ec._UserCompetence(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUserCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserCompetence(ctx context.Context, sel ast.SelectionSet, v []*db.UserCompetence) graphql.Marshaler {
+func (ec *executionContext) marshalNUserCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserCompetence(ctx context.Context, sel ast.SelectionSet, v []*db.UserCompetence) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -45774,7 +45909,7 @@ func (ec *executionContext) marshalNUserCompetence2ᚕᚖgithubᚗcomᚋdokedu�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOUserCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserCompetence(ctx, sel, v[i])
+			ret[i] = ec.marshalOUserCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserCompetence(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -45788,7 +45923,7 @@ func (ec *executionContext) marshalNUserCompetence2ᚕᚖgithubᚗcomᚋdokedu�
 	return ret
 }
 
-func (ec *executionContext) marshalNUserCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserCompetenceᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.UserCompetence) graphql.Marshaler {
+func (ec *executionContext) marshalNUserCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserCompetenceᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.UserCompetence) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -45812,7 +45947,7 @@ func (ec *executionContext) marshalNUserCompetence2ᚕᚖgithubᚗcomᚋdokedu�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUserCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserCompetence(ctx, sel, v[i])
+			ret[i] = ec.marshalNUserCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserCompetence(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -45832,7 +45967,7 @@ func (ec *executionContext) marshalNUserCompetence2ᚕᚖgithubᚗcomᚋdokedu�
 	return ret
 }
 
-func (ec *executionContext) marshalNUserCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserCompetence(ctx context.Context, sel ast.SelectionSet, v *db.UserCompetence) graphql.Marshaler {
+func (ec *executionContext) marshalNUserCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserCompetence(ctx context.Context, sel ast.SelectionSet, v *db.UserCompetence) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -45856,29 +45991,23 @@ func (ec *executionContext) marshalNUserConnection2ᚖgithubᚗcomᚋdokeduᚋdo
 	return ec._UserConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNUserLanguage2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserLanguage(ctx context.Context, v interface{}) (db.UserLanguage, error) {
-	tmp, err := graphql.UnmarshalString(v)
-	res := db.UserLanguage(tmp)
+func (ec *executionContext) unmarshalNUserLanguage2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUserLanguage(ctx context.Context, v interface{}) (model.UserLanguage, error) {
+	var res model.UserLanguage
+	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUserLanguage2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserLanguage(ctx context.Context, sel ast.SelectionSet, v db.UserLanguage) graphql.Marshaler {
-	res := graphql.MarshalString(string(v))
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
+func (ec *executionContext) marshalNUserLanguage2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUserLanguage(ctx context.Context, sel ast.SelectionSet, v model.UserLanguage) graphql.Marshaler {
+	return v
 }
 
-func (ec *executionContext) unmarshalNUserRole2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserRole(ctx context.Context, v interface{}) (db.UserRole, error) {
+func (ec *executionContext) unmarshalNUserRole2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserRole(ctx context.Context, v interface{}) (db.UserRole, error) {
 	tmp, err := graphql.UnmarshalString(v)
 	res := db.UserRole(tmp)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUserRole2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserRole(ctx context.Context, sel ast.SelectionSet, v db.UserRole) graphql.Marshaler {
+func (ec *executionContext) marshalNUserRole2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserRole(ctx context.Context, sel ast.SelectionSet, v db.UserRole) graphql.Marshaler {
 	res := graphql.MarshalString(string(v))
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -45888,11 +46017,11 @@ func (ec *executionContext) marshalNUserRole2githubᚗcomᚋdokeduᚋdokeduᚋba
 	return res
 }
 
-func (ec *executionContext) marshalNUserStudent2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserStudent(ctx context.Context, sel ast.SelectionSet, v db.UserStudent) graphql.Marshaler {
+func (ec *executionContext) marshalNUserStudent2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserStudent(ctx context.Context, sel ast.SelectionSet, v db.UserStudent) graphql.Marshaler {
 	return ec._UserStudent(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUserStudent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserStudent(ctx context.Context, sel ast.SelectionSet, v *db.UserStudent) graphql.Marshaler {
+func (ec *executionContext) marshalNUserStudent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserStudent(ctx context.Context, sel ast.SelectionSet, v *db.UserStudent) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -45916,11 +46045,11 @@ func (ec *executionContext) marshalNUserStudentConnection2ᚖgithubᚗcomᚋdoke
 	return ec._UserStudentConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNUserStudentGrades2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserStudentGrades(ctx context.Context, sel ast.SelectionSet, v db.UserStudentGrades) graphql.Marshaler {
+func (ec *executionContext) marshalNUserStudentGrades2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUserStudentGrades(ctx context.Context, sel ast.SelectionSet, v model.UserStudentGrades) graphql.Marshaler {
 	return ec._UserStudentGrades(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUserStudentGrades2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserStudentGradesᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.UserStudentGrades) graphql.Marshaler {
+func (ec *executionContext) marshalNUserStudentGrades2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUserStudentGradesᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.UserStudentGrades) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -45944,7 +46073,7 @@ func (ec *executionContext) marshalNUserStudentGrades2ᚕᚖgithubᚗcomᚋdoked
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUserStudentGrades2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserStudentGrades(ctx, sel, v[i])
+			ret[i] = ec.marshalNUserStudentGrades2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUserStudentGrades(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -45964,7 +46093,7 @@ func (ec *executionContext) marshalNUserStudentGrades2ᚕᚖgithubᚗcomᚋdoked
 	return ret
 }
 
-func (ec *executionContext) marshalNUserStudentGrades2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserStudentGrades(ctx context.Context, sel ast.SelectionSet, v *db.UserStudentGrades) graphql.Marshaler {
+func (ec *executionContext) marshalNUserStudentGrades2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUserStudentGrades(ctx context.Context, sel ast.SelectionSet, v *model.UserStudentGrades) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -46275,7 +46404,7 @@ func (ec *executionContext) unmarshalOBucketFilterInput2ᚖgithubᚗcomᚋdokedu
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOChat2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChat(ctx context.Context, sel ast.SelectionSet, v []*db.Chat) graphql.Marshaler {
+func (ec *executionContext) marshalOChat2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChat(ctx context.Context, sel ast.SelectionSet, v []*db.Chat) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -46302,7 +46431,7 @@ func (ec *executionContext) marshalOChat2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChat(ctx, sel, v[i])
+			ret[i] = ec.marshalOChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChat(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -46316,21 +46445,21 @@ func (ec *executionContext) marshalOChat2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalOChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChat(ctx context.Context, sel ast.SelectionSet, v *db.Chat) graphql.Marshaler {
+func (ec *executionContext) marshalOChat2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChat(ctx context.Context, sel ast.SelectionSet, v *db.Chat) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Chat(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOChatMessage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐChatMessage(ctx context.Context, sel ast.SelectionSet, v *db.ChatMessage) graphql.Marshaler {
+func (ec *executionContext) marshalOChatMessage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatMessage(ctx context.Context, sel ast.SelectionSet, v *db.ChatMessage) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._ChatMessage(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetence(ctx context.Context, sel ast.SelectionSet, v []*db.Competence) graphql.Marshaler {
+func (ec *executionContext) marshalOCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetence(ctx context.Context, sel ast.SelectionSet, v []*db.Competence) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -46357,7 +46486,7 @@ func (ec *executionContext) marshalOCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdok
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetence(ctx, sel, v[i])
+			ret[i] = ec.marshalOCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetence(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -46371,7 +46500,7 @@ func (ec *executionContext) marshalOCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdok
 	return ret
 }
 
-func (ec *executionContext) marshalOCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetence(ctx context.Context, sel ast.SelectionSet, v *db.Competence) graphql.Marshaler {
+func (ec *executionContext) marshalOCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetence(ctx context.Context, sel ast.SelectionSet, v *db.Competence) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -46401,7 +46530,7 @@ func (ec *executionContext) marshalOCompetenceTendency2ᚖgithubᚗcomᚋdokedu�
 	return ec._CompetenceTendency(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOCompetenceType2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetenceType(ctx context.Context, v interface{}) ([]*db.CompetenceType, error) {
+func (ec *executionContext) unmarshalOCompetenceType2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetenceType(ctx context.Context, v interface{}) ([]*db.CompetenceType, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -46413,7 +46542,7 @@ func (ec *executionContext) unmarshalOCompetenceType2ᚕᚖgithubᚗcomᚋdokedu
 	res := make([]*db.CompetenceType, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalOCompetenceType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetenceType(ctx, vSlice[i])
+		res[i], err = ec.unmarshalOCompetenceType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetenceType(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -46421,7 +46550,7 @@ func (ec *executionContext) unmarshalOCompetenceType2ᚕᚖgithubᚗcomᚋdokedu
 	return res, nil
 }
 
-func (ec *executionContext) marshalOCompetenceType2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetenceType(ctx context.Context, sel ast.SelectionSet, v []*db.CompetenceType) graphql.Marshaler {
+func (ec *executionContext) marshalOCompetenceType2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetenceType(ctx context.Context, sel ast.SelectionSet, v []*db.CompetenceType) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -46448,7 +46577,7 @@ func (ec *executionContext) marshalOCompetenceType2ᚕᚖgithubᚗcomᚋdokedu�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOCompetenceType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetenceType(ctx, sel, v[i])
+			ret[i] = ec.marshalOCompetenceType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetenceType(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -46462,7 +46591,7 @@ func (ec *executionContext) marshalOCompetenceType2ᚕᚖgithubᚗcomᚋdokedu�
 	return ret
 }
 
-func (ec *executionContext) unmarshalOCompetenceType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetenceType(ctx context.Context, v interface{}) (*db.CompetenceType, error) {
+func (ec *executionContext) unmarshalOCompetenceType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetenceType(ctx context.Context, v interface{}) (*db.CompetenceType, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -46471,7 +46600,7 @@ func (ec *executionContext) unmarshalOCompetenceType2ᚖgithubᚗcomᚋdokeduᚋ
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOCompetenceType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐCompetenceType(ctx context.Context, sel ast.SelectionSet, v *db.CompetenceType) graphql.Marshaler {
+func (ec *executionContext) marshalOCompetenceType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetenceType(ctx context.Context, sel ast.SelectionSet, v *db.CompetenceType) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -46479,7 +46608,7 @@ func (ec *executionContext) marshalOCompetenceType2ᚖgithubᚗcomᚋdokeduᚋdo
 	return res
 }
 
-func (ec *executionContext) marshalODomain2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐDomain(ctx context.Context, sel ast.SelectionSet, v []*db.Domain) graphql.Marshaler {
+func (ec *executionContext) marshalODomain2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐDomain(ctx context.Context, sel ast.SelectionSet, v []*db.Domain) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -46506,7 +46635,7 @@ func (ec *executionContext) marshalODomain2ᚕᚖgithubᚗcomᚋdokeduᚋdokedu�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalODomain2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐDomain(ctx, sel, v[i])
+			ret[i] = ec.marshalODomain2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐDomain(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -46520,7 +46649,7 @@ func (ec *executionContext) marshalODomain2ᚕᚖgithubᚗcomᚋdokeduᚋdokedu�
 	return ret
 }
 
-func (ec *executionContext) marshalODomain2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐDomain(ctx context.Context, sel ast.SelectionSet, v *db.Domain) graphql.Marshaler {
+func (ec *executionContext) marshalODomain2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐDomain(ctx context.Context, sel ast.SelectionSet, v *db.Domain) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -46534,7 +46663,7 @@ func (ec *executionContext) marshalODomainConnection2ᚖgithubᚗcomᚋdokeduᚋ
 	return ec._DomainConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOEmail2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmail(ctx context.Context, sel ast.SelectionSet, v []*db.Email) graphql.Marshaler {
+func (ec *executionContext) marshalOEmail2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmail(ctx context.Context, sel ast.SelectionSet, v []*db.Email) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -46561,7 +46690,7 @@ func (ec *executionContext) marshalOEmail2ᚕᚖgithubᚗcomᚋdokeduᚋdokedu�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOEmail2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmail(ctx, sel, v[i])
+			ret[i] = ec.marshalOEmail2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmail(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -46575,14 +46704,14 @@ func (ec *executionContext) marshalOEmail2ᚕᚖgithubᚗcomᚋdokeduᚋdokedu�
 	return ret
 }
 
-func (ec *executionContext) marshalOEmail2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmail(ctx context.Context, sel ast.SelectionSet, v *db.Email) graphql.Marshaler {
+func (ec *executionContext) marshalOEmail2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmail(ctx context.Context, sel ast.SelectionSet, v *db.Email) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Email(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOEmailAccount2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccount(ctx context.Context, sel ast.SelectionSet, v []*db.EmailAccount) graphql.Marshaler {
+func (ec *executionContext) marshalOEmailAccount2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx context.Context, sel ast.SelectionSet, v []*db.EmailAccount) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -46609,7 +46738,7 @@ func (ec *executionContext) marshalOEmailAccount2ᚕᚖgithubᚗcomᚋdokeduᚋd
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccount(ctx, sel, v[i])
+			ret[i] = ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -46623,7 +46752,7 @@ func (ec *executionContext) marshalOEmailAccount2ᚕᚖgithubᚗcomᚋdokeduᚋd
 	return ret
 }
 
-func (ec *executionContext) marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccount(ctx context.Context, sel ast.SelectionSet, v *db.EmailAccount) graphql.Marshaler {
+func (ec *executionContext) marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx context.Context, sel ast.SelectionSet, v *db.EmailAccount) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -46645,21 +46774,20 @@ func (ec *executionContext) unmarshalOEmailAccountFilter2ᚖgithubᚗcomᚋdoked
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOEmailAccountType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccountType(ctx context.Context, v interface{}) (*db.EmailAccountType, error) {
+func (ec *executionContext) unmarshalOEmailAccountType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountType(ctx context.Context, v interface{}) (*model.EmailAccountType, error) {
 	if v == nil {
 		return nil, nil
 	}
-	tmp, err := graphql.UnmarshalString(v)
-	res := db.EmailAccountType(tmp)
-	return &res, graphql.ErrorOnPath(ctx, err)
+	var res = new(model.EmailAccountType)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOEmailAccountType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailAccountType(ctx context.Context, sel ast.SelectionSet, v *db.EmailAccountType) graphql.Marshaler {
+func (ec *executionContext) marshalOEmailAccountType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountType(ctx context.Context, sel ast.SelectionSet, v *model.EmailAccountType) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	res := graphql.MarshalString(string(*v))
-	return res
+	return v
 }
 
 func (ec *executionContext) marshalOEmailConnection2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailConnection(ctx context.Context, sel ast.SelectionSet, v *model.EmailConnection) graphql.Marshaler {
@@ -46669,7 +46797,7 @@ func (ec *executionContext) marshalOEmailConnection2ᚖgithubᚗcomᚋdokeduᚋd
 	return ec._EmailConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOEmailForwarding2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailForwarding(ctx context.Context, sel ast.SelectionSet, v []*db.EmailForwarding) graphql.Marshaler {
+func (ec *executionContext) marshalOEmailForwarding2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailForwarding(ctx context.Context, sel ast.SelectionSet, v []*db.EmailForwarding) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -46696,7 +46824,7 @@ func (ec *executionContext) marshalOEmailForwarding2ᚕᚖgithubᚗcomᚋdokedu�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOEmailForwarding2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailForwarding(ctx, sel, v[i])
+			ret[i] = ec.marshalOEmailForwarding2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailForwarding(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -46710,7 +46838,7 @@ func (ec *executionContext) marshalOEmailForwarding2ᚕᚖgithubᚗcomᚋdokedu�
 	return ret
 }
 
-func (ec *executionContext) marshalOEmailForwarding2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailForwarding(ctx context.Context, sel ast.SelectionSet, v *db.EmailForwarding) graphql.Marshaler {
+func (ec *executionContext) marshalOEmailForwarding2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailForwarding(ctx context.Context, sel ast.SelectionSet, v *db.EmailForwarding) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -46724,7 +46852,7 @@ func (ec *executionContext) marshalOEmailForwardingConnection2ᚖgithubᚗcomᚋ
 	return ec._EmailForwardingConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOEmailGroupMember2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailGroupMember(ctx context.Context, sel ast.SelectionSet, v []*db.EmailGroupMember) graphql.Marshaler {
+func (ec *executionContext) marshalOEmailGroupMember2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailGroupMember(ctx context.Context, sel ast.SelectionSet, v []*db.EmailGroupMember) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -46751,7 +46879,7 @@ func (ec *executionContext) marshalOEmailGroupMember2ᚕᚖgithubᚗcomᚋdokedu
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOEmailGroupMember2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailGroupMember(ctx, sel, v[i])
+			ret[i] = ec.marshalOEmailGroupMember2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailGroupMember(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -46765,7 +46893,7 @@ func (ec *executionContext) marshalOEmailGroupMember2ᚕᚖgithubᚗcomᚋdokedu
 	return ret
 }
 
-func (ec *executionContext) marshalOEmailGroupMember2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEmailGroupMember(ctx context.Context, sel ast.SelectionSet, v *db.EmailGroupMember) graphql.Marshaler {
+func (ec *executionContext) marshalOEmailGroupMember2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailGroupMember(ctx context.Context, sel ast.SelectionSet, v *db.EmailGroupMember) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -46779,7 +46907,7 @@ func (ec *executionContext) marshalOEmailGroupMemberConnection2ᚖgithubᚗcom�
 	return ec._EmailGroupMemberConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEntry(ctx context.Context, sel ast.SelectionSet, v *db.Entry) graphql.Marshaler {
+func (ec *executionContext) marshalOEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx context.Context, sel ast.SelectionSet, v *db.Entry) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -46810,7 +46938,7 @@ func (ec *executionContext) marshalOEntrySortBy2ᚖgithubᚗcomᚋdokeduᚋdoked
 	return v
 }
 
-func (ec *executionContext) marshalOEvent2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEvent(ctx context.Context, sel ast.SelectionSet, v []*db.Event) graphql.Marshaler {
+func (ec *executionContext) marshalOEvent2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEvent(ctx context.Context, sel ast.SelectionSet, v []*db.Event) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -46837,7 +46965,7 @@ func (ec *executionContext) marshalOEvent2ᚕᚖgithubᚗcomᚋdokeduᚋdokedu�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOEvent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEvent(ctx, sel, v[i])
+			ret[i] = ec.marshalOEvent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEvent(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -46851,7 +46979,7 @@ func (ec *executionContext) marshalOEvent2ᚕᚖgithubᚗcomᚋdokeduᚋdokedu�
 	return ret
 }
 
-func (ec *executionContext) marshalOEvent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐEvent(ctx context.Context, sel ast.SelectionSet, v *db.Event) graphql.Marshaler {
+func (ec *executionContext) marshalOEvent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEvent(ctx context.Context, sel ast.SelectionSet, v *db.Event) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -46889,27 +47017,28 @@ func (ec *executionContext) marshalOExportEventsPayload2ᚖgithubᚗcomᚋdokedu
 	return ec._ExportEventsPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐFile(ctx context.Context, sel ast.SelectionSet, v *db.File) graphql.Marshaler {
+func (ec *executionContext) marshalOFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx context.Context, sel ast.SelectionSet, v *db.File) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._File(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOFilePermission2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFilePermission(ctx context.Context, v interface{}) (*model.FilePermission, error) {
+func (ec *executionContext) unmarshalOFilePermission2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx context.Context, v interface{}) (*db.FilePermission, error) {
 	if v == nil {
 		return nil, nil
 	}
-	var res = new(model.FilePermission)
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
+	tmp, err := graphql.UnmarshalString(v)
+	res := db.FilePermission(tmp)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOFilePermission2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFilePermission(ctx context.Context, sel ast.SelectionSet, v *model.FilePermission) graphql.Marshaler {
+func (ec *executionContext) marshalOFilePermission2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx context.Context, sel ast.SelectionSet, v *db.FilePermission) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return v
+	res := graphql.MarshalString(string(*v))
+	return res
 }
 
 func (ec *executionContext) unmarshalOFilesFilterInput2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFilesFilterInput(ctx context.Context, v interface{}) (*model.FilesFilterInput, error) {
@@ -46968,16 +47097,6 @@ func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalOInt2int(ctx context.Context, v interface{}) (int, error) {
-	res, err := graphql.UnmarshalInt(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
-	res := graphql.MarshalInt(v)
-	return res
-}
-
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
 	if v == nil {
 		return nil, nil
@@ -46994,14 +47113,14 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return res
 }
 
-func (ec *executionContext) marshalOOrganisation2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐOrganisation(ctx context.Context, sel ast.SelectionSet, v *db.Organisation) graphql.Marshaler {
+func (ec *executionContext) marshalOOrganisation2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐOrganisation(ctx context.Context, sel ast.SelectionSet, v *db.Organisation) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Organisation(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOReport2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReport(ctx context.Context, sel ast.SelectionSet, v []*db.Report) graphql.Marshaler {
+func (ec *executionContext) marshalOReport2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReport(ctx context.Context, sel ast.SelectionSet, v []*db.Report) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -47028,7 +47147,7 @@ func (ec *executionContext) marshalOReport2ᚕᚖgithubᚗcomᚋdokeduᚋdokedu�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOReport2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReport(ctx, sel, v[i])
+			ret[i] = ec.marshalOReport2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReport(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -47042,7 +47161,7 @@ func (ec *executionContext) marshalOReport2ᚕᚖgithubᚗcomᚋdokeduᚋdokedu�
 	return ret
 }
 
-func (ec *executionContext) marshalOReport2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐReport(ctx context.Context, sel ast.SelectionSet, v *db.Report) graphql.Marshaler {
+func (ec *executionContext) marshalOReport2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐReport(ctx context.Context, sel ast.SelectionSet, v *db.Report) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -47194,7 +47313,7 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalOTag2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐTag(ctx context.Context, sel ast.SelectionSet, v []*db.Tag) graphql.Marshaler {
+func (ec *executionContext) marshalOTag2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐTag(ctx context.Context, sel ast.SelectionSet, v []*db.Tag) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -47221,7 +47340,7 @@ func (ec *executionContext) marshalOTag2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋb
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOTag2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐTag(ctx, sel, v[i])
+			ret[i] = ec.marshalOTag2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐTag(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -47235,7 +47354,7 @@ func (ec *executionContext) marshalOTag2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋb
 	return ret
 }
 
-func (ec *executionContext) marshalOTag2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐTag(ctx context.Context, sel ast.SelectionSet, v *db.Tag) graphql.Marshaler {
+func (ec *executionContext) marshalOTag2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐTag(ctx context.Context, sel ast.SelectionSet, v *db.Tag) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -47274,7 +47393,7 @@ func (ec *executionContext) marshalOUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 	return res
 }
 
-func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx context.Context, sel ast.SelectionSet, v []*db.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx context.Context, sel ast.SelectionSet, v []*db.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -47301,7 +47420,7 @@ func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, sel, v[i])
+			ret[i] = ec.marshalOUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -47315,14 +47434,14 @@ func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx context.Context, sel ast.SelectionSet, v *db.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx context.Context, sel ast.SelectionSet, v *db.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOUserCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserCompetence(ctx context.Context, sel ast.SelectionSet, v []*db.UserCompetence) graphql.Marshaler {
+func (ec *executionContext) marshalOUserCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserCompetence(ctx context.Context, sel ast.SelectionSet, v []*db.UserCompetence) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -47349,7 +47468,7 @@ func (ec *executionContext) marshalOUserCompetence2ᚕᚖgithubᚗcomᚋdokedu�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOUserCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserCompetence(ctx, sel, v[i])
+			ret[i] = ec.marshalOUserCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserCompetence(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -47363,7 +47482,7 @@ func (ec *executionContext) marshalOUserCompetence2ᚕᚖgithubᚗcomᚋdokedu�
 	return ret
 }
 
-func (ec *executionContext) marshalOUserCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserCompetence(ctx context.Context, sel ast.SelectionSet, v *db.UserCompetence) graphql.Marshaler {
+func (ec *executionContext) marshalOUserCompetence2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserCompetence(ctx context.Context, sel ast.SelectionSet, v *db.UserCompetence) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -47378,15 +47497,20 @@ func (ec *executionContext) unmarshalOUserFilterInput2ᚖgithubᚗcomᚋdokedu�
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOUserLanguage2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserLanguage(ctx context.Context, v interface{}) (db.UserLanguage, error) {
-	tmp, err := graphql.UnmarshalString(v)
-	res := db.UserLanguage(tmp)
+func (ec *executionContext) unmarshalOUserLanguage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUserLanguage(ctx context.Context, v interface{}) (*model.UserLanguage, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.UserLanguage)
+	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOUserLanguage2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserLanguage(ctx context.Context, sel ast.SelectionSet, v db.UserLanguage) graphql.Marshaler {
-	res := graphql.MarshalString(string(v))
-	return res
+func (ec *executionContext) marshalOUserLanguage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUserLanguage(ctx context.Context, sel ast.SelectionSet, v *model.UserLanguage) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalOUserOrderBy2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUserOrderBy(ctx context.Context, v interface{}) (*model.UserOrderBy, error) {
@@ -47405,7 +47529,7 @@ func (ec *executionContext) marshalOUserOrderBy2ᚖgithubᚗcomᚋdokeduᚋdoked
 	return v
 }
 
-func (ec *executionContext) unmarshalOUserRole2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserRole(ctx context.Context, v interface{}) ([]*db.UserRole, error) {
+func (ec *executionContext) unmarshalOUserRole2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserRole(ctx context.Context, v interface{}) ([]*db.UserRole, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -47417,7 +47541,7 @@ func (ec *executionContext) unmarshalOUserRole2ᚕᚖgithubᚗcomᚋdokeduᚋdok
 	res := make([]*db.UserRole, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalOUserRole2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserRole(ctx, vSlice[i])
+		res[i], err = ec.unmarshalOUserRole2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserRole(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -47425,7 +47549,7 @@ func (ec *executionContext) unmarshalOUserRole2ᚕᚖgithubᚗcomᚋdokeduᚋdok
 	return res, nil
 }
 
-func (ec *executionContext) marshalOUserRole2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserRole(ctx context.Context, sel ast.SelectionSet, v []*db.UserRole) graphql.Marshaler {
+func (ec *executionContext) marshalOUserRole2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserRole(ctx context.Context, sel ast.SelectionSet, v []*db.UserRole) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -47452,7 +47576,7 @@ func (ec *executionContext) marshalOUserRole2ᚕᚖgithubᚗcomᚋdokeduᚋdoked
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOUserRole2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserRole(ctx, sel, v[i])
+			ret[i] = ec.marshalOUserRole2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserRole(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -47466,7 +47590,7 @@ func (ec *executionContext) marshalOUserRole2ᚕᚖgithubᚗcomᚋdokeduᚋdoked
 	return ret
 }
 
-func (ec *executionContext) unmarshalOUserRole2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserRole(ctx context.Context, v interface{}) (*db.UserRole, error) {
+func (ec *executionContext) unmarshalOUserRole2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserRole(ctx context.Context, v interface{}) (*db.UserRole, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -47475,7 +47599,7 @@ func (ec *executionContext) unmarshalOUserRole2ᚖgithubᚗcomᚋdokeduᚋdokedu
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOUserRole2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserRole(ctx context.Context, sel ast.SelectionSet, v *db.UserRole) graphql.Marshaler {
+func (ec *executionContext) marshalOUserRole2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserRole(ctx context.Context, sel ast.SelectionSet, v *db.UserRole) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -47483,7 +47607,7 @@ func (ec *executionContext) marshalOUserRole2ᚖgithubᚗcomᚋdokeduᚋdokedu�
 	return res
 }
 
-func (ec *executionContext) marshalOUserStudent2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserStudent(ctx context.Context, sel ast.SelectionSet, v []*db.UserStudent) graphql.Marshaler {
+func (ec *executionContext) marshalOUserStudent2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserStudent(ctx context.Context, sel ast.SelectionSet, v []*db.UserStudent) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -47510,7 +47634,7 @@ func (ec *executionContext) marshalOUserStudent2ᚕᚖgithubᚗcomᚋdokeduᚋdo
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOUserStudent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserStudent(ctx, sel, v[i])
+			ret[i] = ec.marshalOUserStudent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserStudent(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -47524,7 +47648,7 @@ func (ec *executionContext) marshalOUserStudent2ᚕᚖgithubᚗcomᚋdokeduᚋdo
 	return ret
 }
 
-func (ec *executionContext) marshalOUserStudent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUserStudent(ctx context.Context, sel ast.SelectionSet, v *db.UserStudent) graphql.Marshaler {
+func (ec *executionContext) marshalOUserStudent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserStudent(ctx context.Context, sel ast.SelectionSet, v *db.UserStudent) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

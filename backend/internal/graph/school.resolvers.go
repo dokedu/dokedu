@@ -10,16 +10,17 @@ import (
 	"slices"
 	"time"
 
+	db1 "github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/db"
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 	"github.com/uptrace/bun"
-	"github.com/xuri/excelize/v2"
+	excelize "github.com/xuri/excelize/v2"
 )
 
 // CreateSubject is the resolver for the createSubject field.
-func (r *mutationResolver) CreateSubject(ctx context.Context, input model.CreateSubjectInput) (*db.Subject, error) {
+func (r *mutationResolver) CreateSubject(ctx context.Context, input model.CreateSubjectInput) (*db1.Subject, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, err
@@ -38,7 +39,7 @@ func (r *mutationResolver) CreateSubject(ctx context.Context, input model.Create
 }
 
 // UpdateSubject is the resolver for the updateSubject field.
-func (r *mutationResolver) UpdateSubject(ctx context.Context, input model.UpdateSubjectInput) (*db.Subject, error) {
+func (r *mutationResolver) UpdateSubject(ctx context.Context, input model.UpdateSubjectInput) (*db1.Subject, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, err
@@ -55,7 +56,7 @@ func (r *mutationResolver) UpdateSubject(ctx context.Context, input model.Update
 }
 
 // DeleteSubject is the resolver for the deleteSubject field.
-func (r *mutationResolver) DeleteSubject(ctx context.Context, id string) (*db.Subject, error) {
+func (r *mutationResolver) DeleteSubject(ctx context.Context, id string) (*db1.Subject, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, err
@@ -71,7 +72,7 @@ func (r *mutationResolver) DeleteSubject(ctx context.Context, id string) (*db.Su
 }
 
 // CreateSchoolYear is the resolver for the createSchoolYear field.
-func (r *mutationResolver) CreateSchoolYear(ctx context.Context, input model.CreateSchoolYearInput) (*db.SchoolYear, error) {
+func (r *mutationResolver) CreateSchoolYear(ctx context.Context, input model.CreateSchoolYearInput) (*db1.SchoolYear, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, err
@@ -90,7 +91,7 @@ func (r *mutationResolver) CreateSchoolYear(ctx context.Context, input model.Cre
 }
 
 // UpdateSchoolYear is the resolver for the updateSchoolYear field.
-func (r *mutationResolver) UpdateSchoolYear(ctx context.Context, input model.UpdateSchoolYearInput) (*db.SchoolYear, error) {
+func (r *mutationResolver) UpdateSchoolYear(ctx context.Context, input model.UpdateSchoolYearInput) (*db1.SchoolYear, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, err
@@ -107,7 +108,7 @@ func (r *mutationResolver) UpdateSchoolYear(ctx context.Context, input model.Upd
 }
 
 // DeleteSchoolYear is the resolver for the deleteSchoolYear field.
-func (r *mutationResolver) DeleteSchoolYear(ctx context.Context, id string) (*db.SchoolYear, error) {
+func (r *mutationResolver) DeleteSchoolYear(ctx context.Context, id string) (*db1.SchoolYear, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, err
@@ -123,7 +124,7 @@ func (r *mutationResolver) DeleteSchoolYear(ctx context.Context, id string) (*db
 }
 
 // UpdateUserStudentGrade is the resolver for the updateUserStudentGrade field.
-func (r *mutationResolver) UpdateUserStudentGrade(ctx context.Context, input model.UpdateUserStudentGradesInput) (*db.UserStudentGrades, error) {
+func (r *mutationResolver) UpdateUserStudentGrade(ctx context.Context, input model.UpdateUserStudentGradesInput) (*model.UserStudentGrades, error) {
 	panic(fmt.Errorf("not implemented: UpdateUserStudentGrade - updateUserStudentGrade"))
 }
 
@@ -306,7 +307,7 @@ func (r *queryResolver) Subjects(ctx context.Context, limit *int, offset *int) (
 }
 
 // Subject is the resolver for the subject field.
-func (r *queryResolver) Subject(ctx context.Context, id string) (*db.Subject, error) {
+func (r *queryResolver) Subject(ctx context.Context, id string) (*db1.Subject, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, err
@@ -362,7 +363,7 @@ func (r *queryResolver) SchoolYears(ctx context.Context, limit *int, offset *int
 }
 
 // SchoolYear is the resolver for the SchoolYear field.
-func (r *queryResolver) SchoolYear(ctx context.Context, id string) (*db.SchoolYear, error) {
+func (r *queryResolver) SchoolYear(ctx context.Context, id string) (*db1.SchoolYear, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, err
@@ -411,7 +412,7 @@ func (r *queryResolver) UserStudentGrades(ctx context.Context, limit *int, offse
 }
 
 // UserStudentGrade is the resolver for the userStudentGrade field.
-func (r *queryResolver) UserStudentGrade(ctx context.Context, id string) (*db.UserStudentGrades, error) {
+func (r *queryResolver) UserStudentGrade(ctx context.Context, id string) (*model.UserStudentGrades, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, err
@@ -426,7 +427,22 @@ func (r *queryResolver) UserStudentGrade(ctx context.Context, id string) (*db.Us
 	return &userStudentGrade, nil
 }
 
-// Student is the resolver for the student field.
+// Description is the resolver for the description field.
+func (r *schoolYearResolver) Description(ctx context.Context, obj *db1.SchoolYear) (string, error) {
+	panic(fmt.Errorf("not implemented: Description - description"))
+}
+
+// SchoolYear returns SchoolYearResolver implementation.
+func (r *Resolver) SchoolYear() SchoolYearResolver { return &schoolYearResolver{r} }
+
+type schoolYearResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
 func (r *userStudentGradesResolver) Student(ctx context.Context, obj *db.UserStudentGrades) (*db.UserStudent, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
@@ -441,8 +457,6 @@ func (r *userStudentGradesResolver) Student(ctx context.Context, obj *db.UserStu
 
 	return &student, nil
 }
-
-// Subject is the resolver for the subject field.
 func (r *userStudentGradesResolver) Subject(ctx context.Context, obj *db.UserStudentGrades) (*db.Subject, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
@@ -457,8 +471,6 @@ func (r *userStudentGradesResolver) Subject(ctx context.Context, obj *db.UserStu
 
 	return &subject, nil
 }
-
-// SchoolYear is the resolver for the schoolYear field.
 func (r *userStudentGradesResolver) SchoolYear(ctx context.Context, obj *db.UserStudentGrades) (*db.SchoolYear, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
@@ -473,20 +485,12 @@ func (r *userStudentGradesResolver) SchoolYear(ctx context.Context, obj *db.User
 
 	return &schoolYear, nil
 }
-
-// UserStudentGrades returns UserStudentGradesResolver implementation.
 func (r *Resolver) UserStudentGrades() UserStudentGradesResolver {
 	return &userStudentGradesResolver{r}
 }
 
 type userStudentGradesResolver struct{ *Resolver }
 
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//     it when you're done.
-//   - You have helper methods in this file. Move them out to keep these resolver files clean.
 func (r *mutationResolver) createUserFromRow(row []string, organisationID string) *db.User {
 	var user db.User
 	user.FirstName = row[0]

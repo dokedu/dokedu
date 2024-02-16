@@ -21,8 +21,6 @@ type ChatUser {
     id: ID!
     chat: Chat!
     user: User!
-    createdAt: Time!
-    deletedAt: Time
 }
 
 type ChatMessage {

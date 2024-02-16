@@ -42,11 +42,44 @@ func (q *Queries) UserByEmail(ctx context.Context, email pgtype.Text) (User, err
 const userById = `-- name: UserById :one
 SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
 FROM users
+WHERE id = $1 AND organisation_id = $2
+`
+
+type UserByIdParams struct {
+	ID             string `db:"id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) UserById(ctx context.Context, arg UserByIdParams) (User, error) {
+	row := q.db.QueryRow(ctx, userById, arg.ID, arg.OrganisationID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Role,
+		&i.OrganisationID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Password,
+		&i.RecoveryToken,
+		&i.RecoverySentAt,
+		&i.AvatarFileID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.Language,
+		&i.Sex,
+	)
+	return i, err
+}
+
+const userById_NORG = `-- name: UserById_NORG :one
+SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
+FROM users
 WHERE id = $1
 `
 
-func (q *Queries) UserById(ctx context.Context, id string) (User, error) {
-	row := q.db.QueryRow(ctx, userById, id)
+func (q *Queries) UserById_NORG(ctx context.Context, id string) (User, error) {
+	row := q.db.QueryRow(ctx, userById_NORG, id)
 	var i User
 	err := row.Scan(
 		&i.ID,

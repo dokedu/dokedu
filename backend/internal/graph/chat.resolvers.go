@@ -9,14 +9,16 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"strings"
+	"github.com/dokedu/dokedu/backend/internal/msg"
+	"github.com/jackc/pgx/v5/pgtype"
 	"time"
 
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/dataloaders"
-	"github.com/dokedu/dokedu/backend/internal/db"
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
+	"github.com/samber/lo"
 	"github.com/uptrace/bun"
 )
 
@@ -27,16 +29,13 @@ func (r *chatResolver) Name(ctx context.Context, obj *db.Chat) (*string, error) 
 		return nil, nil
 	}
 
-	if obj.Type == db.ChatTypePrivate {
-		var user db.User
-		err = r.DB.NewSelect().
-			Column("id", "first_name", "last_name").
-			Model(&user).
-			Join("LEFT JOIN chat_users ON chat_users.user_id = \"user\".id").
-			Where("chat_users.user_id <> ?", currentUser.ID).
-			Where("chat_users.chat_id = ?", obj.ID).
-			Where("\"user\".organisation_id = ?", currentUser.OrganisationID).
-			Scan(ctx)
+	if obj.Type.Valid && obj.Type.ChatType == db.ChatTypePrivate {
+		user, err := r.DB.ChatNameWithAuthByChatId(ctx, db.ChatNameWithAuthByChatIdParams{
+			ChatID:         obj.ID,
+			UserID:         currentUser.ID,
+			OrganisationID: currentUser.OrganisationID,
+		})
+
 		if err != nil {
 			return nil, err
 		}
@@ -56,25 +55,17 @@ func (r *chatResolver) Users(ctx context.Context, obj *db.Chat) ([]*db.User, err
 		return nil, nil
 	}
 
-	var users []*db.User
-	err = r.DB.NewSelect().
-		Model(&users).
-		Join("JOIN chat_users ON chat_users.user_id = \"user\".id").
-		Where("chat_users.chat_id = ?", obj.ID).
-		Where("\"user\".organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
+	users, err := r.DB.UserListByChatId(ctx, db.UserListByChatIdParams{
+		ChatID:         obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 
-	return users, nil
+	return lo.ToSlicePtr(users), err
 }
 
 // Type is the resolver for the type field.
 func (r *chatResolver) Type(ctx context.Context, obj *db.Chat) (db.ChatType, error) {
-	//return obj.Type, nil
-	// return as uppercase
-	return db.ChatType(strings.ToUpper(string(obj.Type))), nil
+	return obj.Type.ChatType, nil
 }
 
 // Messages is the resolver for the messages field.
@@ -84,18 +75,11 @@ func (r *chatResolver) Messages(ctx context.Context, obj *db.Chat) ([]*db.ChatMe
 		return nil, nil
 	}
 
-	var messages []*db.ChatMessage
-	err = r.DB.NewSelect().
-		Model(&messages).
-		Where("chat_id = ?", obj.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Order("created_at ASC").
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return messages, nil
+	messages, err := r.DB.ChatMessageListByChatId(ctx, db.ChatMessageListByChatIdParams{
+		ChatID:         obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	return lo.ToSlicePtr(messages), err
 }
 
 // LastMessage is the resolver for the lastMessage field.
@@ -105,14 +89,10 @@ func (r *chatResolver) LastMessage(ctx context.Context, obj *db.Chat) (*db.ChatM
 		return nil, nil
 	}
 
-	var chatMessage db.ChatMessage
-	err = r.DB.NewSelect().
-		Model(&chatMessage).
-		Where("chat_id = ?", obj.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Order("created_at DESC").
-		Limit(1).
-		Scan(ctx)
+	chatMessage, err := r.DB.LastChatMessage(ctx, db.LastChatMessageParams{
+		ChatID:         obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -135,32 +115,25 @@ func (r *chatResolver) UnreadMessageCount(ctx context.Context, obj *db.Chat) (in
 		return 0, nil
 	}
 
-	chatMessageViewCount, err := r.DB.NewSelect().
-		Model(&db.ChatMessage{}).
-		Where("chat_message.chat_id = ?", obj.ID).
-		Where("chat_message.user_id <> ?", currentUser.ID).
-		Where("chat_message.organisation_id = ?", currentUser.OrganisationID).
-		Where("cmv.chat_message_id IS NULL").
-		Join("LEFT JOIN chat_message_views cmv ON cmv.chat_message_id = chat_message.id AND cmv.user_id = ?", currentUser.ID).
-		Count(ctx)
+	chatMessageViewCount, err := r.DB.UnreadMessageCount(ctx, db.UnreadMessageCountParams{
+		ChatID:         obj.ID,
+		UserID:         currentUser.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return 0, errors.New("unable to get unread message count")
 	}
 
-	return chatMessageViewCount, nil
+	return int(chatMessageViewCount), nil
 }
 
 // UserCount is the resolver for the userCount field.
 func (r *chatResolver) UserCount(ctx context.Context, obj *db.Chat) (int, error) {
-	count, err := r.DB.NewSelect().
-		Model(&db.ChatUser{}).
-		Where("chat_id = ?", obj.ID).
-		Count(ctx)
-	if err != nil {
-		return 0, err
-	}
-
-	return count, nil
+	count, err := r.DB.UserCountByChatId(ctx, db.UserCountByChatIdParams{
+		ChatID:         obj.ID,
+		OrganisationID: obj.OrganisationID,
+	})
+	return int(count), err
 }
 
 // Chat is the resolver for the chat field.
@@ -170,18 +143,11 @@ func (r *chatMessageResolver) Chat(ctx context.Context, obj *db.ChatMessage) (*d
 		return nil, nil
 	}
 
-	var chat db.Chat
-	err = r.DB.NewSelect().
-		Model(&chat).
-		Where("chat.id = ?", obj.ChatID).
-		Join("LEFT JOIN chat_users ON chat_users.chat_id = chat.id").
-		Where("chat.organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-	if err != nil {
-		return nil, errors.New("chat not found")
-	}
-
-	return &chat, nil
+	chat, err := r.DB.ChatById(ctx, db.ChatByIdParams{
+		ID:             obj.ChatID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	return &chat, err
 }
 
 // User is the resolver for the user field.
@@ -196,11 +162,7 @@ func (r *chatMessageResolver) User(ctx context.Context, obj *db.ChatMessage) (*d
 
 // IsEdited is the resolver for the isEdited field.
 func (r *chatMessageResolver) IsEdited(ctx context.Context, obj *db.ChatMessage) (bool, error) {
-	if obj.UpdatedAt.IsZero() {
-		return false, nil
-	}
-
-	return true, nil
+	return obj.UpdatedAt.Valid, nil
 }
 
 // IsSeen is the resolver for the isSeen field.
@@ -223,17 +185,11 @@ func (r *chatUserResolver) Chat(ctx context.Context, obj *db.ChatUser) (*db.Chat
 		return nil, nil
 	}
 
-	var chat db.Chat
-	err = r.DB.NewSelect().
-		Model(&chat).
-		Where("id = ?", obj.ChatID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &chat, nil
+	chat, err := r.DB.ChatById(ctx, db.ChatByIdParams{
+		ID:             obj.ChatID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	return &chat, err
 }
 
 // User is the resolver for the user field.
@@ -246,50 +202,37 @@ func (r *chatUserResolver) User(ctx context.Context, obj *db.ChatUser) (*db.User
 	return dataloaders.GetUser(ctx, obj.UserID, currentUser)
 }
 
-// CreatedAt is the resolver for the createdAt field.
-func (r *chatUserResolver) CreatedAt(ctx context.Context, obj *db.ChatUser) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: CreatedAt - createdAt"))
-}
-
-// DeletedAt is the resolver for the deletedAt field.
-func (r *chatUserResolver) DeletedAt(ctx context.Context, obj *db.ChatUser) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
-}
-
 // CreateChat is the resolver for the createChat field.
 func (r *mutationResolver) CreateChat(ctx context.Context, input model.CreateChatInput) (*db.Chat, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
-		return nil, nil
+		return nil, msg.ErrUnauthorized
 	}
 
-	var chat db.Chat
-	chat.Name = sql.NullString{
-		String: *input.Name,
-		Valid:  true,
+	tx, err := r.DB.DB.Begin(ctx)
+	if err != nil {
+		return nil, err
 	}
+	defer tx.Rollback(ctx)
 
-	chat.Type = db.ChatTypeGroup
-	chat.OrganisationID = currentUser.OrganisationID
+	qtx := r.DB.WithTx(tx)
 
-	err = r.DB.NewInsert().
-		Model(&chat).
-		Returning("*").
-		Scan(ctx)
+	chat, err := qtx.CreateChat(ctx, db.CreateChatParams{
+		Name:           pgtype.Text{String: *input.Name, Valid: true},
+		Type:           db.NullChatType{ChatType: db.ChatTypeGroup, Valid: true},
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	_, err = qtx.CreateChatUser(ctx, db.CreateChatUserParams{
+		ChatID:         chat.ID,
+		UserID:         currentUser.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var chatUser db.ChatUser
-	chatUser.ChatID = chat.ID
-	chatUser.UserID = currentUser.ID
-	chatUser.OrganisationID = currentUser.OrganisationID
-
-	err = r.DB.NewInsert().
-		Model(&chatUser).
-		Returning("*").
-		Scan(ctx)
-
+	err = tx.Commit(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -301,31 +244,15 @@ func (r *mutationResolver) CreateChat(ctx context.Context, input model.CreateCha
 func (r *mutationResolver) DeleteChat(ctx context.Context, input model.DeleteChatInput) (*db.Chat, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
-		return nil, nil
+		return nil, msg.ErrUnauthorized
 	}
 
-	var chat db.Chat
-	err = r.DB.NewSelect().
-		Model(&chat).
-		Where("chat.id = ?", input.ID).
-		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
-		Where("chat.organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-	if err != nil {
-		return nil, errors.New("chat not found")
-	}
-
-	err = r.DB.NewDelete().
-		Model(&chat).
-		Where("id = ?", input.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Returning("*").
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &chat, nil
+	chat, err := r.DB.DeleteChat(ctx, db.DeleteChatParams{
+		ID:             input.ID,
+		UserID:         currentUser.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	return &chat, err
 }
 
 // CreatePrivatChat is the resolver for the createPrivatChat field.
@@ -336,89 +263,62 @@ func (r *mutationResolver) CreatePrivatChat(ctx context.Context, userID string) 
 	}
 
 	// check if a privat chat already exists
-	var existingChat db.Chat
-	err = r.DB.NewSelect().
-		Model(&existingChat).
-		Where("chat.type = ?", db.ChatTypePrivate).
-		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
-		Join("INNER JOIN chat_users AS chat_users2 ON chat_users2.chat_id = chat.id AND chat_users2.user_id = ?", userID).
-		Where("chat.organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	existingChat, err := r.DB.ExistingChatBetweenTwoUsers(ctx, db.ExistingChatBetweenTwoUsersParams{
+		UserID:         currentUser.ID,
+		OtherUserID:    userID,
+		ChatType:       db.NullChatType{ChatType: db.ChatTypePrivate, Valid: true},
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err == nil {
 		return &existingChat, nil
 	}
 
-	t, err := r.DB.BeginTx(ctx, nil)
-
-	var user db.User
-	err = t.NewSelect().
-		Model(&user).
-		Where("id = ?", userID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	tx, err := r.DB.DB.Begin(ctx)
 	if err != nil {
-		_ = t.Rollback()
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	qtx := r.DB.WithTx(tx)
+
+	user, err := qtx.UserById(ctx, db.UserByIdParams{
+		ID:             userID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
 		return nil, errors.New("user not found")
 	}
 
-	var chat db.Chat
-	chat.Type = db.ChatTypePrivate
-	chat.OrganisationID = currentUser.OrganisationID
-
-	err = t.NewInsert().
-		Model(&chat).
-		Returning("*").
-		Scan(ctx)
+	newChat, err := qtx.CreateChat(ctx, db.CreateChatParams{
+		Name:           pgtype.Text{},
+		Type:           db.NullChatType{ChatType: db.ChatTypePrivate, Valid: true},
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
-		_ = t.Rollback()
 		return nil, errors.New("unable to create chat")
 	}
 
-	var chatUser1 db.ChatUser
-	chatUser1.ChatID = chat.ID
-	chatUser1.UserID = currentUser.ID
-	chatUser1.OrganisationID = currentUser.OrganisationID
-
-	err = t.NewInsert().
-		Model(&chatUser1).
-		Returning("*").
-		Scan(ctx)
+	_, err = qtx.CreateChatUser(ctx, db.CreateChatUserParams{
+		ChatID:         newChat.ID,
+		UserID:         currentUser.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
-		_ = t.Rollback()
-		return nil, errors.New("unable to create chat")
+		return nil, errors.New("unable to add user to chat")
 	}
 
-	var user2 db.User
-	err = t.NewSelect().
-		Model(&user2).
-		Where("id = ?", userID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	_, err = qtx.CreateChatUser(ctx, db.CreateChatUserParams{
+		ChatID:         newChat.ID,
+		UserID:         user.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
-		_ = t.Rollback()
-		return nil, errors.New("other user not found")
+		return nil, errors.New("unable to add other user to chat")
 	}
 
-	var chatUser2 db.ChatUser
-	chatUser2.ChatID = chat.ID
-	chatUser2.UserID = user2.ID
-	chatUser2.OrganisationID = currentUser.OrganisationID
+	err = tx.Commit(ctx)
 
-	err = t.NewInsert().
-		Model(&chatUser2).
-		Returning("*").
-		Scan(ctx)
-	if err != nil {
-		_ = t.Rollback()
-		return nil, errors.New("unable to create chat")
-	}
-
-	err = t.Commit()
-	if err != nil {
-		return nil, errors.New("unable to create chat - commit failed")
-	}
-
-	return &chat, nil
+	return &newChat, nil
 }
 
 // AddUserToChat is the resolver for the addUserToChat field.

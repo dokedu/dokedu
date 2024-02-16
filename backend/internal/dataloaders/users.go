@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 
 	"github.com/graph-gophers/dataloader"

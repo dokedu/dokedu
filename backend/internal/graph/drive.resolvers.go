@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/dataloaders"
-	"github.com/dokedu/dokedu/backend/internal/db"
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
@@ -47,7 +47,7 @@ func (r *bucketResolver) DeletedAt(ctx context.Context, obj *db.Bucket) (*time.T
 }
 
 // Permission is the resolver for the permission field.
-func (r *bucketResolver) Permission(ctx context.Context, obj *db.Bucket) (*model.FilePermission, error) {
+func (r *bucketResolver) Permission(ctx context.Context, obj *db.Bucket) (*db.FilePermission, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, nil
@@ -88,6 +88,11 @@ func (r *bucketResolver) Files(ctx context.Context, obj *db.Bucket) ([]*db.File,
 	}
 
 	return files, nil
+}
+
+// MIMEType is the resolver for the MIMEType field.
+func (r *fileResolver) MIMEType(ctx context.Context, obj *db.File) (string, error) {
+	panic(fmt.Errorf("not implemented: MIMEType - MIMEType"))
 }
 
 // Bucket is the resolver for the bucket field.

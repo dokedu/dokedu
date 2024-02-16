@@ -5,6 +5,11 @@ FROM users;
 -- name: UserById :one
 SELECT *
 FROM users
+WHERE id = $1 AND organisation_id = $2;
+
+-- name: UserById_NORG :one
+SELECT *
+FROM users
 WHERE id = $1;
 
 -- name: UserByEmail :one

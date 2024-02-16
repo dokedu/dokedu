@@ -14,14 +14,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/dataloaders"
-	"github.com/dokedu/dokedu/backend/internal/db"
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 	meili "github.com/dokedu/dokedu/backend/internal/modules/meilisearch"
 	"github.com/dokedu/dokedu/backend/internal/msg"
-
 	nanoid "github.com/matoous/go-nanoid/v2"
 	meilisearch "github.com/meilisearch/meilisearch-go"
 	"github.com/uptrace/bun"
@@ -50,6 +49,11 @@ func (r *competenceResolver) Parents(ctx context.Context, obj *db.Competence) ([
 	}
 
 	return dataloaders.GetCompetenceParents(ctx, obj.ID, currentUser)
+}
+
+// SortOrder is the resolver for the sortOrder field.
+func (r *competenceResolver) SortOrder(ctx context.Context, obj *db.Competence) (int, error) {
+	panic(fmt.Errorf("not implemented: SortOrder - sortOrder"))
 }
 
 // Competences is the resolver for the competences field.
@@ -522,7 +526,7 @@ func (r *mutationResolver) ArchiveUser(ctx context.Context, id string) (*db.User
 }
 
 // UpdateUserLanguage is the resolver for the updateUserLanguage field.
-func (r *mutationResolver) UpdateUserLanguage(ctx context.Context, language db.UserLanguage) (*db.User, error) {
+func (r *mutationResolver) UpdateUserLanguage(ctx context.Context, language model.UserLanguage) (*db.User, error) {
 	// We get the currentUser from context
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
@@ -1284,6 +1288,11 @@ func (r *userResolver) Student(ctx context.Context, obj *db.User) (*db.UserStude
 	return &userStudent, nil
 }
 
+// Language is the resolver for the language field.
+func (r *userResolver) Language(ctx context.Context, obj *db.User) (*model.UserLanguage, error) {
+	panic(fmt.Errorf("not implemented: Language - language"))
+}
+
 // DeletedAt is the resolver for the deletedAt field.
 func (r *userResolver) DeletedAt(ctx context.Context, obj *db.User) (*time.Time, error) {
 	if obj.DeletedAt.IsZero() {
@@ -1496,6 +1505,16 @@ func (r *userStudentResolver) User(ctx context.Context, obj *db.UserStudent) (*d
 	}
 
 	return dataloaders.GetUser(ctx, obj.UserID, currentUser)
+}
+
+// MissedHours is the resolver for the missedHours field.
+func (r *userStudentResolver) MissedHours(ctx context.Context, obj *db.UserStudent) (int, error) {
+	panic(fmt.Errorf("not implemented: MissedHours - missedHours"))
+}
+
+// MissedHoursExcused is the resolver for the missedHoursExcused field.
+func (r *userStudentResolver) MissedHoursExcused(ctx context.Context, obj *db.UserStudent) (int, error) {
+	panic(fmt.Errorf("not implemented: MissedHoursExcused - missedHoursExcused"))
 }
 
 // Competence returns CompetenceResolver implementation.

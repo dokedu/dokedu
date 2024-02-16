@@ -8,18 +8,24 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"mime"
 	"path/filepath"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 	minio "github.com/minio/minio-go/v7"
 	"github.com/uptrace/bun"
 )
+
+// Date is the resolver for the date field.
+func (r *entryResolver) Date(ctx context.Context, obj *db.Entry) (string, error) {
+	panic(fmt.Errorf("not implemented: Date - date"))
+}
 
 // DeletedAt is the resolver for the deletedAt field.
 func (r *entryResolver) DeletedAt(ctx context.Context, obj *db.Entry) (*time.Time, error) {

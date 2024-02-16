@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 )
 
 type AddEventCompetenceInput struct {
@@ -89,10 +89,10 @@ type CreateDomainInput struct {
 }
 
 type CreateEmailAccountInput struct {
-	Name        string              `json:"name"`
-	Description *string             `json:"description,omitempty"`
-	Type        db.EmailAccountType `json:"type"`
-	Quota       *int                `json:"quota,omitempty"`
+	Name        string           `json:"name"`
+	Description *string          `json:"description,omitempty"`
+	Type        EmailAccountType `json:"type"`
+	Quota       *int             `json:"quota,omitempty"`
 }
 
 type CreateEmailForwardingInput struct {
@@ -112,9 +112,9 @@ type CreateEmailGroupMemberInput struct {
 }
 
 type CreateEmailInput struct {
-	Name    string       `json:"name"`
-	Address string       `json:"address"`
-	Type    db.EmailType `json:"type"`
+	Name    string    `json:"name"`
+	Address string    `json:"address"`
+	Type    EmailType `json:"type"`
 }
 
 type CreateEntryCompetenceInput struct {
@@ -172,10 +172,10 @@ type CreateSchoolYearInput struct {
 }
 
 type CreateShareInput struct {
-	FileID     *string        `json:"fileId,omitempty"`
-	BucketID   *string        `json:"bucketId,omitempty"`
-	User       string         `json:"user"`
-	Permission FilePermission `json:"permission"`
+	FileID     *string           `json:"fileId,omitempty"`
+	BucketID   *string           `json:"bucketId,omitempty"`
+	User       string            `json:"user"`
+	Permission db.FilePermission `json:"permission"`
 }
 
 type CreateStudentInput struct {
@@ -328,7 +328,7 @@ type EmailAccountConnection struct {
 }
 
 type EmailAccountFilter struct {
-	Type *db.EmailAccountType `json:"type,omitempty"`
+	Type *EmailAccountType `json:"type,omitempty"`
 }
 
 type EmailConnection struct {
@@ -518,10 +518,10 @@ type SendMessageInput struct {
 }
 
 type ShareFileInput struct {
-	FileID     string         `json:"fileId"`
-	Users      []string       `json:"users"`
-	Emails     []string       `json:"emails"`
-	Permission FilePermission `json:"permission"`
+	FileID     string            `json:"fileId"`
+	Users      []string          `json:"users"`
+	Emails     []string          `json:"emails"`
+	Permission db.FilePermission `json:"permission"`
 }
 
 type ShareInput struct {
@@ -530,8 +530,8 @@ type ShareInput struct {
 }
 
 type ShareUser struct {
-	User       *db.User       `json:"user"`
-	Permission FilePermission `json:"permission"`
+	User       *db.User          `json:"user"`
+	Permission db.FilePermission `json:"permission"`
 }
 
 type SharedDriveFilterInput struct {
@@ -590,12 +590,12 @@ type UpdateCompetenceSortingInput struct {
 }
 
 type UpdateEmailAccountInput struct {
-	ID          string               `json:"id"`
-	Name        *string              `json:"name,omitempty"`
-	Description *string              `json:"description,omitempty"`
-	Type        *db.EmailAccountType `json:"type,omitempty"`
-	Quota       *int                 `json:"quota,omitempty"`
-	Active      *bool                `json:"active,omitempty"`
+	ID          string            `json:"id"`
+	Name        *string           `json:"name,omitempty"`
+	Description *string           `json:"description,omitempty"`
+	Type        *EmailAccountType `json:"type,omitempty"`
+	Quota       *int              `json:"quota,omitempty"`
+	Active      *bool             `json:"active,omitempty"`
 }
 
 type UpdateEmailGroupInput struct {
@@ -707,10 +707,18 @@ type UserStudentConnection struct {
 	TotalCount int               `json:"totalCount"`
 }
 
+type UserStudentGrades struct {
+	ID         string          `json:"id"`
+	Student    *db.UserStudent `json:"student"`
+	Subject    *db.Subject     `json:"subject"`
+	Grade      int             `json:"grade"`
+	SchoolYear *db.SchoolYear  `json:"schoolYear"`
+}
+
 type UserStudentGradesConnection struct {
-	Edges      []*db.UserStudentGrades `json:"edges"`
-	TotalCount int                     `json:"totalCount"`
-	PageInfo   *PageInfo               `json:"pageInfo"`
+	Edges      []*UserStudentGrades `json:"edges"`
+	TotalCount int                  `json:"totalCount"`
+	PageInfo   *PageInfo            `json:"pageInfo"`
 }
 
 type CompetenceSortField string
@@ -753,6 +761,90 @@ func (e *CompetenceSortField) UnmarshalGQL(v interface{}) error {
 }
 
 func (e CompetenceSortField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type EmailAccountType string
+
+const (
+	EmailAccountTypeIndividual EmailAccountType = "INDIVIDUAL"
+	EmailAccountTypeGroup      EmailAccountType = "GROUP"
+)
+
+var AllEmailAccountType = []EmailAccountType{
+	EmailAccountTypeIndividual,
+	EmailAccountTypeGroup,
+}
+
+func (e EmailAccountType) IsValid() bool {
+	switch e {
+	case EmailAccountTypeIndividual, EmailAccountTypeGroup:
+		return true
+	}
+	return false
+}
+
+func (e EmailAccountType) String() string {
+	return string(e)
+}
+
+func (e *EmailAccountType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EmailAccountType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EmailAccountType", str)
+	}
+	return nil
+}
+
+func (e EmailAccountType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type EmailType string
+
+const (
+	EmailTypePrimary EmailType = "PRIMARY"
+	EmailTypeAlias   EmailType = "ALIAS"
+	EmailTypeList    EmailType = "LIST"
+)
+
+var AllEmailType = []EmailType{
+	EmailTypePrimary,
+	EmailTypeAlias,
+	EmailTypeList,
+}
+
+func (e EmailType) IsValid() bool {
+	switch e {
+	case EmailTypePrimary, EmailTypeAlias, EmailTypeList:
+		return true
+	}
+	return false
+}
+
+func (e EmailType) String() string {
+	return string(e)
+}
+
+func (e *EmailType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EmailType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EmailType", str)
+	}
+	return nil
+}
+
+func (e EmailType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -846,47 +938,6 @@ func (e EventOrderBy) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type FilePermission string
-
-const (
-	FilePermissionViewer  FilePermission = "Viewer"
-	FilePermissionManager FilePermission = "Manager"
-)
-
-var AllFilePermission = []FilePermission{
-	FilePermissionViewer,
-	FilePermissionManager,
-}
-
-func (e FilePermission) IsValid() bool {
-	switch e {
-	case FilePermissionViewer, FilePermissionManager:
-		return true
-	}
-	return false
-}
-
-func (e FilePermission) String() string {
-	return string(e)
-}
-
-func (e *FilePermission) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = FilePermission(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid FilePermission", str)
-	}
-	return nil
-}
-
-func (e FilePermission) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
 type ImportStudentsError string
 
 const (
@@ -972,6 +1023,47 @@ func (e *SortDirection) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SortDirection) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type UserLanguage string
+
+const (
+	UserLanguageEn UserLanguage = "en"
+	UserLanguageDe UserLanguage = "de"
+)
+
+var AllUserLanguage = []UserLanguage{
+	UserLanguageEn,
+	UserLanguageDe,
+}
+
+func (e UserLanguage) IsValid() bool {
+	switch e {
+	case UserLanguageEn, UserLanguageDe:
+		return true
+	}
+	return false
+}
+
+func (e UserLanguage) String() string {
+	return string(e)
+}
+
+func (e *UserLanguage) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = UserLanguage(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid UserLanguage", str)
+	}
+	return nil
+}
+
+func (e UserLanguage) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

@@ -15,7 +15,9 @@ type ErrorWithCode struct {
 
 var (
 	ErrInvalidEmailOrPassword = errors.New("invalid email or password")
-	ErrUnauthorized           = ErrWithCode("UNAUTHORIZED", "no user found in the context")
+	ErrUnauthorized           = ErrWithCode("UNAUTHORIZED", "unauthorized")
+	ErrUnauthenticated        = ErrWithCode("UNAUTHENTICATED", "unauthenticated")
+	ErrUnexpected             = errors.New("unexpected error")
 )
 
 func ErrWithCode(code string, message string) ErrorWithCode {

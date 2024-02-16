@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/dataloaders"
-	"github.com/dokedu/dokedu/backend/internal/db"
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 )
@@ -27,6 +27,11 @@ func (r *domainResolver) CreatedAt(ctx context.Context, obj *db.Domain) (string,
 	return obj.CreatedAt.Format(time.RFC1123Z), nil
 }
 
+// Type is the resolver for the type field.
+func (r *emailResolver) Type(ctx context.Context, obj *db.Email) (model.EmailType, error) {
+	panic(fmt.Errorf("not implemented: Type - type"))
+}
+
 // CreatedAt is the resolver for the createdAt field.
 func (r *emailResolver) CreatedAt(ctx context.Context, obj *db.Email) (string, error) {
 	if obj.CreatedAt.IsZero() {
@@ -34,6 +39,26 @@ func (r *emailResolver) CreatedAt(ctx context.Context, obj *db.Email) (string, e
 	}
 
 	return obj.CreatedAt.Format(time.RFC1123Z), nil
+}
+
+// Description is the resolver for the description field.
+func (r *emailAccountResolver) Description(ctx context.Context, obj *db.EmailAccount) (*string, error) {
+	panic(fmt.Errorf("not implemented: Description - description"))
+}
+
+// Type is the resolver for the type field.
+func (r *emailAccountResolver) Type(ctx context.Context, obj *db.EmailAccount) (model.EmailAccountType, error) {
+	panic(fmt.Errorf("not implemented: Type - type"))
+}
+
+// Quota is the resolver for the quota field.
+func (r *emailAccountResolver) Quota(ctx context.Context, obj *db.EmailAccount) (*int, error) {
+	panic(fmt.Errorf("not implemented: Quota - quota"))
+}
+
+// Active is the resolver for the active field.
+func (r *emailAccountResolver) Active(ctx context.Context, obj *db.EmailAccount) (*bool, error) {
+	panic(fmt.Errorf("not implemented: Active - active"))
 }
 
 // User is the resolver for the user field.
