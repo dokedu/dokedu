@@ -3,10 +3,11 @@ package meilisearch
 import (
 	"context"
 	"database/sql"
-	"github.com/dokedu/dokedu/backend/internal/database"
-	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"os"
 	"slices"
+
+	"github.com/dokedu/dokedu/backend/internal/database"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 
 	"github.com/meilisearch/meilisearch-go"
 )

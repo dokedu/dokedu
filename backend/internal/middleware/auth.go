@@ -4,10 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/dokedu/dokedu/backend/internal/database"
-	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"log/slog"
 	"time"
+
+	"github.com/dokedu/dokedu/backend/internal/database"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 
 	"github.com/dokedu/dokedu/backend/internal/msg"
 

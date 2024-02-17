@@ -19,7 +19,6 @@ import (
 	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 	"github.com/samber/lo"
-	"github.com/uptrace/bun"
 )
 
 // Name is the resolver for the name field.
@@ -35,7 +34,6 @@ func (r *chatResolver) Name(ctx context.Context, obj *db.Chat) (*string, error) 
 			UserID:         currentUser.ID,
 			OrganisationID: currentUser.OrganisationID,
 		})
-
 		if err != nil {
 			return nil, err
 		}
@@ -129,6 +127,11 @@ func (r *chatResolver) UnreadMessageCount(ctx context.Context, obj *db.Chat) (in
 
 // UserCount is the resolver for the userCount field.
 func (r *chatResolver) UserCount(ctx context.Context, obj *db.Chat) (int, error) {
+	_, err := middleware.GetUser(ctx)
+	if err != nil {
+		return 0, nil
+	}
+
 	count, err := r.DB.UserCountByChatId(ctx, db.UserCountByChatIdParams{
 		ChatID:         obj.ID,
 		OrganisationID: obj.OrganisationID,
@@ -206,7 +209,7 @@ func (r *chatUserResolver) User(ctx context.Context, obj *db.ChatUser) (*db.User
 func (r *mutationResolver) CreateChat(ctx context.Context, input model.CreateChatInput) (*db.Chat, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
-		return nil, msg.ErrUnauthorized
+		return nil, nil
 	}
 
 	tx, err := r.DB.DB.Begin(ctx)
@@ -244,7 +247,7 @@ func (r *mutationResolver) CreateChat(ctx context.Context, input model.CreateCha
 func (r *mutationResolver) DeleteChat(ctx context.Context, input model.DeleteChatInput) (*db.Chat, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
-		return nil, msg.ErrUnauthorized
+		return nil, nil
 	}
 
 	chat, err := r.DB.DeleteChat(ctx, db.DeleteChatParams{
@@ -327,49 +330,20 @@ func (r *mutationResolver) AddUserToChat(ctx context.Context, input model.AddUse
 	if err != nil {
 		return nil, nil
 	}
-
 	if input.UserID == currentUser.ID {
 		return nil, errors.New("you cannot add yourself to a chat")
 	}
 
-	var chat db.Chat
-	err = r.DB.NewSelect().
-		Model(&chat).
-		Where("chat.id = ?", input.ChatID).
-		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
-		Where("chat.organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	chatUser, err := r.DB.CreateChatUser(ctx, db.CreateChatUserParams{
+		ChatID:         input.ChatID,
+		UserID:         input.UserID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
-		return nil, errors.New("chat not found")
+		return nil, errors.New("unable to add user to chat")
 	}
 
-	var user db.User
-	err = r.DB.NewSelect().
-		Model(&user).
-		Where("id = ?", input.UserID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, errors.New("user not found")
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	var chatUser3 db.ChatUser
-	chatUser3.ChatID = input.ChatID
-	chatUser3.UserID = input.UserID
-	chatUser3.OrganisationID = currentUser.OrganisationID
-
-	err = r.DB.NewInsert().
-		Model(&chatUser3).
-		Returning("*").
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &chatUser3, nil
+	return &chatUser, nil
 }
 
 // RemoveUserFromChat is the resolver for the removeUserFromChat field.
@@ -379,30 +353,14 @@ func (r *mutationResolver) RemoveUserFromChat(ctx context.Context, input model.R
 		return nil, nil
 	}
 
-	var chat db.Chat
-	err = r.DB.NewSelect().
-		Model(&chat).
-		Where("chat.id = ?", input.ChatID).
-		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
-		Where("chat.organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-	if err != nil {
-		return nil, errors.New("chat not found")
-	}
+	chatUser, err := r.DB.DeleteChatUser(ctx, db.DeleteChatUserParams{
+		ChatID:         input.ChatID,
+		UserID:         input.UserID,
+		OrganisationID: currentUser.OrganisationID,
+		CurrentUserID:  currentUser.ID,
+	})
 
-	var chatUser db.ChatUser
-	err = r.DB.NewDelete().
-		Model(&chatUser).
-		Where("chat_id = ?", input.ChatID).
-		Where("user_id = ?", input.UserID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Returning("*").
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &chatUser, nil
+	return &chatUser, err
 }
 
 // SendMessage is the resolver for the sendMessage field.
@@ -417,31 +375,12 @@ func (r *mutationResolver) SendMessage(ctx context.Context, input model.SendMess
 		return nil, errors.New("message too long, max 4096 characters")
 	}
 
-	var chat db.Chat
-	err = r.DB.NewSelect().
-		Model(&chat).
-		Where("chat.id = ?", input.ChatID).
-		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
-		Where("chat.organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-	if err != nil {
-		return nil, errors.New("chat not found")
-	}
-
-	var chatMessage db.ChatMessage
-	chatMessage.ChatID = input.ChatID
-	chatMessage.UserID = currentUser.ID
-	chatMessage.OrganisationID = currentUser.OrganisationID
-	chatMessage.Message = input.Message
-	chatMessage.CreatedAt = time.Now()
-
-	err = r.DB.NewInsert().
-		Model(&chatMessage).
-		Returning("*").
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
+	chatMessage, err := r.DB.CreateChatMessage(ctx, db.CreateChatMessageParams{
+		ChatID:         input.ChatID,
+		UserID:         currentUser.ID,
+		Message:        input.Message,
+		OrganisationID: currentUser.OrganisationID,
+	})
 
 	// background handling of sending message to other users
 	go r.SubscriptionHandler.PublishMessage(&chatMessage)
@@ -457,33 +396,14 @@ func (r *mutationResolver) EditChatMessage(ctx context.Context, input model.Edit
 		return nil, nil
 	}
 
-	var chatMessage db.ChatMessage
-	err = r.DB.NewSelect().
-		Model(&chatMessage).
-		Where("id = ?", input.ID).
-		Where("user_id = ?", currentUser.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	chatMessage, err := r.DB.UpdateChatMessageByUser(ctx, db.UpdateChatMessageByUserParams{
+		Message:        input.Message,
+		UserID:         currentUser.ID,
+		MessageID:      input.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
-		return nil, errors.New("message not found")
-	}
-
-	// check that the message is less than 4096 characters
-	if len(input.Message) > 4096 {
-		return nil, errors.New("message too long, max 4096 characters")
-	}
-
-	chatMessage.Message = input.Message
-	chatMessage.UpdatedAt = bun.NullTime{Time: time.Now()}
-
-	err = r.DB.NewUpdate().
-		Model(&chatMessage).
-		Where("id = ?", input.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Returning("*").
-		Scan(ctx)
-	if err != nil {
-		return nil, errors.New("unable to update message")
+		return nil, errors.New("unable to edit message")
 	}
 
 	go r.SubscriptionHandler.PublishMessage(&chatMessage)
@@ -498,30 +418,14 @@ func (r *mutationResolver) UpdateChat(ctx context.Context, input model.UpdateCha
 		return nil, nil
 	}
 
-	var chat db.Chat
-	err = r.DB.NewSelect().
-		Model(&chat).
-		Where("chat.id = ?", input.ID).
-		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
-		Where("chat.organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	chat, err := r.DB.UpdateChatName(ctx, db.UpdateChatNameParams{
+		Name:           pgtype.Text{String: *input.Name, Valid: true},
+		ChatID:         input.ID,
+		UserID:         currentUser.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
-		return nil, errors.New("chat not found")
-	}
-
-	chat.Name = sql.NullString{
-		String: *input.Name,
-		Valid:  true,
-	}
-
-	err = r.DB.NewUpdate().
-		Model(&chat).
-		Where("id = ?", input.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Returning("*").
-		Scan(ctx)
-	if err != nil {
-		return nil, err
+		return nil, errors.New("unable to update chat")
 	}
 
 	return &chat, nil
@@ -534,42 +438,18 @@ func (r *mutationResolver) MarkMessageAsRead(ctx context.Context, messageID stri
 		return nil, nil
 	}
 
-	var chatMessage db.ChatMessage
-	err = r.DB.NewSelect().
-		Model(&chatMessage).
-		Where("id = ?", messageID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-	if err != nil {
-		return nil, errors.New("chat not found")
-	}
-
-	var chat db.Chat
-	err = r.DB.NewSelect().
-		Model(&chat).
-		Where("chat.id = ?", chatMessage.ChatID).
-		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
-		Where("chat.organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-	if err != nil {
-		return nil, errors.New("chat not found")
-	}
-
-	var chatMessageView db.ChatMessageView
-	chatMessageView.ChatID = chat.ID
-	chatMessageView.UserID = currentUser.ID
-	chatMessageView.ChatMessageID = chatMessage.ID
-	chatMessageView.OrganisationID = currentUser.OrganisationID
-	err = r.DB.NewInsert().
-		Model(&chatMessageView).
-		Returning("*").
-		On("CONFLICT (chat_id, user_id, chat_message_id) DO NOTHING").
-		Scan(ctx)
-	if errors.Is(err, sql.ErrNoRows) {
-		return &chatMessage, nil
-	}
+	chatMessageView, err := r.DB.MarkChatMessageAsRead(ctx, db.MarkChatMessageAsReadParams{
+		ChatMessageID:  messageID,
+		UserID:         currentUser.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, errors.New("unable to mark message as read")
+	}
+
+	chatMessage, err := r.DB.ChatMessageById(ctx, chatMessageView.ChatMessageID)
+	if err != nil {
+		return nil, errors.New("unable to find chat message")
 	}
 
 	return &chatMessage, nil
@@ -582,15 +462,13 @@ func (r *queryResolver) Chat(ctx context.Context, id string) (*db.Chat, error) {
 		return nil, nil
 	}
 
-	var chat db.Chat
-	err = r.DB.NewSelect().
-		Model(&chat).
-		Where("chat.id = ?", id).
-		Join("INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = ?", currentUser.ID).
-		Where("chat.organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	chat, err := r.DB.ChatByIdWithUser(ctx, db.ChatByIdWithUserParams{
+		UserID:         currentUser.ID,
+		ChatID:         id,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
-		return nil, errors.New("chat not found")
+		return nil, errors.New("unable to find chat")
 	}
 
 	return &chat, nil
@@ -605,44 +483,37 @@ func (r *queryResolver) Chats(ctx context.Context, limit *int, offset *int) (*mo
 
 	pageLimit, pageOffset := helper.SetPageLimits(limit, offset)
 
-	var count int
-	var chats []*db.ChatWithLastMessage
-	count, err = r.DB.
-		NewSelect().
-		Model(&chats).
-		ColumnExpr("chat.*").
-		ColumnExpr("MAX(cm.created_at) as last_message_at").
-		Join("LEFT JOIN chat_users ON chat_users.chat_id = chat.id").
-		Join("LEFT JOIN chat_messages cm ON cm.chat_id = chat.id").
-		TableExpr("chats AS chat").
-		Where("chat_users.user_id = ?", currentUser.ID).
-		Where("chat.organisation_id = ?", currentUser.OrganisationID).
-		Where("chat.deleted_at IS NULL").
-		Limit(pageLimit).
-		Offset(pageOffset).
-		Group("chat.id").
-		OrderExpr("CASE WHEN MAX(cm.created_at) IS NULL THEN 1 ELSE 0 END").
-		Order("last_message_at DESC").
-		ScanAndCount(ctx)
-	if errors.Is(err, sql.ErrNoRows) {
-		return &model.ChatConnection{}, nil
-	}
-	if err != nil {
-		return nil, err
-	}
+	chatListWithUserRow, err := r.DB.ChatListWithUser(ctx, db.ChatListWithUserParams{
+		UserID:         currentUser.ID,
+		OrganisationID: currentUser.OrganisationID,
+		PageOffset:     int32(pageOffset),
+		PageLimit:      int32(pageLimit),
+	})
+
+	chats := make([]*db.Chat, len(chatListWithUserRow))
+
+	lo.ForEach(chatListWithUserRow, func(chat db.ChatListWithUserRow, i int) {
+		chats = append(chats, &db.Chat{
+			ID:             chat.ID,
+			Name:           chat.Name,
+			OrganisationID: chat.OrganisationID,
+			UpdatedAt:      chat.UpdatedAt,
+			CreatedAt:      chat.CreatedAt,
+			DeletedAt:      chat.DeletedAt,
+			Type:           chat.Type,
+		})
+	})
+
+	// get count from the first row (ChatListWithUserRow.TotalCount)
+	count := int(chatListWithUserRow[0].TotalCount)
 
 	pageInfo, err := helper.CreatePageInfo(pageOffset, pageLimit, count)
 	if err != nil {
-		return nil, err
-	}
-
-	var returnChats []*db.Chat
-	for _, chat := range chats {
-		returnChats = append(returnChats, chat.Chat)
+		return nil, msg.ErrUnexpected
 	}
 
 	return &model.ChatConnection{
-		Edges:      returnChats,
+		Edges:      chats,
 		TotalCount: count,
 		PageInfo:   pageInfo,
 	}, nil

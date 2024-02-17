@@ -2,9 +2,10 @@ package subscription
 
 import (
 	"context"
+	"sync"
+
 	"github.com/dokedu/dokedu/backend/internal/database"
 	"github.com/dokedu/dokedu/backend/internal/database/db"
-	"sync"
 )
 
 type Handler struct {

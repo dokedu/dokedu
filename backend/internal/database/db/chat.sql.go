@@ -77,7 +77,8 @@ func (q *Queries) BotUserByChatId(ctx context.Context, arg BotUserByChatIdParams
 const chatById = `-- name: ChatById :one
 SELECT id, name, organisation_id, updated_at, created_at, deleted_at, type
 FROM chats
-WHERE id = $1 AND organisation_id = $2
+WHERE id = $1
+  AND organisation_id = $2
 LIMIT 1
 `
 
@@ -88,6 +89,36 @@ type ChatByIdParams struct {
 
 func (q *Queries) ChatById(ctx context.Context, arg ChatByIdParams) (Chat, error) {
 	row := q.db.QueryRow(ctx, chatById, arg.ID, arg.OrganisationID)
+	var i Chat
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.OrganisationID,
+		&i.UpdatedAt,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.Type,
+	)
+	return i, err
+}
+
+const chatByIdWithUser = `-- name: ChatByIdWithUser :one
+SELECT chat.id, chat.name, chat.organisation_id, chat.updated_at, chat.created_at, chat.deleted_at, chat.type
+FROM chats chat
+         INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = $1
+WHERE chat.id = $2
+  AND chat.organisation_id = $3
+LIMIT 1
+`
+
+type ChatByIdWithUserParams struct {
+	UserID         string `db:"user_id"`
+	ChatID         string `db:"chat_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) ChatByIdWithUser(ctx context.Context, arg ChatByIdWithUserParams) (Chat, error) {
+	row := q.db.QueryRow(ctx, chatByIdWithUser, arg.UserID, arg.ChatID, arg.OrganisationID)
 	var i Chat
 	err := row.Scan(
 		&i.ID,
@@ -121,6 +152,77 @@ func (q *Queries) ChatByIdWithoutOrg(ctx context.Context, id string) (Chat, erro
 		&i.Type,
 	)
 	return i, err
+}
+
+const chatListWithUser = `-- name: ChatListWithUser :many
+SELECT chat.id, chat.name, chat.organisation_id, chat.updated_at, chat.created_at, chat.deleted_at, chat.type,
+       MAX(cm.created_at) AS last_message_at,
+       COUNT(*) OVER ()   AS total_count
+FROM chats AS chat
+         LEFT JOIN chat_users ON chat_users.chat_id = chat.id
+         LEFT JOIN chat_messages cm ON cm.chat_id = chat.id
+WHERE chat_users.user_id = $1
+  AND chat.organisation_id = $2
+  AND chat.deleted_at IS NULL
+GROUP BY chat.id
+ORDER BY CASE WHEN MAX(cm.created_at) IS NULL THEN 1 ELSE 0 END,
+         last_message_at DESC
+LIMIT $4
+OFFSET $3
+`
+
+type ChatListWithUserParams struct {
+	UserID         string `db:"user_id"`
+	OrganisationID string `db:"organisation_id"`
+	PageOffset     int32  `db:"page_offset"`
+	PageLimit      int32  `db:"page_limit"`
+}
+
+type ChatListWithUserRow struct {
+	ID             string             `db:"id"`
+	Name           pgtype.Text        `db:"name"`
+	OrganisationID string             `db:"organisation_id"`
+	UpdatedAt      pgtype.Timestamptz `db:"updated_at"`
+	CreatedAt      time.Time          `db:"created_at"`
+	DeletedAt      pgtype.Timestamptz `db:"deleted_at"`
+	Type           NullChatType       `db:"type"`
+	LastMessageAt  interface{}        `db:"last_message_at"`
+	TotalCount     int64              `db:"total_count"`
+}
+
+func (q *Queries) ChatListWithUser(ctx context.Context, arg ChatListWithUserParams) ([]ChatListWithUserRow, error) {
+	rows, err := q.db.Query(ctx, chatListWithUser,
+		arg.UserID,
+		arg.OrganisationID,
+		arg.PageOffset,
+		arg.PageLimit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ChatListWithUserRow
+	for rows.Next() {
+		var i ChatListWithUserRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.OrganisationID,
+			&i.UpdatedAt,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.Type,
+			&i.LastMessageAt,
+			&i.TotalCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const chatMessageById = `-- name: ChatMessageById :one
@@ -343,6 +445,48 @@ func (q *Queries) CreateChatMessage(ctx context.Context, arg CreateChatMessagePa
 	return i, err
 }
 
+const createChatMessageByUser = `-- name: CreateChatMessageByUser :one
+WITH valid_user AS (SELECT 1
+                    FROM chat_users
+                    WHERE chat_id = $1
+                      AND user_id = $2
+                      AND organisation_id = $4
+                    LIMIT 1)
+INSERT
+INTO chat_messages (chat_id, user_id, message, organisation_id)
+SELECT $1, $2, $3, $4
+FROM valid_user
+RETURNING id, chat_id, user_id, message, organisation_id, updated_at, created_at, deleted_at
+`
+
+type CreateChatMessageByUserParams struct {
+	ChatID         string `db:"chat_id"`
+	UserID         string `db:"user_id"`
+	Message        string `db:"message"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) CreateChatMessageByUser(ctx context.Context, arg CreateChatMessageByUserParams) (ChatMessage, error) {
+	row := q.db.QueryRow(ctx, createChatMessageByUser,
+		arg.ChatID,
+		arg.UserID,
+		arg.Message,
+		arg.OrganisationID,
+	)
+	var i ChatMessage
+	err := row.Scan(
+		&i.ID,
+		&i.ChatID,
+		&i.UserID,
+		&i.Message,
+		&i.OrganisationID,
+		&i.UpdatedAt,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const createChatUser = `-- name: CreateChatUser :one
 INSERT INTO chat_users (chat_id, user_id, organisation_id)
 VALUES ($1, $2, $3)
@@ -369,8 +513,13 @@ func (q *Queries) CreateChatUser(ctx context.Context, arg CreateChatUserParams) 
 
 const deleteChat = `-- name: DeleteChat :one
 UPDATE chats
-SET deleted_at = now()
-WHERE chats.id = $1 AND chats.organisation_id = $2 AND chats.id IN (SELECT chat_id FROM chat_users WHERE chat_users.user_id = $3 AND chat_users.organisation_id = $2)
+SET deleted_at = NOW()
+WHERE chats.id = $1
+  AND chats.organisation_id = $2
+  AND chats.id IN (SELECT chat_id
+                   FROM chat_users
+                   WHERE chat_users.user_id = $3
+                     AND chat_users.organisation_id = $2)
 RETURNING id, name, organisation_id, updated_at, created_at, deleted_at, type
 `
 
@@ -395,12 +544,51 @@ func (q *Queries) DeleteChat(ctx context.Context, arg DeleteChatParams) (Chat, e
 	return i, err
 }
 
+const deleteChatUser = `-- name: DeleteChatUser :one
+DELETE
+FROM chat_users
+WHERE chat_users.chat_id = $1
+  AND chat_users.user_id = $2
+  AND chat_users.organisation_id = $3
+  AND EXISTS (SELECT 1
+              FROM chat_users AS cu
+              WHERE cu.chat_id = $1
+                AND cu.user_id = $4
+                AND cu.organisation_id = $3)
+RETURNING id, chat_id, user_id, organisation_id
+`
+
+type DeleteChatUserParams struct {
+	ChatID         string `db:"chat_id"`
+	UserID         string `db:"user_id"`
+	OrganisationID string `db:"organisation_id"`
+	CurrentUserID  string `db:"current_user_id"`
+}
+
+func (q *Queries) DeleteChatUser(ctx context.Context, arg DeleteChatUserParams) (ChatUser, error) {
+	row := q.db.QueryRow(ctx, deleteChatUser,
+		arg.ChatID,
+		arg.UserID,
+		arg.OrganisationID,
+		arg.CurrentUserID,
+	)
+	var i ChatUser
+	err := row.Scan(
+		&i.ID,
+		&i.ChatID,
+		&i.UserID,
+		&i.OrganisationID,
+	)
+	return i, err
+}
+
 const existingChatBetweenTwoUsers = `-- name: ExistingChatBetweenTwoUsers :one
 SELECT chat.id, chat.name, chat.organisation_id, chat.updated_at, chat.created_at, chat.deleted_at, chat.type
 FROM chats chat
-INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = $1
-INNER JOIN chat_users AS chat_users2 ON chat_users2.chat_id = chat.id AND chat_users2.user_id = $2
-WHERE chat.type = $3 AND chat.organisation_id = $4
+         INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = $1
+         INNER JOIN chat_users AS chat_users2 ON chat_users2.chat_id = chat.id AND chat_users2.user_id = $2
+WHERE chat.type = $3
+  AND chat.organisation_id = $4
 `
 
 type ExistingChatBetweenTwoUsersParams struct {
@@ -460,6 +648,42 @@ func (q *Queries) LastChatMessage(ctx context.Context, arg LastChatMessageParams
 	return i, err
 }
 
+const markChatMessageAsRead = `-- name: MarkChatMessageAsRead :one
+WITH valid_user AS (SELECT chat_users.chat_id
+                    FROM chat_users
+                             JOIN chat_messages ON chat_messages.chat_id = chat_users.chat_id
+                    WHERE chat_messages.id = $1
+                      AND chat_users.user_id = $2
+                      AND chat_users.organisation_id = $3
+                    LIMIT 1)
+INSERT
+INTO chat_message_views (chat_message_id, user_id, chat_id, organisation_id)
+SELECT $1, $2, valid_user.chat_id, $3
+FROM valid_user
+ON CONFLICT DO NOTHING
+RETURNING id, user_id, chat_id, chat_message_id, organisation_id, created_at
+`
+
+type MarkChatMessageAsReadParams struct {
+	ChatMessageID  string `db:"chat_message_id"`
+	UserID         string `db:"user_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) MarkChatMessageAsRead(ctx context.Context, arg MarkChatMessageAsReadParams) (ChatMessageView, error) {
+	row := q.db.QueryRow(ctx, markChatMessageAsRead, arg.ChatMessageID, arg.UserID, arg.OrganisationID)
+	var i ChatMessageView
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.ChatID,
+		&i.ChatMessageID,
+		&i.OrganisationID,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const unreadMessageCount = `-- name: UnreadMessageCount :one
 SELECT COUNT(*)
 FROM chat_messages
@@ -480,6 +704,46 @@ func (q *Queries) UnreadMessageCount(ctx context.Context, arg UnreadMessageCount
 	var count int64
 	err := row.Scan(&count)
 	return count, err
+}
+
+const updateChatMessageByUser = `-- name: UpdateChatMessageByUser :one
+UPDATE chat_messages
+SET message = $1
+FROM chat_users
+WHERE chat_messages.id = $2
+  AND chat_messages.user_id = $3
+  AND chat_users.user_id = chat_messages.user_id
+  AND chat_users.organisation_id = $4
+  AND chat_users.chat_id = chat_messages.chat_id
+RETURNING chat_messages.id, chat_messages.chat_id, chat_messages.user_id, chat_messages.message, chat_messages.organisation_id, chat_messages.updated_at, chat_messages.created_at, chat_messages.deleted_at
+`
+
+type UpdateChatMessageByUserParams struct {
+	Message        string `db:"message"`
+	MessageID      string `db:"message_id"`
+	UserID         string `db:"user_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) UpdateChatMessageByUser(ctx context.Context, arg UpdateChatMessageByUserParams) (ChatMessage, error) {
+	row := q.db.QueryRow(ctx, updateChatMessageByUser,
+		arg.Message,
+		arg.MessageID,
+		arg.UserID,
+		arg.OrganisationID,
+	)
+	var i ChatMessage
+	err := row.Scan(
+		&i.ID,
+		&i.ChatID,
+		&i.UserID,
+		&i.Message,
+		&i.OrganisationID,
+		&i.UpdatedAt,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
 }
 
 const updateChatMessageMessageWithoutOrg = `-- name: UpdateChatMessageMessageWithoutOrg :one
@@ -506,6 +770,44 @@ func (q *Queries) UpdateChatMessageMessageWithoutOrg(ctx context.Context, arg Up
 		&i.UpdatedAt,
 		&i.CreatedAt,
 		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const updateChatName = `-- name: UpdateChatName :one
+UPDATE chats
+SET name = $1
+FROM chat_users
+WHERE chats.id = $2
+  AND chat_users.user_id = $3
+  AND chat_users.organisation_id = $4
+  AND chat_users.chat_id = chats.id
+RETURNING chats.id, chats.name, chats.organisation_id, chats.updated_at, chats.created_at, chats.deleted_at, chats.type
+`
+
+type UpdateChatNameParams struct {
+	Name           pgtype.Text `db:"name"`
+	ChatID         string      `db:"chat_id"`
+	UserID         string      `db:"user_id"`
+	OrganisationID string      `db:"organisation_id"`
+}
+
+func (q *Queries) UpdateChatName(ctx context.Context, arg UpdateChatNameParams) (Chat, error) {
+	row := q.db.QueryRow(ctx, updateChatName,
+		arg.Name,
+		arg.ChatID,
+		arg.UserID,
+		arg.OrganisationID,
+	)
+	var i Chat
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.OrganisationID,
+		&i.UpdatedAt,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.Type,
 	)
 	return i, err
 }
