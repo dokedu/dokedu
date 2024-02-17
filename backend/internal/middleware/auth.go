@@ -61,14 +61,14 @@ func AuthMiddlewareFunction(ctx context.Context, conn *database.DB, token string
 		return nil
 	}
 
-	session, err := conn.SessionByToken(ctx, token)
+	session, err := conn.GLOBAL_SessionByToken(ctx, token)
 	if err != nil {
 		return nil
 	}
 
 	// Check if created at is no longer than 12 hours ago
 	if session.CreatedAt.Add(12 * time.Hour).Before(time.Now()) {
-		err := conn.DeleteExpiredSession(ctx)
+		err := conn.GLOBAL_DeleteExpiredSession(ctx)
 		if err != nil {
 			slog.Error("unable to delete session for the database", "err", err)
 		}
@@ -76,10 +76,10 @@ func AuthMiddlewareFunction(ctx context.Context, conn *database.DB, token string
 		return nil
 	}
 
-	user, err := conn.UserById_NORG(ctx, session.UserID)
+	user, err := conn.GLOBAL_UserById(ctx, session.UserID)
 	if errors.Is(err, sql.ErrNoRows) {
 		// Remove all sessions for this user if the user is deleted
-		err := conn.DeleteSessionsByUserID(ctx, session.UserID)
+		err := conn.GLOBAL_DeleteSessionsByUserID(ctx, session.UserID)
 		if err != nil {
 			slog.Error("unable to update sessions for deleted user", "err", err, "user_id", session.UserID)
 		}

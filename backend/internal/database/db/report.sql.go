@@ -9,15 +9,15 @@ import (
 	"context"
 )
 
-const reportById = `-- name: ReportById :one
+const gLOBAL_ReportById = `-- name: GLOBAL_ReportById :one
 SELECT id, status, format, kind, "from", "to", meta, filter_tags, file_id, user_id, student_user_id, organisation_id, created_at, deleted_at
 FROM reports
 WHERE id = $1
 LIMIT 1
 `
 
-func (q *Queries) ReportById(ctx context.Context, id string) (Report, error) {
-	row := q.db.QueryRow(ctx, reportById, id)
+func (q *Queries) GLOBAL_ReportById(ctx context.Context, id string) (Report, error) {
+	row := q.db.QueryRow(ctx, gLOBAL_ReportById, id)
 	var i Report
 	err := row.Scan(
 		&i.ID,
@@ -38,14 +38,14 @@ func (q *Queries) ReportById(ctx context.Context, id string) (Report, error) {
 	return i, err
 }
 
-const reportsByStatus = `-- name: ReportsByStatus :many
+const gLOBAL_ReportsByStatus = `-- name: GLOBAL_ReportsByStatus :many
 SELECT id, status, format, kind, "from", "to", meta, filter_tags, file_id, user_id, student_user_id, organisation_id, created_at, deleted_at
 FROM reports
 WHERE status = $1
 `
 
-func (q *Queries) ReportsByStatus(ctx context.Context, status ReportStatus) ([]Report, error) {
-	rows, err := q.db.Query(ctx, reportsByStatus, status)
+func (q *Queries) GLOBAL_ReportsByStatus(ctx context.Context, status ReportStatus) ([]Report, error) {
+	rows, err := q.db.Query(ctx, gLOBAL_ReportsByStatus, status)
 	if err != nil {
 		return nil, err
 	}
@@ -79,18 +79,18 @@ func (q *Queries) ReportsByStatus(ctx context.Context, status ReportStatus) ([]R
 	return items, nil
 }
 
-const updateReportStatus = `-- name: UpdateReportStatus :exec
+const gLOBAL_UpdateReportStatus = `-- name: GLOBAL_UpdateReportStatus :exec
 UPDATE reports
 SET status = $1
 WHERE id = $2
 `
 
-type UpdateReportStatusParams struct {
+type GLOBAL_UpdateReportStatusParams struct {
 	Status ReportStatus `db:"status"`
 	ID     string       `db:"id"`
 }
 
-func (q *Queries) UpdateReportStatus(ctx context.Context, arg UpdateReportStatusParams) error {
-	_, err := q.db.Exec(ctx, updateReportStatus, arg.Status, arg.ID)
+func (q *Queries) GLOBAL_UpdateReportStatus(ctx context.Context, arg GLOBAL_UpdateReportStatusParams) error {
+	_, err := q.db.Exec(ctx, gLOBAL_UpdateReportStatus, arg.Status, arg.ID)
 	return err
 }

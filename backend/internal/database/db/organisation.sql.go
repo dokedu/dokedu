@@ -9,12 +9,12 @@ import (
 	"context"
 )
 
-const organisationList = `-- name: OrganisationList :many
+const gLOBAL_OrganisationList = `-- name: GLOBAL_OrganisationList :many
 SELECT id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps, created_at, deleted_at, setup_complete, address, logo_url, stripe_customer_id, stripe_subscription_id FROM organisations
 `
 
-func (q *Queries) OrganisationList(ctx context.Context) ([]Organisation, error) {
-	rows, err := q.db.Query(ctx, organisationList)
+func (q *Queries) GLOBAL_OrganisationList(ctx context.Context) ([]Organisation, error) {
+	rows, err := q.db.Query(ctx, gLOBAL_OrganisationList)
 	if err != nil {
 		return nil, err
 	}

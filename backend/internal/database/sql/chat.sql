@@ -1,4 +1,4 @@
--- name: ChatUserByChatId :many
+-- name: GLOBAL_ChatUserByChatId :many
 SELECT *
 FROM chat_users
 WHERE chat_id = $1;
@@ -10,13 +10,13 @@ WHERE id = @id
   AND organisation_id = @organisation_id
 LIMIT 1;
 
--- name: ChatByIdWithoutOrg :one
+-- name: GLOBAL_ChatById :one
 SELECT *
 FROM chats
 WHERE id = $1
 LIMIT 1;
 
--- name: ChatByIdWithUser :one
+-- name: ChatByIdAndUser :one
 SELECT chat.*
 FROM chats chat
          INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = @user_id
@@ -50,19 +50,19 @@ SET message = $2
 WHERE id = $1
 RETURNING *;
 
--- name: ChatMessagesByChatIdWithoutOrg :many
+-- name: GLOBAL_ChatMessagesByChatId :many
 SELECT *
 FROM chat_messages
 WHERE chat_id = $1
 ORDER BY created_at DESC;
 
--- name: UsersInChat :many
+-- name: GLOBAL_UsersInChat :many
 SELECT users.*
 FROM users
          INNER JOIN public.chat_users cu ON users.id = cu.user_id
 WHERE cu.chat_id = $1;
 
--- name: ChatNameWithAuthByChatId :one
+-- name: ChatNameByChatId :one
 SELECT users.id, users.first_name, users.last_name
 FROM users
          LEFT JOIN chat_users cu ON users.id = cu.user_id AND cu.chat_id = @chat_id
@@ -209,5 +209,4 @@ WHERE chat_users.user_id = @user_id
 GROUP BY chat.id
 ORDER BY CASE WHEN MAX(cm.created_at) IS NULL THEN 1 ELSE 0 END,
          last_message_at DESC
-LIMIT @page_limit
-OFFSET @page_offset;
+LIMIT @page_limit OFFSET @page_offset;

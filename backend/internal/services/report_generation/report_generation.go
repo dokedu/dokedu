@@ -81,7 +81,7 @@ func (s *ReportGenerationService) process(reportId string) {
 	// Fetch the report from the database
 	//var report db.Report
 	//err := s.cfg.DB.NewSelect().Model(&report).Where("id = ?", reportId).Scan(context.Background())
-	report, err := s.cfg.DB.ReportById(ctx, reportId)
+	report, err := s.cfg.DB.GLOBAL_ReportById(ctx, reportId)
 
 	if err != nil {
 		fmt.Println("Error fetching report: ", err)
@@ -196,7 +196,7 @@ func (s *ReportGenerationService) scheduleUnprocessedReports() error {
 
 // unprocessedReports fetches the reports that are not processed yet
 func (s *ReportGenerationService) unprocessedReports() ([]db.Report, error) {
-	reports, err := s.cfg.DB.ReportsByStatus(context.Background(), db.ReportStatusPending)
+	reports, err := s.cfg.DB.GLOBAL_ReportsByStatus(context.Background(), db.ReportStatusPending)
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func (s *ReportGenerationService) unprocessedReports() ([]db.Report, error) {
 }
 
 func (s *ReportGenerationService) updateReportStatus(reportId string, status db.ReportStatus) error {
-	return s.cfg.DB.UpdateReportStatus(context.Background(), db.UpdateReportStatusParams{
+	return s.cfg.DB.GLOBAL_UpdateReportStatus(context.Background(), db.GLOBAL_UpdateReportStatusParams{
 		Status: status,
 		ID:     reportId,
 	})

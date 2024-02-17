@@ -9,37 +9,37 @@ import (
 	"context"
 )
 
-const deleteExpiredSession = `-- name: DeleteExpiredSession :exec
+const gLOBAL_DeleteExpiredSession = `-- name: GLOBAL_DeleteExpiredSession :exec
 UPDATE sessions
 SET deleted_at = NOW()
 WHERE created_at < NOW() - INTERVAL '12 hours'
 `
 
-func (q *Queries) DeleteExpiredSession(ctx context.Context) error {
-	_, err := q.db.Exec(ctx, deleteExpiredSession)
+func (q *Queries) GLOBAL_DeleteExpiredSession(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, gLOBAL_DeleteExpiredSession)
 	return err
 }
 
-const deleteSessionsByUserID = `-- name: DeleteSessionsByUserID :exec
+const gLOBAL_DeleteSessionsByUserID = `-- name: GLOBAL_DeleteSessionsByUserID :exec
 UPDATE sessions
 SET deleted_at = NOW()
 WHERE user_id = $1
 `
 
-func (q *Queries) DeleteSessionsByUserID(ctx context.Context, userID string) error {
-	_, err := q.db.Exec(ctx, deleteSessionsByUserID, userID)
+func (q *Queries) GLOBAL_DeleteSessionsByUserID(ctx context.Context, userID string) error {
+	_, err := q.db.Exec(ctx, gLOBAL_DeleteSessionsByUserID, userID)
 	return err
 }
 
-const sessionByToken = `-- name: SessionByToken :one
+const gLOBAL_SessionByToken = `-- name: GLOBAL_SessionByToken :one
 SELECT id, user_id, token, created_at, deleted_at
 FROM sessions
 WHERE token = $1
 LIMIT 1
 `
 
-func (q *Queries) SessionByToken(ctx context.Context, token string) (Session, error) {
-	row := q.db.QueryRow(ctx, sessionByToken, token)
+func (q *Queries) GLOBAL_SessionByToken(ctx context.Context, token string) (Session, error) {
+	row := q.db.QueryRow(ctx, gLOBAL_SessionByToken, token)
 	var i Session
 	err := row.Scan(
 		&i.ID,
