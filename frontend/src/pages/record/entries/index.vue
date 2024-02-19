@@ -146,16 +146,21 @@ import { useCreateEntryDraftMutation } from "@/gql/mutations/entries/createEntry
 import { GetEntriesDocument } from "@/gql/queries/entries/getEntries"
 import { useTagLimitedQuery } from "@/gql/queries/tags/tags"
 import { EntrySortBy } from "@/gql/schema"
-import DCombobox from "@/components/d-combobox/d-combobox.vue"
+import DCombobox, { type Option } from "@/components/d-combobox/d-combobox.vue"
 
 const i18nLocale = useI18n()
 const router = useRouter()
 
 const tagSearch = ref("")
 
-const student = useSessionStorage<string>("filter/record/entries/index#student", null)
-const teacher = useSessionStorage<string>("filter/record/entries/index#teacher", null)
-const tags = useSessionStorage<string[]>(`filter/record/entries/index#tags`, [])
+const refSerializer = {
+  read: (v: any) => (v ? JSON.parse(v) : null),
+  write: (v: any) => JSON.stringify(v)
+}
+
+const student = useSessionStorage<Option>("filter/record/entries/index#student", null, { serializer: refSerializer })
+const teacher = useSessionStorage<Option>("filter/record/entries/index#teacher", null, { serializer: refSerializer })
+const tags = useSessionStorage<Option[]>(`filter/record/entries/index#tags`, null, { serializer: refSerializer })
 
 interface Variables extends PageVariables {
   filter: {
@@ -200,9 +205,9 @@ const goToProject = (id: string) => {
 const pageVariables = ref<Variables[]>([
   {
     filter: {
-      users: student.value || undefined,
-      authors: teacher.value || undefined,
-      tags: tags.value
+      users: student.value?.value || undefined,
+      authors: teacher.value?.value || undefined,
+      tags: tags.value?.map((el) => el.value)
     },
     limit: 30,
     order: EntrySortBy.CreatedAtDesc,
@@ -217,9 +222,9 @@ watch([student, teacher, tags], () => {
   pageVariables.value = [
     {
       filter: {
-        users: student.value || undefined,
-        authors: teacher.value || undefined,
-        tags: tags.value
+        users: student.value?.value || undefined,
+        authors: teacher.value?.value || undefined,
+        tags: tags.value?.map((el) => el.value)
       },
       limit: 30,
       order: lastPage.order,

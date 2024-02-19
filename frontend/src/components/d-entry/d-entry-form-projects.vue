@@ -37,15 +37,17 @@ const { data: eventsData } = useEventsQuery({})
 
 const selected = computed({
   get: () => {
-    return entry.value.events?.map((el: any) => el.id) || []
+    return entry.value.events?.map((el: any) => {
+      return { label: el.title, value: el.id }
+    }) || []
   },
-  set: async (value: string[]) => {
+  set: async (value: Option[]) => {
     const existing = entry.value.events?.map((el: any) => el.id) || []
-    const removables = existing.filter((el) => !value.includes(el))
-    const creatables = value.filter((el) => !existing.includes(el))
+    const removables = existing.filter((el) => !value.map((el) => el.value).includes(el))
+    const creatables = value.filter((el) => !existing.includes(el.value))
 
     for (const id of creatables || []) {
-      await createEntryEvent({ input: { entryId: entry.value.id as string, eventId: id } })
+      await createEntryEvent({ input: { entryId: entry.value.id as string, eventId: id.value } })
     }
 
     for (const id of removables || []) {

@@ -2,25 +2,40 @@
   <DDialog :title="$t('share_drive')" :open="open" @close="onClose()" class="min-w-[450px] p-4">
     <template #main>
       <div class="space-y-4">
-        <div v-if="permission == FilePermission.Manager" class="grow space-y-1 text-sm">
+        <div v-if="permission?.value == FilePermission.Manager" class="grow space-y-1 text-sm">
           <div class="text-subtle">{{ $t("user", 2) }}</div>
-          <DCombobox v-model="selectedUser" :options="userOptions" :label="$t('select_user')"
-            :placeholder="$t('select_user')" @select="onCreateShare" />
+          <DCombobox
+            v-model="selectedUser"
+            :options="userOptions"
+            :label="$t('select_user')"
+            :placeholder="$t('select_user')"
+            @select="onCreateShare"
+          />
         </div>
         <div class="space-y-2 text-sm">
           <div class="text-subtle">{{ $t("shared_with") }}</div>
           <div class="h-[200px] space-y-2 overflow-y-auto">
-            <div v-for="share in shares?.shares" :key="share.user.id"
-              class="flex items-center justify-between gap-2 rounded-md bg-neutral-50 px-3 py-2">
+            <div
+              v-for="share in sharesWithPermission"
+              :key="share.user.id"
+              class="flex items-center justify-between gap-2 rounded-md bg-neutral-50 px-3 py-2"
+            >
               <div>{{ share.user.firstName }} {{ share.user.lastName }}</div>
               <div class="flex items-center gap-4">
-                <DCombobox v-if="permission == FilePermission.Manager" v-model="share.permission"
-                  :options="permissionOptions" label="Select permission" placeholder="Select permission"
-                  @select="onEditShare(share as ShareUser)" />
+                <DCombobox
+                  v-if="permission?.value == FilePermission.Manager"
+                  v-model="share.permission"
+                  :options="permissionOptions"
+                  label="Select permission"
+                  placeholder="Select permission"
+                  @select="onEditShare(share)"
+                />
                 <div v-else class="text-sm text-subtle">{{ share.permission }}</div>
-                <button v-if="permission == FilePermission.Manager"
+                <button
+                  v-if="permission?.value == FilePermission.Manager"
                   class="flex h-8 w-8 items-center justify-center rounded-md p-1 hover:bg-neutral-100"
-                  @click="removeShare(share as ShareUser)">
+                  @click="removeShare(share as ShareUser)"
+                >
                   <Trash class="h-4 w-4 text-neutral-600"></Trash>
                 </button>
               </div>
@@ -44,6 +59,8 @@ import { useCreateShareMutation } from "@/gql/mutations/shares/createShare"
 import { useDeleteShareMutation } from "@/gql/mutations/shares/deleteShare"
 import { useEditShareMutation } from "@/gql/mutations/shares/editShare"
 import DCombobox from "@/components/d-combobox/d-combobox.vue"
+import type { Option } from "@/components/d-combobox/d-combobox.vue"
+import { watch } from "vue"
 
 interface Props {
   open: boolean
@@ -52,7 +69,12 @@ interface Props {
 const props = defineProps<Props>()
 const emit = defineEmits(["close", "share"])
 const bucketId = computed(() => props.item?.id)
-const permission = computed(() => props.item?.permission || FilePermission.Viewer)
+const permission = computed(() => {
+  if (props.item?.permission) {
+    return permissionOptions.find((el) => el.value == props.item.permission)
+  }
+  return permissionOptions[0]
+})
 
 const permissionOptions = [
   {
@@ -80,9 +102,17 @@ const { data: shares } = useBucketSharesQuery({
   }
 })
 
+type ShareWithPermission = ShareUser & { permission: Option }
+const sharesWithPermission = computed(() => {
+  return shares?.value?.shares?.map((share: any) => ({
+    ...share,
+    permission: permissionOptions.find((el) => el.value == share.permission)
+  }))
+})
+
 const { data: me } = useMeBucketShareQuery({})
 
-const selectedUser = ref<string>()
+const selectedUser = ref<Option>()
 const userOptions = computed(() => {
   // Filter out current user
   const myId = me?.value?.me?.id
@@ -125,13 +155,18 @@ async function removeShare(share: ShareUser) {
   })
 }
 
-async function onEditShare(share: ShareUser) {
+async function onEditShare(share: ShareWithPermission) {
   await editShare({
     input: reactive({
       bucketId,
       user: share.user.id,
-      permission: share.permission
+      permission: share.permission.value as FilePermission
     })
   })
+
+  if (!shares.value) return
+  if (!shares.value.shares) return
+  const index = shares.value.shares.findIndex((el: any) => el.user.id == share.user.id)
+  shares.value.shares[index].permission = share.permission.value as FilePermission
 }
 </script>

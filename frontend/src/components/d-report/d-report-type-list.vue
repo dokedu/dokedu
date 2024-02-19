@@ -3,9 +3,9 @@
     <DCombobox :options="typeOptions" :placeholder="$t('type')" v-model="type" class="w-full">
       <template #display>
         <div v-if="type" class="py-1">
-          <div class="mb-1 text-sm font-medium">{{ types.find((t) => t.value === type)?.label }}</div>
+          <div class="mb-1 text-sm font-medium">{{ types.find((t) => t.value === type?.value)?.label }}</div>
           <div class="text-xs text-neutral-500">
-            {{ types.find((t) => t.value === type)?.description }}
+            {{ types.find((t) => t.value === type?.value)?.description }}
           </div>
         </div>
         <div v-else class="text-sm">
@@ -27,15 +27,9 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useI18n } from "vue-i18n"
-import DCombobox from "../d-combobox/d-combobox.vue"
-import { useVModel } from "@vueuse/core"
+import DCombobox, { type Option } from "../d-combobox/d-combobox.vue"
 
-const props = defineProps<{
-  modelValue: string
-}>()
-const emit = defineEmits(["update:modelValue"])
-
-const type = useVModel(props, "modelValue", emit)
+const type = defineModel<Option>()
 
 export type ReportType = {
   label: string

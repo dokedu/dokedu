@@ -10,9 +10,11 @@
           <div class="min-w-16 text-sm text-neutral-400">{{ $t("color") }}</div>
           <DCombobox :options="colorOptions" :placeholder="$t('tag', 2)" v-model="tagColor" class="w-full">
             <template #display="{ displayedLabel }">
-              <d-tag :color="tag?.color">
-                {{ displayedLabel }}
-              </d-tag>
+              <div class="flex">
+                <d-tag :color="tag?.color">
+                  {{ displayedLabel }}
+                </d-tag>
+              </div>
             </template>
             <template v-slot="{ option }">
               <d-tag :color="option.value">
@@ -41,6 +43,7 @@ import DTag from "./d-tag/d-tag.vue"
 import { useUpdateTagMutation } from "@/gql/mutations/tags/updateTag"
 import { useArchiveTagMutation } from "@/gql/mutations/tags/archiveTag"
 import type { Tag } from "@/gql/schema"
+import type { Option } from "./d-combobox/d-combobox.vue"
 
 const colors = ["red", "orange", "yellow", "green", "blue", "indigo", "purple", "pink", "gray"]
 
@@ -67,11 +70,14 @@ const error = ref("")
 
 const tagColor = computed({
   get() {
-    return tag.value?.color || "gray"
-  },
-  set(value: string) {
     if (tag.value) {
-      tag.value.color = value
+      return { label: capitalize(tag.value.color), value: tag.value.color }
+    }
+    return { label: "Gray", value: "gray" }
+  },
+  set(value: Option) {
+    if (tag.value) {
+      tag.value.color = value.value
     }
   }
 })

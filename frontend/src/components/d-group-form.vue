@@ -61,14 +61,6 @@ import type { EmailAccount } from "@/gql/schema"
 const router = useRouter()
 const t = useI18n().t
 
-const domainOptions = computed(
-  () =>
-    domainData?.value?.domains?.edges?.map((edge: any) => ({
-      label: edge.name,
-      value: edge.name
-    })) || []
-)
-
 export interface Props {
   emailAccount: EmailAccount
   title: string
@@ -80,15 +72,22 @@ const emit = defineEmits(["save", "delete"])
 
 const account = toRef(props, "emailAccount")
 const name = ref(account.value.name.split("@")[0])
-const domain = ref(account.value.name.split("@")[1])
 const members = ref(
   account.value.members?.map((member) => {
     if (!member) return
-    return member.name
-  }) as string[]
+    return { label: member.name, value: member.id }
+  }) || []
 )
 
 const { data: domainData } = useDomainsQuery({})
+const domainOptions = computed(
+  () =>
+    domainData?.value?.domains?.edges?.map((edge: any) => ({
+      label: edge.name,
+      value: edge.name
+    })) || []
+)
+const domain = ref(domainOptions.value.find((el) => el.value == account.value.name.split("@")[1])?.value)
 
 const userSearch = ref("")
 const { data: userData } = useGroupUsersQuery({})
@@ -155,8 +154,8 @@ const onSave = () => {
 
   emit("save", {
     name: `${name.value}@${domain.value}`,
-    domain: domain.value,
-    members: members.value
+    domain: domain.value.value,
+    members: members.value.map((el) => el?.value)
   })
 }
 </script>

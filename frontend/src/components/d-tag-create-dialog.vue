@@ -13,9 +13,9 @@
           <div class="min-w-16 text-sm text-neutral-400">{{ $t("color") }}</div>
           <DCombobox class="grow" :placeholder="$t('tag', 2)" v-model="tagColor" :options="colorOptions">
             <template #display>
-              <div class="py-1">
-                <d-tag :color="tagColor">
-                  {{ tagColor }}
+              <div class="py-1 flex">
+                <d-tag :color="tagColor.value">
+                  {{ tagColor.label }}
                 </d-tag>
               </div>
             </template>
@@ -62,7 +62,7 @@ const emit = defineEmits(["close", "created"])
 
 const modalOpen = toRef(props, "open")
 const name = ref("")
-const tagColor = ref("gray")
+const tagColor = ref({ label: "Gray", value: "gray" })
 const error = ref("")
 
 const { executeMutation: createTag } = useCreateTagMutation()
@@ -75,7 +75,7 @@ const onCreate = async () => {
   const mutation = await createTag({
     input: {
       name: name.value,
-      color: tagColor.value
+      color: tagColor.value.value
     }
   })
 
@@ -85,7 +85,7 @@ const onCreate = async () => {
   }
 
   name.value = ""
-  tagColor.value = "gray"
+  tagColor.value = { label: "Gray", value: "gray" }
 
   emit("created")
 }

@@ -44,22 +44,24 @@ const { data: tagsData } = useTagLimitedQuery({})
 
 const selected = computed({
   get: () => {
-    return entry.value.tags?.map((el: any) => el.id) || []
+    return entry.value.tags?.map((el: any) => {
+      return { label: el.name, value: el.id }
+    }) || []
   },
-  set: async (value: string[]) => {
+  set: async (value: Option[]) => {
     // value contains all selected ids, we need to compare it to the existing ones
     // and if there are any differences, we need to create or delete the entryTag
     const existing = entry.value.tags?.map((el: any) => el.id) || []
 
-    const toDelete = existing.filter((el) => !value.includes(el))
-    const toCreate = value.filter((el) => !existing.includes(el))
+    const toDelete = existing.filter((el) => !value.map((el) => el.value).includes(el))
+    const toCreate = value.filter((el) => !existing.includes(el.value))
 
     for (const id of toDelete || []) {
       await deleteEntryTag({ input: { entryId: entry.value.id as string, tagId: id } })
     }
 
     for (const id of toCreate || []) {
-      await createEntryTag({ input: { entryId: entry.value.id as string, tagId: id } })
+      await createEntryTag({ input: { entryId: entry.value.id as string, tagId: id.value } })
     }
   }
 })

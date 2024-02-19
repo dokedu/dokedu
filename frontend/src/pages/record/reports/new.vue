@@ -15,16 +15,37 @@ import { useGetEntryFilterStudentsQuery } from "@/gql/queries/users/getEntryFilt
 import { useRouteQuery } from "@vueuse/router"
 import DTag from "@/components/d-tag/d-tag.vue"
 import { useCompetenceSubjectsQuery } from "@/gql/queries/competences/competenceSubjects"
-import DCombobox from "@/components/d-combobox/d-combobox.vue"
+import DCombobox, { type Option } from "@/components/d-combobox/d-combobox.vue"
 
 const router = useRouter()
 
 const student = useRouteQuery<string>("student")
 const from = useRouteQuery<string>("from")
 const to = useRouteQuery<string>("to")
-const type = useRouteQuery<string>("type", "entries")
+const type = useRouteQuery<string>("type", '{ "label": "Einträge ", "value": "entries"}')
 const competence = useRouteQuery<string>("competence")
 const competenceSearch = ref<string>("")
+
+const studentModel = computed({
+  get: () => (student.value ? JSON.parse(student.value) : undefined),
+  set: (value: any) => {
+    student.value = JSON.stringify(value)
+  }
+})
+
+const typeModel = computed({
+  get: () => JSON.parse(type.value),
+  set: (value: any) => {
+    type.value = JSON.stringify(value)
+  }
+})
+
+const competenceModel = computed({
+  get: () => (competence.value ? JSON.parse(competence.value) : null),
+  set: (value: any) => {
+    competence.value = JSON.stringify(value)
+  }
+})
 
 const { executeMutation: createReportMutation } = useCreateReportMutation()
 
@@ -122,11 +143,10 @@ async function createReport() {
         <div class="border-r h-full p-4 max-w-sm w-full">
           <div class="max-w-sm w-full space-y-4">
             <DCombobox
-              v-if="studentOptions.length > 1"
               :options="studentOptions"
               :placeholder="$t('student')"
               v-model:search="studentSearch"
-              v-model="student"
+              v-model="studentModel"
               searchable
             />
 
@@ -135,7 +155,7 @@ async function createReport() {
               <d-input class="w-full" type="date" name="to" v-model="to" />
             </div>
 
-            <ReportTypeList v-model="type" />
+            <ReportTypeList v-model="typeModel" />
 
             <template v-if="false">
               <div class="bg-blue-100 rounded-md flex gap-2.5 p-2.5">
@@ -151,7 +171,7 @@ async function createReport() {
                 searchable
                 :options="tagOptions"
                 :placeholder="$t('subject')"
-                v-model="competence"
+                v-model="competenceModel"
                 v-model:search="competenceSearch"
               >
                 <template #display>
