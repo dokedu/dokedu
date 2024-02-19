@@ -3,9 +3,8 @@ package pdf
 import (
 	"context"
 	"fmt"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"time"
-
-	"github.com/dokedu/dokedu/backend/internal/db"
 )
 
 type CompetenceStruct struct {

@@ -7,7 +7,7 @@ WHERE chat_id = $1;
 SELECT *
 FROM chats
 WHERE id = @id
-  AND organisation_id = @organisation_id
+  AND organisation_id = @organisation_id  AND deleted_at IS NULL
 LIMIT 1;
 
 -- name: GLOBAL_ChatById :one
@@ -21,7 +21,7 @@ SELECT chat.*
 FROM chats chat
          INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = @user_id
 WHERE chat.id = @chat_id
-  AND chat.organisation_id = @organisation_id
+  AND chat.organisation_id = @organisation_id AND deleted_at IS NULL
 LIMIT 1;
 
 -- name: BotUserByChatId :one
@@ -30,7 +30,7 @@ FROM users
          INNER JOIN public.chat_users cu ON users.id = cu.user_id
 WHERE cu.id = $1
   AND users.role = 'bot'::user_role
-  AND users.organisation_id = $2
+  AND users.organisation_id = $2 AND deleted_at IS NULL
 LIMIT 1;
 
 -- name: CreateChatMessage :one
@@ -41,7 +41,7 @@ RETURNING *;
 -- name: ChatMessageById :one
 SELECT *
 FROM chat_messages
-WHERE id = $1
+WHERE id = $1 AND deleted_at IS NULL
 LIMIT 1;
 
 -- name: UpdateChatMessageMessageWithoutOrg :one
@@ -53,21 +53,21 @@ RETURNING *;
 -- name: GLOBAL_ChatMessagesByChatId :many
 SELECT *
 FROM chat_messages
-WHERE chat_id = $1
+WHERE chat_id = $1 AND deleted_at IS NULL
 ORDER BY created_at DESC;
 
 -- name: GLOBAL_UsersInChat :many
 SELECT users.*
 FROM users
          INNER JOIN public.chat_users cu ON users.id = cu.user_id
-WHERE cu.chat_id = $1;
+WHERE cu.chat_id = $1 AND deleted_at IS NULL;
 
 -- name: ChatNameByChatId :one
 SELECT users.id, users.first_name, users.last_name
 FROM users
          LEFT JOIN chat_users cu ON users.id = cu.user_id AND cu.chat_id = @chat_id
 WHERE users.id = @user_id
-  AND users.organisation_id = @organisation_id
+  AND users.organisation_id = @organisation_id AND deleted_at IS NULL
 LIMIT 1;
 
 -- name: UserListByChatId :many
@@ -75,19 +75,19 @@ SELECT users.*
 FROM users
          INNER JOIN chat_users cu ON users.id = cu.user_id
 WHERE cu.chat_id = @chat_id
-  AND users.organisation_id = @organisation_id;
+  AND users.organisation_id = @organisation_id AND deleted_at IS NULL;
 
 -- name: ChatMessageListByChatId :many
 SELECT *
 FROM chat_messages
 WHERE chat_id = @chat_id
-  AND organisation_id = @organisation_id;
+  AND organisation_id = @organisation_id AND deleted_at IS NULL;
 
 -- name: LastChatMessage :one
 SELECT *
 FROM chat_messages
 WHERE chat_id = @chat_id
-  AND organisation_id = @organisation_id
+  AND organisation_id = @organisation_id AND deleted_at IS NULL
 ORDER BY created_at DESC
 LIMIT 1;
 
@@ -97,7 +97,7 @@ FROM chat_messages
          LEFT JOIN chat_message_views cmv ON chat_messages.id = cmv.chat_message_id
 WHERE chat_messages.chat_id = @chat_id
   AND chat_messages.organisation_id = @organisation_id
-  AND cmv.user_id = @user_id;
+  AND cmv.user_id = @user_id AND deleted_at IS NULL;
 
 -- name: UserCountByChatId :one
 SELECT COUNT(*)
@@ -132,7 +132,7 @@ FROM chats chat
          INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = @user_id
          INNER JOIN chat_users AS chat_users2 ON chat_users2.chat_id = chat.id AND chat_users2.user_id = @other_user_id
 WHERE chat.type = @chat_type
-  AND chat.organisation_id = @organisation_id;
+  AND chat.organisation_id = @organisation_id AND deleted_at IS NULL;
 
 -- name: DeleteChatUser :one
 DELETE
@@ -197,7 +197,7 @@ ON CONFLICT DO NOTHING
 RETURNING *;
 
 -- name: ChatListWithUser :many
-SELECT chat.*,
+SELECT sqlc.embed(chat),
        MAX(cm.created_at) AS last_message_at,
        COUNT(*) OVER ()   AS total_count
 FROM chats AS chat

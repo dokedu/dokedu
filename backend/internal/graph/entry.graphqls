@@ -1,17 +1,19 @@
 type Entry {
     id: ID!
     date: String!
-    body: String
-    createdAt: Time!
-    deletedAt: Time
+    body: String!
 
     user: User!
+
     users: [User!]!
     events: [Event!]!
     files: [File!]!
     tags: [Tag!]!
     userCompetences: [UserCompetence!]!
     subjects: [Competence!]!
+
+    createdAt: Time!
+    deletedAt: Time
 }
 
 type EntryConnection {
@@ -135,6 +137,8 @@ extend type Mutation {
 
     updateEntryUserCompetenceLevel(input: UpdateEntryUserCompetenceLevel!): Entry!
 
+    # TODO: rename to createEntryFile
     uploadFileToEntry(entryId: ID!, file: Upload!): Entry!
+    # TODO: rename to deleteEntryFile
     removeFileFromEntry(entryId: ID!, fileId: ID!): File!
 }

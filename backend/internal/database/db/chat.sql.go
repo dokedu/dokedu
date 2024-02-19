@@ -18,7 +18,7 @@ FROM users
          INNER JOIN public.chat_users cu ON users.id = cu.user_id
 WHERE cu.id = $1
   AND users.role = 'bot'::user_role
-  AND users.organisation_id = $2
+  AND users.organisation_id = $2 AND deleted_at IS NULL
 LIMIT 1
 `
 
@@ -78,7 +78,7 @@ const chatById = `-- name: ChatById :one
 SELECT id, name, organisation_id, updated_at, created_at, deleted_at, type
 FROM chats
 WHERE id = $1
-  AND organisation_id = $2
+  AND organisation_id = $2  AND deleted_at IS NULL
 LIMIT 1
 `
 
@@ -107,7 +107,7 @@ SELECT chat.id, chat.name, chat.organisation_id, chat.updated_at, chat.created_a
 FROM chats chat
          INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = $1
 WHERE chat.id = $2
-  AND chat.organisation_id = $3
+  AND chat.organisation_id = $3 AND deleted_at IS NULL
 LIMIT 1
 `
 
@@ -156,15 +156,9 @@ type ChatListWithUserParams struct {
 }
 
 type ChatListWithUserRow struct {
-	ID             string             `db:"id"`
-	Name           pgtype.Text        `db:"name"`
-	OrganisationID string             `db:"organisation_id"`
-	UpdatedAt      pgtype.Timestamptz `db:"updated_at"`
-	CreatedAt      time.Time          `db:"created_at"`
-	DeletedAt      pgtype.Timestamptz `db:"deleted_at"`
-	Type           NullChatType       `db:"type"`
-	LastMessageAt  interface{}        `db:"last_message_at"`
-	TotalCount     int64              `db:"total_count"`
+	Chat          Chat        `db:"chat"`
+	LastMessageAt interface{} `db:"last_message_at"`
+	TotalCount    int64       `db:"total_count"`
 }
 
 func (q *Queries) ChatListWithUser(ctx context.Context, arg ChatListWithUserParams) ([]ChatListWithUserRow, error) {
@@ -182,13 +176,13 @@ func (q *Queries) ChatListWithUser(ctx context.Context, arg ChatListWithUserPara
 	for rows.Next() {
 		var i ChatListWithUserRow
 		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.OrganisationID,
-			&i.UpdatedAt,
-			&i.CreatedAt,
-			&i.DeletedAt,
-			&i.Type,
+			&i.Chat.ID,
+			&i.Chat.Name,
+			&i.Chat.OrganisationID,
+			&i.Chat.UpdatedAt,
+			&i.Chat.CreatedAt,
+			&i.Chat.DeletedAt,
+			&i.Chat.Type,
 			&i.LastMessageAt,
 			&i.TotalCount,
 		); err != nil {
@@ -205,7 +199,7 @@ func (q *Queries) ChatListWithUser(ctx context.Context, arg ChatListWithUserPara
 const chatMessageById = `-- name: ChatMessageById :one
 SELECT id, chat_id, user_id, message, organisation_id, updated_at, created_at, deleted_at
 FROM chat_messages
-WHERE id = $1
+WHERE id = $1 AND deleted_at IS NULL
 LIMIT 1
 `
 
@@ -229,7 +223,7 @@ const chatMessageListByChatId = `-- name: ChatMessageListByChatId :many
 SELECT id, chat_id, user_id, message, organisation_id, updated_at, created_at, deleted_at
 FROM chat_messages
 WHERE chat_id = $1
-  AND organisation_id = $2
+  AND organisation_id = $2 AND deleted_at IS NULL
 `
 
 type ChatMessageListByChatIdParams struct {
@@ -271,7 +265,7 @@ SELECT users.id, users.first_name, users.last_name
 FROM users
          LEFT JOIN chat_users cu ON users.id = cu.user_id AND cu.chat_id = $1
 WHERE users.id = $2
-  AND users.organisation_id = $3
+  AND users.organisation_id = $3 AND deleted_at IS NULL
 LIMIT 1
 `
 
@@ -498,7 +492,7 @@ FROM chats chat
          INNER JOIN chat_users ON chat_users.chat_id = chat.id AND chat_users.user_id = $1
          INNER JOIN chat_users AS chat_users2 ON chat_users2.chat_id = chat.id AND chat_users2.user_id = $2
 WHERE chat.type = $3
-  AND chat.organisation_id = $4
+  AND chat.organisation_id = $4 AND deleted_at IS NULL
 `
 
 type ExistingChatBetweenTwoUsersParams struct {
@@ -553,7 +547,7 @@ func (q *Queries) GLOBAL_ChatById(ctx context.Context, id string) (Chat, error) 
 const gLOBAL_ChatMessagesByChatId = `-- name: GLOBAL_ChatMessagesByChatId :many
 SELECT id, chat_id, user_id, message, organisation_id, updated_at, created_at, deleted_at
 FROM chat_messages
-WHERE chat_id = $1
+WHERE chat_id = $1 AND deleted_at IS NULL
 ORDER BY created_at DESC
 `
 
@@ -621,7 +615,7 @@ const gLOBAL_UsersInChat = `-- name: GLOBAL_UsersInChat :many
 SELECT users.id, users.role, users.organisation_id, users.first_name, users.last_name, users.email, users.password, users.recovery_token, users.recovery_sent_at, users.avatar_file_id, users.created_at, users.deleted_at, users.language, users.sex
 FROM users
          INNER JOIN public.chat_users cu ON users.id = cu.user_id
-WHERE cu.chat_id = $1
+WHERE cu.chat_id = $1 AND deleted_at IS NULL
 `
 
 func (q *Queries) GLOBAL_UsersInChat(ctx context.Context, chatID string) ([]User, error) {
@@ -663,7 +657,7 @@ const lastChatMessage = `-- name: LastChatMessage :one
 SELECT id, chat_id, user_id, message, organisation_id, updated_at, created_at, deleted_at
 FROM chat_messages
 WHERE chat_id = $1
-  AND organisation_id = $2
+  AND organisation_id = $2 AND deleted_at IS NULL
 ORDER BY created_at DESC
 LIMIT 1
 `
@@ -731,7 +725,7 @@ FROM chat_messages
          LEFT JOIN chat_message_views cmv ON chat_messages.id = cmv.chat_message_id
 WHERE chat_messages.chat_id = $1
   AND chat_messages.organisation_id = $2
-  AND cmv.user_id = $3
+  AND cmv.user_id = $3 AND deleted_at IS NULL
 `
 
 type UnreadMessageCountParams struct {
@@ -877,7 +871,7 @@ SELECT users.id, users.role, users.organisation_id, users.first_name, users.last
 FROM users
          INNER JOIN chat_users cu ON users.id = cu.user_id
 WHERE cu.chat_id = $1
-  AND users.organisation_id = $2
+  AND users.organisation_id = $2 AND deleted_at IS NULL
 `
 
 type UserListByChatIdParams struct {

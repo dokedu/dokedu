@@ -42,19 +42,14 @@ type Config struct {
 }
 
 type ResolverRoot interface {
-	Bucket() BucketResolver
 	Chat() ChatResolver
 	ChatMessage() ChatMessageResolver
 	ChatUser() ChatUserResolver
 	Competence() CompetenceResolver
-	Domain() DomainResolver
-	Email() EmailResolver
-	EmailAccount() EmailAccountResolver
-	EmailForwarding() EmailForwardingResolver
-	EmailGroupMember() EmailGroupMemberResolver
 	Entry() EntryResolver
 	Event() EventResolver
 	File() FileResolver
+	FilePermission() FilePermissionResolver
 	Mutation() MutationResolver
 	Organisation() OrganisationResolver
 	Query() QueryResolver
@@ -72,25 +67,9 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	Bucket struct {
-		CreatedAt  func(childComplexity int) int
-		DeletedAt  func(childComplexity int) int
-		Files      func(childComplexity int) int
-		ID         func(childComplexity int) int
-		Name       func(childComplexity int) int
-		Permission func(childComplexity int) int
-		Shared     func(childComplexity int) int
-		User       func(childComplexity int) int
-	}
-
-	BucketConnection struct {
-		Edges      func(childComplexity int) int
-		PageInfo   func(childComplexity int) int
-		TotalCount func(childComplexity int) int
-	}
-
 	Chat struct {
 		CreatedAt          func(childComplexity int) int
+		Deleted            func(childComplexity int) int
 		DeletedAt          func(childComplexity int) int
 		ID                 func(childComplexity int) int
 		LastMessage        func(childComplexity int) int
@@ -150,96 +129,20 @@ type ComplexityRoot struct {
 		Tendency                func(childComplexity int) int
 	}
 
-	CopyFilesPayload struct {
-		Files func(childComplexity int) int
+	CreateFilePayload struct {
+		File func(childComplexity int) int
+	}
+
+	CreateFilePermissionPayload struct {
+		FilePermission func(childComplexity int) int
 	}
 
 	DeleteFilePayload struct {
-		File    func(childComplexity int) int
-		Success func(childComplexity int) int
+		File func(childComplexity int) int
 	}
 
-	DeleteFilesPayload struct {
-		Files   func(childComplexity int) int
-		Success func(childComplexity int) int
-	}
-
-	Domain struct {
-		CreatedAt func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Name      func(childComplexity int) int
-	}
-
-	DomainConnection struct {
-		Edges      func(childComplexity int) int
-		PageInfo   func(childComplexity int) int
-		TotalCount func(childComplexity int) int
-	}
-
-	DownloadFilePayload struct {
-		URL func(childComplexity int) int
-	}
-
-	DownloadFilesPayload struct {
-		URL func(childComplexity int) int
-	}
-
-	Email struct {
-		Address   func(childComplexity int) int
-		CreatedAt func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Name      func(childComplexity int) int
-		Type      func(childComplexity int) int
-	}
-
-	EmailAccount struct {
-		Active      func(childComplexity int) int
-		CreatedAt   func(childComplexity int) int
-		Description func(childComplexity int) int
-		ID          func(childComplexity int) int
-		Members     func(childComplexity int) int
-		Name        func(childComplexity int) int
-		Quota       func(childComplexity int) int
-		Type        func(childComplexity int) int
-		User        func(childComplexity int) int
-	}
-
-	EmailAccountConnection struct {
-		Edges      func(childComplexity int) int
-		PageInfo   func(childComplexity int) int
-		TotalCount func(childComplexity int) int
-	}
-
-	EmailConnection struct {
-		Edges      func(childComplexity int) int
-		PageInfo   func(childComplexity int) int
-		TotalCount func(childComplexity int) int
-	}
-
-	EmailForwarding struct {
-		CreatedAt func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Origin    func(childComplexity int) int
-		Target    func(childComplexity int) int
-	}
-
-	EmailForwardingConnection struct {
-		Edges      func(childComplexity int) int
-		PageInfo   func(childComplexity int) int
-		TotalCount func(childComplexity int) int
-	}
-
-	EmailGroupMember struct {
-		CreatedAt func(childComplexity int) int
-		ID        func(childComplexity int) int
-		MemberOf  func(childComplexity int) int
-		Name      func(childComplexity int) int
-	}
-
-	EmailGroupMemberConnection struct {
-		Edges      func(childComplexity int) int
-		PageInfo   func(childComplexity int) int
-		TotalCount func(childComplexity int) int
+	DeleteFilePermissionPayload struct {
+		FilePermission func(childComplexity int) int
 	}
 
 	Entry struct {
@@ -292,23 +195,33 @@ type ComplexityRoot struct {
 	}
 
 	File struct {
-		Bucket    func(childComplexity int) int
-		CreatedAt func(childComplexity int) int
-		DeletedAt func(childComplexity int) int
-		FileType  func(childComplexity int) int
-		Files     func(childComplexity int) int
-		ID        func(childComplexity int) int
-		MIMEType  func(childComplexity int) int
-		Name      func(childComplexity int) int
-		Parent    func(childComplexity int) int
-		Parents   func(childComplexity int) int
-		Size      func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		DeletedAt   func(childComplexity int) int
+		Files       func(childComplexity int) int
+		Folder      func(childComplexity int) int
+		Folders     func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Mime        func(childComplexity int) int
+		Name        func(childComplexity int) int
+		Permissions func(childComplexity int) int
+		Size        func(childComplexity int) int
+		Type        func(childComplexity int) int
 	}
 
 	FileConnection struct {
 		Edges      func(childComplexity int) int
 		PageInfo   func(childComplexity int) int
 		TotalCount func(childComplexity int) int
+	}
+
+	FilePermission struct {
+		DisplayName  func(childComplexity int) int
+		EmailAddress func(childComplexity int) int
+		File         func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Inherited    func(childComplexity int) int
+		Role         func(childComplexity int) int
+		Type         func(childComplexity int) int
 	}
 
 	ForgotPasswordPayload struct {
@@ -327,29 +240,16 @@ type ComplexityRoot struct {
 		LastName  func(childComplexity int) int
 	}
 
-	MoveFilesPayload struct {
-		Files func(childComplexity int) int
-	}
-
 	Mutation struct {
 		AcceptInvite                   func(childComplexity int, token string, input model.SignUpInput) int
-		AddFileShare                   func(childComplexity int, input model.ShareFileInput) int
 		AddUserToChat                  func(childComplexity int, input model.AddUserToChatInput) int
 		ArchiveEntry                   func(childComplexity int, id string) int
 		ArchiveEvent                   func(childComplexity int, id string) int
 		ArchiveTag                     func(childComplexity int, id string) int
 		ArchiveUser                    func(childComplexity int, id string) int
 		ArchiveUserCompetence          func(childComplexity int, id string) int
-		CopyFile                       func(childComplexity int, input model.CopyFileInput) int
-		CopyFiles                      func(childComplexity int, input model.CopyFilesInput) int
 		CreateChat                     func(childComplexity int, input model.CreateChatInput) int
 		CreateCompetence               func(childComplexity int, input model.CreateCompetenceInput) int
-		CreateDomain                   func(childComplexity int, input model.CreateDomainInput) int
-		CreateEmail                    func(childComplexity int, input model.CreateEmailInput) int
-		CreateEmailAccount             func(childComplexity int, input model.CreateEmailAccountInput) int
-		CreateEmailForwarding          func(childComplexity int, input model.CreateEmailForwardingInput) int
-		CreateEmailGroup               func(childComplexity int, input model.CreateEmailGroupInput) int
-		CreateEmailGroupMember         func(childComplexity int, input model.CreateEmailGroupMemberInput) int
 		CreateEntry                    func(childComplexity int) int
 		CreateEntryCompetence          func(childComplexity int, input model.CreateEntryCompetenceInput) int
 		CreateEntryEvent               func(childComplexity int, input model.CreateEntryEventInput) int
@@ -357,86 +257,66 @@ type ComplexityRoot struct {
 		CreateEntryTag                 func(childComplexity int, input model.CreateEntryTagInput) int
 		CreateEntryUser                func(childComplexity int, input model.CreateEntryUserInput) int
 		CreateEvent                    func(childComplexity int, input model.CreateEventInput) int
-		CreateFolder                   func(childComplexity int, input model.CreateFolderInput) int
+		CreateFile                     func(childComplexity int, input model.CreateFileInput) int
+		CreateFilePermission           func(childComplexity int, input model.CreateFilePermissionInput) int
 		CreatePrivatChat               func(childComplexity int, userID string) int
 		CreateReport                   func(childComplexity int, input model.CreateReportInput) int
 		CreateSchoolYear               func(childComplexity int, input model.CreateSchoolYearInput) int
-		CreateShare                    func(childComplexity int, input model.CreateShareInput) int
-		CreateSharedDrive              func(childComplexity int, name string) int
 		CreateStudent                  func(childComplexity int, input model.CreateStudentInput) int
 		CreateSubject                  func(childComplexity int, input model.CreateSubjectInput) int
 		CreateTag                      func(childComplexity int, input model.CreateTagInput) int
 		CreateUser                     func(childComplexity int, input model.CreateUserInput) int
 		CreateUserCompetence           func(childComplexity int, input model.CreateUserCompetenceInput) int
 		DeleteChat                     func(childComplexity int, input model.DeleteChatInput) int
-		DeleteDomain                   func(childComplexity int, input model.DeleteDomainInput) int
-		DeleteEmail                    func(childComplexity int, input model.DeleteEmailInput) int
-		DeleteEmailAccount             func(childComplexity int, input model.DeleteEmailAccountInput) int
-		DeleteEmailForwarding          func(childComplexity int, input model.DeleteEmailForwardingInput) int
-		DeleteEmailGroup               func(childComplexity int, id string) int
-		DeleteEmailGroupMember         func(childComplexity int, input model.DeleteEmailGroupMemberInput) int
 		DeleteEntryCompetence          func(childComplexity int, input model.DeleteEntryCompetenceInput) int
 		DeleteEntryEvent               func(childComplexity int, input model.DeleteEntryEventInput) int
 		DeleteEntryFile                func(childComplexity int, input model.DeleteEntryFileInput) int
 		DeleteEntryTag                 func(childComplexity int, input model.DeleteEntryTagInput) int
 		DeleteEntryUser                func(childComplexity int, input model.DeleteEntryUserInput) int
 		DeleteFile                     func(childComplexity int, input model.DeleteFileInput) int
-		DeleteFiles                    func(childComplexity int, input model.DeleteFilesInput) int
+		DeleteFilePermission           func(childComplexity int, input model.DeleteFilePermissionInput) int
 		DeleteSchoolYear               func(childComplexity int, id string) int
-		DeleteShare                    func(childComplexity int, input model.DeleteShareInput) int
-		DeleteSharedDrive              func(childComplexity int, id string) int
 		DeleteSubject                  func(childComplexity int, id string) int
-		DownloadFile                   func(childComplexity int, input model.DownloadFileInput) int
-		DownloadFiles                  func(childComplexity int, input model.DownloadFilesInput) int
 		EditChatMessage                func(childComplexity int, input model.EditChatMessageInput) int
-		EditShare                      func(childComplexity int, input model.CreateShareInput) int
 		ForgotPassword                 func(childComplexity int, input model.ForgotPasswordInput) int
 		ImportStudents                 func(childComplexity int, input model.ImportStudentsInput) int
 		MarkMessageAsRead              func(childComplexity int, messageID string) int
-		MoveFile                       func(childComplexity int, input model.MoveFileInput) int
-		MoveFiles                      func(childComplexity int, input model.MoveFilesInput) int
-		PreviewFile                    func(childComplexity int, input model.PreviewFileInput) int
 		RemoveFileFromEntry            func(childComplexity int, entryID string, fileID string) int
-		RemoveFileShare                func(childComplexity int, input string) int
 		RemoveUserFromChat             func(childComplexity int, input model.RemoveUserFromChatInput) int
-		RenameFile                     func(childComplexity int, input model.RenameFileInput) int
-		RenameSharedDrive              func(childComplexity int, input model.RenameSharedDriveInput) int
 		ResetPassword                  func(childComplexity int, input model.ResetPasswordInput) int
 		SendMessage                    func(childComplexity int, input model.SendMessageInput) int
 		SendUserInvite                 func(childComplexity int, id string) int
-		SetUserAttendanceState         func(childComplexity int, userID string, date time.Time, state db.UserAttendanceState) int
 		SignIn                         func(childComplexity int, input model.SignInInput) int
 		SignOut                        func(childComplexity int) int
 		ToggleEventCompetence          func(childComplexity int, input model.AddEventCompetenceInput) int
 		UpdateChat                     func(childComplexity int, input model.UpdateChatInput) int
 		UpdateCompetence               func(childComplexity int, input model.UpdateCompetenceInput) int
 		UpdateCompetenceSorting        func(childComplexity int, input model.UpdateCompetenceSortingInput) int
-		UpdateDailyAttendance          func(childComplexity int, date time.Time, state db.UserAttendanceState) int
-		UpdateEmailAccount             func(childComplexity int, input model.UpdateEmailAccountInput) int
-		UpdateEmailGroup               func(childComplexity int, input model.UpdateEmailGroupInput) int
 		UpdateEntry                    func(childComplexity int, input model.UpdateEntryInput) int
 		UpdateEntryUserCompetenceLevel func(childComplexity int, input model.UpdateEntryUserCompetenceLevel) int
 		UpdateEvent                    func(childComplexity int, input model.UpdateEventInput) int
+		UpdateFile                     func(childComplexity int, input model.UpdateFileInput) int
+		UpdateFilePermission           func(childComplexity int, input model.UpdateFilePermissionInput) int
 		UpdateOrganisation             func(childComplexity int, input model.UpdateOrganisationInput) int
 		UpdatePassword                 func(childComplexity int, oldPassword string, newPassword string) int
 		UpdateSchoolYear               func(childComplexity int, input model.UpdateSchoolYearInput) int
 		UpdateSubject                  func(childComplexity int, input model.UpdateSubjectInput) int
 		UpdateTag                      func(childComplexity int, id string, input model.CreateTagInput) int
 		UpdateUser                     func(childComplexity int, input model.UpdateUserInput) int
+		UpdateUserAttendance           func(childComplexity int, input model.UpdateUserAttendanceInput) int
 		UpdateUserLanguage             func(childComplexity int, language model.UserLanguage) int
 		UpdateUserStudentGrade         func(childComplexity int, input model.UpdateUserStudentGradesInput) int
-		UploadFile                     func(childComplexity int, input model.FileUploadInput) int
 		UploadFileToEntry              func(childComplexity int, entryID string, file graphql.Upload) int
-		UploadFiles                    func(childComplexity int, input model.FileUploadInput) int
 	}
 
 	Organisation struct {
-		ID        func(childComplexity int) int
-		LegalName func(childComplexity int) int
-		Name      func(childComplexity int) int
-		Owner     func(childComplexity int) int
-		Phone     func(childComplexity int) int
-		Website   func(childComplexity int) int
+		Applications func(childComplexity int) int
+		ID           func(childComplexity int) int
+		LegalName    func(childComplexity int) int
+		Name         func(childComplexity int) int
+		Owner        func(childComplexity int) int
+		Phone        func(childComplexity int) int
+		Website      func(childComplexity int) int
 	}
 
 	PageInfo struct {
@@ -445,53 +325,39 @@ type ComplexityRoot struct {
 		HasPreviousPage func(childComplexity int) int
 	}
 
-	PreviewFilePayload struct {
-		URL func(childComplexity int) int
-	}
-
 	Query struct {
-		Bucket                 func(childComplexity int, id string) int
-		Buckets                func(childComplexity int, input *model.BucketFilterInput, limit *int, offset *int) int
-		Chat                   func(childComplexity int, id string) int
-		Chats                  func(childComplexity int, limit *int, offset *int) int
-		Competence             func(childComplexity int, id string) int
-		Competences            func(childComplexity int, limit *int, offset *int, filter *model.CompetenceFilterInput, search *string, sort *model.CompetenceSort) int
-		Domain                 func(childComplexity int, id string) int
-		Domains                func(childComplexity int) int
-		Email                  func(childComplexity int, id string) int
-		EmailAccount           func(childComplexity int, id string) int
-		EmailAccounts          func(childComplexity int, filter *model.EmailAccountFilter) int
-		EmailForwarding        func(childComplexity int, id string) int
-		EmailForwardings       func(childComplexity int) int
-		EmailGroupMember       func(childComplexity int, id string) int
-		EmailGroupMembers      func(childComplexity int) int
-		Emails                 func(childComplexity int) int
-		Entries                func(childComplexity int, limit *int, offset *int, filter *model.EntryFilterInput, sortBy *model.EntrySortBy, search *string) int
-		Entry                  func(childComplexity int, id string) int
-		Event                  func(childComplexity int, id string) int
-		Events                 func(childComplexity int, limit *int, offset *int, filter *model.EventFilterInput, order *model.EventOrderBy, search *string) int
-		ExportEvents           func(childComplexity int, input model.ExportEventsInput) int
-		File                   func(childComplexity int, id string) int
-		Files                  func(childComplexity int, input *model.FilesFilterInput, limit *int, offset *int) int
-		InviteDetails          func(childComplexity int, token string) int
-		Me                     func(childComplexity int) int
-		Organisation           func(childComplexity int) int
-		Report                 func(childComplexity int, id string) int
-		Reports                func(childComplexity int, limit *int, offset *int) int
-		SchoolYear             func(childComplexity int, id string) int
-		SchoolYears            func(childComplexity int, limit *int, offset *int) int
-		Shares                 func(childComplexity int, input *model.ShareInput) int
-		Subject                func(childComplexity int, id string) int
-		Subjects               func(childComplexity int, limit *int, offset *int) int
-		Tag                    func(childComplexity int, id string) int
-		Tags                   func(childComplexity int, limit *int, offset *int, search *string) int
-		User                   func(childComplexity int, id string) int
-		UserAttendanceOverview func(childComplexity int, date time.Time) int
-		UserStudent            func(childComplexity int, id string) int
-		UserStudentGrade       func(childComplexity int, id string) int
-		UserStudentGrades      func(childComplexity int, limit *int, offset *int) int
-		UserStudents           func(childComplexity int, limit *int, offset *int) int
-		Users                  func(childComplexity int, limit *int, offset *int, filter *model.UserFilterInput, search *string) int
+		Chat              func(childComplexity int, id string) int
+		Chats             func(childComplexity int, limit *int, offset *int) int
+		Competence        func(childComplexity int, id string) int
+		Competences       func(childComplexity int, limit *int, offset *int, filter *model.CompetenceFilterInput, search *string, sort *model.CompetenceSort) int
+		Entries           func(childComplexity int, limit *int, offset *int, filter *model.EntryFilterInput, sortBy *model.EntrySortBy, search *string) int
+		Entry             func(childComplexity int, id string) int
+		Event             func(childComplexity int, id string) int
+		Events            func(childComplexity int, limit *int, offset *int, filter *model.EventFilterInput, order *model.EventOrderBy, search *string) int
+		ExportEvents      func(childComplexity int, input model.ExportEventsInput) int
+		File              func(childComplexity int, id string) int
+		Files             func(childComplexity int, input *model.FileFilterInput) int
+		InviteDetails     func(childComplexity int, token string) int
+		Me                func(childComplexity int) int
+		MyDrive           func(childComplexity int, input *model.FileFilterInput) int
+		Organisation      func(childComplexity int) int
+		Report            func(childComplexity int, id string) int
+		Reports           func(childComplexity int, limit *int, offset *int) int
+		SchoolYear        func(childComplexity int, id string) int
+		SchoolYears       func(childComplexity int, limit *int, offset *int) int
+		SharedDrives      func(childComplexity int, input *model.FileFilterInput) int
+		Subject           func(childComplexity int, id string) int
+		Subjects          func(childComplexity int, limit *int, offset *int) int
+		Tag               func(childComplexity int, id string) int
+		Tags              func(childComplexity int, limit *int, offset *int, search *string) int
+		Trash             func(childComplexity int, input *model.FileFilterInput) int
+		User              func(childComplexity int, id string) int
+		UserAttendances   func(childComplexity int, date time.Time) int
+		UserStudent       func(childComplexity int, id string) int
+		UserStudentGrade  func(childComplexity int, id string) int
+		UserStudentGrades func(childComplexity int, limit *int, offset *int) int
+		UserStudents      func(childComplexity int, limit *int, offset *int) int
+		Users             func(childComplexity int, limit *int, offset *int, filter *model.UserFilterInput, search *string) int
 	}
 
 	Report struct {
@@ -517,11 +383,9 @@ type ComplexityRoot struct {
 	}
 
 	ResetPasswordPayload struct {
-		InvalidToken  func(childComplexity int) int
-		Success       func(childComplexity int) int
-		TokenExpired  func(childComplexity int) int
-		UnableToReset func(childComplexity int) int
-		Unauthorized  func(childComplexity int) int
+		Organisation func(childComplexity int) int
+		Token        func(childComplexity int) int
+		User         func(childComplexity int) int
 	}
 
 	SchoolYear struct {
@@ -536,17 +400,10 @@ type ComplexityRoot struct {
 		TotalCount func(childComplexity int) int
 	}
 
-	ShareUser struct {
-		Permission func(childComplexity int) int
-		User       func(childComplexity int) int
-	}
-
 	SignInPayload struct {
-		EnabledApps   func(childComplexity int) int
-		Language      func(childComplexity int) int
-		SetupComplete func(childComplexity int) int
-		Token         func(childComplexity int) int
-		User          func(childComplexity int) int
+		Organisation func(childComplexity int) int
+		Token        func(childComplexity int) int
+		User         func(childComplexity int) int
 	}
 
 	Subject struct {
@@ -579,15 +436,18 @@ type ComplexityRoot struct {
 		TotalCount func(childComplexity int) int
 	}
 
-	UploadFilesPayload struct {
-		Files func(childComplexity int) int
+	UpdateFilePayload struct {
+		Name func(childComplexity int) int
+	}
+
+	UpdateFilePermissionPayload struct {
+		FilePermission func(childComplexity int) int
 	}
 
 	User struct {
 		CreatedAt      func(childComplexity int) int
 		DeletedAt      func(childComplexity int) int
 		Email          func(childComplexity int) int
-		EmailAccounts  func(childComplexity int) int
 		FirstName      func(childComplexity int) int
 		ID             func(childComplexity int) int
 		InviteAccepted func(childComplexity int) int
@@ -668,23 +528,17 @@ type ComplexityRoot struct {
 	}
 }
 
-type BucketResolver interface {
-	User(ctx context.Context, obj *db.Bucket) (*db.User, error)
-
-	DeletedAt(ctx context.Context, obj *db.Bucket) (*time.Time, error)
-	Permission(ctx context.Context, obj *db.Bucket) (*db.FilePermission, error)
-	Files(ctx context.Context, obj *db.Bucket) ([]*db.File, error)
-}
 type ChatResolver interface {
 	Name(ctx context.Context, obj *db.Chat) (*string, error)
-	Users(ctx context.Context, obj *db.Chat) ([]*db.User, error)
 	Type(ctx context.Context, obj *db.Chat) (db.ChatType, error)
+	Users(ctx context.Context, obj *db.Chat) ([]*db.User, error)
+	UserCount(ctx context.Context, obj *db.Chat) (int, error)
+	UnreadMessageCount(ctx context.Context, obj *db.Chat) (int, error)
 	Messages(ctx context.Context, obj *db.Chat) ([]*db.ChatMessage, error)
 	LastMessage(ctx context.Context, obj *db.Chat) (*db.ChatMessage, error)
 
 	DeletedAt(ctx context.Context, obj *db.Chat) (*time.Time, error)
-	UnreadMessageCount(ctx context.Context, obj *db.Chat) (int, error)
-	UserCount(ctx context.Context, obj *db.Chat) (int, error)
+	Deleted(ctx context.Context, obj *db.Chat) (bool, error)
 }
 type ChatMessageResolver interface {
 	Chat(ctx context.Context, obj *db.ChatMessage) (*db.Chat, error)
@@ -708,32 +562,9 @@ type CompetenceResolver interface {
 	UserCompetences(ctx context.Context, obj *db.Competence, userID *string) ([]*db.UserCompetence, error)
 	Tendency(ctx context.Context, obj *db.Competence, userID string) (*model.CompetenceTendency, error)
 }
-type DomainResolver interface {
-	CreatedAt(ctx context.Context, obj *db.Domain) (string, error)
-}
-type EmailResolver interface {
-	Type(ctx context.Context, obj *db.Email) (model.EmailType, error)
-	CreatedAt(ctx context.Context, obj *db.Email) (string, error)
-}
-type EmailAccountResolver interface {
-	Description(ctx context.Context, obj *db.EmailAccount) (*string, error)
-	Type(ctx context.Context, obj *db.EmailAccount) (model.EmailAccountType, error)
-	Quota(ctx context.Context, obj *db.EmailAccount) (*int, error)
-	Active(ctx context.Context, obj *db.EmailAccount) (*bool, error)
-	User(ctx context.Context, obj *db.EmailAccount) (*db.User, error)
-	CreatedAt(ctx context.Context, obj *db.EmailAccount) (string, error)
-	Members(ctx context.Context, obj *db.EmailAccount) ([]*db.EmailGroupMember, error)
-}
-type EmailForwardingResolver interface {
-	CreatedAt(ctx context.Context, obj *db.EmailForwarding) (string, error)
-}
-type EmailGroupMemberResolver interface {
-	CreatedAt(ctx context.Context, obj *db.EmailGroupMember) (string, error)
-}
 type EntryResolver interface {
 	Date(ctx context.Context, obj *db.Entry) (string, error)
 
-	DeletedAt(ctx context.Context, obj *db.Entry) (*time.Time, error)
 	User(ctx context.Context, obj *db.Entry) (*db.User, error)
 	Users(ctx context.Context, obj *db.Entry) ([]*db.User, error)
 	Events(ctx context.Context, obj *db.Entry) ([]*db.Event, error)
@@ -741,26 +572,43 @@ type EntryResolver interface {
 	Tags(ctx context.Context, obj *db.Entry) ([]*db.Tag, error)
 	UserCompetences(ctx context.Context, obj *db.Entry) ([]*db.UserCompetence, error)
 	Subjects(ctx context.Context, obj *db.Entry) ([]*db.Competence, error)
+
+	DeletedAt(ctx context.Context, obj *db.Entry) (*time.Time, error)
 }
 type EventResolver interface {
 	Image(ctx context.Context, obj *db.Event) (*db.File, error)
 
-	DeletedAt(ctx context.Context, obj *db.Event) (*time.Time, error)
 	Competences(ctx context.Context, obj *db.Event) ([]*db.Competence, error)
+
+	DeletedAt(ctx context.Context, obj *db.Event) (*time.Time, error)
 }
 type FileResolver interface {
-	MIMEType(ctx context.Context, obj *db.File) (string, error)
-
-	Bucket(ctx context.Context, obj *db.File) (*db.Bucket, error)
-	Parent(ctx context.Context, obj *db.File) (*db.File, error)
+	Type(ctx context.Context, obj *db.File) (db.FileType, error)
+	Mime(ctx context.Context, obj *db.File) (string, error)
+	Folder(ctx context.Context, obj *db.File) (*db.File, error)
+	Folders(ctx context.Context, obj *db.File) ([]*db.File, error)
+	Files(ctx context.Context, obj *db.File) ([]*db.File, error)
 
 	DeletedAt(ctx context.Context, obj *db.File) (*time.Time, error)
-	Parents(ctx context.Context, obj *db.File) ([]*db.File, error)
-	Files(ctx context.Context, obj *db.File) ([]*db.File, error)
+	Permissions(ctx context.Context, obj *db.File) ([]*db.FilePermission, error)
+}
+type FilePermissionResolver interface {
+	File(ctx context.Context, obj *db.FilePermission) (*db.File, error)
+	DisplayName(ctx context.Context, obj *db.FilePermission) (string, error)
+	EmailAddress(ctx context.Context, obj *db.FilePermission) (*string, error)
+	Type(ctx context.Context, obj *db.FilePermission) (model.FilePermissionType, error)
+
+	Inherited(ctx context.Context, obj *db.FilePermission) (bool, error)
 }
 type MutationResolver interface {
-	SetUserAttendanceState(ctx context.Context, userID string, date time.Time, state db.UserAttendanceState) (*db.UserAttendance, error)
-	UpdateDailyAttendance(ctx context.Context, date time.Time, state db.UserAttendanceState) ([]*db.UserAttendance, error)
+	UpdateUserAttendance(ctx context.Context, input model.UpdateUserAttendanceInput) (*db.UserAttendance, error)
+	SendUserInvite(ctx context.Context, id string) (bool, error)
+	AcceptInvite(ctx context.Context, token string, input model.SignUpInput) (*model.SignInPayload, error)
+	SignIn(ctx context.Context, input model.SignInInput) (*model.SignInPayload, error)
+	ResetPassword(ctx context.Context, input model.ResetPasswordInput) (*model.ResetPasswordPayload, error)
+	ForgotPassword(ctx context.Context, input model.ForgotPasswordInput) (bool, error)
+	SignOut(ctx context.Context) (bool, error)
+	UpdatePassword(ctx context.Context, oldPassword string, newPassword string) (bool, error)
 	CreateChat(ctx context.Context, input model.CreateChatInput) (*db.Chat, error)
 	DeleteChat(ctx context.Context, input model.DeleteChatInput) (*db.Chat, error)
 	CreatePrivatChat(ctx context.Context, userID string) (*db.Chat, error)
@@ -770,41 +618,12 @@ type MutationResolver interface {
 	EditChatMessage(ctx context.Context, input model.EditChatMessageInput) (*db.ChatMessage, error)
 	UpdateChat(ctx context.Context, input model.UpdateChatInput) (*db.Chat, error)
 	MarkMessageAsRead(ctx context.Context, messageID string) (*db.ChatMessage, error)
-	UploadFile(ctx context.Context, input model.FileUploadInput) (*db.File, error)
-	UploadFiles(ctx context.Context, input model.FileUploadInput) (*model.UploadFilesPayload, error)
-	CreateFolder(ctx context.Context, input model.CreateFolderInput) (*db.File, error)
-	RenameFile(ctx context.Context, input model.RenameFileInput) (*db.File, error)
-	MoveFile(ctx context.Context, input model.MoveFileInput) (*db.File, error)
-	MoveFiles(ctx context.Context, input model.MoveFilesInput) (*model.MoveFilesPayload, error)
-	CopyFile(ctx context.Context, input model.CopyFileInput) (*db.File, error)
-	CopyFiles(ctx context.Context, input model.CopyFilesInput) (*model.CopyFilesPayload, error)
+	CreateFile(ctx context.Context, input model.CreateFileInput) (*model.CreateFilePayload, error)
+	UpdateFile(ctx context.Context, input model.UpdateFileInput) (*model.UpdateFilePayload, error)
 	DeleteFile(ctx context.Context, input model.DeleteFileInput) (*model.DeleteFilePayload, error)
-	DeleteFiles(ctx context.Context, input model.DeleteFilesInput) (*model.DeleteFilesPayload, error)
-	PreviewFile(ctx context.Context, input model.PreviewFileInput) (*model.PreviewFilePayload, error)
-	DownloadFile(ctx context.Context, input model.DownloadFileInput) (*model.DownloadFilePayload, error)
-	DownloadFiles(ctx context.Context, input model.DownloadFilesInput) (*model.DownloadFilesPayload, error)
-	AddFileShare(ctx context.Context, input model.ShareFileInput) (*db.File, error)
-	RemoveFileShare(ctx context.Context, input string) (*db.File, error)
-	CreateSharedDrive(ctx context.Context, name string) (*db.Bucket, error)
-	RenameSharedDrive(ctx context.Context, input model.RenameSharedDriveInput) (*db.Bucket, error)
-	DeleteSharedDrive(ctx context.Context, id string) (*db.Bucket, error)
-	CreateShare(ctx context.Context, input model.CreateShareInput) (*model.ShareUser, error)
-	EditShare(ctx context.Context, input model.CreateShareInput) (*model.ShareUser, error)
-	DeleteShare(ctx context.Context, input model.DeleteShareInput) (*model.ShareUser, error)
-	CreateEmailAccount(ctx context.Context, input model.CreateEmailAccountInput) (*db.EmailAccount, error)
-	UpdateEmailAccount(ctx context.Context, input model.UpdateEmailAccountInput) (*db.EmailAccount, error)
-	DeleteEmailAccount(ctx context.Context, input model.DeleteEmailAccountInput) (*db.EmailAccount, error)
-	CreateEmailGroupMember(ctx context.Context, input model.CreateEmailGroupMemberInput) (*db.EmailGroupMember, error)
-	DeleteEmailGroupMember(ctx context.Context, input model.DeleteEmailGroupMemberInput) (*db.EmailGroupMember, error)
-	CreateEmail(ctx context.Context, input model.CreateEmailInput) (*db.Email, error)
-	DeleteEmail(ctx context.Context, input model.DeleteEmailInput) (*db.Email, error)
-	CreateEmailForwarding(ctx context.Context, input model.CreateEmailForwardingInput) (*db.EmailForwarding, error)
-	DeleteEmailForwarding(ctx context.Context, input model.DeleteEmailForwardingInput) (*db.EmailForwarding, error)
-	CreateDomain(ctx context.Context, input model.CreateDomainInput) (*db.Domain, error)
-	DeleteDomain(ctx context.Context, input model.DeleteDomainInput) (*db.Domain, error)
-	CreateEmailGroup(ctx context.Context, input model.CreateEmailGroupInput) (*db.EmailAccount, error)
-	UpdateEmailGroup(ctx context.Context, input model.UpdateEmailGroupInput) (*db.EmailAccount, error)
-	DeleteEmailGroup(ctx context.Context, id string) (*db.EmailAccount, error)
+	CreateFilePermission(ctx context.Context, input model.CreateFilePermissionInput) (*model.CreateFilePermissionPayload, error)
+	UpdateFilePermission(ctx context.Context, input model.UpdateFilePermissionInput) (*model.UpdateFilePermissionPayload, error)
+	DeleteFilePermission(ctx context.Context, input model.DeleteFilePermissionInput) (*model.DeleteFilePermissionPayload, error)
 	CreateEntry(ctx context.Context) (*db.Entry, error)
 	UpdateEntry(ctx context.Context, input model.UpdateEntryInput) (*db.Entry, error)
 	ArchiveEntry(ctx context.Context, id string) (*db.Entry, error)
@@ -827,23 +646,12 @@ type MutationResolver interface {
 	ArchiveEvent(ctx context.Context, id string) (*db.Event, error)
 	UpdateOrganisation(ctx context.Context, input model.UpdateOrganisationInput) (*db.Organisation, error)
 	CreateReport(ctx context.Context, input model.CreateReportInput) ([]*db.Report, error)
-	SignIn(ctx context.Context, input model.SignInInput) (*model.SignInPayload, error)
-	ResetPassword(ctx context.Context, input model.ResetPasswordInput) (*model.ResetPasswordPayload, error)
-	ForgotPassword(ctx context.Context, input model.ForgotPasswordInput) (*model.ForgotPasswordPayload, error)
-	SignOut(ctx context.Context) (bool, error)
-	AcceptInvite(ctx context.Context, token string, input model.SignUpInput) (*model.SignInPayload, error)
-	CreateUser(ctx context.Context, input model.CreateUserInput) (*db.User, error)
-	UpdateUser(ctx context.Context, input model.UpdateUserInput) (*db.User, error)
-	ArchiveUser(ctx context.Context, id string) (*db.User, error)
-	UpdateUserLanguage(ctx context.Context, language model.UserLanguage) (*db.User, error)
-	SendUserInvite(ctx context.Context, id string) (bool, error)
 	CreateStudent(ctx context.Context, input model.CreateStudentInput) (*db.User, error)
 	CreateUserCompetence(ctx context.Context, input model.CreateUserCompetenceInput) (*db.UserCompetence, error)
 	ArchiveUserCompetence(ctx context.Context, id string) (*db.UserCompetence, error)
 	CreateTag(ctx context.Context, input model.CreateTagInput) (*db.Tag, error)
 	ArchiveTag(ctx context.Context, id string) (*db.Tag, error)
 	UpdateTag(ctx context.Context, id string, input model.CreateTagInput) (*db.Tag, error)
-	UpdatePassword(ctx context.Context, oldPassword string, newPassword string) (bool, error)
 	UpdateCompetence(ctx context.Context, input model.UpdateCompetenceInput) (*db.Competence, error)
 	UpdateCompetenceSorting(ctx context.Context, input model.UpdateCompetenceSortingInput) ([]*db.Competence, error)
 	CreateCompetence(ctx context.Context, input model.CreateCompetenceInput) (*db.Competence, error)
@@ -855,29 +663,25 @@ type MutationResolver interface {
 	DeleteSchoolYear(ctx context.Context, id string) (*db.SchoolYear, error)
 	UpdateUserStudentGrade(ctx context.Context, input model.UpdateUserStudentGradesInput) (*model.UserStudentGrades, error)
 	ImportStudents(ctx context.Context, input model.ImportStudentsInput) (*model.ImportStudentsPayload, error)
+	CreateUser(ctx context.Context, input model.CreateUserInput) (*db.User, error)
+	UpdateUser(ctx context.Context, input model.UpdateUserInput) (*db.User, error)
+	ArchiveUser(ctx context.Context, id string) (*db.User, error)
+	UpdateUserLanguage(ctx context.Context, language model.UserLanguage) (*db.User, error)
 }
 type OrganisationResolver interface {
 	Owner(ctx context.Context, obj *db.Organisation) (*db.User, error)
+	Applications(ctx context.Context, obj *db.Organisation) ([]model.OrganisationApplication, error)
 }
 type QueryResolver interface {
-	UserAttendanceOverview(ctx context.Context, date time.Time) ([]*db.UserAttendance, error)
+	UserAttendances(ctx context.Context, date time.Time) ([]*db.UserAttendance, error)
+	InviteDetails(ctx context.Context, token string) (*model.InviteDetailsPayload, error)
 	Chat(ctx context.Context, id string) (*db.Chat, error)
 	Chats(ctx context.Context, limit *int, offset *int) (*model.ChatConnection, error)
-	Buckets(ctx context.Context, input *model.BucketFilterInput, limit *int, offset *int) (*model.BucketConnection, error)
-	Bucket(ctx context.Context, id string) (*db.Bucket, error)
+	MyDrive(ctx context.Context, input *model.FileFilterInput) (*model.FileConnection, error)
+	SharedDrives(ctx context.Context, input *model.FileFilterInput) (*model.FileConnection, error)
+	Trash(ctx context.Context, input *model.FileFilterInput) (*model.FileConnection, error)
 	File(ctx context.Context, id string) (*db.File, error)
-	Files(ctx context.Context, input *model.FilesFilterInput, limit *int, offset *int) (*model.FileConnection, error)
-	Shares(ctx context.Context, input *model.ShareInput) ([]*model.ShareUser, error)
-	EmailAccounts(ctx context.Context, filter *model.EmailAccountFilter) (*model.EmailAccountConnection, error)
-	EmailAccount(ctx context.Context, id string) (*db.EmailAccount, error)
-	EmailGroupMembers(ctx context.Context) (*model.EmailGroupMemberConnection, error)
-	EmailGroupMember(ctx context.Context, id string) (*db.EmailGroupMember, error)
-	Emails(ctx context.Context) (*model.EmailConnection, error)
-	Email(ctx context.Context, id string) (*db.Email, error)
-	EmailForwardings(ctx context.Context) (*model.EmailForwardingConnection, error)
-	EmailForwarding(ctx context.Context, id string) (*db.EmailForwarding, error)
-	Domains(ctx context.Context) (*model.DomainConnection, error)
-	Domain(ctx context.Context, id string) (*db.Domain, error)
+	Files(ctx context.Context, input *model.FileFilterInput) (*model.FileConnection, error)
 	Entry(ctx context.Context, id string) (*db.Entry, error)
 	Entries(ctx context.Context, limit *int, offset *int, filter *model.EntryFilterInput, sortBy *model.EntrySortBy, search *string) (*model.EntryConnection, error)
 	Event(ctx context.Context, id string) (*db.Event, error)
@@ -886,22 +690,21 @@ type QueryResolver interface {
 	Organisation(ctx context.Context) (*db.Organisation, error)
 	Report(ctx context.Context, id string) (*db.Report, error)
 	Reports(ctx context.Context, limit *int, offset *int) (*model.ReportConnection, error)
-	Users(ctx context.Context, limit *int, offset *int, filter *model.UserFilterInput, search *string) (*model.UserConnection, error)
-	User(ctx context.Context, id string) (*db.User, error)
-	Me(ctx context.Context) (*db.User, error)
 	Competence(ctx context.Context, id string) (*db.Competence, error)
 	Competences(ctx context.Context, limit *int, offset *int, filter *model.CompetenceFilterInput, search *string, sort *model.CompetenceSort) (*model.CompetenceConnection, error)
 	Tag(ctx context.Context, id string) (*db.Tag, error)
 	Tags(ctx context.Context, limit *int, offset *int, search *string) (*model.TagConnection, error)
 	UserStudents(ctx context.Context, limit *int, offset *int) (*model.UserStudentConnection, error)
 	UserStudent(ctx context.Context, id string) (*db.UserStudent, error)
-	InviteDetails(ctx context.Context, token string) (*model.InviteDetailsPayload, error)
 	Subjects(ctx context.Context, limit *int, offset *int) (*model.SubjectConnection, error)
 	Subject(ctx context.Context, id string) (*db.Subject, error)
 	SchoolYears(ctx context.Context, limit *int, offset *int) (*model.SchoolYearConnection, error)
 	SchoolYear(ctx context.Context, id string) (*db.SchoolYear, error)
 	UserStudentGrades(ctx context.Context, limit *int, offset *int) (*model.UserStudentGradesConnection, error)
 	UserStudentGrade(ctx context.Context, id string) (*model.UserStudentGrades, error)
+	Users(ctx context.Context, limit *int, offset *int, filter *model.UserFilterInput, search *string) (*model.UserConnection, error)
+	User(ctx context.Context, id string) (*db.User, error)
+	Me(ctx context.Context) (*db.User, error)
 }
 type ReportResolver interface {
 	Meta(ctx context.Context, obj *db.Report) (string, error)
@@ -934,12 +737,10 @@ type UserResolver interface {
 
 	InviteAccepted(ctx context.Context, obj *db.User) (bool, error)
 	LastSeenAt(ctx context.Context, obj *db.User) (*time.Time, error)
-	EmailAccounts(ctx context.Context, obj *db.User) ([]*db.EmailAccount, error)
 }
 type UserAttendanceResolver interface {
-	User(ctx context.Context, obj *db.UserAttendance) (*db.User, error)
-
 	Date(ctx context.Context, obj *db.UserAttendance) (*time.Time, error)
+	User(ctx context.Context, obj *db.UserAttendance) (*db.User, error)
 }
 type UserCompetenceResolver interface {
 	Competence(ctx context.Context, obj *db.UserCompetence) (*db.Competence, error)
@@ -984,89 +785,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Bucket.createdAt":
-		if e.complexity.Bucket.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.Bucket.CreatedAt(childComplexity), true
-
-	case "Bucket.deletedAt":
-		if e.complexity.Bucket.DeletedAt == nil {
-			break
-		}
-
-		return e.complexity.Bucket.DeletedAt(childComplexity), true
-
-	case "Bucket.files":
-		if e.complexity.Bucket.Files == nil {
-			break
-		}
-
-		return e.complexity.Bucket.Files(childComplexity), true
-
-	case "Bucket.id":
-		if e.complexity.Bucket.ID == nil {
-			break
-		}
-
-		return e.complexity.Bucket.ID(childComplexity), true
-
-	case "Bucket.name":
-		if e.complexity.Bucket.Name == nil {
-			break
-		}
-
-		return e.complexity.Bucket.Name(childComplexity), true
-
-	case "Bucket.permission":
-		if e.complexity.Bucket.Permission == nil {
-			break
-		}
-
-		return e.complexity.Bucket.Permission(childComplexity), true
-
-	case "Bucket.shared":
-		if e.complexity.Bucket.Shared == nil {
-			break
-		}
-
-		return e.complexity.Bucket.Shared(childComplexity), true
-
-	case "Bucket.user":
-		if e.complexity.Bucket.User == nil {
-			break
-		}
-
-		return e.complexity.Bucket.User(childComplexity), true
-
-	case "BucketConnection.edges":
-		if e.complexity.BucketConnection.Edges == nil {
-			break
-		}
-
-		return e.complexity.BucketConnection.Edges(childComplexity), true
-
-	case "BucketConnection.pageInfo":
-		if e.complexity.BucketConnection.PageInfo == nil {
-			break
-		}
-
-		return e.complexity.BucketConnection.PageInfo(childComplexity), true
-
-	case "BucketConnection.totalCount":
-		if e.complexity.BucketConnection.TotalCount == nil {
-			break
-		}
-
-		return e.complexity.BucketConnection.TotalCount(childComplexity), true
-
 	case "Chat.createdAt":
 		if e.complexity.Chat.CreatedAt == nil {
 			break
 		}
 
 		return e.complexity.Chat.CreatedAt(childComplexity), true
+
+	case "Chat.deleted":
+		if e.complexity.Chat.Deleted == nil {
+			break
+		}
+
+		return e.complexity.Chat.Deleted(childComplexity), true
 
 	case "Chat.deletedAt":
 		if e.complexity.Chat.DeletedAt == nil {
@@ -1356,12 +1087,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CompetenceTendency.Tendency(childComplexity), true
 
-	case "CopyFilesPayload.files":
-		if e.complexity.CopyFilesPayload.Files == nil {
+	case "CreateFilePayload.file":
+		if e.complexity.CreateFilePayload.File == nil {
 			break
 		}
 
-		return e.complexity.CopyFilesPayload.Files(childComplexity), true
+		return e.complexity.CreateFilePayload.File(childComplexity), true
+
+	case "CreateFilePermissionPayload.filePermission":
+		if e.complexity.CreateFilePermissionPayload.FilePermission == nil {
+			break
+		}
+
+		return e.complexity.CreateFilePermissionPayload.FilePermission(childComplexity), true
 
 	case "DeleteFilePayload.file":
 		if e.complexity.DeleteFilePayload.File == nil {
@@ -1370,320 +1108,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.DeleteFilePayload.File(childComplexity), true
 
-	case "DeleteFilePayload.success":
-		if e.complexity.DeleteFilePayload.Success == nil {
+	case "DeleteFilePermissionPayload.filePermission":
+		if e.complexity.DeleteFilePermissionPayload.FilePermission == nil {
 			break
 		}
 
-		return e.complexity.DeleteFilePayload.Success(childComplexity), true
-
-	case "DeleteFilesPayload.files":
-		if e.complexity.DeleteFilesPayload.Files == nil {
-			break
-		}
-
-		return e.complexity.DeleteFilesPayload.Files(childComplexity), true
-
-	case "DeleteFilesPayload.success":
-		if e.complexity.DeleteFilesPayload.Success == nil {
-			break
-		}
-
-		return e.complexity.DeleteFilesPayload.Success(childComplexity), true
-
-	case "Domain.createdAt":
-		if e.complexity.Domain.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.Domain.CreatedAt(childComplexity), true
-
-	case "Domain.id":
-		if e.complexity.Domain.ID == nil {
-			break
-		}
-
-		return e.complexity.Domain.ID(childComplexity), true
-
-	case "Domain.name":
-		if e.complexity.Domain.Name == nil {
-			break
-		}
-
-		return e.complexity.Domain.Name(childComplexity), true
-
-	case "DomainConnection.edges":
-		if e.complexity.DomainConnection.Edges == nil {
-			break
-		}
-
-		return e.complexity.DomainConnection.Edges(childComplexity), true
-
-	case "DomainConnection.pageInfo":
-		if e.complexity.DomainConnection.PageInfo == nil {
-			break
-		}
-
-		return e.complexity.DomainConnection.PageInfo(childComplexity), true
-
-	case "DomainConnection.totalCount":
-		if e.complexity.DomainConnection.TotalCount == nil {
-			break
-		}
-
-		return e.complexity.DomainConnection.TotalCount(childComplexity), true
-
-	case "DownloadFilePayload.url":
-		if e.complexity.DownloadFilePayload.URL == nil {
-			break
-		}
-
-		return e.complexity.DownloadFilePayload.URL(childComplexity), true
-
-	case "DownloadFilesPayload.url":
-		if e.complexity.DownloadFilesPayload.URL == nil {
-			break
-		}
-
-		return e.complexity.DownloadFilesPayload.URL(childComplexity), true
-
-	case "Email.address":
-		if e.complexity.Email.Address == nil {
-			break
-		}
-
-		return e.complexity.Email.Address(childComplexity), true
-
-	case "Email.createdAt":
-		if e.complexity.Email.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.Email.CreatedAt(childComplexity), true
-
-	case "Email.id":
-		if e.complexity.Email.ID == nil {
-			break
-		}
-
-		return e.complexity.Email.ID(childComplexity), true
-
-	case "Email.name":
-		if e.complexity.Email.Name == nil {
-			break
-		}
-
-		return e.complexity.Email.Name(childComplexity), true
-
-	case "Email.type":
-		if e.complexity.Email.Type == nil {
-			break
-		}
-
-		return e.complexity.Email.Type(childComplexity), true
-
-	case "EmailAccount.active":
-		if e.complexity.EmailAccount.Active == nil {
-			break
-		}
-
-		return e.complexity.EmailAccount.Active(childComplexity), true
-
-	case "EmailAccount.createdAt":
-		if e.complexity.EmailAccount.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.EmailAccount.CreatedAt(childComplexity), true
-
-	case "EmailAccount.description":
-		if e.complexity.EmailAccount.Description == nil {
-			break
-		}
-
-		return e.complexity.EmailAccount.Description(childComplexity), true
-
-	case "EmailAccount.id":
-		if e.complexity.EmailAccount.ID == nil {
-			break
-		}
-
-		return e.complexity.EmailAccount.ID(childComplexity), true
-
-	case "EmailAccount.members":
-		if e.complexity.EmailAccount.Members == nil {
-			break
-		}
-
-		return e.complexity.EmailAccount.Members(childComplexity), true
-
-	case "EmailAccount.name":
-		if e.complexity.EmailAccount.Name == nil {
-			break
-		}
-
-		return e.complexity.EmailAccount.Name(childComplexity), true
-
-	case "EmailAccount.quota":
-		if e.complexity.EmailAccount.Quota == nil {
-			break
-		}
-
-		return e.complexity.EmailAccount.Quota(childComplexity), true
-
-	case "EmailAccount.type":
-		if e.complexity.EmailAccount.Type == nil {
-			break
-		}
-
-		return e.complexity.EmailAccount.Type(childComplexity), true
-
-	case "EmailAccount.user":
-		if e.complexity.EmailAccount.User == nil {
-			break
-		}
-
-		return e.complexity.EmailAccount.User(childComplexity), true
-
-	case "EmailAccountConnection.edges":
-		if e.complexity.EmailAccountConnection.Edges == nil {
-			break
-		}
-
-		return e.complexity.EmailAccountConnection.Edges(childComplexity), true
-
-	case "EmailAccountConnection.pageInfo":
-		if e.complexity.EmailAccountConnection.PageInfo == nil {
-			break
-		}
-
-		return e.complexity.EmailAccountConnection.PageInfo(childComplexity), true
-
-	case "EmailAccountConnection.totalCount":
-		if e.complexity.EmailAccountConnection.TotalCount == nil {
-			break
-		}
-
-		return e.complexity.EmailAccountConnection.TotalCount(childComplexity), true
-
-	case "EmailConnection.edges":
-		if e.complexity.EmailConnection.Edges == nil {
-			break
-		}
-
-		return e.complexity.EmailConnection.Edges(childComplexity), true
-
-	case "EmailConnection.pageInfo":
-		if e.complexity.EmailConnection.PageInfo == nil {
-			break
-		}
-
-		return e.complexity.EmailConnection.PageInfo(childComplexity), true
-
-	case "EmailConnection.totalCount":
-		if e.complexity.EmailConnection.TotalCount == nil {
-			break
-		}
-
-		return e.complexity.EmailConnection.TotalCount(childComplexity), true
-
-	case "EmailForwarding.createdAt":
-		if e.complexity.EmailForwarding.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.EmailForwarding.CreatedAt(childComplexity), true
-
-	case "EmailForwarding.id":
-		if e.complexity.EmailForwarding.ID == nil {
-			break
-		}
-
-		return e.complexity.EmailForwarding.ID(childComplexity), true
-
-	case "EmailForwarding.origin":
-		if e.complexity.EmailForwarding.Origin == nil {
-			break
-		}
-
-		return e.complexity.EmailForwarding.Origin(childComplexity), true
-
-	case "EmailForwarding.target":
-		if e.complexity.EmailForwarding.Target == nil {
-			break
-		}
-
-		return e.complexity.EmailForwarding.Target(childComplexity), true
-
-	case "EmailForwardingConnection.edges":
-		if e.complexity.EmailForwardingConnection.Edges == nil {
-			break
-		}
-
-		return e.complexity.EmailForwardingConnection.Edges(childComplexity), true
-
-	case "EmailForwardingConnection.pageInfo":
-		if e.complexity.EmailForwardingConnection.PageInfo == nil {
-			break
-		}
-
-		return e.complexity.EmailForwardingConnection.PageInfo(childComplexity), true
-
-	case "EmailForwardingConnection.totalCount":
-		if e.complexity.EmailForwardingConnection.TotalCount == nil {
-			break
-		}
-
-		return e.complexity.EmailForwardingConnection.TotalCount(childComplexity), true
-
-	case "EmailGroupMember.createdAt":
-		if e.complexity.EmailGroupMember.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.EmailGroupMember.CreatedAt(childComplexity), true
-
-	case "EmailGroupMember.id":
-		if e.complexity.EmailGroupMember.ID == nil {
-			break
-		}
-
-		return e.complexity.EmailGroupMember.ID(childComplexity), true
-
-	case "EmailGroupMember.memberOf":
-		if e.complexity.EmailGroupMember.MemberOf == nil {
-			break
-		}
-
-		return e.complexity.EmailGroupMember.MemberOf(childComplexity), true
-
-	case "EmailGroupMember.name":
-		if e.complexity.EmailGroupMember.Name == nil {
-			break
-		}
-
-		return e.complexity.EmailGroupMember.Name(childComplexity), true
-
-	case "EmailGroupMemberConnection.edges":
-		if e.complexity.EmailGroupMemberConnection.Edges == nil {
-			break
-		}
-
-		return e.complexity.EmailGroupMemberConnection.Edges(childComplexity), true
-
-	case "EmailGroupMemberConnection.pageInfo":
-		if e.complexity.EmailGroupMemberConnection.PageInfo == nil {
-			break
-		}
-
-		return e.complexity.EmailGroupMemberConnection.PageInfo(childComplexity), true
-
-	case "EmailGroupMemberConnection.totalCount":
-		if e.complexity.EmailGroupMemberConnection.TotalCount == nil {
-			break
-		}
-
-		return e.complexity.EmailGroupMemberConnection.TotalCount(childComplexity), true
+		return e.complexity.DeleteFilePermissionPayload.FilePermission(childComplexity), true
 
 	case "Entry.body":
 		if e.complexity.Entry.Body == nil {
@@ -1923,13 +1353,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ExportEventsPayload.Title(childComplexity), true
 
-	case "File.bucket":
-		if e.complexity.File.Bucket == nil {
-			break
-		}
-
-		return e.complexity.File.Bucket(childComplexity), true
-
 	case "File.createdAt":
 		if e.complexity.File.CreatedAt == nil {
 			break
@@ -1944,19 +1367,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.File.DeletedAt(childComplexity), true
 
-	case "File.fileType":
-		if e.complexity.File.FileType == nil {
-			break
-		}
-
-		return e.complexity.File.FileType(childComplexity), true
-
 	case "File.files":
 		if e.complexity.File.Files == nil {
 			break
 		}
 
 		return e.complexity.File.Files(childComplexity), true
+
+	case "File.folder":
+		if e.complexity.File.Folder == nil {
+			break
+		}
+
+		return e.complexity.File.Folder(childComplexity), true
+
+	case "File.folders":
+		if e.complexity.File.Folders == nil {
+			break
+		}
+
+		return e.complexity.File.Folders(childComplexity), true
 
 	case "File.id":
 		if e.complexity.File.ID == nil {
@@ -1965,12 +1395,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.File.ID(childComplexity), true
 
-	case "File.MIMEType":
-		if e.complexity.File.MIMEType == nil {
+	case "File.mime":
+		if e.complexity.File.Mime == nil {
 			break
 		}
 
-		return e.complexity.File.MIMEType(childComplexity), true
+		return e.complexity.File.Mime(childComplexity), true
 
 	case "File.name":
 		if e.complexity.File.Name == nil {
@@ -1979,19 +1409,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.File.Name(childComplexity), true
 
-	case "File.parent":
-		if e.complexity.File.Parent == nil {
+	case "File.permissions":
+		if e.complexity.File.Permissions == nil {
 			break
 		}
 
-		return e.complexity.File.Parent(childComplexity), true
-
-	case "File.parents":
-		if e.complexity.File.Parents == nil {
-			break
-		}
-
-		return e.complexity.File.Parents(childComplexity), true
+		return e.complexity.File.Permissions(childComplexity), true
 
 	case "File.size":
 		if e.complexity.File.Size == nil {
@@ -1999,6 +1422,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.File.Size(childComplexity), true
+
+	case "File.type":
+		if e.complexity.File.Type == nil {
+			break
+		}
+
+		return e.complexity.File.Type(childComplexity), true
 
 	case "FileConnection.edges":
 		if e.complexity.FileConnection.Edges == nil {
@@ -2020,6 +1450,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.FileConnection.TotalCount(childComplexity), true
+
+	case "FilePermission.displayName":
+		if e.complexity.FilePermission.DisplayName == nil {
+			break
+		}
+
+		return e.complexity.FilePermission.DisplayName(childComplexity), true
+
+	case "FilePermission.emailAddress":
+		if e.complexity.FilePermission.EmailAddress == nil {
+			break
+		}
+
+		return e.complexity.FilePermission.EmailAddress(childComplexity), true
+
+	case "FilePermission.file":
+		if e.complexity.FilePermission.File == nil {
+			break
+		}
+
+		return e.complexity.FilePermission.File(childComplexity), true
+
+	case "FilePermission.id":
+		if e.complexity.FilePermission.ID == nil {
+			break
+		}
+
+		return e.complexity.FilePermission.ID(childComplexity), true
+
+	case "FilePermission.inherited":
+		if e.complexity.FilePermission.Inherited == nil {
+			break
+		}
+
+		return e.complexity.FilePermission.Inherited(childComplexity), true
+
+	case "FilePermission.role":
+		if e.complexity.FilePermission.Role == nil {
+			break
+		}
+
+		return e.complexity.FilePermission.Role(childComplexity), true
+
+	case "FilePermission.type":
+		if e.complexity.FilePermission.Type == nil {
+			break
+		}
+
+		return e.complexity.FilePermission.Type(childComplexity), true
 
 	case "ForgotPasswordPayload.success":
 		if e.complexity.ForgotPasswordPayload.Success == nil {
@@ -2070,13 +1549,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.InviteDetailsPayload.LastName(childComplexity), true
 
-	case "MoveFilesPayload.files":
-		if e.complexity.MoveFilesPayload.Files == nil {
-			break
-		}
-
-		return e.complexity.MoveFilesPayload.Files(childComplexity), true
-
 	case "Mutation.acceptInvite":
 		if e.complexity.Mutation.AcceptInvite == nil {
 			break
@@ -2088,18 +1560,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.AcceptInvite(childComplexity, args["token"].(string), args["input"].(model.SignUpInput)), true
-
-	case "Mutation.addFileShare":
-		if e.complexity.Mutation.AddFileShare == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_addFileShare_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.AddFileShare(childComplexity, args["input"].(model.ShareFileInput)), true
 
 	case "Mutation.addUserToChat":
 		if e.complexity.Mutation.AddUserToChat == nil {
@@ -2173,30 +1633,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.ArchiveUserCompetence(childComplexity, args["id"].(string)), true
 
-	case "Mutation.copyFile":
-		if e.complexity.Mutation.CopyFile == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_copyFile_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CopyFile(childComplexity, args["input"].(model.CopyFileInput)), true
-
-	case "Mutation.copyFiles":
-		if e.complexity.Mutation.CopyFiles == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_copyFiles_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CopyFiles(childComplexity, args["input"].(model.CopyFilesInput)), true
-
 	case "Mutation.createChat":
 		if e.complexity.Mutation.CreateChat == nil {
 			break
@@ -2220,78 +1656,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateCompetence(childComplexity, args["input"].(model.CreateCompetenceInput)), true
-
-	case "Mutation.createDomain":
-		if e.complexity.Mutation.CreateDomain == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_createDomain_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreateDomain(childComplexity, args["input"].(model.CreateDomainInput)), true
-
-	case "Mutation.createEmail":
-		if e.complexity.Mutation.CreateEmail == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_createEmail_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreateEmail(childComplexity, args["input"].(model.CreateEmailInput)), true
-
-	case "Mutation.createEmailAccount":
-		if e.complexity.Mutation.CreateEmailAccount == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_createEmailAccount_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreateEmailAccount(childComplexity, args["input"].(model.CreateEmailAccountInput)), true
-
-	case "Mutation.createEmailForwarding":
-		if e.complexity.Mutation.CreateEmailForwarding == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_createEmailForwarding_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreateEmailForwarding(childComplexity, args["input"].(model.CreateEmailForwardingInput)), true
-
-	case "Mutation.createEmailGroup":
-		if e.complexity.Mutation.CreateEmailGroup == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_createEmailGroup_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreateEmailGroup(childComplexity, args["input"].(model.CreateEmailGroupInput)), true
-
-	case "Mutation.createEmailGroupMember":
-		if e.complexity.Mutation.CreateEmailGroupMember == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_createEmailGroupMember_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreateEmailGroupMember(childComplexity, args["input"].(model.CreateEmailGroupMemberInput)), true
 
 	case "Mutation.createEntry":
 		if e.complexity.Mutation.CreateEntry == nil {
@@ -2372,17 +1736,29 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateEvent(childComplexity, args["input"].(model.CreateEventInput)), true
 
-	case "Mutation.createFolder":
-		if e.complexity.Mutation.CreateFolder == nil {
+	case "Mutation.createFile":
+		if e.complexity.Mutation.CreateFile == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_createFolder_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_createFile_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateFolder(childComplexity, args["input"].(model.CreateFolderInput)), true
+		return e.complexity.Mutation.CreateFile(childComplexity, args["input"].(model.CreateFileInput)), true
+
+	case "Mutation.createFilePermission":
+		if e.complexity.Mutation.CreateFilePermission == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createFilePermission_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateFilePermission(childComplexity, args["input"].(model.CreateFilePermissionInput)), true
 
 	case "Mutation.createPrivatChat":
 		if e.complexity.Mutation.CreatePrivatChat == nil {
@@ -2419,30 +1795,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateSchoolYear(childComplexity, args["input"].(model.CreateSchoolYearInput)), true
-
-	case "Mutation.createShare":
-		if e.complexity.Mutation.CreateShare == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_createShare_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreateShare(childComplexity, args["input"].(model.CreateShareInput)), true
-
-	case "Mutation.createSharedDrive":
-		if e.complexity.Mutation.CreateSharedDrive == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_createSharedDrive_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreateSharedDrive(childComplexity, args["name"].(string)), true
 
 	case "Mutation.createStudent":
 		if e.complexity.Mutation.CreateStudent == nil {
@@ -2516,78 +1868,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteChat(childComplexity, args["input"].(model.DeleteChatInput)), true
 
-	case "Mutation.deleteDomain":
-		if e.complexity.Mutation.DeleteDomain == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_deleteDomain_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.DeleteDomain(childComplexity, args["input"].(model.DeleteDomainInput)), true
-
-	case "Mutation.deleteEmail":
-		if e.complexity.Mutation.DeleteEmail == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_deleteEmail_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.DeleteEmail(childComplexity, args["input"].(model.DeleteEmailInput)), true
-
-	case "Mutation.deleteEmailAccount":
-		if e.complexity.Mutation.DeleteEmailAccount == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_deleteEmailAccount_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.DeleteEmailAccount(childComplexity, args["input"].(model.DeleteEmailAccountInput)), true
-
-	case "Mutation.deleteEmailForwarding":
-		if e.complexity.Mutation.DeleteEmailForwarding == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_deleteEmailForwarding_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.DeleteEmailForwarding(childComplexity, args["input"].(model.DeleteEmailForwardingInput)), true
-
-	case "Mutation.deleteEmailGroup":
-		if e.complexity.Mutation.DeleteEmailGroup == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_deleteEmailGroup_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.DeleteEmailGroup(childComplexity, args["id"].(string)), true
-
-	case "Mutation.deleteEmailGroupMember":
-		if e.complexity.Mutation.DeleteEmailGroupMember == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_deleteEmailGroupMember_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.DeleteEmailGroupMember(childComplexity, args["input"].(model.DeleteEmailGroupMemberInput)), true
-
 	case "Mutation.deleteEntryCompetence":
 		if e.complexity.Mutation.DeleteEntryCompetence == nil {
 			break
@@ -2660,17 +1940,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteFile(childComplexity, args["input"].(model.DeleteFileInput)), true
 
-	case "Mutation.deleteFiles":
-		if e.complexity.Mutation.DeleteFiles == nil {
+	case "Mutation.deleteFilePermission":
+		if e.complexity.Mutation.DeleteFilePermission == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_deleteFiles_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_deleteFilePermission_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteFiles(childComplexity, args["input"].(model.DeleteFilesInput)), true
+		return e.complexity.Mutation.DeleteFilePermission(childComplexity, args["input"].(model.DeleteFilePermissionInput)), true
 
 	case "Mutation.deleteSchoolYear":
 		if e.complexity.Mutation.DeleteSchoolYear == nil {
@@ -2684,30 +1964,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteSchoolYear(childComplexity, args["id"].(string)), true
 
-	case "Mutation.deleteShare":
-		if e.complexity.Mutation.DeleteShare == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_deleteShare_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.DeleteShare(childComplexity, args["input"].(model.DeleteShareInput)), true
-
-	case "Mutation.deleteSharedDrive":
-		if e.complexity.Mutation.DeleteSharedDrive == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_deleteSharedDrive_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.DeleteSharedDrive(childComplexity, args["id"].(string)), true
-
 	case "Mutation.deleteSubject":
 		if e.complexity.Mutation.DeleteSubject == nil {
 			break
@@ -2720,30 +1976,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteSubject(childComplexity, args["id"].(string)), true
 
-	case "Mutation.downloadFile":
-		if e.complexity.Mutation.DownloadFile == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_downloadFile_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.DownloadFile(childComplexity, args["input"].(model.DownloadFileInput)), true
-
-	case "Mutation.downloadFiles":
-		if e.complexity.Mutation.DownloadFiles == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_downloadFiles_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.DownloadFiles(childComplexity, args["input"].(model.DownloadFilesInput)), true
-
 	case "Mutation.editChatMessage":
 		if e.complexity.Mutation.EditChatMessage == nil {
 			break
@@ -2755,18 +1987,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.EditChatMessage(childComplexity, args["input"].(model.EditChatMessageInput)), true
-
-	case "Mutation.editShare":
-		if e.complexity.Mutation.EditShare == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_editShare_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.EditShare(childComplexity, args["input"].(model.CreateShareInput)), true
 
 	case "Mutation.forgotPassword":
 		if e.complexity.Mutation.ForgotPassword == nil {
@@ -2804,42 +2024,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.MarkMessageAsRead(childComplexity, args["messageId"].(string)), true
 
-	case "Mutation.moveFile":
-		if e.complexity.Mutation.MoveFile == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_moveFile_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.MoveFile(childComplexity, args["input"].(model.MoveFileInput)), true
-
-	case "Mutation.moveFiles":
-		if e.complexity.Mutation.MoveFiles == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_moveFiles_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.MoveFiles(childComplexity, args["input"].(model.MoveFilesInput)), true
-
-	case "Mutation.previewFile":
-		if e.complexity.Mutation.PreviewFile == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_previewFile_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.PreviewFile(childComplexity, args["input"].(model.PreviewFileInput)), true
-
 	case "Mutation.removeFileFromEntry":
 		if e.complexity.Mutation.RemoveFileFromEntry == nil {
 			break
@@ -2852,18 +2036,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.RemoveFileFromEntry(childComplexity, args["entryId"].(string), args["fileId"].(string)), true
 
-	case "Mutation.removeFileShare":
-		if e.complexity.Mutation.RemoveFileShare == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_removeFileShare_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.RemoveFileShare(childComplexity, args["input"].(string)), true
-
 	case "Mutation.removeUserFromChat":
 		if e.complexity.Mutation.RemoveUserFromChat == nil {
 			break
@@ -2875,30 +2047,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.RemoveUserFromChat(childComplexity, args["input"].(model.RemoveUserFromChatInput)), true
-
-	case "Mutation.renameFile":
-		if e.complexity.Mutation.RenameFile == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_renameFile_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.RenameFile(childComplexity, args["input"].(model.RenameFileInput)), true
-
-	case "Mutation.renameSharedDrive":
-		if e.complexity.Mutation.RenameSharedDrive == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_renameSharedDrive_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.RenameSharedDrive(childComplexity, args["input"].(model.RenameSharedDriveInput)), true
 
 	case "Mutation.resetPassword":
 		if e.complexity.Mutation.ResetPassword == nil {
@@ -2935,18 +2083,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.SendUserInvite(childComplexity, args["id"].(string)), true
-
-	case "Mutation.setUserAttendanceState":
-		if e.complexity.Mutation.SetUserAttendanceState == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_setUserAttendanceState_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.SetUserAttendanceState(childComplexity, args["userId"].(string), args["date"].(time.Time), args["state"].(db.UserAttendanceState)), true
 
 	case "Mutation.signIn":
 		if e.complexity.Mutation.SignIn == nil {
@@ -3015,42 +2151,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateCompetenceSorting(childComplexity, args["input"].(model.UpdateCompetenceSortingInput)), true
 
-	case "Mutation.updateDailyAttendance":
-		if e.complexity.Mutation.UpdateDailyAttendance == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_updateDailyAttendance_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.UpdateDailyAttendance(childComplexity, args["date"].(time.Time), args["state"].(db.UserAttendanceState)), true
-
-	case "Mutation.updateEmailAccount":
-		if e.complexity.Mutation.UpdateEmailAccount == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_updateEmailAccount_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.UpdateEmailAccount(childComplexity, args["input"].(model.UpdateEmailAccountInput)), true
-
-	case "Mutation.updateEmailGroup":
-		if e.complexity.Mutation.UpdateEmailGroup == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_updateEmailGroup_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.UpdateEmailGroup(childComplexity, args["input"].(model.UpdateEmailGroupInput)), true
-
 	case "Mutation.updateEntry":
 		if e.complexity.Mutation.UpdateEntry == nil {
 			break
@@ -3086,6 +2186,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateEvent(childComplexity, args["input"].(model.UpdateEventInput)), true
+
+	case "Mutation.updateFile":
+		if e.complexity.Mutation.UpdateFile == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateFile_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateFile(childComplexity, args["input"].(model.UpdateFileInput)), true
+
+	case "Mutation.updateFilePermission":
+		if e.complexity.Mutation.UpdateFilePermission == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateFilePermission_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateFilePermission(childComplexity, args["input"].(model.UpdateFilePermissionInput)), true
 
 	case "Mutation.updateOrganisation":
 		if e.complexity.Mutation.UpdateOrganisation == nil {
@@ -3159,6 +2283,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateUser(childComplexity, args["input"].(model.UpdateUserInput)), true
 
+	case "Mutation.updateUserAttendance":
+		if e.complexity.Mutation.UpdateUserAttendance == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateUserAttendance_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateUserAttendance(childComplexity, args["input"].(model.UpdateUserAttendanceInput)), true
+
 	case "Mutation.updateUserLanguage":
 		if e.complexity.Mutation.UpdateUserLanguage == nil {
 			break
@@ -3183,18 +2319,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateUserStudentGrade(childComplexity, args["input"].(model.UpdateUserStudentGradesInput)), true
 
-	case "Mutation.uploadFile":
-		if e.complexity.Mutation.UploadFile == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_uploadFile_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.UploadFile(childComplexity, args["input"].(model.FileUploadInput)), true
-
 	case "Mutation.uploadFileToEntry":
 		if e.complexity.Mutation.UploadFileToEntry == nil {
 			break
@@ -3207,17 +2331,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UploadFileToEntry(childComplexity, args["entryId"].(string), args["file"].(graphql.Upload)), true
 
-	case "Mutation.uploadFiles":
-		if e.complexity.Mutation.UploadFiles == nil {
+	case "Organisation.applications":
+		if e.complexity.Organisation.Applications == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_uploadFiles_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.UploadFiles(childComplexity, args["input"].(model.FileUploadInput)), true
+		return e.complexity.Organisation.Applications(childComplexity), true
 
 	case "Organisation.id":
 		if e.complexity.Organisation.ID == nil {
@@ -3282,37 +2401,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PageInfo.HasPreviousPage(childComplexity), true
 
-	case "PreviewFilePayload.url":
-		if e.complexity.PreviewFilePayload.URL == nil {
-			break
-		}
-
-		return e.complexity.PreviewFilePayload.URL(childComplexity), true
-
-	case "Query.bucket":
-		if e.complexity.Query.Bucket == nil {
-			break
-		}
-
-		args, err := ec.field_Query_bucket_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Bucket(childComplexity, args["id"].(string)), true
-
-	case "Query.buckets":
-		if e.complexity.Query.Buckets == nil {
-			break
-		}
-
-		args, err := ec.field_Query_buckets_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Buckets(childComplexity, args["input"].(*model.BucketFilterInput), args["limit"].(*int), args["offset"].(*int)), true
-
 	case "Query.chat":
 		if e.complexity.Query.Chat == nil {
 			break
@@ -3360,106 +2448,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Competences(childComplexity, args["limit"].(*int), args["offset"].(*int), args["filter"].(*model.CompetenceFilterInput), args["search"].(*string), args["sort"].(*model.CompetenceSort)), true
-
-	case "Query.domain":
-		if e.complexity.Query.Domain == nil {
-			break
-		}
-
-		args, err := ec.field_Query_domain_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Domain(childComplexity, args["id"].(string)), true
-
-	case "Query.domains":
-		if e.complexity.Query.Domains == nil {
-			break
-		}
-
-		return e.complexity.Query.Domains(childComplexity), true
-
-	case "Query.email":
-		if e.complexity.Query.Email == nil {
-			break
-		}
-
-		args, err := ec.field_Query_email_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Email(childComplexity, args["id"].(string)), true
-
-	case "Query.emailAccount":
-		if e.complexity.Query.EmailAccount == nil {
-			break
-		}
-
-		args, err := ec.field_Query_emailAccount_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.EmailAccount(childComplexity, args["id"].(string)), true
-
-	case "Query.emailAccounts":
-		if e.complexity.Query.EmailAccounts == nil {
-			break
-		}
-
-		args, err := ec.field_Query_emailAccounts_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.EmailAccounts(childComplexity, args["filter"].(*model.EmailAccountFilter)), true
-
-	case "Query.emailForwarding":
-		if e.complexity.Query.EmailForwarding == nil {
-			break
-		}
-
-		args, err := ec.field_Query_emailForwarding_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.EmailForwarding(childComplexity, args["id"].(string)), true
-
-	case "Query.emailForwardings":
-		if e.complexity.Query.EmailForwardings == nil {
-			break
-		}
-
-		return e.complexity.Query.EmailForwardings(childComplexity), true
-
-	case "Query.EmailGroupMember":
-		if e.complexity.Query.EmailGroupMember == nil {
-			break
-		}
-
-		args, err := ec.field_Query_EmailGroupMember_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.EmailGroupMember(childComplexity, args["id"].(string)), true
-
-	case "Query.EmailGroupMembers":
-		if e.complexity.Query.EmailGroupMembers == nil {
-			break
-		}
-
-		return e.complexity.Query.EmailGroupMembers(childComplexity), true
-
-	case "Query.emails":
-		if e.complexity.Query.Emails == nil {
-			break
-		}
-
-		return e.complexity.Query.Emails(childComplexity), true
 
 	case "Query.entries":
 		if e.complexity.Query.Entries == nil {
@@ -3543,7 +2531,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Files(childComplexity, args["input"].(*model.FilesFilterInput), args["limit"].(*int), args["offset"].(*int)), true
+		return e.complexity.Query.Files(childComplexity, args["input"].(*model.FileFilterInput)), true
 
 	case "Query.inviteDetails":
 		if e.complexity.Query.InviteDetails == nil {
@@ -3563,6 +2551,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Me(childComplexity), true
+
+	case "Query.myDrive":
+		if e.complexity.Query.MyDrive == nil {
+			break
+		}
+
+		args, err := ec.field_Query_myDrive_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.MyDrive(childComplexity, args["input"].(*model.FileFilterInput)), true
 
 	case "Query.organisation":
 		if e.complexity.Query.Organisation == nil {
@@ -3619,17 +2619,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.SchoolYears(childComplexity, args["limit"].(*int), args["offset"].(*int)), true
 
-	case "Query.shares":
-		if e.complexity.Query.Shares == nil {
+	case "Query.sharedDrives":
+		if e.complexity.Query.SharedDrives == nil {
 			break
 		}
 
-		args, err := ec.field_Query_shares_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_sharedDrives_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Shares(childComplexity, args["input"].(*model.ShareInput)), true
+		return e.complexity.Query.SharedDrives(childComplexity, args["input"].(*model.FileFilterInput)), true
 
 	case "Query.subject":
 		if e.complexity.Query.Subject == nil {
@@ -3679,6 +2679,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Tags(childComplexity, args["limit"].(*int), args["offset"].(*int), args["search"].(*string)), true
 
+	case "Query.trash":
+		if e.complexity.Query.Trash == nil {
+			break
+		}
+
+		args, err := ec.field_Query_trash_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Trash(childComplexity, args["input"].(*model.FileFilterInput)), true
+
 	case "Query.user":
 		if e.complexity.Query.User == nil {
 			break
@@ -3691,17 +2703,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.User(childComplexity, args["id"].(string)), true
 
-	case "Query.userAttendanceOverview":
-		if e.complexity.Query.UserAttendanceOverview == nil {
+	case "Query.userAttendances":
+		if e.complexity.Query.UserAttendances == nil {
 			break
 		}
 
-		args, err := ec.field_Query_userAttendanceOverview_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_userAttendances_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.UserAttendanceOverview(childComplexity, args["date"].(time.Time)), true
+		return e.complexity.Query.UserAttendances(childComplexity, args["date"].(time.Time)), true
 
 	case "Query.userStudent":
 		if e.complexity.Query.UserStudent == nil {
@@ -3875,40 +2887,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ReportConnection.TotalCount(childComplexity), true
 
-	case "ResetPasswordPayload.invalidToken":
-		if e.complexity.ResetPasswordPayload.InvalidToken == nil {
+	case "ResetPasswordPayload.organisation":
+		if e.complexity.ResetPasswordPayload.Organisation == nil {
 			break
 		}
 
-		return e.complexity.ResetPasswordPayload.InvalidToken(childComplexity), true
+		return e.complexity.ResetPasswordPayload.Organisation(childComplexity), true
 
-	case "ResetPasswordPayload.success":
-		if e.complexity.ResetPasswordPayload.Success == nil {
+	case "ResetPasswordPayload.token":
+		if e.complexity.ResetPasswordPayload.Token == nil {
 			break
 		}
 
-		return e.complexity.ResetPasswordPayload.Success(childComplexity), true
+		return e.complexity.ResetPasswordPayload.Token(childComplexity), true
 
-	case "ResetPasswordPayload.tokenExpired":
-		if e.complexity.ResetPasswordPayload.TokenExpired == nil {
+	case "ResetPasswordPayload.user":
+		if e.complexity.ResetPasswordPayload.User == nil {
 			break
 		}
 
-		return e.complexity.ResetPasswordPayload.TokenExpired(childComplexity), true
-
-	case "ResetPasswordPayload.unableToReset":
-		if e.complexity.ResetPasswordPayload.UnableToReset == nil {
-			break
-		}
-
-		return e.complexity.ResetPasswordPayload.UnableToReset(childComplexity), true
-
-	case "ResetPasswordPayload.unauthorized":
-		if e.complexity.ResetPasswordPayload.Unauthorized == nil {
-			break
-		}
-
-		return e.complexity.ResetPasswordPayload.Unauthorized(childComplexity), true
+		return e.complexity.ResetPasswordPayload.User(childComplexity), true
 
 	case "SchoolYear.description":
 		if e.complexity.SchoolYear.Description == nil {
@@ -3952,40 +2950,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SchoolYearConnection.TotalCount(childComplexity), true
 
-	case "ShareUser.permission":
-		if e.complexity.ShareUser.Permission == nil {
+	case "SignInPayload.organisation":
+		if e.complexity.SignInPayload.Organisation == nil {
 			break
 		}
 
-		return e.complexity.ShareUser.Permission(childComplexity), true
-
-	case "ShareUser.user":
-		if e.complexity.ShareUser.User == nil {
-			break
-		}
-
-		return e.complexity.ShareUser.User(childComplexity), true
-
-	case "SignInPayload.enabled_apps":
-		if e.complexity.SignInPayload.EnabledApps == nil {
-			break
-		}
-
-		return e.complexity.SignInPayload.EnabledApps(childComplexity), true
-
-	case "SignInPayload.language":
-		if e.complexity.SignInPayload.Language == nil {
-			break
-		}
-
-		return e.complexity.SignInPayload.Language(childComplexity), true
-
-	case "SignInPayload.setupComplete":
-		if e.complexity.SignInPayload.SetupComplete == nil {
-			break
-		}
-
-		return e.complexity.SignInPayload.SetupComplete(childComplexity), true
+		return e.complexity.SignInPayload.Organisation(childComplexity), true
 
 	case "SignInPayload.token":
 		if e.complexity.SignInPayload.Token == nil {
@@ -4106,12 +3076,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.TagConnection.TotalCount(childComplexity), true
 
-	case "UploadFilesPayload.files":
-		if e.complexity.UploadFilesPayload.Files == nil {
+	case "UpdateFilePayload.name":
+		if e.complexity.UpdateFilePayload.Name == nil {
 			break
 		}
 
-		return e.complexity.UploadFilesPayload.Files(childComplexity), true
+		return e.complexity.UpdateFilePayload.Name(childComplexity), true
+
+	case "UpdateFilePermissionPayload.filePermission":
+		if e.complexity.UpdateFilePermissionPayload.FilePermission == nil {
+			break
+		}
+
+		return e.complexity.UpdateFilePermissionPayload.FilePermission(childComplexity), true
 
 	case "User.createdAt":
 		if e.complexity.User.CreatedAt == nil {
@@ -4133,13 +3110,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.Email(childComplexity), true
-
-	case "User.emailAccounts":
-		if e.complexity.User.EmailAccounts == nil {
-			break
-		}
-
-		return e.complexity.User.EmailAccounts(childComplexity), true
 
 	case "User.firstName":
 		if e.complexity.User.FirstName == nil {
@@ -4522,29 +3492,20 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputAddEventCompetenceInput,
 		ec.unmarshalInputAddUserToChatInput,
-		ec.unmarshalInputBucketFilterInput,
 		ec.unmarshalInputCompetenceFilterInput,
 		ec.unmarshalInputCompetenceSort,
-		ec.unmarshalInputCopyFileInput,
-		ec.unmarshalInputCopyFilesInput,
 		ec.unmarshalInputCreateChatInput,
 		ec.unmarshalInputCreateCompetenceInput,
-		ec.unmarshalInputCreateDomainInput,
-		ec.unmarshalInputCreateEmailAccountInput,
-		ec.unmarshalInputCreateEmailForwardingInput,
-		ec.unmarshalInputCreateEmailGroupInput,
-		ec.unmarshalInputCreateEmailGroupMemberInput,
-		ec.unmarshalInputCreateEmailInput,
 		ec.unmarshalInputCreateEntryCompetenceInput,
 		ec.unmarshalInputCreateEntryEventInput,
 		ec.unmarshalInputCreateEntryFileInput,
 		ec.unmarshalInputCreateEntryTagInput,
 		ec.unmarshalInputCreateEntryUserInput,
 		ec.unmarshalInputCreateEventInput,
-		ec.unmarshalInputCreateFolderInput,
+		ec.unmarshalInputCreateFileInput,
+		ec.unmarshalInputCreateFilePermissionInput,
 		ec.unmarshalInputCreateReportInput,
 		ec.unmarshalInputCreateSchoolYearInput,
-		ec.unmarshalInputCreateShareInput,
 		ec.unmarshalInputCreateStudentInput,
 		ec.unmarshalInputCreateSubjectInput,
 		ec.unmarshalInputCreateTagInput,
@@ -4552,62 +3513,42 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCreateUserInput,
 		ec.unmarshalInputCreateUserStudentGradesInput,
 		ec.unmarshalInputDeleteChatInput,
-		ec.unmarshalInputDeleteDomainInput,
-		ec.unmarshalInputDeleteEmailAccountInput,
-		ec.unmarshalInputDeleteEmailForwardingInput,
-		ec.unmarshalInputDeleteEmailGroupMemberInput,
-		ec.unmarshalInputDeleteEmailInput,
 		ec.unmarshalInputDeleteEntryCompetenceInput,
 		ec.unmarshalInputDeleteEntryEventInput,
 		ec.unmarshalInputDeleteEntryFileInput,
 		ec.unmarshalInputDeleteEntryTagInput,
 		ec.unmarshalInputDeleteEntryUserInput,
 		ec.unmarshalInputDeleteFileInput,
-		ec.unmarshalInputDeleteFilesInput,
-		ec.unmarshalInputDeleteShareInput,
-		ec.unmarshalInputDownloadFileInput,
-		ec.unmarshalInputDownloadFilesInput,
+		ec.unmarshalInputDeleteFilePermissionInput,
 		ec.unmarshalInputEditChatMessageInput,
-		ec.unmarshalInputEmailAccountFilter,
 		ec.unmarshalInputEntryFilterInput,
 		ec.unmarshalInputEventFilterInput,
 		ec.unmarshalInputExportEventsInput,
-		ec.unmarshalInputFileUploadInput,
-		ec.unmarshalInputFilesFilterInput,
+		ec.unmarshalInputFileFilterInput,
 		ec.unmarshalInputForgotPasswordInput,
-		ec.unmarshalInputGenerateFileURLInput,
 		ec.unmarshalInputImportStudentsInput,
-		ec.unmarshalInputMoveFileInput,
-		ec.unmarshalInputMoveFilesInput,
-		ec.unmarshalInputMyFilesFilterInput,
-		ec.unmarshalInputPreviewFileInput,
 		ec.unmarshalInputRemoveUserFromChatInput,
-		ec.unmarshalInputRenameFileInput,
-		ec.unmarshalInputRenameSharedDriveInput,
 		ec.unmarshalInputResetPasswordInput,
 		ec.unmarshalInputSendMessageInput,
-		ec.unmarshalInputShareFileInput,
-		ec.unmarshalInputShareInput,
-		ec.unmarshalInputSharedDriveFilterInput,
 		ec.unmarshalInputSignInInput,
 		ec.unmarshalInputSignUpInput,
 		ec.unmarshalInputSortCompetenceInput,
 		ec.unmarshalInputUpdateChatInput,
 		ec.unmarshalInputUpdateCompetenceInput,
 		ec.unmarshalInputUpdateCompetenceSortingInput,
-		ec.unmarshalInputUpdateEmailAccountInput,
-		ec.unmarshalInputUpdateEmailGroupInput,
 		ec.unmarshalInputUpdateEntryInput,
 		ec.unmarshalInputUpdateEntryUserCompetenceLevel,
 		ec.unmarshalInputUpdateEventInput,
+		ec.unmarshalInputUpdateFileInput,
+		ec.unmarshalInputUpdateFilePermissionInput,
 		ec.unmarshalInputUpdateOrganisationInput,
 		ec.unmarshalInputUpdateSchoolYearInput,
 		ec.unmarshalInputUpdateSubjectInput,
+		ec.unmarshalInputUpdateUserAttendanceInput,
 		ec.unmarshalInputUpdateUserCompetenceInput,
 		ec.unmarshalInputUpdateUserInput,
 		ec.unmarshalInputUpdateUserStudentGradesInput,
 		ec.unmarshalInputUserCompetenceFilterInput,
-		ec.unmarshalInputUserFileFilterInput,
 		ec.unmarshalInputUserFilterInput,
 	)
 	first := true
@@ -4722,7 +3663,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
-//go:embed "attendance.graphqls" "chat.graphqls" "drive.graphqls" "email.graphqls" "entry.graphqls" "event.graphqls" "organisation.graphqls" "report.graphqls" "schema.graphqls" "school.graphqls"
+//go:embed "attendance.graphqls" "auth.graphqls" "chat.graphqls" "drive.graphqls" "entry.graphqls" "event.graphqls" "organisation.graphqls" "report.graphqls" "schema.graphqls" "school.graphqls" "user.graphqls"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -4735,15 +3676,16 @@ func sourceData(filename string) string {
 
 var sources = []*ast.Source{
 	{Name: "attendance.graphqls", Input: sourceData("attendance.graphqls"), BuiltIn: false},
+	{Name: "auth.graphqls", Input: sourceData("auth.graphqls"), BuiltIn: false},
 	{Name: "chat.graphqls", Input: sourceData("chat.graphqls"), BuiltIn: false},
 	{Name: "drive.graphqls", Input: sourceData("drive.graphqls"), BuiltIn: false},
-	{Name: "email.graphqls", Input: sourceData("email.graphqls"), BuiltIn: false},
 	{Name: "entry.graphqls", Input: sourceData("entry.graphqls"), BuiltIn: false},
 	{Name: "event.graphqls", Input: sourceData("event.graphqls"), BuiltIn: false},
 	{Name: "organisation.graphqls", Input: sourceData("organisation.graphqls"), BuiltIn: false},
 	{Name: "report.graphqls", Input: sourceData("report.graphqls"), BuiltIn: false},
 	{Name: "schema.graphqls", Input: sourceData("schema.graphqls"), BuiltIn: false},
 	{Name: "school.graphqls", Input: sourceData("school.graphqls"), BuiltIn: false},
+	{Name: "user.graphqls", Input: sourceData("user.graphqls"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -4826,21 +3768,6 @@ func (ec *executionContext) field_Mutation_acceptInvite_args(ctx context.Context
 		}
 	}
 	args["input"] = arg1
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_addFileShare_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.ShareFileInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNShareFileInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐShareFileInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
 	return args, nil
 }
 
@@ -4934,36 +3861,6 @@ func (ec *executionContext) field_Mutation_archiveUser_args(ctx context.Context,
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_copyFile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.CopyFileInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNCopyFileInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCopyFileInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_copyFiles_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.CopyFilesInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNCopyFilesInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCopyFilesInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_createChat_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -4986,96 +3883,6 @@ func (ec *executionContext) field_Mutation_createCompetence_args(ctx context.Con
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNCreateCompetenceInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateCompetenceInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_createDomain_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.CreateDomainInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNCreateDomainInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateDomainInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_createEmailAccount_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.CreateEmailAccountInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNCreateEmailAccountInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateEmailAccountInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_createEmailForwarding_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.CreateEmailForwardingInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNCreateEmailForwardingInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateEmailForwardingInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_createEmailGroupMember_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.CreateEmailGroupMemberInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNCreateEmailGroupMemberInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateEmailGroupMemberInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_createEmailGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.CreateEmailGroupInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNCreateEmailGroupInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateEmailGroupInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_createEmail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.CreateEmailInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNCreateEmailInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateEmailInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5174,13 +3981,28 @@ func (ec *executionContext) field_Mutation_createEvent_args(ctx context.Context,
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_createFolder_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_createFilePermission_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.CreateFolderInput
+	var arg0 model.CreateFilePermissionInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNCreateFolderInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateFolderInput(ctx, tmp)
+		arg0, err = ec.unmarshalNCreateFilePermissionInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateFilePermissionInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createFile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CreateFileInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNCreateFileInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateFileInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5231,36 +4053,6 @@ func (ec *executionContext) field_Mutation_createSchoolYear_args(ctx context.Con
 		}
 	}
 	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_createShare_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.CreateShareInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNCreateShareInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateShareInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_createSharedDrive_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["name"] = arg0
 	return args, nil
 }
 
@@ -5354,96 +4146,6 @@ func (ec *executionContext) field_Mutation_deleteChat_args(ctx context.Context, 
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_deleteDomain_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.DeleteDomainInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNDeleteDomainInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteDomainInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_deleteEmailAccount_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.DeleteEmailAccountInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNDeleteEmailAccountInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteEmailAccountInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_deleteEmailForwarding_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.DeleteEmailForwardingInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNDeleteEmailForwardingInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteEmailForwardingInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_deleteEmailGroupMember_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.DeleteEmailGroupMemberInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNDeleteEmailGroupMemberInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteEmailGroupMemberInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_deleteEmailGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_deleteEmail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.DeleteEmailInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNDeleteEmailInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteEmailInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_deleteEntryCompetence_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -5519,6 +4221,21 @@ func (ec *executionContext) field_Mutation_deleteEntryUser_args(ctx context.Cont
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_deleteFilePermission_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.DeleteFilePermissionInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNDeleteFilePermissionInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteFilePermissionInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_deleteFile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -5534,52 +4251,7 @@ func (ec *executionContext) field_Mutation_deleteFile_args(ctx context.Context, 
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_deleteFiles_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.DeleteFilesInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNDeleteFilesInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteFilesInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_deleteSchoolYear_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_deleteShare_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.DeleteShareInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNDeleteShareInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteShareInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_deleteSharedDrive_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -5609,36 +4281,6 @@ func (ec *executionContext) field_Mutation_deleteSubject_args(ctx context.Contex
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_downloadFile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.DownloadFileInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNDownloadFileInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDownloadFileInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_downloadFiles_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.DownloadFilesInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNDownloadFilesInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDownloadFilesInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_editChatMessage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -5646,21 +4288,6 @@ func (ec *executionContext) field_Mutation_editChatMessage_args(ctx context.Cont
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNEditChatMessageInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEditChatMessageInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_editShare_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.CreateShareInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNCreateShareInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateShareInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5714,51 +4341,6 @@ func (ec *executionContext) field_Mutation_markMessageAsRead_args(ctx context.Co
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_moveFile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.MoveFileInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNMoveFileInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐMoveFileInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_moveFiles_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.MoveFilesInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNMoveFilesInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐMoveFilesInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_previewFile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.PreviewFileInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNPreviewFileInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐPreviewFileInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_removeFileFromEntry_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -5783,21 +4365,6 @@ func (ec *executionContext) field_Mutation_removeFileFromEntry_args(ctx context.
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_removeFileShare_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_removeUserFromChat_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -5805,36 +4372,6 @@ func (ec *executionContext) field_Mutation_removeUserFromChat_args(ctx context.C
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNRemoveUserFromChatInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐRemoveUserFromChatInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_renameFile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.RenameFileInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNRenameFileInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐRenameFileInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_renameSharedDrive_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.RenameSharedDriveInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNRenameSharedDriveInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐRenameSharedDriveInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5885,39 +4422,6 @@ func (ec *executionContext) field_Mutation_sendUserInvite_args(ctx context.Conte
 		}
 	}
 	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_setUserAttendanceState_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["userId"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["userId"] = arg0
-	var arg1 time.Time
-	if tmp, ok := rawArgs["date"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("date"))
-		arg1, err = ec.unmarshalNTime2timeᚐTime(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["date"] = arg1
-	var arg2 db.UserAttendanceState
-	if tmp, ok := rawArgs["state"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("state"))
-		arg2, err = ec.unmarshalNUserAttendanceState2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserAttendanceState(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["state"] = arg2
 	return args, nil
 }
 
@@ -5996,60 +4500,6 @@ func (ec *executionContext) field_Mutation_updateCompetence_args(ctx context.Con
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_updateDailyAttendance_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 time.Time
-	if tmp, ok := rawArgs["date"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("date"))
-		arg0, err = ec.unmarshalNTime2timeᚐTime(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["date"] = arg0
-	var arg1 db.UserAttendanceState
-	if tmp, ok := rawArgs["state"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("state"))
-		arg1, err = ec.unmarshalNUserAttendanceState2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserAttendanceState(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["state"] = arg1
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_updateEmailAccount_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.UpdateEmailAccountInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNUpdateEmailAccountInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateEmailAccountInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_updateEmailGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.UpdateEmailGroupInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNUpdateEmailGroupInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateEmailGroupInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_updateEntryUserCompetenceLevel_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -6087,6 +4537,36 @@ func (ec *executionContext) field_Mutation_updateEvent_args(ctx context.Context,
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNUpdateEventInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateEventInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateFilePermission_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.UpdateFilePermissionInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNUpdateFilePermissionInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateFilePermissionInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateFile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.UpdateFileInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNUpdateFileInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateFileInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -6188,6 +4668,21 @@ func (ec *executionContext) field_Mutation_updateTag_args(ctx context.Context, r
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_updateUserAttendance_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.UpdateUserAttendanceInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNUpdateUserAttendanceInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateUserAttendanceInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_updateUserLanguage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -6257,51 +4752,6 @@ func (ec *executionContext) field_Mutation_uploadFileToEntry_args(ctx context.Co
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_uploadFile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.FileUploadInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNFileUploadInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFileUploadInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_uploadFiles_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.FileUploadInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNFileUploadInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFileUploadInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_EmailGroupMember_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -6314,54 +4764,6 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_bucket_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_buckets_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *model.BucketFilterInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOBucketFilterInput2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐBucketFilterInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	var arg1 *int
-	if tmp, ok := rawArgs["limit"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
-		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["limit"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["offset"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["offset"] = arg2
 	return args, nil
 }
 
@@ -6467,81 +4869,6 @@ func (ec *executionContext) field_Query_competences_args(ctx context.Context, ra
 		}
 	}
 	args["sort"] = arg4
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_domain_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_emailAccount_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_emailAccounts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *model.EmailAccountFilter
-	if tmp, ok := rawArgs["filter"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
-		arg0, err = ec.unmarshalOEmailAccountFilter2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountFilter(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["filter"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_emailForwarding_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_email_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
 	return args, nil
 }
 
@@ -6710,33 +5037,15 @@ func (ec *executionContext) field_Query_file_args(ctx context.Context, rawArgs m
 func (ec *executionContext) field_Query_files_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.FilesFilterInput
+	var arg0 *model.FileFilterInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOFilesFilterInput2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFilesFilterInput(ctx, tmp)
+		arg0, err = ec.unmarshalOFileFilterInput2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFileFilterInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["input"] = arg0
-	var arg1 *int
-	if tmp, ok := rawArgs["limit"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
-		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["limit"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["offset"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["offset"] = arg2
 	return args, nil
 }
 
@@ -6752,6 +5061,21 @@ func (ec *executionContext) field_Query_inviteDetails_args(ctx context.Context, 
 		}
 	}
 	args["token"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_myDrive_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.FileFilterInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalOFileFilterInput2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFileFilterInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -6833,13 +5157,13 @@ func (ec *executionContext) field_Query_schoolYears_args(ctx context.Context, ra
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_shares_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_sharedDrives_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.ShareInput
+	var arg0 *model.FileFilterInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOShareInput2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐShareInput(ctx, tmp)
+		arg0, err = ec.unmarshalOFileFilterInput2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFileFilterInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -6935,7 +5259,22 @@ func (ec *executionContext) field_Query_tags_args(ctx context.Context, rawArgs m
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_userAttendanceOverview_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_trash_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.FileFilterInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalOFileFilterInput2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFileFilterInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_userAttendances_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 time.Time
@@ -7123,562 +5462,6 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Bucket_id(ctx context.Context, field graphql.CollectedField, obj *db.Bucket) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Bucket_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Bucket_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Bucket",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Bucket_name(ctx context.Context, field graphql.CollectedField, obj *db.Bucket) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Bucket_name(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Bucket_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Bucket",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Bucket_user(ctx context.Context, field graphql.CollectedField, obj *db.Bucket) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Bucket_user(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Bucket().User(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Bucket_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Bucket",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "role":
-				return ec.fieldContext_User_role(ctx, field)
-			case "firstName":
-				return ec.fieldContext_User_firstName(ctx, field)
-			case "lastName":
-				return ec.fieldContext_User_lastName(ctx, field)
-			case "student":
-				return ec.fieldContext_User_student(ctx, field)
-			case "language":
-				return ec.fieldContext_User_language(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_User_deletedAt(ctx, field)
-			case "organisationId":
-				return ec.fieldContext_User_organisationId(ctx, field)
-			case "inviteAccepted":
-				return ec.fieldContext_User_inviteAccepted(ctx, field)
-			case "lastSeenAt":
-				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Bucket_shared(ctx context.Context, field graphql.CollectedField, obj *db.Bucket) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Bucket_shared(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Shared, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Bucket_shared(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Bucket",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Bucket_createdAt(ctx context.Context, field graphql.CollectedField, obj *db.Bucket) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Bucket_createdAt(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedAt, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(time.Time)
-	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Bucket_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Bucket",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Bucket_deletedAt(ctx context.Context, field graphql.CollectedField, obj *db.Bucket) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Bucket_deletedAt(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Bucket().DeletedAt(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*time.Time)
-	fc.Result = res
-	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Bucket_deletedAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Bucket",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Bucket_permission(ctx context.Context, field graphql.CollectedField, obj *db.Bucket) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Bucket_permission(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Bucket().Permission(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.FilePermission)
-	fc.Result = res
-	return ec.marshalOFilePermission2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Bucket_permission(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Bucket",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type FilePermission does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Bucket_files(ctx context.Context, field graphql.CollectedField, obj *db.Bucket) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Bucket_files(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Bucket().Files(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*db.File)
-	fc.Result = res
-	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Bucket_files(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Bucket",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
-			case "size":
-				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_File_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _BucketConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.BucketConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_BucketConnection_edges(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Edges, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*db.Bucket)
-	fc.Result = res
-	return ec.marshalNBucket2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucketᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_BucketConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "BucketConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Bucket_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Bucket_name(ctx, field)
-			case "user":
-				return ec.fieldContext_Bucket_user(ctx, field)
-			case "shared":
-				return ec.fieldContext_Bucket_shared(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Bucket_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Bucket_deletedAt(ctx, field)
-			case "permission":
-				return ec.fieldContext_Bucket_permission(ctx, field)
-			case "files":
-				return ec.fieldContext_Bucket_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Bucket", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _BucketConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.BucketConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_BucketConnection_totalCount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TotalCount, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_BucketConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "BucketConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _BucketConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.BucketConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_BucketConnection_pageInfo(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PageInfo, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.PageInfo)
-	fc.Result = res
-	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_BucketConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "BucketConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "hasNextPage":
-				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
-			case "hasPreviousPage":
-				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
-			case "currentPage":
-				return ec.fieldContext_PageInfo_currentPage(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Chat_id(ctx context.Context, field graphql.CollectedField, obj *db.Chat) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Chat_id(ctx, field)
 	if err != nil {
@@ -7764,6 +5547,50 @@ func (ec *executionContext) fieldContext_Chat_name(ctx context.Context, field gr
 	return fc, nil
 }
 
+func (ec *executionContext) _Chat_type(ctx context.Context, field graphql.CollectedField, obj *db.Chat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Chat_type(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Chat().Type(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(db.ChatType)
+	fc.Result = res
+	return ec.marshalNChatType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Chat_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Chat",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ChatType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Chat_users(ctx context.Context, field graphql.CollectedField, obj *db.Chat) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Chat_users(ctx, field)
 	if err != nil {
@@ -7827,8 +5654,6 @@ func (ec *executionContext) fieldContext_Chat_users(ctx context.Context, field g
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "lastSeenAt":
 				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -7836,8 +5661,8 @@ func (ec *executionContext) fieldContext_Chat_users(ctx context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _Chat_type(ctx context.Context, field graphql.CollectedField, obj *db.Chat) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Chat_type(ctx, field)
+func (ec *executionContext) _Chat_userCount(ctx context.Context, field graphql.CollectedField, obj *db.Chat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Chat_userCount(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -7850,7 +5675,7 @@ func (ec *executionContext) _Chat_type(ctx context.Context, field graphql.Collec
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Chat().Type(rctx, obj)
+		return ec.resolvers.Chat().UserCount(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -7862,19 +5687,63 @@ func (ec *executionContext) _Chat_type(ctx context.Context, field graphql.Collec
 		}
 		return graphql.Null
 	}
-	res := resTmp.(db.ChatType)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNChatType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChatType(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Chat_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Chat_userCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Chat",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ChatType does not have child fields")
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Chat_unreadMessageCount(ctx context.Context, field graphql.CollectedField, obj *db.Chat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Chat_unreadMessageCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Chat().UnreadMessageCount(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Chat_unreadMessageCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Chat",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -7927,12 +5796,12 @@ func (ec *executionContext) fieldContext_Chat_messages(ctx context.Context, fiel
 				return ec.fieldContext_ChatMessage_user(ctx, field)
 			case "message":
 				return ec.fieldContext_ChatMessage_message(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_ChatMessage_createdAt(ctx, field)
 			case "isEdited":
 				return ec.fieldContext_ChatMessage_isEdited(ctx, field)
 			case "isSeen":
 				return ec.fieldContext_ChatMessage_isSeen(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_ChatMessage_createdAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ChatMessage", field.Name)
 		},
@@ -7984,12 +5853,12 @@ func (ec *executionContext) fieldContext_Chat_lastMessage(ctx context.Context, f
 				return ec.fieldContext_ChatMessage_user(ctx, field)
 			case "message":
 				return ec.fieldContext_ChatMessage_message(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_ChatMessage_createdAt(ctx, field)
 			case "isEdited":
 				return ec.fieldContext_ChatMessage_isEdited(ctx, field)
 			case "isSeen":
 				return ec.fieldContext_ChatMessage_isSeen(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_ChatMessage_createdAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ChatMessage", field.Name)
 		},
@@ -8082,8 +5951,8 @@ func (ec *executionContext) fieldContext_Chat_deletedAt(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Chat_unreadMessageCount(ctx context.Context, field graphql.CollectedField, obj *db.Chat) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Chat_unreadMessageCount(ctx, field)
+func (ec *executionContext) _Chat_deleted(ctx context.Context, field graphql.CollectedField, obj *db.Chat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Chat_deleted(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -8096,7 +5965,7 @@ func (ec *executionContext) _Chat_unreadMessageCount(ctx context.Context, field 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Chat().UnreadMessageCount(rctx, obj)
+		return ec.resolvers.Chat().Deleted(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8108,63 +5977,19 @@ func (ec *executionContext) _Chat_unreadMessageCount(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(bool)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Chat_unreadMessageCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Chat_deleted(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Chat",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Chat_userCount(ctx context.Context, field graphql.CollectedField, obj *db.Chat) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Chat_userCount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Chat().UserCount(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Chat_userCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Chat",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -8210,10 +6035,14 @@ func (ec *executionContext) fieldContext_ChatConnection_edges(ctx context.Contex
 				return ec.fieldContext_Chat_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Chat_name(ctx, field)
-			case "users":
-				return ec.fieldContext_Chat_users(ctx, field)
 			case "type":
 				return ec.fieldContext_Chat_type(ctx, field)
+			case "users":
+				return ec.fieldContext_Chat_users(ctx, field)
+			case "userCount":
+				return ec.fieldContext_Chat_userCount(ctx, field)
+			case "unreadMessageCount":
+				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
 			case "messages":
 				return ec.fieldContext_Chat_messages(ctx, field)
 			case "lastMessage":
@@ -8222,10 +6051,8 @@ func (ec *executionContext) fieldContext_ChatConnection_edges(ctx context.Contex
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
-			case "unreadMessageCount":
-				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
-			case "userCount":
-				return ec.fieldContext_Chat_userCount(ctx, field)
+			case "deleted":
+				return ec.fieldContext_Chat_deleted(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -8416,10 +6243,14 @@ func (ec *executionContext) fieldContext_ChatMessage_chat(ctx context.Context, f
 				return ec.fieldContext_Chat_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Chat_name(ctx, field)
-			case "users":
-				return ec.fieldContext_Chat_users(ctx, field)
 			case "type":
 				return ec.fieldContext_Chat_type(ctx, field)
+			case "users":
+				return ec.fieldContext_Chat_users(ctx, field)
+			case "userCount":
+				return ec.fieldContext_Chat_userCount(ctx, field)
+			case "unreadMessageCount":
+				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
 			case "messages":
 				return ec.fieldContext_Chat_messages(ctx, field)
 			case "lastMessage":
@@ -8428,10 +6259,8 @@ func (ec *executionContext) fieldContext_ChatMessage_chat(ctx context.Context, f
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
-			case "unreadMessageCount":
-				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
-			case "userCount":
-				return ec.fieldContext_Chat_userCount(ctx, field)
+			case "deleted":
+				return ec.fieldContext_Chat_deleted(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -8502,8 +6331,6 @@ func (ec *executionContext) fieldContext_ChatMessage_user(ctx context.Context, f
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "lastSeenAt":
 				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -8550,50 +6377,6 @@ func (ec *executionContext) fieldContext_ChatMessage_message(ctx context.Context
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ChatMessage_createdAt(ctx context.Context, field graphql.CollectedField, obj *db.ChatMessage) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ChatMessage_createdAt(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedAt, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(time.Time)
-	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ChatMessage_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ChatMessage",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
 		},
 	}
 	return fc, nil
@@ -8687,6 +6470,50 @@ func (ec *executionContext) fieldContext_ChatMessage_isSeen(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _ChatMessage_createdAt(ctx context.Context, field graphql.CollectedField, obj *db.ChatMessage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ChatMessage_createdAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ChatMessage_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ChatMessage",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _ChatUser_id(ctx context.Context, field graphql.CollectedField, obj *db.ChatUser) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_ChatUser_id(ctx, field)
 	if err != nil {
@@ -8774,10 +6601,14 @@ func (ec *executionContext) fieldContext_ChatUser_chat(ctx context.Context, fiel
 				return ec.fieldContext_Chat_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Chat_name(ctx, field)
-			case "users":
-				return ec.fieldContext_Chat_users(ctx, field)
 			case "type":
 				return ec.fieldContext_Chat_type(ctx, field)
+			case "users":
+				return ec.fieldContext_Chat_users(ctx, field)
+			case "userCount":
+				return ec.fieldContext_Chat_userCount(ctx, field)
+			case "unreadMessageCount":
+				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
 			case "messages":
 				return ec.fieldContext_Chat_messages(ctx, field)
 			case "lastMessage":
@@ -8786,10 +6617,8 @@ func (ec *executionContext) fieldContext_ChatUser_chat(ctx context.Context, fiel
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
-			case "unreadMessageCount":
-				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
-			case "userCount":
-				return ec.fieldContext_Chat_userCount(ctx, field)
+			case "deleted":
+				return ec.fieldContext_Chat_deleted(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -8860,8 +6689,6 @@ func (ec *executionContext) fieldContext_ChatUser_user(ctx context.Context, fiel
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "lastSeenAt":
 				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -9748,8 +7575,8 @@ func (ec *executionContext) fieldContext_CompetenceTendency_tendency(ctx context
 	return fc, nil
 }
 
-func (ec *executionContext) _CopyFilesPayload_files(ctx context.Context, field graphql.CollectedField, obj *model.CopyFilesPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CopyFilesPayload_files(ctx, field)
+func (ec *executionContext) _CreateFilePayload_file(ctx context.Context, field graphql.CollectedField, obj *model.CreateFilePayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CreateFilePayload_file(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -9762,7 +7589,7 @@ func (ec *executionContext) _CopyFilesPayload_files(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Files, nil
+		return obj.File, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -9774,14 +7601,14 @@ func (ec *executionContext) _CopyFilesPayload_files(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*db.File)
+	res := resTmp.(*db.File)
 	fc.Result = res
-	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileᚄ(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CopyFilesPayload_files(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_CreateFilePayload_file(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "CopyFilesPayload",
+		Object:     "CreateFilePayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -9789,26 +7616,26 @@ func (ec *executionContext) fieldContext_CopyFilesPayload_files(ctx context.Cont
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
 			case "size":
 				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "type":
+				return ec.fieldContext_File_type(ctx, field)
+			case "mime":
+				return ec.fieldContext_File_mime(ctx, field)
+			case "folder":
+				return ec.fieldContext_File_folder(ctx, field)
+			case "folders":
+				return ec.fieldContext_File_folders(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_File_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
+			case "permissions":
+				return ec.fieldContext_File_permissions(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
 		},
@@ -9816,8 +7643,8 @@ func (ec *executionContext) fieldContext_CopyFilesPayload_files(ctx context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _DeleteFilePayload_success(ctx context.Context, field graphql.CollectedField, obj *model.DeleteFilePayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DeleteFilePayload_success(ctx, field)
+func (ec *executionContext) _CreateFilePermissionPayload_filePermission(ctx context.Context, field graphql.CollectedField, obj *model.CreateFilePermissionPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CreateFilePermissionPayload_filePermission(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -9830,7 +7657,7 @@ func (ec *executionContext) _DeleteFilePayload_success(ctx context.Context, fiel
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Success, nil
+		return obj.FilePermission, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -9842,19 +7669,35 @@ func (ec *executionContext) _DeleteFilePayload_success(ctx context.Context, fiel
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(*db.FilePermission)
 	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNFilePermission2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_DeleteFilePayload_success(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_CreateFilePermissionPayload_filePermission(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "DeleteFilePayload",
+		Object:     "CreateFilePermissionPayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_FilePermission_id(ctx, field)
+			case "file":
+				return ec.fieldContext_FilePermission_file(ctx, field)
+			case "displayName":
+				return ec.fieldContext_FilePermission_displayName(ctx, field)
+			case "emailAddress":
+				return ec.fieldContext_FilePermission_emailAddress(ctx, field)
+			case "type":
+				return ec.fieldContext_FilePermission_type(ctx, field)
+			case "role":
+				return ec.fieldContext_FilePermission_role(ctx, field)
+			case "inherited":
+				return ec.fieldContext_FilePermission_inherited(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type FilePermission", field.Name)
 		},
 	}
 	return fc, nil
@@ -9901,26 +7744,26 @@ func (ec *executionContext) fieldContext_DeleteFilePayload_file(ctx context.Cont
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
 			case "size":
 				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "type":
+				return ec.fieldContext_File_type(ctx, field)
+			case "mime":
+				return ec.fieldContext_File_mime(ctx, field)
+			case "folder":
+				return ec.fieldContext_File_folder(ctx, field)
+			case "folders":
+				return ec.fieldContext_File_folders(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_File_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
+			case "permissions":
+				return ec.fieldContext_File_permissions(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
 		},
@@ -9928,8 +7771,8 @@ func (ec *executionContext) fieldContext_DeleteFilePayload_file(ctx context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _DeleteFilesPayload_success(ctx context.Context, field graphql.CollectedField, obj *model.DeleteFilesPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DeleteFilesPayload_success(ctx, field)
+func (ec *executionContext) _DeleteFilePermissionPayload_filePermission(ctx context.Context, field graphql.CollectedField, obj *model.DeleteFilePermissionPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteFilePermissionPayload_filePermission(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -9942,7 +7785,7 @@ func (ec *executionContext) _DeleteFilesPayload_success(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Success, nil
+		return obj.FilePermission, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -9954,2043 +7797,35 @@ func (ec *executionContext) _DeleteFilesPayload_success(ctx context.Context, fie
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(*db.FilePermission)
 	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNFilePermission2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_DeleteFilesPayload_success(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_DeleteFilePermissionPayload_filePermission(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "DeleteFilesPayload",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _DeleteFilesPayload_files(ctx context.Context, field graphql.CollectedField, obj *model.DeleteFilesPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DeleteFilesPayload_files(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Files, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*db.File)
-	fc.Result = res
-	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_DeleteFilesPayload_files(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "DeleteFilesPayload",
+		Object:     "DeleteFilePermissionPayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
-			case "size":
-				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_File_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Domain_id(ctx context.Context, field graphql.CollectedField, obj *db.Domain) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Domain_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Domain_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Domain",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Domain_name(ctx context.Context, field graphql.CollectedField, obj *db.Domain) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Domain_name(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Domain_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Domain",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Domain_createdAt(ctx context.Context, field graphql.CollectedField, obj *db.Domain) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Domain_createdAt(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Domain().CreatedAt(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Domain_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Domain",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _DomainConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.DomainConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DomainConnection_edges(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Edges, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*db.Domain)
-	fc.Result = res
-	return ec.marshalODomain2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐDomain(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_DomainConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "DomainConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Domain_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Domain_name(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Domain_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Domain", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _DomainConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.DomainConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DomainConnection_pageInfo(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PageInfo, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.PageInfo)
-	fc.Result = res
-	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_DomainConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "DomainConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "hasNextPage":
-				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
-			case "hasPreviousPage":
-				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
-			case "currentPage":
-				return ec.fieldContext_PageInfo_currentPage(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _DomainConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.DomainConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DomainConnection_totalCount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TotalCount, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_DomainConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "DomainConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _DownloadFilePayload_url(ctx context.Context, field graphql.CollectedField, obj *model.DownloadFilePayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DownloadFilePayload_url(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.URL, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_DownloadFilePayload_url(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "DownloadFilePayload",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _DownloadFilesPayload_url(ctx context.Context, field graphql.CollectedField, obj *model.DownloadFilesPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DownloadFilesPayload_url(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.URL, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_DownloadFilesPayload_url(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "DownloadFilesPayload",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Email_id(ctx context.Context, field graphql.CollectedField, obj *db.Email) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Email_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Email_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Email",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Email_name(ctx context.Context, field graphql.CollectedField, obj *db.Email) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Email_name(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Email_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Email",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Email_address(ctx context.Context, field graphql.CollectedField, obj *db.Email) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Email_address(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Address, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Email_address(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Email",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Email_type(ctx context.Context, field graphql.CollectedField, obj *db.Email) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Email_type(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Email().Type(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(model.EmailType)
-	fc.Result = res
-	return ec.marshalNEmailType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailType(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Email_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Email",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type EmailType does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Email_createdAt(ctx context.Context, field graphql.CollectedField, obj *db.Email) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Email_createdAt(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Email().CreatedAt(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Email_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Email",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailAccount_id(ctx context.Context, field graphql.CollectedField, obj *db.EmailAccount) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailAccount_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailAccount_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailAccount",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailAccount_name(ctx context.Context, field graphql.CollectedField, obj *db.EmailAccount) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailAccount_name(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailAccount_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailAccount",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailAccount_description(ctx context.Context, field graphql.CollectedField, obj *db.EmailAccount) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailAccount_description(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.EmailAccount().Description(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailAccount_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailAccount",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailAccount_type(ctx context.Context, field graphql.CollectedField, obj *db.EmailAccount) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailAccount_type(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.EmailAccount().Type(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(model.EmailAccountType)
-	fc.Result = res
-	return ec.marshalNEmailAccountType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountType(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailAccount_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailAccount",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type EmailAccountType does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailAccount_quota(ctx context.Context, field graphql.CollectedField, obj *db.EmailAccount) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailAccount_quota(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.EmailAccount().Quota(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*int)
-	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailAccount_quota(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailAccount",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailAccount_active(ctx context.Context, field graphql.CollectedField, obj *db.EmailAccount) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailAccount_active(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.EmailAccount().Active(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*bool)
-	fc.Result = res
-	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailAccount_active(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailAccount",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailAccount_user(ctx context.Context, field graphql.CollectedField, obj *db.EmailAccount) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailAccount_user(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.EmailAccount().User(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.User)
-	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailAccount_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailAccount",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
+				return ec.fieldContext_FilePermission_id(ctx, field)
+			case "file":
+				return ec.fieldContext_FilePermission_file(ctx, field)
+			case "displayName":
+				return ec.fieldContext_FilePermission_displayName(ctx, field)
+			case "emailAddress":
+				return ec.fieldContext_FilePermission_emailAddress(ctx, field)
+			case "type":
+				return ec.fieldContext_FilePermission_type(ctx, field)
 			case "role":
-				return ec.fieldContext_User_role(ctx, field)
-			case "firstName":
-				return ec.fieldContext_User_firstName(ctx, field)
-			case "lastName":
-				return ec.fieldContext_User_lastName(ctx, field)
-			case "student":
-				return ec.fieldContext_User_student(ctx, field)
-			case "language":
-				return ec.fieldContext_User_language(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_User_deletedAt(ctx, field)
-			case "organisationId":
-				return ec.fieldContext_User_organisationId(ctx, field)
-			case "inviteAccepted":
-				return ec.fieldContext_User_inviteAccepted(ctx, field)
-			case "lastSeenAt":
-				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
+				return ec.fieldContext_FilePermission_role(ctx, field)
+			case "inherited":
+				return ec.fieldContext_FilePermission_inherited(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailAccount_createdAt(ctx context.Context, field graphql.CollectedField, obj *db.EmailAccount) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailAccount_createdAt(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.EmailAccount().CreatedAt(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailAccount_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailAccount",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailAccount_members(ctx context.Context, field graphql.CollectedField, obj *db.EmailAccount) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailAccount_members(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.EmailAccount().Members(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*db.EmailGroupMember)
-	fc.Result = res
-	return ec.marshalOEmailGroupMember2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailGroupMember(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailAccount_members(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailAccount",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EmailGroupMember_id(ctx, field)
-			case "name":
-				return ec.fieldContext_EmailGroupMember_name(ctx, field)
-			case "memberOf":
-				return ec.fieldContext_EmailGroupMember_memberOf(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_EmailGroupMember_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailGroupMember", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailAccountConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.EmailAccountConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailAccountConnection_edges(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Edges, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*db.EmailAccount)
-	fc.Result = res
-	return ec.marshalOEmailAccount2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailAccountConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailAccountConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EmailAccount_id(ctx, field)
-			case "name":
-				return ec.fieldContext_EmailAccount_name(ctx, field)
-			case "description":
-				return ec.fieldContext_EmailAccount_description(ctx, field)
-			case "type":
-				return ec.fieldContext_EmailAccount_type(ctx, field)
-			case "quota":
-				return ec.fieldContext_EmailAccount_quota(ctx, field)
-			case "active":
-				return ec.fieldContext_EmailAccount_active(ctx, field)
-			case "user":
-				return ec.fieldContext_EmailAccount_user(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_EmailAccount_createdAt(ctx, field)
-			case "members":
-				return ec.fieldContext_EmailAccount_members(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailAccount", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailAccountConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.EmailAccountConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailAccountConnection_pageInfo(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PageInfo, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.PageInfo)
-	fc.Result = res
-	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailAccountConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailAccountConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "hasNextPage":
-				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
-			case "hasPreviousPage":
-				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
-			case "currentPage":
-				return ec.fieldContext_PageInfo_currentPage(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailAccountConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.EmailAccountConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailAccountConnection_totalCount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TotalCount, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailAccountConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailAccountConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.EmailConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailConnection_edges(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Edges, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*db.Email)
-	fc.Result = res
-	return ec.marshalOEmail2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmail(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Email_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Email_name(ctx, field)
-			case "address":
-				return ec.fieldContext_Email_address(ctx, field)
-			case "type":
-				return ec.fieldContext_Email_type(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Email_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Email", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.EmailConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailConnection_pageInfo(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PageInfo, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.PageInfo)
-	fc.Result = res
-	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "hasNextPage":
-				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
-			case "hasPreviousPage":
-				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
-			case "currentPage":
-				return ec.fieldContext_PageInfo_currentPage(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.EmailConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailConnection_totalCount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TotalCount, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailForwarding_id(ctx context.Context, field graphql.CollectedField, obj *db.EmailForwarding) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailForwarding_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailForwarding_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailForwarding",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailForwarding_origin(ctx context.Context, field graphql.CollectedField, obj *db.EmailForwarding) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailForwarding_origin(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Origin, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailForwarding_origin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailForwarding",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailForwarding_target(ctx context.Context, field graphql.CollectedField, obj *db.EmailForwarding) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailForwarding_target(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Target, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailForwarding_target(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailForwarding",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailForwarding_createdAt(ctx context.Context, field graphql.CollectedField, obj *db.EmailForwarding) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailForwarding_createdAt(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.EmailForwarding().CreatedAt(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailForwarding_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailForwarding",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailForwardingConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.EmailForwardingConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailForwardingConnection_edges(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Edges, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*db.EmailForwarding)
-	fc.Result = res
-	return ec.marshalOEmailForwarding2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailForwarding(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailForwardingConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailForwardingConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EmailForwarding_id(ctx, field)
-			case "origin":
-				return ec.fieldContext_EmailForwarding_origin(ctx, field)
-			case "target":
-				return ec.fieldContext_EmailForwarding_target(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_EmailForwarding_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailForwarding", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailForwardingConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.EmailForwardingConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailForwardingConnection_pageInfo(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PageInfo, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.PageInfo)
-	fc.Result = res
-	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailForwardingConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailForwardingConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "hasNextPage":
-				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
-			case "hasPreviousPage":
-				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
-			case "currentPage":
-				return ec.fieldContext_PageInfo_currentPage(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailForwardingConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.EmailForwardingConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailForwardingConnection_totalCount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TotalCount, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailForwardingConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailForwardingConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailGroupMember_id(ctx context.Context, field graphql.CollectedField, obj *db.EmailGroupMember) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailGroupMember_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailGroupMember_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailGroupMember",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailGroupMember_name(ctx context.Context, field graphql.CollectedField, obj *db.EmailGroupMember) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailGroupMember_name(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailGroupMember_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailGroupMember",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailGroupMember_memberOf(ctx context.Context, field graphql.CollectedField, obj *db.EmailGroupMember) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailGroupMember_memberOf(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.MemberOf, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailGroupMember_memberOf(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailGroupMember",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailGroupMember_createdAt(ctx context.Context, field graphql.CollectedField, obj *db.EmailGroupMember) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailGroupMember_createdAt(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.EmailGroupMember().CreatedAt(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailGroupMember_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailGroupMember",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailGroupMemberConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.EmailGroupMemberConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailGroupMemberConnection_edges(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Edges, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*db.EmailGroupMember)
-	fc.Result = res
-	return ec.marshalOEmailGroupMember2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailGroupMember(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailGroupMemberConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailGroupMemberConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EmailGroupMember_id(ctx, field)
-			case "name":
-				return ec.fieldContext_EmailGroupMember_name(ctx, field)
-			case "memberOf":
-				return ec.fieldContext_EmailGroupMember_memberOf(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_EmailGroupMember_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailGroupMember", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailGroupMemberConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.EmailGroupMemberConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailGroupMemberConnection_pageInfo(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PageInfo, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.PageInfo)
-	fc.Result = res
-	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailGroupMemberConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailGroupMemberConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "hasNextPage":
-				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
-			case "hasPreviousPage":
-				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
-			case "currentPage":
-				return ec.fieldContext_PageInfo_currentPage(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EmailGroupMemberConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.EmailGroupMemberConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EmailGroupMemberConnection_totalCount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TotalCount, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EmailGroupMemberConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EmailGroupMemberConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
+			return nil, fmt.Errorf("no field named %q was found under type FilePermission", field.Name)
 		},
 	}
 	return fc, nil
@@ -12105,11 +7940,14 @@ func (ec *executionContext) _Entry_body(ctx context.Context, field graphql.Colle
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Entry_body(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -12120,91 +7958,6 @@ func (ec *executionContext) fieldContext_Entry_body(ctx context.Context, field g
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Entry_createdAt(ctx context.Context, field graphql.CollectedField, obj *db.Entry) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Entry_createdAt(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedAt, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(time.Time)
-	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Entry_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Entry",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Entry_deletedAt(ctx context.Context, field graphql.CollectedField, obj *db.Entry) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Entry_deletedAt(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Entry().DeletedAt(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*time.Time)
-	fc.Result = res
-	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Entry_deletedAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Entry",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
 		},
 	}
 	return fc, nil
@@ -12273,8 +8026,6 @@ func (ec *executionContext) fieldContext_Entry_user(ctx context.Context, field g
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "lastSeenAt":
 				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -12345,8 +8096,6 @@ func (ec *executionContext) fieldContext_Entry_users(ctx context.Context, field 
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "lastSeenAt":
 				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -12407,12 +8156,12 @@ func (ec *executionContext) fieldContext_Entry_events(ctx context.Context, field
 				return ec.fieldContext_Event_endsAt(ctx, field)
 			case "recurrence":
 				return ec.fieldContext_Event_recurrence(ctx, field)
+			case "competences":
+				return ec.fieldContext_Event_competences(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Event_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Event_deletedAt(ctx, field)
-			case "competences":
-				return ec.fieldContext_Event_competences(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
@@ -12461,26 +8210,26 @@ func (ec *executionContext) fieldContext_Entry_files(ctx context.Context, field 
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
 			case "size":
 				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "type":
+				return ec.fieldContext_File_type(ctx, field)
+			case "mime":
+				return ec.fieldContext_File_mime(ctx, field)
+			case "folder":
+				return ec.fieldContext_File_folder(ctx, field)
+			case "folders":
+				return ec.fieldContext_File_folders(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_File_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
+			case "permissions":
+				return ec.fieldContext_File_permissions(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
 		},
@@ -12672,6 +8421,91 @@ func (ec *executionContext) fieldContext_Entry_subjects(ctx context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _Entry_createdAt(ctx context.Context, field graphql.CollectedField, obj *db.Entry) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Entry_createdAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Entry_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Entry_deletedAt(ctx context.Context, field graphql.CollectedField, obj *db.Entry) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Entry_deletedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entry().DeletedAt(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Entry_deletedAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entry",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _EntryConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.EntryConnection) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EntryConnection_edges(ctx, field)
 	if err != nil {
@@ -12717,10 +8551,6 @@ func (ec *executionContext) fieldContext_EntryConnection_edges(ctx context.Conte
 				return ec.fieldContext_Entry_date(ctx, field)
 			case "body":
 				return ec.fieldContext_Entry_body(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Entry_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "users":
@@ -12735,6 +8565,10 @@ func (ec *executionContext) fieldContext_EntryConnection_edges(ctx context.Conte
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Entry_subjects(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -12964,26 +8798,26 @@ func (ec *executionContext) fieldContext_Event_image(ctx context.Context, field 
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
 			case "size":
 				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "type":
+				return ec.fieldContext_File_type(ctx, field)
+			case "mime":
+				return ec.fieldContext_File_mime(ctx, field)
+			case "folder":
+				return ec.fieldContext_File_folder(ctx, field)
+			case "folders":
+				return ec.fieldContext_File_folders(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_File_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
+			case "permissions":
+				return ec.fieldContext_File_permissions(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
 		},
@@ -13161,6 +8995,74 @@ func (ec *executionContext) fieldContext_Event_recurrence(ctx context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _Event_competences(ctx context.Context, field graphql.CollectedField, obj *db.Event) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Event_competences(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Event().Competences(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*db.Competence)
+	fc.Result = res
+	return ec.marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetenceᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Event_competences(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Event",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Competence_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Competence_name(ctx, field)
+			case "type":
+				return ec.fieldContext_Competence_type(ctx, field)
+			case "grades":
+				return ec.fieldContext_Competence_grades(ctx, field)
+			case "color":
+				return ec.fieldContext_Competence_color(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Competence_createdAt(ctx, field)
+			case "parents":
+				return ec.fieldContext_Competence_parents(ctx, field)
+			case "sortOrder":
+				return ec.fieldContext_Competence_sortOrder(ctx, field)
+			case "competences":
+				return ec.fieldContext_Competence_competences(ctx, field)
+			case "userCompetences":
+				return ec.fieldContext_Competence_userCompetences(ctx, field)
+			case "tendency":
+				return ec.fieldContext_Competence_tendency(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Event_createdAt(ctx context.Context, field graphql.CollectedField, obj *db.Event) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Event_createdAt(ctx, field)
 	if err != nil {
@@ -13246,74 +9148,6 @@ func (ec *executionContext) fieldContext_Event_deletedAt(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_competences(ctx context.Context, field graphql.CollectedField, obj *db.Event) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Event_competences(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Event().Competences(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*db.Competence)
-	fc.Result = res
-	return ec.marshalNCompetence2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐCompetenceᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Event_competences(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Event",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Competence_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Competence_name(ctx, field)
-			case "type":
-				return ec.fieldContext_Competence_type(ctx, field)
-			case "grades":
-				return ec.fieldContext_Competence_grades(ctx, field)
-			case "color":
-				return ec.fieldContext_Competence_color(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Competence_createdAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_Competence_parents(ctx, field)
-			case "sortOrder":
-				return ec.fieldContext_Competence_sortOrder(ctx, field)
-			case "competences":
-				return ec.fieldContext_Competence_competences(ctx, field)
-			case "userCompetences":
-				return ec.fieldContext_Competence_userCompetences(ctx, field)
-			case "tendency":
-				return ec.fieldContext_Competence_tendency(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Competence", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _EventConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.EventConnection) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EventConnection_edges(ctx, field)
 	if err != nil {
@@ -13364,12 +9198,12 @@ func (ec *executionContext) fieldContext_EventConnection_edges(ctx context.Conte
 				return ec.fieldContext_Event_endsAt(ctx, field)
 			case "recurrence":
 				return ec.fieldContext_Event_recurrence(ctx, field)
+			case "competences":
+				return ec.fieldContext_Event_competences(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Event_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Event_deletedAt(ctx, field)
-			case "competences":
-				return ec.fieldContext_Event_competences(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
@@ -13781,138 +9615,6 @@ func (ec *executionContext) fieldContext_File_id(ctx context.Context, field grap
 	return fc, nil
 }
 
-func (ec *executionContext) _File_name(ctx context.Context, field graphql.CollectedField, obj *db.File) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_File_name(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_File_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "File",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _File_fileType(ctx context.Context, field graphql.CollectedField, obj *db.File) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_File_fileType(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.FileType, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(db.FileType)
-	fc.Result = res
-	return ec.marshalNFileType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileType(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_File_fileType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "File",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type FileType does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _File_MIMEType(ctx context.Context, field graphql.CollectedField, obj *db.File) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_File_MIMEType(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.File().MIMEType(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_File_MIMEType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "File",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _File_size(ctx context.Context, field graphql.CollectedField, obj *db.File) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_File_size(ctx, field)
 	if err != nil {
@@ -13957,8 +9659,8 @@ func (ec *executionContext) fieldContext_File_size(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _File_bucket(ctx context.Context, field graphql.CollectedField, obj *db.File) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_File_bucket(ctx, field)
+func (ec *executionContext) _File_name(ctx context.Context, field graphql.CollectedField, obj *db.File) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_File_name(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -13971,7 +9673,7 @@ func (ec *executionContext) _File_bucket(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.File().Bucket(rctx, obj)
+		return obj.Name, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -13983,44 +9685,26 @@ func (ec *executionContext) _File_bucket(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*db.Bucket)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucket(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_File_bucket(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_File_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "File",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Bucket_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Bucket_name(ctx, field)
-			case "user":
-				return ec.fieldContext_Bucket_user(ctx, field)
-			case "shared":
-				return ec.fieldContext_Bucket_shared(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Bucket_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Bucket_deletedAt(ctx, field)
-			case "permission":
-				return ec.fieldContext_Bucket_permission(ctx, field)
-			case "files":
-				return ec.fieldContext_Bucket_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Bucket", field.Name)
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _File_parent(ctx context.Context, field graphql.CollectedField, obj *db.File) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_File_parent(ctx, field)
+func (ec *executionContext) _File_type(ctx context.Context, field graphql.CollectedField, obj *db.File) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_File_type(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -14033,7 +9717,95 @@ func (ec *executionContext) _File_parent(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.File().Parent(rctx, obj)
+		return ec.resolvers.File().Type(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(db.FileType)
+	fc.Result = res
+	return ec.marshalNFileType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_File_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "File",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type FileType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _File_mime(ctx context.Context, field graphql.CollectedField, obj *db.File) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_File_mime(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.File().Mime(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_File_mime(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "File",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _File_folder(ctx context.Context, field graphql.CollectedField, obj *db.File) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_File_folder(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.File().Folder(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -14047,7 +9819,7 @@ func (ec *executionContext) _File_parent(ctx context.Context, field graphql.Coll
 	return ec.marshalOFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_File_parent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_File_folder(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "File",
 		Field:      field,
@@ -14057,26 +9829,162 @@ func (ec *executionContext) fieldContext_File_parent(ctx context.Context, field 
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
 			case "size":
 				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "type":
+				return ec.fieldContext_File_type(ctx, field)
+			case "mime":
+				return ec.fieldContext_File_mime(ctx, field)
+			case "folder":
+				return ec.fieldContext_File_folder(ctx, field)
+			case "folders":
+				return ec.fieldContext_File_folders(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_File_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
+			case "permissions":
+				return ec.fieldContext_File_permissions(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _File_folders(ctx context.Context, field graphql.CollectedField, obj *db.File) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_File_folders(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.File().Folders(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*db.File)
+	fc.Result = res
+	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_File_folders(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "File",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_File_id(ctx, field)
+			case "size":
+				return ec.fieldContext_File_size(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "type":
+				return ec.fieldContext_File_type(ctx, field)
+			case "mime":
+				return ec.fieldContext_File_mime(ctx, field)
+			case "folder":
+				return ec.fieldContext_File_folder(ctx, field)
+			case "folders":
+				return ec.fieldContext_File_folders(ctx, field)
 			case "files":
 				return ec.fieldContext_File_files(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_File_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "permissions":
+				return ec.fieldContext_File_permissions(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _File_files(ctx context.Context, field graphql.CollectedField, obj *db.File) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_File_files(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.File().Files(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*db.File)
+	fc.Result = res
+	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_File_files(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "File",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_File_id(ctx, field)
+			case "size":
+				return ec.fieldContext_File_size(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "type":
+				return ec.fieldContext_File_type(ctx, field)
+			case "mime":
+				return ec.fieldContext_File_mime(ctx, field)
+			case "folder":
+				return ec.fieldContext_File_folder(ctx, field)
+			case "folders":
+				return ec.fieldContext_File_folders(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_File_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "permissions":
+				return ec.fieldContext_File_permissions(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
 		},
@@ -14169,8 +10077,8 @@ func (ec *executionContext) fieldContext_File_deletedAt(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _File_parents(ctx context.Context, field graphql.CollectedField, obj *db.File) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_File_parents(ctx, field)
+func (ec *executionContext) _File_permissions(ctx context.Context, field graphql.CollectedField, obj *db.File) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_File_permissions(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -14183,7 +10091,7 @@ func (ec *executionContext) _File_parents(ctx context.Context, field graphql.Col
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.File().Parents(rctx, obj)
+		return ec.resolvers.File().Permissions(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -14195,12 +10103,12 @@ func (ec *executionContext) _File_parents(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*db.File)
+	res := resTmp.([]*db.FilePermission)
 	fc.Result = res
-	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileᚄ(ctx, field.Selections, res)
+	return ec.marshalNFilePermission2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermissionᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_File_parents(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_File_permissions(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "File",
 		Field:      field,
@@ -14209,97 +10117,21 @@ func (ec *executionContext) fieldContext_File_parents(ctx context.Context, field
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
-			case "size":
-				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_File_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
+				return ec.fieldContext_FilePermission_id(ctx, field)
+			case "file":
+				return ec.fieldContext_FilePermission_file(ctx, field)
+			case "displayName":
+				return ec.fieldContext_FilePermission_displayName(ctx, field)
+			case "emailAddress":
+				return ec.fieldContext_FilePermission_emailAddress(ctx, field)
+			case "type":
+				return ec.fieldContext_FilePermission_type(ctx, field)
+			case "role":
+				return ec.fieldContext_FilePermission_role(ctx, field)
+			case "inherited":
+				return ec.fieldContext_FilePermission_inherited(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _File_files(ctx context.Context, field graphql.CollectedField, obj *db.File) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_File_files(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.File().Files(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*db.File)
-	fc.Result = res
-	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_File_files(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "File",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
-			case "size":
-				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_File_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type FilePermission", field.Name)
 		},
 	}
 	return fc, nil
@@ -14346,26 +10178,26 @@ func (ec *executionContext) fieldContext_FileConnection_edges(ctx context.Contex
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
 			case "size":
 				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "type":
+				return ec.fieldContext_File_type(ctx, field)
+			case "mime":
+				return ec.fieldContext_File_mime(ctx, field)
+			case "folder":
+				return ec.fieldContext_File_folder(ctx, field)
+			case "folders":
+				return ec.fieldContext_File_folders(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_File_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
+			case "permissions":
+				return ec.fieldContext_File_permissions(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
 		},
@@ -14464,6 +10296,335 @@ func (ec *executionContext) fieldContext_FileConnection_pageInfo(ctx context.Con
 				return ec.fieldContext_PageInfo_currentPage(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FilePermission_id(ctx context.Context, field graphql.CollectedField, obj *db.FilePermission) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FilePermission_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FilePermission_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FilePermission",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FilePermission_file(ctx context.Context, field graphql.CollectedField, obj *db.FilePermission) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FilePermission_file(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.FilePermission().File(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.File)
+	fc.Result = res
+	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FilePermission_file(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FilePermission",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_File_id(ctx, field)
+			case "size":
+				return ec.fieldContext_File_size(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "type":
+				return ec.fieldContext_File_type(ctx, field)
+			case "mime":
+				return ec.fieldContext_File_mime(ctx, field)
+			case "folder":
+				return ec.fieldContext_File_folder(ctx, field)
+			case "folders":
+				return ec.fieldContext_File_folders(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_File_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_File_deletedAt(ctx, field)
+			case "permissions":
+				return ec.fieldContext_File_permissions(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FilePermission_displayName(ctx context.Context, field graphql.CollectedField, obj *db.FilePermission) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FilePermission_displayName(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.FilePermission().DisplayName(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FilePermission_displayName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FilePermission",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FilePermission_emailAddress(ctx context.Context, field graphql.CollectedField, obj *db.FilePermission) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FilePermission_emailAddress(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.FilePermission().EmailAddress(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FilePermission_emailAddress(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FilePermission",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FilePermission_type(ctx context.Context, field graphql.CollectedField, obj *db.FilePermission) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FilePermission_type(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.FilePermission().Type(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.FilePermissionType)
+	fc.Result = res
+	return ec.marshalNFilePermissionType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFilePermissionType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FilePermission_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FilePermission",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type FilePermissionType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FilePermission_role(ctx context.Context, field graphql.CollectedField, obj *db.FilePermission) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FilePermission_role(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Role, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(db.FilePermissionRole)
+	fc.Result = res
+	return ec.marshalNFilePermissionRole2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermissionRole(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FilePermission_role(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FilePermission",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type FilePermissionRole does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FilePermission_inherited(ctx context.Context, field graphql.CollectedField, obj *db.FilePermission) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FilePermission_inherited(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.FilePermission().Inherited(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FilePermission_inherited(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FilePermission",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -14777,8 +10938,8 @@ func (ec *executionContext) fieldContext_InviteDetailsPayload_lastName(ctx conte
 	return fc, nil
 }
 
-func (ec *executionContext) _MoveFilesPayload_files(ctx context.Context, field graphql.CollectedField, obj *model.MoveFilesPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_MoveFilesPayload_files(ctx, field)
+func (ec *executionContext) _Mutation_updateUserAttendance(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateUserAttendance(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -14791,75 +10952,7 @@ func (ec *executionContext) _MoveFilesPayload_files(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Files, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*db.File)
-	fc.Result = res
-	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_MoveFilesPayload_files(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MoveFilesPayload",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
-			case "size":
-				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_File_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_setUserAttendanceState(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_setUserAttendanceState(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().SetUserAttendanceState(rctx, fc.Args["userId"].(string), fc.Args["date"].(time.Time), fc.Args["state"].(db.UserAttendanceState))
+		return ec.resolvers.Mutation().UpdateUserAttendance(rctx, fc.Args["input"].(model.UpdateUserAttendanceInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -14876,7 +10969,7 @@ func (ec *executionContext) _Mutation_setUserAttendanceState(ctx context.Context
 	return ec.marshalNUserAttendance2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserAttendance(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_setUserAttendanceState(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_updateUserAttendance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -14886,12 +10979,12 @@ func (ec *executionContext) fieldContext_Mutation_setUserAttendanceState(ctx con
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_UserAttendance_id(ctx, field)
+			case "date":
+				return ec.fieldContext_UserAttendance_date(ctx, field)
 			case "user":
 				return ec.fieldContext_UserAttendance_user(ctx, field)
 			case "state":
 				return ec.fieldContext_UserAttendance_state(ctx, field)
-			case "date":
-				return ec.fieldContext_UserAttendance_date(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserAttendance", field.Name)
 		},
@@ -14903,15 +10996,15 @@ func (ec *executionContext) fieldContext_Mutation_setUserAttendanceState(ctx con
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_setUserAttendanceState_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_updateUserAttendance_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_updateDailyAttendance(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_updateDailyAttendance(ctx, field)
+func (ec *executionContext) _Mutation_sendUserInvite(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_sendUserInvite(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -14924,7 +11017,7 @@ func (ec *executionContext) _Mutation_updateDailyAttendance(ctx context.Context,
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateDailyAttendance(rctx, fc.Args["date"].(time.Time), fc.Args["state"].(db.UserAttendanceState))
+		return ec.resolvers.Mutation().SendUserInvite(rctx, fc.Args["id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -14936,29 +11029,19 @@ func (ec *executionContext) _Mutation_updateDailyAttendance(ctx context.Context,
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*db.UserAttendance)
+	res := resTmp.(bool)
 	fc.Result = res
-	return ec.marshalNUserAttendance2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserAttendanceᚄ(ctx, field.Selections, res)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_updateDailyAttendance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_sendUserInvite(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_UserAttendance_id(ctx, field)
-			case "user":
-				return ec.fieldContext_UserAttendance_user(ctx, field)
-			case "state":
-				return ec.fieldContext_UserAttendance_state(ctx, field)
-			case "date":
-				return ec.fieldContext_UserAttendance_date(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type UserAttendance", field.Name)
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	defer func() {
@@ -14968,7 +11051,350 @@ func (ec *executionContext) fieldContext_Mutation_updateDailyAttendance(ctx cont
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_updateDailyAttendance_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_sendUserInvite_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_acceptInvite(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_acceptInvite(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AcceptInvite(rctx, fc.Args["token"].(string), fc.Args["input"].(model.SignUpInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.SignInPayload)
+	fc.Result = res
+	return ec.marshalNSignInPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐSignInPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_acceptInvite(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "user":
+				return ec.fieldContext_SignInPayload_user(ctx, field)
+			case "token":
+				return ec.fieldContext_SignInPayload_token(ctx, field)
+			case "organisation":
+				return ec.fieldContext_SignInPayload_organisation(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SignInPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_acceptInvite_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_signIn(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_signIn(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SignIn(rctx, fc.Args["input"].(model.SignInInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.SignInPayload)
+	fc.Result = res
+	return ec.marshalNSignInPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐSignInPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_signIn(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "user":
+				return ec.fieldContext_SignInPayload_user(ctx, field)
+			case "token":
+				return ec.fieldContext_SignInPayload_token(ctx, field)
+			case "organisation":
+				return ec.fieldContext_SignInPayload_organisation(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SignInPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_signIn_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_resetPassword(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_resetPassword(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ResetPassword(rctx, fc.Args["input"].(model.ResetPasswordInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ResetPasswordPayload)
+	fc.Result = res
+	return ec.marshalNResetPasswordPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐResetPasswordPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_resetPassword(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "user":
+				return ec.fieldContext_ResetPasswordPayload_user(ctx, field)
+			case "token":
+				return ec.fieldContext_ResetPasswordPayload_token(ctx, field)
+			case "organisation":
+				return ec.fieldContext_ResetPasswordPayload_organisation(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ResetPasswordPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_resetPassword_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_forgotPassword(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_forgotPassword(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ForgotPassword(rctx, fc.Args["input"].(model.ForgotPasswordInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_forgotPassword(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_forgotPassword_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_signOut(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_signOut(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SignOut(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_signOut(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updatePassword(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updatePassword(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdatePassword(rctx, fc.Args["oldPassword"].(string), fc.Args["newPassword"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updatePassword(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updatePassword_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -15018,10 +11444,14 @@ func (ec *executionContext) fieldContext_Mutation_createChat(ctx context.Context
 				return ec.fieldContext_Chat_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Chat_name(ctx, field)
-			case "users":
-				return ec.fieldContext_Chat_users(ctx, field)
 			case "type":
 				return ec.fieldContext_Chat_type(ctx, field)
+			case "users":
+				return ec.fieldContext_Chat_users(ctx, field)
+			case "userCount":
+				return ec.fieldContext_Chat_userCount(ctx, field)
+			case "unreadMessageCount":
+				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
 			case "messages":
 				return ec.fieldContext_Chat_messages(ctx, field)
 			case "lastMessage":
@@ -15030,10 +11460,8 @@ func (ec *executionContext) fieldContext_Mutation_createChat(ctx context.Context
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
-			case "unreadMessageCount":
-				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
-			case "userCount":
-				return ec.fieldContext_Chat_userCount(ctx, field)
+			case "deleted":
+				return ec.fieldContext_Chat_deleted(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -15095,10 +11523,14 @@ func (ec *executionContext) fieldContext_Mutation_deleteChat(ctx context.Context
 				return ec.fieldContext_Chat_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Chat_name(ctx, field)
-			case "users":
-				return ec.fieldContext_Chat_users(ctx, field)
 			case "type":
 				return ec.fieldContext_Chat_type(ctx, field)
+			case "users":
+				return ec.fieldContext_Chat_users(ctx, field)
+			case "userCount":
+				return ec.fieldContext_Chat_userCount(ctx, field)
+			case "unreadMessageCount":
+				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
 			case "messages":
 				return ec.fieldContext_Chat_messages(ctx, field)
 			case "lastMessage":
@@ -15107,10 +11539,8 @@ func (ec *executionContext) fieldContext_Mutation_deleteChat(ctx context.Context
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
-			case "unreadMessageCount":
-				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
-			case "userCount":
-				return ec.fieldContext_Chat_userCount(ctx, field)
+			case "deleted":
+				return ec.fieldContext_Chat_deleted(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -15172,10 +11602,14 @@ func (ec *executionContext) fieldContext_Mutation_createPrivatChat(ctx context.C
 				return ec.fieldContext_Chat_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Chat_name(ctx, field)
-			case "users":
-				return ec.fieldContext_Chat_users(ctx, field)
 			case "type":
 				return ec.fieldContext_Chat_type(ctx, field)
+			case "users":
+				return ec.fieldContext_Chat_users(ctx, field)
+			case "userCount":
+				return ec.fieldContext_Chat_userCount(ctx, field)
+			case "unreadMessageCount":
+				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
 			case "messages":
 				return ec.fieldContext_Chat_messages(ctx, field)
 			case "lastMessage":
@@ -15184,10 +11618,8 @@ func (ec *executionContext) fieldContext_Mutation_createPrivatChat(ctx context.C
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
-			case "unreadMessageCount":
-				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
-			case "userCount":
-				return ec.fieldContext_Chat_userCount(ctx, field)
+			case "deleted":
+				return ec.fieldContext_Chat_deleted(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -15379,12 +11811,12 @@ func (ec *executionContext) fieldContext_Mutation_sendMessage(ctx context.Contex
 				return ec.fieldContext_ChatMessage_user(ctx, field)
 			case "message":
 				return ec.fieldContext_ChatMessage_message(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_ChatMessage_createdAt(ctx, field)
 			case "isEdited":
 				return ec.fieldContext_ChatMessage_isEdited(ctx, field)
 			case "isSeen":
 				return ec.fieldContext_ChatMessage_isSeen(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_ChatMessage_createdAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ChatMessage", field.Name)
 		},
@@ -15450,12 +11882,12 @@ func (ec *executionContext) fieldContext_Mutation_editChatMessage(ctx context.Co
 				return ec.fieldContext_ChatMessage_user(ctx, field)
 			case "message":
 				return ec.fieldContext_ChatMessage_message(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_ChatMessage_createdAt(ctx, field)
 			case "isEdited":
 				return ec.fieldContext_ChatMessage_isEdited(ctx, field)
 			case "isSeen":
 				return ec.fieldContext_ChatMessage_isSeen(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_ChatMessage_createdAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ChatMessage", field.Name)
 		},
@@ -15517,10 +11949,14 @@ func (ec *executionContext) fieldContext_Mutation_updateChat(ctx context.Context
 				return ec.fieldContext_Chat_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Chat_name(ctx, field)
-			case "users":
-				return ec.fieldContext_Chat_users(ctx, field)
 			case "type":
 				return ec.fieldContext_Chat_type(ctx, field)
+			case "users":
+				return ec.fieldContext_Chat_users(ctx, field)
+			case "userCount":
+				return ec.fieldContext_Chat_userCount(ctx, field)
+			case "unreadMessageCount":
+				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
 			case "messages":
 				return ec.fieldContext_Chat_messages(ctx, field)
 			case "lastMessage":
@@ -15529,10 +11965,8 @@ func (ec *executionContext) fieldContext_Mutation_updateChat(ctx context.Context
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
-			case "unreadMessageCount":
-				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
-			case "userCount":
-				return ec.fieldContext_Chat_userCount(ctx, field)
+			case "deleted":
+				return ec.fieldContext_Chat_deleted(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -15598,12 +12032,12 @@ func (ec *executionContext) fieldContext_Mutation_markMessageAsRead(ctx context.
 				return ec.fieldContext_ChatMessage_user(ctx, field)
 			case "message":
 				return ec.fieldContext_ChatMessage_message(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_ChatMessage_createdAt(ctx, field)
 			case "isEdited":
 				return ec.fieldContext_ChatMessage_isEdited(ctx, field)
 			case "isSeen":
 				return ec.fieldContext_ChatMessage_isSeen(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_ChatMessage_createdAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ChatMessage", field.Name)
 		},
@@ -15622,8 +12056,8 @@ func (ec *executionContext) fieldContext_Mutation_markMessageAsRead(ctx context.
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_uploadFile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_uploadFile(ctx, field)
+func (ec *executionContext) _Mutation_createFile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createFile(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -15636,7 +12070,7 @@ func (ec *executionContext) _Mutation_uploadFile(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UploadFile(rctx, fc.Args["input"].(model.FileUploadInput))
+		return ec.resolvers.Mutation().CreateFile(rctx, fc.Args["input"].(model.CreateFileInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -15648,12 +12082,12 @@ func (ec *executionContext) _Mutation_uploadFile(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*db.File)
+	res := resTmp.(*model.CreateFilePayload)
 	fc.Result = res
-	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
+	return ec.marshalNCreateFilePayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateFilePayload(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_uploadFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_createFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -15661,30 +12095,69 @@ func (ec *executionContext) fieldContext_Mutation_uploadFile(ctx context.Context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_File_id(ctx, field)
+			case "file":
+				return ec.fieldContext_CreateFilePayload_file(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CreateFilePayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createFile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateFile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateFile(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateFile(rctx, fc.Args["input"].(model.UpdateFileInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.UpdateFilePayload)
+	fc.Result = res
+	return ec.marshalNUpdateFilePayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateFilePayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
 			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
-			case "size":
-				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_File_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
+				return ec.fieldContext_UpdateFilePayload_name(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type UpdateFilePayload", field.Name)
 		},
 	}
 	defer func() {
@@ -15694,500 +12167,7 @@ func (ec *executionContext) fieldContext_Mutation_uploadFile(ctx context.Context
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_uploadFile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_uploadFiles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_uploadFiles(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UploadFiles(rctx, fc.Args["input"].(model.FileUploadInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.UploadFilesPayload)
-	fc.Result = res
-	return ec.marshalNUploadFilesPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUploadFilesPayload(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_uploadFiles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "files":
-				return ec.fieldContext_UploadFilesPayload_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type UploadFilesPayload", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_uploadFiles_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_createFolder(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_createFolder(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateFolder(rctx, fc.Args["input"].(model.CreateFolderInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.File)
-	fc.Result = res
-	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_createFolder(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
-			case "size":
-				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_File_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_createFolder_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_renameFile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_renameFile(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().RenameFile(rctx, fc.Args["input"].(model.RenameFileInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.File)
-	fc.Result = res
-	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_renameFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
-			case "size":
-				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_File_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_renameFile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_moveFile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_moveFile(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().MoveFile(rctx, fc.Args["input"].(model.MoveFileInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.File)
-	fc.Result = res
-	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_moveFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
-			case "size":
-				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_File_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_moveFile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_moveFiles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_moveFiles(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().MoveFiles(rctx, fc.Args["input"].(model.MoveFilesInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.MoveFilesPayload)
-	fc.Result = res
-	return ec.marshalNMoveFilesPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐMoveFilesPayload(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_moveFiles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "files":
-				return ec.fieldContext_MoveFilesPayload_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type MoveFilesPayload", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_moveFiles_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_copyFile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_copyFile(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CopyFile(rctx, fc.Args["input"].(model.CopyFileInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.File)
-	fc.Result = res
-	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_copyFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
-			case "size":
-				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_File_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_copyFile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_copyFiles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_copyFiles(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CopyFiles(rctx, fc.Args["input"].(model.CopyFilesInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.CopyFilesPayload)
-	fc.Result = res
-	return ec.marshalNCopyFilesPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCopyFilesPayload(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_copyFiles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "files":
-				return ec.fieldContext_CopyFilesPayload_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CopyFilesPayload", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_copyFiles_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_updateFile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -16233,8 +12213,6 @@ func (ec *executionContext) fieldContext_Mutation_deleteFile(ctx context.Context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "success":
-				return ec.fieldContext_DeleteFilePayload_success(ctx, field)
 			case "file":
 				return ec.fieldContext_DeleteFilePayload_file(ctx, field)
 			}
@@ -16255,8 +12233,8 @@ func (ec *executionContext) fieldContext_Mutation_deleteFile(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_deleteFiles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_deleteFiles(ctx, field)
+func (ec *executionContext) _Mutation_createFilePermission(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createFilePermission(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -16269,7 +12247,7 @@ func (ec *executionContext) _Mutation_deleteFiles(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteFiles(rctx, fc.Args["input"].(model.DeleteFilesInput))
+		return ec.resolvers.Mutation().CreateFilePermission(rctx, fc.Args["input"].(model.CreateFilePermissionInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -16281,12 +12259,12 @@ func (ec *executionContext) _Mutation_deleteFiles(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.DeleteFilesPayload)
+	res := resTmp.(*model.CreateFilePermissionPayload)
 	fc.Result = res
-	return ec.marshalNDeleteFilesPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteFilesPayload(ctx, field.Selections, res)
+	return ec.marshalNCreateFilePermissionPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateFilePermissionPayload(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_deleteFiles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_createFilePermission(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -16294,12 +12272,10 @@ func (ec *executionContext) fieldContext_Mutation_deleteFiles(ctx context.Contex
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "success":
-				return ec.fieldContext_DeleteFilesPayload_success(ctx, field)
-			case "files":
-				return ec.fieldContext_DeleteFilesPayload_files(ctx, field)
+			case "filePermission":
+				return ec.fieldContext_CreateFilePermissionPayload_filePermission(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type DeleteFilesPayload", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type CreateFilePermissionPayload", field.Name)
 		},
 	}
 	defer func() {
@@ -16309,15 +12285,15 @@ func (ec *executionContext) fieldContext_Mutation_deleteFiles(ctx context.Contex
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_deleteFiles_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_createFilePermission_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_previewFile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_previewFile(ctx, field)
+func (ec *executionContext) _Mutation_updateFilePermission(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateFilePermission(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -16330,7 +12306,7 @@ func (ec *executionContext) _Mutation_previewFile(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().PreviewFile(rctx, fc.Args["input"].(model.PreviewFileInput))
+		return ec.resolvers.Mutation().UpdateFilePermission(rctx, fc.Args["input"].(model.UpdateFilePermissionInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -16342,12 +12318,12 @@ func (ec *executionContext) _Mutation_previewFile(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.PreviewFilePayload)
+	res := resTmp.(*model.UpdateFilePermissionPayload)
 	fc.Result = res
-	return ec.marshalNPreviewFilePayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐPreviewFilePayload(ctx, field.Selections, res)
+	return ec.marshalNUpdateFilePermissionPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateFilePermissionPayload(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_previewFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_updateFilePermission(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -16355,10 +12331,10 @@ func (ec *executionContext) fieldContext_Mutation_previewFile(ctx context.Contex
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "url":
-				return ec.fieldContext_PreviewFilePayload_url(ctx, field)
+			case "filePermission":
+				return ec.fieldContext_UpdateFilePermissionPayload_filePermission(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type PreviewFilePayload", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type UpdateFilePermissionPayload", field.Name)
 		},
 	}
 	defer func() {
@@ -16368,15 +12344,15 @@ func (ec *executionContext) fieldContext_Mutation_previewFile(ctx context.Contex
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_previewFile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_updateFilePermission_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_downloadFile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_downloadFile(ctx, field)
+func (ec *executionContext) _Mutation_deleteFilePermission(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deleteFilePermission(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -16389,7 +12365,7 @@ func (ec *executionContext) _Mutation_downloadFile(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DownloadFile(rctx, fc.Args["input"].(model.DownloadFileInput))
+		return ec.resolvers.Mutation().DeleteFilePermission(rctx, fc.Args["input"].(model.DeleteFilePermissionInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -16401,12 +12377,12 @@ func (ec *executionContext) _Mutation_downloadFile(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.DownloadFilePayload)
+	res := resTmp.(*model.DeleteFilePermissionPayload)
 	fc.Result = res
-	return ec.marshalNDownloadFilePayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDownloadFilePayload(ctx, field.Selections, res)
+	return ec.marshalNDeleteFilePermissionPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteFilePermissionPayload(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_downloadFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_deleteFilePermission(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -16414,10 +12390,10 @@ func (ec *executionContext) fieldContext_Mutation_downloadFile(ctx context.Conte
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "url":
-				return ec.fieldContext_DownloadFilePayload_url(ctx, field)
+			case "filePermission":
+				return ec.fieldContext_DeleteFilePermissionPayload_filePermission(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type DownloadFilePayload", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type DeleteFilePermissionPayload", field.Name)
 		},
 	}
 	defer func() {
@@ -16427,1554 +12403,7 @@ func (ec *executionContext) fieldContext_Mutation_downloadFile(ctx context.Conte
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_downloadFile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_downloadFiles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_downloadFiles(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DownloadFiles(rctx, fc.Args["input"].(model.DownloadFilesInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.DownloadFilesPayload)
-	fc.Result = res
-	return ec.marshalNDownloadFilesPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDownloadFilesPayload(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_downloadFiles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "url":
-				return ec.fieldContext_DownloadFilesPayload_url(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type DownloadFilesPayload", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_downloadFiles_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_addFileShare(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_addFileShare(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddFileShare(rctx, fc.Args["input"].(model.ShareFileInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.File)
-	fc.Result = res
-	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_addFileShare(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
-			case "size":
-				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_File_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_addFileShare_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_removeFileShare(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_removeFileShare(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().RemoveFileShare(rctx, fc.Args["input"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.File)
-	fc.Result = res
-	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_removeFileShare(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
-			case "size":
-				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_File_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_removeFileShare_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_createSharedDrive(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_createSharedDrive(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateSharedDrive(rctx, fc.Args["name"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.Bucket)
-	fc.Result = res
-	return ec.marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucket(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_createSharedDrive(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Bucket_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Bucket_name(ctx, field)
-			case "user":
-				return ec.fieldContext_Bucket_user(ctx, field)
-			case "shared":
-				return ec.fieldContext_Bucket_shared(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Bucket_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Bucket_deletedAt(ctx, field)
-			case "permission":
-				return ec.fieldContext_Bucket_permission(ctx, field)
-			case "files":
-				return ec.fieldContext_Bucket_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Bucket", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_createSharedDrive_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_renameSharedDrive(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_renameSharedDrive(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().RenameSharedDrive(rctx, fc.Args["input"].(model.RenameSharedDriveInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.Bucket)
-	fc.Result = res
-	return ec.marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucket(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_renameSharedDrive(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Bucket_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Bucket_name(ctx, field)
-			case "user":
-				return ec.fieldContext_Bucket_user(ctx, field)
-			case "shared":
-				return ec.fieldContext_Bucket_shared(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Bucket_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Bucket_deletedAt(ctx, field)
-			case "permission":
-				return ec.fieldContext_Bucket_permission(ctx, field)
-			case "files":
-				return ec.fieldContext_Bucket_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Bucket", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_renameSharedDrive_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_deleteSharedDrive(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_deleteSharedDrive(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteSharedDrive(rctx, fc.Args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.Bucket)
-	fc.Result = res
-	return ec.marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucket(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_deleteSharedDrive(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Bucket_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Bucket_name(ctx, field)
-			case "user":
-				return ec.fieldContext_Bucket_user(ctx, field)
-			case "shared":
-				return ec.fieldContext_Bucket_shared(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Bucket_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Bucket_deletedAt(ctx, field)
-			case "permission":
-				return ec.fieldContext_Bucket_permission(ctx, field)
-			case "files":
-				return ec.fieldContext_Bucket_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Bucket", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_deleteSharedDrive_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_createShare(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_createShare(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateShare(rctx, fc.Args["input"].(model.CreateShareInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.ShareUser)
-	fc.Result = res
-	return ec.marshalNShareUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐShareUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_createShare(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "user":
-				return ec.fieldContext_ShareUser_user(ctx, field)
-			case "permission":
-				return ec.fieldContext_ShareUser_permission(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ShareUser", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_createShare_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_editShare(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_editShare(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().EditShare(rctx, fc.Args["input"].(model.CreateShareInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.ShareUser)
-	fc.Result = res
-	return ec.marshalNShareUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐShareUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_editShare(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "user":
-				return ec.fieldContext_ShareUser_user(ctx, field)
-			case "permission":
-				return ec.fieldContext_ShareUser_permission(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ShareUser", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_editShare_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_deleteShare(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_deleteShare(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteShare(rctx, fc.Args["input"].(model.DeleteShareInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.ShareUser)
-	fc.Result = res
-	return ec.marshalNShareUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐShareUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_deleteShare(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "user":
-				return ec.fieldContext_ShareUser_user(ctx, field)
-			case "permission":
-				return ec.fieldContext_ShareUser_permission(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ShareUser", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_deleteShare_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_createEmailAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_createEmailAccount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateEmailAccount(rctx, fc.Args["input"].(model.CreateEmailAccountInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.EmailAccount)
-	fc.Result = res
-	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_createEmailAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EmailAccount_id(ctx, field)
-			case "name":
-				return ec.fieldContext_EmailAccount_name(ctx, field)
-			case "description":
-				return ec.fieldContext_EmailAccount_description(ctx, field)
-			case "type":
-				return ec.fieldContext_EmailAccount_type(ctx, field)
-			case "quota":
-				return ec.fieldContext_EmailAccount_quota(ctx, field)
-			case "active":
-				return ec.fieldContext_EmailAccount_active(ctx, field)
-			case "user":
-				return ec.fieldContext_EmailAccount_user(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_EmailAccount_createdAt(ctx, field)
-			case "members":
-				return ec.fieldContext_EmailAccount_members(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailAccount", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_createEmailAccount_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_updateEmailAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_updateEmailAccount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateEmailAccount(rctx, fc.Args["input"].(model.UpdateEmailAccountInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.EmailAccount)
-	fc.Result = res
-	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_updateEmailAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EmailAccount_id(ctx, field)
-			case "name":
-				return ec.fieldContext_EmailAccount_name(ctx, field)
-			case "description":
-				return ec.fieldContext_EmailAccount_description(ctx, field)
-			case "type":
-				return ec.fieldContext_EmailAccount_type(ctx, field)
-			case "quota":
-				return ec.fieldContext_EmailAccount_quota(ctx, field)
-			case "active":
-				return ec.fieldContext_EmailAccount_active(ctx, field)
-			case "user":
-				return ec.fieldContext_EmailAccount_user(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_EmailAccount_createdAt(ctx, field)
-			case "members":
-				return ec.fieldContext_EmailAccount_members(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailAccount", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_updateEmailAccount_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_deleteEmailAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_deleteEmailAccount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteEmailAccount(rctx, fc.Args["input"].(model.DeleteEmailAccountInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.EmailAccount)
-	fc.Result = res
-	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_deleteEmailAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EmailAccount_id(ctx, field)
-			case "name":
-				return ec.fieldContext_EmailAccount_name(ctx, field)
-			case "description":
-				return ec.fieldContext_EmailAccount_description(ctx, field)
-			case "type":
-				return ec.fieldContext_EmailAccount_type(ctx, field)
-			case "quota":
-				return ec.fieldContext_EmailAccount_quota(ctx, field)
-			case "active":
-				return ec.fieldContext_EmailAccount_active(ctx, field)
-			case "user":
-				return ec.fieldContext_EmailAccount_user(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_EmailAccount_createdAt(ctx, field)
-			case "members":
-				return ec.fieldContext_EmailAccount_members(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailAccount", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_deleteEmailAccount_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_createEmailGroupMember(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_createEmailGroupMember(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateEmailGroupMember(rctx, fc.Args["input"].(model.CreateEmailGroupMemberInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.EmailGroupMember)
-	fc.Result = res
-	return ec.marshalOEmailGroupMember2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailGroupMember(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_createEmailGroupMember(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EmailGroupMember_id(ctx, field)
-			case "name":
-				return ec.fieldContext_EmailGroupMember_name(ctx, field)
-			case "memberOf":
-				return ec.fieldContext_EmailGroupMember_memberOf(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_EmailGroupMember_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailGroupMember", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_createEmailGroupMember_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_deleteEmailGroupMember(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_deleteEmailGroupMember(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteEmailGroupMember(rctx, fc.Args["input"].(model.DeleteEmailGroupMemberInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.EmailGroupMember)
-	fc.Result = res
-	return ec.marshalOEmailGroupMember2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailGroupMember(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_deleteEmailGroupMember(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EmailGroupMember_id(ctx, field)
-			case "name":
-				return ec.fieldContext_EmailGroupMember_name(ctx, field)
-			case "memberOf":
-				return ec.fieldContext_EmailGroupMember_memberOf(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_EmailGroupMember_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailGroupMember", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_deleteEmailGroupMember_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_createEmail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_createEmail(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateEmail(rctx, fc.Args["input"].(model.CreateEmailInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.Email)
-	fc.Result = res
-	return ec.marshalOEmail2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmail(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_createEmail(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Email_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Email_name(ctx, field)
-			case "address":
-				return ec.fieldContext_Email_address(ctx, field)
-			case "type":
-				return ec.fieldContext_Email_type(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Email_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Email", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_createEmail_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_deleteEmail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_deleteEmail(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteEmail(rctx, fc.Args["input"].(model.DeleteEmailInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.Email)
-	fc.Result = res
-	return ec.marshalOEmail2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmail(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_deleteEmail(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Email_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Email_name(ctx, field)
-			case "address":
-				return ec.fieldContext_Email_address(ctx, field)
-			case "type":
-				return ec.fieldContext_Email_type(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Email_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Email", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_deleteEmail_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_createEmailForwarding(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_createEmailForwarding(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateEmailForwarding(rctx, fc.Args["input"].(model.CreateEmailForwardingInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.EmailForwarding)
-	fc.Result = res
-	return ec.marshalOEmailForwarding2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailForwarding(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_createEmailForwarding(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EmailForwarding_id(ctx, field)
-			case "origin":
-				return ec.fieldContext_EmailForwarding_origin(ctx, field)
-			case "target":
-				return ec.fieldContext_EmailForwarding_target(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_EmailForwarding_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailForwarding", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_createEmailForwarding_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_deleteEmailForwarding(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_deleteEmailForwarding(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteEmailForwarding(rctx, fc.Args["input"].(model.DeleteEmailForwardingInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.EmailForwarding)
-	fc.Result = res
-	return ec.marshalOEmailForwarding2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailForwarding(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_deleteEmailForwarding(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EmailForwarding_id(ctx, field)
-			case "origin":
-				return ec.fieldContext_EmailForwarding_origin(ctx, field)
-			case "target":
-				return ec.fieldContext_EmailForwarding_target(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_EmailForwarding_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailForwarding", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_deleteEmailForwarding_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_createDomain(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_createDomain(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateDomain(rctx, fc.Args["input"].(model.CreateDomainInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.Domain)
-	fc.Result = res
-	return ec.marshalODomain2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐDomain(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_createDomain(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Domain_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Domain_name(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Domain_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Domain", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_createDomain_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_deleteDomain(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_deleteDomain(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteDomain(rctx, fc.Args["input"].(model.DeleteDomainInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.Domain)
-	fc.Result = res
-	return ec.marshalODomain2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐDomain(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_deleteDomain(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Domain_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Domain_name(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Domain_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Domain", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_deleteDomain_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_createEmailGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_createEmailGroup(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateEmailGroup(rctx, fc.Args["input"].(model.CreateEmailGroupInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.EmailAccount)
-	fc.Result = res
-	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_createEmailGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EmailAccount_id(ctx, field)
-			case "name":
-				return ec.fieldContext_EmailAccount_name(ctx, field)
-			case "description":
-				return ec.fieldContext_EmailAccount_description(ctx, field)
-			case "type":
-				return ec.fieldContext_EmailAccount_type(ctx, field)
-			case "quota":
-				return ec.fieldContext_EmailAccount_quota(ctx, field)
-			case "active":
-				return ec.fieldContext_EmailAccount_active(ctx, field)
-			case "user":
-				return ec.fieldContext_EmailAccount_user(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_EmailAccount_createdAt(ctx, field)
-			case "members":
-				return ec.fieldContext_EmailAccount_members(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailAccount", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_createEmailGroup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_updateEmailGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_updateEmailGroup(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateEmailGroup(rctx, fc.Args["input"].(model.UpdateEmailGroupInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.EmailAccount)
-	fc.Result = res
-	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_updateEmailGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EmailAccount_id(ctx, field)
-			case "name":
-				return ec.fieldContext_EmailAccount_name(ctx, field)
-			case "description":
-				return ec.fieldContext_EmailAccount_description(ctx, field)
-			case "type":
-				return ec.fieldContext_EmailAccount_type(ctx, field)
-			case "quota":
-				return ec.fieldContext_EmailAccount_quota(ctx, field)
-			case "active":
-				return ec.fieldContext_EmailAccount_active(ctx, field)
-			case "user":
-				return ec.fieldContext_EmailAccount_user(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_EmailAccount_createdAt(ctx, field)
-			case "members":
-				return ec.fieldContext_EmailAccount_members(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailAccount", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_updateEmailGroup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_deleteEmailGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_deleteEmailGroup(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteEmailGroup(rctx, fc.Args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.EmailAccount)
-	fc.Result = res
-	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_deleteEmailGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EmailAccount_id(ctx, field)
-			case "name":
-				return ec.fieldContext_EmailAccount_name(ctx, field)
-			case "description":
-				return ec.fieldContext_EmailAccount_description(ctx, field)
-			case "type":
-				return ec.fieldContext_EmailAccount_type(ctx, field)
-			case "quota":
-				return ec.fieldContext_EmailAccount_quota(ctx, field)
-			case "active":
-				return ec.fieldContext_EmailAccount_active(ctx, field)
-			case "user":
-				return ec.fieldContext_EmailAccount_user(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_EmailAccount_createdAt(ctx, field)
-			case "members":
-				return ec.fieldContext_EmailAccount_members(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailAccount", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_deleteEmailGroup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_deleteFilePermission_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -18026,10 +12455,6 @@ func (ec *executionContext) fieldContext_Mutation_createEntry(ctx context.Contex
 				return ec.fieldContext_Entry_date(ctx, field)
 			case "body":
 				return ec.fieldContext_Entry_body(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Entry_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "users":
@@ -18044,6 +12469,10 @@ func (ec *executionContext) fieldContext_Mutation_createEntry(ctx context.Contex
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Entry_subjects(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -18096,10 +12525,6 @@ func (ec *executionContext) fieldContext_Mutation_updateEntry(ctx context.Contex
 				return ec.fieldContext_Entry_date(ctx, field)
 			case "body":
 				return ec.fieldContext_Entry_body(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Entry_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "users":
@@ -18114,6 +12539,10 @@ func (ec *executionContext) fieldContext_Mutation_updateEntry(ctx context.Contex
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Entry_subjects(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -18177,10 +12606,6 @@ func (ec *executionContext) fieldContext_Mutation_archiveEntry(ctx context.Conte
 				return ec.fieldContext_Entry_date(ctx, field)
 			case "body":
 				return ec.fieldContext_Entry_body(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Entry_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "users":
@@ -18195,6 +12620,10 @@ func (ec *executionContext) fieldContext_Mutation_archiveEntry(ctx context.Conte
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Entry_subjects(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -18258,10 +12687,6 @@ func (ec *executionContext) fieldContext_Mutation_createEntryTag(ctx context.Con
 				return ec.fieldContext_Entry_date(ctx, field)
 			case "body":
 				return ec.fieldContext_Entry_body(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Entry_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "users":
@@ -18276,6 +12701,10 @@ func (ec *executionContext) fieldContext_Mutation_createEntryTag(ctx context.Con
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Entry_subjects(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -18339,10 +12768,6 @@ func (ec *executionContext) fieldContext_Mutation_createEntryFile(ctx context.Co
 				return ec.fieldContext_Entry_date(ctx, field)
 			case "body":
 				return ec.fieldContext_Entry_body(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Entry_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "users":
@@ -18357,6 +12782,10 @@ func (ec *executionContext) fieldContext_Mutation_createEntryFile(ctx context.Co
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Entry_subjects(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -18420,10 +12849,6 @@ func (ec *executionContext) fieldContext_Mutation_createEntryUser(ctx context.Co
 				return ec.fieldContext_Entry_date(ctx, field)
 			case "body":
 				return ec.fieldContext_Entry_body(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Entry_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "users":
@@ -18438,6 +12863,10 @@ func (ec *executionContext) fieldContext_Mutation_createEntryUser(ctx context.Co
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Entry_subjects(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -18501,10 +12930,6 @@ func (ec *executionContext) fieldContext_Mutation_createEntryEvent(ctx context.C
 				return ec.fieldContext_Entry_date(ctx, field)
 			case "body":
 				return ec.fieldContext_Entry_body(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Entry_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "users":
@@ -18519,6 +12944,10 @@ func (ec *executionContext) fieldContext_Mutation_createEntryEvent(ctx context.C
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Entry_subjects(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -18582,10 +13011,6 @@ func (ec *executionContext) fieldContext_Mutation_createEntryCompetence(ctx cont
 				return ec.fieldContext_Entry_date(ctx, field)
 			case "body":
 				return ec.fieldContext_Entry_body(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Entry_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "users":
@@ -18600,6 +13025,10 @@ func (ec *executionContext) fieldContext_Mutation_createEntryCompetence(ctx cont
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Entry_subjects(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -18663,10 +13092,6 @@ func (ec *executionContext) fieldContext_Mutation_deleteEntryTag(ctx context.Con
 				return ec.fieldContext_Entry_date(ctx, field)
 			case "body":
 				return ec.fieldContext_Entry_body(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Entry_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "users":
@@ -18681,6 +13106,10 @@ func (ec *executionContext) fieldContext_Mutation_deleteEntryTag(ctx context.Con
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Entry_subjects(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -18744,10 +13173,6 @@ func (ec *executionContext) fieldContext_Mutation_deleteEntryFile(ctx context.Co
 				return ec.fieldContext_Entry_date(ctx, field)
 			case "body":
 				return ec.fieldContext_Entry_body(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Entry_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "users":
@@ -18762,6 +13187,10 @@ func (ec *executionContext) fieldContext_Mutation_deleteEntryFile(ctx context.Co
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Entry_subjects(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -18825,10 +13254,6 @@ func (ec *executionContext) fieldContext_Mutation_deleteEntryUser(ctx context.Co
 				return ec.fieldContext_Entry_date(ctx, field)
 			case "body":
 				return ec.fieldContext_Entry_body(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Entry_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "users":
@@ -18843,6 +13268,10 @@ func (ec *executionContext) fieldContext_Mutation_deleteEntryUser(ctx context.Co
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Entry_subjects(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -18906,10 +13335,6 @@ func (ec *executionContext) fieldContext_Mutation_deleteEntryEvent(ctx context.C
 				return ec.fieldContext_Entry_date(ctx, field)
 			case "body":
 				return ec.fieldContext_Entry_body(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Entry_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "users":
@@ -18924,6 +13349,10 @@ func (ec *executionContext) fieldContext_Mutation_deleteEntryEvent(ctx context.C
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Entry_subjects(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -18987,10 +13416,6 @@ func (ec *executionContext) fieldContext_Mutation_deleteEntryCompetence(ctx cont
 				return ec.fieldContext_Entry_date(ctx, field)
 			case "body":
 				return ec.fieldContext_Entry_body(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Entry_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "users":
@@ -19005,6 +13430,10 @@ func (ec *executionContext) fieldContext_Mutation_deleteEntryCompetence(ctx cont
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Entry_subjects(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -19068,10 +13497,6 @@ func (ec *executionContext) fieldContext_Mutation_updateEntryUserCompetenceLevel
 				return ec.fieldContext_Entry_date(ctx, field)
 			case "body":
 				return ec.fieldContext_Entry_body(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Entry_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "users":
@@ -19086,6 +13511,10 @@ func (ec *executionContext) fieldContext_Mutation_updateEntryUserCompetenceLevel
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Entry_subjects(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -19149,10 +13578,6 @@ func (ec *executionContext) fieldContext_Mutation_uploadFileToEntry(ctx context.
 				return ec.fieldContext_Entry_date(ctx, field)
 			case "body":
 				return ec.fieldContext_Entry_body(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Entry_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "users":
@@ -19167,6 +13592,10 @@ func (ec *executionContext) fieldContext_Mutation_uploadFileToEntry(ctx context.
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Entry_subjects(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -19226,26 +13655,26 @@ func (ec *executionContext) fieldContext_Mutation_removeFileFromEntry(ctx contex
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
 			case "size":
 				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "type":
+				return ec.fieldContext_File_type(ctx, field)
+			case "mime":
+				return ec.fieldContext_File_mime(ctx, field)
+			case "folder":
+				return ec.fieldContext_File_folder(ctx, field)
+			case "folders":
+				return ec.fieldContext_File_folders(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_File_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
+			case "permissions":
+				return ec.fieldContext_File_permissions(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
 		},
@@ -19317,12 +13746,12 @@ func (ec *executionContext) fieldContext_Mutation_createEvent(ctx context.Contex
 				return ec.fieldContext_Event_endsAt(ctx, field)
 			case "recurrence":
 				return ec.fieldContext_Event_recurrence(ctx, field)
+			case "competences":
+				return ec.fieldContext_Event_competences(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Event_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Event_deletedAt(ctx, field)
-			case "competences":
-				return ec.fieldContext_Event_competences(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
@@ -19394,12 +13823,12 @@ func (ec *executionContext) fieldContext_Mutation_updateEvent(ctx context.Contex
 				return ec.fieldContext_Event_endsAt(ctx, field)
 			case "recurrence":
 				return ec.fieldContext_Event_recurrence(ctx, field)
+			case "competences":
+				return ec.fieldContext_Event_competences(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Event_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Event_deletedAt(ctx, field)
-			case "competences":
-				return ec.fieldContext_Event_competences(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
@@ -19471,12 +13900,12 @@ func (ec *executionContext) fieldContext_Mutation_toggleEventCompetence(ctx cont
 				return ec.fieldContext_Event_endsAt(ctx, field)
 			case "recurrence":
 				return ec.fieldContext_Event_recurrence(ctx, field)
+			case "competences":
+				return ec.fieldContext_Event_competences(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Event_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Event_deletedAt(ctx, field)
-			case "competences":
-				return ec.fieldContext_Event_competences(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
@@ -19548,12 +13977,12 @@ func (ec *executionContext) fieldContext_Mutation_archiveEvent(ctx context.Conte
 				return ec.fieldContext_Event_endsAt(ctx, field)
 			case "recurrence":
 				return ec.fieldContext_Event_recurrence(ctx, field)
+			case "competences":
+				return ec.fieldContext_Event_competences(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Event_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Event_deletedAt(ctx, field)
-			case "competences":
-				return ec.fieldContext_Event_competences(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
@@ -19623,6 +14052,8 @@ func (ec *executionContext) fieldContext_Mutation_updateOrganisation(ctx context
 				return ec.fieldContext_Organisation_phone(ctx, field)
 			case "owner":
 				return ec.fieldContext_Organisation_owner(ctx, field)
+			case "applications":
+				return ec.fieldContext_Organisation_applications(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Organisation", field.Name)
 		},
@@ -19724,697 +14155,6 @@ func (ec *executionContext) fieldContext_Mutation_createReport(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_signIn(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_signIn(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().SignIn(rctx, fc.Args["input"].(model.SignInInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.SignInPayload)
-	fc.Result = res
-	return ec.marshalNSignInPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐSignInPayload(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_signIn(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "token":
-				return ec.fieldContext_SignInPayload_token(ctx, field)
-			case "enabled_apps":
-				return ec.fieldContext_SignInPayload_enabled_apps(ctx, field)
-			case "language":
-				return ec.fieldContext_SignInPayload_language(ctx, field)
-			case "setupComplete":
-				return ec.fieldContext_SignInPayload_setupComplete(ctx, field)
-			case "user":
-				return ec.fieldContext_SignInPayload_user(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type SignInPayload", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_signIn_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_resetPassword(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_resetPassword(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ResetPassword(rctx, fc.Args["input"].(model.ResetPasswordInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.ResetPasswordPayload)
-	fc.Result = res
-	return ec.marshalNResetPasswordPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐResetPasswordPayload(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_resetPassword(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "success":
-				return ec.fieldContext_ResetPasswordPayload_success(ctx, field)
-			case "unauthorized":
-				return ec.fieldContext_ResetPasswordPayload_unauthorized(ctx, field)
-			case "invalidToken":
-				return ec.fieldContext_ResetPasswordPayload_invalidToken(ctx, field)
-			case "tokenExpired":
-				return ec.fieldContext_ResetPasswordPayload_tokenExpired(ctx, field)
-			case "unableToReset":
-				return ec.fieldContext_ResetPasswordPayload_unableToReset(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ResetPasswordPayload", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_resetPassword_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_forgotPassword(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_forgotPassword(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ForgotPassword(rctx, fc.Args["input"].(model.ForgotPasswordInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.ForgotPasswordPayload)
-	fc.Result = res
-	return ec.marshalNForgotPasswordPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐForgotPasswordPayload(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_forgotPassword(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "success":
-				return ec.fieldContext_ForgotPasswordPayload_success(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ForgotPasswordPayload", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_forgotPassword_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_signOut(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_signOut(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().SignOut(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_signOut(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_acceptInvite(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_acceptInvite(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AcceptInvite(rctx, fc.Args["token"].(string), fc.Args["input"].(model.SignUpInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.SignInPayload)
-	fc.Result = res
-	return ec.marshalNSignInPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐSignInPayload(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_acceptInvite(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "token":
-				return ec.fieldContext_SignInPayload_token(ctx, field)
-			case "enabled_apps":
-				return ec.fieldContext_SignInPayload_enabled_apps(ctx, field)
-			case "language":
-				return ec.fieldContext_SignInPayload_language(ctx, field)
-			case "setupComplete":
-				return ec.fieldContext_SignInPayload_setupComplete(ctx, field)
-			case "user":
-				return ec.fieldContext_SignInPayload_user(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type SignInPayload", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_acceptInvite_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_createUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_createUser(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateUser(rctx, fc.Args["input"].(model.CreateUserInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "role":
-				return ec.fieldContext_User_role(ctx, field)
-			case "firstName":
-				return ec.fieldContext_User_firstName(ctx, field)
-			case "lastName":
-				return ec.fieldContext_User_lastName(ctx, field)
-			case "student":
-				return ec.fieldContext_User_student(ctx, field)
-			case "language":
-				return ec.fieldContext_User_language(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_User_deletedAt(ctx, field)
-			case "organisationId":
-				return ec.fieldContext_User_organisationId(ctx, field)
-			case "inviteAccepted":
-				return ec.fieldContext_User_inviteAccepted(ctx, field)
-			case "lastSeenAt":
-				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_createUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_updateUser(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateUser(rctx, fc.Args["input"].(model.UpdateUserInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "role":
-				return ec.fieldContext_User_role(ctx, field)
-			case "firstName":
-				return ec.fieldContext_User_firstName(ctx, field)
-			case "lastName":
-				return ec.fieldContext_User_lastName(ctx, field)
-			case "student":
-				return ec.fieldContext_User_student(ctx, field)
-			case "language":
-				return ec.fieldContext_User_language(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_User_deletedAt(ctx, field)
-			case "organisationId":
-				return ec.fieldContext_User_organisationId(ctx, field)
-			case "inviteAccepted":
-				return ec.fieldContext_User_inviteAccepted(ctx, field)
-			case "lastSeenAt":
-				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_updateUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_archiveUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_archiveUser(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ArchiveUser(rctx, fc.Args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_archiveUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "role":
-				return ec.fieldContext_User_role(ctx, field)
-			case "firstName":
-				return ec.fieldContext_User_firstName(ctx, field)
-			case "lastName":
-				return ec.fieldContext_User_lastName(ctx, field)
-			case "student":
-				return ec.fieldContext_User_student(ctx, field)
-			case "language":
-				return ec.fieldContext_User_language(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_User_deletedAt(ctx, field)
-			case "organisationId":
-				return ec.fieldContext_User_organisationId(ctx, field)
-			case "inviteAccepted":
-				return ec.fieldContext_User_inviteAccepted(ctx, field)
-			case "lastSeenAt":
-				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_archiveUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_updateUserLanguage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_updateUserLanguage(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateUserLanguage(rctx, fc.Args["language"].(model.UserLanguage))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_updateUserLanguage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "role":
-				return ec.fieldContext_User_role(ctx, field)
-			case "firstName":
-				return ec.fieldContext_User_firstName(ctx, field)
-			case "lastName":
-				return ec.fieldContext_User_lastName(ctx, field)
-			case "student":
-				return ec.fieldContext_User_student(ctx, field)
-			case "language":
-				return ec.fieldContext_User_language(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_User_deletedAt(ctx, field)
-			case "organisationId":
-				return ec.fieldContext_User_organisationId(ctx, field)
-			case "inviteAccepted":
-				return ec.fieldContext_User_inviteAccepted(ctx, field)
-			case "lastSeenAt":
-				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_updateUserLanguage_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_sendUserInvite(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_sendUserInvite(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().SendUserInvite(rctx, fc.Args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_sendUserInvite(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_sendUserInvite_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Mutation_createStudent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_createStudent(ctx, field)
 	if err != nil {
@@ -20478,8 +14218,6 @@ func (ec *executionContext) fieldContext_Mutation_createStudent(ctx context.Cont
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "lastSeenAt":
 				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -20835,61 +14573,6 @@ func (ec *executionContext) fieldContext_Mutation_updateTag(ctx context.Context,
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updateTag_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_updatePassword(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_updatePassword(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdatePassword(rctx, fc.Args["oldPassword"].(string), fc.Args["newPassword"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_updatePassword(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_updatePassword_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -21635,6 +15318,330 @@ func (ec *executionContext) fieldContext_Mutation_importStudents(ctx context.Con
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_createUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createUser(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateUser(rctx, fc.Args["input"].(model.CreateUserInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "student":
+				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateUser(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateUser(rctx, fc.Args["input"].(model.UpdateUserInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "student":
+				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_archiveUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_archiveUser(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ArchiveUser(rctx, fc.Args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_archiveUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "student":
+				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_archiveUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateUserLanguage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateUserLanguage(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateUserLanguage(rctx, fc.Args["language"].(model.UserLanguage))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateUserLanguage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "student":
+				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateUserLanguage_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Organisation_id(ctx context.Context, field graphql.CollectedField, obj *db.Organisation) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Organisation_id(ctx, field)
 	if err != nil {
@@ -21912,10 +15919,52 @@ func (ec *executionContext) fieldContext_Organisation_owner(ctx context.Context,
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "lastSeenAt":
 				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Organisation_applications(ctx context.Context, field graphql.CollectedField, obj *db.Organisation) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Organisation_applications(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Organisation().Applications(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]model.OrganisationApplication)
+	fc.Result = res
+	return ec.marshalNOrganisationApplication2ᚕgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐOrganisationApplicationᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Organisation_applications(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Organisation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type OrganisationApplication does not have child fields")
 		},
 	}
 	return fc, nil
@@ -22053,8 +16102,8 @@ func (ec *executionContext) fieldContext_PageInfo_currentPage(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _PreviewFilePayload_url(ctx context.Context, field graphql.CollectedField, obj *model.PreviewFilePayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PreviewFilePayload_url(ctx, field)
+func (ec *executionContext) _Query_userAttendances(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_userAttendances(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -22067,51 +16116,7 @@ func (ec *executionContext) _PreviewFilePayload_url(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.URL, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_PreviewFilePayload_url(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PreviewFilePayload",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_userAttendanceOverview(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_userAttendanceOverview(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().UserAttendanceOverview(rctx, fc.Args["date"].(time.Time))
+		return ec.resolvers.Query().UserAttendances(rctx, fc.Args["date"].(time.Time))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -22128,7 +16133,7 @@ func (ec *executionContext) _Query_userAttendanceOverview(ctx context.Context, f
 	return ec.marshalNUserAttendance2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserAttendanceᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_userAttendanceOverview(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_userAttendances(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -22138,12 +16143,12 @@ func (ec *executionContext) fieldContext_Query_userAttendanceOverview(ctx contex
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_UserAttendance_id(ctx, field)
+			case "date":
+				return ec.fieldContext_UserAttendance_date(ctx, field)
 			case "user":
 				return ec.fieldContext_UserAttendance_user(ctx, field)
 			case "state":
 				return ec.fieldContext_UserAttendance_state(ctx, field)
-			case "date":
-				return ec.fieldContext_UserAttendance_date(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserAttendance", field.Name)
 		},
@@ -22155,7 +16160,70 @@ func (ec *executionContext) fieldContext_Query_userAttendanceOverview(ctx contex
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_userAttendanceOverview_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_userAttendances_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_inviteDetails(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_inviteDetails(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().InviteDetails(rctx, fc.Args["token"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.InviteDetailsPayload)
+	fc.Result = res
+	return ec.marshalNInviteDetailsPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐInviteDetailsPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_inviteDetails(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "email":
+				return ec.fieldContext_InviteDetailsPayload_email(ctx, field)
+			case "firstName":
+				return ec.fieldContext_InviteDetailsPayload_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_InviteDetailsPayload_lastName(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type InviteDetailsPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_inviteDetails_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -22205,10 +16273,14 @@ func (ec *executionContext) fieldContext_Query_chat(ctx context.Context, field g
 				return ec.fieldContext_Chat_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Chat_name(ctx, field)
-			case "users":
-				return ec.fieldContext_Chat_users(ctx, field)
 			case "type":
 				return ec.fieldContext_Chat_type(ctx, field)
+			case "users":
+				return ec.fieldContext_Chat_users(ctx, field)
+			case "userCount":
+				return ec.fieldContext_Chat_userCount(ctx, field)
+			case "unreadMessageCount":
+				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
 			case "messages":
 				return ec.fieldContext_Chat_messages(ctx, field)
 			case "lastMessage":
@@ -22217,10 +16289,8 @@ func (ec *executionContext) fieldContext_Query_chat(ctx context.Context, field g
 				return ec.fieldContext_Chat_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Chat_deletedAt(ctx, field)
-			case "unreadMessageCount":
-				return ec.fieldContext_Chat_unreadMessageCount(ctx, field)
-			case "userCount":
-				return ec.fieldContext_Chat_userCount(ctx, field)
+			case "deleted":
+				return ec.fieldContext_Chat_deleted(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chat", field.Name)
 		},
@@ -22302,8 +16372,8 @@ func (ec *executionContext) fieldContext_Query_chats(ctx context.Context, field 
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_buckets(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_buckets(ctx, field)
+func (ec *executionContext) _Query_myDrive(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_myDrive(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -22316,7 +16386,7 @@ func (ec *executionContext) _Query_buckets(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Buckets(rctx, fc.Args["input"].(*model.BucketFilterInput), fc.Args["limit"].(*int), fc.Args["offset"].(*int))
+		return ec.resolvers.Query().MyDrive(rctx, fc.Args["input"].(*model.FileFilterInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -22328,12 +16398,12 @@ func (ec *executionContext) _Query_buckets(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.BucketConnection)
+	res := resTmp.(*model.FileConnection)
 	fc.Result = res
-	return ec.marshalNBucketConnection2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐBucketConnection(ctx, field.Selections, res)
+	return ec.marshalNFileConnection2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFileConnection(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_buckets(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_myDrive(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -22342,13 +16412,13 @@ func (ec *executionContext) fieldContext_Query_buckets(ctx context.Context, fiel
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "edges":
-				return ec.fieldContext_BucketConnection_edges(ctx, field)
+				return ec.fieldContext_FileConnection_edges(ctx, field)
 			case "totalCount":
-				return ec.fieldContext_BucketConnection_totalCount(ctx, field)
+				return ec.fieldContext_FileConnection_totalCount(ctx, field)
 			case "pageInfo":
-				return ec.fieldContext_BucketConnection_pageInfo(ctx, field)
+				return ec.fieldContext_FileConnection_pageInfo(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type BucketConnection", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type FileConnection", field.Name)
 		},
 	}
 	defer func() {
@@ -22358,15 +16428,15 @@ func (ec *executionContext) fieldContext_Query_buckets(ctx context.Context, fiel
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_buckets_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_myDrive_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_bucket(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_bucket(ctx, field)
+func (ec *executionContext) _Query_sharedDrives(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_sharedDrives(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -22379,7 +16449,7 @@ func (ec *executionContext) _Query_bucket(ctx context.Context, field graphql.Col
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Bucket(rctx, fc.Args["id"].(string))
+		return ec.resolvers.Query().SharedDrives(rctx, fc.Args["input"].(*model.FileFilterInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -22391,12 +16461,12 @@ func (ec *executionContext) _Query_bucket(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*db.Bucket)
+	res := resTmp.(*model.FileConnection)
 	fc.Result = res
-	return ec.marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucket(ctx, field.Selections, res)
+	return ec.marshalNFileConnection2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFileConnection(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_bucket(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_sharedDrives(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -22404,24 +16474,14 @@ func (ec *executionContext) fieldContext_Query_bucket(ctx context.Context, field
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_Bucket_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Bucket_name(ctx, field)
-			case "user":
-				return ec.fieldContext_Bucket_user(ctx, field)
-			case "shared":
-				return ec.fieldContext_Bucket_shared(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Bucket_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Bucket_deletedAt(ctx, field)
-			case "permission":
-				return ec.fieldContext_Bucket_permission(ctx, field)
-			case "files":
-				return ec.fieldContext_Bucket_files(ctx, field)
+			case "edges":
+				return ec.fieldContext_FileConnection_edges(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_FileConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_FileConnection_pageInfo(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Bucket", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type FileConnection", field.Name)
 		},
 	}
 	defer func() {
@@ -22431,7 +16491,70 @@ func (ec *executionContext) fieldContext_Query_bucket(ctx context.Context, field
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_bucket_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_sharedDrives_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_trash(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_trash(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Trash(rctx, fc.Args["input"].(*model.FileFilterInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.FileConnection)
+	fc.Result = res
+	return ec.marshalNFileConnection2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFileConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_trash(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "edges":
+				return ec.fieldContext_FileConnection_edges(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_FileConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_FileConnection_pageInfo(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type FileConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_trash_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -22479,26 +16602,26 @@ func (ec *executionContext) fieldContext_Query_file(ctx context.Context, field g
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
 			case "size":
 				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "type":
+				return ec.fieldContext_File_type(ctx, field)
+			case "mime":
+				return ec.fieldContext_File_mime(ctx, field)
+			case "folder":
+				return ec.fieldContext_File_folder(ctx, field)
+			case "folders":
+				return ec.fieldContext_File_folders(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_File_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
+			case "permissions":
+				return ec.fieldContext_File_permissions(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
 		},
@@ -22531,7 +16654,7 @@ func (ec *executionContext) _Query_files(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Files(rctx, fc.Args["input"].(*model.FilesFilterInput), fc.Args["limit"].(*int), fc.Args["offset"].(*int))
+		return ec.resolvers.Query().Files(rctx, fc.Args["input"].(*model.FileFilterInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -22574,640 +16697,6 @@ func (ec *executionContext) fieldContext_Query_files(ctx context.Context, field 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_files_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_shares(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_shares(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Shares(rctx, fc.Args["input"].(*model.ShareInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*model.ShareUser)
-	fc.Result = res
-	return ec.marshalOShareUser2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐShareUserᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_shares(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "user":
-				return ec.fieldContext_ShareUser_user(ctx, field)
-			case "permission":
-				return ec.fieldContext_ShareUser_permission(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ShareUser", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_shares_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_emailAccounts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_emailAccounts(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().EmailAccounts(rctx, fc.Args["filter"].(*model.EmailAccountFilter))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.EmailAccountConnection)
-	fc.Result = res
-	return ec.marshalOEmailAccountConnection2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountConnection(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_emailAccounts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "edges":
-				return ec.fieldContext_EmailAccountConnection_edges(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_EmailAccountConnection_pageInfo(ctx, field)
-			case "totalCount":
-				return ec.fieldContext_EmailAccountConnection_totalCount(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailAccountConnection", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_emailAccounts_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_emailAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_emailAccount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().EmailAccount(rctx, fc.Args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.EmailAccount)
-	fc.Result = res
-	return ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_emailAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EmailAccount_id(ctx, field)
-			case "name":
-				return ec.fieldContext_EmailAccount_name(ctx, field)
-			case "description":
-				return ec.fieldContext_EmailAccount_description(ctx, field)
-			case "type":
-				return ec.fieldContext_EmailAccount_type(ctx, field)
-			case "quota":
-				return ec.fieldContext_EmailAccount_quota(ctx, field)
-			case "active":
-				return ec.fieldContext_EmailAccount_active(ctx, field)
-			case "user":
-				return ec.fieldContext_EmailAccount_user(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_EmailAccount_createdAt(ctx, field)
-			case "members":
-				return ec.fieldContext_EmailAccount_members(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailAccount", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_emailAccount_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_EmailGroupMembers(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_EmailGroupMembers(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().EmailGroupMembers(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.EmailGroupMemberConnection)
-	fc.Result = res
-	return ec.marshalOEmailGroupMemberConnection2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailGroupMemberConnection(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_EmailGroupMembers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "edges":
-				return ec.fieldContext_EmailGroupMemberConnection_edges(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_EmailGroupMemberConnection_pageInfo(ctx, field)
-			case "totalCount":
-				return ec.fieldContext_EmailGroupMemberConnection_totalCount(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailGroupMemberConnection", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_EmailGroupMember(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_EmailGroupMember(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().EmailGroupMember(rctx, fc.Args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.EmailGroupMember)
-	fc.Result = res
-	return ec.marshalOEmailGroupMember2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailGroupMember(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_EmailGroupMember(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EmailGroupMember_id(ctx, field)
-			case "name":
-				return ec.fieldContext_EmailGroupMember_name(ctx, field)
-			case "memberOf":
-				return ec.fieldContext_EmailGroupMember_memberOf(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_EmailGroupMember_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailGroupMember", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_EmailGroupMember_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_emails(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_emails(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Emails(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.EmailConnection)
-	fc.Result = res
-	return ec.marshalOEmailConnection2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailConnection(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_emails(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "edges":
-				return ec.fieldContext_EmailConnection_edges(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_EmailConnection_pageInfo(ctx, field)
-			case "totalCount":
-				return ec.fieldContext_EmailConnection_totalCount(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailConnection", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_email(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_email(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Email(rctx, fc.Args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.Email)
-	fc.Result = res
-	return ec.marshalOEmail2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmail(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_email(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Email_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Email_name(ctx, field)
-			case "address":
-				return ec.fieldContext_Email_address(ctx, field)
-			case "type":
-				return ec.fieldContext_Email_type(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Email_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Email", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_email_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_emailForwardings(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_emailForwardings(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().EmailForwardings(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.EmailForwardingConnection)
-	fc.Result = res
-	return ec.marshalOEmailForwardingConnection2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailForwardingConnection(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_emailForwardings(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "edges":
-				return ec.fieldContext_EmailForwardingConnection_edges(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_EmailForwardingConnection_pageInfo(ctx, field)
-			case "totalCount":
-				return ec.fieldContext_EmailForwardingConnection_totalCount(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailForwardingConnection", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_emailForwarding(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_emailForwarding(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().EmailForwarding(rctx, fc.Args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.EmailForwarding)
-	fc.Result = res
-	return ec.marshalOEmailForwarding2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailForwarding(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_emailForwarding(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EmailForwarding_id(ctx, field)
-			case "origin":
-				return ec.fieldContext_EmailForwarding_origin(ctx, field)
-			case "target":
-				return ec.fieldContext_EmailForwarding_target(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_EmailForwarding_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailForwarding", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_emailForwarding_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_domains(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_domains(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Domains(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.DomainConnection)
-	fc.Result = res
-	return ec.marshalODomainConnection2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDomainConnection(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_domains(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "edges":
-				return ec.fieldContext_DomainConnection_edges(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_DomainConnection_pageInfo(ctx, field)
-			case "totalCount":
-				return ec.fieldContext_DomainConnection_totalCount(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type DomainConnection", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_domain(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_domain(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Domain(rctx, fc.Args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*db.Domain)
-	fc.Result = res
-	return ec.marshalODomain2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐDomain(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_domain(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Domain_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Domain_name(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Domain_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Domain", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_domain_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -23259,10 +16748,6 @@ func (ec *executionContext) fieldContext_Query_entry(ctx context.Context, field 
 				return ec.fieldContext_Entry_date(ctx, field)
 			case "body":
 				return ec.fieldContext_Entry_body(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Entry_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "users":
@@ -23277,6 +16762,10 @@ func (ec *executionContext) fieldContext_Query_entry(ctx context.Context, field 
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Entry_subjects(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -23411,12 +16900,12 @@ func (ec *executionContext) fieldContext_Query_event(ctx context.Context, field 
 				return ec.fieldContext_Event_endsAt(ctx, field)
 			case "recurrence":
 				return ec.fieldContext_Event_recurrence(ctx, field)
+			case "competences":
+				return ec.fieldContext_Event_competences(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Event_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_Event_deletedAt(ctx, field)
-			case "competences":
-				return ec.fieldContext_Event_competences(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
@@ -23615,6 +17104,8 @@ func (ec *executionContext) fieldContext_Query_organisation(ctx context.Context,
 				return ec.fieldContext_Organisation_phone(ctx, field)
 			case "owner":
 				return ec.fieldContext_Organisation_owner(ctx, field)
+			case "applications":
+				return ec.fieldContext_Organisation_applications(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Organisation", field.Name)
 		},
@@ -23764,224 +17255,6 @@ func (ec *executionContext) fieldContext_Query_reports(ctx context.Context, fiel
 	if fc.Args, err = ec.field_Query_reports_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_users(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Users(rctx, fc.Args["limit"].(*int), fc.Args["offset"].(*int), fc.Args["filter"].(*model.UserFilterInput), fc.Args["search"].(*string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.UserConnection)
-	fc.Result = res
-	return ec.marshalNUserConnection2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUserConnection(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_users(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "edges":
-				return ec.fieldContext_UserConnection_edges(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_UserConnection_pageInfo(ctx, field)
-			case "totalCount":
-				return ec.fieldContext_UserConnection_totalCount(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type UserConnection", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_users_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_user(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().User(rctx, fc.Args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "role":
-				return ec.fieldContext_User_role(ctx, field)
-			case "firstName":
-				return ec.fieldContext_User_firstName(ctx, field)
-			case "lastName":
-				return ec.fieldContext_User_lastName(ctx, field)
-			case "student":
-				return ec.fieldContext_User_student(ctx, field)
-			case "language":
-				return ec.fieldContext_User_language(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_User_deletedAt(ctx, field)
-			case "organisationId":
-				return ec.fieldContext_User_organisationId(ctx, field)
-			case "inviteAccepted":
-				return ec.fieldContext_User_inviteAccepted(ctx, field)
-			case "lastSeenAt":
-				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_user_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_me(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_me(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Me(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_me(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "role":
-				return ec.fieldContext_User_role(ctx, field)
-			case "firstName":
-				return ec.fieldContext_User_firstName(ctx, field)
-			case "lastName":
-				return ec.fieldContext_User_lastName(ctx, field)
-			case "student":
-				return ec.fieldContext_User_student(ctx, field)
-			case "language":
-				return ec.fieldContext_User_language(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_User_deletedAt(ctx, field)
-			case "organisationId":
-				return ec.fieldContext_User_organisationId(ctx, field)
-			case "inviteAccepted":
-				return ec.fieldContext_User_inviteAccepted(ctx, field)
-			case "lastSeenAt":
-				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
 	}
 	return fc, nil
 }
@@ -24410,69 +17683,6 @@ func (ec *executionContext) fieldContext_Query_userStudent(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_inviteDetails(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_inviteDetails(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().InviteDetails(rctx, fc.Args["token"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.InviteDetailsPayload)
-	fc.Result = res
-	return ec.marshalNInviteDetailsPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐInviteDetailsPayload(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_inviteDetails(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "email":
-				return ec.fieldContext_InviteDetailsPayload_email(ctx, field)
-			case "firstName":
-				return ec.fieldContext_InviteDetailsPayload_firstName(ctx, field)
-			case "lastName":
-				return ec.fieldContext_InviteDetailsPayload_lastName(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type InviteDetailsPayload", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_inviteDetails_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Query_subjects(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_subjects(ctx, field)
 	if err != nil {
@@ -24849,6 +18059,220 @@ func (ec *executionContext) fieldContext_Query_userStudentGrade(ctx context.Cont
 	if fc.Args, err = ec.field_Query_userStudentGrade_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_users(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Users(rctx, fc.Args["limit"].(*int), fc.Args["offset"].(*int), fc.Args["filter"].(*model.UserFilterInput), fc.Args["search"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.UserConnection)
+	fc.Result = res
+	return ec.marshalNUserConnection2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUserConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_users(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "edges":
+				return ec.fieldContext_UserConnection_edges(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_UserConnection_pageInfo(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_UserConnection_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_users_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_user(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().User(rctx, fc.Args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "student":
+				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_user_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_me(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_me(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Me(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_me(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "student":
+				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -25397,8 +18821,6 @@ func (ec *executionContext) fieldContext_Report_user(ctx context.Context, field 
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "lastSeenAt":
 				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -25469,8 +18891,6 @@ func (ec *executionContext) fieldContext_Report_studentUser(ctx context.Context,
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "lastSeenAt":
 				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -25516,26 +18936,26 @@ func (ec *executionContext) fieldContext_Report_file(ctx context.Context, field 
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
 			case "size":
 				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "type":
+				return ec.fieldContext_File_type(ctx, field)
+			case "mime":
+				return ec.fieldContext_File_mime(ctx, field)
+			case "folder":
+				return ec.fieldContext_File_folder(ctx, field)
+			case "folders":
+				return ec.fieldContext_File_folders(ctx, field)
+			case "files":
+				return ec.fieldContext_File_files(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_File_createdAt(ctx, field)
 			case "deletedAt":
 				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
+			case "permissions":
+				return ec.fieldContext_File_permissions(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
 		},
@@ -25793,8 +19213,8 @@ func (ec *executionContext) fieldContext_ReportConnection_totalCount(ctx context
 	return fc, nil
 }
 
-func (ec *executionContext) _ResetPasswordPayload_success(ctx context.Context, field graphql.CollectedField, obj *model.ResetPasswordPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ResetPasswordPayload_success(ctx, field)
+func (ec *executionContext) _ResetPasswordPayload_user(ctx context.Context, field graphql.CollectedField, obj *model.ResetPasswordPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ResetPasswordPayload_user(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -25807,7 +19227,7 @@ func (ec *executionContext) _ResetPasswordPayload_success(ctx context.Context, f
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Success, nil
+		return obj.User, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -25819,26 +19239,52 @@ func (ec *executionContext) _ResetPasswordPayload_success(ctx context.Context, f
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(*db.User)
 	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ResetPasswordPayload_success(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ResetPasswordPayload_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "ResetPasswordPayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "student":
+				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _ResetPasswordPayload_unauthorized(ctx context.Context, field graphql.CollectedField, obj *model.ResetPasswordPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ResetPasswordPayload_unauthorized(ctx, field)
+func (ec *executionContext) _ResetPasswordPayload_token(ctx context.Context, field graphql.CollectedField, obj *model.ResetPasswordPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ResetPasswordPayload_token(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -25851,7 +19297,7 @@ func (ec *executionContext) _ResetPasswordPayload_unauthorized(ctx context.Conte
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Unauthorized, nil
+		return obj.Token, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -25863,26 +19309,26 @@ func (ec *executionContext) _ResetPasswordPayload_unauthorized(ctx context.Conte
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ResetPasswordPayload_unauthorized(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ResetPasswordPayload_token(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "ResetPasswordPayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _ResetPasswordPayload_invalidToken(ctx context.Context, field graphql.CollectedField, obj *model.ResetPasswordPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ResetPasswordPayload_invalidToken(ctx, field)
+func (ec *executionContext) _ResetPasswordPayload_organisation(ctx context.Context, field graphql.CollectedField, obj *model.ResetPasswordPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ResetPasswordPayload_organisation(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -25895,7 +19341,7 @@ func (ec *executionContext) _ResetPasswordPayload_invalidToken(ctx context.Conte
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.InvalidToken, nil
+		return obj.Organisation, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -25907,107 +19353,35 @@ func (ec *executionContext) _ResetPasswordPayload_invalidToken(ctx context.Conte
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(*db.Organisation)
 	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNOrganisation2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐOrganisation(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ResetPasswordPayload_invalidToken(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ResetPasswordPayload_organisation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "ResetPasswordPayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ResetPasswordPayload_tokenExpired(ctx context.Context, field graphql.CollectedField, obj *model.ResetPasswordPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ResetPasswordPayload_tokenExpired(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TokenExpired, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ResetPasswordPayload_tokenExpired(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ResetPasswordPayload",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ResetPasswordPayload_unableToReset(ctx context.Context, field graphql.CollectedField, obj *model.ResetPasswordPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ResetPasswordPayload_unableToReset(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.UnableToReset, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ResetPasswordPayload_unableToReset(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ResetPasswordPayload",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Organisation_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Organisation_name(ctx, field)
+			case "legalName":
+				return ec.fieldContext_Organisation_legalName(ctx, field)
+			case "website":
+				return ec.fieldContext_Organisation_website(ctx, field)
+			case "phone":
+				return ec.fieldContext_Organisation_phone(ctx, field)
+			case "owner":
+				return ec.fieldContext_Organisation_owner(ctx, field)
+			case "applications":
+				return ec.fieldContext_Organisation_applications(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Organisation", field.Name)
 		},
 	}
 	return fc, nil
@@ -26293,298 +19667,6 @@ func (ec *executionContext) fieldContext_SchoolYearConnection_pageInfo(ctx conte
 	return fc, nil
 }
 
-func (ec *executionContext) _ShareUser_user(ctx context.Context, field graphql.CollectedField, obj *model.ShareUser) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ShareUser_user(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.User, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*db.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ShareUser_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ShareUser",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "role":
-				return ec.fieldContext_User_role(ctx, field)
-			case "firstName":
-				return ec.fieldContext_User_firstName(ctx, field)
-			case "lastName":
-				return ec.fieldContext_User_lastName(ctx, field)
-			case "student":
-				return ec.fieldContext_User_student(ctx, field)
-			case "language":
-				return ec.fieldContext_User_language(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_User_deletedAt(ctx, field)
-			case "organisationId":
-				return ec.fieldContext_User_organisationId(ctx, field)
-			case "inviteAccepted":
-				return ec.fieldContext_User_inviteAccepted(ctx, field)
-			case "lastSeenAt":
-				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ShareUser_permission(ctx context.Context, field graphql.CollectedField, obj *model.ShareUser) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ShareUser_permission(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Permission, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(db.FilePermission)
-	fc.Result = res
-	return ec.marshalNFilePermission2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ShareUser_permission(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ShareUser",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type FilePermission does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _SignInPayload_token(ctx context.Context, field graphql.CollectedField, obj *model.SignInPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SignInPayload_token(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Token, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_SignInPayload_token(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "SignInPayload",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _SignInPayload_enabled_apps(ctx context.Context, field graphql.CollectedField, obj *model.SignInPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SignInPayload_enabled_apps(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.EnabledApps, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]string)
-	fc.Result = res
-	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_SignInPayload_enabled_apps(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "SignInPayload",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _SignInPayload_language(ctx context.Context, field graphql.CollectedField, obj *model.SignInPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SignInPayload_language(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Language, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_SignInPayload_language(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "SignInPayload",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _SignInPayload_setupComplete(ctx context.Context, field graphql.CollectedField, obj *model.SignInPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SignInPayload_setupComplete(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.SetupComplete, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_SignInPayload_setupComplete(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "SignInPayload",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _SignInPayload_user(ctx context.Context, field graphql.CollectedField, obj *model.SignInPayload) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_SignInPayload_user(ctx, field)
 	if err != nil {
@@ -26648,10 +19730,112 @@ func (ec *executionContext) fieldContext_SignInPayload_user(ctx context.Context,
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "lastSeenAt":
 				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SignInPayload_token(ctx context.Context, field graphql.CollectedField, obj *model.SignInPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SignInPayload_token(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Token, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SignInPayload_token(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SignInPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SignInPayload_organisation(ctx context.Context, field graphql.CollectedField, obj *model.SignInPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SignInPayload_organisation(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Organisation, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.Organisation)
+	fc.Result = res
+	return ec.marshalNOrganisation2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐOrganisation(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SignInPayload_organisation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SignInPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Organisation_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Organisation_name(ctx, field)
+			case "legalName":
+				return ec.fieldContext_Organisation_legalName(ctx, field)
+			case "website":
+				return ec.fieldContext_Organisation_website(ctx, field)
+			case "phone":
+				return ec.fieldContext_Organisation_phone(ctx, field)
+			case "owner":
+				return ec.fieldContext_Organisation_owner(ctx, field)
+			case "applications":
+				return ec.fieldContext_Organisation_applications(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Organisation", field.Name)
 		},
 	}
 	return fc, nil
@@ -26952,12 +20136,12 @@ func (ec *executionContext) fieldContext_Subscription_messageAdded(ctx context.C
 				return ec.fieldContext_ChatMessage_user(ctx, field)
 			case "message":
 				return ec.fieldContext_ChatMessage_message(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_ChatMessage_createdAt(ctx, field)
 			case "isEdited":
 				return ec.fieldContext_ChatMessage_isEdited(ctx, field)
 			case "isSeen":
 				return ec.fieldContext_ChatMessage_isSeen(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_ChatMessage_createdAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ChatMessage", field.Name)
 		},
@@ -27417,8 +20601,8 @@ func (ec *executionContext) fieldContext_TagConnection_totalCount(ctx context.Co
 	return fc, nil
 }
 
-func (ec *executionContext) _UploadFilesPayload_files(ctx context.Context, field graphql.CollectedField, obj *model.UploadFilesPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UploadFilesPayload_files(ctx, field)
+func (ec *executionContext) _UpdateFilePayload_name(ctx context.Context, field graphql.CollectedField, obj *model.UpdateFilePayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdateFilePayload_name(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -27431,7 +20615,48 @@ func (ec *executionContext) _UploadFilesPayload_files(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Files, nil
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdateFilePayload_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdateFilePayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UpdateFilePermissionPayload_filePermission(ctx context.Context, field graphql.CollectedField, obj *model.UpdateFilePermissionPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdateFilePermissionPayload_filePermission(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FilePermission, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -27443,43 +20668,35 @@ func (ec *executionContext) _UploadFilesPayload_files(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*db.File)
+	res := resTmp.(*db.FilePermission)
 	fc.Result = res
-	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileᚄ(ctx, field.Selections, res)
+	return ec.marshalNFilePermission2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UploadFilesPayload_files(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_UpdateFilePermissionPayload_filePermission(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "UploadFilesPayload",
+		Object:     "UpdateFilePermissionPayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_File_id(ctx, field)
-			case "name":
-				return ec.fieldContext_File_name(ctx, field)
-			case "fileType":
-				return ec.fieldContext_File_fileType(ctx, field)
-			case "MIMEType":
-				return ec.fieldContext_File_MIMEType(ctx, field)
-			case "size":
-				return ec.fieldContext_File_size(ctx, field)
-			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
-			case "parent":
-				return ec.fieldContext_File_parent(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_File_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_File_deletedAt(ctx, field)
-			case "parents":
-				return ec.fieldContext_File_parents(ctx, field)
-			case "files":
-				return ec.fieldContext_File_files(ctx, field)
+				return ec.fieldContext_FilePermission_id(ctx, field)
+			case "file":
+				return ec.fieldContext_FilePermission_file(ctx, field)
+			case "displayName":
+				return ec.fieldContext_FilePermission_displayName(ctx, field)
+			case "emailAddress":
+				return ec.fieldContext_FilePermission_emailAddress(ctx, field)
+			case "type":
+				return ec.fieldContext_FilePermission_type(ctx, field)
+			case "role":
+				return ec.fieldContext_FilePermission_role(ctx, field)
+			case "inherited":
+				return ec.fieldContext_FilePermission_inherited(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type FilePermission", field.Name)
 		},
 	}
 	return fc, nil
@@ -28032,67 +21249,6 @@ func (ec *executionContext) fieldContext_User_lastSeenAt(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _User_emailAccounts(ctx context.Context, field graphql.CollectedField, obj *db.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_emailAccounts(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.User().EmailAccounts(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*db.EmailAccount)
-	fc.Result = res
-	return ec.marshalOEmailAccount2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_User_emailAccounts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EmailAccount_id(ctx, field)
-			case "name":
-				return ec.fieldContext_EmailAccount_name(ctx, field)
-			case "description":
-				return ec.fieldContext_EmailAccount_description(ctx, field)
-			case "type":
-				return ec.fieldContext_EmailAccount_type(ctx, field)
-			case "quota":
-				return ec.fieldContext_EmailAccount_quota(ctx, field)
-			case "active":
-				return ec.fieldContext_EmailAccount_active(ctx, field)
-			case "user":
-				return ec.fieldContext_EmailAccount_user(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_EmailAccount_createdAt(ctx, field)
-			case "members":
-				return ec.fieldContext_EmailAccount_members(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EmailAccount", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _UserAttendance_id(ctx context.Context, field graphql.CollectedField, obj *db.UserAttendance) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UserAttendance_id(ctx, field)
 	if err != nil {
@@ -28132,6 +21288,50 @@ func (ec *executionContext) fieldContext_UserAttendance_id(ctx context.Context, 
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserAttendance_date(ctx context.Context, field graphql.CollectedField, obj *db.UserAttendance) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserAttendance_date(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.UserAttendance().Date(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalNTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserAttendance_date(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserAttendance",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
 		},
 	}
 	return fc, nil
@@ -28200,8 +21400,6 @@ func (ec *executionContext) fieldContext_UserAttendance_user(ctx context.Context
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "lastSeenAt":
 				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -28248,50 +21446,6 @@ func (ec *executionContext) fieldContext_UserAttendance_state(ctx context.Contex
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type UserAttendanceState does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _UserAttendance_date(ctx context.Context, field graphql.CollectedField, obj *db.UserAttendance) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UserAttendance_date(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.UserAttendance().Date(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*time.Time)
-	fc.Result = res
-	return ec.marshalNTime2ᚖtimeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_UserAttendance_date(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "UserAttendance",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
 		},
 	}
 	return fc, nil
@@ -28495,10 +21649,6 @@ func (ec *executionContext) fieldContext_UserCompetence_entry(ctx context.Contex
 				return ec.fieldContext_Entry_date(ctx, field)
 			case "body":
 				return ec.fieldContext_Entry_body(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Entry_createdAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			case "user":
 				return ec.fieldContext_Entry_user(ctx, field)
 			case "users":
@@ -28513,6 +21663,10 @@ func (ec *executionContext) fieldContext_UserCompetence_entry(ctx context.Contex
 				return ec.fieldContext_Entry_userCompetences(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Entry_subjects(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Entry_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Entry_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Entry", field.Name)
 		},
@@ -28583,8 +21737,6 @@ func (ec *executionContext) fieldContext_UserCompetence_user(ctx context.Context
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "lastSeenAt":
 				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -28652,8 +21804,6 @@ func (ec *executionContext) fieldContext_UserCompetence_createdBy(ctx context.Co
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "lastSeenAt":
 				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -28918,8 +22068,6 @@ func (ec *executionContext) fieldContext_UserConnection_edges(ctx context.Contex
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "lastSeenAt":
 				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -29637,8 +22785,6 @@ func (ec *executionContext) fieldContext_UserStudent_user(ctx context.Context, f
 				return ec.fieldContext_User_inviteAccepted(ctx, field)
 			case "lastSeenAt":
 				return ec.fieldContext_User_lastSeenAt(ctx, field)
-			case "emailAccounts":
-				return ec.fieldContext_User_emailAccounts(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -32174,35 +25320,6 @@ func (ec *executionContext) unmarshalInputAddUserToChatInput(ctx context.Context
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputBucketFilterInput(ctx context.Context, obj interface{}) (model.BucketFilterInput, error) {
-	var it model.BucketFilterInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"shared"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "shared":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("shared"))
-			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Shared = data
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputCompetenceFilterInput(ctx context.Context, obj interface{}) (model.CompetenceFilterInput, error) {
 	var it model.CompetenceFilterInput
 	asMap := map[string]interface{}{}
@@ -32288,82 +25405,6 @@ func (ec *executionContext) unmarshalInputCompetenceSort(ctx context.Context, ob
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputCopyFileInput(ctx context.Context, obj interface{}) (model.CopyFileInput, error) {
-	var it model.CopyFileInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"id", "targetId"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
-		case "targetId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.TargetID = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputCopyFilesInput(ctx context.Context, obj interface{}) (model.CopyFilesInput, error) {
-	var it model.CopyFilesInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"ids", "targetId"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "ids":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ids"))
-			data, err := ec.unmarshalNID2ᚕstringᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Ids = data
-		case "targetId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.TargetID = data
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputCreateChatInput(ctx context.Context, obj interface{}) (model.CreateChatInput, error) {
 	var it model.CreateChatInput
 	asMap := map[string]interface{}{}
@@ -32425,261 +25466,6 @@ func (ec *executionContext) unmarshalInputCreateCompetenceInput(ctx context.Cont
 				return it, err
 			}
 			it.ParentID = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputCreateDomainInput(ctx context.Context, obj interface{}) (model.CreateDomainInput, error) {
-	var it model.CreateDomainInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"name"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "name":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Name = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputCreateEmailAccountInput(ctx context.Context, obj interface{}) (model.CreateEmailAccountInput, error) {
-	var it model.CreateEmailAccountInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"name", "description", "type", "quota"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "name":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Name = data
-		case "description":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Description = data
-		case "type":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-			data, err := ec.unmarshalNEmailAccountType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountType(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Type = data
-		case "quota":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("quota"))
-			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Quota = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputCreateEmailForwardingInput(ctx context.Context, obj interface{}) (model.CreateEmailForwardingInput, error) {
-	var it model.CreateEmailForwardingInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"origin", "target"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "origin":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Origin = data
-		case "target":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Target = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputCreateEmailGroupInput(ctx context.Context, obj interface{}) (model.CreateEmailGroupInput, error) {
-	var it model.CreateEmailGroupInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"name", "members", "description"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "name":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Name = data
-		case "members":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("members"))
-			data, err := ec.unmarshalOString2ᚕᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Members = data
-		case "description":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Description = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputCreateEmailGroupMemberInput(ctx context.Context, obj interface{}) (model.CreateEmailGroupMemberInput, error) {
-	var it model.CreateEmailGroupMemberInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"name", "memberOf"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "name":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Name = data
-		case "memberOf":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("memberOf"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.MemberOf = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputCreateEmailInput(ctx context.Context, obj interface{}) (model.CreateEmailInput, error) {
-	var it model.CreateEmailInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"name", "address", "type"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "name":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Name = data
-		case "address":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("address"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Address = data
-		case "type":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-			data, err := ec.unmarshalNEmailType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailType(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Type = data
 		}
 	}
 
@@ -32950,14 +25736,14 @@ func (ec *executionContext) unmarshalInputCreateEventInput(ctx context.Context, 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputCreateFolderInput(ctx context.Context, obj interface{}) (model.CreateFolderInput, error) {
-	var it model.CreateFolderInput
+func (ec *executionContext) unmarshalInputCreateFileInput(ctx context.Context, obj interface{}) (model.CreateFileInput, error) {
+	var it model.CreateFileInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "parentId", "bucketId"}
+	fieldsInOrder := [...]string{"name", "type", "folderId", "upload"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -32973,24 +25759,80 @@ func (ec *executionContext) unmarshalInputCreateFolderInput(ctx context.Context,
 				return it, err
 			}
 			it.Name = data
-		case "parentId":
+		case "type":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("parentId"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+			data, err := ec.unmarshalNFileType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Type = data
+		case "folderId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("folderId"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.ParentID = data
-		case "bucketId":
+			it.FolderID = data
+		case "upload":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bucketId"))
-			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("upload"))
+			data, err := ec.unmarshalOUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.BucketID = data
+			it.Upload = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateFilePermissionInput(ctx context.Context, obj interface{}) (model.CreateFilePermissionInput, error) {
+	var it model.CreateFilePermissionInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"fileId", "userId", "permission"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "fileId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileID = data
+		case "userId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.UserID = data
+		case "permission":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("permission"))
+			data, err := ec.unmarshalNFilePermissionRole2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermissionRole(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Permission = data
 		}
 	}
 
@@ -33103,62 +25945,6 @@ func (ec *executionContext) unmarshalInputCreateSchoolYearInput(ctx context.Cont
 				return it, err
 			}
 			it.Year = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputCreateShareInput(ctx context.Context, obj interface{}) (model.CreateShareInput, error) {
-	var it model.CreateShareInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"fileId", "bucketId", "user", "permission"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "fileId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileId"))
-			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.FileID = data
-		case "bucketId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bucketId"))
-			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.BucketID = data
-		case "user":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.User = data
-		case "permission":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("permission"))
-			data, err := ec.unmarshalNFilePermission2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Permission = data
 		}
 	}
 
@@ -33530,151 +26316,6 @@ func (ec *executionContext) unmarshalInputDeleteChatInput(ctx context.Context, o
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputDeleteDomainInput(ctx context.Context, obj interface{}) (model.DeleteDomainInput, error) {
-	var it model.DeleteDomainInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"id"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputDeleteEmailAccountInput(ctx context.Context, obj interface{}) (model.DeleteEmailAccountInput, error) {
-	var it model.DeleteEmailAccountInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"id"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputDeleteEmailForwardingInput(ctx context.Context, obj interface{}) (model.DeleteEmailForwardingInput, error) {
-	var it model.DeleteEmailForwardingInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"id"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputDeleteEmailGroupMemberInput(ctx context.Context, obj interface{}) (model.DeleteEmailGroupMemberInput, error) {
-	var it model.DeleteEmailGroupMemberInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"id"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputDeleteEmailInput(ctx context.Context, obj interface{}) (model.DeleteEmailInput, error) {
-	var it model.DeleteEmailInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"id"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputDeleteEntryCompetenceInput(ctx context.Context, obj interface{}) (model.DeleteEntryCompetenceInput, error) {
 	var it model.DeleteEntryCompetenceInput
 	asMap := map[string]interface{}{}
@@ -33894,84 +26535,8 @@ func (ec *executionContext) unmarshalInputDeleteFileInput(ctx context.Context, o
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputDeleteFilesInput(ctx context.Context, obj interface{}) (model.DeleteFilesInput, error) {
-	var it model.DeleteFilesInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"ids"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "ids":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ids"))
-			data, err := ec.unmarshalNID2ᚕstringᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Ids = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputDeleteShareInput(ctx context.Context, obj interface{}) (model.DeleteShareInput, error) {
-	var it model.DeleteShareInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"fileId", "bucketId", "user"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "fileId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileId"))
-			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.FileID = data
-		case "bucketId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bucketId"))
-			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.BucketID = data
-		case "user":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.User = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputDownloadFileInput(ctx context.Context, obj interface{}) (model.DownloadFileInput, error) {
-	var it model.DownloadFileInput
+func (ec *executionContext) unmarshalInputDeleteFilePermissionInput(ctx context.Context, obj interface{}) (model.DeleteFilePermissionInput, error) {
+	var it model.DeleteFilePermissionInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -33993,35 +26558,6 @@ func (ec *executionContext) unmarshalInputDownloadFileInput(ctx context.Context,
 				return it, err
 			}
 			it.ID = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputDownloadFilesInput(ctx context.Context, obj interface{}) (model.DownloadFilesInput, error) {
-	var it model.DownloadFilesInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"ids"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "ids":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ids"))
-			data, err := ec.unmarshalNID2ᚕstringᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Ids = data
 		}
 	}
 
@@ -34060,35 +26596,6 @@ func (ec *executionContext) unmarshalInputEditChatMessageInput(ctx context.Conte
 				return it, err
 			}
 			it.Message = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputEmailAccountFilter(ctx context.Context, obj interface{}) (model.EmailAccountFilter, error) {
-	var it model.EmailAccountFilter
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"type"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "type":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-			data, err := ec.unmarshalOEmailAccountType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountType(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Type = data
 		}
 	}
 
@@ -34272,29 +26779,33 @@ func (ec *executionContext) unmarshalInputExportEventsInput(ctx context.Context,
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputFileUploadInput(ctx context.Context, obj interface{}) (model.FileUploadInput, error) {
-	var it model.FileUploadInput
+func (ec *executionContext) unmarshalInputFileFilterInput(ctx context.Context, obj interface{}) (model.FileFilterInput, error) {
+	var it model.FileFilterInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"file", "parentId", "bucketId"}
+	if _, present := asMap["deleted"]; !present {
+		asMap["deleted"] = false
+	}
+
+	fieldsInOrder := [...]string{"search", "parentId", "deleted", "limit", "offset"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "file":
+		case "search":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
-			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("search"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.File = data
+			it.Search = data
 		case "parentId":
 			var err error
 
@@ -34304,62 +26815,33 @@ func (ec *executionContext) unmarshalInputFileUploadInput(ctx context.Context, o
 				return it, err
 			}
 			it.ParentID = data
-		case "bucketId":
+		case "deleted":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bucketId"))
-			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.BucketID = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputFilesFilterInput(ctx context.Context, obj interface{}) (model.FilesFilterInput, error) {
-	var it model.FilesFilterInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"parentId", "bucketId", "myBucket"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "parentId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("parentId"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ParentID = data
-		case "bucketId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bucketId"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.BucketID = data
-		case "myBucket":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("myBucket"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deleted"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.MyBucket = data
+			it.Deleted = data
+		case "limit":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Limit = data
+		case "offset":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Offset = data
 		}
 	}
 
@@ -34395,35 +26877,6 @@ func (ec *executionContext) unmarshalInputForgotPasswordInput(ctx context.Contex
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputGenerateFileURLInput(ctx context.Context, obj interface{}) (model.GenerateFileURLInput, error) {
-	var it model.GenerateFileURLInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"id"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputImportStudentsInput(ctx context.Context, obj interface{}) (model.ImportStudentsInput, error) {
 	var it model.ImportStudentsInput
 	asMap := map[string]interface{}{}
@@ -34447,140 +26900,6 @@ func (ec *executionContext) unmarshalInputImportStudentsInput(ctx context.Contex
 				return it, err
 			}
 			it.File = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputMoveFileInput(ctx context.Context, obj interface{}) (model.MoveFileInput, error) {
-	var it model.MoveFileInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"id", "targetId"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
-		case "targetId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetId"))
-			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.TargetID = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputMoveFilesInput(ctx context.Context, obj interface{}) (model.MoveFilesInput, error) {
-	var it model.MoveFilesInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"ids", "targetId"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "ids":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ids"))
-			data, err := ec.unmarshalNID2ᚕstringᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Ids = data
-		case "targetId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.TargetID = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputMyFilesFilterInput(ctx context.Context, obj interface{}) (model.MyFilesFilterInput, error) {
-	var it model.MyFilesFilterInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"parentId"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "parentId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("parentId"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ParentID = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputPreviewFileInput(ctx context.Context, obj interface{}) (model.PreviewFileInput, error) {
-	var it model.PreviewFileInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"id"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
 		}
 	}
 
@@ -34619,82 +26938,6 @@ func (ec *executionContext) unmarshalInputRemoveUserFromChatInput(ctx context.Co
 				return it, err
 			}
 			it.UserID = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputRenameFileInput(ctx context.Context, obj interface{}) (model.RenameFileInput, error) {
-	var it model.RenameFileInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"id", "name"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
-		case "name":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Name = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputRenameSharedDriveInput(ctx context.Context, obj interface{}) (model.RenameSharedDriveInput, error) {
-	var it model.RenameSharedDriveInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"id", "name"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
-		case "name":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Name = data
 		}
 	}
 
@@ -34771,129 +27014,6 @@ func (ec *executionContext) unmarshalInputSendMessageInput(ctx context.Context, 
 				return it, err
 			}
 			it.Message = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputShareFileInput(ctx context.Context, obj interface{}) (model.ShareFileInput, error) {
-	var it model.ShareFileInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"fileId", "users", "emails", "permission"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "fileId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.FileID = data
-		case "users":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("users"))
-			data, err := ec.unmarshalNID2ᚕstringᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Users = data
-		case "emails":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("emails"))
-			data, err := ec.unmarshalNString2ᚕstringᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Emails = data
-		case "permission":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("permission"))
-			data, err := ec.unmarshalNFilePermission2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Permission = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputShareInput(ctx context.Context, obj interface{}) (model.ShareInput, error) {
-	var it model.ShareInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"bucketId", "fileId"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "bucketId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bucketId"))
-			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.BucketID = data
-		case "fileId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileId"))
-			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.FileID = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputSharedDriveFilterInput(ctx context.Context, obj interface{}) (model.SharedDriveFilterInput, error) {
-	var it model.SharedDriveFilterInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"folder"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "folder":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("folder"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Folder = data
 		}
 	}
 
@@ -35137,136 +27257,6 @@ func (ec *executionContext) unmarshalInputUpdateCompetenceSortingInput(ctx conte
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputUpdateEmailAccountInput(ctx context.Context, obj interface{}) (model.UpdateEmailAccountInput, error) {
-	var it model.UpdateEmailAccountInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"id", "name", "description", "type", "quota", "active"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
-		case "name":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Name = data
-		case "description":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Description = data
-		case "type":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-			data, err := ec.unmarshalOEmailAccountType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountType(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Type = data
-		case "quota":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("quota"))
-			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Quota = data
-		case "active":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("active"))
-			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Active = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputUpdateEmailGroupInput(ctx context.Context, obj interface{}) (model.UpdateEmailGroupInput, error) {
-	var it model.UpdateEmailGroupInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"id", "name", "members", "description"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
-		case "name":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Name = data
-		case "members":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("members"))
-			data, err := ec.unmarshalOString2ᚕᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Members = data
-		case "description":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Description = data
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputUpdateEntryInput(ctx context.Context, obj interface{}) (model.UpdateEntryInput, error) {
 	var it model.UpdateEntryInput
 	asMap := map[string]interface{}{}
@@ -35444,6 +27434,91 @@ func (ec *executionContext) unmarshalInputUpdateEventInput(ctx context.Context, 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateFileInput(ctx context.Context, obj interface{}) (model.UpdateFileInput, error) {
+	var it model.UpdateFileInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "name", "parentId"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "parentId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("parentId"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ParentID = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateFilePermissionInput(ctx context.Context, obj interface{}) (model.UpdateFilePermissionInput, error) {
+	var it model.UpdateFilePermissionInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "permission"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "permission":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("permission"))
+			data, err := ec.unmarshalNFilePermissionRole2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermissionRole(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Permission = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateOrganisationInput(ctx context.Context, obj interface{}) (model.UpdateOrganisationInput, error) {
 	var it model.UpdateOrganisationInput
 	asMap := map[string]interface{}{}
@@ -35579,6 +27654,53 @@ func (ec *executionContext) unmarshalInputUpdateSubjectInput(ctx context.Context
 				return it, err
 			}
 			it.Name = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateUserAttendanceInput(ctx context.Context, obj interface{}) (model.UpdateUserAttendanceInput, error) {
+	var it model.UpdateUserAttendanceInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"date", "userId", "state"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "date":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("date"))
+			data, err := ec.unmarshalNTime2timeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Date = data
+		case "userId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.UserID = data
+		case "state":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("state"))
+			data, err := ec.unmarshalNUserAttendanceState2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUserAttendanceState(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.State = data
 		}
 	}
 
@@ -35827,35 +27949,6 @@ func (ec *executionContext) unmarshalInputUserCompetenceFilterInput(ctx context.
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputUserFileFilterInput(ctx context.Context, obj interface{}) (model.UserFileFilterInput, error) {
-	var it model.UserFileFilterInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"folderId"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "folderId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("folderId"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.FolderID = data
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputUserFilterInput(ctx context.Context, obj interface{}) (model.UserFilterInput, error) {
 	var it model.UserFilterInput
 	asMap := map[string]interface{}{}
@@ -35911,247 +28004,6 @@ func (ec *executionContext) unmarshalInputUserFilterInput(ctx context.Context, o
 
 // region    **************************** object.gotpl ****************************
 
-var bucketImplementors = []string{"Bucket"}
-
-func (ec *executionContext) _Bucket(ctx context.Context, sel ast.SelectionSet, obj *db.Bucket) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, bucketImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Bucket")
-		case "id":
-			out.Values[i] = ec._Bucket_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "name":
-			out.Values[i] = ec._Bucket_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "user":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Bucket_user(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "shared":
-			out.Values[i] = ec._Bucket_shared(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "createdAt":
-			out.Values[i] = ec._Bucket_createdAt(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "deletedAt":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Bucket_deletedAt(ctx, field, obj)
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "permission":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Bucket_permission(ctx, field, obj)
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "files":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Bucket_files(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var bucketConnectionImplementors = []string{"BucketConnection"}
-
-func (ec *executionContext) _BucketConnection(ctx context.Context, sel ast.SelectionSet, obj *model.BucketConnection) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, bucketConnectionImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("BucketConnection")
-		case "edges":
-			out.Values[i] = ec._BucketConnection_edges(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "totalCount":
-			out.Values[i] = ec._BucketConnection_totalCount(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "pageInfo":
-			out.Values[i] = ec._BucketConnection_pageInfo(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
 var chatImplementors = []string{"Chat"}
 
 func (ec *executionContext) _Chat(ctx context.Context, sel ast.SelectionSet, obj *db.Chat) graphql.Marshaler {
@@ -36178,6 +28030,42 @@ func (ec *executionContext) _Chat(ctx context.Context, sel ast.SelectionSet, obj
 					}
 				}()
 				res = ec._Chat_name(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "type":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Chat_type(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -36237,7 +28125,7 @@ func (ec *executionContext) _Chat(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "type":
+		case "userCount":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -36246,7 +28134,43 @@ func (ec *executionContext) _Chat(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Chat_type(ctx, field, obj)
+				res = ec._Chat_userCount(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "unreadMessageCount":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Chat_unreadMessageCount(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -36380,7 +28304,7 @@ func (ec *executionContext) _Chat(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "unreadMessageCount":
+		case "deleted":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -36389,43 +28313,7 @@ func (ec *executionContext) _Chat(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Chat_unreadMessageCount(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "userCount":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Chat_userCount(ctx, field, obj)
+				res = ec._Chat_deleted(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -36614,11 +28502,6 @@ func (ec *executionContext) _ChatMessage(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "createdAt":
-			out.Values[i] = ec._ChatMessage_createdAt(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
 		case "isEdited":
 			field := field
 
@@ -36691,6 +28574,11 @@ func (ec *executionContext) _ChatMessage(ctx context.Context, sel ast.SelectionS
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "createdAt":
+			out.Values[i] = ec._ChatMessage_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -37223,19 +29111,58 @@ func (ec *executionContext) _CompetenceTendency(ctx context.Context, sel ast.Sel
 	return out
 }
 
-var copyFilesPayloadImplementors = []string{"CopyFilesPayload"}
+var createFilePayloadImplementors = []string{"CreateFilePayload"}
 
-func (ec *executionContext) _CopyFilesPayload(ctx context.Context, sel ast.SelectionSet, obj *model.CopyFilesPayload) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, copyFilesPayloadImplementors)
+func (ec *executionContext) _CreateFilePayload(ctx context.Context, sel ast.SelectionSet, obj *model.CreateFilePayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, createFilePayloadImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("CopyFilesPayload")
-		case "files":
-			out.Values[i] = ec._CopyFilesPayload_files(ctx, field, obj)
+			out.Values[i] = graphql.MarshalString("CreateFilePayload")
+		case "file":
+			out.Values[i] = ec._CreateFilePayload_file(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var createFilePermissionPayloadImplementors = []string{"CreateFilePermissionPayload"}
+
+func (ec *executionContext) _CreateFilePermissionPayload(ctx context.Context, sel ast.SelectionSet, obj *model.CreateFilePermissionPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, createFilePermissionPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CreateFilePermissionPayload")
+		case "filePermission":
+			out.Values[i] = ec._CreateFilePermissionPayload_filePermission(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -37273,11 +29200,6 @@ func (ec *executionContext) _DeleteFilePayload(ctx context.Context, sel ast.Sele
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("DeleteFilePayload")
-		case "success":
-			out.Values[i] = ec._DeleteFilePayload_success(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "file":
 			out.Values[i] = ec._DeleteFilePayload_file(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -37306,984 +29228,19 @@ func (ec *executionContext) _DeleteFilePayload(ctx context.Context, sel ast.Sele
 	return out
 }
 
-var deleteFilesPayloadImplementors = []string{"DeleteFilesPayload"}
+var deleteFilePermissionPayloadImplementors = []string{"DeleteFilePermissionPayload"}
 
-func (ec *executionContext) _DeleteFilesPayload(ctx context.Context, sel ast.SelectionSet, obj *model.DeleteFilesPayload) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, deleteFilesPayloadImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("DeleteFilesPayload")
-		case "success":
-			out.Values[i] = ec._DeleteFilesPayload_success(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "files":
-			out.Values[i] = ec._DeleteFilesPayload_files(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var domainImplementors = []string{"Domain"}
-
-func (ec *executionContext) _Domain(ctx context.Context, sel ast.SelectionSet, obj *db.Domain) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, domainImplementors)
+func (ec *executionContext) _DeleteFilePermissionPayload(ctx context.Context, sel ast.SelectionSet, obj *model.DeleteFilePermissionPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, deleteFilePermissionPayloadImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Domain")
-		case "id":
-			out.Values[i] = ec._Domain_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "name":
-			out.Values[i] = ec._Domain_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "createdAt":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Domain_createdAt(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var domainConnectionImplementors = []string{"DomainConnection"}
-
-func (ec *executionContext) _DomainConnection(ctx context.Context, sel ast.SelectionSet, obj *model.DomainConnection) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, domainConnectionImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("DomainConnection")
-		case "edges":
-			out.Values[i] = ec._DomainConnection_edges(ctx, field, obj)
-		case "pageInfo":
-			out.Values[i] = ec._DomainConnection_pageInfo(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "totalCount":
-			out.Values[i] = ec._DomainConnection_totalCount(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var downloadFilePayloadImplementors = []string{"DownloadFilePayload"}
-
-func (ec *executionContext) _DownloadFilePayload(ctx context.Context, sel ast.SelectionSet, obj *model.DownloadFilePayload) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, downloadFilePayloadImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("DownloadFilePayload")
-		case "url":
-			out.Values[i] = ec._DownloadFilePayload_url(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var downloadFilesPayloadImplementors = []string{"DownloadFilesPayload"}
-
-func (ec *executionContext) _DownloadFilesPayload(ctx context.Context, sel ast.SelectionSet, obj *model.DownloadFilesPayload) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, downloadFilesPayloadImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("DownloadFilesPayload")
-		case "url":
-			out.Values[i] = ec._DownloadFilesPayload_url(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var emailImplementors = []string{"Email"}
-
-func (ec *executionContext) _Email(ctx context.Context, sel ast.SelectionSet, obj *db.Email) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, emailImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Email")
-		case "id":
-			out.Values[i] = ec._Email_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "name":
-			out.Values[i] = ec._Email_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "address":
-			out.Values[i] = ec._Email_address(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "type":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Email_type(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "createdAt":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Email_createdAt(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var emailAccountImplementors = []string{"EmailAccount"}
-
-func (ec *executionContext) _EmailAccount(ctx context.Context, sel ast.SelectionSet, obj *db.EmailAccount) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, emailAccountImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("EmailAccount")
-		case "id":
-			out.Values[i] = ec._EmailAccount_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "name":
-			out.Values[i] = ec._EmailAccount_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "description":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._EmailAccount_description(ctx, field, obj)
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "type":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._EmailAccount_type(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "quota":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._EmailAccount_quota(ctx, field, obj)
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "active":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._EmailAccount_active(ctx, field, obj)
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "user":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._EmailAccount_user(ctx, field, obj)
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "createdAt":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._EmailAccount_createdAt(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "members":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._EmailAccount_members(ctx, field, obj)
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var emailAccountConnectionImplementors = []string{"EmailAccountConnection"}
-
-func (ec *executionContext) _EmailAccountConnection(ctx context.Context, sel ast.SelectionSet, obj *model.EmailAccountConnection) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, emailAccountConnectionImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("EmailAccountConnection")
-		case "edges":
-			out.Values[i] = ec._EmailAccountConnection_edges(ctx, field, obj)
-		case "pageInfo":
-			out.Values[i] = ec._EmailAccountConnection_pageInfo(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "totalCount":
-			out.Values[i] = ec._EmailAccountConnection_totalCount(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var emailConnectionImplementors = []string{"EmailConnection"}
-
-func (ec *executionContext) _EmailConnection(ctx context.Context, sel ast.SelectionSet, obj *model.EmailConnection) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, emailConnectionImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("EmailConnection")
-		case "edges":
-			out.Values[i] = ec._EmailConnection_edges(ctx, field, obj)
-		case "pageInfo":
-			out.Values[i] = ec._EmailConnection_pageInfo(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "totalCount":
-			out.Values[i] = ec._EmailConnection_totalCount(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var emailForwardingImplementors = []string{"EmailForwarding"}
-
-func (ec *executionContext) _EmailForwarding(ctx context.Context, sel ast.SelectionSet, obj *db.EmailForwarding) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, emailForwardingImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("EmailForwarding")
-		case "id":
-			out.Values[i] = ec._EmailForwarding_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "origin":
-			out.Values[i] = ec._EmailForwarding_origin(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "target":
-			out.Values[i] = ec._EmailForwarding_target(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "createdAt":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._EmailForwarding_createdAt(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var emailForwardingConnectionImplementors = []string{"EmailForwardingConnection"}
-
-func (ec *executionContext) _EmailForwardingConnection(ctx context.Context, sel ast.SelectionSet, obj *model.EmailForwardingConnection) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, emailForwardingConnectionImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("EmailForwardingConnection")
-		case "edges":
-			out.Values[i] = ec._EmailForwardingConnection_edges(ctx, field, obj)
-		case "pageInfo":
-			out.Values[i] = ec._EmailForwardingConnection_pageInfo(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "totalCount":
-			out.Values[i] = ec._EmailForwardingConnection_totalCount(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var emailGroupMemberImplementors = []string{"EmailGroupMember"}
-
-func (ec *executionContext) _EmailGroupMember(ctx context.Context, sel ast.SelectionSet, obj *db.EmailGroupMember) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, emailGroupMemberImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("EmailGroupMember")
-		case "id":
-			out.Values[i] = ec._EmailGroupMember_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "name":
-			out.Values[i] = ec._EmailGroupMember_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "memberOf":
-			out.Values[i] = ec._EmailGroupMember_memberOf(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "createdAt":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._EmailGroupMember_createdAt(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var emailGroupMemberConnectionImplementors = []string{"EmailGroupMemberConnection"}
-
-func (ec *executionContext) _EmailGroupMemberConnection(ctx context.Context, sel ast.SelectionSet, obj *model.EmailGroupMemberConnection) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, emailGroupMemberConnectionImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("EmailGroupMemberConnection")
-		case "edges":
-			out.Values[i] = ec._EmailGroupMemberConnection_edges(ctx, field, obj)
-		case "pageInfo":
-			out.Values[i] = ec._EmailGroupMemberConnection_pageInfo(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "totalCount":
-			out.Values[i] = ec._EmailGroupMemberConnection_totalCount(ctx, field, obj)
+			out.Values[i] = graphql.MarshalString("DeleteFilePermissionPayload")
+		case "filePermission":
+			out.Values[i] = ec._DeleteFilePermissionPayload_filePermission(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -38364,44 +29321,9 @@ func (ec *executionContext) _Entry(ctx context.Context, sel ast.SelectionSet, ob
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "body":
 			out.Values[i] = ec._Entry_body(ctx, field, obj)
-		case "createdAt":
-			out.Values[i] = ec._Entry_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "deletedAt":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Entry_deletedAt(ctx, field, obj)
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "user":
 			field := field
 
@@ -38654,6 +29576,44 @@ func (ec *executionContext) _Entry(ctx context.Context, sel ast.SelectionSet, ob
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "createdAt":
+			out.Values[i] = ec._Entry_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "deletedAt":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Entry_deletedAt(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -38794,12 +29754,7 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "recurrence":
 			out.Values[i] = ec._Event_recurrence(ctx, field, obj)
-		case "createdAt":
-			out.Values[i] = ec._Event_createdAt(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "deletedAt":
+		case "competences":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -38808,7 +29763,10 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Event_deletedAt(ctx, field, obj)
+				res = ec._Event_competences(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -38832,7 +29790,12 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "competences":
+		case "createdAt":
+			out.Values[i] = ec._Event_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "deletedAt":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -38841,10 +29804,7 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Event_competences(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
+				res = ec._Event_deletedAt(ctx, field, obj)
 				return res
 			}
 
@@ -39017,58 +29977,17 @@ func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "name":
-			out.Values[i] = ec._File_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "fileType":
-			out.Values[i] = ec._File_fileType(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "MIMEType":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._File_MIMEType(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "size":
 			out.Values[i] = ec._File_size(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "bucket":
+		case "name":
+			out.Values[i] = ec._File_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "type":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -39077,7 +29996,7 @@ func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._File_bucket(ctx, field, obj)
+				res = ec._File_type(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -39104,7 +30023,7 @@ func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "parent":
+		case "mime":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -39113,7 +30032,115 @@ func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._File_parent(ctx, field, obj)
+				res = ec._File_mime(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "folder":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._File_folder(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "folders":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._File_folders(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "files":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._File_files(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -39175,7 +30202,7 @@ func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "parents":
+		case "permissions":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -39184,43 +30211,7 @@ func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._File_parents(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "files":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._File_files(ctx, field, obj)
+				res = ec._File_permissions(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -39296,6 +30287,227 @@ func (ec *executionContext) _FileConnection(ctx context.Context, sel ast.Selecti
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var filePermissionImplementors = []string{"FilePermission"}
+
+func (ec *executionContext) _FilePermission(ctx context.Context, sel ast.SelectionSet, obj *db.FilePermission) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, filePermissionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FilePermission")
+		case "id":
+			out.Values[i] = ec._FilePermission_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "file":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._FilePermission_file(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "displayName":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._FilePermission_displayName(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "emailAddress":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._FilePermission_emailAddress(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "type":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._FilePermission_type(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "role":
+			out.Values[i] = ec._FilePermission_role(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "inherited":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._FilePermission_inherited(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -39456,45 +30668,6 @@ func (ec *executionContext) _InviteDetailsPayload(ctx context.Context, sel ast.S
 	return out
 }
 
-var moveFilesPayloadImplementors = []string{"MoveFilesPayload"}
-
-func (ec *executionContext) _MoveFilesPayload(ctx context.Context, sel ast.SelectionSet, obj *model.MoveFilesPayload) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, moveFilesPayloadImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("MoveFilesPayload")
-		case "files":
-			out.Values[i] = ec._MoveFilesPayload_files(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -39514,16 +30687,58 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "setUserAttendanceState":
+		case "updateUserAttendance":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_setUserAttendanceState(ctx, field)
+				return ec._Mutation_updateUserAttendance(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "updateDailyAttendance":
+		case "sendUserInvite":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_updateDailyAttendance(ctx, field)
+				return ec._Mutation_sendUserInvite(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "acceptInvite":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_acceptInvite(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "signIn":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_signIn(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resetPassword":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_resetPassword(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "forgotPassword":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_forgotPassword(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "signOut":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_signOut(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatePassword":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updatePassword(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -39591,58 +30806,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "uploadFile":
+		case "createFile":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_uploadFile(ctx, field)
+				return ec._Mutation_createFile(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "uploadFiles":
+		case "updateFile":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_uploadFiles(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "createFolder":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createFolder(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "renameFile":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_renameFile(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "moveFile":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_moveFile(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "moveFiles":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_moveFiles(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "copyFile":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_copyFile(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "copyFiles":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_copyFiles(ctx, field)
+				return ec._Mutation_updateFile(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -39654,146 +30827,27 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "deleteFiles":
+		case "createFilePermission":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_deleteFiles(ctx, field)
+				return ec._Mutation_createFilePermission(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "previewFile":
+		case "updateFilePermission":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_previewFile(ctx, field)
+				return ec._Mutation_updateFilePermission(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "downloadFile":
+		case "deleteFilePermission":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_downloadFile(ctx, field)
+				return ec._Mutation_deleteFilePermission(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "downloadFiles":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_downloadFiles(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "addFileShare":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_addFileShare(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "removeFileShare":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_removeFileShare(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "createSharedDrive":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createSharedDrive(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "renameSharedDrive":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_renameSharedDrive(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "deleteSharedDrive":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_deleteSharedDrive(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "createShare":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createShare(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "editShare":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_editShare(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "deleteShare":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_deleteShare(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "createEmailAccount":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createEmailAccount(ctx, field)
-			})
-		case "updateEmailAccount":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_updateEmailAccount(ctx, field)
-			})
-		case "deleteEmailAccount":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_deleteEmailAccount(ctx, field)
-			})
-		case "createEmailGroupMember":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createEmailGroupMember(ctx, field)
-			})
-		case "deleteEmailGroupMember":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_deleteEmailGroupMember(ctx, field)
-			})
-		case "createEmail":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createEmail(ctx, field)
-			})
-		case "deleteEmail":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_deleteEmail(ctx, field)
-			})
-		case "createEmailForwarding":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createEmailForwarding(ctx, field)
-			})
-		case "deleteEmailForwarding":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_deleteEmailForwarding(ctx, field)
-			})
-		case "createDomain":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createDomain(ctx, field)
-			})
-		case "deleteDomain":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_deleteDomain(ctx, field)
-			})
-		case "createEmailGroup":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createEmailGroup(ctx, field)
-			})
-		case "updateEmailGroup":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_updateEmailGroup(ctx, field)
-			})
-		case "deleteEmailGroup":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_deleteEmailGroup(ctx, field)
-			})
 		case "createEntry":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createEntry(ctx, field)
@@ -39948,76 +31002,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "signIn":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_signIn(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "resetPassword":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_resetPassword(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "forgotPassword":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_forgotPassword(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "signOut":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_signOut(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "acceptInvite":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_acceptInvite(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "createUser":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createUser(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "updateUser":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_updateUser(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "archiveUser":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_archiveUser(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "updateUserLanguage":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_updateUserLanguage(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "sendUserInvite":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_sendUserInvite(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "createStudent":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createStudent(ctx, field)
@@ -40056,13 +31040,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "updateTag":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateTag(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "updatePassword":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_updatePassword(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -40144,6 +31121,34 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "createUser":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createUser(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updateUser":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateUser(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "archiveUser":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_archiveUser(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updateUserLanguage":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateUserLanguage(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -40207,6 +31212,42 @@ func (ec *executionContext) _Organisation(ctx context.Context, sel ast.Selection
 					}
 				}()
 				res = ec._Organisation_owner(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "applications":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Organisation_applications(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -40305,45 +31346,6 @@ func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
-var previewFilePayloadImplementors = []string{"PreviewFilePayload"}
-
-func (ec *executionContext) _PreviewFilePayload(ctx context.Context, sel ast.SelectionSet, obj *model.PreviewFilePayload) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, previewFilePayloadImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("PreviewFilePayload")
-		case "url":
-			out.Values[i] = ec._PreviewFilePayload_url(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
 var queryImplementors = []string{"Query"}
 
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -40363,7 +31365,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "userAttendanceOverview":
+		case "userAttendances":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -40372,7 +31374,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_userAttendanceOverview(ctx, field)
+				res = ec._Query_userAttendances(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "inviteDetails":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_inviteDetails(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -40429,7 +31453,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "buckets":
+		case "myDrive":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -40438,7 +31462,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_buckets(ctx, field)
+				res = ec._Query_myDrive(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -40451,7 +31475,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "bucket":
+		case "sharedDrives":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -40460,7 +31484,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_bucket(ctx, field)
+				res = ec._Query_sharedDrives(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "trash":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_trash(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -40508,215 +31554,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "shares":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_shares(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "emailAccounts":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_emailAccounts(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "emailAccount":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_emailAccount(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "EmailGroupMembers":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_EmailGroupMembers(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "EmailGroupMember":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_EmailGroupMember(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "emails":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_emails(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "email":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_email(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "emailForwardings":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_emailForwardings(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "emailForwarding":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_emailForwarding(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "domains":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_domains(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "domain":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_domain(ctx, field)
 				return res
 			}
 
@@ -40899,72 +31736,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "users":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_users(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "user":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_user(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "me":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_me(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "competence":
 			field := field
 
@@ -41097,28 +31868,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "inviteDetails":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_inviteDetails(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "subjects":
 			field := field
 
@@ -41239,6 +31988,72 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_userStudentGrade(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "users":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_users(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "user":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_user(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "me":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_me(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -41587,28 +32402,18 @@ func (ec *executionContext) _ResetPasswordPayload(ctx context.Context, sel ast.S
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ResetPasswordPayload")
-		case "success":
-			out.Values[i] = ec._ResetPasswordPayload_success(ctx, field, obj)
+		case "user":
+			out.Values[i] = ec._ResetPasswordPayload_user(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "unauthorized":
-			out.Values[i] = ec._ResetPasswordPayload_unauthorized(ctx, field, obj)
+		case "token":
+			out.Values[i] = ec._ResetPasswordPayload_token(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "invalidToken":
-			out.Values[i] = ec._ResetPasswordPayload_invalidToken(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "tokenExpired":
-			out.Values[i] = ec._ResetPasswordPayload_tokenExpired(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "unableToReset":
-			out.Values[i] = ec._ResetPasswordPayload_unableToReset(ctx, field, obj)
+		case "organisation":
+			out.Values[i] = ec._ResetPasswordPayload_organisation(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -41764,50 +32569,6 @@ func (ec *executionContext) _SchoolYearConnection(ctx context.Context, sel ast.S
 	return out
 }
 
-var shareUserImplementors = []string{"ShareUser"}
-
-func (ec *executionContext) _ShareUser(ctx context.Context, sel ast.SelectionSet, obj *model.ShareUser) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, shareUserImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("ShareUser")
-		case "user":
-			out.Values[i] = ec._ShareUser_user(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "permission":
-			out.Values[i] = ec._ShareUser_permission(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
 var signInPayloadImplementors = []string{"SignInPayload"}
 
 func (ec *executionContext) _SignInPayload(ctx context.Context, sel ast.SelectionSet, obj *model.SignInPayload) graphql.Marshaler {
@@ -41819,28 +32580,18 @@ func (ec *executionContext) _SignInPayload(ctx context.Context, sel ast.Selectio
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("SignInPayload")
+		case "user":
+			out.Values[i] = ec._SignInPayload_user(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "token":
 			out.Values[i] = ec._SignInPayload_token(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "enabled_apps":
-			out.Values[i] = ec._SignInPayload_enabled_apps(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "language":
-			out.Values[i] = ec._SignInPayload_language(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "setupComplete":
-			out.Values[i] = ec._SignInPayload_setupComplete(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "user":
-			out.Values[i] = ec._SignInPayload_user(ctx, field, obj)
+		case "organisation":
+			out.Values[i] = ec._SignInPayload_organisation(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -42146,19 +32897,55 @@ func (ec *executionContext) _TagConnection(ctx context.Context, sel ast.Selectio
 	return out
 }
 
-var uploadFilesPayloadImplementors = []string{"UploadFilesPayload"}
+var updateFilePayloadImplementors = []string{"UpdateFilePayload"}
 
-func (ec *executionContext) _UploadFilesPayload(ctx context.Context, sel ast.SelectionSet, obj *model.UploadFilesPayload) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, uploadFilesPayloadImplementors)
+func (ec *executionContext) _UpdateFilePayload(ctx context.Context, sel ast.SelectionSet, obj *model.UpdateFilePayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, updateFilePayloadImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("UploadFilesPayload")
-		case "files":
-			out.Values[i] = ec._UploadFilesPayload_files(ctx, field, obj)
+			out.Values[i] = graphql.MarshalString("UpdateFilePayload")
+		case "name":
+			out.Values[i] = ec._UpdateFilePayload_name(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var updateFilePermissionPayloadImplementors = []string{"UpdateFilePermissionPayload"}
+
+func (ec *executionContext) _UpdateFilePermissionPayload(ctx context.Context, sel ast.SelectionSet, obj *model.UpdateFilePermissionPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, updateFilePermissionPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UpdateFilePermissionPayload")
+		case "filePermission":
+			out.Values[i] = ec._UpdateFilePermissionPayload_filePermission(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -42427,39 +33214,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "emailAccounts":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._User_emailAccounts(ctx, field, obj)
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -42499,6 +33253,42 @@ func (ec *executionContext) _UserAttendance(ctx context.Context, sel ast.Selecti
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "date":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UserAttendance_date(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "user":
 			field := field
 
@@ -42540,42 +33330,6 @@ func (ec *executionContext) _UserAttendance(ctx context.Context, sel ast.Selecti
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "date":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._UserAttendance_date(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -43879,78 +34633,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNBucket2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucket(ctx context.Context, sel ast.SelectionSet, v db.Bucket) graphql.Marshaler {
-	return ec._Bucket(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNBucket2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucketᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.Bucket) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucket(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) marshalNBucket2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐBucket(ctx context.Context, sel ast.SelectionSet, v *db.Bucket) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._Bucket(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNBucketConnection2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐBucketConnection(ctx context.Context, sel ast.SelectionSet, v model.BucketConnection) graphql.Marshaler {
-	return ec._BucketConnection(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNBucketConnection2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐBucketConnection(ctx context.Context, sel ast.SelectionSet, v *model.BucketConnection) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._BucketConnection(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalNChat2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChat(ctx context.Context, sel ast.SelectionSet, v db.Chat) graphql.Marshaler {
 	return ec._Chat(ctx, sel, &v)
 }
@@ -44203,30 +34885,6 @@ func (ec *executionContext) marshalNCompetenceType2githubᚗcomᚋdokeduᚋdoked
 	return res
 }
 
-func (ec *executionContext) unmarshalNCopyFileInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCopyFileInput(ctx context.Context, v interface{}) (model.CopyFileInput, error) {
-	res, err := ec.unmarshalInputCopyFileInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNCopyFilesInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCopyFilesInput(ctx context.Context, v interface{}) (model.CopyFilesInput, error) {
-	res, err := ec.unmarshalInputCopyFilesInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNCopyFilesPayload2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCopyFilesPayload(ctx context.Context, sel ast.SelectionSet, v model.CopyFilesPayload) graphql.Marshaler {
-	return ec._CopyFilesPayload(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNCopyFilesPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCopyFilesPayload(ctx context.Context, sel ast.SelectionSet, v *model.CopyFilesPayload) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._CopyFilesPayload(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalNCreateChatInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateChatInput(ctx context.Context, v interface{}) (model.CreateChatInput, error) {
 	res, err := ec.unmarshalInputCreateChatInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -44234,36 +34892,6 @@ func (ec *executionContext) unmarshalNCreateChatInput2githubᚗcomᚋdokeduᚋdo
 
 func (ec *executionContext) unmarshalNCreateCompetenceInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateCompetenceInput(ctx context.Context, v interface{}) (model.CreateCompetenceInput, error) {
 	res, err := ec.unmarshalInputCreateCompetenceInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNCreateDomainInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateDomainInput(ctx context.Context, v interface{}) (model.CreateDomainInput, error) {
-	res, err := ec.unmarshalInputCreateDomainInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNCreateEmailAccountInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateEmailAccountInput(ctx context.Context, v interface{}) (model.CreateEmailAccountInput, error) {
-	res, err := ec.unmarshalInputCreateEmailAccountInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNCreateEmailForwardingInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateEmailForwardingInput(ctx context.Context, v interface{}) (model.CreateEmailForwardingInput, error) {
-	res, err := ec.unmarshalInputCreateEmailForwardingInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNCreateEmailGroupInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateEmailGroupInput(ctx context.Context, v interface{}) (model.CreateEmailGroupInput, error) {
-	res, err := ec.unmarshalInputCreateEmailGroupInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNCreateEmailGroupMemberInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateEmailGroupMemberInput(ctx context.Context, v interface{}) (model.CreateEmailGroupMemberInput, error) {
-	res, err := ec.unmarshalInputCreateEmailGroupMemberInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNCreateEmailInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateEmailInput(ctx context.Context, v interface{}) (model.CreateEmailInput, error) {
-	res, err := ec.unmarshalInputCreateEmailInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -44297,9 +34925,42 @@ func (ec *executionContext) unmarshalNCreateEventInput2githubᚗcomᚋdokeduᚋd
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreateFolderInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateFolderInput(ctx context.Context, v interface{}) (model.CreateFolderInput, error) {
-	res, err := ec.unmarshalInputCreateFolderInput(ctx, v)
+func (ec *executionContext) unmarshalNCreateFileInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateFileInput(ctx context.Context, v interface{}) (model.CreateFileInput, error) {
+	res, err := ec.unmarshalInputCreateFileInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNCreateFilePayload2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateFilePayload(ctx context.Context, sel ast.SelectionSet, v model.CreateFilePayload) graphql.Marshaler {
+	return ec._CreateFilePayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNCreateFilePayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateFilePayload(ctx context.Context, sel ast.SelectionSet, v *model.CreateFilePayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._CreateFilePayload(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNCreateFilePermissionInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateFilePermissionInput(ctx context.Context, v interface{}) (model.CreateFilePermissionInput, error) {
+	res, err := ec.unmarshalInputCreateFilePermissionInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNCreateFilePermissionPayload2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateFilePermissionPayload(ctx context.Context, sel ast.SelectionSet, v model.CreateFilePermissionPayload) graphql.Marshaler {
+	return ec._CreateFilePermissionPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNCreateFilePermissionPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateFilePermissionPayload(ctx context.Context, sel ast.SelectionSet, v *model.CreateFilePermissionPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._CreateFilePermissionPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNCreateReportInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateReportInput(ctx context.Context, v interface{}) (model.CreateReportInput, error) {
@@ -44309,11 +34970,6 @@ func (ec *executionContext) unmarshalNCreateReportInput2githubᚗcomᚋdokeduᚋ
 
 func (ec *executionContext) unmarshalNCreateSchoolYearInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateSchoolYearInput(ctx context.Context, v interface{}) (model.CreateSchoolYearInput, error) {
 	res, err := ec.unmarshalInputCreateSchoolYearInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNCreateShareInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐCreateShareInput(ctx context.Context, v interface{}) (model.CreateShareInput, error) {
-	res, err := ec.unmarshalInputCreateShareInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -44344,31 +35000,6 @@ func (ec *executionContext) unmarshalNCreateUserInput2githubᚗcomᚋdokeduᚋdo
 
 func (ec *executionContext) unmarshalNDeleteChatInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteChatInput(ctx context.Context, v interface{}) (model.DeleteChatInput, error) {
 	res, err := ec.unmarshalInputDeleteChatInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNDeleteDomainInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteDomainInput(ctx context.Context, v interface{}) (model.DeleteDomainInput, error) {
-	res, err := ec.unmarshalInputDeleteDomainInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNDeleteEmailAccountInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteEmailAccountInput(ctx context.Context, v interface{}) (model.DeleteEmailAccountInput, error) {
-	res, err := ec.unmarshalInputDeleteEmailAccountInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNDeleteEmailForwardingInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteEmailForwardingInput(ctx context.Context, v interface{}) (model.DeleteEmailForwardingInput, error) {
-	res, err := ec.unmarshalInputDeleteEmailForwardingInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNDeleteEmailGroupMemberInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteEmailGroupMemberInput(ctx context.Context, v interface{}) (model.DeleteEmailGroupMemberInput, error) {
-	res, err := ec.unmarshalInputDeleteEmailGroupMemberInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNDeleteEmailInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteEmailInput(ctx context.Context, v interface{}) (model.DeleteEmailInput, error) {
-	res, err := ec.unmarshalInputDeleteEmailInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -44416,91 +35047,28 @@ func (ec *executionContext) marshalNDeleteFilePayload2ᚖgithubᚗcomᚋdokedu�
 	return ec._DeleteFilePayload(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNDeleteFilesInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteFilesInput(ctx context.Context, v interface{}) (model.DeleteFilesInput, error) {
-	res, err := ec.unmarshalInputDeleteFilesInput(ctx, v)
+func (ec *executionContext) unmarshalNDeleteFilePermissionInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteFilePermissionInput(ctx context.Context, v interface{}) (model.DeleteFilePermissionInput, error) {
+	res, err := ec.unmarshalInputDeleteFilePermissionInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNDeleteFilesPayload2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteFilesPayload(ctx context.Context, sel ast.SelectionSet, v model.DeleteFilesPayload) graphql.Marshaler {
-	return ec._DeleteFilesPayload(ctx, sel, &v)
+func (ec *executionContext) marshalNDeleteFilePermissionPayload2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteFilePermissionPayload(ctx context.Context, sel ast.SelectionSet, v model.DeleteFilePermissionPayload) graphql.Marshaler {
+	return ec._DeleteFilePermissionPayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNDeleteFilesPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteFilesPayload(ctx context.Context, sel ast.SelectionSet, v *model.DeleteFilesPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNDeleteFilePermissionPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteFilePermissionPayload(ctx context.Context, sel ast.SelectionSet, v *model.DeleteFilePermissionPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._DeleteFilesPayload(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNDeleteShareInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDeleteShareInput(ctx context.Context, v interface{}) (model.DeleteShareInput, error) {
-	res, err := ec.unmarshalInputDeleteShareInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNDownloadFileInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDownloadFileInput(ctx context.Context, v interface{}) (model.DownloadFileInput, error) {
-	res, err := ec.unmarshalInputDownloadFileInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNDownloadFilePayload2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDownloadFilePayload(ctx context.Context, sel ast.SelectionSet, v model.DownloadFilePayload) graphql.Marshaler {
-	return ec._DownloadFilePayload(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNDownloadFilePayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDownloadFilePayload(ctx context.Context, sel ast.SelectionSet, v *model.DownloadFilePayload) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._DownloadFilePayload(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNDownloadFilesInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDownloadFilesInput(ctx context.Context, v interface{}) (model.DownloadFilesInput, error) {
-	res, err := ec.unmarshalInputDownloadFilesInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNDownloadFilesPayload2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDownloadFilesPayload(ctx context.Context, sel ast.SelectionSet, v model.DownloadFilesPayload) graphql.Marshaler {
-	return ec._DownloadFilesPayload(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNDownloadFilesPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDownloadFilesPayload(ctx context.Context, sel ast.SelectionSet, v *model.DownloadFilesPayload) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._DownloadFilesPayload(ctx, sel, v)
+	return ec._DeleteFilePermissionPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNEditChatMessageInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEditChatMessageInput(ctx context.Context, v interface{}) (model.EditChatMessageInput, error) {
 	res, err := ec.unmarshalInputEditChatMessageInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNEmailAccountType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountType(ctx context.Context, v interface{}) (model.EmailAccountType, error) {
-	var res model.EmailAccountType
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNEmailAccountType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountType(ctx context.Context, sel ast.SelectionSet, v model.EmailAccountType) graphql.Marshaler {
-	return v
-}
-
-func (ec *executionContext) unmarshalNEmailType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailType(ctx context.Context, v interface{}) (model.EmailType, error) {
-	var res model.EmailType
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNEmailType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailType(ctx context.Context, sel ast.SelectionSet, v model.EmailType) graphql.Marshaler {
-	return v
 }
 
 func (ec *executionContext) marshalNEntry2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx context.Context, sel ast.SelectionSet, v db.Entry) graphql.Marshaler {
@@ -44762,13 +35330,67 @@ func (ec *executionContext) marshalNFileConnection2ᚖgithubᚗcomᚋdokeduᚋdo
 	return ec._FileConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNFilePermission2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx context.Context, v interface{}) (db.FilePermission, error) {
+func (ec *executionContext) marshalNFilePermission2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermissionᚄ(ctx context.Context, sel ast.SelectionSet, v []*db.FilePermission) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNFilePermission2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNFilePermission2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx context.Context, sel ast.SelectionSet, v *db.FilePermission) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._FilePermission(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNFilePermissionRole2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermissionRole(ctx context.Context, v interface{}) (db.FilePermissionRole, error) {
 	tmp, err := graphql.UnmarshalString(v)
-	res := db.FilePermission(tmp)
+	res := db.FilePermissionRole(tmp)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNFilePermission2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx context.Context, sel ast.SelectionSet, v db.FilePermission) graphql.Marshaler {
+func (ec *executionContext) marshalNFilePermissionRole2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermissionRole(ctx context.Context, sel ast.SelectionSet, v db.FilePermissionRole) graphql.Marshaler {
 	res := graphql.MarshalString(string(v))
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -44776,6 +35398,16 @@ func (ec *executionContext) marshalNFilePermission2githubᚗcomᚋdokeduᚋdoked
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNFilePermissionType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFilePermissionType(ctx context.Context, v interface{}) (model.FilePermissionType, error) {
+	var res model.FilePermissionType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFilePermissionType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFilePermissionType(ctx context.Context, sel ast.SelectionSet, v model.FilePermissionType) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) unmarshalNFileType2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFileType(ctx context.Context, v interface{}) (db.FileType, error) {
@@ -44792,11 +35424,6 @@ func (ec *executionContext) marshalNFileType2githubᚗcomᚋdokeduᚋdokeduᚋba
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) unmarshalNFileUploadInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFileUploadInput(ctx context.Context, v interface{}) (model.FileUploadInput, error) {
-	res, err := ec.unmarshalInputFileUploadInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
@@ -44817,20 +35444,6 @@ func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.S
 func (ec *executionContext) unmarshalNForgotPasswordInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐForgotPasswordInput(ctx context.Context, v interface{}) (model.ForgotPasswordInput, error) {
 	res, err := ec.unmarshalInputForgotPasswordInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNForgotPasswordPayload2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐForgotPasswordPayload(ctx context.Context, sel ast.SelectionSet, v model.ForgotPasswordPayload) graphql.Marshaler {
-	return ec._ForgotPasswordPayload(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNForgotPasswordPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐForgotPasswordPayload(ctx context.Context, sel ast.SelectionSet, v *model.ForgotPasswordPayload) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._ForgotPasswordPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
@@ -45061,30 +35674,6 @@ func (ec *executionContext) marshalNInviteDetailsPayload2ᚖgithubᚗcomᚋdoked
 	return ec._InviteDetailsPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNMoveFileInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐMoveFileInput(ctx context.Context, v interface{}) (model.MoveFileInput, error) {
-	res, err := ec.unmarshalInputMoveFileInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNMoveFilesInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐMoveFilesInput(ctx context.Context, v interface{}) (model.MoveFilesInput, error) {
-	res, err := ec.unmarshalInputMoveFilesInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNMoveFilesPayload2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐMoveFilesPayload(ctx context.Context, sel ast.SelectionSet, v model.MoveFilesPayload) graphql.Marshaler {
-	return ec._MoveFilesPayload(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNMoveFilesPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐMoveFilesPayload(ctx context.Context, sel ast.SelectionSet, v *model.MoveFilesPayload) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._MoveFilesPayload(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalNOrganisation2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐOrganisation(ctx context.Context, sel ast.SelectionSet, v db.Organisation) graphql.Marshaler {
 	return ec._Organisation(ctx, sel, &v)
 }
@@ -45099,6 +35688,77 @@ func (ec *executionContext) marshalNOrganisation2ᚖgithubᚗcomᚋdokeduᚋdoke
 	return ec._Organisation(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNOrganisationApplication2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐOrganisationApplication(ctx context.Context, v interface{}) (model.OrganisationApplication, error) {
+	var res model.OrganisationApplication
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNOrganisationApplication2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐOrganisationApplication(ctx context.Context, sel ast.SelectionSet, v model.OrganisationApplication) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNOrganisationApplication2ᚕgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐOrganisationApplicationᚄ(ctx context.Context, v interface{}) ([]model.OrganisationApplication, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]model.OrganisationApplication, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNOrganisationApplication2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐOrganisationApplication(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNOrganisationApplication2ᚕgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐOrganisationApplicationᚄ(ctx context.Context, sel ast.SelectionSet, v []model.OrganisationApplication) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNOrganisationApplication2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐOrganisationApplication(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) marshalNPageInfo2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *model.PageInfo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -45109,37 +35769,8 @@ func (ec *executionContext) marshalNPageInfo2ᚖgithubᚗcomᚋdokeduᚋdokedu�
 	return ec._PageInfo(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNPreviewFileInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐPreviewFileInput(ctx context.Context, v interface{}) (model.PreviewFileInput, error) {
-	res, err := ec.unmarshalInputPreviewFileInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNPreviewFilePayload2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐPreviewFilePayload(ctx context.Context, sel ast.SelectionSet, v model.PreviewFilePayload) graphql.Marshaler {
-	return ec._PreviewFilePayload(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNPreviewFilePayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐPreviewFilePayload(ctx context.Context, sel ast.SelectionSet, v *model.PreviewFilePayload) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._PreviewFilePayload(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalNRemoveUserFromChatInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐRemoveUserFromChatInput(ctx context.Context, v interface{}) (model.RemoveUserFromChatInput, error) {
 	res, err := ec.unmarshalInputRemoveUserFromChatInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNRenameFileInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐRenameFileInput(ctx context.Context, v interface{}) (model.RenameFileInput, error) {
-	res, err := ec.unmarshalInputRenameFileInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNRenameSharedDriveInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐRenameSharedDriveInput(ctx context.Context, v interface{}) (model.RenameSharedDriveInput, error) {
-	res, err := ec.unmarshalInputRenameSharedDriveInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -45353,25 +35984,6 @@ func (ec *executionContext) unmarshalNSendMessageInput2githubᚗcomᚋdokeduᚋd
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNShareFileInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐShareFileInput(ctx context.Context, v interface{}) (model.ShareFileInput, error) {
-	res, err := ec.unmarshalInputShareFileInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNShareUser2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐShareUser(ctx context.Context, sel ast.SelectionSet, v model.ShareUser) graphql.Marshaler {
-	return ec._ShareUser(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNShareUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐShareUser(ctx context.Context, sel ast.SelectionSet, v *model.ShareUser) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._ShareUser(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalNSignInInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐSignInInput(ctx context.Context, v interface{}) (model.SignInInput, error) {
 	res, err := ec.unmarshalInputSignInInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -45441,38 +36053,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
-	var vSlice []interface{}
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([]string, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	for i := range v {
-		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
-	}
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
 }
 
 func (ec *executionContext) marshalNSubject2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐSubject(ctx context.Context, sel ast.SelectionSet, v db.Subject) graphql.Marshaler {
@@ -45670,16 +36250,6 @@ func (ec *executionContext) unmarshalNUpdateCompetenceSortingInput2githubᚗcom�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateEmailAccountInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateEmailAccountInput(ctx context.Context, v interface{}) (model.UpdateEmailAccountInput, error) {
-	res, err := ec.unmarshalInputUpdateEmailAccountInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNUpdateEmailGroupInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateEmailGroupInput(ctx context.Context, v interface{}) (model.UpdateEmailGroupInput, error) {
-	res, err := ec.unmarshalInputUpdateEmailGroupInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalNUpdateEntryInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateEntryInput(ctx context.Context, v interface{}) (model.UpdateEntryInput, error) {
 	res, err := ec.unmarshalInputUpdateEntryInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -45695,6 +36265,44 @@ func (ec *executionContext) unmarshalNUpdateEventInput2githubᚗcomᚋdokeduᚋd
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNUpdateFileInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateFileInput(ctx context.Context, v interface{}) (model.UpdateFileInput, error) {
+	res, err := ec.unmarshalInputUpdateFileInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUpdateFilePayload2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateFilePayload(ctx context.Context, sel ast.SelectionSet, v model.UpdateFilePayload) graphql.Marshaler {
+	return ec._UpdateFilePayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUpdateFilePayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateFilePayload(ctx context.Context, sel ast.SelectionSet, v *model.UpdateFilePayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._UpdateFilePayload(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNUpdateFilePermissionInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateFilePermissionInput(ctx context.Context, v interface{}) (model.UpdateFilePermissionInput, error) {
+	res, err := ec.unmarshalInputUpdateFilePermissionInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUpdateFilePermissionPayload2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateFilePermissionPayload(ctx context.Context, sel ast.SelectionSet, v model.UpdateFilePermissionPayload) graphql.Marshaler {
+	return ec._UpdateFilePermissionPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUpdateFilePermissionPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateFilePermissionPayload(ctx context.Context, sel ast.SelectionSet, v *model.UpdateFilePermissionPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._UpdateFilePermissionPayload(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNUpdateOrganisationInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateOrganisationInput(ctx context.Context, v interface{}) (model.UpdateOrganisationInput, error) {
 	res, err := ec.unmarshalInputUpdateOrganisationInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -45707,6 +36315,11 @@ func (ec *executionContext) unmarshalNUpdateSchoolYearInput2githubᚗcomᚋdoked
 
 func (ec *executionContext) unmarshalNUpdateSubjectInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateSubjectInput(ctx context.Context, v interface{}) (model.UpdateSubjectInput, error) {
 	res, err := ec.unmarshalInputUpdateSubjectInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateUserAttendanceInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUpdateUserAttendanceInput(ctx context.Context, v interface{}) (model.UpdateUserAttendanceInput, error) {
+	res, err := ec.unmarshalInputUpdateUserAttendanceInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -45733,20 +36346,6 @@ func (ec *executionContext) marshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋg
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalNUploadFilesPayload2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUploadFilesPayload(ctx context.Context, sel ast.SelectionSet, v model.UploadFilesPayload) graphql.Marshaler {
-	return ec._UploadFilesPayload(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNUploadFilesPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐUploadFilesPayload(ctx context.Context, sel ast.SelectionSet, v *model.UploadFilesPayload) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._UploadFilesPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNUser2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐUser(ctx context.Context, sel ast.SelectionSet, v db.User) graphql.Marshaler {
@@ -46396,14 +36995,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) unmarshalOBucketFilterInput2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐBucketFilterInput(ctx context.Context, v interface{}) (*model.BucketFilterInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputBucketFilterInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) marshalOChat2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐChat(ctx context.Context, sel ast.SelectionSet, v []*db.Chat) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -46608,305 +37199,6 @@ func (ec *executionContext) marshalOCompetenceType2ᚖgithubᚗcomᚋdokeduᚋdo
 	return res
 }
 
-func (ec *executionContext) marshalODomain2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐDomain(ctx context.Context, sel ast.SelectionSet, v []*db.Domain) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalODomain2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐDomain(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	return ret
-}
-
-func (ec *executionContext) marshalODomain2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐDomain(ctx context.Context, sel ast.SelectionSet, v *db.Domain) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Domain(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalODomainConnection2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐDomainConnection(ctx context.Context, sel ast.SelectionSet, v *model.DomainConnection) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._DomainConnection(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOEmail2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmail(ctx context.Context, sel ast.SelectionSet, v []*db.Email) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOEmail2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmail(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	return ret
-}
-
-func (ec *executionContext) marshalOEmail2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmail(ctx context.Context, sel ast.SelectionSet, v *db.Email) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Email(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOEmailAccount2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx context.Context, sel ast.SelectionSet, v []*db.EmailAccount) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	return ret
-}
-
-func (ec *executionContext) marshalOEmailAccount2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailAccount(ctx context.Context, sel ast.SelectionSet, v *db.EmailAccount) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._EmailAccount(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOEmailAccountConnection2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountConnection(ctx context.Context, sel ast.SelectionSet, v *model.EmailAccountConnection) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._EmailAccountConnection(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOEmailAccountFilter2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountFilter(ctx context.Context, v interface{}) (*model.EmailAccountFilter, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputEmailAccountFilter(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalOEmailAccountType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountType(ctx context.Context, v interface{}) (*model.EmailAccountType, error) {
-	if v == nil {
-		return nil, nil
-	}
-	var res = new(model.EmailAccountType)
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOEmailAccountType2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailAccountType(ctx context.Context, sel ast.SelectionSet, v *model.EmailAccountType) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return v
-}
-
-func (ec *executionContext) marshalOEmailConnection2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailConnection(ctx context.Context, sel ast.SelectionSet, v *model.EmailConnection) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._EmailConnection(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOEmailForwarding2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailForwarding(ctx context.Context, sel ast.SelectionSet, v []*db.EmailForwarding) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOEmailForwarding2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailForwarding(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	return ret
-}
-
-func (ec *executionContext) marshalOEmailForwarding2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailForwarding(ctx context.Context, sel ast.SelectionSet, v *db.EmailForwarding) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._EmailForwarding(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOEmailForwardingConnection2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailForwardingConnection(ctx context.Context, sel ast.SelectionSet, v *model.EmailForwardingConnection) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._EmailForwardingConnection(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOEmailGroupMember2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailGroupMember(ctx context.Context, sel ast.SelectionSet, v []*db.EmailGroupMember) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOEmailGroupMember2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailGroupMember(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	return ret
-}
-
-func (ec *executionContext) marshalOEmailGroupMember2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEmailGroupMember(ctx context.Context, sel ast.SelectionSet, v *db.EmailGroupMember) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._EmailGroupMember(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOEmailGroupMemberConnection2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐEmailGroupMemberConnection(ctx context.Context, sel ast.SelectionSet, v *model.EmailGroupMemberConnection) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._EmailGroupMemberConnection(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalOEntry2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐEntry(ctx context.Context, sel ast.SelectionSet, v *db.Entry) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -47024,28 +37316,11 @@ func (ec *executionContext) marshalOFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbac
 	return ec._File(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOFilePermission2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx context.Context, v interface{}) (*db.FilePermission, error) {
+func (ec *executionContext) unmarshalOFileFilterInput2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFileFilterInput(ctx context.Context, v interface{}) (*model.FileFilterInput, error) {
 	if v == nil {
 		return nil, nil
 	}
-	tmp, err := graphql.UnmarshalString(v)
-	res := db.FilePermission(tmp)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOFilePermission2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFilePermission(ctx context.Context, sel ast.SelectionSet, v *db.FilePermission) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	res := graphql.MarshalString(string(*v))
-	return res
-}
-
-func (ec *executionContext) unmarshalOFilesFilterInput2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFilesFilterInput(ctx context.Context, v interface{}) (*model.FilesFilterInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputFilesFilterInput(ctx, v)
+	res, err := ec.unmarshalInputFileFilterInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -47166,61 +37441,6 @@ func (ec *executionContext) marshalOReport2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋb
 		return graphql.Null
 	}
 	return ec._Report(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOShareInput2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐShareInput(ctx context.Context, v interface{}) (*model.ShareInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputShareInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOShareUser2ᚕᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐShareUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ShareUser) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNShareUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐShareUser(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

@@ -8,17 +8,22 @@ enum UserAttendanceState {
 
 type UserAttendance {
     id: ID!
+    date: Time!
     user: User!
     state: UserAttendanceState!
+}
+
+input UpdateUserAttendanceInput {
     date: Time!
+    userId: ID!
+    state: UserAttendanceState!
 }
 
 extend type Mutation  {
-    setUserAttendanceState(userId: ID!, date: Time!, state: UserAttendanceState!): UserAttendance!
-    updateDailyAttendance(date: Time!, state: UserAttendanceState!): [UserAttendance!]!
+    updateUserAttendance(input: UpdateUserAttendanceInput!): UserAttendance!
 
 }
 
 extend type Query {
-    userAttendanceOverview(date: Time!): [UserAttendance!]!
+    userAttendances(date: Time!): [UserAttendance!]!
 }

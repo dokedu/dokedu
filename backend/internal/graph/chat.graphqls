@@ -2,19 +2,24 @@ enum ChatType {
     PRIVATE
     GROUP
     CHANNEL
+    AI
 }
 
 type Chat {
     id: ID!
     name: String
-    users: [User!]!
     type: ChatType!
+    users: [User!]!
+
+    userCount: Int!
+    unreadMessageCount: Int!
+
     messages: [ChatMessage!]!
     lastMessage: ChatMessage
+
     createdAt: Time!
     deletedAt: Time
-    unreadMessageCount: Int!
-    userCount: Int!
+    deleted: Boolean!
 }
 
 type ChatUser {
@@ -28,9 +33,11 @@ type ChatMessage {
     chat: Chat!
     user: User!
     message: String!
-    createdAt: Time!
+
     isEdited: Boolean!
     isSeen: Boolean!
+
+    createdAt: Time!
 }
 
 type ChatConnection {

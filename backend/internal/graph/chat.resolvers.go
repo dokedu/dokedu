@@ -9,8 +9,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/dokedu/dokedu/backend/internal/msg"
-	"github.com/jackc/pgx/v5/pgtype"
 	"time"
 
 	"github.com/dokedu/dokedu/backend/internal/database/db"
@@ -18,6 +16,8 @@ import (
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
+	"github.com/dokedu/dokedu/backend/internal/msg"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/samber/lo"
 )
 
@@ -29,7 +29,7 @@ func (r *chatResolver) Name(ctx context.Context, obj *db.Chat) (*string, error) 
 	}
 
 	if obj.Type.Valid && obj.Type.ChatType == db.ChatTypePrivate {
-		user, err := r.DB.ChatNameWithAuthByChatId(ctx, db.ChatNameWithAuthByChatIdParams{
+		user, err := r.DB.ChatNameByChatId(ctx, db.ChatNameByChatIdParams{
 			ChatID:         obj.ID,
 			UserID:         currentUser.ID,
 			OrganisationID: currentUser.OrganisationID,
@@ -44,6 +44,11 @@ func (r *chatResolver) Name(ctx context.Context, obj *db.Chat) (*string, error) 
 	}
 
 	return &obj.Name.String, nil
+}
+
+// Type is the resolver for the type field.
+func (r *chatResolver) Type(ctx context.Context, obj *db.Chat) (db.ChatType, error) {
+	return obj.Type.ChatType, nil
 }
 
 // Users is the resolver for the users field.
@@ -61,9 +66,37 @@ func (r *chatResolver) Users(ctx context.Context, obj *db.Chat) ([]*db.User, err
 	return lo.ToSlicePtr(users), err
 }
 
-// Type is the resolver for the type field.
-func (r *chatResolver) Type(ctx context.Context, obj *db.Chat) (db.ChatType, error) {
-	return obj.Type.ChatType, nil
+// UserCount is the resolver for the userCount field.
+func (r *chatResolver) UserCount(ctx context.Context, obj *db.Chat) (int, error) {
+	_, err := middleware.GetUser(ctx)
+	if err != nil {
+		return 0, nil
+	}
+
+	count, err := r.DB.UserCountByChatId(ctx, db.UserCountByChatIdParams{
+		ChatID:         obj.ID,
+		OrganisationID: obj.OrganisationID,
+	})
+	return int(count), err
+}
+
+// UnreadMessageCount is the resolver for the unreadMessageCount field.
+func (r *chatResolver) UnreadMessageCount(ctx context.Context, obj *db.Chat) (int, error) {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return 0, nil
+	}
+
+	chatMessageViewCount, err := r.DB.UnreadMessageCount(ctx, db.UnreadMessageCountParams{
+		ChatID:         obj.ID,
+		UserID:         currentUser.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return 0, errors.New("unable to get unread message count")
+	}
+
+	return int(chatMessageViewCount), nil
 }
 
 // Messages is the resolver for the messages field.
@@ -106,37 +139,9 @@ func (r *chatResolver) DeletedAt(ctx context.Context, obj *db.Chat) (*time.Time,
 	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
 }
 
-// UnreadMessageCount is the resolver for the unreadMessageCount field.
-func (r *chatResolver) UnreadMessageCount(ctx context.Context, obj *db.Chat) (int, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return 0, nil
-	}
-
-	chatMessageViewCount, err := r.DB.UnreadMessageCount(ctx, db.UnreadMessageCountParams{
-		ChatID:         obj.ID,
-		UserID:         currentUser.ID,
-		OrganisationID: currentUser.OrganisationID,
-	})
-	if err != nil {
-		return 0, errors.New("unable to get unread message count")
-	}
-
-	return int(chatMessageViewCount), nil
-}
-
-// UserCount is the resolver for the userCount field.
-func (r *chatResolver) UserCount(ctx context.Context, obj *db.Chat) (int, error) {
-	_, err := middleware.GetUser(ctx)
-	if err != nil {
-		return 0, nil
-	}
-
-	count, err := r.DB.UserCountByChatId(ctx, db.UserCountByChatIdParams{
-		ChatID:         obj.ID,
-		OrganisationID: obj.OrganisationID,
-	})
-	return int(count), err
+// Deleted is the resolver for the deleted field.
+func (r *chatResolver) Deleted(ctx context.Context, obj *db.Chat) (bool, error) {
+	panic(fmt.Errorf("not implemented: Deleted - deleted"))
 }
 
 // Chat is the resolver for the chat field.
@@ -462,7 +467,7 @@ func (r *queryResolver) Chat(ctx context.Context, id string) (*db.Chat, error) {
 		return nil, nil
 	}
 
-	chat, err := r.DB.ChatByIdWithUser(ctx, db.ChatByIdWithUserParams{
+	chat, err := r.DB.ChatByIdAndUser(ctx, db.ChatByIdAndUserParams{
 		UserID:         currentUser.ID,
 		ChatID:         id,
 		OrganisationID: currentUser.OrganisationID,
@@ -493,15 +498,7 @@ func (r *queryResolver) Chats(ctx context.Context, limit *int, offset *int) (*mo
 	chats := make([]*db.Chat, len(chatListWithUserRow))
 
 	lo.ForEach(chatListWithUserRow, func(chat db.ChatListWithUserRow, i int) {
-		chats = append(chats, &db.Chat{
-			ID:             chat.ID,
-			Name:           chat.Name,
-			OrganisationID: chat.OrganisationID,
-			UpdatedAt:      chat.UpdatedAt,
-			CreatedAt:      chat.CreatedAt,
-			DeletedAt:      chat.DeletedAt,
-			Type:           chat.Type,
-		})
+		chats = append(chats, &chat.Chat)
 	})
 
 	// get count from the first row (ChatListWithUserRow.TotalCount)

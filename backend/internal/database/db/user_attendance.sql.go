@@ -98,3 +98,46 @@ func (q *Queries) UpdateUserAttendanceForUser(ctx context.Context, arg UpdateUse
 	)
 	return i, err
 }
+
+const userAttendanceListByDate = `-- name: UserAttendanceListByDate :many
+SELECT user_attendances.id, user_attendances.user_id, user_attendances.date, user_attendances.state, user_attendances.created_by, user_attendances.organisation_id, user_attendances.created_at, user_attendances.deleted_at
+FROM user_attendances
+JOIN users u ON user_attendances.user_id = u.id
+WHERE date = $1
+  AND user_attendances.organisation_id = $2 AND deleted_at IS NULL
+ORDER BY u.first_name ASC, u.last_name ASC
+`
+
+type UserAttendanceListByDateParams struct {
+	Date           pgtype.Date `db:"date"`
+	OrganisationID string      `db:"organisation_id"`
+}
+
+func (q *Queries) UserAttendanceListByDate(ctx context.Context, arg UserAttendanceListByDateParams) ([]UserAttendance, error) {
+	rows, err := q.db.Query(ctx, userAttendanceListByDate, arg.Date, arg.OrganisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserAttendance
+	for rows.Next() {
+		var i UserAttendance
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Date,
+			&i.State,
+			&i.CreatedBy,
+			&i.OrganisationID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

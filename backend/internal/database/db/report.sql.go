@@ -12,7 +12,7 @@ import (
 const gLOBAL_ReportById = `-- name: GLOBAL_ReportById :one
 SELECT id, status, format, kind, "from", "to", meta, filter_tags, file_id, user_id, student_user_id, organisation_id, created_at, deleted_at
 FROM reports
-WHERE id = $1
+WHERE id = $1 AND deleted_at IS NULL
 LIMIT 1
 `
 
@@ -41,7 +41,7 @@ func (q *Queries) GLOBAL_ReportById(ctx context.Context, id string) (Report, err
 const gLOBAL_ReportsByStatus = `-- name: GLOBAL_ReportsByStatus :many
 SELECT id, status, format, kind, "from", "to", meta, filter_tags, file_id, user_id, student_user_id, organisation_id, created_at, deleted_at
 FROM reports
-WHERE status = $1
+WHERE status = $1 AND deleted_at IS NULL
 `
 
 func (q *Queries) GLOBAL_ReportsByStatus(ctx context.Context, status ReportStatus) ([]Report, error) {
@@ -82,7 +82,7 @@ func (q *Queries) GLOBAL_ReportsByStatus(ctx context.Context, status ReportStatu
 const gLOBAL_UpdateReportStatus = `-- name: GLOBAL_UpdateReportStatus :exec
 UPDATE reports
 SET status = $1
-WHERE id = $2
+WHERE id = $2 AND deleted_at IS NULL
 `
 
 type GLOBAL_UpdateReportStatusParams struct {

@@ -18,8 +18,10 @@ import (
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
-	minio "github.com/minio/minio-go/v7"
-	"github.com/uptrace/bun"
+	"github.com/dokedu/dokedu/backend/internal/msg"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/minio/minio-go/v7"
+	"github.com/samber/lo"
 )
 
 // Date is the resolver for the date field.
@@ -27,26 +29,19 @@ func (r *entryResolver) Date(ctx context.Context, obj *db.Entry) (string, error)
 	panic(fmt.Errorf("not implemented: Date - date"))
 }
 
-// DeletedAt is the resolver for the deletedAt field.
-func (r *entryResolver) DeletedAt(ctx context.Context, obj *db.Entry) (*time.Time, error) {
-	if obj.DeletedAt.IsZero() {
-		return &obj.DeletedAt.Time, nil
-	}
-
-	return nil, nil
-}
-
 // User is the resolver for the user field.
 func (r *entryResolver) User(ctx context.Context, obj *db.Entry) (*db.User, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
-		return nil, nil
+		return nil, msg.ErrUnauthenticated
 	}
 
-	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).WhereAllWithDeleted().Scan(ctx)
+	user, err := r.DB.UserById(ctx, db.UserByIdParams{
+		ID:             obj.UserID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
-		return nil, err
+		return nil, errors.New("failed to get user")
 	}
 
 	return &user, nil
@@ -59,22 +54,15 @@ func (r *entryResolver) Users(ctx context.Context, obj *db.Entry) ([]*db.User, e
 		return nil, nil
 	}
 
-	var users []*db.User
-
-	err = r.DB.NewSelect().
-		Model(&users).
-		Join("JOIN entry_users eu on \"user\".id = eu.user_id").
-		Join("JOIN entries e on eu.entry_id = e.id").
-		Where("eu.deleted_at is NULL").
-		Where("e.id = ?", obj.ID).
-		Where("\"user\".organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-
+	users, err := r.DB.UserListByEntryUserByEntryId(ctx, db.UserListByEntryUserByEntryIdParams{
+		EntryID:        obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
-		return nil, err
+		return nil, errors.New("failed to get users")
 	}
 
-	return users, nil
+	return lo.ToSlicePtr(users), nil
 }
 
 // Events is the resolver for the events field.
@@ -84,40 +72,33 @@ func (r *entryResolver) Events(ctx context.Context, obj *db.Entry) ([]*db.Event,
 		return nil, nil
 	}
 
-	var events []*db.Event
-	err = r.DB.NewSelect().
-		Model(&events).
-		ColumnExpr("event.*").
-		Join("JOIN entry_events ee on event.id = ee.event_id").
-		Join("JOIN entries e on ee.entry_id = e.id").
-		Where("ee.deleted_at is NULL").
-		Where("e.id = ?", obj.ID).
-		Where("event.organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	events, err := r.DB.EventListByEntryEventByEntryId(ctx, db.EventListByEntryEventByEntryIdParams{
+		EntryID:        obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
-		return nil, err
+		return nil, errors.New("failed to get events")
 	}
 
-	return events, nil
+	return lo.ToSlicePtr(events), nil
 }
 
 // Files is the resolver for the files field.
 func (r *entryResolver) Files(ctx context.Context, obj *db.Entry) ([]*db.File, error) {
-	var files []*db.File
-	err := r.DB.NewSelect().
-		Model(&files).
-		ColumnExpr("file.*").
-		Join("JOIN entry_files ef on file.id = ef.file_id").
-		Join("JOIN entries e on ef.entry_id = e.id").
-		Where("ef.deleted_at is NULL").
-		Where("file.organisation_id = ?", obj.OrganisationID).
-		Where("e.id = ?", obj.ID).
-		Scan(ctx)
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	files, err := r.DB.FileListByEntryFileByEntryId(ctx, db.FileListByEntryFileByEntryIdParams{
+		EntryID:        obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, errors.New("failed to get files")
 	}
 
-	return files, nil
+	return lo.ToSlicePtr(files), nil
 }
 
 // Tags is the resolver for the tags field.
@@ -127,20 +108,15 @@ func (r *entryResolver) Tags(ctx context.Context, obj *db.Entry) ([]*db.Tag, err
 		return nil, nil
 	}
 
-	var tags []*db.Tag
-	err = r.DB.NewSelect().
-		Model(&tags).
-		ColumnExpr("tag.*").
-		Join("JOIN entry_tags et on tag.id = et.tag_id").
-		Join("JOIN entries e on et.entry_id = e.id").
-		Where("et.deleted_at is NULL").
-		Where("e.id = ?", obj.ID).
-		Where("tag.organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	tags, err := r.DB.TagListByEntryTagByEntryId(ctx, db.TagListByEntryTagByEntryIdParams{
+		EntryID:        obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
-		return nil, err
+		return nil, errors.New("failed to get tags")
 	}
 
-	return tags, nil
+	return lo.ToSlicePtr(tags), nil
 }
 
 // UserCompetences is the resolver for the userCompetences field.
@@ -150,32 +126,30 @@ func (r *entryResolver) UserCompetences(ctx context.Context, obj *db.Entry) ([]*
 		return nil, nil
 	}
 
-	var userCompetences []*db.UserCompetence
-	err = r.DB.NewSelect().
-		Model(&userCompetences).
-		Where("entry_id = ?", obj.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Order("competence_id DESC").
-		Scan(ctx)
-
+	userCompetences, err := r.DB.UserCompetenceListByEntryId(ctx, db.UserCompetenceListByEntryIdParams{
+		EntryID:        pgtype.Text{String: obj.ID, Valid: true},
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
-		return nil, err
+		return nil, errors.New("failed to get user competences")
 	}
 
-	return userCompetences, nil
+	return lo.ToSlicePtr(userCompetences), nil
 }
 
 // Subjects is the resolver for the subjects field.
 func (r *entryResolver) Subjects(ctx context.Context, obj *db.Entry) ([]*db.Competence, error) {
-	entryID := obj.ID
-
-	var userCompetences []*db.UserCompetence
-	err := r.DB.NewSelect().
-		Model(&userCompetences).
-		Where("entry_id = ?", entryID).
-		Scan(ctx)
+	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil
+	}
+
+	userCompetences, err := r.DB.UserCompetenceListByEntryId(ctx, db.UserCompetenceListByEntryIdParams{
+		EntryID:        pgtype.Text{String: obj.ID, Valid: true},
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, errors.New("failed to get user competences")
 	}
 
 	var competenceIDs []string
@@ -183,33 +157,37 @@ func (r *entryResolver) Subjects(ctx context.Context, obj *db.Entry) ([]*db.Comp
 		competenceIDs = append(competenceIDs, uc.CompetenceID)
 	}
 
+	competences, err := r.DB.CompetenceList(ctx, currentUser.OrganisationID)
+	if err != nil {
+		return nil, errors.New("failed to get competences")
+	}
+
 	var subjects []*db.Competence
 
-	for _, id := range competenceIDs {
-		var competences []*db.Competence
-		err := r.DB.NewRaw(`SELECT * FROM get_competence_tree(?)`, id).Scan(ctx, &competences)
-		if err != nil {
-			return nil, err
+	// TODO: this might not work and also requires performance improvements,
+	//  ideally we cache the competences of each organisation in memory
+	//  or we store the parents as path in the database as extra column for each competence
+	for _, uc := range userCompetences {
+		competence, ok := helper.FindCompetenceById(competences, uc.CompetenceID)
+		if !ok {
+			return nil, errors.New("failed to get competence")
 		}
-
-		subjects = append(subjects, competences[len(competences)-1])
+		subject, ok := helper.FindCompetenceParent(competences, competence)
+		if !ok {
+			return nil, errors.New("failed to get subject")
+		}
+		subjects = append(subjects, &subject)
 	}
 
-	var ids []string
-	for _, subject := range subjects {
-		ids = append(ids, subject.ID)
-	}
+	return subjects, nil
+}
 
-	var subjects2 []*db.Competence
-	err = r.DB.NewSelect().
-		Model(&subjects2).
-		Where("id IN (?)", bun.In(ids)).
-		Scan(ctx)
-	if err != nil {
-		return nil, err
+// DeletedAt is the resolver for the deletedAt field.
+func (r *entryResolver) DeletedAt(ctx context.Context, obj *db.Entry) (*time.Time, error) {
+	if obj.DeletedAt.Valid {
+		return &obj.DeletedAt.Time, nil
 	}
-
-	return subjects2, nil
+	return nil, nil
 }
 
 // CreateEntry is the resolver for the createEntry field.
@@ -219,17 +197,13 @@ func (r *mutationResolver) CreateEntry(ctx context.Context) (*db.Entry, error) {
 		return nil, nil
 	}
 
-	date := time.Now().Format("2006-01-02")
-
-	entry := db.Entry{
-		OrganisationID: currentUser.OrganisationID,
-		UserID:         currentUser.ID,
-		Date:           date,
+	entry, err := r.DB.CreateEntry(ctx, db.CreateEntryParams{
 		Body:           "",
-	}
-	err = r.DB.NewInsert().Model(&entry).Returning("*").Scan(ctx)
+		UserID:         currentUser.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
-		return nil, err
+		return nil, errors.New("failed to create entry")
 	}
 
 	return &entry, nil
@@ -245,25 +219,29 @@ func (r *mutationResolver) UpdateEntry(ctx context.Context, input model.UpdateEn
 	var entry db.Entry
 	entry.ID = input.ID
 
-	q := r.DB.NewUpdate().
-		Model(&entry).
+	query := r.DB.NewQueryBuilder().
+		Update("entries").
 		Where("organisation_id = ?", currentUser.OrganisationID).
 		Where("id = ?", input.ID).
-		Returning("*")
+		Suffix("RETURNING *")
 
 	if input.Date != nil {
-		entry.Date = *input.Date
-		q = q.Column("date")
+		d, err := time.Parse("2006-01-02", *input.Date)
+		if err != nil {
+			return nil, errors.New("failed to parse date")
+		}
+		entry.Date = pgtype.Date{Time: d, Valid: true}
+		query.Set("date", entry.Date)
 	}
 
 	if input.Body != nil {
 		entry.Body = *input.Body
-		q = q.Column("body")
+		query = query.Set("body", entry.Body)
 	}
 
-	err = q.Scan(ctx)
+	err = query.Scan(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("failed to update entry")
 	}
 
 	return &entry, nil
@@ -277,20 +255,12 @@ func (r *mutationResolver) ArchiveEntry(ctx context.Context, id string) (*db.Ent
 	}
 
 	// set deleted_at field to the current time
-	entry := db.Entry{
+	entry, err := r.DB.DeleteEntry(ctx, db.DeleteEntryParams{
 		ID:             id,
 		OrganisationID: currentUser.OrganisationID,
-		DeletedAt:      bun.NullTime{Time: time.Now()},
-	}
-	_, err = r.DB.
-		NewUpdate().
-		Model(&entry).
-		Column("deleted_at").
-		Where("id = ?", id).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Exec(ctx)
+	})
 	if err != nil {
-		return nil, err
+		return nil, errors.New("failed to archive entry")
 	}
 
 	return &entry, nil
@@ -303,42 +273,29 @@ func (r *mutationResolver) CreateEntryTag(ctx context.Context, input model.Creat
 		return nil, nil
 	}
 
-	var entry db.Entry
-	err = r.DB.
-		NewSelect().
-		Model(&entry).
-		Where("id = ?", input.EntryID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	entry, err := r.DB.EntryById(ctx, db.EntryByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var tag db.Tag
-	err = r.DB.
-		NewSelect().
-		Model(&tag).
-		Where("id = ?", input.TagID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	tag, err := r.DB.TagById(ctx, db.TagByIdParams{
+		ID:             input.TagID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	entryTag := db.EntryTag{
+	_, err = r.DB.CreateEntryTag(ctx, db.CreateEntryTagParams{
 		EntryID:        entry.ID,
 		TagID:          tag.ID,
 		OrganisationID: currentUser.OrganisationID,
-	}
-
-	err = r.DB.
-		NewInsert().
-		Model(&entryTag).
-		On("CONFLICT (entry_id, tag_id) DO UPDATE SET deleted_at = null").
-		Returning("*").
-		Scan(ctx)
+	})
 	if err != nil {
-		return nil, err
+		return nil, errors.New("failed to create entry tag")
 	}
 
 	return &entry, nil
@@ -351,42 +308,29 @@ func (r *mutationResolver) CreateEntryFile(ctx context.Context, input model.Crea
 		return nil, nil
 	}
 
-	var entry db.Entry
-	err = r.DB.
-		NewSelect().
-		Model(&entry).
-		Where("id = ?", input.EntryID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	entry, err := r.DB.EntryById(ctx, db.EntryByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
-		return nil, err
+		return nil, errors.New("failed to get entry")
 	}
 
-	var file db.File
-	err = r.DB.
-		NewSelect().
-		Model(&file).
-		Where("id = ?", input.FileID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	file, err := r.DB.FileById(ctx, db.FileByIdParams{
+		ID:             input.FileID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
-		return nil, err
+		return nil, errors.New("failed to get file")
 	}
 
-	entryFile := db.EntryFile{
+	_, err = r.DB.CreateEntryFile(ctx, db.CreateEntryFileParams{
 		EntryID:        entry.ID,
 		FileID:         file.ID,
 		OrganisationID: currentUser.OrganisationID,
-	}
-
-	err = r.DB.
-		NewInsert().
-		Model(&entryFile).
-		On("CONFLICT (entry_id, file_id) DO UPDATE SET deleted_at = null").
-		Returning("*").
-		Scan(ctx)
+	})
 	if err != nil {
-		return nil, err
+		return nil, errors.New("failed to create entry file")
 	}
 
 	return &entry, nil
@@ -399,114 +343,65 @@ func (r *mutationResolver) CreateEntryUser(ctx context.Context, input model.Crea
 		return nil, nil
 	}
 
-	var entry db.Entry
-	err = r.DB.
-		NewSelect().
-		Model(&entry).
-		Where("id = ?", input.EntryID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	entry, err := r.DB.EntryById(ctx, db.EntryByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, errors.New("failed to get entry")
+	}
+
+	user, err := r.DB.UserById(ctx, db.UserByIdParams{
+		ID:             input.UserID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var user db.User
-	err = r.DB.
-		NewSelect().
-		Model(&user).
-		Where("id = ?", input.UserID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	entryUser := db.EntryUser{
+	_, err = r.DB.CreateEntryUser(ctx, db.CreateEntryUserParams{
 		EntryID:        entry.ID,
 		UserID:         user.ID,
 		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, errors.New("failed to create entry user")
 	}
 
-	err = r.DB.
-		NewInsert().
-		Model(&entryUser).
-		On("CONFLICT (entry_id, user_id) DO UPDATE SET deleted_at = null").
-		Returning("*").
-		Scan(ctx)
+	// user competences for entry
+	userCompetence, err := r.DB.CompetenceListByUserCompetenceByEntry(ctx, db.CompetenceListByUserCompetenceByEntryParams{
+		EntryID:        pgtype.Text{String: entry.ID, Valid: true},
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, errors.New("failed to get user competences")
+	}
+
+	tx, err := r.DB.DB.Begin(ctx)
 	if err != nil {
 		return nil, err
 	}
+	defer tx.Rollback(ctx)
 
-	// update user_competences
-	var competences []*db.Competence
-	err = r.DB.
-		NewSelect().
-		Model(&competences).
-		Where("\"competence\".organisation_id = ?", currentUser.OrganisationID).
-		Join("JOIN user_competences uc on \"competence\".id = uc.competence_id").
-		Where("uc.entry_id = ?", entry.ID).
-		Where("uc.deleted_at is null").
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
+	qtx := r.DB.WithTx(tx)
 
-	var userCompetences []*db.UserCompetence
-	err = r.DB.
-		NewSelect().
-		Model(&userCompetences).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Where("entry_id = ?", entry.ID).
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, competence := range competences {
-		var userCompetence *db.UserCompetence
-		for _, uc := range userCompetences {
-			if uc.CompetenceID == competence.ID && uc.UserID == user.ID {
-				userCompetence = uc
-				break
-			}
-		}
-
-		if userCompetence == nil {
-			level := 1
-			for _, uc := range userCompetences {
-				if uc.CompetenceID == competence.ID {
-					level = uc.Level
-					break
-				}
-			}
-
-			// create new user competence
-			userCompetence = &db.UserCompetence{
-				UserID:         user.ID,
-				CompetenceID:   competence.ID,
-				EntryID:        sql.NullString{String: entry.ID, Valid: true},
-				Level:          level,
-				OrganisationID: currentUser.OrganisationID,
-				CreatedBy:      sql.NullString{String: currentUser.ID, Valid: true},
-			}
-		} else {
-			// update existing user competence
-			userCompetence.DeletedAt = bun.NullTime{Time: time.Time{}}
-		}
-
-		err = r.DB.
-			NewInsert().
-			Model(userCompetence).
-			Returning("*").
-			On("CONFLICT (user_id, competence_id, entry_id) DO UPDATE SET deleted_at = null").
-			Returning("*").
-			Scan(ctx)
-		if errors.Is(err, sql.ErrNoRows) {
-			continue
-		}
+	// TODO: this might not work and also requires performance improvements
+	for _, uc := range userCompetence {
+		_, err = qtx.UpsertUserCompetence(ctx, db.UpsertUserCompetenceParams{
+			EntryID:        pgtype.Text{String: entry.ID, Valid: true},
+			OrganisationID: currentUser.OrganisationID,
+			CompetenceID:   uc.CompetenceID.String,
+			Level:          1,
+			UserID:         user.ID,
+		})
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	return &entry, nil
@@ -519,40 +414,27 @@ func (r *mutationResolver) CreateEntryEvent(ctx context.Context, input model.Cre
 		return nil, nil
 	}
 
-	var entry db.Entry
-	err = r.DB.
-		NewSelect().
-		Model(&entry).
-		Where("id = ?", input.EntryID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	entry, err := r.DB.EntryById(ctx, db.EntryByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var event db.Event
-	err = r.DB.
-		NewSelect().
-		Model(&event).
-		Where("id = ?", input.EventID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	event, err := r.DB.EventById(ctx, db.EventByIdParams{
+		ID:             input.EventID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	entryEvent := db.EntryEvent{
+	_, err = r.DB.CreateEntryEvent(ctx, db.CreateEntryEventParams{
 		EntryID:        entry.ID,
 		EventID:        event.ID,
 		OrganisationID: currentUser.OrganisationID,
-	}
-
-	err = r.DB.
-		NewInsert().
-		Model(&entryEvent).
-		Returning("*").
-		On("CONFLICT (entry_id, event_id) DO UPDATE SET deleted_at = null").
-		Scan(ctx)
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -567,59 +449,52 @@ func (r *mutationResolver) CreateEntryCompetence(ctx context.Context, input mode
 		return nil, nil
 	}
 
-	var entry db.Entry
-	err = r.DB.
-		NewSelect().
-		Model(&entry).
-		Where("id = ?", input.EntryID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	entry, err := r.DB.EntryById(ctx, db.EntryByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var competence db.Competence
-	err = r.DB.
-		NewSelect().
-		Model(&competence).
-		Where("id = ?", input.CompetenceID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	competence, err := r.DB.CompetenceById(ctx, db.CompetenceByIdParams{
+		ID:             input.CompetenceID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var users []*db.User
-	err = r.DB.
-		NewSelect().
-		Model(&users).
-		ColumnExpr("\"user\".*").
-		Join("JOIN entry_users eu on \"user\".id = eu.user_id").
-		Join("JOIN entries e on eu.entry_id = e.id").
-		Where("eu.deleted_at is NULL").
-		Where("e.id = ?", entry.ID).
-		Where("\"user\".organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	users, err := r.DB.UserListByEntryUserByEntryId(ctx, db.UserListByEntryUserByEntryIdParams{
+		EntryID:        entry.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var userCompetences []*db.UserCompetence
+	tx, err := r.DB.DB.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	qtx := r.DB.WithTx(tx)
+
 	for _, user := range users {
-		userCompetences = append(userCompetences, &db.UserCompetence{
-			UserID:         user.ID,
-			CompetenceID:   competence.ID,
-			EntryID:        sql.NullString{String: entry.ID, Valid: true},
-			Level:          1,
+		_, err = qtx.UpsertUserCompetence(ctx, db.UpsertUserCompetenceParams{
+			EntryID:        pgtype.Text{String: entry.ID, Valid: true},
 			OrganisationID: currentUser.OrganisationID,
-			CreatedBy:      sql.NullString{String: currentUser.ID, Valid: true},
+			CompetenceID:   competence.ID,
+			Level:          1,
+			UserID:         user.ID,
 		})
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	err = r.DB.NewInsert().
-		Model(&userCompetences).
-		On("CONFLICT (user_id, competence_id, entry_id) DO UPDATE SET deleted_at = null").
-		Scan(ctx)
+	err = tx.Commit(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -634,26 +509,19 @@ func (r *mutationResolver) DeleteEntryTag(ctx context.Context, input model.Delet
 		return nil, nil
 	}
 
-	var entry db.Entry
-	err = r.DB.
-		NewSelect().
-		Model(&entry).
-		Where("id = ?", input.EntryID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	entry, err := r.DB.EntryById(ctx, db.EntryByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var entryTag db.EntryTag
-	err = r.DB.
-		NewDelete().
-		Model(&entryTag).
-		Where("entry_id = ?", input.EntryID).
-		Where("tag_id = ?", input.TagID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Returning("*").
-		Scan(ctx)
+	_, err = r.DB.DeleteEntryTag(ctx, db.DeleteEntryTagParams{
+		EntryID:        input.EntryID,
+		TagID:          input.TagID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -668,26 +536,18 @@ func (r *mutationResolver) DeleteEntryFile(ctx context.Context, input model.Dele
 		return nil, nil
 	}
 
-	var entry db.Entry
-	err = r.DB.
-		NewSelect().
-		Model(&entry).
-		Where("id = ?", input.EntryID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	entry, err := r.DB.EntryById(ctx, db.EntryByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var entryFile db.EntryFile
-	err = r.DB.
-		NewDelete().
-		Model(&entryFile).
-		Where("entry_id = ?", input.EntryID).
-		Where("file_id = ?", input.FileID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Where("deleted_at IS NULL").
-		Scan(ctx)
+	_, err = r.DB.DeleteEntryFile(ctx, db.DeleteEntryFileParams{
+		EntryID: input.EntryID,
+		FileID:  input.FileID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -702,40 +562,40 @@ func (r *mutationResolver) DeleteEntryUser(ctx context.Context, input model.Dele
 		return nil, nil
 	}
 
-	var entry db.Entry
-	err = r.DB.
-		NewSelect().
-		Model(&entry).
-		Where("id = ?", input.EntryID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	entry, err := r.DB.EntryById(ctx, db.EntryByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var entryUser db.EntryUser
-	err = r.DB.
-		NewDelete().
-		Model(&entryUser).
-		Where("entry_id = ?", input.EntryID).
-		Where("user_id = ?", input.UserID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Returning("*").
-		Scan(ctx)
+	tx, err := r.DB.DB.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	qtx := r.DB.WithTx(tx)
+
+	_, err = qtx.DeleteEntryUser(ctx, db.DeleteEntryUserParams{
+		EntryID: input.EntryID,
+		UserID:  input.UserID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	// remove user competences for this entry for this user
-	var userCompetences []*db.UserCompetence
-	err = r.DB.
-		NewDelete().
-		Model(&userCompetences).
-		Where("entry_id = ?", input.EntryID).
-		Where("user_id = ?", input.UserID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Returning("*").
-		Scan(ctx)
+	_, err = qtx.DeleteUserCompetences(ctx, db.DeleteUserCompetencesParams{
+		EntryID:        pgtype.Text{String: entry.ID, Valid: true},
+		OrganisationID: currentUser.OrganisationID,
+		UserID:         input.UserID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	err = tx.Commit(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -750,26 +610,19 @@ func (r *mutationResolver) DeleteEntryEvent(ctx context.Context, input model.Del
 		return nil, nil
 	}
 
-	var entry db.Entry
-	err = r.DB.
-		NewSelect().
-		Model(&entry).
-		Where("id = ?", input.EntryID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	entry, err := r.DB.EntryById(ctx, db.EntryByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var entryEvent db.EntryEvent
-	err = r.DB.
-		NewDelete().
-		Model(&entryEvent).
-		Where("entry_id = ?", input.EntryID).
-		Where("event_id = ?", input.EventID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Returning("*").
-		Scan(ctx)
+	_, err = r.DB.DeleteEntryEvent(ctx, db.DeleteEntryEventParams{
+		EntryID:        input.EntryID,
+		EventID:        input.EventID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -784,26 +637,18 @@ func (r *mutationResolver) DeleteEntryCompetence(ctx context.Context, input mode
 		return nil, nil
 	}
 
-	var entry db.Entry
-	err = r.DB.
-		NewSelect().
-		Model(&entry).
-		Where("id = ?", input.EntryID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	entry, err := r.DB.EntryById(ctx, db.EntryByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var userCompetences []*db.UserCompetence
-	err = r.DB.
-		NewDelete().
-		Model(&userCompetences).
-		Where("entry_id = ?", input.EntryID).
-		Where("competence_id = ?", input.CompetenceID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Returning("*").
-		Scan(ctx)
+	_, err = r.DB.DeleteEntryCompetences(ctx, db.DeleteEntryCompetencesParams{
+		EntryID:        pgtype.Text{String: entry.ID, Valid: true},
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -818,28 +663,20 @@ func (r *mutationResolver) UpdateEntryUserCompetenceLevel(ctx context.Context, i
 		return nil, nil
 	}
 
-	var entry db.Entry
-	err = r.DB.
-		NewSelect().
-		Model(&entry).
-		Where("id = ?", input.EntryID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	entry, err := r.DB.EntryById(ctx, db.EntryByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var userCompetence db.UserCompetence
-	userCompetence.Level = input.Level
-	err = r.DB.
-		NewUpdate().
-		Model(&userCompetence).
-		Column("level").
-		Where("entry_id = ?", input.EntryID).
-		Where("competence_id = ?", input.CompetenceID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Returning("*").
-		Scan(ctx)
+	_, err = r.DB.UpdateUserCompetenceLevels(ctx, db.UpdateUserCompetenceLevelsParams{
+		Level:          int32(input.Level),
+		CompetenceID:   input.CompetenceID,
+		EntryID:        pgtype.Text{String: entry.ID, Valid: true},
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -854,35 +691,34 @@ func (r *mutationResolver) UploadFileToEntry(ctx context.Context, entryID string
 		return nil, nil
 	}
 
-	var entry db.Entry
-	err = r.DB.NewSelect().Model(&entry).Where("id = ?", entryID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	entry, err := r.DB.EntryById(ctx, db.EntryByIdParams{
+		ID:             entryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
-		return nil, errors.New("entry not found")
+		return nil, err
 	}
 
-	var f db.File
-	f.Name = file.Filename
-	f.FileType = "blob"
-	f.OrganisationID = currentUser.OrganisationID
-	f.Size = file.Size
+	var uploadFile db.File
+	uploadFile.Name = file.Filename
+	uploadFile.FileType = "blob"
+	uploadFile.OrganisationID = currentUser.OrganisationID
+	uploadFile.Size = file.Size
 
 	mimeFileType := mime.TypeByExtension(filepath.Ext(file.Filename))
-	f.MimeType = mimeFileType
+	uploadFile.MimeType = pgtype.Text{String: mimeFileType, Valid: true}
 
-	var bucket db.Bucket
-	err = r.DB.NewSelect().
-		Model(&bucket).
-		Where("name = ?", "entries").
-		Where("shared = false").
-		Where("user_id IS NULL").
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	bucket, err := r.DB.InternalBucketByName(ctx, db.InternalBucketByNameParams{
+		Name:           "entries",
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if errors.Is(err, sql.ErrNoRows) {
 		//	create bucket
-		bucket.Name = "entries"
-		bucket.Shared = false
-		bucket.OrganisationID = currentUser.OrganisationID
-		err = r.DB.NewInsert().Model(&bucket).Returning("*").Scan(ctx)
+		_, err = r.DB.CreateInternalBucket(ctx, db.CreateInternalBucketParams{
+			Name:           "entries",
+			Shared:         false,
+			OrganisationID: currentUser.OrganisationID,
+		})
 		if err != nil {
 			return nil, errors.New("failed to create bucket")
 		}
@@ -896,24 +732,28 @@ func (r *mutationResolver) UploadFileToEntry(ctx context.Context, entryID string
 		return nil, errors.New("failed to find bucket")
 	}
 
-	f.BucketID = bucket.ID
-
-	err = r.DB.NewInsert().Model(&f).Returning("*").Scan(ctx)
+	uploadFile, err = r.DB.CreateFile(ctx, db.CreateFileParams{
+		Name:           uploadFile.Name,
+		MimeType:       uploadFile.MimeType,
+		FileType:       uploadFile.FileType,
+		BucketID:       bucket.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
-		return nil, errors.New("failed to create file")
+		return nil, errors.New("failed to save file")
 	}
 
-	var entryFile db.EntryFile
-	entryFile.EntryID = entry.ID
-	entryFile.FileID = f.ID
-	entryFile.OrganisationID = currentUser.OrganisationID
-	err = r.DB.NewInsert().Model(&entryFile).Returning("*").Scan(ctx)
+	_, err = r.DB.CreateEntryFile(ctx, db.CreateEntryFileParams{
+		EntryID:        entry.ID,
+		FileID:         uploadFile.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, errors.New("failed to create entry file")
 	}
 
 	// Upload the file to specific bucket with the file id
-	_, err = r.MinioClient.PutObject(ctx, bucket.ID, f.ID, file.File, f.Size, minio.PutObjectOptions{
+	_, err = r.MinioClient.PutObject(ctx, bucket.ID, uploadFile.ID, file.File, uploadFile.Size, minio.PutObjectOptions{
 		ContentType: file.ContentType,
 	})
 	if err != nil {
@@ -930,46 +770,19 @@ func (r *mutationResolver) RemoveFileFromEntry(ctx context.Context, entryID stri
 		return nil, nil
 	}
 
-	var entry db.Entry
-	err = r.DB.NewSelect().
-		Model(&entry).
-		Where("id = ?", entryID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	entryFile, err := r.DB.DeleteEntryFile(ctx, db.DeleteEntryFileParams{
+		EntryID:        entryID,
+		FileID:         fileID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
-		return nil, errors.New("entry not found")
+		return nil, errors.New("failed to delete file from entry")
 	}
 
-	var entryFile db.EntryFile
-	err = r.DB.NewSelect().
-		Model(&entryFile).
-		Where("entry_id = ?", entryID).
-		Where("file_id = ?", fileID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-	if err != nil {
-		return nil, errors.New("entry file not found")
-	}
-
-	err = r.DB.NewDelete().
-		Model(&entryFile).
-		Where("entry_id = ?", entryID).
-		Where("file_id = ?", fileID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Returning("*").
-		Scan(ctx)
-	if errors.Is(err, sql.ErrNoRows) {
-		//
-	} else if err != nil {
-		return nil, errors.New("failed to delete entry file")
-	}
-
-	var file db.File
-	err = r.DB.NewSelect().
-		Model(&file).
-		Where("id = ?", fileID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	file, err := r.DB.FileById(ctx, db.FileByIdParams{
+		ID:             entryFile.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, errors.New("file not found")
 	}
@@ -984,8 +797,10 @@ func (r *queryResolver) Entry(ctx context.Context, id string) (*db.Entry, error)
 		return nil, nil
 	}
 
-	var entry db.Entry
-	err = r.DB.NewSelect().Model(&entry).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	entry, err := r.DB.EntryById(ctx, db.EntryByIdParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -1003,48 +818,52 @@ func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, fi
 	pageLimit, pageOffset := helper.SetPageLimits(limit, offset)
 
 	var entries []*db.Entry
-	query := r.DB.NewSelect().
-		Distinct().
-		Model(&entries).
-		Join("LEFT JOIN entry_users eu ON \"entry\".id = eu.entry_id").
+
+	query := r.DB.NewQueryBuilder().Select("*").
+		From("entries").
+		Join("LEFT JOIN entry_users eu ON entries.id = eu.entry_id").
 		Where("eu.deleted_at IS NULL").
-		Join("LEFT JOIN entry_tags et ON \"entry\".id = et.entry_id").
+		Join("LEFT JOIN entry_tags et ON entries.id = et.entry_id").
 		Where("et.deleted_at IS NULL").
-		Where("\"entry\".organisation_id = ?", currentUser.OrganisationID).
-		Limit(pageLimit).Offset(pageOffset)
+		Where("entries.organisation_id = ?", currentUser.OrganisationID).
+		Limit(uint64(pageLimit)).
+		Offset(uint64(pageOffset))
 
 	if filter != nil {
 		if filter.Users != nil && len(filter.Users) > 0 {
-			query.Where("eu.user_id IN (?)", bun.In(filter.Users))
+			query.Where("eu.user_id = ANY(?)", filter.Users)
 		}
 		if filter.Authors != nil && len(filter.Authors) > 0 {
-			query.Where("\"entry\".user_id IN (?)", bun.In(filter.Authors))
+			query.Where("entries.user_id = ANY(?)", filter.Authors)
 		}
 		if filter.Tags != nil && len(filter.Tags) > 0 {
-			query.Where("et.tag_id IN (?)", bun.In(filter.Tags))
-			query.Where("(SELECT COUNT(DISTINCT et2.tag_id) FROM entry_tags et2 WHERE et2.entry_id = \"entry\".id) >= ?", len(filter.Tags))
+			query.Where("et.tag_id = ANY(?)", filter.Tags)
+			query.Where("(SELECT COUNT(DISTINCT et2.tag_id) FROM entry_tags et2 WHERE et2.entry_id = entries.id) >= ?", len(filter.Tags))
 		}
 	}
 
 	if sortBy != nil {
 		switch *sortBy {
 		case model.EntrySortByCreatedAtAsc:
-			query.Order("entry.created_at ASC")
+			query.OrderBy("entries.created_at ASC")
 		case model.EntrySortByCreatedAtDesc:
-			query.Order("entry.created_at DESC")
+			query.OrderBy("entries.created_at DESC")
 		case model.EntrySortByDateAsc:
-			query.Order("entry.date ASC")
+			query.OrderBy("entries.date ASC")
 		case model.EntrySortByDateDesc:
-			query.Order("entry.date DESC")
+			query.OrderBy("entries.date DESC")
 		default:
-			query.Order("entry.created_at DESC")
+			query.OrderBy("entries.created_at DESC")
 		}
 	}
 
-	count, err := query.ScanAndCount(ctx)
+	err = query.Scan(entries)
 	if err != nil {
 		return nil, err
 	}
+
+	// TODO: this is a placeholder, we need to implement the count!!!
+	count := 10_000
 
 	// Page info
 	page, err := helper.CreatePageInfo(pageLimit, pageOffset, count)

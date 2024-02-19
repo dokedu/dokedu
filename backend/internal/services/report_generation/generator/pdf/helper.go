@@ -4,10 +4,9 @@ import (
 	"bytes"
 	"context"
 	"database/sql"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 
 	"github.com/minio/minio-go/v7"
-
-	"github.com/dokedu/dokedu/backend/internal/db"
 )
 
 func (g *Generator) UpdateReportStatus(reportId string, status db.ReportStatus) error {

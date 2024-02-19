@@ -9,8 +9,35 @@ import (
 	"context"
 )
 
+const gLOBAL_OrganisationById = `-- name: GLOBAL_OrganisationById :one
+SELECT id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps, created_at, deleted_at, setup_complete, address, logo_url, stripe_customer_id, stripe_subscription_id FROM organisations WHERE id = $1 LIMIT 1 AND deleted_at IS NULL
+`
+
+func (q *Queries) GLOBAL_OrganisationById(ctx context.Context, id string) (Organisation, error) {
+	row := q.db.QueryRow(ctx, gLOBAL_OrganisationById, id)
+	var i Organisation
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.LegalName,
+		&i.Website,
+		&i.Phone,
+		&i.OwnerID,
+		&i.AllowedDomains,
+		&i.EnabledApps,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.SetupComplete,
+		&i.Address,
+		&i.LogoUrl,
+		&i.StripeCustomerID,
+		&i.StripeSubscriptionID,
+	)
+	return i, err
+}
+
 const gLOBAL_OrganisationList = `-- name: GLOBAL_OrganisationList :many
-SELECT id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps, created_at, deleted_at, setup_complete, address, logo_url, stripe_customer_id, stripe_subscription_id FROM organisations
+SELECT id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps, created_at, deleted_at, setup_complete, address, logo_url, stripe_customer_id, stripe_subscription_id FROM organisations WHERE  deleted_at IS NULL
 `
 
 func (q *Queries) GLOBAL_OrganisationList(ctx context.Context) ([]Organisation, error) {

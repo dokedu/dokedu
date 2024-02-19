@@ -11,7 +11,6 @@ import (
 	"github.com/uptrace/bun"
 
 	"github.com/dokedu/dokedu/backend/internal/database"
-	"github.com/dokedu/dokedu/backend/internal/db"
 	"github.com/dokedu/dokedu/backend/internal/graph"
 	"github.com/dokedu/dokedu/backend/internal/mail"
 	"github.com/dokedu/dokedu/backend/internal/middleware"

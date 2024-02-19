@@ -13,7 +13,6 @@ import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/dokedu/dokedu/backend/internal/db"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 	"github.com/dokedu/dokedu/backend/internal/testsuite"
 )

@@ -2,11 +2,10 @@ package mail
 
 import (
 	"fmt"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"net/smtp"
 	"os"
 	"strconv"
-
-	"github.com/dokedu/dokedu/backend/internal/db"
 
 	"github.com/labstack/gommon/log"
 )

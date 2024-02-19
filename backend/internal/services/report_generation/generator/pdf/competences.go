@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-
-	"github.com/dokedu/dokedu/backend/internal/db"
 )
 
 type Competence struct {

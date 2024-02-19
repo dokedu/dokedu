@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"log"
 	"time"
 
-	"github.com/dokedu/dokedu/backend/internal/db"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 
 	"github.com/graph-gophers/dataloader"
@@ -38,7 +38,7 @@ func (u *Reader) GetCompetenceParents(ctx context.Context, keys dataloader.Keys)
 	competenceById := map[string][]*db.Competence{}
 
 	for _, parent := range parents {
-		var parentItems []*db.CompetenceNoNullString
+		var parentItems []*db.Competence
 		if len(parent.Parents) == 0 {
 			competenceById[parent.CompetenceID] = []*db.Competence{}
 			continue

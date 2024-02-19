@@ -14,7 +14,7 @@ import (
 const gLOBAL_UserByEmail = `-- name: GLOBAL_UserByEmail :one
 SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
 FROM users
-WHERE email = $1
+WHERE email = $1 AND deleted_at IS NULL
 `
 
 func (q *Queries) GLOBAL_UserByEmail(ctx context.Context, email pgtype.Text) (User, error) {
@@ -42,7 +42,7 @@ func (q *Queries) GLOBAL_UserByEmail(ctx context.Context, email pgtype.Text) (Us
 const gLOBAL_UserById = `-- name: GLOBAL_UserById :one
 SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
 FROM users
-WHERE id = $1
+WHERE id = $1 AND deleted_at IS NULL
 `
 
 func (q *Queries) GLOBAL_UserById(ctx context.Context, id string) (User, error) {
@@ -67,10 +67,40 @@ func (q *Queries) GLOBAL_UserById(ctx context.Context, id string) (User, error) 
 	return i, err
 }
 
+const gLOBAL_UserByRecoveryToken = `-- name: GLOBAL_UserByRecoveryToken :one
+SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
+FROM users
+WHERE recovery_token = $1 AND deleted_at IS NULL
+LIMIT 1
+`
+
+func (q *Queries) GLOBAL_UserByRecoveryToken(ctx context.Context, recoveryToken pgtype.Text) (User, error) {
+	row := q.db.QueryRow(ctx, gLOBAL_UserByRecoveryToken, recoveryToken)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Role,
+		&i.OrganisationID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Password,
+		&i.RecoveryToken,
+		&i.RecoverySentAt,
+		&i.AvatarFileID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.Language,
+		&i.Sex,
+	)
+	return i, err
+}
+
 const gLOBAL_UserFindBySession = `-- name: GLOBAL_UserFindBySession :one
 SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
 FROM users
-WHERE id = (SELECT user_id FROM sessions WHERE token = $1 AND users.created_at > NOW() - INTERVAL '30 days')
+WHERE id = (SELECT user_id FROM sessions WHERE token = $1 LIMIT 1) AND deleted_at IS NULL
+LIMIT 1
 `
 
 func (q *Queries) GLOBAL_UserFindBySession(ctx context.Context, token string) (User, error) {
@@ -138,7 +168,7 @@ func (q *Queries) GLOBAL_UserList(ctx context.Context) ([]User, error) {
 const gLOBAL_UsersByIds = `-- name: GLOBAL_UsersByIds :many
 SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
 FROM users
-WHERE id = ANY($1::text[])
+WHERE id = ANY ($1::text[]) AND deleted_at IS NULL
 `
 
 func (q *Queries) GLOBAL_UsersByIds(ctx context.Context, ids []string) ([]User, error) {
@@ -176,10 +206,83 @@ func (q *Queries) GLOBAL_UsersByIds(ctx context.Context, ids []string) ([]User, 
 	return items, nil
 }
 
+const updateUserPassword = `-- name: UpdateUserPassword :one
+UPDATE users
+SET password = $1
+WHERE id = $2
+  AND organisation_id = $3
+RETURNING id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
+`
+
+type UpdateUserPasswordParams struct {
+	Password       pgtype.Text `db:"password"`
+	ID             string      `db:"id"`
+	OrganisationID string      `db:"organisation_id"`
+}
+
+func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUserPassword, arg.Password, arg.ID, arg.OrganisationID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Role,
+		&i.OrganisationID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Password,
+		&i.RecoveryToken,
+		&i.RecoverySentAt,
+		&i.AvatarFileID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.Language,
+		&i.Sex,
+	)
+	return i, err
+}
+
+const updateUserRecoveryToken = `-- name: UpdateUserRecoveryToken :one
+UPDATE users
+SET recovery_token = $1
+WHERE id = $2
+  AND organisation_id = $3
+RETURNING id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
+`
+
+type UpdateUserRecoveryTokenParams struct {
+	RecoveryToken  pgtype.Text `db:"recovery_token"`
+	ID             string      `db:"id"`
+	OrganisationID string      `db:"organisation_id"`
+}
+
+func (q *Queries) UpdateUserRecoveryToken(ctx context.Context, arg UpdateUserRecoveryTokenParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUserRecoveryToken, arg.RecoveryToken, arg.ID, arg.OrganisationID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Role,
+		&i.OrganisationID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Password,
+		&i.RecoveryToken,
+		&i.RecoverySentAt,
+		&i.AvatarFileID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.Language,
+		&i.Sex,
+	)
+	return i, err
+}
+
 const userById = `-- name: UserById :one
 SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
 FROM users
-WHERE id = $1 AND organisation_id = $2
+WHERE id = $1
+  AND organisation_id = $2
 `
 
 type UserByIdParams struct {
@@ -207,4 +310,118 @@ func (q *Queries) UserById(ctx context.Context, arg UserByIdParams) (User, error
 		&i.Sex,
 	)
 	return i, err
+}
+
+const userList = `-- name: UserList :many
+SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
+FROM users
+WHERE organisation_id = $1 AND deleted_at IS NULL
+`
+
+func (q *Queries) UserList(ctx context.Context, organisationID string) ([]User, error) {
+	rows, err := q.db.Query(ctx, userList, organisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Role,
+			&i.OrganisationID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.Password,
+			&i.RecoveryToken,
+			&i.RecoverySentAt,
+			&i.AvatarFileID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.Language,
+			&i.Sex,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const userListByRole = `-- name: UserListByRole :many
+SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
+FROM users
+WHERE role = $1
+  AND organisation_id = $2 AND deleted_at IS NULL
+`
+
+type UserListByRoleParams struct {
+	Role           UserRole `db:"role"`
+	OrganisationID string   `db:"organisation_id"`
+}
+
+func (q *Queries) UserListByRole(ctx context.Context, arg UserListByRoleParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, userListByRole, arg.Role, arg.OrganisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Role,
+			&i.OrganisationID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.Password,
+			&i.RecoveryToken,
+			&i.RecoverySentAt,
+			&i.AvatarFileID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.Language,
+			&i.Sex,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const userListCount = `-- name: UserListCount :many
+SELECT COUNT(*)
+FROM users
+WHERE organisation_id = $1 AND deleted_at IS NULL
+`
+
+func (q *Queries) UserListCount(ctx context.Context, organisationID string) ([]int64, error) {
+	rows, err := q.db.Query(ctx, userListCount, organisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []int64
+	for rows.Next() {
+		var count int64
+		if err := rows.Scan(&count); err != nil {
+			return nil, err
+		}
+		items = append(items, count)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

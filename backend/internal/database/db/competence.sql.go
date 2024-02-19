@@ -9,8 +9,44 @@ import (
 	"context"
 )
 
+const competenceById = `-- name: CompetenceById :one
+SELECT id, name, competence_id, competence_type, organisation_id, grades, color, curriculum_id, created_at, deleted_at, sort_order, created_by
+FROM competences
+WHERE id = $1
+  AND organisation_id = $2
+  AND deleted_at IS NULL
+`
+
+type CompetenceByIdParams struct {
+	ID             string `db:"id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) CompetenceById(ctx context.Context, arg CompetenceByIdParams) (Competence, error) {
+	row := q.db.QueryRow(ctx, competenceById, arg.ID, arg.OrganisationID)
+	var i Competence
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CompetenceID,
+		&i.CompetenceType,
+		&i.OrganisationID,
+		&i.Grades,
+		&i.Color,
+		&i.CurriculumID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.SortOrder,
+		&i.CreatedBy,
+	)
+	return i, err
+}
+
 const competenceList = `-- name: CompetenceList :many
-SELECT id, name, competence_id, competence_type, organisation_id, grades, color, curriculum_id, created_at, deleted_at, sort_order, created_by FROM competences WHERE organisation_id = $1
+SELECT id, name, competence_id, competence_type, organisation_id, grades, color, curriculum_id, created_at, deleted_at, sort_order, created_by
+FROM competences
+WHERE organisation_id = $1
+  AND deleted_at IS NULL
 `
 
 func (q *Queries) CompetenceList(ctx context.Context, organisationID string) ([]Competence, error) {
@@ -47,7 +83,8 @@ func (q *Queries) CompetenceList(ctx context.Context, organisationID string) ([]
 }
 
 const competenceParentsList = `-- name: CompetenceParentsList :many
-SELECT get_competence_parents FROM get_competence_parents($1::text[])
+SELECT get_competence_parents
+FROM get_competence_parents($1::text[])
 `
 
 func (q *Queries) CompetenceParentsList(ctx context.Context, dollar_1 []string) ([]interface{}, error) {
@@ -68,4 +105,16 @@ func (q *Queries) CompetenceParentsList(ctx context.Context, dollar_1 []string) 
 		return nil, err
 	}
 	return items, nil
+}
+
+const competenceTree = `-- name: CompetenceTree :one
+SELECT get_competence_tree
+FROM get_competence_tree($1::text[])
+`
+
+func (q *Queries) CompetenceTree(ctx context.Context, dollar_1 []string) (interface{}, error) {
+	row := q.db.QueryRow(ctx, competenceTree, dollar_1)
+	var get_competence_tree interface{}
+	err := row.Scan(&get_competence_tree)
+	return get_competence_tree, err
 }

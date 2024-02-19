@@ -98,53 +98,53 @@ func (ns NullCompetenceType) Value() (driver.Value, error) {
 	return string(ns.CompetenceType), nil
 }
 
-type FilePermission string
+type FilePermissionRole string
 
 const (
-	FilePermissionViewer  FilePermission = "viewer"
-	FilePermissionManager FilePermission = "manager"
+	FilePermissionRoleViewer  FilePermissionRole = "viewer"
+	FilePermissionRoleManager FilePermissionRole = "manager"
 )
 
-func (e *FilePermission) Scan(src interface{}) error {
+func (e *FilePermissionRole) Scan(src interface{}) error {
 	switch s := src.(type) {
 	case []byte:
-		*e = FilePermission(s)
+		*e = FilePermissionRole(s)
 	case string:
-		*e = FilePermission(s)
+		*e = FilePermissionRole(s)
 	default:
-		return fmt.Errorf("unsupported scan type for FilePermission: %T", src)
+		return fmt.Errorf("unsupported scan type for FilePermissionRole: %T", src)
 	}
 	return nil
 }
 
-type NullFilePermission struct {
-	FilePermission FilePermission
-	Valid          bool // Valid is true if FilePermission is not NULL
+type NullFilePermissionRole struct {
+	FilePermissionRole FilePermissionRole
+	Valid              bool // Valid is true if FilePermissionRole is not NULL
 }
 
 // Scan implements the Scanner interface.
-func (ns *NullFilePermission) Scan(value interface{}) error {
+func (ns *NullFilePermissionRole) Scan(value interface{}) error {
 	if value == nil {
-		ns.FilePermission, ns.Valid = "", false
+		ns.FilePermissionRole, ns.Valid = "", false
 		return nil
 	}
 	ns.Valid = true
-	return ns.FilePermission.Scan(value)
+	return ns.FilePermissionRole.Scan(value)
 }
 
 // Value implements the driver Valuer interface.
-func (ns NullFilePermission) Value() (driver.Value, error) {
+func (ns NullFilePermissionRole) Value() (driver.Value, error) {
 	if !ns.Valid {
 		return nil, nil
 	}
-	return string(ns.FilePermission), nil
+	return string(ns.FilePermissionRole), nil
 }
 
 type FileType string
 
 const (
-	FileTypeBlob   FileType = "blob"
-	FileTypeFolder FileType = "folder"
+	FileTypeBLOB   FileType = "BLOB"
+	FileTypeFOLDER FileType = "FOLDER"
 )
 
 func (e *FileType) Scan(src interface{}) error {
@@ -718,6 +718,18 @@ type File struct {
 	DeletedAt      pgtype.Timestamptz `db:"deleted_at"`
 }
 
+type FilePermission struct {
+	ID             string             `db:"id"`
+	FileID         pgtype.Text        `db:"file_id"`
+	BucketID       pgtype.Text        `db:"bucket_id"`
+	SharedWith     string             `db:"shared_with"`
+	SharedBy       string             `db:"shared_by"`
+	Role           FilePermissionRole `db:"role"`
+	OrganisationID string             `db:"organisation_id"`
+	CreatedAt      time.Time          `db:"created_at"`
+	DeletedAt      pgtype.Timestamptz `db:"deleted_at"`
+}
+
 type Organisation struct {
 	ID                   string             `db:"id"`
 	Name                 string             `db:"name"`
@@ -793,18 +805,6 @@ type Session struct {
 	Token     string             `db:"token"`
 	CreatedAt time.Time          `db:"created_at"`
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
-}
-
-type Share struct {
-	ID             string             `db:"id"`
-	FileID         pgtype.Text        `db:"file_id"`
-	BucketID       pgtype.Text        `db:"bucket_id"`
-	SharedWith     string             `db:"shared_with"`
-	SharedBy       string             `db:"shared_by"`
-	Permission     FilePermission     `db:"permission"`
-	OrganisationID string             `db:"organisation_id"`
-	CreatedAt      time.Time          `db:"created_at"`
-	DeletedAt      pgtype.Timestamptz `db:"deleted_at"`
 }
 
 type Subject struct {

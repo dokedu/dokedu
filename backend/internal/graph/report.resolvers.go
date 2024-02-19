@@ -32,12 +32,10 @@ func (r *mutationResolver) CreateReport(ctx context.Context, input model.CreateR
 	var reports []*db.Report
 
 	if input.AllUsers != nil && *input.AllUsers {
-		var students []*db.User
-		err = r.DB.NewSelect().
-			Model(&students).
-			Where("organisation_id = ?", currentUser.OrganisationID).
-			Where("role = ?", db.UserRoleStudent).
-			Scan(ctx)
+		students, err := r.DB.UserListByRole(ctx, db.UserListByRoleParams{
+			Role:           db.UserRoleStudent,
+			OrganisationID: currentUser.OrganisationID,
+		})
 		if err != nil {
 			return nil, errors.New("failed to get students")
 		}

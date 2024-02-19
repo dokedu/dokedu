@@ -10,8 +10,7 @@ import (
 	"slices"
 	"time"
 
-	db1 "github.com/dokedu/dokedu/backend/internal/database/db"
-	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
@@ -20,7 +19,7 @@ import (
 )
 
 // CreateSubject is the resolver for the createSubject field.
-func (r *mutationResolver) CreateSubject(ctx context.Context, input model.CreateSubjectInput) (*db1.Subject, error) {
+func (r *mutationResolver) CreateSubject(ctx context.Context, input model.CreateSubjectInput) (*db.Subject, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, err
@@ -39,7 +38,7 @@ func (r *mutationResolver) CreateSubject(ctx context.Context, input model.Create
 }
 
 // UpdateSubject is the resolver for the updateSubject field.
-func (r *mutationResolver) UpdateSubject(ctx context.Context, input model.UpdateSubjectInput) (*db1.Subject, error) {
+func (r *mutationResolver) UpdateSubject(ctx context.Context, input model.UpdateSubjectInput) (*db.Subject, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, err
@@ -56,7 +55,7 @@ func (r *mutationResolver) UpdateSubject(ctx context.Context, input model.Update
 }
 
 // DeleteSubject is the resolver for the deleteSubject field.
-func (r *mutationResolver) DeleteSubject(ctx context.Context, id string) (*db1.Subject, error) {
+func (r *mutationResolver) DeleteSubject(ctx context.Context, id string) (*db.Subject, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, err
@@ -72,7 +71,7 @@ func (r *mutationResolver) DeleteSubject(ctx context.Context, id string) (*db1.S
 }
 
 // CreateSchoolYear is the resolver for the createSchoolYear field.
-func (r *mutationResolver) CreateSchoolYear(ctx context.Context, input model.CreateSchoolYearInput) (*db1.SchoolYear, error) {
+func (r *mutationResolver) CreateSchoolYear(ctx context.Context, input model.CreateSchoolYearInput) (*db.SchoolYear, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, err
@@ -91,7 +90,7 @@ func (r *mutationResolver) CreateSchoolYear(ctx context.Context, input model.Cre
 }
 
 // UpdateSchoolYear is the resolver for the updateSchoolYear field.
-func (r *mutationResolver) UpdateSchoolYear(ctx context.Context, input model.UpdateSchoolYearInput) (*db1.SchoolYear, error) {
+func (r *mutationResolver) UpdateSchoolYear(ctx context.Context, input model.UpdateSchoolYearInput) (*db.SchoolYear, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, err
@@ -108,7 +107,7 @@ func (r *mutationResolver) UpdateSchoolYear(ctx context.Context, input model.Upd
 }
 
 // DeleteSchoolYear is the resolver for the deleteSchoolYear field.
-func (r *mutationResolver) DeleteSchoolYear(ctx context.Context, id string) (*db1.SchoolYear, error) {
+func (r *mutationResolver) DeleteSchoolYear(ctx context.Context, id string) (*db.SchoolYear, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, err
@@ -307,7 +306,7 @@ func (r *queryResolver) Subjects(ctx context.Context, limit *int, offset *int) (
 }
 
 // Subject is the resolver for the subject field.
-func (r *queryResolver) Subject(ctx context.Context, id string) (*db1.Subject, error) {
+func (r *queryResolver) Subject(ctx context.Context, id string) (*db.Subject, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, err
@@ -363,7 +362,7 @@ func (r *queryResolver) SchoolYears(ctx context.Context, limit *int, offset *int
 }
 
 // SchoolYear is the resolver for the SchoolYear field.
-func (r *queryResolver) SchoolYear(ctx context.Context, id string) (*db1.SchoolYear, error) {
+func (r *queryResolver) SchoolYear(ctx context.Context, id string) (*db.SchoolYear, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, err
@@ -428,7 +427,7 @@ func (r *queryResolver) UserStudentGrade(ctx context.Context, id string) (*model
 }
 
 // Description is the resolver for the description field.
-func (r *schoolYearResolver) Description(ctx context.Context, obj *db1.SchoolYear) (string, error) {
+func (r *schoolYearResolver) Description(ctx context.Context, obj *db.SchoolYear) (string, error) {
 	panic(fmt.Errorf("not implemented: Description - description"))
 }
 

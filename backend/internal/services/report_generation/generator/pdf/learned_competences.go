@@ -3,8 +3,7 @@ package pdf
 import (
 	"context"
 	"fmt"
-
-	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 
 	"github.com/uptrace/bun"
 )

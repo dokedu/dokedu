@@ -11,132 +11,36 @@ import (
 
 	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/dataloaders"
+	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
-	"github.com/dokedu/dokedu/backend/internal/msg"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/samber/lo"
 )
 
-// SetUserAttendanceState is the resolver for the setUserAttendanceState field.
-func (r *mutationResolver) SetUserAttendanceState(ctx context.Context, userID string, date time.Time, state db.UserAttendanceState) (*db.UserAttendance, error) {
+// UpdateUserAttendance is the resolver for the updateUserAttendance field.
+func (r *mutationResolver) UpdateUserAttendance(ctx context.Context, input model.UpdateUserAttendanceInput) (*db.UserAttendance, error) {
+	panic(fmt.Errorf("not implemented: UpdateUserAttendance - updateUserAttendance"))
+}
+
+// UserAttendances is the resolver for the userAttendances field.
+func (r *queryResolver) UserAttendances(ctx context.Context, date time.Time) ([]*db.UserAttendance, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	userAttendance, err := r.DB.UpdateUserAttendanceForUser(ctx, db.UpdateUserAttendanceForUserParams{
-		State:          state,
-		UserID:         userID,
-		CreatedBy:      currentUser.ID,
+	// TODO: in case for the requested day there are no user attendances for all students, we must create them before returning
+	userAttendances, err := r.DB.UserAttendanceListByDate(ctx, db.UserAttendanceListByDateParams{
 		Date:           pgtype.Date{Time: date, Valid: true},
 		OrganisationID: currentUser.OrganisationID,
 	})
-	if err != nil {
-		return nil, msg.ErrUnexpected
-	}
-	return &userAttendance, nil
-}
-
-// UpdateDailyAttendance is the resolver for the updateDailyAttendance field.
-func (r *mutationResolver) UpdateDailyAttendance(ctx context.Context, date time.Time, state db.UserAttendanceState) ([]*db.UserAttendance, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, msg.ErrUnauthorized
-	}
-
-	userAttendances, err := r.DB.UpdateUserAttendanceForDate(ctx, db.UpdateUserAttendanceForDateParams{
-		OrganisationID: currentUser.OrganisationID,
-		Date: pgtype.Date{
-			Time:  date,
-			Valid: true,
-		},
-		State:     state,
-		CreatedBy: currentUser.ID,
-	})
-	if err != nil {
-		return nil, msg.ErrUnexpected
-	}
 
 	return lo.ToSlicePtr(userAttendances), nil
 }
 
-// UserAttendanceOverview is the resolver for the userAttendanceOverview field.
-func (r *queryResolver) UserAttendanceOverview(ctx context.Context, date time.Time) ([]*db.UserAttendance, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var users []*db.User
-	err = r.DB.NewSelect().
-		Model(&users).
-		Where("role = 'student'").
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var count int
-	var userAttendances []*db.UserAttendance
-	count, err = r.DB.NewSelect().
-		Model(&userAttendances).
-		Where("date = ?", date).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		ScanAndCount(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if count != len(users) {
-		var unknownUserAttendance []*db.UserAttendance
-
-		for _, user := range users {
-			var found bool
-
-			for _, userAttendance := range userAttendances {
-				if userAttendance.UserID == user.ID {
-					found = true
-					break
-				}
-			}
-
-			if !found {
-				unknownUserAttendance = append(unknownUserAttendance, &db.UserAttendance{
-					UserID:         user.ID,
-					Date:           date,
-					State:          db.UserAttendanceStateUnknown,
-					CreatedBy:      currentUser.ID,
-					OrganisationID: currentUser.OrganisationID,
-				})
-			}
-		}
-
-		if len(unknownUserAttendance) != 0 {
-			err = r.DB.NewInsert().
-				Model(&unknownUserAttendance).
-				Scan(ctx)
-			if err != nil {
-				return nil, err
-			}
-
-			userAttendances = append(userAttendances, unknownUserAttendance...)
-		}
-	}
-
-	err = r.DB.NewSelect().
-		Model(&userAttendances).
-		Where("date = ?", date).
-		Join("JOIN users ON users.id = user_attendance.user_id").
-		Order("users.first_name ASC").
-		Order("users.last_name ASC").
-		Where("user_attendance.organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return userAttendances, nil
+// Date is the resolver for the date field.
+func (r *userAttendanceResolver) Date(ctx context.Context, obj *db.UserAttendance) (*time.Time, error) {
+	return &obj.Date.Time, nil
 }
 
 // User is the resolver for the user field.
@@ -147,11 +51,6 @@ func (r *userAttendanceResolver) User(ctx context.Context, obj *db.UserAttendanc
 	}
 
 	return dataloaders.GetUser(ctx, obj.UserID, currentUser)
-}
-
-// Date is the resolver for the date field.
-func (r *userAttendanceResolver) Date(ctx context.Context, obj *db.UserAttendance) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: Date - date"))
 }
 
 // UserAttendance returns UserAttendanceResolver implementation.

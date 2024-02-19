@@ -6,63 +6,48 @@ package graph
 
 import (
 	"context"
-	"errors"
+	"fmt"
 
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
-	"github.com/vektah/gqlparser/v2/gqlerror"
+	"github.com/dokedu/dokedu/backend/internal/msg"
 )
 
 // UpdateOrganisation is the resolver for the updateOrganisation field.
 func (r *mutationResolver) UpdateOrganisation(ctx context.Context, input model.UpdateOrganisationInput) (*db.Organisation, error) {
 	currentUser, err := middleware.GetUser(ctx)
 	if err != nil {
-		return nil, nil
+		return nil, msg.ErrUnauthenticated
 	}
-	if !currentUser.HasPermissionAdmin() {
-		graphql.AddError(ctx, &gqlerror.Error{
-			Message: "You do not have permission to update this organisation",
-			Extensions: map[string]interface{}{
-				"code": "UNAUTHORIZED",
-			},
-		})
-		return nil, errors.New("unauthorized")
-	}
-	if currentUser.OrganisationID != input.ID {
-		graphql.AddError(ctx, &gqlerror.Error{
-			Message: "You do not have permission to update this organisation",
-			Extensions: map[string]interface{}{
-				"code": "UNAUTHORIZED",
-			},
-		})
-		return nil, errors.New("unauthorized")
+	if !currentUser.HasPermissionAdmin() || currentUser.OrganisationID != input.ID {
+		return nil, msg.ErrUnauthorized
 	}
 
-	var organisation db.Organisation
-	err = r.DB.NewSelect().Model(&organisation).Where("id = ?", currentUser.OrganisationID).Scan(ctx)
+	organisation, err := r.DB.GLOBAL_OrganisationById(ctx, input.ID)
 	if err != nil {
 		return nil, err
 	}
 
+	query := r.DB.NewQueryBuilder().Update("organisations").Where("id = ?", input.ID)
+
 	if input.Name != nil {
-		organisation.Name = *input.Name
+		query.Set("name", *input.Name)
 	}
 
 	if input.LegalName != nil {
-		organisation.LegalName = *input.LegalName
+		query.Set("legal_name", *input.LegalName)
 	}
 
 	if input.Phone != nil {
-		organisation.Phone = *input.Phone
+		query.Set("phone", *input.Phone)
 	}
 
 	if input.Website != nil {
-		organisation.Website = *input.Website
+		query.Set("website", *input.Website)
 	}
 
-	err = r.DB.NewUpdate().Model(&organisation).Column("name").Column("legal_name").Column("phone").Column("website").WherePK().Returning("*").Scan(ctx)
+	err = query.Scan(ctx, organisation)
 	if err != nil {
 		return nil, err
 	}
@@ -77,13 +62,16 @@ func (r *organisationResolver) Owner(ctx context.Context, obj *db.Organisation) 
 		return nil, nil
 	}
 
-	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.OwnerID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
+	user, err := r.DB.UserById(ctx, db.UserByIdParams{
+		ID:             obj.OwnerID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	return &user, err
+}
 
-	return &user, nil
+// Applications is the resolver for the applications field.
+func (r *organisationResolver) Applications(ctx context.Context, obj *db.Organisation) ([]model.OrganisationApplication, error) {
+	panic(fmt.Errorf("not implemented: Applications - applications"))
 }
 
 // Organisation is the resolver for the organisation field.
@@ -93,13 +81,8 @@ func (r *queryResolver) Organisation(ctx context.Context) (*db.Organisation, err
 		return nil, nil
 	}
 
-	var organisation db.Organisation
-	err = r.DB.NewSelect().Model(&organisation).Where("id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &organisation, nil
+	organisation, err := r.DB.GLOBAL_OrganisationById(ctx, currentUser.OrganisationID)
+	return &organisation, err
 }
 
 // Organisation returns OrganisationResolver implementation.

@@ -1,74 +1,57 @@
 scalar Upload
 
 enum FileType {
-    blob
-    folder
-}
-
-type Bucket {
-    id: ID!
-    name: String!
-    user: User!
-    shared: Boolean!
-    createdAt: Time!
-    deletedAt: Time
-    permission: FilePermission
-
-    files: [File!]!
+    BLOB
+    FOLDER
 }
 
 type File {
     id: ID!
-    name: String!
-    fileType: FileType!
-    MIMEType: String!
     size: Int!
-    bucket: Bucket!
-    parent: File
+    name: String!
+    type: FileType!
+    mime: String!
+
+    folder: File
+    folders: [File!]!
+
+    files: [File!]!
+
     createdAt: Time!
     deletedAt: Time
 
-    parents: [File!]!
-
-    files: [File!]!
+    permissions: [FilePermission!]!
 }
 
-type ShareUser {
-    user: User!
-    permission: FilePermission!
+enum FilePermissionType {
+    USER
+    GROUP
+    DOMAIN
+    ANYONE
 }
 
-input UserFileFilterInput {
-    folderId: String
+enum FilePermissionRole {
+    VIEWER
+    MANAGER
+    OWNER
 }
 
-input SharedDriveFilterInput {
-    folder: String
+type FilePermission {
+    id: ID!
+    file: File!
+    displayName: String!
+    emailAddress: String
+    type: FilePermissionType!
+    role: FilePermissionRole!
+    inherited: Boolean!
 }
 
-input FilesFilterInput {
-    parentId: String
-    bucketId: String
-    myBucket: Boolean
-}
-
-input MyFilesFilterInput {
-    parentId: String
-}
-
-input BucketFilterInput {
-    shared: Boolean
-}
-
-input ShareInput {
-    bucketId: ID
-    fileId: ID
-}
-
-type BucketConnection {
-    edges: [Bucket!]!
-    totalCount: Int!
-    pageInfo: PageInfo!
+input FileFilterInput {
+    search: String
+    parentId: ID
+    deleted: Boolean = false
+    limit: Int
+    offset: Int
 }
 
 type FileConnection {
@@ -78,179 +61,76 @@ type FileConnection {
 }
 
 extend type Query {
-    buckets(input: BucketFilterInput, limit: Int, offset: Int): BucketConnection!
-    bucket(id: ID!): Bucket!
+    myDrive(input: FileFilterInput): FileConnection!
+    sharedDrives(input: FileFilterInput): FileConnection!
+    trash(input: FileFilterInput): FileConnection!
 
     file(id: ID!): File!
-    files(input: FilesFilterInput, limit: Int, offset: Int): FileConnection!
-
-    shares(input: ShareInput): [ShareUser!]
+    files(input: FileFilterInput): FileConnection!
 }
 
-input FileUploadInput {
-    file: Upload!
-    """
-    The folder to upload the file to if empty the file will be uploaded to the root folder of the user.
-    """
-    parentId: ID
-    """
-    The shared drive to upload the file to if empty the file will be uploaded to the root folder of the user.
-    """
-    bucketId: ID
-}
-
-input CreateFolderInput {
+input CreateFileInput {
     name: String!
-    parentId: ID
-    bucketId: ID
+    type: FileType!
+    folderId: ID
+    upload: Upload
 }
 
-input GenerateFileURLInput {
-    id: ID!
-}
-
-type PreviewFilePayload {
-    url: String!
-}
-
-type DeleteFilePayload {
-    success: Boolean!
+type CreateFilePayload {
     file: File!
 }
 
-type DeleteFilesPayload {
-    success: Boolean!
-    files: [File!]!
-}
-
-input DownloadFileInput {
+input UpdateFileInput {
     id: ID!
+    name: String
+    parentId: ID
 }
 
-input DownloadFilesInput {
-    ids: [ID!]!
-}
-
-type DownloadFilePayload {
-    url: String!
-}
-
-type DownloadFilesPayload {
-    """
-    The url to download a zip file containing all the files.
-    """
-    url: String!
-}
-
-input RenameFileInput {
-    id: ID!
-    name: String!
-}
-
-input MoveFileInput {
-    id: ID!
-    targetId: ID
-}
-
-input MoveFilesInput {
-    ids: [ID!]!
-    targetId: ID!
-}
-
-input CopyFileInput {
-    id: ID!
-    targetId: ID!
-}
-
-input CopyFilesInput {
-    ids: [ID!]!
-    targetId: ID!
+type UpdateFilePayload {
+    name: String
 }
 
 input DeleteFileInput {
     id: ID!
 }
 
-input DeleteFilesInput {
-    ids: [ID!]!
+type DeleteFilePayload {
+    file: File!
 }
 
-type MoveFilesPayload {
-    files: [File!]!
-}
-
-type CopyFilesPayload {
-    files: [File!]!
-}
-
-type UploadFilesPayload {
-    files: [File!]!
-}
-
-input PreviewFileInput {
-    id: ID!
-}
-
-# file permission: Viewer, Manager
-enum FilePermission {
-    Viewer
-    Manager
-}
-
-input ShareFileInput {
+input CreateFilePermissionInput {
     fileId: ID!
-    users: [ID!]!
-    emails: [String!]!
-    permission: FilePermission!
+    userId: ID!
+    permission: FilePermissionRole!
 }
 
-input CreateShareInput {
-    fileId: ID
-    bucketId: ID
-    user: ID!
-    permission: FilePermission!
+type CreateFilePermissionPayload {
+    filePermission: FilePermission!
 }
 
-input DeleteShareInput {
-    fileId: ID
-    bucketId: ID
-    user: ID!
-}
-
-input RenameSharedDriveInput {
+input UpdateFilePermissionInput {
     id: ID!
-    name: String!
+    permission: FilePermissionRole!
+}
+
+type UpdateFilePermissionPayload {
+    filePermission: FilePermission!
+}
+
+input DeleteFilePermissionInput {
+    id: ID!
+}
+
+type DeleteFilePermissionPayload {
+    filePermission: FilePermission!
 }
 
 extend type Mutation {
-    uploadFile(input: FileUploadInput!): File!
-    uploadFiles(input: FileUploadInput!): UploadFilesPayload!
-
-    createFolder(input: CreateFolderInput!): File!
-
-    renameFile(input: RenameFileInput!): File!
-
-    moveFile(input: MoveFileInput!): File!
-    moveFiles(input: MoveFilesInput!): MoveFilesPayload!
-
-    copyFile(input: CopyFileInput!): File!
-    copyFiles(input: CopyFilesInput!): CopyFilesPayload!
-
+    createFile(input: CreateFileInput!): CreateFilePayload!
+    updateFile(input: UpdateFileInput!): UpdateFilePayload!
     deleteFile(input: DeleteFileInput!): DeleteFilePayload!
-    deleteFiles(input: DeleteFilesInput!): DeleteFilesPayload!
 
-    previewFile(input: PreviewFileInput!): PreviewFilePayload!
-    downloadFile(input: DownloadFileInput!): DownloadFilePayload!
-    downloadFiles(input: DownloadFilesInput!): DownloadFilesPayload!
-
-    addFileShare(input: ShareFileInput!): File!
-    removeFileShare(input: ID!): File!
-
-    createSharedDrive(name: String!): Bucket!
-    renameSharedDrive(input: RenameSharedDriveInput!): Bucket!
-    deleteSharedDrive(id: ID!): Bucket!
-
-    createShare(input: CreateShareInput!): ShareUser!
-    editShare(input: CreateShareInput!): ShareUser!
-    deleteShare(input: DeleteShareInput!): ShareUser!
+    createFilePermission(input: CreateFilePermissionInput!): CreateFilePermissionPayload!
+    updateFilePermission(input: UpdateFilePermissionInput!): UpdateFilePermissionPayload!
+    deleteFilePermission(input: DeleteFilePermissionInput!): DeleteFilePermissionPayload!
 }

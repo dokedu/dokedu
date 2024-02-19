@@ -6,6 +6,8 @@ package graph
 
 import (
 	"context"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/samber/lo"
 	"time"
 
 	"github.com/dokedu/dokedu/backend/internal/database/db"
@@ -21,22 +23,15 @@ func (r *eventResolver) Image(ctx context.Context, obj *db.Event) (*db.File, err
 		return nil, err
 	}
 
-	var file db.File
-	err = r.DB.NewSelect().Model(&file).Where("id = ?", obj.ImageFileID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	file, err := r.DB.FileById(ctx, db.FileByIdParams{
+		ID:             obj.ImageFileID.String,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	return &file, nil
-}
-
-// DeletedAt is the resolver for the deletedAt field.
-func (r *eventResolver) DeletedAt(ctx context.Context, obj *db.Event) (*time.Time, error) {
-	if obj.DeletedAt.IsZero() {
-		return nil, nil
-	}
-
-	return &obj.DeletedAt.Time, nil
 }
 
 // Competences is the resolver for the competences field.
@@ -46,18 +41,24 @@ func (r *eventResolver) Competences(ctx context.Context, obj *db.Event) ([]*db.C
 		return nil, err
 	}
 
-	var competences []*db.Competence
-	err = r.DB.NewSelect().
-		Model(&competences).
-		Join("JOIN event_competences ON event_competences.competence_id = competence.id and event_competences.deleted_at is null").
-		Where("event_competences.event_id = ?", obj.ID).
-		Where("competence.organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	competences, err := r.DB.EventCompetenceListByEventId(ctx, db.EventCompetenceListByEventIdParams{
+		EventID:        obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	return competences, nil
+	return lo.ToSlicePtr(competences), nil
+}
+
+// DeletedAt is the resolver for the deletedAt field.
+func (r *eventResolver) DeletedAt(ctx context.Context, obj *db.Event) (*time.Time, error) {
+	if !obj.DeletedAt.Valid {
+		return nil, nil
+	}
+
+	return &obj.DeletedAt.Time, nil
 }
 
 // CreateEvent is the resolver for the createEvent field.
@@ -92,7 +93,15 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input model.CreateEv
 		event.Recurrence = []string{}
 	}
 
-	err = r.DB.NewInsert().Model(&event).Returning("*").Scan(ctx)
+	event, err = r.DB.CreateEvent(ctx, db.CreateEventParams{
+		ImageFileID:    pgtype.Text{},
+		OrganisationID: currentUser.OrganisationID,
+		Title:          event.Title,
+		Body:           event.Body,
+		StartsAt:       event.StartsAt,
+		EndsAt:         event.EndsAt,
+		Recurrence:     event.Recurrence,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -109,11 +118,11 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input model.UpdateEv
 
 	var event db.Event
 
-	query := r.DB.NewUpdate().
-		Model(&event).
+	query := r.DB.NewQueryBuilder().
+		Update("events").
+		Where("id = ?", input.ID).
 		Where("organisation_id = ?", currentUser.OrganisationID).
-		Returning("*").
-		Where("id = ?", input.ID)
+		Prefix("RETURNING *")
 
 	if input.Title != nil && len(*input.Title) > 0 {
 		event.Title = *input.Title

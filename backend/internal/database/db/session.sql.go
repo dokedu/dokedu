@@ -9,6 +9,30 @@ import (
 	"context"
 )
 
+const gLOBAL_CreateSession = `-- name: GLOBAL_CreateSession :one
+INSERT INTO sessions (user_id, token)
+VALUES ($1, $2)
+RETURNING id, user_id, token, created_at, deleted_at
+`
+
+type GLOBAL_CreateSessionParams struct {
+	UserID string `db:"user_id"`
+	Token  string `db:"token"`
+}
+
+func (q *Queries) GLOBAL_CreateSession(ctx context.Context, arg GLOBAL_CreateSessionParams) (Session, error) {
+	row := q.db.QueryRow(ctx, gLOBAL_CreateSession, arg.UserID, arg.Token)
+	var i Session
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Token,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const gLOBAL_DeleteExpiredSession = `-- name: GLOBAL_DeleteExpiredSession :exec
 UPDATE sessions
 SET deleted_at = NOW()
@@ -34,7 +58,7 @@ func (q *Queries) GLOBAL_DeleteSessionsByUserID(ctx context.Context, userID stri
 const gLOBAL_SessionByToken = `-- name: GLOBAL_SessionByToken :one
 SELECT id, user_id, token, created_at, deleted_at
 FROM sessions
-WHERE token = $1
+WHERE token = $1 AND deleted_at IS NULL
 LIMIT 1
 `
 
