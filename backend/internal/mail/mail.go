@@ -55,7 +55,7 @@ func (m Mailer) Send(to []string, subject string, message string) error {
 	return nil
 }
 
-func (m Mailer) SendPasswordReset(to string, name string, lang db.UserLanguage, token string) error {
+func (m Mailer) SendPasswordReset(to string, name string, lang db.UserLang, token string) error {
 	frontendUrl := os.Getenv("FRONTEND_URL")
 
 	link := fmt.Sprintf("%s/reset-password#token=%s", frontendUrl, token)
@@ -76,7 +76,7 @@ func (m Mailer) SendPasswordReset(to string, name string, lang db.UserLanguage, 
 	return m.Send([]string{to}, subject, template)
 }
 
-func (m Mailer) SendInvite(to string, name string, organisationName string, lang db.UserLanguage, token string) error {
+func (m Mailer) SendInvite(to string, name string, organisationName string, lang db.UserLang, token string) error {
 	frontendUrl := os.Getenv("FRONTEND_URL")
 
 	link := fmt.Sprintf("%s/invite#token=%s", frontendUrl, token)

@@ -156,12 +156,12 @@ func chatCompletionRequest(messages []openai.ChatCompletionMessage, stream bool)
 func (a *ChatMessageProcessor) GenerateMessages(message db.ChatMessage) ([]openai.ChatCompletionMessage, error) {
 	var messages []openai.ChatCompletionMessage
 
-	msgHistory, err := a.DB.ChatMessagesByChatIdWithoutOrg(context.Background(), message.ChatID)
+	msgHistory, err := a.DB.GLOBAL_ChatMessagesByChatId(context.Background(), message.ChatID)
 	if err != nil {
 		return messages, nil
 	}
 
-	users, err := a.DB.UsersInChat(context.Background(), message.ChatID)
+	users, err := a.DB.GLOBAL_UsersInChat(context.Background(), message.ChatID)
 	if err != nil {
 		return nil, err
 	}

@@ -76,3 +76,15 @@ LIMIT 1;
 INSERT INTO users (role, organisation_id, first_name, last_name, email, password, language, sex)
 VALUES (@role, @organisation_id, @first_name, @last_name, @email, @password, @language, @sex)
 RETURNING *;
+
+-- name: CreateUserWithId :one
+INSERT INTO users (id, role, organisation_id, first_name, last_name, email, password, language, sex)
+VALUES (@id, @role, @organisation_id, @first_name, @last_name, @email, @password, @language, @sex)
+RETURNING *;
+
+-- name: GLOBAL_DeleteUserByEmail :one
+UPDATE users
+SET deleted_at = now()
+WHERE email = lower($1)
+  AND deleted_at IS NULL
+RETURNING *;

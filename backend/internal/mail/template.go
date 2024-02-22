@@ -10,7 +10,7 @@ import (
 //go:embed templates/*
 var templateFiles embed.FS
 
-func PasswordResetMailTemplate(name string, link string, language db.UserLanguage) (string, error) {
+func PasswordResetMailTemplate(name string, link string, language db.UserLang) (string, error) {
 	t, err := template.ParseFS(templateFiles, "templates/"+string(language)+"/*.gohtml")
 	if err != nil {
 		return "", err
@@ -34,7 +34,7 @@ func PasswordResetMailTemplate(name string, link string, language db.UserLanguag
 	return out.String(), nil
 }
 
-func InviteMailTemplate(name string, link string, organisation string, language db.UserLanguage) (string, error) {
+func InviteMailTemplate(name string, link string, organisation string, language db.UserLang) (string, error) {
 	t, err := template.ParseFS(templateFiles, "templates/"+string(language)+"/*.gohtml")
 	if err != nil {
 		return "", err

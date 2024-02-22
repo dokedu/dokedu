@@ -43,7 +43,7 @@ func NewMeiliClient() *MeiliClient {
 }
 
 func (m MeiliClient) GenerateCompetenceIndex(ctx context.Context, conn *database.DB) error {
-	organisations, err := conn.OrganisationList(ctx)
+	organisations, err := conn.GLOBAL_OrganisationList(ctx)
 	if err != nil {
 		return err
 	}

@@ -1,7 +1,3 @@
--- name: CompetenceParentsList :many
-SELECT *
-FROM get_competence_parents($1::text[]);
-
 -- name: CompetenceTree :one
 SELECT *
 FROM get_competence_tree($1::text[]);
@@ -35,16 +31,14 @@ FROM child_competences
 WHERE competence_type = 'competence';
 
 -- name: UserCompetenceCount :one
-WITH RECURSIVE child_competences AS (
-    SELECT id
-    FROM competences
-    WHERE competences.id = @_competence_id -- Assuming this is the correct column for the initial filter
-    UNION ALL
-    SELECT c.id
-    FROM competences c
-             INNER JOIN child_competences cc ON c.competence_id = cc.id
-    WHERE c.competence_type = 'competence'
-)
+WITH RECURSIVE child_competences AS (SELECT id
+                                     FROM competences
+                                     WHERE competences.id = @_competence_id -- Assuming this is the correct column for the initial filter
+                                     UNION ALL
+                                     SELECT c.id
+                                     FROM competences c
+                                              INNER JOIN child_competences cc ON c.competence_id = cc.id
+                                     WHERE c.competence_type = 'competence')
 SELECT COUNT(DISTINCT uc.competence_id)
 FROM user_competences uc
 WHERE uc.organisation_id = @organisation_id
@@ -62,7 +56,7 @@ RETURNING *;
 -- name: CompetenceListByIds :many
 SELECT *
 FROM competences
-WHERE id = ANY(@ids::text[])
+WHERE id = ANY (@ids::text[])
   AND organisation_id = @organisation_id
   AND deleted_at IS NULL;
 

@@ -148,7 +148,7 @@ func (q *Queries) CompetenceList(ctx context.Context, organisationID string) ([]
 const competenceListByIds = `-- name: CompetenceListByIds :many
 SELECT id, name, competence_id, competence_type, organisation_id, grades, color, curriculum_id, created_at, deleted_at, sort_order, created_by
 FROM competences
-WHERE id = ANY($1::text[])
+WHERE id = ANY ($1::text[])
   AND organisation_id = $2
   AND deleted_at IS NULL
 `
@@ -184,31 +184,6 @@ func (q *Queries) CompetenceListByIds(ctx context.Context, arg CompetenceListByI
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const competenceParentsList = `-- name: CompetenceParentsList :many
-SELECT get_competence_parents
-FROM get_competence_parents($1::text[])
-`
-
-func (q *Queries) CompetenceParentsList(ctx context.Context, dollar_1 []string) ([]interface{}, error) {
-	rows, err := q.db.Query(ctx, competenceParentsList, dollar_1)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []interface{}
-	for rows.Next() {
-		var get_competence_parents interface{}
-		if err := rows.Scan(&get_competence_parents); err != nil {
-			return nil, err
-		}
-		items = append(items, get_competence_parents)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -385,16 +360,14 @@ func (q *Queries) UpdateCompetenceSortOrder(ctx context.Context, arg UpdateCompe
 }
 
 const userCompetenceCount = `-- name: UserCompetenceCount :one
-WITH RECURSIVE child_competences AS (
-    SELECT id
-    FROM competences
-    WHERE competences.id = $3 -- Assuming this is the correct column for the initial filter
-    UNION ALL
-    SELECT c.id
-    FROM competences c
-             INNER JOIN child_competences cc ON c.competence_id = cc.id
-    WHERE c.competence_type = 'competence'
-)
+WITH RECURSIVE child_competences AS (SELECT id
+                                     FROM competences
+                                     WHERE competences.id = $3 -- Assuming this is the correct column for the initial filter
+                                     UNION ALL
+                                     SELECT c.id
+                                     FROM competences c
+                                              INNER JOIN child_competences cc ON c.competence_id = cc.id
+                                     WHERE c.competence_type = 'competence')
 SELECT COUNT(DISTINCT uc.competence_id)
 FROM user_competences uc
 WHERE uc.organisation_id = $1

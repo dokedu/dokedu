@@ -51,7 +51,7 @@ func (h *Handler) RemoveChatChannel(userId string, userChannel chan *db.ChatMess
 func (h *Handler) PublishMessage(message *db.ChatMessage) error {
 	ctx := context.Background()
 
-	chatUsers, err := h.db.ChatUserByChatId(ctx, message.ChatID)
+	chatUsers, err := h.db.GLOBAL_ChatUserByChatId(ctx, message.ChatID)
 	if err != nil {
 		return err
 	}

@@ -9,6 +9,53 @@ import (
 	"context"
 )
 
+const gLOBAL_CreateOrganisation = `-- name: GLOBAL_CreateOrganisation :one
+INSERT INTO organisations (name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps, created_at, deleted_at, setup_complete, address, logo_url, stripe_customer_id, stripe_subscription_id
+`
+
+type GLOBAL_CreateOrganisationParams struct {
+	Name           string   `db:"name"`
+	LegalName      string   `db:"legal_name"`
+	Website        string   `db:"website"`
+	Phone          string   `db:"phone"`
+	OwnerID        string   `db:"owner_id"`
+	AllowedDomains []string `db:"allowed_domains"`
+	EnabledApps    []string `db:"enabled_apps"`
+}
+
+func (q *Queries) GLOBAL_CreateOrganisation(ctx context.Context, arg GLOBAL_CreateOrganisationParams) (Organisation, error) {
+	row := q.db.QueryRow(ctx, gLOBAL_CreateOrganisation,
+		arg.Name,
+		arg.LegalName,
+		arg.Website,
+		arg.Phone,
+		arg.OwnerID,
+		arg.AllowedDomains,
+		arg.EnabledApps,
+	)
+	var i Organisation
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.LegalName,
+		&i.Website,
+		&i.Phone,
+		&i.OwnerID,
+		&i.AllowedDomains,
+		&i.EnabledApps,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.SetupComplete,
+		&i.Address,
+		&i.LogoUrl,
+		&i.StripeCustomerID,
+		&i.StripeSubscriptionID,
+	)
+	return i, err
+}
+
 const gLOBAL_OrganisationById = `-- name: GLOBAL_OrganisationById :one
 SELECT id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps, created_at, deleted_at, setup_complete, address, logo_url, stripe_customer_id, stripe_subscription_id FROM organisations WHERE id = $1 LIMIT 1 AND deleted_at IS NULL
 `

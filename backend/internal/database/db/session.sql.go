@@ -87,3 +87,16 @@ func (q *Queries) GLOBAL_SessionCountByToken(ctx context.Context, token string) 
 	err := row.Scan(&count)
 	return count, err
 }
+
+const gLOBAL_SessionCountByUserId = `-- name: GLOBAL_SessionCountByUserId :one
+SELECT COUNT(*)
+FROM sessions
+WHERE user_id = $1 AND deleted_at IS NULL
+`
+
+func (q *Queries) GLOBAL_SessionCountByUserId(ctx context.Context, userID string) (int64, error) {
+	row := q.db.QueryRow(ctx, gLOBAL_SessionCountByUserId, userID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}

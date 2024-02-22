@@ -2,15 +2,9 @@ package testsuite
 
 import (
 	"context"
-	"database/sql"
 	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/jackc/pgx/v5/pgtype"
 	"testing"
-
-	gonanoid "github.com/matoous/go-nanoid/v2"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
-	"github.com/uptrace/bun"
 
 	"github.com/dokedu/dokedu/backend/internal/database"
 	"github.com/dokedu/dokedu/backend/internal/graph"
@@ -18,6 +12,9 @@ import (
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 	"github.com/dokedu/dokedu/backend/internal/modules/meilisearch"
 	"github.com/dokedu/dokedu/backend/internal/modules/minio"
+	gonanoid "github.com/matoous/go-nanoid/v2"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
 type TestSuite struct {
@@ -106,60 +103,65 @@ func (ts *TestSuite) UserByEmail(email string) *db.User {
 }
 
 func (ts *TestSuite) MockAdminForOrganisation(organisationID string) *db.User {
-	user := &db.User{
+	userParams := db.CreateUserParams{
 		Role:           "admin",
-		Email:          sql.NullString{Valid: true, String: gonanoid.Must(32) + "@dokedu.org"},
+		Email:          pgtype.Text{Valid: true, String: gonanoid.Must(32) + "@dokedu.org"},
 		FirstName:      gonanoid.Must(32),
 		LastName:       "tester",
 		OrganisationID: organisationID,
 	}
 
-	_, err := ts.DB.NewInsert().Model(user).Exec(context.Background())
+	user, err := ts.DB.CreateUser(context.Background(), userParams)
 	ts.NoError(err)
 
-	return user
+	return &user
 }
 
 // MockOrganisationWithOwner creates a new organisation + owner user
 func (ts *TestSuite) MockOrganisationWithOwner() (org *db.Organisation, user *db.User) {
 	name := gonanoid.Must(12)
-	err := ts.DB.RunInTx(ts.Ctx(), nil, func(ctx context.Context, tx bun.Tx) error {
-		ownerID := gonanoid.Must(32)
-		org = &db.Organisation{
-			Name:           name,
-			LegalName:      name,
-			Website:        name,
-			Phone:          name,
-			OwnerID:        ownerID,
-			AllowedDomains: []string{},
-			EnabledApps:    []string{"drive", "admin", "record", "school", "chat"},
-		}
-		_, err := tx.NewInsert().Model(org).Exec(ctx)
-		if err != nil {
-			return err
-		}
 
-		user = &db.User{
-			ID:             ownerID,
-			Role:           "owner",
-			Email:          sql.NullString{Valid: true, String: ownerID + "@dokedu.org"},
-			FirstName:      gonanoid.Must(32),
-			LastName:       "tester",
-			OrganisationID: org.ID,
-		}
-		_, err = tx.NewInsert().Model(user).Exec(ctx)
-		if err != nil {
-			return err
-		}
+	tx, err := ts.DB.DB.Begin(ts.Ctx())
+	if err != nil {
+		return nil, nil
+	}
+	defer tx.Rollback(ts.Ctx())
 
-		return nil
-	})
+	qtx := ts.DB.WithTx(tx)
+
+	ownerID := gonanoid.Must(32)
+	orgParams := db.GLOBAL_CreateOrganisationParams{
+		Name:           name,
+		LegalName:      name,
+		Website:        name,
+		Phone:          name,
+		OwnerID:        ownerID,
+		AllowedDomains: []string{},
+		EnabledApps:    []string{"drive", "admin", "record", "school", "chat"},
+	}
+	createdOrg, err := qtx.GLOBAL_CreateOrganisation(ts.Ctx(), orgParams)
+	if err != nil {
+		return nil, nil
+	}
+
+	userParams := db.CreateUserWithIdParams{
+		ID:             ownerID,
+		Role:           "owner",
+		Email:          pgtype.Text{Valid: true, String: ownerID + "@dokedu.org"},
+		FirstName:      gonanoid.Must(32),
+		LastName:       "tester",
+		OrganisationID: createdOrg.ID,
+	}
+	_, err = qtx.CreateUserWithId(ts.Ctx(), userParams)
+	if err != nil {
+		return nil, nil
+	}
 	ts.NoError(err)
 
-	return org, user
+	return &createdOrg, user
 }
 
 func (ts *TestSuite) DeleteUserByEmail(email string) {
-	_, err := ts.DB.NewDelete().Model(&db.User{}).Where("email = ?", email).Exec(context.Background())
+	_, err := ts.DB.GLOBAL_DeleteUserByEmail(ts.Ctx(), email)
 	ts.NoError(err)
 }

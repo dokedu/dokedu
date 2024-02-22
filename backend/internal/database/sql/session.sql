@@ -23,3 +23,8 @@ RETURNING *;
 SELECT COUNT(*)
 FROM sessions
 WHERE token = $1 AND deleted_at IS NULL;
+
+-- name: GLOBAL_SessionCountByUserId :one
+SELECT COUNT(*)
+FROM sessions
+WHERE user_id = @user_id AND deleted_at IS NULL;

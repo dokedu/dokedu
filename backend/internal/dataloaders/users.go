@@ -16,7 +16,7 @@ func (u *Reader) GetUser(ctx context.Context, keys dataloader.Keys) []*dataloade
 		ids[ix] = key.String()
 	}
 
-	users, err := u.conn.UsersByIds(ctx, ids)
+	users, err := u.conn.GLOBAL_UsersByIds(ctx, ids)
 	if err != nil {
 		log.Fatal(err)
 	}

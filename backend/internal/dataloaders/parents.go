@@ -2,14 +2,12 @@ package dataloaders
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/dokedu/dokedu/backend/internal/database/db"
-	"log"
-	"time"
-
+	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
+	"github.com/samber/lo"
 
 	"github.com/graph-gophers/dataloader"
 	"github.com/uptrace/bun"
@@ -23,59 +21,32 @@ type CompetenceParents struct {
 }
 
 func (u *Reader) GetCompetenceParents(ctx context.Context, keys dataloader.Keys) []*dataloader.Result {
+	currentUser, err := middleware.GetUser(ctx)
+	if err != nil {
+		return nil
+	}
+
 	// read all requested competences in a single query
 	competenceIDs := make([]string, len(keys))
 	for ix, key := range keys {
 		competenceIDs[ix] = key.String()
 	}
 
-	parents, err := u.conn.CompetenceParentsList(ctx, competenceIDs)
+	competences, err := u.conn.CompetenceList(ctx, currentUser.OrganisationID)
 	if err != nil {
 		return nil
 	}
 
-	// return Competence records into a map by ID
-	competenceById := map[string][]*db.Competence{}
+	competenceParentMap := make(map[string][]*db.Competence, len(competenceIDs))
 
-	for _, parent := range parents {
-		var parentItems []*db.Competence
-		if len(parent.Parents) == 0 {
-			competenceById[parent.CompetenceID] = []*db.Competence{}
-			continue
-		}
-		err := json.Unmarshal(parent.Parents, &parentItems)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// reverse order of parentItems
-		for i, j := 0, len(parentItems)-1; i < j; i, j = i+1, j-1 {
-			parentItems[i], parentItems[j] = parentItems[j], parentItems[i]
-		}
-
-		var competences []*db.Competence
-		for _, parentItem := range parentItems {
-			competences = append(competences, &db.Competence{
-				ID:             parentItem.ID,
-				Name:           parentItem.Name,
-				CompetenceID:   sql.NullString{String: parent.CompetenceID, Valid: len(parent.CompetenceID) > 0},
-				CompetenceType: parentItem.CompetenceType,
-				OrganisationID: parentItem.OrganisationID,
-				Grades:         parentItem.Grades,
-				Color:          sql.NullString{String: parentItem.Color, Valid: len(parentItem.Color) > 0},
-				SortOrder:      parentItem.SortOrder,
-				CurriculumID:   sql.NullString{String: parentItem.CurriculumID, Valid: len(parentItem.CurriculumID) > 0},
-				CreatedAt:      parentItem.CreatedAt,
-				DeletedAt:      bun.NullTime{Time: time.Time{}},
-			})
-		}
-		competenceById[parent.CompetenceID] = competences
+	for _, competenceId := range competenceIDs {
+		competenceParentMap[competenceId] = lo.ToSlicePtr(helper.FindRecursiveCompetenceParents(competences, competenceId))
 	}
 
 	// return competences in the same order requested
 	output := make([]*dataloader.Result, len(keys))
 	for index, competenceKey := range keys {
-		competence, ok := competenceById[competenceKey.String()]
+		competence, ok := competenceParentMap[competenceKey.String()]
 		if ok {
 			output[index] = &dataloader.Result{Data: competence, Error: nil}
 		} else {
