@@ -29,8 +29,7 @@ func NewClient() *DB {
 		Queries: db.New(pool),
 	}
 }
-
-func (db *DB) NewQueryBuilder() squirrel.StatementBuilderType {
+func (d *DB) NewQueryBuilder() squirrel.StatementBuilderType {
 	return squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 }
 
@@ -57,5 +56,35 @@ func ScanUpdateOne[T any](dbI *DB, ctx context.Context, query squirrel.UpdateBui
 		return t, err
 	}
 
-	return pgx.CollectOneRow(rows, pgx.RowToStructByPos[T])
+	return pgx.CollectOneRow(rows, pgx.RowToStructByName[T])
+}
+
+func ScanSelectOne[T any](dbI *DB, ctx context.Context, query squirrel.SelectBuilder) (T, error) {
+	var t T
+
+	sql, args, err := query.ToSql()
+	if err != nil {
+		return t, err
+	}
+
+	rows, err := dbI.DB.Query(ctx, sql, args...)
+	if err != nil {
+		return t, err
+	}
+
+	return pgx.CollectOneRow(rows, pgx.RowToStructByName[T])
+}
+
+func ScanSelectMany[T any](dbI *DB, ctx context.Context, query squirrel.SelectBuilder) ([]T, error) {
+	sql, args, err := query.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := dbI.DB.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	return pgx.CollectRows(rows, pgx.RowToStructByName[T])
 }

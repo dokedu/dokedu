@@ -7,7 +7,61 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const createTag = `-- name: CreateTag :one
+INSERT INTO tags (name, color, organisation_id)
+VALUES ($1, $2, $3)
+RETURNING id, name, color, organisation_id, created_at, deleted_at
+`
+
+type CreateTagParams struct {
+	Name           string      `db:"name"`
+	Color          pgtype.Text `db:"color"`
+	OrganisationID string      `db:"organisation_id"`
+}
+
+func (q *Queries) CreateTag(ctx context.Context, arg CreateTagParams) (Tag, error) {
+	row := q.db.QueryRow(ctx, createTag, arg.Name, arg.Color, arg.OrganisationID)
+	var i Tag
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Color,
+		&i.OrganisationID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const deleteTag = `-- name: DeleteTag :one
+UPDATE tags
+SET deleted_at = now()
+WHERE id = $1 AND organisation_id = $2
+RETURNING id, name, color, organisation_id, created_at, deleted_at
+`
+
+type DeleteTagParams struct {
+	ID             string `db:"id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) DeleteTag(ctx context.Context, arg DeleteTagParams) (Tag, error) {
+	row := q.db.QueryRow(ctx, deleteTag, arg.ID, arg.OrganisationID)
+	var i Tag
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Color,
+		&i.OrganisationID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
 
 const tagById = `-- name: TagById :one
 SELECT id, name, color, organisation_id, created_at, deleted_at
@@ -23,6 +77,82 @@ type TagByIdParams struct {
 
 func (q *Queries) TagById(ctx context.Context, arg TagByIdParams) (Tag, error) {
 	row := q.db.QueryRow(ctx, tagById, arg.ID, arg.OrganisationID)
+	var i Tag
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Color,
+		&i.OrganisationID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const tagList = `-- name: TagList :many
+SELECT id, name, color, organisation_id, created_at, deleted_at
+FROM tags
+WHERE organisation_id = $1 AND deleted_at IS NULL AND name ILIKE $2
+ORDER BY name
+LIMIT $4
+OFFSET $3
+`
+
+type TagListParams struct {
+	OrganisationID string `db:"organisation_id"`
+	Search         string `db:"_search"`
+	Offset         int32  `db:"_offset"`
+	Limit          int32  `db:"_limit"`
+}
+
+func (q *Queries) TagList(ctx context.Context, arg TagListParams) ([]Tag, error) {
+	rows, err := q.db.Query(ctx, tagList,
+		arg.OrganisationID,
+		arg.Search,
+		arg.Offset,
+		arg.Limit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Tag
+	for rows.Next() {
+		var i Tag
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Color,
+			&i.OrganisationID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const upsertTag = `-- name: UpsertTag :one
+INSERT INTO tags (name, color, organisation_id)
+VALUES ($1, $2, $3)
+ON CONFLICT (name, organisation_id) DO UPDATE
+SET color = $2
+RETURNING id, name, color, organisation_id, created_at, deleted_at
+`
+
+type UpsertTagParams struct {
+	Name           string      `db:"name"`
+	Color          pgtype.Text `db:"color"`
+	OrganisationID string      `db:"organisation_id"`
+}
+
+func (q *Queries) UpsertTag(ctx context.Context, arg UpsertTagParams) (Tag, error) {
+	row := q.db.QueryRow(ctx, upsertTag, arg.Name, arg.Color, arg.OrganisationID)
 	var i Tag
 	err := row.Scan(
 		&i.ID,

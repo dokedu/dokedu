@@ -18,3 +18,8 @@ WHERE user_id = $1;
 INSERT INTO sessions (user_id, token)
 VALUES ($1, $2)
 RETURNING *;
+
+-- name: GLOBAL_SessionCountByToken :one
+SELECT COUNT(*)
+FROM sessions
+WHERE token = $1 AND deleted_at IS NULL;

@@ -11,6 +11,54 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createUser = `-- name: CreateUser :one
+INSERT INTO users (role, organisation_id, first_name, last_name, email, password, language, sex)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
+`
+
+type CreateUserParams struct {
+	Role           UserRole     `db:"role"`
+	OrganisationID string       `db:"organisation_id"`
+	FirstName      string       `db:"first_name"`
+	LastName       string       `db:"last_name"`
+	Email          pgtype.Text  `db:"email"`
+	Password       pgtype.Text  `db:"password"`
+	Language       NullUserLang `db:"language"`
+	Sex            pgtype.Text  `db:"sex"`
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, createUser,
+		arg.Role,
+		arg.OrganisationID,
+		arg.FirstName,
+		arg.LastName,
+		arg.Email,
+		arg.Password,
+		arg.Language,
+		arg.Sex,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Role,
+		&i.OrganisationID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Password,
+		&i.RecoveryToken,
+		&i.RecoverySentAt,
+		&i.AvatarFileID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.Language,
+		&i.Sex,
+	)
+	return i, err
+}
+
 const gLOBAL_UserByEmail = `-- name: GLOBAL_UserByEmail :one
 SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
 FROM users
@@ -292,6 +340,41 @@ type UserByIdParams struct {
 
 func (q *Queries) UserById(ctx context.Context, arg UserByIdParams) (User, error) {
 	row := q.db.QueryRow(ctx, userById, arg.ID, arg.OrganisationID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Role,
+		&i.OrganisationID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Password,
+		&i.RecoveryToken,
+		&i.RecoverySentAt,
+		&i.AvatarFileID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.Language,
+		&i.Sex,
+	)
+	return i, err
+}
+
+const userByIdWithDeleted = `-- name: UserByIdWithDeleted :one
+SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
+FROM users
+WHERE id = $1
+  AND organisation_id = $2
+LIMIT 1
+`
+
+type UserByIdWithDeletedParams struct {
+	ID             string `db:"id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) UserByIdWithDeleted(ctx context.Context, arg UserByIdWithDeletedParams) (User, error) {
+	row := q.db.QueryRow(ctx, userByIdWithDeleted, arg.ID, arg.OrganisationID)
 	var i User
 	err := row.Scan(
 		&i.ID,

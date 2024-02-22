@@ -38,8 +38,10 @@ func (q *Queries) CreateEntryEvent(ctx context.Context, arg CreateEntryEventPara
 
 const deleteEntryEvent = `-- name: DeleteEntryEvent :one
 UPDATE entry_events
-SET deleted_at = now()
-WHERE entry_id = $1 AND event_id = $2 AND organisation_id = $3
+SET deleted_at = NOW()
+WHERE entry_id = $1
+  AND event_id = $2
+  AND organisation_id = $3
 RETURNING id, entry_id, event_id, organisation_id, created_at, deleted_at
 `
 
@@ -63,13 +65,36 @@ func (q *Queries) DeleteEntryEvent(ctx context.Context, arg DeleteEntryEventPara
 	return i, err
 }
 
+const entryEventCountByUserId = `-- name: EntryEventCountByUserId :one
+SELECT COUNT(*)
+FROM entry_events
+         JOIN public.entry_users eu ON entry_events.entry_id = eu.entry_id
+WHERE eu.user_id = $1
+  AND entry_events.deleted_at IS NULL
+  AND entry_events.organisation_id = $2
+`
+
+type EntryEventCountByUserIdParams struct {
+	UserID         string `db:"user_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) EntryEventCountByUserId(ctx context.Context, arg EntryEventCountByUserIdParams) (int64, error) {
+	row := q.db.QueryRow(ctx, entryEventCountByUserId, arg.UserID, arg.OrganisationID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const eventListByEntryEventByEntryId = `-- name: EventListByEntryEventByEntryId :many
 SELECT events.id, events.image_file_id, events.organisation_id, events.title, events.body, events.starts_at, events.ends_at, events.recurrence, events.created_at, events.deleted_at
 FROM events
-JOIN public.entry_events eu ON events.id = eu.event_id
-JOIN public.entries e ON eu.entry_id = e.id
-WHERE eu.deleted_at IS NULL AND e.id = $1
-AND events.organisation_id = $2 AND events.deleted_at IS NULL
+         JOIN public.entry_events eu ON events.id = eu.event_id
+         JOIN public.entries e ON eu.entry_id = e.id
+WHERE eu.deleted_at IS NULL
+  AND e.id = $1
+  AND events.organisation_id = $2
+  AND events.deleted_at IS NULL
 ORDER BY events.title
 `
 

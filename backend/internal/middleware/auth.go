@@ -31,7 +31,8 @@ func Auth(conn *database.DB) echo.MiddlewareFunc {
 				return next(c)
 			}
 
-			ctx := context.WithValue(c.Request().Context(), UserCtxKey, &userContext)
+			ctx := c.Request().Context()
+			ctx = context.WithValue(ctx, UserCtxKey, userContext)
 			c.SetRequest(c.Request().WithContext(ctx))
 
 			return next(c)

@@ -6,126 +6,15 @@ package graph
 
 import (
 	"context"
-	"fmt"
+	"github.com/jackc/pgx/v5/pgtype"
 	"slices"
 	"time"
 
 	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
-	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
-	"github.com/uptrace/bun"
-	excelize "github.com/xuri/excelize/v2"
+	"github.com/xuri/excelize/v2"
 )
-
-// CreateSubject is the resolver for the createSubject field.
-func (r *mutationResolver) CreateSubject(ctx context.Context, input model.CreateSubjectInput) (*db.Subject, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var subject db.Subject
-	subject.Name = input.Name
-	subject.OrganisationID = currentUser.OrganisationID
-
-	err = r.DB.NewInsert().Model(&subject).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &subject, nil
-}
-
-// UpdateSubject is the resolver for the updateSubject field.
-func (r *mutationResolver) UpdateSubject(ctx context.Context, input model.UpdateSubjectInput) (*db.Subject, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var subject db.Subject
-	subject.Name = input.Name
-	err = r.DB.NewUpdate().Model(&subject).Where("organisation_id = ?", currentUser.OrganisationID).Column("name").Where("id = ?", input.ID).Returning("*").Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &subject, nil
-}
-
-// DeleteSubject is the resolver for the deleteSubject field.
-func (r *mutationResolver) DeleteSubject(ctx context.Context, id string) (*db.Subject, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var subject db.Subject
-	err = r.DB.NewDelete().Model(&subject).Where("organisation_id = ?", currentUser.OrganisationID).Where("id = ?", id).Returning("*").Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &subject, nil
-}
-
-// CreateSchoolYear is the resolver for the createSchoolYear field.
-func (r *mutationResolver) CreateSchoolYear(ctx context.Context, input model.CreateSchoolYearInput) (*db.SchoolYear, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var schoolYear db.SchoolYear
-	schoolYear.Year = input.Year
-	schoolYear.OrganisationID = currentUser.OrganisationID
-
-	err = r.DB.NewInsert().Model(&schoolYear).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &schoolYear, nil
-}
-
-// UpdateSchoolYear is the resolver for the updateSchoolYear field.
-func (r *mutationResolver) UpdateSchoolYear(ctx context.Context, input model.UpdateSchoolYearInput) (*db.SchoolYear, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var schoolYear db.SchoolYear
-	schoolYear.Year = input.Year
-	err = r.DB.NewUpdate().Model(&schoolYear).Where("organisation_id = ?", currentUser.OrganisationID).Column("year").Where("id = ?", input.ID).Returning("*").Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &schoolYear, nil
-}
-
-// DeleteSchoolYear is the resolver for the deleteSchoolYear field.
-func (r *mutationResolver) DeleteSchoolYear(ctx context.Context, id string) (*db.SchoolYear, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var schoolYear db.SchoolYear
-	err = r.DB.NewDelete().Model(&schoolYear).Where("organisation_id = ?", currentUser.OrganisationID).Where("id = ?", id).Returning("*").Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &schoolYear, nil
-}
-
-// UpdateUserStudentGrade is the resolver for the updateUserStudentGrade field.
-func (r *mutationResolver) UpdateUserStudentGrade(ctx context.Context, input model.UpdateUserStudentGradesInput) (*model.UserStudentGrades, error) {
-	panic(fmt.Errorf("not implemented: UpdateUserStudentGrade - updateUserStudentGrade"))
-}
 
 // ImportStudents imports students from an Excel file.
 func (r *mutationResolver) ImportStudents(ctx context.Context, input model.ImportStudentsInput) (*model.ImportStudentsPayload, error) {
@@ -187,14 +76,12 @@ func (r *mutationResolver) ImportStudents(ctx context.Context, input model.Impor
 	}
 
 	// Get existing users and students
-	var existingUsers []*db.User
-	err = r.DB.NewSelect().Model(&existingUsers).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	existingUsers, err := r.DB.UserList(ctx, currentUser.OrganisationID)
 	if err != nil {
 		return nil, err
 	}
 
-	var existingStudents []*db.UserStudent
-	err = r.DB.NewSelect().Model(&existingStudents).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	existingStudents, err := r.DB.UserStudentListAll(ctx, currentUser.OrganisationID)
 	if err != nil {
 		return nil, err
 	}
@@ -202,15 +89,20 @@ func (r *mutationResolver) ImportStudents(ctx context.Context, input model.Impor
 	// Create a map of existing students by user ID
 	existingStudentsByUserMap := make(map[string]*db.UserStudent)
 	for _, student := range existingStudents {
-		existingStudentsByUserMap[student.UserID] = student
+		existingStudentsByUserMap[student.UserID] = &student
 	}
 
 	// Create new users and students
 	var users []*db.User
 	var students []*db.UserStudent
 
-	tx, err := r.DB.BeginTx(ctx, nil)
-	defer tx.Rollback()
+	tx, err := r.DB.DB.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	qtx := r.DB.WithTx(tx)
 
 	existingUserCount := 0
 
@@ -242,24 +134,41 @@ LoopRows:
 			}
 		}
 
-		err = tx.NewInsert().Model(user).Where("organisation_id = ?", currentUser.OrganisationID).Returning("*").Scan(ctx)
+		createdUser, err := qtx.CreateUser(ctx, db.CreateUserParams{
+			Role:           db.UserRoleStudent,
+			OrganisationID: currentUser.OrganisationID,
+			FirstName:      user.FirstName,
+			LastName:       user.LastName,
+			Email:          user.Email,
+			Password:       user.Password,
+			Language:       user.Language,
+			Sex:            user.Sex,
+		})
 		if err != nil {
 			return nil, err
 		}
 
-		student.UserID = user.ID
+		student.UserID = createdUser.ID
 
-		err = tx.NewInsert().Model(student).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+		createdStudent, err := qtx.CreateUserStudent(ctx, db.CreateUserStudentParams{
+			UserID:         createdUser.ID,
+			OrganisationID: currentUser.OrganisationID,
+			LeftAt:         student.LeftAt,
+			Grade:          student.Grade,
+			Birthday:       student.Birthday,
+			JoinedAt:       student.JoinedAt,
+			Emoji:          student.Emoji,
+		})
 		if err != nil {
 			return nil, err
 		}
 
-		users = append(users, user)
-		students = append(students, student)
+		users = append(users, &createdUser)
+		students = append(students, &createdStudent)
 	}
 
 	if len(users) > 0 {
-		err = tx.Commit()
+		err = tx.Commit(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -270,225 +179,6 @@ LoopRows:
 		UsersExisted: existingUserCount,
 	}, nil
 }
-
-// Subjects is the resolver for the subjects field.
-func (r *queryResolver) Subjects(ctx context.Context, limit *int, offset *int) (*model.SubjectConnection, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	pageLimit, pageOffset := helper.SetPageLimits(limit, offset)
-
-	var subjects []*db.Subject
-	count, err := r.DB.
-		NewSelect().
-		Model(&subjects).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Order("name").
-		Limit(pageLimit).
-		Offset(pageOffset).
-		ScanAndCount(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	pageInfo, err := helper.CreatePageInfo(pageLimit, pageOffset, count)
-	if err != nil {
-		return nil, err
-	}
-
-	return &model.SubjectConnection{
-		Edges:      subjects,
-		PageInfo:   pageInfo,
-		TotalCount: count,
-	}, nil
-}
-
-// Subject is the resolver for the subject field.
-func (r *queryResolver) Subject(ctx context.Context, id string) (*db.Subject, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var subject db.Subject
-	err = r.DB.NewSelect().Model(&subject).Where("organisation_id = ?", currentUser.OrganisationID).Where("id = ?", id).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &subject, nil
-}
-
-// SchoolYears is the resolver for the SchoolYears field.
-func (r *queryResolver) SchoolYears(ctx context.Context, limit *int, offset *int) (*model.SchoolYearConnection, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	pageLimit, pageOffset := helper.SetPageLimits(limit, offset)
-
-	if limit != nil {
-		pageLimit = *limit
-	}
-	if offset != nil {
-		pageOffset = *offset
-	}
-
-	var schoolYears []*db.SchoolYear
-	count, err := r.DB.
-		NewSelect().
-		Model(&schoolYears).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Order("year DESC").
-		Limit(pageLimit).
-		Offset(pageOffset).
-		ScanAndCount(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	pageInfo, err := helper.CreatePageInfo(pageLimit, pageOffset, count)
-	if err != nil {
-		return nil, err
-	}
-
-	return &model.SchoolYearConnection{
-		Edges:    schoolYears,
-		PageInfo: pageInfo,
-	}, nil
-}
-
-// SchoolYear is the resolver for the SchoolYear field.
-func (r *queryResolver) SchoolYear(ctx context.Context, id string) (*db.SchoolYear, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var schoolYear db.SchoolYear
-	err = r.DB.NewSelect().Model(&schoolYear).Where("organisation_id = ?", currentUser.OrganisationID).Where("id = ?", id).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &schoolYear, nil
-}
-
-// UserStudentGrades is the resolver for the userStudentGrades field.
-func (r *queryResolver) UserStudentGrades(ctx context.Context, limit *int, offset *int) (*model.UserStudentGradesConnection, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	pageLimit, pageOffset := helper.SetPageLimits(limit, offset)
-
-	var userStudentGrades []*db.UserStudentGrades
-	count, err := r.DB.
-		NewSelect().
-		Model(&userStudentGrades).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Limit(pageLimit).
-		Offset(pageOffset).
-		ScanAndCount(ctx)
-
-	if err != nil {
-		return nil, err
-	}
-
-	pageInfo, err := helper.CreatePageInfo(pageLimit, pageOffset, count)
-	if err != nil {
-		return nil, err
-	}
-
-	return &model.UserStudentGradesConnection{
-		Edges:    userStudentGrades,
-		PageInfo: pageInfo,
-	}, nil
-}
-
-// UserStudentGrade is the resolver for the userStudentGrade field.
-func (r *queryResolver) UserStudentGrade(ctx context.Context, id string) (*model.UserStudentGrades, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var userStudentGrade db.UserStudentGrades
-	err = r.DB.NewSelect().Model(&userStudentGrade).Where("organisation_id = ?", currentUser.OrganisationID).Where("id = ?", id).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &userStudentGrade, nil
-}
-
-// Description is the resolver for the description field.
-func (r *schoolYearResolver) Description(ctx context.Context, obj *db.SchoolYear) (string, error) {
-	panic(fmt.Errorf("not implemented: Description - description"))
-}
-
-// SchoolYear returns SchoolYearResolver implementation.
-func (r *Resolver) SchoolYear() SchoolYearResolver { return &schoolYearResolver{r} }
-
-type schoolYearResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//     it when you're done.
-//   - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *userStudentGradesResolver) Student(ctx context.Context, obj *db.UserStudentGrades) (*db.UserStudent, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var student db.UserStudent
-	err = r.DB.NewSelect().Model(&student).Where("organisation_id = ?", currentUser.OrganisationID).Where("id = ?", obj.UserStudentID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &student, nil
-}
-func (r *userStudentGradesResolver) Subject(ctx context.Context, obj *db.UserStudentGrades) (*db.Subject, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var subject db.Subject
-	err = r.DB.NewSelect().Model(&subject).Where("organisation_id = ?", currentUser.OrganisationID).Where("id = ?", obj.SubjectID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &subject, nil
-}
-func (r *userStudentGradesResolver) SchoolYear(ctx context.Context, obj *db.UserStudentGrades) (*db.SchoolYear, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var schoolYear db.SchoolYear
-	err = r.DB.NewSelect().Model(&schoolYear).Where("organisation_id = ?", currentUser.OrganisationID).Where("id = ?", obj.SchoolYearID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &schoolYear, nil
-}
-func (r *Resolver) UserStudentGrades() UserStudentGradesResolver {
-	return &userStudentGradesResolver{r}
-}
-
-type userStudentGradesResolver struct{ *Resolver }
 
 func (r *mutationResolver) createUserFromRow(row []string, organisationID string) *db.User {
 	var user db.User
@@ -509,7 +199,7 @@ func (r *mutationResolver) createStudentFromRow(user *db.User, row []string, org
 		return nil, err
 	}
 
-	student.Birthday = bun.NullTime{Time: birthday}
+	student.Birthday = pgtype.Date{Time: birthday, Valid: true}
 	student.Grade = 1
 	student.OrganisationID = organisationID
 

@@ -6,14 +6,14 @@ package graph
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/samber/lo"
 	"time"
 
 	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/samber/lo"
 )
 
 // Image is the resolver for the image field.
@@ -173,28 +173,19 @@ func (r *mutationResolver) ToggleEventCompetence(ctx context.Context, input mode
 		return nil, err
 	}
 
-	var eventCompetence db.EventCompetence
-	eventCompetence.EventID = input.EventID
-	eventCompetence.CompetenceID = input.CompetenceID
-	eventCompetence.OrganisationID = currentUser.OrganisationID
-
-	err = r.DB.NewInsert().
-		Model(&eventCompetence).
-		Where("\"event_competence\".organisation_id = ?", currentUser.OrganisationID).
-		On("CONFLICT (event_id, competence_id) DO UPDATE").
-		Set("deleted_at = (SELECT CASE WHEN event_competence.deleted_at IS NULL THEN NOW() ELSE NULL END)").
-		Returning("*").
-		Scan(ctx)
+	_, err = r.DB.CreateEventCompetence(ctx, db.CreateEventCompetenceParams{
+		EventID:        input.EventID,
+		CompetenceID:   input.CompetenceID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var event db.Event
-	err = r.DB.NewSelect().
-		Model(&event).
-		Where("id = ?", input.EventID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	event, err := r.DB.EventById(ctx, db.EventByIdParams{
+		ID:             input.EventID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -209,21 +200,11 @@ func (r *mutationResolver) ArchiveEvent(ctx context.Context, id string) (*db.Eve
 		return nil, err
 	}
 
-	var event db.Event
-	// mark event.deleted_at as now
-	err = r.DB.NewUpdate().
-		Model(&event).
-		Set("deleted_at = ?", time.Now()).
-		Where("id = ?", id).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Returning("*").
-		WhereAllWithDeleted().
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &event, nil
+	event, err := r.DB.DeleteEvent(ctx, db.DeleteEventParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	return &event, err
 }
 
 // Event is the resolver for the event field.
@@ -233,13 +214,11 @@ func (r *queryResolver) Event(ctx context.Context, id string) (*db.Event, error)
 		return nil, err
 	}
 
-	var event db.Event
-	err = r.DB.NewSelect().Model(&event).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &event, nil
+	event, err := r.DB.EventById(ctx, db.EventByIdParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	return &event, err
 }
 
 // Events is the resolver for the events field.
@@ -253,14 +232,19 @@ func (r *queryResolver) Events(ctx context.Context, limit *int, offset *int, fil
 
 	var events []*db.Event
 
-	query := r.DB.NewSelect().Model(&events).Where("organisation_id = ?", currentUser.OrganisationID).Limit(pageLimit).Offset(pageOffset)
+	query := r.DB.NewQueryBuilder().
+		Select("*").
+		From("events").
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Limit(uint64(pageLimit)).
+		Offset(uint64(pageOffset))
 
 	if search != nil && len(*search) > 0 {
 		// TODO: improve search perhaps using meilisearch
 		query.Where("title ILIKE ?", "%"+*search+"%")
 	} else {
 		if order == nil {
-			query.Order("created_at")
+			query.OrderBy("created_at")
 		}
 	}
 
@@ -277,23 +261,26 @@ func (r *queryResolver) Events(ctx context.Context, limit *int, offset *int, fil
 	// Order
 	if order != nil {
 		if *order == model.EventOrderByEndsAtAsc {
-			query.Order("ends_at")
+			query.OrderBy("ends_at")
 		}
 		if *order == model.EventOrderByEndsAtDesc {
-			query.Order("ends_at DESC")
+			query.OrderBy("ends_at DESC")
 		}
 		if *order == model.EventOrderByStartsAtAsc {
-			query.Order("starts_at")
+			query.OrderBy("starts_at")
 		}
 		if *order == model.EventOrderByStartsAtDesc {
-			query.Order("starts_at DESC")
+			query.OrderBy("starts_at DESC")
 		}
 	}
 
-	count, err := query.ScanAndCount(ctx)
+	err = query.Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
+
+	// TODO: Yeah well same problem as before
+	count := 10_000
 
 	// Page info
 	page, err := helper.CreatePageInfo(pageLimit, pageOffset, count)
@@ -321,12 +308,18 @@ func (r *queryResolver) ExportEvents(ctx context.Context, input model.ExportEven
 	to := input.To
 	deleted := input.Deleted
 
-	var events []*model.ExportEventsPayload
-	err = r.DB.NewRaw("SELECT * FROM export_events(?, ?, ?, ?)", orgId, from, to, deleted).Scan(ctx, &events)
+	// TODO: another day, another fix
+	events, err := r.DB.ExportEvents(ctx, db.ExportEventsParams{
+		OrganisationID: orgId,
+		From:           pgtype.Date{Time: from, Valid: true},
+		To:             pgtype.Date{Time: to, Valid: true},
+		ShowArchived:   deleted,
+	})
 	if err != nil {
 		return nil, err
 	}
 
+	// TODO: properly map the events to the payload
 	return events, nil
 }
 

@@ -17,6 +17,7 @@ import (
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
+	"github.com/samber/lo"
 )
 
 // CreateReport is the resolver for the createReport field.
@@ -71,12 +72,33 @@ func (r *mutationResolver) CreateReport(ctx context.Context, input model.CreateR
 		})
 	}
 
-	err = r.DB.NewInsert().Model(&reports).Returning("*").Scan(ctx)
+	var returnReports []*db.Report
+
+	// TODO: refactor to use a single query to create all reports
+	for _, report := range reports {
+		report, err := r.DB.CreateReport(ctx, db.CreateReportParams{
+			Status:         report.Status,
+			Format:         report.Format,
+			Kind:           report.Kind,
+			From:           report.From,
+			To:             report.To,
+			Meta:           report.Meta,
+			FilterTags:     report.FilterTags,
+			UserID:         report.UserID,
+			StudentUserID:  report.StudentUserID,
+			OrganisationID: report.OrganisationID,
+		})
+		if err != nil {
+			return nil, err
+		}
+		returnReports = append(reports, &report)
+	}
+
 	if err != nil {
 		return nil, err
 	}
 
-	for _, report := range reports {
+	for _, report := range returnReports {
 		// Add the report to the queue for processing
 		err = r.ReportService.AddToQueue(report.ID)
 		if err != nil {
@@ -84,7 +106,7 @@ func (r *mutationResolver) CreateReport(ctx context.Context, input model.CreateR
 		}
 	}
 
-	return reports, nil
+	return returnReports, nil
 }
 
 // Report is the resolver for the report field.
@@ -94,14 +116,11 @@ func (r *queryResolver) Report(ctx context.Context, id string) (*db.Report, erro
 		return nil, nil
 	}
 
-	// query the report
-	var report db.Report
-	err = r.DB.NewSelect().Model(&report).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &report, nil
+	report, err := r.DB.ReportById(ctx, db.ReportByIdParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	return &report, err
 }
 
 // Reports is the resolver for the reports field.
@@ -113,17 +132,17 @@ func (r *queryResolver) Reports(ctx context.Context, limit *int, offset *int) (*
 
 	pageLimit, pageOffset := helper.SetPageLimits(limit, offset)
 
-	var reports []*db.Report
-	count, err := r.DB.NewSelect().
-		Model(&reports).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Order("created_at DESC").
-		Limit(pageLimit).
-		Offset(pageOffset).
-		ScanAndCount(ctx)
+	reports, err := r.DB.ReportList(ctx, db.ReportListParams{
+		OrganisationID: currentUser.OrganisationID,
+		Offset:         int32(pageOffset),
+		Limit:          int32(pageLimit),
+	})
 	if err != nil {
 		return nil, err
 	}
+
+	// TODO: get the count from the database
+	count := 10_000
 
 	// Get the pageInfo
 	page, err := helper.CreatePageInfo(pageOffset, pageLimit, count)
@@ -133,7 +152,7 @@ func (r *queryResolver) Reports(ctx context.Context, limit *int, offset *int) (*
 
 	page.CurrentPage = pageOffset / pageLimit
 	return &model.ReportConnection{
-		Edges:      reports,
+		Edges:      lo.ToSlicePtr(reports),
 		PageInfo:   page,
 		TotalCount: count,
 	}, nil
@@ -174,18 +193,11 @@ func (r *reportResolver) StudentUser(ctx context.Context, obj *db.Report) (*db.U
 		return nil, nil
 	}
 
-	var user db.User
-	err = r.DB.NewSelect().
-		Model(&user).
-		Where("id = ?", obj.StudentUserID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		WhereAllWithDeleted().
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
+	user, err := r.DB.UserByIdWithDeleted(ctx, db.UserByIdWithDeletedParams{
+		ID:             obj.StudentUserID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	return &user, err
 }
 
 // File is the resolver for the file field.
@@ -195,8 +207,10 @@ func (r *reportResolver) File(ctx context.Context, obj *db.Report) (*db.File, er
 		return nil, nil
 	}
 
-	var file db.File
-	err = r.DB.NewSelect().Model(&file).Where("id = ?", obj.FileID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	file, err := r.DB.FileById(ctx, db.FileByIdParams{
+		ID:             obj.FileID.String,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -209,7 +223,10 @@ func (r *reportResolver) File(ctx context.Context, obj *db.Report) (*db.File, er
 
 // DeletedAt is the resolver for the deletedAt field.
 func (r *reportResolver) DeletedAt(ctx context.Context, obj *db.Report) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
+	if obj.DeletedAt.Valid {
+		return &obj.DeletedAt.Time, nil
+	}
+	return nil, nil
 }
 
 // ReportCreatedOrUpdated is the resolver for the reportCreatedOrUpdated field.

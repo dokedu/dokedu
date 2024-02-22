@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
-	"github.com/dokedu/dokedu/backend/internal/database"
-	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/dokedu/dokedu/backend/internal/database"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 
 	"github.com/dokedu/dokedu/backend/internal/dataloaders"
 	"github.com/dokedu/dokedu/backend/internal/graph"
@@ -73,6 +74,9 @@ func main() {
 	}()
 
 	e := echo.New()
+
+	// Prevent the server from crashing on panic
+	e.Use(mware.Recover())
 
 	// Add dataloader middleware
 	loader := dataloaders.NewLoaders(dbClient)

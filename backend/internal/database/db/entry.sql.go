@@ -87,3 +87,20 @@ func (q *Queries) EntryById(ctx context.Context, arg EntryByIdParams) (Entry, er
 	)
 	return i, err
 }
+
+const entryCountByUserId = `-- name: EntryCountByUserId :one
+SELECT COUNT(*) FROM entries
+WHERE user_id = $1 AND organisation_id = $2 AND deleted_at IS NULL
+`
+
+type EntryCountByUserIdParams struct {
+	UserID         string `db:"user_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) EntryCountByUserId(ctx context.Context, arg EntryCountByUserIdParams) (int64, error) {
+	row := q.db.QueryRow(ctx, entryCountByUserId, arg.UserID, arg.OrganisationID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}

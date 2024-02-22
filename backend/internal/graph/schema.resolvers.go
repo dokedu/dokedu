@@ -19,7 +19,9 @@ import (
 	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 	meili "github.com/dokedu/dokedu/backend/internal/modules/meilisearch"
+	"github.com/jackc/pgx/v5/pgtype"
 	meilisearch "github.com/meilisearch/meilisearch-go"
+	"github.com/samber/lo"
 	"github.com/uptrace/bun"
 )
 
@@ -61,20 +63,21 @@ func (r *competenceResolver) Competences(ctx context.Context, obj *db.Competence
 
 	var competences []*db.Competence
 	query := r.DB.
-		NewSelect().
-		Model(&competences).
+		NewQueryBuilder().
+		Select("*").
+		From("competences").
 		Where("competence_id = ?", obj.ID).
 		Where("organisation_id = ?", currentUser.OrganisationID)
 
 	if sort != nil {
 		switch sort.Field {
 		case model.CompetenceSortFieldSortOrder:
-			query.Order("sort_order ASC")
-			query.Order("name ASC")
+			query.OrderBy("sort_order ASC")
+			query.OrderBy("name ASC")
 		case model.CompetenceSortFieldName:
-			query.Order("name ASC")
+			query.OrderBy("name ASC")
 		case model.CompetenceSortFieldCreatedAt:
-			query.Order("created_at ASC")
+			query.OrderBy("created_at ASC")
 		}
 	} else {
 		//query.Order("name ASC")
@@ -103,20 +106,17 @@ func (r *competenceResolver) UserCompetences(ctx context.Context, obj *db.Compet
 		return []*db.UserCompetence{}, nil
 	}
 
-	var userCompetences []*db.UserCompetence
-	err = r.DB.NewSelect().
-		Model(&userCompetences).
-		Where("competence_id = ?", obj.ID).
-		Where("user_id = ?", *userID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Order("created_at DESC").
-		Scan(ctx)
+	userCompetences, err := r.DB.UserCompetenceListByUserIdAndCompetenceId(ctx, db.UserCompetenceListByUserIdAndCompetenceIdParams{
+		UserID:         *userID,
+		CompetenceID:   obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 
 	if err != nil {
 		return nil, err
 	}
 
-	return userCompetences, nil
+	return lo.ToSlicePtr(userCompetences), nil
 }
 
 // Tendency is the resolver for the tendency field.
@@ -130,23 +130,39 @@ func (r *competenceResolver) Tendency(ctx context.Context, obj *db.Competence, u
 		return nil, nil
 	}
 
-	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", userID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	user, err := r.DB.UserById(ctx, db.UserByIdParams{
+		ID:             userID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
+	// TODO: how is that even possible?
 	if currentUser.OrganisationID != user.OrganisationID {
 		return nil, errors.New("user does not belong to the same organisation")
 	}
 
+	childrenCount, err := r.DB.CompetenceChildrenCount(ctx, db.CompetenceChildrenCountParams{
+		CompetenceID:   pgtype.Text{String: obj.ID, Valid: true},
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	userCompetenceCount, err := r.DB.UserCompetenceCount(ctx, db.UserCompetenceCountParams{
+		OrganisationID: currentUser.OrganisationID,
+		UserID:         user.ID,
+		CompetenceID:   obj.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	var tendency model.CompetenceTendency
-
-	childCountQuery := `WITH RECURSIVE child_competences AS ( SELECT id, competence_type FROM competences WHERE competence_id = ? UNION ALL SELECT c.id, c.competence_type FROM competences c INNER JOIN child_competences cc ON c.competence_id = cc.id ) SELECT COUNT(id) FROM child_competences WHERE competence_type = 'competence'`
-	err = r.DB.NewRaw(childCountQuery, obj.ID).Scan(ctx, &tendency.CountChildCompetences)
-
-	learnedCountQuery := `SELECT COUNT(DISTINCT user_competences.competence_id) FROM user_competences WHERE organisation_id = ? AND user_id = ? AND competence_id IN ( WITH RECURSIVE child_competences AS ( SELECT id, competence_type FROM competences WHERE competence_id = ? UNION ALL SELECT c.id, c.competence_type FROM competences c INNER JOIN child_competences cc ON c.competence_id = cc.id ) SELECT id FROM child_competences WHERE competence_type = 'competence' )`
-	err = r.DB.NewRaw(learnedCountQuery, currentUser.OrganisationID, userID, obj.ID).Scan(ctx, &tendency.CountLearnedCompetences)
+	tendency.CountLearnedCompetences = int(userCompetenceCount)
+	tendency.CountChildCompetences = int(childrenCount)
 
 	tendency.Tendency = float64(tendency.CountLearnedCompetences) / float64(tendency.CountChildCompetences)
 
@@ -160,45 +176,43 @@ func (r *mutationResolver) CreateStudent(ctx context.Context, input model.Create
 		return nil, nil
 	}
 
-	// Create user first
-	user := db.User{
+	user, err := r.DB.CreateUser(ctx, db.CreateUserParams{
+		Role:           db.UserRoleStudent,
 		OrganisationID: currentUser.OrganisationID,
 		FirstName:      input.FirstName,
 		LastName:       input.LastName,
-		Role:           "student",
-		Email:          sql.NullString{},
-	}
-
-	// Insert and get the new id
-	err = r.DB.NewInsert().Model(&user).Scan(ctx)
+		Email:          pgtype.Text{},
+		Password:       pgtype.Text{},
+		Language:       db.NullUserLang{},
+		Sex:            pgtype.Text{},
+	})
 	if err != nil {
 		return nil, nil
 	}
 
 	// Create user_student struct
-	student := db.UserStudent{
+	student := db.CreateUserStudentParams{
 		UserID:         user.ID,
 		OrganisationID: currentUser.OrganisationID,
 		Grade:          int32(input.Grade),
 	}
 
 	if input.Birthday != nil {
-		student.Birthday = bun.NullTime{Time: *input.Birthday}
+		student.Birthday = pgtype.Date{Time: *input.Birthday, Valid: true}
 	}
 	if input.JoinedAt != nil {
-		student.JoinedAt = bun.NullTime{Time: *input.JoinedAt}
+		student.JoinedAt = pgtype.Timestamptz{Time: *input.JoinedAt, Valid: true}
 	}
 	if input.LeftAt != nil {
-		student.LeftAt = bun.NullTime{Time: *input.LeftAt}
+		student.LeftAt = pgtype.Timestamptz{Time: *input.LeftAt, Valid: true}
 	}
 	if input.Emoji != nil {
-		student.Emoji = sql.NullString{String: *input.Emoji, Valid: true}
+		student.Emoji = pgtype.Text{String: *input.Emoji, Valid: true}
 	}
 
-	// Insert the user_student
-	err = r.DB.NewInsert().Model(&student).Scan(ctx)
+	_, err = r.DB.CreateUserStudent(ctx, student)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	return &user, nil
@@ -218,21 +232,16 @@ func (r *mutationResolver) CreateUserCompetence(ctx context.Context, input model
 		return nil, errors.New("competence id is required")
 	}
 
-	userCompetence := db.UserCompetence{
+	userCompetenceParams := db.CreateUserCompetenceWithoutEntryParams{
 		UserID:         input.UserID,
-		Level:          input.Level,
-		CreatedBy:      sql.NullString{String: currentUser.ID, Valid: true},
+		Level:          int32(input.Level),
+		CreatedBy:      pgtype.Text{String: currentUser.ID, Valid: true},
 		CompetenceID:   input.CompetenceID,
 		OrganisationID: currentUser.OrganisationID,
 	}
 
-	err = r.DB.NewInsert().Model(&userCompetence).Returning("*").Scan(ctx)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &userCompetence, nil
+	userCompetence, err := r.DB.CreateUserCompetenceWithoutEntry(ctx, userCompetenceParams)
+	return &userCompetence, err
 }
 
 // ArchiveUserCompetence is the resolver for the archiveUserCompetence field.
@@ -247,35 +256,25 @@ func (r *mutationResolver) CreateTag(ctx context.Context, input model.CreateTagI
 		return nil, nil
 	}
 
-	// Check if tag with the same name already exists
-	count, err := r.DB.NewSelect().Model(&db.Tag{}).Where("organisation_id = ?", currentUser.OrganisationID).Where("name = ?", input.Name).WhereAllWithDeleted().Count(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if count > 0 {
-		return nil, errors.New("Tag with the same name already exists")
-	}
-
 	// check if color is set
 	color := input.Color
 	if color == "" {
 		color = "blue"
 	}
 
-	newTag := db.Tag{
+	tagParams := db.CreateTagParams{
 		OrganisationID: currentUser.OrganisationID,
 		Name:           input.Name,
-		Color:          sql.NullString{String: color, Valid: true},
+		Color:          pgtype.Text{String: color, Valid: true},
 	}
 
-	err = r.DB.NewInsert().Model(&newTag).Returning("*").Scan(ctx)
-
+	tag, err := r.DB.CreateTag(ctx, tagParams)
+	// TODO: check if returns error because tag already exists with the same name
 	if err != nil {
 		return nil, err
 	}
 
-	return &newTag, nil
+	return &tag, nil
 }
 
 // ArchiveTag is the resolver for the archiveTag field.
@@ -285,16 +284,10 @@ func (r *mutationResolver) ArchiveTag(ctx context.Context, id string) (*db.Tag, 
 		return nil, nil
 	}
 
-	// set deleted_at field to the current time
-	tag := db.Tag{
+	tag, err := r.DB.DeleteTag(ctx, db.DeleteTagParams{
 		ID:             id,
 		OrganisationID: currentUser.OrganisationID,
-		DeletedAt: bun.NullTime{
-			Time: time.Now(),
-		},
-	}
-	_, err = r.DB.NewUpdate().Model(&tag).Column("deleted_at").Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).WhereAllWithDeleted().Returning("*").Exec(ctx)
-
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -309,34 +302,12 @@ func (r *mutationResolver) UpdateTag(ctx context.Context, id string, input model
 		return nil, nil
 	}
 
-	var tag db.Tag
-	tag.ID = id
-	err = r.DB.NewSelect().
-		Model(&tag).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		WherePK().
-		Scan(ctx)
-
-	if err != nil {
-		return nil, err
-	}
-
-	// update the tag
-	tag.Name = input.Name
-
-	color := input.Color
-	if color == "" {
-		color = "blue"
-	}
-
-	tag.Color = sql.NullString{String: color, Valid: true}
-	_, err = r.DB.NewUpdate().Model(&tag).WherePK().Exec(ctx)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &tag, nil
+	tag, err := r.DB.UpsertTag(ctx, db.UpsertTagParams{
+		Name:           input.Name,
+		Color:          pgtype.Text{String: input.Color, Valid: true},
+		OrganisationID: currentUser.OrganisationID,
+	})
+	return &tag, err
 }
 
 // UpdateCompetence is the resolver for the updateCompetence field.
@@ -346,22 +317,18 @@ func (r *mutationResolver) UpdateCompetence(ctx context.Context, input model.Upd
 		return nil, nil
 	}
 
-	var competence db.Competence
-	competence.ID = input.ID
-	err = r.DB.NewSelect().
-		Model(&competence).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		WherePK().
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
+	var color pgtype.Text
 	if input.Color != nil {
-		competence.Color = sql.NullString{String: *input.Color, Valid: true}
+		color.String = *input.Color
+	} else {
+		color.String = "blue"
 	}
 
-	err = r.DB.NewUpdate().Model(&competence).WherePK().Returning("*").Scan(ctx)
+	competence, err := r.DB.UpdateCompetenceColor(ctx, db.UpdateCompetenceColorParams{
+		Color:          color,
+		CompetenceID:   input.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -381,8 +348,10 @@ func (r *mutationResolver) UpdateCompetenceSorting(ctx context.Context, input mo
 		ids[i] = id.ID
 	}
 
-	var competences []*db.Competence
-	err = r.DB.NewSelect().Model(&competences).Where("id IN (?)", bun.In(ids)).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	competences, err := r.DB.CompetenceListByIds(ctx, db.CompetenceListByIdsParams{
+		Ids:            ids,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -395,23 +364,27 @@ func (r *mutationResolver) UpdateCompetenceSorting(ctx context.Context, input mo
 	// create a map of competences for easy lookup
 	competenceMap := make(map[string]*db.Competence)
 	for _, competence := range competences {
-		competenceMap[competence.ID] = competence
+		competenceMap[competence.ID] = &competence
 	}
 
 	// update the sorting
 	for i, id := range ids {
-		competenceMap[id].SortOrder = i
+		competenceMap[id].SortOrder = pgtype.Int4{Int32: int32(i), Valid: true}
 	}
 
 	for _, competence := range competences {
 		sortOrder := competenceMap[competence.ID].SortOrder
-		_, err = r.DB.NewUpdate().Model(competence).WherePK().Set("sort_order = ?", sortOrder).Where("organisation_id = ?", currentUser.OrganisationID).Exec(ctx)
+		_, err = r.DB.UpdateCompetenceSortOrder(ctx, db.UpdateCompetenceSortOrderParams{
+			SortOrder:      sortOrder,
+			CompetenceID:   competence.ID,
+			OrganisationID: currentUser.OrganisationID,
+		})
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return competences, nil
+	return lo.ToSlicePtr(competences), nil
 }
 
 // CreateCompetence is the resolver for the createCompetence field.
@@ -421,31 +394,30 @@ func (r *mutationResolver) CreateCompetence(ctx context.Context, input model.Cre
 		return nil, nil
 	}
 
-	var subject db.Competence
-	err = r.DB.NewSelect().Model(&subject).
-		Where("id = ?", input.ParentID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	subject, err := r.DB.CompetenceById(ctx, db.CompetenceByIdParams{
+		ID:             input.ParentID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, errors.New("subject not found")
 	}
 
 	// grades with default array from 1-10
-	defaultGrades := make([]int, 10)
+	defaultGrades := make([]int32, 10)
 	for i := 0; i < 10; i++ {
-		defaultGrades[i] = i + 1
+		defaultGrades[i] = int32(i + 1)
 	}
 
-	competence := db.Competence{
+	competenceParams := db.CreateCompetenceParams{
 		CompetenceType: db.CompetenceTypeCompetence,
-		CompetenceID:   sql.NullString{String: subject.ID, Valid: true},
+		CompetenceID:   pgtype.Text{String: subject.ID, Valid: true},
 		Name:           input.Name,
 		Grades:         defaultGrades,
 		OrganisationID: currentUser.OrganisationID,
-		CreatedBy:      sql.NullString{String: currentUser.ID, Valid: true},
+		CreatedBy:      pgtype.Text{String: currentUser.ID, Valid: true},
 	}
 
-	err = r.DB.NewInsert().Model(&competence).Returning("*").Scan(ctx)
+	competence, err := r.DB.CreateCompetence(ctx, competenceParams)
 	if err != nil {
 		return nil, errors.New("creating competence failed")
 	}
@@ -460,13 +432,11 @@ func (r *queryResolver) Competence(ctx context.Context, id string) (*db.Competen
 		return nil, nil
 	}
 
-	var competence db.Competence
-	err = r.DB.NewSelect().Model(&competence).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &competence, nil
+	competence, err := r.DB.CompetenceById(ctx, db.CompetenceByIdParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	return &competence, err
 }
 
 // Competences is the resolver for the competences field.
@@ -533,29 +503,30 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 		fmt.Println(ids)
 	}
 
-	var competences []*db.Competence
-	query := r.DB.NewSelect().
-		Model(&competences).
+	competences, err := r.DB.CompetenceList(ctx, currentUser.OrganisationID)
+	query := r.DB.NewQueryBuilder().
+		Select("*").
+		From("competences").
 		Where("organisation_id = ?", currentUser.OrganisationID).
-		Limit(pageLimit).
-		Offset(pageOffset)
+		Limit(uint64(pageLimit)).
+		Offset(uint64(pageOffset))
 
 	if len(ids) > 0 {
 		query.Where("id IN (?)", bun.In(ids))
 	} else {
 		if sort != nil {
-			query.Order("competence_type")
+			query.OrderBy("competence_type")
 			switch sort.Field {
 			case model.CompetenceSortFieldSortOrder:
-				query.Order("sort_order ASC")
+				query.OrderBy("sort_order ASC")
 			case model.CompetenceSortFieldName:
-				query.Order("name ASC")
+				query.OrderBy("name ASC")
 			case model.CompetenceSortFieldCreatedAt:
-				query.Order("created_at ASC")
+				query.OrderBy("created_at ASC")
 			}
 		} else {
-			query.Order("competence_type")
-			query.Order("name ASC")
+			query.OrderBy("competence_type")
+			query.OrderBy("name ASC")
 		}
 
 		if filter != nil {
@@ -577,10 +548,12 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 		}
 	}
 
-	count, err := query.ScanAndCount(ctx)
+	err = query.Scan(competences)
 	if err != nil {
 		return nil, err
 	}
+
+	count := 10_000
 
 	page, err := helper.CreatePageInfo(pageOffset, pageLimit, count)
 	if err != nil {
@@ -589,7 +562,7 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 
 	page.CurrentPage = pageOffset / pageLimit
 	return &model.CompetenceConnection{
-		Edges:      competences,
+		Edges:      lo.ToSlicePtr(competences),
 		PageInfo:   page,
 		TotalCount: count,
 	}, nil
@@ -602,13 +575,11 @@ func (r *queryResolver) Tag(ctx context.Context, id string) (*db.Tag, error) {
 		return nil, nil
 	}
 
-	var tag db.Tag
-	err = r.DB.NewSelect().Model(&tag).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &tag, nil
+	tag, err := r.DB.TagById(ctx, db.TagByIdParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	return &tag, err
 }
 
 // Tags is the resolver for the tags field.
@@ -620,22 +591,18 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int, searc
 
 	pageLimit, pageOffset := helper.SetPageLimits(limit, offset)
 
-	var tags []*db.Tag
-	query := r.DB.NewSelect().
-		Model(&tags).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Limit(pageLimit).
-		Offset(pageOffset).
-		Order("name")
-
-	if search != nil && *search != "" {
-		query.Where("name ILIKE ?", "%"+*search+"%")
-	}
-
-	count, err := query.ScanAndCount(ctx)
+	tags, err := r.DB.TagList(ctx, db.TagListParams{
+		OrganisationID: currentUser.OrganisationID,
+		Offset:         int32(pageOffset),
+		Limit:          int32(pageLimit),
+		Search:         "%" + *search + "%",
+	})
 	if err != nil {
 		return nil, err
 	}
+
+	// TODO: get the count from the database
+	count := 10_000
 
 	// Get the pageInfo
 	page, err := helper.CreatePageInfo(pageOffset, pageLimit, count)
@@ -644,7 +611,7 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int, searc
 	}
 
 	return &model.TagConnection{
-		Edges:      tags,
+		Edges:      lo.ToSlicePtr(tags),
 		PageInfo:   page,
 		TotalCount: count,
 	}, nil
@@ -659,21 +626,29 @@ func (r *queryResolver) UserStudents(ctx context.Context, limit *int, offset *in
 
 	pageLimit, pageOffset := helper.SetPageLimits(limit, offset)
 
-	var userStudents []*db.UserStudent
-	count, err := r.DB.NewSelect().Model(&userStudents).Where("organisation_id = ?", currentUser.OrganisationID).Limit(pageLimit).Offset(pageOffset).ScanAndCount(ctx)
+	userStudents, err := r.DB.UserStudentList(ctx, db.UserStudentListParams{
+		OrganisationID: currentUser.OrganisationID,
+		Offset:         int32(pageOffset),
+		Limit:          int32(pageLimit),
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	page, err := helper.CreatePageInfo(pageOffset, pageLimit, count)
+	count, err := r.DB.UserStudentCount(ctx, currentUser.OrganisationID)
+	if err != nil {
+		return nil, err
+	}
+
+	page, err := helper.CreatePageInfo(pageOffset, pageLimit, int(count))
 	if err != nil {
 		return nil, err
 	}
 
 	return &model.UserStudentConnection{
-		Edges:      userStudents,
+		Edges:      lo.ToSlicePtr(userStudents),
 		PageInfo:   page,
-		TotalCount: count,
+		TotalCount: int(count),
 	}, nil
 }
 
@@ -684,8 +659,10 @@ func (r *queryResolver) UserStudent(ctx context.Context, id string) (*db.UserStu
 		return nil, nil
 	}
 
-	var userStudent db.UserStudent
-	err = r.DB.NewSelect().Model(&userStudent).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	userStudent, err := r.DB.UserStudentByUserId(ctx, db.UserStudentByUserIdParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -704,7 +681,7 @@ func (r *tagResolver) Color(ctx context.Context, obj *db.Tag) (string, error) {
 
 // DeletedAt is the resolver for the deletedAt field.
 func (r *tagResolver) DeletedAt(ctx context.Context, obj *db.Tag) (*time.Time, error) {
-	if obj.DeletedAt.IsZero() {
+	if obj.DeletedAt.Valid {
 		return &obj.DeletedAt.Time, nil
 	}
 
@@ -718,8 +695,10 @@ func (r *userCompetenceResolver) Competence(ctx context.Context, obj *db.UserCom
 		return nil, nil
 	}
 
-	var competence db.Competence
-	err = r.DB.NewSelect().Model(&competence).Where("id = ?", obj.CompetenceID).Where("organisation_id = ?", currentUser.OrganisationID).WhereAllWithDeleted().Scan(ctx)
+	competence, err := r.DB.CompetenceByIdWithDeleted(ctx, db.CompetenceByIdWithDeletedParams{
+		ID:             obj.CompetenceID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -738,8 +717,10 @@ func (r *userCompetenceResolver) Entry(ctx context.Context, obj *db.UserCompeten
 		return nil, nil
 	}
 
-	var entry db.Entry
-	err = r.DB.NewSelect().Model(&entry).Where("id = ?", obj.EntryID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	entry, err := r.DB.EntryById(ctx, db.EntryByIdParams{
+		ID:             obj.EntryID.String,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -768,8 +749,10 @@ func (r *userCompetenceResolver) CreatedBy(ctx context.Context, obj *db.UserComp
 		return nil, nil
 	}
 
-	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.CreatedBy).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	user, err := r.DB.UserById(ctx, db.UserByIdParams{
+		ID:             obj.CreatedBy.String,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -779,7 +762,7 @@ func (r *userCompetenceResolver) CreatedBy(ctx context.Context, obj *db.UserComp
 
 // LeftAt is the resolver for the leftAt field.
 func (r *userStudentResolver) LeftAt(ctx context.Context, obj *db.UserStudent) (*time.Time, error) {
-	if !obj.LeftAt.IsZero() {
+	if !obj.LeftAt.Valid {
 		return &obj.LeftAt.Time, nil
 	}
 
@@ -788,7 +771,7 @@ func (r *userStudentResolver) LeftAt(ctx context.Context, obj *db.UserStudent) (
 
 // Birthday is the resolver for the birthday field.
 func (r *userStudentResolver) Birthday(ctx context.Context, obj *db.UserStudent) (*time.Time, error) {
-	if !obj.Birthday.IsZero() {
+	if !obj.Birthday.Valid {
 		return &obj.Birthday.Time, nil
 	}
 	return nil, nil
@@ -796,17 +779,23 @@ func (r *userStudentResolver) Birthday(ctx context.Context, obj *db.UserStudent)
 
 // Nationality is the resolver for the nationality field.
 func (r *userStudentResolver) Nationality(ctx context.Context, obj *db.UserStudent) (*string, error) {
-	panic(fmt.Errorf("not implemented: Nationality - nationality"))
+	if obj.Nationality.Valid {
+		return &obj.Nationality.String, nil
+	}
+	return nil, nil
 }
 
 // Comments is the resolver for the comments field.
 func (r *userStudentResolver) Comments(ctx context.Context, obj *db.UserStudent) (*string, error) {
-	panic(fmt.Errorf("not implemented: Comments - comments"))
+	if obj.Comments.Valid {
+		return &obj.Comments.String, nil
+	}
+	return nil, nil
 }
 
 // JoinedAt is the resolver for the joinedAt field.
 func (r *userStudentResolver) JoinedAt(ctx context.Context, obj *db.UserStudent) (*time.Time, error) {
-	if !obj.JoinedAt.IsZero() {
+	if !obj.JoinedAt.Valid {
 		return &obj.JoinedAt.Time, nil
 	}
 
@@ -815,7 +804,10 @@ func (r *userStudentResolver) JoinedAt(ctx context.Context, obj *db.UserStudent)
 
 // DeletedAt is the resolver for the deletedAt field.
 func (r *userStudentResolver) DeletedAt(ctx context.Context, obj *db.UserStudent) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
+	if obj.DeletedAt.Valid {
+		return &obj.DeletedAt.Time, nil
+	}
+	return nil, nil
 }
 
 // EntriesCount is the resolver for the entriesCount field.
@@ -825,13 +817,15 @@ func (r *userStudentResolver) EntriesCount(ctx context.Context, obj *db.UserStud
 		return 0, nil
 	}
 
-	count, err := r.DB.NewSelect().Model(&db.EntryUser{}).Where("user_id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Count(ctx)
-
+	count, err := r.DB.EntryCountByUserId(ctx, db.EntryCountByUserIdParams{
+		UserID:         obj.UserID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return 0, err
 	}
 
-	return count, nil
+	return int(count), nil
 }
 
 // CompetencesCount is the resolver for the competencesCount field.
@@ -841,13 +835,15 @@ func (r *userStudentResolver) CompetencesCount(ctx context.Context, obj *db.User
 		return 0, nil
 	}
 
-	count, err := r.DB.NewSelect().Model(&db.UserCompetence{}).Where("user_id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Count(ctx)
-
+	count, err := r.DB.UserCompetenceCountByUserId(ctx, db.UserCompetenceCountByUserIdParams{
+		UserID:         obj.UserID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return 0, err
 	}
 
-	return count, nil
+	return int(count), nil
 }
 
 // EventsCount is the resolver for the eventsCount field.
@@ -857,27 +853,20 @@ func (r *userStudentResolver) EventsCount(ctx context.Context, obj *db.UserStude
 		return 0, nil
 	}
 
-	count, err := r.DB.NewSelect().
-		Model(&db.EntryEvent{}).
-		Join("JOIN entry_users ON entry_users.entry_id = entry_event.entry_id").
-		Where("entry_users.user_id = ?", obj.UserID).
-		Where("entry_event.organisation_id = ?", currentUser.OrganisationID).
-		Count(ctx)
+	count, err := r.DB.EntryEventCountByUserId(ctx, db.EntryEventCountByUserIdParams{
+		UserID:         obj.UserID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 
 	if err != nil {
 		return 0, err
 	}
 
-	return count, nil
+	return int(count), nil
 }
 
 // Emoji is the resolver for the emoji field.
 func (r *userStudentResolver) Emoji(ctx context.Context, obj *db.UserStudent) (*string, error) {
-	_, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, nil
-	}
-
 	if obj.Emoji.Valid {
 		return &obj.Emoji.String, nil
 	}
@@ -896,12 +885,18 @@ func (r *userStudentResolver) User(ctx context.Context, obj *db.UserStudent) (*d
 
 // MissedHours is the resolver for the missedHours field.
 func (r *userStudentResolver) MissedHours(ctx context.Context, obj *db.UserStudent) (int, error) {
-	panic(fmt.Errorf("not implemented: MissedHours - missedHours"))
+	if obj.MissedHours.Valid {
+		return int(obj.MissedHours.Int32), nil
+	}
+	return 0, nil
 }
 
 // MissedHoursExcused is the resolver for the missedHoursExcused field.
 func (r *userStudentResolver) MissedHoursExcused(ctx context.Context, obj *db.UserStudent) (int, error) {
-	panic(fmt.Errorf("not implemented: MissedHoursExcused - missedHoursExcused"))
+	if obj.MissedHoursExcused.Valid {
+		return int(obj.MissedHoursExcused.Int32), nil
+	}
+	return 0, nil
 }
 
 // Competence returns CompetenceResolver implementation.

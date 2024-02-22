@@ -9,6 +9,33 @@ import (
 	"context"
 )
 
+const createEventCompetence = `-- name: CreateEventCompetence :one
+INSERT INTO event_competences (event_id, competence_id, organisation_id)
+VALUES ($1, $2, $3)
+ON CONFLICT (event_id, competence_id, organisation_id) DO UPDATE SET deleted_at = (SELECT CASE WHEN deleted_at IS NULL THEN NOW() END)
+RETURNING id, event_id, competence_id, created_at, deleted_at, organisation_id
+`
+
+type CreateEventCompetenceParams struct {
+	EventID        string `db:"event_id"`
+	CompetenceID   string `db:"competence_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) CreateEventCompetence(ctx context.Context, arg CreateEventCompetenceParams) (EventCompetence, error) {
+	row := q.db.QueryRow(ctx, createEventCompetence, arg.EventID, arg.CompetenceID, arg.OrganisationID)
+	var i EventCompetence
+	err := row.Scan(
+		&i.ID,
+		&i.EventID,
+		&i.CompetenceID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.OrganisationID,
+	)
+	return i, err
+}
+
 const eventCompetenceListByEventId = `-- name: EventCompetenceListByEventId :many
 SELECT competences.id, competences.name, competences.competence_id, competences.competence_type, competences.organisation_id, competences.grades, competences.color, competences.curriculum_id, competences.created_at, competences.deleted_at, competences.sort_order, competences.created_by
 FROM competences

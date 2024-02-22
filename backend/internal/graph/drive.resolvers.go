@@ -23,29 +23,29 @@ func (r *fileResolver) Mime(ctx context.Context, obj *db.File) (string, error) {
 	panic(fmt.Errorf("not implemented: Mime - mime"))
 }
 
-// Folder is the resolver for the folder field.
-func (r *fileResolver) Folder(ctx context.Context, obj *db.File) (*db.File, error) {
-	panic(fmt.Errorf("not implemented: Folder - folder"))
+// Parent is the resolver for the parent field.
+func (r *fileResolver) Parent(ctx context.Context, obj *db.File) (*db.File, error) {
+	panic(fmt.Errorf("not implemented: Parent - parent"))
 }
 
-// Folders is the resolver for the folders field.
-func (r *fileResolver) Folders(ctx context.Context, obj *db.File) ([]*db.File, error) {
-	panic(fmt.Errorf("not implemented: Folders - folders"))
+// ParentsRecursive is the resolver for the parentsRecursive field.
+func (r *fileResolver) ParentsRecursive(ctx context.Context, obj *db.File) ([]*db.File, error) {
+	panic(fmt.Errorf("not implemented: ParentsRecursive - parentsRecursive"))
 }
 
-// Files is the resolver for the files field.
-func (r *fileResolver) Files(ctx context.Context, obj *db.File) ([]*db.File, error) {
-	panic(fmt.Errorf("not implemented: Files - files"))
-}
-
-// DeletedAt is the resolver for the deletedAt field.
-func (r *fileResolver) DeletedAt(ctx context.Context, obj *db.File) (*time.Time, error) {
-	return &obj.DeletedAt.Time, nil
+// Children is the resolver for the children field.
+func (r *fileResolver) Children(ctx context.Context, obj *db.File) ([]*db.File, error) {
+	panic(fmt.Errorf("not implemented: Children - children"))
 }
 
 // Permissions is the resolver for the permissions field.
 func (r *fileResolver) Permissions(ctx context.Context, obj *db.File) ([]*db.FilePermission, error) {
 	panic(fmt.Errorf("not implemented: Permissions - permissions"))
+}
+
+// DeletedAt is the resolver for the deletedAt field.
+func (r *fileResolver) DeletedAt(ctx context.Context, obj *db.File) (*time.Time, error) {
+	return &obj.DeletedAt.Time, nil
 }
 
 // File is the resolver for the file field.
@@ -136,3 +136,19 @@ func (r *Resolver) FilePermission() FilePermissionResolver { return &filePermiss
 
 type fileResolver struct{ *Resolver }
 type filePermissionResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *fileResolver) Folder(ctx context.Context, obj *db.File) (*db.File, error) {
+	panic(fmt.Errorf("not implemented: Folder - folder"))
+}
+func (r *fileResolver) Folders(ctx context.Context, obj *db.File) ([]*db.File, error) {
+	panic(fmt.Errorf("not implemented: Folders - folders"))
+}
+func (r *fileResolver) Files(ctx context.Context, obj *db.File) ([]*db.File, error) {
+	panic(fmt.Errorf("not implemented: Files - files"))
+}

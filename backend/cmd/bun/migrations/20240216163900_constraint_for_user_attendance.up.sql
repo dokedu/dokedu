@@ -27,6 +27,4 @@ ALTER TYPE file_permission RENAME TO file_permission_role;
 -- rename table shares to file_permissions
 ALTER TABLE shares RENAME TO file_permissions;
 
--- drop
-
 ALTER TABLE file_permissions RENAME COLUMN permission TO role;

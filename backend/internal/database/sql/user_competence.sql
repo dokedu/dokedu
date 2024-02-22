@@ -47,3 +47,24 @@ WHERE competence_id = @competence_id
   AND organisation_id = @organisation_id
   AND deleted_at IS NULL
 RETURNING *;
+
+-- name: UserCompetenceListByUserIdAndCompetenceId :many
+SELECT *
+FROM user_competences
+WHERE user_id = @user_id
+  AND competence_id = @competence_id
+  AND organisation_id = @organisation_id
+  AND deleted_at IS NULL
+ORDER BY created_at DESC;
+
+-- name: CreateUserCompetenceWithoutEntry :one
+INSERT INTO user_competences (level, user_id, competence_id, created_by, organisation_id)
+VALUES (@level, @user_id, @competence_id, @created_by, @organisation_id)
+RETURNING *;
+
+-- name: UserCompetenceCountByUserId :one
+SELECT COUNT(*)
+FROM user_competences
+WHERE user_id = @user_id
+  AND organisation_id = @organisation_id
+  AND deleted_at IS NULL;

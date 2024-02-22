@@ -12,15 +12,14 @@ type File {
     type: FileType!
     mime: String!
 
-    folder: File
-    folders: [File!]!
+    parent: File
+    parentsRecursive: [File!]!
+    children: [File!]!
 
-    files: [File!]!
+    permissions: [FilePermission!]!
 
     createdAt: Time!
     deletedAt: Time
-
-    permissions: [FilePermission!]!
 }
 
 enum FilePermissionType {
@@ -33,7 +32,6 @@ enum FilePermissionType {
 enum FilePermissionRole {
     VIEWER
     MANAGER
-    OWNER
 }
 
 type FilePermission {

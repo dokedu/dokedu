@@ -54,6 +54,36 @@ func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event
 	return i, err
 }
 
+const deleteEvent = `-- name: DeleteEvent :one
+UPDATE events
+SET deleted_at = now()
+WHERE id = $1 AND organisation_id = $2
+RETURNING id, image_file_id, organisation_id, title, body, starts_at, ends_at, recurrence, created_at, deleted_at
+`
+
+type DeleteEventParams struct {
+	ID             string `db:"id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) DeleteEvent(ctx context.Context, arg DeleteEventParams) (Event, error) {
+	row := q.db.QueryRow(ctx, deleteEvent, arg.ID, arg.OrganisationID)
+	var i Event
+	err := row.Scan(
+		&i.ID,
+		&i.ImageFileID,
+		&i.OrganisationID,
+		&i.Title,
+		&i.Body,
+		&i.StartsAt,
+		&i.EndsAt,
+		&i.Recurrence,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const eventById = `-- name: EventById :one
 SELECT id, image_file_id, organisation_id, title, body, starts_at, ends_at, recurrence, created_at, deleted_at
 FROM events
@@ -82,4 +112,78 @@ func (q *Queries) EventById(ctx context.Context, arg EventByIdParams) (Event, er
 		&i.DeletedAt,
 	)
 	return i, err
+}
+
+const eventList = `-- name: EventList :many
+SELECT id, image_file_id, organisation_id, title, body, starts_at, ends_at, recurrence, created_at, deleted_at
+FROM events
+WHERE organisation_id = $1 AND deleted_at IS NULL
+`
+
+func (q *Queries) EventList(ctx context.Context, organisationID string) ([]Event, error) {
+	rows, err := q.db.Query(ctx, eventList, organisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Event
+	for rows.Next() {
+		var i Event
+		if err := rows.Scan(
+			&i.ID,
+			&i.ImageFileID,
+			&i.OrganisationID,
+			&i.Title,
+			&i.Body,
+			&i.StartsAt,
+			&i.EndsAt,
+			&i.Recurrence,
+			&i.CreatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const exportEvents = `-- name: ExportEvents :many
+SELECT export_events
+FROM export_events($1, $2, $3, $4)
+`
+
+type ExportEventsParams struct {
+	OrganisationID string      `db:"_organisation_id"`
+	From           pgtype.Date `db:"_from"`
+	To             pgtype.Date `db:"_to"`
+	ShowArchived   bool        `db:"_show_archived"`
+}
+
+func (q *Queries) ExportEvents(ctx context.Context, arg ExportEventsParams) ([]interface{}, error) {
+	rows, err := q.db.Query(ctx, exportEvents,
+		arg.OrganisationID,
+		arg.From,
+		arg.To,
+		arg.ShowArchived,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []interface{}
+	for rows.Next() {
+		var export_events interface{}
+		if err := rows.Scan(&export_events); err != nil {
+			return nil, err
+		}
+		items = append(items, export_events)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

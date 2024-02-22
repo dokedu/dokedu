@@ -125,10 +125,6 @@ type CreateReportInput struct {
 	AllUsers    *bool           `json:"allUsers,omitempty"`
 }
 
-type CreateSchoolYearInput struct {
-	Year int `json:"year"`
-}
-
 type CreateStudentInput struct {
 	FirstName string     `json:"firstName"`
 	LastName  string     `json:"lastName"`
@@ -137,10 +133,6 @@ type CreateStudentInput struct {
 	LeftAt    *time.Time `json:"leftAt,omitempty"`
 	JoinedAt  *time.Time `json:"joinedAt,omitempty"`
 	Emoji     *string    `json:"emoji,omitempty"`
-}
-
-type CreateSubjectInput struct {
-	Name string `json:"name"`
 }
 
 type CreateTagInput struct {
@@ -162,13 +154,6 @@ type CreateUserInput struct {
 	Birthday  *time.Time  `json:"birthday,omitempty"`
 	LeftAt    *time.Time  `json:"leftAt,omitempty"`
 	JoinedAt  *time.Time  `json:"joinedAt,omitempty"`
-}
-
-type CreateUserStudentGradesInput struct {
-	Student    string `json:"student"`
-	Subject    string `json:"subject"`
-	Grade      int    `json:"grade"`
-	SchoolYear string `json:"schoolYear"`
 }
 
 type DeleteChatInput struct {
@@ -330,12 +315,6 @@ type ResetPasswordPayload struct {
 	Organisation *db.Organisation `json:"organisation"`
 }
 
-type SchoolYearConnection struct {
-	Edges      []*db.SchoolYear `json:"edges"`
-	TotalCount int              `json:"totalCount"`
-	PageInfo   *PageInfo        `json:"pageInfo"`
-}
-
 type SendMessageInput struct {
 	ChatID  string `json:"chatId"`
 	Message string `json:"message"`
@@ -362,12 +341,6 @@ type SignUpInput struct {
 type SortCompetenceInput struct {
 	ID        string `json:"id"`
 	SortOrder int    `json:"sortOrder"`
-}
-
-type SubjectConnection struct {
-	Edges      []*db.Subject `json:"edges"`
-	TotalCount int           `json:"totalCount"`
-	PageInfo   *PageInfo     `json:"pageInfo"`
 }
 
 type TagConnection struct {
@@ -439,16 +412,6 @@ type UpdateOrganisationInput struct {
 	Phone     *string `json:"phone,omitempty"`
 }
 
-type UpdateSchoolYearInput struct {
-	ID   string `json:"id"`
-	Year int    `json:"year"`
-}
-
-type UpdateSubjectInput struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
-
 type UpdateUserAttendanceInput struct {
 	Date   time.Time              `json:"date"`
 	UserID string                 `json:"userId"`
@@ -473,11 +436,6 @@ type UpdateUserInput struct {
 	Emoji              *string    `json:"emoji,omitempty"`
 	MissedHours        *int       `json:"missedHours,omitempty"`
 	MissedHoursExcused *int       `json:"missedHoursExcused,omitempty"`
-}
-
-type UpdateUserStudentGradesInput struct {
-	ID    string `json:"id"`
-	Grade int    `json:"grade"`
 }
 
 type UserCompetenceConnection struct {
@@ -507,20 +465,6 @@ type UserStudentConnection struct {
 	Edges      []*db.UserStudent `json:"edges,omitempty"`
 	PageInfo   *PageInfo         `json:"pageInfo"`
 	TotalCount int               `json:"totalCount"`
-}
-
-type UserStudentGrades struct {
-	ID         string          `json:"id"`
-	Student    *db.UserStudent `json:"student"`
-	Subject    *db.Subject     `json:"subject"`
-	Grade      int             `json:"grade"`
-	SchoolYear *db.SchoolYear  `json:"schoolYear"`
-}
-
-type UserStudentGradesConnection struct {
-	Edges      []*UserStudentGrades `json:"edges"`
-	TotalCount int                  `json:"totalCount"`
-	PageInfo   *PageInfo            `json:"pageInfo"`
 }
 
 type CompetenceSortField string

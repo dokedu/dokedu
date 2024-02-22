@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
@@ -71,7 +70,33 @@ func (r *organisationResolver) Owner(ctx context.Context, obj *db.Organisation) 
 
 // Applications is the resolver for the applications field.
 func (r *organisationResolver) Applications(ctx context.Context, obj *db.Organisation) ([]model.OrganisationApplication, error) {
-	panic(fmt.Errorf("not implemented: Applications - applications"))
+	var applications []model.OrganisationApplication
+
+	// TODO: is there a better way for this in Go?
+	for _, application := range obj.EnabledApps {
+		switch application {
+		case model.OrganisationApplicationEmail.String():
+			applications = append(applications, model.OrganisationApplicationEmail)
+			break
+		case model.OrganisationApplicationDrive.String():
+			applications = append(applications, model.OrganisationApplicationDrive)
+			break
+		case model.OrganisationApplicationRecord.String():
+			applications = append(applications, model.OrganisationApplicationRecord)
+			break
+		case model.OrganisationApplicationAdmin.String():
+			applications = append(applications, model.OrganisationApplicationAdmin)
+			break
+		case model.OrganisationApplicationSchool.String():
+			applications = append(applications, model.OrganisationApplicationSchool)
+			break
+		case model.OrganisationApplicationChat.String():
+			applications = append(applications, model.OrganisationApplicationChat)
+			break
+		}
+	}
+
+	return applications, nil
 }
 
 // Organisation is the resolver for the organisation field.

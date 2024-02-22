@@ -8,7 +8,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"mime"
 	"path/filepath"
 	"time"
@@ -20,13 +19,16 @@ import (
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 	"github.com/dokedu/dokedu/backend/internal/msg"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/minio/minio-go/v7"
+	minio "github.com/minio/minio-go/v7"
 	"github.com/samber/lo"
 )
 
 // Date is the resolver for the date field.
 func (r *entryResolver) Date(ctx context.Context, obj *db.Entry) (string, error) {
-	panic(fmt.Errorf("not implemented: Date - date"))
+	if obj.Date.Valid {
+		return obj.Date.Time.Format("2006-01-02"), nil
+	}
+	return "", nil
 }
 
 // User is the resolver for the user field.

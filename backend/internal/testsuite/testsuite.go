@@ -3,6 +3,8 @@ package testsuite
 import (
 	"context"
 	"database/sql"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
+	"github.com/jackc/pgx/v5/pgtype"
 	"testing"
 
 	gonanoid "github.com/matoous/go-nanoid/v2"
@@ -21,7 +23,7 @@ import (
 type TestSuite struct {
 	*suite.Suite
 	Resolver *graph.Resolver
-	DB       *bun.DB
+	DB       *database.DB
 }
 
 func New() (*TestSuite, error) {
@@ -57,31 +59,36 @@ func NewFromT(t *testing.T) *TestSuite {
 	return ts
 }
 
+func (ts *TestSuite) Query1(q string, args ...interface{}) interface{} {
+	res, err := ts.DB.DB.Query(ts.Ctx(), q, args...)
+	ts.NoError(err)
+	defer res.Close()
+
+	var result interface{}
+	res.Next()
+	err = res.Scan(&result)
+	ts.NoError(err)
+	return result
+}
+
 func (ts *TestSuite) Ctx() context.Context {
 	return context.Background()
 }
 
 func (ts *TestSuite) CtxWithToken(token string) context.Context {
-	// find session
-	var session db.Session
-	err := ts.DB.NewSelect().Model(&session).Where("token = ?", token).Scan(context.Background())
-	ts.NoError(err)
-
-	var user db.User
-	err = ts.DB.NewSelect().Model(&user).Where("id = ?", session.UserID).Scan(context.Background())
+	user, err := ts.DB.GLOBAL_UserFindBySession(ts.Ctx(), token)
 	ts.NoError(err)
 
 	userContext := middleware.UserContext{
 		User:  user,
-		Token: session.Token,
+		Token: token,
 	}
 
 	return context.WithValue(ts.Ctx(), middleware.UserCtxKey, &userContext)
 }
 
 func (ts *TestSuite) CtxWithEmail(email string) context.Context {
-	var user db.User
-	err := ts.DB.NewSelect().Model(&user).Where("email = ?", email).Scan(context.Background())
+	user, err := ts.DB.GLOBAL_UserByEmail(ts.Ctx(), pgtype.Text{String: email, Valid: true})
 	ts.NoError(err)
 
 	userContext := middleware.UserContext{
@@ -93,8 +100,7 @@ func (ts *TestSuite) CtxWithEmail(email string) context.Context {
 }
 
 func (ts *TestSuite) UserByEmail(email string) *db.User {
-	var user db.User
-	err := ts.DB.NewSelect().Model(&user).Where("email = ?", email).Scan(context.Background())
+	user, err := ts.DB.GLOBAL_UserByEmail(ts.Ctx(), pgtype.Text{String: email, Valid: true})
 	ts.NoError(err)
 	return &user
 }

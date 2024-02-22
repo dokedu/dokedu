@@ -64,3 +64,15 @@ SET password = $1
 WHERE id = $2
   AND organisation_id = $3
 RETURNING *;
+
+-- name: UserByIdWithDeleted :one
+SELECT *
+FROM users
+WHERE id = $1
+  AND organisation_id = $2
+LIMIT 1;
+
+-- name: CreateUser :one
+INSERT INTO users (role, organisation_id, first_name, last_name, email, password, language, sex)
+VALUES (@role, @organisation_id, @first_name, @last_name, @email, @password, @language, @sex)
+RETURNING *;
