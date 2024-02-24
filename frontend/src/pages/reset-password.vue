@@ -130,7 +130,8 @@ async function onSubmit() {
       router.push("/login")
     }, 3000)
   } else {
-    alert(t("something_went_wrong"))
+    errorTitle.value = t("something_went_wrong")
+    errorBanner.value = true
   }
 }
 </script>

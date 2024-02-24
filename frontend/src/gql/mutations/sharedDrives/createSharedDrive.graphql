@@ -1,6 +1,0 @@
-mutation createSharedDrive($name: String!) {
-  createSharedDrive(name: $name) {
-    id
-    name
-  }
-}

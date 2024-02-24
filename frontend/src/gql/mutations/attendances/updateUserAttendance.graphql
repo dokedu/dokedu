@@ -1,0 +1,12 @@
+mutation updateUserAttendance($input: UpdateUserAttendanceInput!) {
+  updateUserAttendance(input: $input) {
+    id
+    date
+    state
+    user {
+      id
+      firstName
+      lastName
+    }
+  }
+}

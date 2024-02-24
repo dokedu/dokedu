@@ -10,7 +10,7 @@ export type MGetEntriesQueryVariables = Types.Exact<{
 }>;
 
 
-export type MGetEntriesQuery = { __typename?: 'Query', entries: { __typename?: 'EntryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean }, edges: Array<{ __typename?: 'Entry', id: string, date: string, body?: string | null, createdAt: never, user: { __typename?: 'User', id: string, firstName: string, lastName: string } }> } };
+export type MGetEntriesQuery = { __typename?: 'Query', entries: { __typename?: 'EntryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean }, edges: Array<{ __typename?: 'Entry', id: string, date: string, body: string, createdAt: never, user: { __typename?: 'User', id: string, firstName: string, lastName: string } }> } };
 
 
 export const MGetEntriesDocument = gql`

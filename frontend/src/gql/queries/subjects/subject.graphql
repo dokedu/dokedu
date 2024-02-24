@@ -1,6 +1,0 @@
-query subject($id: ID!) {
-  subject(id: $id) {
-    id
-    name
-  }
-}

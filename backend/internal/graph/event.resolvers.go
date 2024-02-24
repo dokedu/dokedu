@@ -8,10 +8,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/samber/lo"
 )
 
 // Image is the resolver for the image field.
@@ -21,22 +23,15 @@ func (r *eventResolver) Image(ctx context.Context, obj *db.Event) (*db.File, err
 		return nil, err
 	}
 
-	var file db.File
-	err = r.DB.NewSelect().Model(&file).Where("id = ?", obj.ImageFileID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	file, err := r.DB.FileById(ctx, db.FileByIdParams{
+		ID:             obj.ImageFileID.String,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	return &file, nil
-}
-
-// DeletedAt is the resolver for the deletedAt field.
-func (r *eventResolver) DeletedAt(ctx context.Context, obj *db.Event) (*time.Time, error) {
-	if obj.DeletedAt.IsZero() {
-		return nil, nil
-	}
-
-	return &obj.DeletedAt.Time, nil
 }
 
 // Competences is the resolver for the competences field.
@@ -46,18 +41,24 @@ func (r *eventResolver) Competences(ctx context.Context, obj *db.Event) ([]*db.C
 		return nil, err
 	}
 
-	var competences []*db.Competence
-	err = r.DB.NewSelect().
-		Model(&competences).
-		Join("JOIN event_competences ON event_competences.competence_id = competence.id and event_competences.deleted_at is null").
-		Where("event_competences.event_id = ?", obj.ID).
-		Where("competence.organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	competences, err := r.DB.EventCompetenceListByEventId(ctx, db.EventCompetenceListByEventIdParams{
+		EventID:        obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	return competences, nil
+	return lo.ToSlicePtr(competences), nil
+}
+
+// DeletedAt is the resolver for the deletedAt field.
+func (r *eventResolver) DeletedAt(ctx context.Context, obj *db.Event) (*time.Time, error) {
+	if !obj.DeletedAt.Valid {
+		return nil, nil
+	}
+
+	return &obj.DeletedAt.Time, nil
 }
 
 // CreateEvent is the resolver for the createEvent field.
@@ -92,7 +93,15 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input model.CreateEv
 		event.Recurrence = []string{}
 	}
 
-	err = r.DB.NewInsert().Model(&event).Returning("*").Scan(ctx)
+	event, err = r.DB.CreateEvent(ctx, db.CreateEventParams{
+		ImageFileID:    pgtype.Text{},
+		OrganisationID: currentUser.OrganisationID,
+		Title:          event.Title,
+		Body:           event.Body,
+		StartsAt:       event.StartsAt,
+		EndsAt:         event.EndsAt,
+		Recurrence:     event.Recurrence,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -109,11 +118,11 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input model.UpdateEv
 
 	var event db.Event
 
-	query := r.DB.NewUpdate().
-		Model(&event).
+	query := r.DB.NewQueryBuilder().
+		Update("events").
+		Where("id = ?", input.ID).
 		Where("organisation_id = ?", currentUser.OrganisationID).
-		Returning("*").
-		Where("id = ?", input.ID)
+		Prefix("RETURNING *")
 
 	if input.Title != nil && len(*input.Title) > 0 {
 		event.Title = *input.Title
@@ -164,28 +173,19 @@ func (r *mutationResolver) ToggleEventCompetence(ctx context.Context, input mode
 		return nil, err
 	}
 
-	var eventCompetence db.EventCompetence
-	eventCompetence.EventID = input.EventID
-	eventCompetence.CompetenceID = input.CompetenceID
-	eventCompetence.OrganisationID = currentUser.OrganisationID
-
-	err = r.DB.NewInsert().
-		Model(&eventCompetence).
-		Where("\"event_competence\".organisation_id = ?", currentUser.OrganisationID).
-		On("CONFLICT (event_id, competence_id) DO UPDATE").
-		Set("deleted_at = (SELECT CASE WHEN event_competence.deleted_at IS NULL THEN NOW() ELSE NULL END)").
-		Returning("*").
-		Scan(ctx)
+	_, err = r.DB.CreateEventCompetence(ctx, db.CreateEventCompetenceParams{
+		EventID:        input.EventID,
+		CompetenceID:   input.CompetenceID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var event db.Event
-	err = r.DB.NewSelect().
-		Model(&event).
-		Where("id = ?", input.EventID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	event, err := r.DB.EventById(ctx, db.EventByIdParams{
+		ID:             input.EventID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -200,21 +200,11 @@ func (r *mutationResolver) ArchiveEvent(ctx context.Context, id string) (*db.Eve
 		return nil, err
 	}
 
-	var event db.Event
-	// mark event.deleted_at as now
-	err = r.DB.NewUpdate().
-		Model(&event).
-		Set("deleted_at = ?", time.Now()).
-		Where("id = ?", id).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Returning("*").
-		WhereAllWithDeleted().
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &event, nil
+	event, err := r.DB.DeleteEvent(ctx, db.DeleteEventParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	return &event, err
 }
 
 // Event is the resolver for the event field.
@@ -224,13 +214,11 @@ func (r *queryResolver) Event(ctx context.Context, id string) (*db.Event, error)
 		return nil, err
 	}
 
-	var event db.Event
-	err = r.DB.NewSelect().Model(&event).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &event, nil
+	event, err := r.DB.EventById(ctx, db.EventByIdParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	return &event, err
 }
 
 // Events is the resolver for the events field.
@@ -244,14 +232,19 @@ func (r *queryResolver) Events(ctx context.Context, limit *int, offset *int, fil
 
 	var events []*db.Event
 
-	query := r.DB.NewSelect().Model(&events).Where("organisation_id = ?", currentUser.OrganisationID).Limit(pageLimit).Offset(pageOffset)
+	query := r.DB.NewQueryBuilder().
+		Select("*").
+		From("events").
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		Limit(uint64(pageLimit)).
+		Offset(uint64(pageOffset))
 
 	if search != nil && len(*search) > 0 {
 		// TODO: improve search perhaps using meilisearch
 		query.Where("title ILIKE ?", "%"+*search+"%")
 	} else {
 		if order == nil {
-			query.Order("created_at")
+			query.OrderBy("created_at")
 		}
 	}
 
@@ -268,23 +261,26 @@ func (r *queryResolver) Events(ctx context.Context, limit *int, offset *int, fil
 	// Order
 	if order != nil {
 		if *order == model.EventOrderByEndsAtAsc {
-			query.Order("ends_at")
+			query.OrderBy("ends_at")
 		}
 		if *order == model.EventOrderByEndsAtDesc {
-			query.Order("ends_at DESC")
+			query.OrderBy("ends_at DESC")
 		}
 		if *order == model.EventOrderByStartsAtAsc {
-			query.Order("starts_at")
+			query.OrderBy("starts_at")
 		}
 		if *order == model.EventOrderByStartsAtDesc {
-			query.Order("starts_at DESC")
+			query.OrderBy("starts_at DESC")
 		}
 	}
 
-	count, err := query.ScanAndCount(ctx)
+	err = query.Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
+
+	// TODO: Yeah well same problem as before
+	count := 10_000
 
 	// Page info
 	page, err := helper.CreatePageInfo(pageLimit, pageOffset, count)
@@ -308,17 +304,39 @@ func (r *queryResolver) ExportEvents(ctx context.Context, input model.ExportEven
 
 	orgId := currentUser.OrganisationID
 
-	from := input.From
-	to := input.To
+	// TODO: might not work
+	from, err := time.Parse(time.RFC3339, input.From)
+	to, err := time.Parse(time.RFC3339, input.To)
 	deleted := input.Deleted
 
-	var events []*model.ExportEventsPayload
-	err = r.DB.NewRaw("SELECT * FROM export_events(?, ?, ?, ?)", orgId, from, to, deleted).Scan(ctx, &events)
+	// TODO: another day, another fix
+	events, err := r.DB.ExportEvents(ctx, db.ExportEventsParams{
+		OrganisationID: orgId,
+		From:           from,
+		To:             to,
+		ShowArchived:   deleted,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	return events, nil
+	//parse events to model.ExportEventsPayload
+
+	var payload []*model.ExportEventsPayload
+	for _, event := range events {
+		payload = append(payload, &model.ExportEventsPayload{
+			ID:       event.ID,
+			Title:    event.Title,
+			Body:     event.Body,
+			StartsAt: event.StartsAt.String(),
+			EndsAt:   event.EndsAt.String(),
+			Subjects: string(event.Subjects),
+		})
+
+	}
+
+	// TODO: properly map the events to the payload
+	return []*model.ExportEventsPayload{}, nil
 }
 
 // Event returns EventResolver implementation.

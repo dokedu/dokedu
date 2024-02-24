@@ -1,0 +1,99 @@
+
+enum UserRole {
+  owner
+  admin
+  teacher
+  educator
+  student
+  parent
+}
+
+enum UserLanguage {
+  en
+  de
+}
+
+type User {
+  id: ID!
+  email: String
+  role: UserRole!
+
+  firstName: String!
+  lastName: String!
+  student: UserStudent
+  language: UserLanguage
+
+  createdAt: Time!
+  deletedAt: Time
+
+  organisationId: ID!
+
+  inviteAccepted: Boolean!
+
+  lastSeenAt: Time
+}
+
+
+type UserConnection {
+  edges: [User]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+
+enum UserOrderBy {
+  firstNameAsc
+  firstNameDesc
+  lastNameAsc
+  lastNameDesc
+}
+
+
+# user filter input
+input UserFilterInput {
+  role: [UserRole]
+  orderBy: UserOrderBy
+  showDeleted: Boolean
+}
+
+
+extend type Query {
+  users(limit: Int, offset: Int, filter: UserFilterInput, search: String): UserConnection!
+  user(id: ID!): User!
+  me: User!
+}
+
+
+input CreateUserInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  role: UserRole!
+
+  birthday: Time
+  leftAt: Time
+  joinedAt: Time
+}
+
+input UpdateUserInput {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String
+  grade: Int
+  birthday: Time
+  leftAt: Time
+  joinedAt: Time
+  emoji: String
+  missedHours: Int
+  missedHoursExcused: Int
+}
+
+
+extend type Mutation {
+  createUser(input: CreateUserInput!): User!
+  updateUser(input: UpdateUserInput!): User!
+  archiveUser(id: ID!): User!
+  updateUserLanguage(language: UserLanguage!): User!
+
+}

@@ -6,10 +6,11 @@ type Event {
     startsAt: Time!
     endsAt: Time!
     recurrence: [String]
-    createdAt: Time!
-    deletedAt: Time
 
     competences: [Competence!]!
+
+    createdAt: Time!
+    deletedAt: Time
 }
 
 type EventConnection {

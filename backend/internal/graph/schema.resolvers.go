@@ -10,22 +10,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/rand"
 	"strings"
 	"time"
 
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/dataloaders"
-	"github.com/dokedu/dokedu/backend/internal/db"
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 	meili "github.com/dokedu/dokedu/backend/internal/modules/meilisearch"
-	"github.com/dokedu/dokedu/backend/internal/msg"
-
-	nanoid "github.com/matoous/go-nanoid/v2"
+	"github.com/jackc/pgx/v5/pgtype"
 	meilisearch "github.com/meilisearch/meilisearch-go"
+	"github.com/samber/lo"
 	"github.com/uptrace/bun"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // Type is the resolver for the type field.
@@ -52,6 +49,11 @@ func (r *competenceResolver) Parents(ctx context.Context, obj *db.Competence) ([
 	return dataloaders.GetCompetenceParents(ctx, obj.ID, currentUser)
 }
 
+// SortOrder is the resolver for the sortOrder field.
+func (r *competenceResolver) SortOrder(ctx context.Context, obj *db.Competence) (int, error) {
+	panic(fmt.Errorf("not implemented: SortOrder - sortOrder"))
+}
+
 // Competences is the resolver for the competences field.
 func (r *competenceResolver) Competences(ctx context.Context, obj *db.Competence, search *string, sort *model.CompetenceSort) ([]*db.Competence, error) {
 	currentUser, err := middleware.GetUser(ctx)
@@ -61,20 +63,21 @@ func (r *competenceResolver) Competences(ctx context.Context, obj *db.Competence
 
 	var competences []*db.Competence
 	query := r.DB.
-		NewSelect().
-		Model(&competences).
+		NewQueryBuilder().
+		Select("*").
+		From("competences").
 		Where("competence_id = ?", obj.ID).
 		Where("organisation_id = ?", currentUser.OrganisationID)
 
 	if sort != nil {
 		switch sort.Field {
 		case model.CompetenceSortFieldSortOrder:
-			query.Order("sort_order ASC")
-			query.Order("name ASC")
+			query.OrderBy("sort_order ASC")
+			query.OrderBy("name ASC")
 		case model.CompetenceSortFieldName:
-			query.Order("name ASC")
+			query.OrderBy("name ASC")
 		case model.CompetenceSortFieldCreatedAt:
-			query.Order("created_at ASC")
+			query.OrderBy("created_at ASC")
 		}
 	} else {
 		//query.Order("name ASC")
@@ -103,20 +106,17 @@ func (r *competenceResolver) UserCompetences(ctx context.Context, obj *db.Compet
 		return []*db.UserCompetence{}, nil
 	}
 
-	var userCompetences []*db.UserCompetence
-	err = r.DB.NewSelect().
-		Model(&userCompetences).
-		Where("competence_id = ?", obj.ID).
-		Where("user_id = ?", *userID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Order("created_at DESC").
-		Scan(ctx)
+	userCompetences, err := r.DB.UserCompetenceListByUserIdAndCompetenceId(ctx, db.UserCompetenceListByUserIdAndCompetenceIdParams{
+		UserID:         *userID,
+		CompetenceID:   obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 
 	if err != nil {
 		return nil, err
 	}
 
-	return userCompetences, nil
+	return lo.ToSlicePtr(userCompetences), nil
 }
 
 // Tendency is the resolver for the tendency field.
@@ -130,453 +130,43 @@ func (r *competenceResolver) Tendency(ctx context.Context, obj *db.Competence, u
 		return nil, nil
 	}
 
-	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", userID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	user, err := r.DB.UserById(ctx, db.UserByIdParams{
+		ID:             userID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
+	// TODO: how is that even possible?
 	if currentUser.OrganisationID != user.OrganisationID {
 		return nil, errors.New("user does not belong to the same organisation")
 	}
 
+	childrenCount, err := r.DB.CompetenceChildrenCount(ctx, db.CompetenceChildrenCountParams{
+		CompetenceID:   pgtype.Text{String: obj.ID, Valid: true},
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	userCompetenceCount, err := r.DB.UserCompetenceCount(ctx, db.UserCompetenceCountParams{
+		OrganisationID: currentUser.OrganisationID,
+		UserID:         user.ID,
+		CompetenceID:   obj.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	var tendency model.CompetenceTendency
-
-	childCountQuery := `WITH RECURSIVE child_competences AS ( SELECT id, competence_type FROM competences WHERE competence_id = ? UNION ALL SELECT c.id, c.competence_type FROM competences c INNER JOIN child_competences cc ON c.competence_id = cc.id ) SELECT COUNT(id) FROM child_competences WHERE competence_type = 'competence'`
-	err = r.DB.NewRaw(childCountQuery, obj.ID).Scan(ctx, &tendency.CountChildCompetences)
-
-	learnedCountQuery := `SELECT COUNT(DISTINCT user_competences.competence_id) FROM user_competences WHERE organisation_id = ? AND user_id = ? AND competence_id IN ( WITH RECURSIVE child_competences AS ( SELECT id, competence_type FROM competences WHERE competence_id = ? UNION ALL SELECT c.id, c.competence_type FROM competences c INNER JOIN child_competences cc ON c.competence_id = cc.id ) SELECT id FROM child_competences WHERE competence_type = 'competence' )`
-	err = r.DB.NewRaw(learnedCountQuery, currentUser.OrganisationID, userID, obj.ID).Scan(ctx, &tendency.CountLearnedCompetences)
+	tendency.CountLearnedCompetences = int(userCompetenceCount)
+	tendency.CountChildCompetences = int(childrenCount)
 
 	tendency.Tendency = float64(tendency.CountLearnedCompetences) / float64(tendency.CountChildCompetences)
 
 	return &tendency, nil
-}
-
-// SignIn is the resolver for the signIn field.
-func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) (*model.SignInPayload, error) {
-	var user db.User
-	err := r.DB.NewSelect().Model(&user).Where("email = ?", strings.ToLower(input.Email)).Scan(ctx)
-	if err != nil {
-		return nil, msg.ErrInvalidEmailOrPassword
-	}
-
-	var organisation db.Organisation
-	err = r.DB.NewSelect().Model(&organisation).Where("id = ?", user.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, msg.ErrInvalidEmailOrPassword
-	}
-
-	// user.Password is a sql.NullString, so we need to check if it is valid
-	if !user.Password.Valid {
-		return nil, msg.ErrInvalidEmailOrPassword
-	}
-
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password.String), []byte(input.Password)); err != nil {
-		return nil, msg.ErrInvalidEmailOrPassword
-	}
-
-	// Generate a new token
-	token, err := nanoid.New(32)
-	if err != nil {
-		return nil, errors.New("unable to generate a token")
-	}
-
-	// Save the token in the database
-	session := db.Session{
-		UserID: user.ID,
-		Token:  token,
-	}
-
-	_, err = r.DB.NewInsert().Model(&session).Exec(ctx)
-	if err != nil {
-		return nil, errors.New("unable to generate a token")
-	}
-
-	return &model.SignInPayload{
-		Token:         token,
-		EnabledApps:   organisation.EnabledApps,
-		Language:      string(user.Language),
-		SetupComplete: organisation.SetupComplete,
-		User:          &user,
-	}, nil
-}
-
-// ResetPassword is the resolver for the resetPassword field.
-func (r *mutationResolver) ResetPassword(ctx context.Context, input model.ResetPasswordInput) (*model.ResetPasswordPayload, error) {
-	var user db.User
-
-	if input.Token == nil {
-		currentUser := middleware.ForContext(ctx)
-		if currentUser == nil {
-			return nil, errors.New("no user found in the context")
-		}
-
-		err := r.DB.NewSelect().Model(&user).Where("id = ?", currentUser.ID).Scan(ctx)
-		if err != nil {
-			return &model.ResetPasswordPayload{
-				Success:      false,
-				Unauthorized: true,
-			}, nil
-		}
-
-	} else {
-		err := r.DB.NewSelect().Model(&user).Where("recovery_token = ?", input.Token).Scan(ctx)
-		if err != nil {
-			return &model.ResetPasswordPayload{
-				Success:      false,
-				InvalidToken: true,
-			}, nil
-		}
-
-		if time.Now().After(user.RecoverySentAt.Add(24 * time.Hour)) {
-			return &model.ResetPasswordPayload{
-				Success:      false,
-				TokenExpired: true,
-			}, nil
-		}
-
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return &model.ResetPasswordPayload{
-			Success:       false,
-			UnableToReset: true,
-		}, nil
-	}
-
-	_, err = r.DB.NewUpdate().Model(&user).Set("password = ?", string(hashedPassword)).Set("recovery_token = NULL").Set("recovery_sent_at = NULL").WherePK().Exec(ctx)
-	if err != nil {
-		return &model.ResetPasswordPayload{
-			Success:       false,
-			UnableToReset: true,
-		}, nil
-	}
-
-	var emailAccount db.EmailAccount
-	_ = r.DB.NewSelect().Model(&emailAccount).Where("user_id = ?", user.ID).Scan(ctx)
-	if len(emailAccount.ID) > 1 {
-		err = r.DB.NewUpdate().Model(&emailAccount).Set("secret = ?", string(hashedPassword)).WherePK().Where("organisation_id = ?", user.OrganisationID).Scan(ctx)
-		if err != nil {
-			return &model.ResetPasswordPayload{
-				Success:       false,
-				UnableToReset: true,
-			}, nil
-		}
-	}
-
-	return &model.ResetPasswordPayload{
-		Success: true,
-	}, nil
-}
-
-// ForgotPassword is the resolver for the forgotPassword field.
-func (r *mutationResolver) ForgotPassword(ctx context.Context, input model.ForgotPasswordInput) (*model.ForgotPasswordPayload, error) {
-	var user db.User
-	err := r.DB.NewSelect().Model(&user).Where("email = ?", strings.ToLower(input.Email)).Scan(ctx)
-	if err != nil {
-		return &model.ForgotPasswordPayload{
-			Success: false,
-		}, nil
-	}
-
-	token := nanoid.Must(32)
-
-	_, err = r.DB.NewUpdate().Model(&user).Set("recovery_token = ?", token).Set("recovery_sent_at = now()").Where("id = ?", user.ID).Exec(ctx)
-	if err != nil {
-		return &model.ForgotPasswordPayload{
-			Success: false,
-		}, nil
-	}
-
-	err = r.Mailer.SendPasswordReset(input.Email, user.FirstName, user.Language, token)
-	if err != nil {
-		return &model.ForgotPasswordPayload{
-			Success: false,
-		}, nil
-	}
-
-	return &model.ForgotPasswordPayload{
-		Success: true,
-	}, nil
-}
-
-// SignOut is the resolver for the signOut field.
-func (r *mutationResolver) SignOut(ctx context.Context) (bool, error) {
-	currentUser := middleware.ForContext(ctx)
-	if currentUser == nil {
-		return false, errors.New("no user found in the context")
-	}
-
-	// TODO: suggestion: use a hard delete instead of a soft delete
-	// TODO: suggestion: perhaps delete all sessions for the user?
-	var session db.Session
-	_, err := r.DB.NewUpdate().
-		Model(&session).
-		Set("deleted_at = now()").
-		Where("user_id = ?", currentUser.ID).
-		Where("token = ?", currentUser.Token).
-		Exec(ctx)
-
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-// AcceptInvite is the resolver for the acceptInvite field.
-func (r *mutationResolver) AcceptInvite(ctx context.Context, token string, input model.SignUpInput) (*model.SignInPayload, error) {
-	panic(fmt.Errorf("not implemented: AcceptInvite - acceptInvite"))
-}
-
-// CreateUser is the resolver for the createUser field.
-func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*db.User, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, nil
-	}
-
-	var organisation db.Organisation
-	err = r.DB.NewSelect().Model(&organisation).Where("id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	//// check if the email is in the allowed domains
-	//if isStringInArray(input.Email, organisation.AllowedDomains) {
-	//	return nil, errors.New("email is not in the allowed domains (allowed domains: " + strings.Join(organisation.AllowedDomains, ", ") + ")")
-	//}
-
-	var count int
-	count, err = r.DB.NewSelect().Model(&db.User{}).Where("organisation_id = ?", currentUser.OrganisationID).Where("email = ?", input.Email).Count(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if count > 0 {
-		return nil, errors.New("email is already in the database")
-	}
-
-	// create a new user
-	user := db.User{
-		OrganisationID: currentUser.OrganisationID,
-		Role:           input.Role,
-		Email:          sql.NullString{String: input.Email, Valid: true},
-		FirstName:      input.FirstName,
-		LastName:       input.LastName,
-	}
-
-	// insert the user into the database
-	err = r.DB.NewInsert().Model(&user).Returning("*").Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	// Email the user
-	token := nanoid.Must(32)
-	_, err = r.DB.NewUpdate().Model(&user).Set("recovery_token = ?", token).Set("recovery_sent_at = now()").Where("id = ?", user.ID).Exec(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	err = r.Mailer.SendInvite(input.Email, user.FirstName, organisation.Name, currentUser.Language, token)
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
-}
-
-// UpdateUser is the resolver for the updateUser field.
-func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUserInput) (*db.User, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, nil
-	}
-
-	// update the user
-	user := db.User{
-		ID:             input.ID,
-		OrganisationID: currentUser.OrganisationID,
-		FirstName:      input.FirstName,
-		LastName:       input.LastName,
-	}
-
-	_, err = r.DB.NewUpdate().
-		Model(&user).
-		OmitZero().
-		WherePK().
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Returning("*").
-		Exec(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	// Update the user_student if the role is student
-	if user.Role == "student" {
-		student := db.UserStudent{
-			UserID:         user.ID,
-			OrganisationID: currentUser.OrganisationID,
-		}
-
-		// Check the optional fields
-		if input.Grade != nil {
-			student.Grade = int32(*input.Grade)
-		}
-		if input.Birthday != nil {
-			student.Birthday = bun.NullTime{Time: *input.Birthday}
-		}
-		if input.JoinedAt != nil {
-			student.JoinedAt = bun.NullTime{Time: *input.JoinedAt}
-		}
-		if input.LeftAt != nil {
-			student.LeftAt = bun.NullTime{Time: *input.LeftAt}
-		}
-		if input.Emoji != nil {
-			student.Emoji = sql.NullString{String: *input.Emoji, Valid: true}
-		}
-		if input.MissedHours != nil {
-			student.MissedHours = int32(*input.MissedHours)
-		}
-		if input.MissedHoursExcused != nil {
-			student.MissedHoursExcused = int32(*input.MissedHoursExcused)
-		}
-
-		_, err = r.DB.NewUpdate().
-			Model(&student).
-			OmitZero().
-			Where("user_id = ?", user.ID).
-			Where("organisation_id = ?", currentUser.OrganisationID).
-			Returning("*").
-			Exec(ctx)
-		if err != nil {
-			return nil, nil
-		}
-	}
-
-	return &user, nil
-}
-
-// ArchiveUser is the resolver for the archiveUser field.
-func (r *mutationResolver) ArchiveUser(ctx context.Context, id string) (*db.User, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, nil
-	}
-
-	// check whether the user is already archived
-	count, err := r.DB.NewSelect().Model(&db.User{}).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Where("deleted_at IS NOT NULL").Count(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if count > 0 {
-		return nil, errors.New("user is already archived")
-	}
-
-	user := &db.User{
-		ID:             id,
-		OrganisationID: currentUser.OrganisationID,
-		DeletedAt: bun.NullTime{
-			Time: time.Now(),
-		},
-	}
-
-	// archive the user by setting the deleted_at field to the current time
-	res, err := r.DB.NewUpdate().Model(user).Column("deleted_at").Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Returning("*").Exec(ctx)
-	if err != nil {
-		return nil, err
-	}
-	affected, err := res.RowsAffected()
-	if err != nil {
-		return nil, err
-	}
-	if affected == 0 {
-		return nil, errors.New("user not found")
-	}
-
-	// If the user is a student, we also need to archive the user_student
-	if user.Role == "student" {
-		student := db.UserStudent{
-			UserID:         user.ID,
-			OrganisationID: currentUser.OrganisationID,
-			DeletedAt: bun.NullTime{
-				Time: time.Now(),
-			},
-		}
-
-		_, err = r.DB.NewUpdate().Model(&student).Column("deleted_at").Where("user_id = ?", user.ID).Where("organisation_id = ?", currentUser.OrganisationID).Exec(ctx)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// Remove the sessions for the user
-	_, err = r.DB.NewDelete().Model(&db.Session{}).Where("user_id = ?", user.ID).Exec(ctx)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return nil, err
-	}
-
-	return user, nil
-}
-
-// UpdateUserLanguage is the resolver for the updateUserLanguage field.
-func (r *mutationResolver) UpdateUserLanguage(ctx context.Context, language db.UserLanguage) (*db.User, error) {
-	// We get the currentUser from context
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, nil
-	}
-
-	updatedUser := db.User{
-		ID:             currentUser.ID,
-		OrganisationID: currentUser.OrganisationID,
-		Language:       language,
-	}
-
-	// update the user
-	_, err = r.DB.NewUpdate().
-		Model(&updatedUser).
-		Column("language").
-		Where("id = ?", currentUser.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Exec(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &updatedUser, nil
-}
-
-// SendUserInvite is the resolver for the sendUserInvite field.
-func (r *mutationResolver) SendUserInvite(ctx context.Context, id string) (bool, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return false, nil
-	}
-
-	// Get the user
-	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-
-	// Get the organisation
-	var organisation db.Organisation
-	err = r.DB.NewSelect().Model(&organisation).Where("id = ?", currentUser.OrganisationID).Scan(ctx)
-
-	// Email the user
-	token := nanoid.Must(32)
-	_, err = r.DB.NewUpdate().Model(&user).Set("recovery_token = ?", token).Set("recovery_sent_at = now()").Where("id = ?", user.ID).Exec(ctx)
-	if err != nil {
-		return false, err
-	}
-
-	err = r.Mailer.SendInvite(user.Email.String, user.FirstName, organisation.Name, currentUser.Language, token)
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
 }
 
 // CreateStudent is the resolver for the createStudent field.
@@ -586,45 +176,43 @@ func (r *mutationResolver) CreateStudent(ctx context.Context, input model.Create
 		return nil, nil
 	}
 
-	// Create user first
-	user := db.User{
+	user, err := r.DB.CreateUser(ctx, db.CreateUserParams{
+		Role:           db.UserRoleStudent,
 		OrganisationID: currentUser.OrganisationID,
 		FirstName:      input.FirstName,
 		LastName:       input.LastName,
-		Role:           "student",
-		Email:          sql.NullString{},
-	}
-
-	// Insert and get the new id
-	err = r.DB.NewInsert().Model(&user).Scan(ctx)
+		Email:          pgtype.Text{},
+		Password:       pgtype.Text{},
+		Language:       db.NullUserLang{},
+		Sex:            pgtype.Text{},
+	})
 	if err != nil {
 		return nil, nil
 	}
 
 	// Create user_student struct
-	student := db.UserStudent{
+	student := db.CreateUserStudentParams{
 		UserID:         user.ID,
 		OrganisationID: currentUser.OrganisationID,
 		Grade:          int32(input.Grade),
 	}
 
 	if input.Birthday != nil {
-		student.Birthday = bun.NullTime{Time: *input.Birthday}
+		student.Birthday = pgtype.Date{Time: *input.Birthday, Valid: true}
 	}
 	if input.JoinedAt != nil {
-		student.JoinedAt = bun.NullTime{Time: *input.JoinedAt}
+		student.JoinedAt = pgtype.Timestamptz{Time: *input.JoinedAt, Valid: true}
 	}
 	if input.LeftAt != nil {
-		student.LeftAt = bun.NullTime{Time: *input.LeftAt}
+		student.LeftAt = pgtype.Timestamptz{Time: *input.LeftAt, Valid: true}
 	}
 	if input.Emoji != nil {
-		student.Emoji = sql.NullString{String: *input.Emoji, Valid: true}
+		student.Emoji = pgtype.Text{String: *input.Emoji, Valid: true}
 	}
 
-	// Insert the user_student
-	err = r.DB.NewInsert().Model(&student).Scan(ctx)
+	_, err = r.DB.CreateUserStudent(ctx, student)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	return &user, nil
@@ -644,21 +232,16 @@ func (r *mutationResolver) CreateUserCompetence(ctx context.Context, input model
 		return nil, errors.New("competence id is required")
 	}
 
-	userCompetence := db.UserCompetence{
+	userCompetenceParams := db.CreateUserCompetenceWithoutEntryParams{
 		UserID:         input.UserID,
-		Level:          input.Level,
-		CreatedBy:      sql.NullString{String: currentUser.ID, Valid: true},
+		Level:          int32(input.Level),
+		CreatedBy:      pgtype.Text{String: currentUser.ID, Valid: true},
 		CompetenceID:   input.CompetenceID,
 		OrganisationID: currentUser.OrganisationID,
 	}
 
-	err = r.DB.NewInsert().Model(&userCompetence).Returning("*").Scan(ctx)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &userCompetence, nil
+	userCompetence, err := r.DB.CreateUserCompetenceWithoutEntry(ctx, userCompetenceParams)
+	return &userCompetence, err
 }
 
 // ArchiveUserCompetence is the resolver for the archiveUserCompetence field.
@@ -673,35 +256,25 @@ func (r *mutationResolver) CreateTag(ctx context.Context, input model.CreateTagI
 		return nil, nil
 	}
 
-	// Check if tag with the same name already exists
-	count, err := r.DB.NewSelect().Model(&db.Tag{}).Where("organisation_id = ?", currentUser.OrganisationID).Where("name = ?", input.Name).WhereAllWithDeleted().Count(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if count > 0 {
-		return nil, errors.New("Tag with the same name already exists")
-	}
-
 	// check if color is set
 	color := input.Color
 	if color == "" {
 		color = "blue"
 	}
 
-	newTag := db.Tag{
+	tagParams := db.CreateTagParams{
 		OrganisationID: currentUser.OrganisationID,
 		Name:           input.Name,
-		Color:          sql.NullString{String: color, Valid: true},
+		Color:          pgtype.Text{String: color, Valid: true},
 	}
 
-	err = r.DB.NewInsert().Model(&newTag).Returning("*").Scan(ctx)
-
+	tag, err := r.DB.CreateTag(ctx, tagParams)
+	// TODO: check if returns error because tag already exists with the same name
 	if err != nil {
 		return nil, err
 	}
 
-	return &newTag, nil
+	return &tag, nil
 }
 
 // ArchiveTag is the resolver for the archiveTag field.
@@ -711,16 +284,10 @@ func (r *mutationResolver) ArchiveTag(ctx context.Context, id string) (*db.Tag, 
 		return nil, nil
 	}
 
-	// set deleted_at field to the current time
-	tag := db.Tag{
+	tag, err := r.DB.DeleteTag(ctx, db.DeleteTagParams{
 		ID:             id,
 		OrganisationID: currentUser.OrganisationID,
-		DeletedAt: bun.NullTime{
-			Time: time.Now(),
-		},
-	}
-	_, err = r.DB.NewUpdate().Model(&tag).Column("deleted_at").Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).WhereAllWithDeleted().Returning("*").Exec(ctx)
-
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -735,39 +302,12 @@ func (r *mutationResolver) UpdateTag(ctx context.Context, id string, input model
 		return nil, nil
 	}
 
-	var tag db.Tag
-	tag.ID = id
-	err = r.DB.NewSelect().
-		Model(&tag).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		WherePK().
-		Scan(ctx)
-
-	if err != nil {
-		return nil, err
-	}
-
-	// update the tag
-	tag.Name = input.Name
-
-	color := input.Color
-	if color == "" {
-		color = "blue"
-	}
-
-	tag.Color = sql.NullString{String: color, Valid: true}
-	_, err = r.DB.NewUpdate().Model(&tag).WherePK().Exec(ctx)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &tag, nil
-}
-
-// UpdatePassword is the resolver for the updatePassword field.
-func (r *mutationResolver) UpdatePassword(ctx context.Context, oldPassword string, newPassword string) (bool, error) {
-	panic(fmt.Errorf("not implemented: UpdatePassword - updatePassword"))
+	tag, err := r.DB.UpsertTag(ctx, db.UpsertTagParams{
+		Name:           input.Name,
+		Color:          pgtype.Text{String: input.Color, Valid: true},
+		OrganisationID: currentUser.OrganisationID,
+	})
+	return &tag, err
 }
 
 // UpdateCompetence is the resolver for the updateCompetence field.
@@ -777,22 +317,18 @@ func (r *mutationResolver) UpdateCompetence(ctx context.Context, input model.Upd
 		return nil, nil
 	}
 
-	var competence db.Competence
-	competence.ID = input.ID
-	err = r.DB.NewSelect().
-		Model(&competence).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		WherePK().
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
+	var color pgtype.Text
 	if input.Color != nil {
-		competence.Color = sql.NullString{String: *input.Color, Valid: true}
+		color.String = *input.Color
+	} else {
+		color.String = "blue"
 	}
 
-	err = r.DB.NewUpdate().Model(&competence).WherePK().Returning("*").Scan(ctx)
+	competence, err := r.DB.UpdateCompetenceColor(ctx, db.UpdateCompetenceColorParams{
+		Color:          color,
+		CompetenceID:   input.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -812,8 +348,10 @@ func (r *mutationResolver) UpdateCompetenceSorting(ctx context.Context, input mo
 		ids[i] = id.ID
 	}
 
-	var competences []*db.Competence
-	err = r.DB.NewSelect().Model(&competences).Where("id IN (?)", bun.In(ids)).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	competences, err := r.DB.CompetenceListByIds(ctx, db.CompetenceListByIdsParams{
+		Ids:            ids,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -826,23 +364,27 @@ func (r *mutationResolver) UpdateCompetenceSorting(ctx context.Context, input mo
 	// create a map of competences for easy lookup
 	competenceMap := make(map[string]*db.Competence)
 	for _, competence := range competences {
-		competenceMap[competence.ID] = competence
+		competenceMap[competence.ID] = &competence
 	}
 
 	// update the sorting
 	for i, id := range ids {
-		competenceMap[id].SortOrder = i
+		competenceMap[id].SortOrder = pgtype.Int4{Int32: int32(i), Valid: true}
 	}
 
 	for _, competence := range competences {
 		sortOrder := competenceMap[competence.ID].SortOrder
-		_, err = r.DB.NewUpdate().Model(competence).WherePK().Set("sort_order = ?", sortOrder).Where("organisation_id = ?", currentUser.OrganisationID).Exec(ctx)
+		_, err = r.DB.UpdateCompetenceSortOrder(ctx, db.UpdateCompetenceSortOrderParams{
+			SortOrder:      sortOrder,
+			CompetenceID:   competence.ID,
+			OrganisationID: currentUser.OrganisationID,
+		})
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return competences, nil
+	return lo.ToSlicePtr(competences), nil
 }
 
 // CreateCompetence is the resolver for the createCompetence field.
@@ -852,131 +394,35 @@ func (r *mutationResolver) CreateCompetence(ctx context.Context, input model.Cre
 		return nil, nil
 	}
 
-	var subject db.Competence
-	err = r.DB.NewSelect().Model(&subject).
-		Where("id = ?", input.ParentID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Scan(ctx)
+	subject, err := r.DB.CompetenceById(ctx, db.CompetenceByIdParams{
+		ID:             input.ParentID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, errors.New("subject not found")
 	}
 
 	// grades with default array from 1-10
-	defaultGrades := make([]int, 10)
+	defaultGrades := make([]int32, 10)
 	for i := 0; i < 10; i++ {
-		defaultGrades[i] = i + 1
+		defaultGrades[i] = int32(i + 1)
 	}
 
-	competence := db.Competence{
+	competenceParams := db.CreateCompetenceParams{
 		CompetenceType: db.CompetenceTypeCompetence,
-		CompetenceID:   sql.NullString{String: subject.ID, Valid: true},
+		CompetenceID:   pgtype.Text{String: subject.ID, Valid: true},
 		Name:           input.Name,
 		Grades:         defaultGrades,
 		OrganisationID: currentUser.OrganisationID,
-		CreatedBy:      sql.NullString{String: currentUser.ID, Valid: true},
+		CreatedBy:      pgtype.Text{String: currentUser.ID, Valid: true},
 	}
 
-	err = r.DB.NewInsert().Model(&competence).Returning("*").Scan(ctx)
+	competence, err := r.DB.CreateCompetence(ctx, competenceParams)
 	if err != nil {
 		return nil, errors.New("creating competence failed")
 	}
 
 	return &competence, nil
-}
-
-// Users is the resolver for the users field.
-func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filter *model.UserFilterInput, search *string) (*model.UserConnection, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, nil
-	}
-
-	pageLimit, pageOffset := helper.SetPageLimits(limit, offset)
-
-	// query the users
-	var users []*db.User
-	query := r.DB.NewSelect().
-		Model(&users).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Limit(pageLimit).
-		Offset(pageOffset)
-
-	if filter != nil {
-		if filter.Role != nil && len(filter.Role) > 0 {
-			query.Where("role IN (?)", bun.In(filter.Role))
-		}
-		if filter.OrderBy != nil {
-			switch *filter.OrderBy {
-			case model.UserOrderByFirstNameAsc:
-				query.OrderExpr("first_name ASC, last_name ASC")
-			case model.UserOrderByFirstNameDesc:
-				query.OrderExpr("first_name DESC, last_name DESC")
-			case model.UserOrderByLastNameAsc:
-				query.OrderExpr("last_name ASC, first_name ASC")
-			case model.UserOrderByLastNameDesc:
-				query.OrderExpr("last_name DESC, first_name DESC")
-			default:
-				query.OrderExpr("last_name ASC, first_name ASC")
-			}
-		}
-		if filter.ShowDeleted != nil && *filter.ShowDeleted == true {
-			query.WhereDeleted()
-		}
-	}
-
-	if search != nil && *search != "" {
-		withoutSpace := strings.Replace(*search, " ", "", -1)
-		// TODO: refactor this
-		query.Where("first_name ILIKE ? OR last_name ILIKE ? OR first_name || last_name ILIKE ? OR last_name || first_name ILIKE ?", "%"+withoutSpace+"%", "%"+withoutSpace+"%", "%"+withoutSpace+"%", "%"+withoutSpace+"%")
-	}
-
-	count, err := query.ScanAndCount(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	pageInfo, err := helper.CreatePageInfo(pageOffset, pageLimit, count)
-	if err != nil {
-		return nil, err
-	}
-
-	return &model.UserConnection{
-		Edges:      users,
-		PageInfo:   pageInfo,
-		TotalCount: count,
-	}, nil
-}
-
-// User is the resolver for the user field.
-func (r *queryResolver) User(ctx context.Context, id string) (*db.User, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, nil
-	}
-
-	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
-}
-
-// Me is the resolver for the me field.
-func (r *queryResolver) Me(ctx context.Context) (*db.User, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, nil
-	}
-
-	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
 }
 
 // Competence is the resolver for the competence field.
@@ -986,13 +432,11 @@ func (r *queryResolver) Competence(ctx context.Context, id string) (*db.Competen
 		return nil, nil
 	}
 
-	var competence db.Competence
-	err = r.DB.NewSelect().Model(&competence).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &competence, nil
+	competence, err := r.DB.CompetenceById(ctx, db.CompetenceByIdParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	return &competence, err
 }
 
 // Competences is the resolver for the competences field.
@@ -1059,29 +503,30 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 		fmt.Println(ids)
 	}
 
-	var competences []*db.Competence
-	query := r.DB.NewSelect().
-		Model(&competences).
+	competences, err := r.DB.CompetenceList(ctx, currentUser.OrganisationID)
+	query := r.DB.NewQueryBuilder().
+		Select("*").
+		From("competences").
 		Where("organisation_id = ?", currentUser.OrganisationID).
-		Limit(pageLimit).
-		Offset(pageOffset)
+		Limit(uint64(pageLimit)).
+		Offset(uint64(pageOffset))
 
 	if len(ids) > 0 {
 		query.Where("id IN (?)", bun.In(ids))
 	} else {
 		if sort != nil {
-			query.Order("competence_type")
+			query.OrderBy("competence_type")
 			switch sort.Field {
 			case model.CompetenceSortFieldSortOrder:
-				query.Order("sort_order ASC")
+				query.OrderBy("sort_order ASC")
 			case model.CompetenceSortFieldName:
-				query.Order("name ASC")
+				query.OrderBy("name ASC")
 			case model.CompetenceSortFieldCreatedAt:
-				query.Order("created_at ASC")
+				query.OrderBy("created_at ASC")
 			}
 		} else {
-			query.Order("competence_type")
-			query.Order("name ASC")
+			query.OrderBy("competence_type")
+			query.OrderBy("name ASC")
 		}
 
 		if filter != nil {
@@ -1103,10 +548,12 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 		}
 	}
 
-	count, err := query.ScanAndCount(ctx)
+	err = query.Scan(competences)
 	if err != nil {
 		return nil, err
 	}
+
+	count := 10_000
 
 	page, err := helper.CreatePageInfo(pageOffset, pageLimit, count)
 	if err != nil {
@@ -1115,7 +562,7 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 
 	page.CurrentPage = pageOffset / pageLimit
 	return &model.CompetenceConnection{
-		Edges:      competences,
+		Edges:      lo.ToSlicePtr(competences),
 		PageInfo:   page,
 		TotalCount: count,
 	}, nil
@@ -1128,13 +575,11 @@ func (r *queryResolver) Tag(ctx context.Context, id string) (*db.Tag, error) {
 		return nil, nil
 	}
 
-	var tag db.Tag
-	err = r.DB.NewSelect().Model(&tag).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &tag, nil
+	tag, err := r.DB.TagById(ctx, db.TagByIdParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	return &tag, err
 }
 
 // Tags is the resolver for the tags field.
@@ -1146,22 +591,18 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int, searc
 
 	pageLimit, pageOffset := helper.SetPageLimits(limit, offset)
 
-	var tags []*db.Tag
-	query := r.DB.NewSelect().
-		Model(&tags).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Limit(pageLimit).
-		Offset(pageOffset).
-		Order("name")
-
-	if search != nil && *search != "" {
-		query.Where("name ILIKE ?", "%"+*search+"%")
-	}
-
-	count, err := query.ScanAndCount(ctx)
+	tags, err := r.DB.TagList(ctx, db.TagListParams{
+		OrganisationID: currentUser.OrganisationID,
+		Offset:         int32(pageOffset),
+		Limit:          int32(pageLimit),
+		Search:         "%" + *search + "%",
+	})
 	if err != nil {
 		return nil, err
 	}
+
+	// TODO: get the count from the database
+	count := 10_000
 
 	// Get the pageInfo
 	page, err := helper.CreatePageInfo(pageOffset, pageLimit, count)
@@ -1170,7 +611,7 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int, searc
 	}
 
 	return &model.TagConnection{
-		Edges:      tags,
+		Edges:      lo.ToSlicePtr(tags),
 		PageInfo:   page,
 		TotalCount: count,
 	}, nil
@@ -1185,21 +626,29 @@ func (r *queryResolver) UserStudents(ctx context.Context, limit *int, offset *in
 
 	pageLimit, pageOffset := helper.SetPageLimits(limit, offset)
 
-	var userStudents []*db.UserStudent
-	count, err := r.DB.NewSelect().Model(&userStudents).Where("organisation_id = ?", currentUser.OrganisationID).Limit(pageLimit).Offset(pageOffset).ScanAndCount(ctx)
+	userStudents, err := r.DB.UserStudentList(ctx, db.UserStudentListParams{
+		OrganisationID: currentUser.OrganisationID,
+		Offset:         int32(pageOffset),
+		Limit:          int32(pageLimit),
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	page, err := helper.CreatePageInfo(pageOffset, pageLimit, count)
+	count, err := r.DB.UserStudentCount(ctx, currentUser.OrganisationID)
+	if err != nil {
+		return nil, err
+	}
+
+	page, err := helper.CreatePageInfo(pageOffset, pageLimit, int(count))
 	if err != nil {
 		return nil, err
 	}
 
 	return &model.UserStudentConnection{
-		Edges:      userStudents,
+		Edges:      lo.ToSlicePtr(userStudents),
 		PageInfo:   page,
-		TotalCount: count,
+		TotalCount: int(count),
 	}, nil
 }
 
@@ -1210,32 +659,15 @@ func (r *queryResolver) UserStudent(ctx context.Context, id string) (*db.UserStu
 		return nil, nil
 	}
 
-	var userStudent db.UserStudent
-	err = r.DB.NewSelect().Model(&userStudent).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	userStudent, err := r.DB.UserStudentByUserId(ctx, db.UserStudentByUserIdParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	return &userStudent, nil
-}
-
-// InviteDetails is the resolver for the inviteDetails field.
-func (r *queryResolver) InviteDetails(ctx context.Context, token string) (*model.InviteDetailsPayload, error) {
-	var user db.User
-	err := r.DB.NewSelect().Model(&user).Where("recovery_token = ?", token).Scan(ctx)
-	if err != nil {
-		return nil, errors.New("invalid token")
-	}
-
-	if user.RecoverySentAt.Before(time.Now().Add(-time.Hour * 24)) {
-		return nil, errors.New("token expired")
-	}
-
-	return &model.InviteDetailsPayload{
-		Email:     user.Email.String,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-	}, nil
 }
 
 // Color is the resolver for the color field.
@@ -1249,70 +681,11 @@ func (r *tagResolver) Color(ctx context.Context, obj *db.Tag) (string, error) {
 
 // DeletedAt is the resolver for the deletedAt field.
 func (r *tagResolver) DeletedAt(ctx context.Context, obj *db.Tag) (*time.Time, error) {
-	if obj.DeletedAt.IsZero() {
+	if obj.DeletedAt.Valid {
 		return &obj.DeletedAt.Time, nil
 	}
 
 	return nil, nil
-}
-
-// Email is the resolver for the email field.
-func (r *userResolver) Email(ctx context.Context, obj *db.User) (*string, error) {
-	if obj.Email.Valid {
-		return &obj.Email.String, nil
-	}
-
-	return nil, nil
-}
-
-// Student is the resolver for the student field.
-func (r *userResolver) Student(ctx context.Context, obj *db.User) (*db.UserStudent, error) {
-	currentUser, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, nil
-	}
-
-	var userStudent db.UserStudent
-	err = r.DB.NewSelect().Model(&userStudent).Where("user_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	return &userStudent, nil
-}
-
-// DeletedAt is the resolver for the deletedAt field.
-func (r *userResolver) DeletedAt(ctx context.Context, obj *db.User) (*time.Time, error) {
-	if obj.DeletedAt.IsZero() {
-		return &obj.DeletedAt.Time, nil
-	}
-
-	return nil, nil
-}
-
-// InviteAccepted is the resolver for the inviteAccepted field.
-func (r *userResolver) InviteAccepted(ctx context.Context, obj *db.User) (bool, error) {
-	_, err := middleware.GetUser(ctx)
-	if err != nil {
-		return false, nil
-	}
-
-	if obj.Password.Valid {
-		return true, nil
-	}
-
-	return false, nil
-}
-
-// LastSeenAt is the resolver for the lastSeenAt field.
-func (r *userResolver) LastSeenAt(ctx context.Context, obj *db.User) (*time.Time, error) {
-	randomTime := rand.Int63n(time.Now().Unix()-94608000) + 94608000
-	randomNow := time.Unix(randomTime, 0)
-
-	return &randomNow, nil
 }
 
 // Competence is the resolver for the competence field.
@@ -1322,8 +695,10 @@ func (r *userCompetenceResolver) Competence(ctx context.Context, obj *db.UserCom
 		return nil, nil
 	}
 
-	var competence db.Competence
-	err = r.DB.NewSelect().Model(&competence).Where("id = ?", obj.CompetenceID).Where("organisation_id = ?", currentUser.OrganisationID).WhereAllWithDeleted().Scan(ctx)
+	competence, err := r.DB.CompetenceByIdWithDeleted(ctx, db.CompetenceByIdWithDeletedParams{
+		ID:             obj.CompetenceID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -1342,8 +717,10 @@ func (r *userCompetenceResolver) Entry(ctx context.Context, obj *db.UserCompeten
 		return nil, nil
 	}
 
-	var entry db.Entry
-	err = r.DB.NewSelect().Model(&entry).Where("id = ?", obj.EntryID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	entry, err := r.DB.EntryById(ctx, db.EntryByIdParams{
+		ID:             obj.EntryID.String,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -1372,8 +749,10 @@ func (r *userCompetenceResolver) CreatedBy(ctx context.Context, obj *db.UserComp
 		return nil, nil
 	}
 
-	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", obj.CreatedBy).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	user, err := r.DB.UserById(ctx, db.UserByIdParams{
+		ID:             obj.CreatedBy.String,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -1383,7 +762,7 @@ func (r *userCompetenceResolver) CreatedBy(ctx context.Context, obj *db.UserComp
 
 // LeftAt is the resolver for the leftAt field.
 func (r *userStudentResolver) LeftAt(ctx context.Context, obj *db.UserStudent) (*time.Time, error) {
-	if !obj.LeftAt.IsZero() {
+	if !obj.LeftAt.Valid {
 		return &obj.LeftAt.Time, nil
 	}
 
@@ -1392,7 +771,7 @@ func (r *userStudentResolver) LeftAt(ctx context.Context, obj *db.UserStudent) (
 
 // Birthday is the resolver for the birthday field.
 func (r *userStudentResolver) Birthday(ctx context.Context, obj *db.UserStudent) (*time.Time, error) {
-	if !obj.Birthday.IsZero() {
+	if !obj.Birthday.Valid {
 		return &obj.Birthday.Time, nil
 	}
 	return nil, nil
@@ -1400,17 +779,23 @@ func (r *userStudentResolver) Birthday(ctx context.Context, obj *db.UserStudent)
 
 // Nationality is the resolver for the nationality field.
 func (r *userStudentResolver) Nationality(ctx context.Context, obj *db.UserStudent) (*string, error) {
-	panic(fmt.Errorf("not implemented: Nationality - nationality"))
+	if obj.Nationality.Valid {
+		return &obj.Nationality.String, nil
+	}
+	return nil, nil
 }
 
 // Comments is the resolver for the comments field.
 func (r *userStudentResolver) Comments(ctx context.Context, obj *db.UserStudent) (*string, error) {
-	panic(fmt.Errorf("not implemented: Comments - comments"))
+	if obj.Comments.Valid {
+		return &obj.Comments.String, nil
+	}
+	return nil, nil
 }
 
 // JoinedAt is the resolver for the joinedAt field.
 func (r *userStudentResolver) JoinedAt(ctx context.Context, obj *db.UserStudent) (*time.Time, error) {
-	if !obj.JoinedAt.IsZero() {
+	if !obj.JoinedAt.Valid {
 		return &obj.JoinedAt.Time, nil
 	}
 
@@ -1419,7 +804,10 @@ func (r *userStudentResolver) JoinedAt(ctx context.Context, obj *db.UserStudent)
 
 // DeletedAt is the resolver for the deletedAt field.
 func (r *userStudentResolver) DeletedAt(ctx context.Context, obj *db.UserStudent) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
+	if obj.DeletedAt.Valid {
+		return &obj.DeletedAt.Time, nil
+	}
+	return nil, nil
 }
 
 // EntriesCount is the resolver for the entriesCount field.
@@ -1429,13 +817,15 @@ func (r *userStudentResolver) EntriesCount(ctx context.Context, obj *db.UserStud
 		return 0, nil
 	}
 
-	count, err := r.DB.NewSelect().Model(&db.EntryUser{}).Where("user_id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Count(ctx)
-
+	count, err := r.DB.EntryCountByUserId(ctx, db.EntryCountByUserIdParams{
+		UserID:         obj.UserID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return 0, err
 	}
 
-	return count, nil
+	return int(count), nil
 }
 
 // CompetencesCount is the resolver for the competencesCount field.
@@ -1445,13 +835,15 @@ func (r *userStudentResolver) CompetencesCount(ctx context.Context, obj *db.User
 		return 0, nil
 	}
 
-	count, err := r.DB.NewSelect().Model(&db.UserCompetence{}).Where("user_id = ?", obj.UserID).Where("organisation_id = ?", currentUser.OrganisationID).Count(ctx)
-
+	count, err := r.DB.UserCompetenceCountByUserId(ctx, db.UserCompetenceCountByUserIdParams{
+		UserID:         obj.UserID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return 0, err
 	}
 
-	return count, nil
+	return int(count), nil
 }
 
 // EventsCount is the resolver for the eventsCount field.
@@ -1461,27 +853,20 @@ func (r *userStudentResolver) EventsCount(ctx context.Context, obj *db.UserStude
 		return 0, nil
 	}
 
-	count, err := r.DB.NewSelect().
-		Model(&db.EntryEvent{}).
-		Join("JOIN entry_users ON entry_users.entry_id = entry_event.entry_id").
-		Where("entry_users.user_id = ?", obj.UserID).
-		Where("entry_event.organisation_id = ?", currentUser.OrganisationID).
-		Count(ctx)
+	count, err := r.DB.EntryEventCountByUserId(ctx, db.EntryEventCountByUserIdParams{
+		UserID:         obj.UserID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 
 	if err != nil {
 		return 0, err
 	}
 
-	return count, nil
+	return int(count), nil
 }
 
 // Emoji is the resolver for the emoji field.
 func (r *userStudentResolver) Emoji(ctx context.Context, obj *db.UserStudent) (*string, error) {
-	_, err := middleware.GetUser(ctx)
-	if err != nil {
-		return nil, nil
-	}
-
 	if obj.Emoji.Valid {
 		return &obj.Emoji.String, nil
 	}
@@ -1498,6 +883,22 @@ func (r *userStudentResolver) User(ctx context.Context, obj *db.UserStudent) (*d
 	return dataloaders.GetUser(ctx, obj.UserID, currentUser)
 }
 
+// MissedHours is the resolver for the missedHours field.
+func (r *userStudentResolver) MissedHours(ctx context.Context, obj *db.UserStudent) (int, error) {
+	if obj.MissedHours.Valid {
+		return int(obj.MissedHours.Int32), nil
+	}
+	return 0, nil
+}
+
+// MissedHoursExcused is the resolver for the missedHoursExcused field.
+func (r *userStudentResolver) MissedHoursExcused(ctx context.Context, obj *db.UserStudent) (int, error) {
+	if obj.MissedHoursExcused.Valid {
+		return int(obj.MissedHoursExcused.Int32), nil
+	}
+	return 0, nil
+}
+
 // Competence returns CompetenceResolver implementation.
 func (r *Resolver) Competence() CompetenceResolver { return &competenceResolver{r} }
 
@@ -1510,9 +911,6 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 // Tag returns TagResolver implementation.
 func (r *Resolver) Tag() TagResolver { return &tagResolver{r} }
 
-// User returns UserResolver implementation.
-func (r *Resolver) User() UserResolver { return &userResolver{r} }
-
 // UserCompetence returns UserCompetenceResolver implementation.
 func (r *Resolver) UserCompetence() UserCompetenceResolver { return &userCompetenceResolver{r} }
 
@@ -1523,6 +921,5 @@ type competenceResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type tagResolver struct{ *Resolver }
-type userResolver struct{ *Resolver }
 type userCompetenceResolver struct{ *Resolver }
 type userStudentResolver struct{ *Resolver }

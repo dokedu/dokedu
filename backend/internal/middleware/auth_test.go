@@ -9,11 +9,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/dokedu/dokedu/backend/internal/database/db"
+
 	"github.com/labstack/echo/v4"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/dokedu/dokedu/backend/internal/db"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 	"github.com/dokedu/dokedu/backend/internal/testsuite"
 )
@@ -70,11 +71,13 @@ func (ts *TestSuite) Test_AuthMiddleware() {
 
 	// expired token: no error, next called, no user, session deleted from db
 	session := gonanoid.Must(32)
-	_, err = ts.DB.NewInsert().Model(&db.Session{
-		UserID:    user.ID,
-		Token:     session,
-		CreatedAt: time.Now().Add(-13 * time.Hour),
-	}).Exec(ts.Ctx())
+	_, err = ts.DB.NewQueryBuilder().Insert("sessions").
+		Columns("user_id", "token", "created_at").
+		Values(user.ID, session, time.Now().Add(-13*time.Hour)).
+		Exec()
+	if err != nil {
+		return
+	}
 	ts.NoError(err)
 
 	hasUser, err = callMiddleware(session)
@@ -82,18 +85,17 @@ func (ts *TestSuite) Test_AuthMiddleware() {
 	ts.True(nextCalled)
 	ts.False(hasUser)
 
-	count, err := ts.DB.NewSelect().Model(&db.Session{}).Where("token = ?", session).Count(ts.Ctx())
+	count, err := ts.DB.GLOBAL_SessionCountByToken(ts.Ctx(), session)
 	ts.NoError(err)
 	ts.Equal(0, count)
 
 	// token for deleted user: no error, next called, no user, sessions deleted from db
 	deletedUser := ts.MockAdminForOrganisation(user.OrganisationID)
 	session = gonanoid.Must(32)
-	_, err = ts.DB.NewInsert().Model(&db.Session{
-		UserID:    deletedUser.ID,
-		Token:     session,
-		CreatedAt: time.Now(),
-	}).Exec(ts.Ctx())
+	_, err = ts.DB.GLOBAL_CreateSession(ts.Ctx(), db.GLOBAL_CreateSessionParams{
+		UserID: deletedUser.ID,
+		Token:  session,
+	})
 	ts.NoError(err)
 	ts.DeleteUserByEmail(deletedUser.Email.String)
 
@@ -102,16 +104,16 @@ func (ts *TestSuite) Test_AuthMiddleware() {
 	ts.True(nextCalled)
 	ts.False(hasUser)
 
-	count, err = ts.DB.NewSelect().Model(&db.Session{}).Where("user_id = ?", deletedUser.ID).Count(ts.Ctx())
+	count, err = ts.DB.GLOBAL_SessionCountByUserId(ts.Ctx(), deletedUser.ID)
 	ts.NoError(err)
 	ts.Equal(0, count)
 
 	// valid token: no error, next called, user
 	session = gonanoid.Must(32)
-	_, err = ts.DB.NewInsert().Model(&db.Session{
+	_, err = ts.DB.GLOBAL_CreateSession(ts.Ctx(), db.GLOBAL_CreateSessionParams{
 		UserID: user.ID,
 		Token:  session,
-	}).Exec(ts.Ctx())
+	})
 	ts.NoError(err)
 
 	hasUser, err = callMiddleware(session)

@@ -1,7 +1,0 @@
-query adminDomainById($id: ID!) {
-  domain(id: $id) {
-    id
-    name
-    createdAt
-  }
-}

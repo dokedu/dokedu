@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/dokedu/dokedu/backend/internal/db"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 )
 
 type AddEventCompetenceInput struct {
@@ -20,16 +20,6 @@ type AddEventCompetenceInput struct {
 type AddUserToChatInput struct {
 	ChatID string `json:"chatId"`
 	UserID string `json:"userId"`
-}
-
-type BucketConnection struct {
-	Edges      []*db.Bucket `json:"edges"`
-	TotalCount int          `json:"totalCount"`
-	PageInfo   *PageInfo    `json:"pageInfo"`
-}
-
-type BucketFilterInput struct {
-	Shared *bool `json:"shared,omitempty"`
 }
 
 type ChatConnection struct {
@@ -61,20 +51,6 @@ type CompetenceTendency struct {
 	Tendency                float64 `json:"tendency"`
 }
 
-type CopyFileInput struct {
-	ID       string `json:"id"`
-	TargetID string `json:"targetId"`
-}
-
-type CopyFilesInput struct {
-	Ids      []string `json:"ids"`
-	TargetID string   `json:"targetId"`
-}
-
-type CopyFilesPayload struct {
-	Files []*db.File `json:"files"`
-}
-
 type CreateChatInput struct {
 	Name *string `json:"name,omitempty"`
 }
@@ -82,39 +58,6 @@ type CreateChatInput struct {
 type CreateCompetenceInput struct {
 	Name     string `json:"name"`
 	ParentID string `json:"parentId"`
-}
-
-type CreateDomainInput struct {
-	Name string `json:"name"`
-}
-
-type CreateEmailAccountInput struct {
-	Name        string              `json:"name"`
-	Description *string             `json:"description,omitempty"`
-	Type        db.EmailAccountType `json:"type"`
-	Quota       *int                `json:"quota,omitempty"`
-}
-
-type CreateEmailForwardingInput struct {
-	Origin string `json:"origin"`
-	Target string `json:"target"`
-}
-
-type CreateEmailGroupInput struct {
-	Name        string    `json:"name"`
-	Members     []*string `json:"members,omitempty"`
-	Description *string   `json:"description,omitempty"`
-}
-
-type CreateEmailGroupMemberInput struct {
-	Name     string `json:"name"`
-	MemberOf string `json:"memberOf"`
-}
-
-type CreateEmailInput struct {
-	Name    string       `json:"name"`
-	Address string       `json:"address"`
-	Type    db.EmailType `json:"type"`
 }
 
 type CreateEntryCompetenceInput struct {
@@ -151,10 +94,25 @@ type CreateEventInput struct {
 	Recurrence []*string       `json:"recurrence,omitempty"`
 }
 
-type CreateFolderInput struct {
-	Name     string  `json:"name"`
-	ParentID *string `json:"parentId,omitempty"`
-	BucketID *string `json:"bucketId,omitempty"`
+type CreateFileInput struct {
+	Name     string          `json:"name"`
+	Type     db.FileType     `json:"type"`
+	FolderID *string         `json:"folderId,omitempty"`
+	Upload   *graphql.Upload `json:"upload,omitempty"`
+}
+
+type CreateFilePayload struct {
+	File *db.File `json:"file"`
+}
+
+type CreateFilePermissionInput struct {
+	FileID     string                `json:"fileId"`
+	UserID     string                `json:"userId"`
+	Permission db.FilePermissionRole `json:"permission"`
+}
+
+type CreateFilePermissionPayload struct {
+	FilePermission *db.FilePermission `json:"filePermission"`
 }
 
 type CreateReportInput struct {
@@ -167,17 +125,6 @@ type CreateReportInput struct {
 	AllUsers    *bool           `json:"allUsers,omitempty"`
 }
 
-type CreateSchoolYearInput struct {
-	Year int `json:"year"`
-}
-
-type CreateShareInput struct {
-	FileID     *string        `json:"fileId,omitempty"`
-	BucketID   *string        `json:"bucketId,omitempty"`
-	User       string         `json:"user"`
-	Permission FilePermission `json:"permission"`
-}
-
 type CreateStudentInput struct {
 	FirstName string     `json:"firstName"`
 	LastName  string     `json:"lastName"`
@@ -186,10 +133,6 @@ type CreateStudentInput struct {
 	LeftAt    *time.Time `json:"leftAt,omitempty"`
 	JoinedAt  *time.Time `json:"joinedAt,omitempty"`
 	Emoji     *string    `json:"emoji,omitempty"`
-}
-
-type CreateSubjectInput struct {
-	Name string `json:"name"`
 }
 
 type CreateTagInput struct {
@@ -213,34 +156,7 @@ type CreateUserInput struct {
 	JoinedAt  *time.Time  `json:"joinedAt,omitempty"`
 }
 
-type CreateUserStudentGradesInput struct {
-	Student    string `json:"student"`
-	Subject    string `json:"subject"`
-	Grade      int    `json:"grade"`
-	SchoolYear string `json:"schoolYear"`
-}
-
 type DeleteChatInput struct {
-	ID string `json:"id"`
-}
-
-type DeleteDomainInput struct {
-	ID string `json:"id"`
-}
-
-type DeleteEmailAccountInput struct {
-	ID string `json:"id"`
-}
-
-type DeleteEmailForwardingInput struct {
-	ID string `json:"id"`
-}
-
-type DeleteEmailGroupMemberInput struct {
-	ID string `json:"id"`
-}
-
-type DeleteEmailInput struct {
 	ID string `json:"id"`
 }
 
@@ -274,79 +190,20 @@ type DeleteFileInput struct {
 }
 
 type DeleteFilePayload struct {
-	Success bool     `json:"success"`
-	File    *db.File `json:"file"`
+	File *db.File `json:"file"`
 }
 
-type DeleteFilesInput struct {
-	Ids []string `json:"ids"`
-}
-
-type DeleteFilesPayload struct {
-	Success bool       `json:"success"`
-	Files   []*db.File `json:"files"`
-}
-
-type DeleteShareInput struct {
-	FileID   *string `json:"fileId,omitempty"`
-	BucketID *string `json:"bucketId,omitempty"`
-	User     string  `json:"user"`
-}
-
-type DomainConnection struct {
-	Edges      []*db.Domain `json:"edges,omitempty"`
-	PageInfo   *PageInfo    `json:"pageInfo"`
-	TotalCount int          `json:"totalCount"`
-}
-
-type DownloadFileInput struct {
+type DeleteFilePermissionInput struct {
 	ID string `json:"id"`
 }
 
-type DownloadFilePayload struct {
-	URL string `json:"url"`
-}
-
-type DownloadFilesInput struct {
-	Ids []string `json:"ids"`
-}
-
-type DownloadFilesPayload struct {
-	// The url to download a zip file containing all the files.
-	URL string `json:"url"`
+type DeleteFilePermissionPayload struct {
+	FilePermission *db.FilePermission `json:"filePermission"`
 }
 
 type EditChatMessageInput struct {
 	ID      string `json:"id"`
 	Message string `json:"message"`
-}
-
-type EmailAccountConnection struct {
-	Edges      []*db.EmailAccount `json:"edges,omitempty"`
-	PageInfo   *PageInfo          `json:"pageInfo"`
-	TotalCount int                `json:"totalCount"`
-}
-
-type EmailAccountFilter struct {
-	Type *db.EmailAccountType `json:"type,omitempty"`
-}
-
-type EmailConnection struct {
-	Edges      []*db.Email `json:"edges,omitempty"`
-	PageInfo   *PageInfo   `json:"pageInfo"`
-	TotalCount int         `json:"totalCount"`
-}
-
-type EmailForwardingConnection struct {
-	Edges      []*db.EmailForwarding `json:"edges,omitempty"`
-	PageInfo   *PageInfo             `json:"pageInfo"`
-	TotalCount int                   `json:"totalCount"`
-}
-
-type EmailGroupMemberConnection struct {
-	Edges      []*db.EmailGroupMember `json:"edges,omitempty"`
-	PageInfo   *PageInfo              `json:"pageInfo"`
-	TotalCount int                    `json:"totalCount"`
 }
 
 type EntryConnection struct {
@@ -398,18 +255,12 @@ type FileConnection struct {
 	PageInfo   *PageInfo  `json:"pageInfo"`
 }
 
-type FileUploadInput struct {
-	File graphql.Upload `json:"file"`
-	// The folder to upload the file to if empty the file will be uploaded to the root folder of the user.
+type FileFilterInput struct {
+	Search   *string `json:"search,omitempty"`
 	ParentID *string `json:"parentId,omitempty"`
-	// The shared drive to upload the file to if empty the file will be uploaded to the root folder of the user.
-	BucketID *string `json:"bucketId,omitempty"`
-}
-
-type FilesFilterInput struct {
-	ParentID *string `json:"parentId,omitempty"`
-	BucketID *string `json:"bucketId,omitempty"`
-	MyBucket *bool   `json:"myBucket,omitempty"`
+	Deleted  *bool   `json:"deleted,omitempty"`
+	Limit    *int    `json:"limit,omitempty"`
+	Offset   *int    `json:"offset,omitempty"`
 }
 
 type ForgotPasswordInput struct {
@@ -418,10 +269,6 @@ type ForgotPasswordInput struct {
 
 type ForgotPasswordPayload struct {
 	Success bool `json:"success"`
-}
-
-type GenerateFileURLInput struct {
-	ID string `json:"id"`
 }
 
 type ImportStudentsInput struct {
@@ -440,51 +287,15 @@ type InviteDetailsPayload struct {
 	LastName  string `json:"lastName"`
 }
 
-type MoveFileInput struct {
-	ID       string  `json:"id"`
-	TargetID *string `json:"targetId,omitempty"`
-}
-
-type MoveFilesInput struct {
-	Ids      []string `json:"ids"`
-	TargetID string   `json:"targetId"`
-}
-
-type MoveFilesPayload struct {
-	Files []*db.File `json:"files"`
-}
-
-type MyFilesFilterInput struct {
-	ParentID *string `json:"parentId,omitempty"`
-}
-
 type PageInfo struct {
 	HasNextPage     bool `json:"hasNextPage"`
 	HasPreviousPage bool `json:"hasPreviousPage"`
 	CurrentPage     int  `json:"currentPage"`
 }
 
-type PreviewFileInput struct {
-	ID string `json:"id"`
-}
-
-type PreviewFilePayload struct {
-	URL string `json:"url"`
-}
-
 type RemoveUserFromChatInput struct {
 	ChatID string `json:"chatId"`
 	UserID string `json:"userId"`
-}
-
-type RenameFileInput struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
-
-type RenameSharedDriveInput struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
 }
 
 type ReportConnection struct {
@@ -499,43 +310,14 @@ type ResetPasswordInput struct {
 }
 
 type ResetPasswordPayload struct {
-	Success       bool `json:"success"`
-	Unauthorized  bool `json:"unauthorized"`
-	InvalidToken  bool `json:"invalidToken"`
-	TokenExpired  bool `json:"tokenExpired"`
-	UnableToReset bool `json:"unableToReset"`
-}
-
-type SchoolYearConnection struct {
-	Edges      []*db.SchoolYear `json:"edges"`
-	TotalCount int              `json:"totalCount"`
-	PageInfo   *PageInfo        `json:"pageInfo"`
+	User         *db.User         `json:"user"`
+	Token        string           `json:"token"`
+	Organisation *db.Organisation `json:"organisation"`
 }
 
 type SendMessageInput struct {
 	ChatID  string `json:"chatId"`
 	Message string `json:"message"`
-}
-
-type ShareFileInput struct {
-	FileID     string         `json:"fileId"`
-	Users      []string       `json:"users"`
-	Emails     []string       `json:"emails"`
-	Permission FilePermission `json:"permission"`
-}
-
-type ShareInput struct {
-	BucketID *string `json:"bucketId,omitempty"`
-	FileID   *string `json:"fileId,omitempty"`
-}
-
-type ShareUser struct {
-	User       *db.User       `json:"user"`
-	Permission FilePermission `json:"permission"`
-}
-
-type SharedDriveFilterInput struct {
-	Folder *string `json:"folder,omitempty"`
 }
 
 type SignInInput struct {
@@ -544,11 +326,9 @@ type SignInInput struct {
 }
 
 type SignInPayload struct {
-	Token         string   `json:"token"`
-	EnabledApps   []string `json:"enabled_apps"`
-	Language      string   `json:"language"`
-	SetupComplete bool     `json:"setupComplete"`
-	User          *db.User `json:"user"`
+	User         *db.User         `json:"user"`
+	Token        string           `json:"token"`
+	Organisation *db.Organisation `json:"organisation"`
 }
 
 type SignUpInput struct {
@@ -561,12 +341,6 @@ type SignUpInput struct {
 type SortCompetenceInput struct {
 	ID        string `json:"id"`
 	SortOrder int    `json:"sortOrder"`
-}
-
-type SubjectConnection struct {
-	Edges      []*db.Subject `json:"edges"`
-	TotalCount int           `json:"totalCount"`
-	PageInfo   *PageInfo     `json:"pageInfo"`
 }
 
 type TagConnection struct {
@@ -587,22 +361,6 @@ type UpdateCompetenceInput struct {
 
 type UpdateCompetenceSortingInput struct {
 	Competences []*SortCompetenceInput `json:"competences"`
-}
-
-type UpdateEmailAccountInput struct {
-	ID          string               `json:"id"`
-	Name        *string              `json:"name,omitempty"`
-	Description *string              `json:"description,omitempty"`
-	Type        *db.EmailAccountType `json:"type,omitempty"`
-	Quota       *int                 `json:"quota,omitempty"`
-	Active      *bool                `json:"active,omitempty"`
-}
-
-type UpdateEmailGroupInput struct {
-	ID          string    `json:"id"`
-	Name        *string   `json:"name,omitempty"`
-	Members     []*string `json:"members,omitempty"`
-	Description *string   `json:"description,omitempty"`
 }
 
 type UpdateEntryInput struct {
@@ -627,6 +385,25 @@ type UpdateEventInput struct {
 	Recurrence []*string       `json:"recurrence,omitempty"`
 }
 
+type UpdateFileInput struct {
+	ID       string  `json:"id"`
+	Name     *string `json:"name,omitempty"`
+	ParentID *string `json:"parentId,omitempty"`
+}
+
+type UpdateFilePayload struct {
+	File *db.File `json:"file"`
+}
+
+type UpdateFilePermissionInput struct {
+	ID         string                `json:"id"`
+	Permission db.FilePermissionRole `json:"permission"`
+}
+
+type UpdateFilePermissionPayload struct {
+	FilePermission *db.FilePermission `json:"filePermission"`
+}
+
 type UpdateOrganisationInput struct {
 	ID        string  `json:"id"`
 	Name      *string `json:"name,omitempty"`
@@ -635,14 +412,10 @@ type UpdateOrganisationInput struct {
 	Phone     *string `json:"phone,omitempty"`
 }
 
-type UpdateSchoolYearInput struct {
-	ID   string `json:"id"`
-	Year int    `json:"year"`
-}
-
-type UpdateSubjectInput struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type UpdateUserAttendanceInput struct {
+	Date   time.Time              `json:"date"`
+	UserID string                 `json:"userId"`
+	State  db.UserAttendanceState `json:"state"`
 }
 
 type UpdateUserCompetenceInput struct {
@@ -665,15 +438,6 @@ type UpdateUserInput struct {
 	MissedHoursExcused *int       `json:"missedHoursExcused,omitempty"`
 }
 
-type UpdateUserStudentGradesInput struct {
-	ID    string `json:"id"`
-	Grade int    `json:"grade"`
-}
-
-type UploadFilesPayload struct {
-	Files []*db.File `json:"files"`
-}
-
 type UserCompetenceConnection struct {
 	Edges      []*db.UserCompetence `json:"edges,omitempty"`
 	PageInfo   *PageInfo            `json:"pageInfo"`
@@ -691,10 +455,6 @@ type UserConnection struct {
 	TotalCount int        `json:"totalCount"`
 }
 
-type UserFileFilterInput struct {
-	FolderID *string `json:"folderId,omitempty"`
-}
-
 type UserFilterInput struct {
 	Role        []*db.UserRole `json:"role,omitempty"`
 	OrderBy     *UserOrderBy   `json:"orderBy,omitempty"`
@@ -705,12 +465,6 @@ type UserStudentConnection struct {
 	Edges      []*db.UserStudent `json:"edges,omitempty"`
 	PageInfo   *PageInfo         `json:"pageInfo"`
 	TotalCount int               `json:"totalCount"`
-}
-
-type UserStudentGradesConnection struct {
-	Edges      []*db.UserStudentGrades `json:"edges"`
-	TotalCount int                     `json:"totalCount"`
-	PageInfo   *PageInfo               `json:"pageInfo"`
 }
 
 type CompetenceSortField string
@@ -846,44 +600,48 @@ func (e EventOrderBy) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type FilePermission string
+type FilePermissionType string
 
 const (
-	FilePermissionViewer  FilePermission = "Viewer"
-	FilePermissionManager FilePermission = "Manager"
+	FilePermissionTypeUser   FilePermissionType = "USER"
+	FilePermissionTypeGroup  FilePermissionType = "GROUP"
+	FilePermissionTypeDomain FilePermissionType = "DOMAIN"
+	FilePermissionTypeAnyone FilePermissionType = "ANYONE"
 )
 
-var AllFilePermission = []FilePermission{
-	FilePermissionViewer,
-	FilePermissionManager,
+var AllFilePermissionType = []FilePermissionType{
+	FilePermissionTypeUser,
+	FilePermissionTypeGroup,
+	FilePermissionTypeDomain,
+	FilePermissionTypeAnyone,
 }
 
-func (e FilePermission) IsValid() bool {
+func (e FilePermissionType) IsValid() bool {
 	switch e {
-	case FilePermissionViewer, FilePermissionManager:
+	case FilePermissionTypeUser, FilePermissionTypeGroup, FilePermissionTypeDomain, FilePermissionTypeAnyone:
 		return true
 	}
 	return false
 }
 
-func (e FilePermission) String() string {
+func (e FilePermissionType) String() string {
 	return string(e)
 }
 
-func (e *FilePermission) UnmarshalGQL(v interface{}) error {
+func (e *FilePermissionType) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = FilePermission(str)
+	*e = FilePermissionType(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid FilePermission", str)
+		return fmt.Errorf("%s is not a valid FilePermissionType", str)
 	}
 	return nil
 }
 
-func (e FilePermission) MarshalGQL(w io.Writer) {
+func (e FilePermissionType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -934,6 +692,55 @@ func (e ImportStudentsError) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type OrganisationApplication string
+
+const (
+	OrganisationApplicationEmail  OrganisationApplication = "EMAIL"
+	OrganisationApplicationDrive  OrganisationApplication = "DRIVE"
+	OrganisationApplicationRecord OrganisationApplication = "RECORD"
+	OrganisationApplicationAdmin  OrganisationApplication = "ADMIN"
+	OrganisationApplicationSchool OrganisationApplication = "SCHOOL"
+	OrganisationApplicationChat   OrganisationApplication = "CHAT"
+)
+
+var AllOrganisationApplication = []OrganisationApplication{
+	OrganisationApplicationEmail,
+	OrganisationApplicationDrive,
+	OrganisationApplicationRecord,
+	OrganisationApplicationAdmin,
+	OrganisationApplicationSchool,
+	OrganisationApplicationChat,
+}
+
+func (e OrganisationApplication) IsValid() bool {
+	switch e {
+	case OrganisationApplicationEmail, OrganisationApplicationDrive, OrganisationApplicationRecord, OrganisationApplicationAdmin, OrganisationApplicationSchool, OrganisationApplicationChat:
+		return true
+	}
+	return false
+}
+
+func (e OrganisationApplication) String() string {
+	return string(e)
+}
+
+func (e *OrganisationApplication) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = OrganisationApplication(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid OrganisationApplication", str)
+	}
+	return nil
+}
+
+func (e OrganisationApplication) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type SortDirection string
 
 const (
@@ -972,6 +779,47 @@ func (e *SortDirection) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SortDirection) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type UserLanguage string
+
+const (
+	UserLanguageEn UserLanguage = "en"
+	UserLanguageDe UserLanguage = "de"
+)
+
+var AllUserLanguage = []UserLanguage{
+	UserLanguageEn,
+	UserLanguageDe,
+}
+
+func (e UserLanguage) IsValid() bool {
+	switch e {
+	case UserLanguageEn, UserLanguageDe:
+		return true
+	}
+	return false
+}
+
+func (e UserLanguage) String() string {
+	return string(e)
+}
+
+func (e *UserLanguage) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = UserLanguage(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid UserLanguage", str)
+	}
+	return nil
+}
+
+func (e UserLanguage) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

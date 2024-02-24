@@ -11,7 +11,7 @@ export type GetEntriesQueryVariables = Types.Exact<{
 }>;
 
 
-export type GetEntriesQuery = { __typename?: 'Query', entries: { __typename?: 'EntryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean }, edges: Array<{ __typename?: 'Entry', id: string, date: string, body?: string | null, createdAt: never, user: { __typename?: 'User', id: string, firstName: string, lastName: string }, events: Array<{ __typename?: 'Event', id: string, title: string }>, tags: Array<{ __typename?: 'Tag', id: string, name: string, color: string }>, subjects: Array<{ __typename?: 'Competence', id: string, name: string, color: string }> }> } };
+export type GetEntriesQuery = { __typename?: 'Query', entries: { __typename?: 'EntryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean }, edges: Array<{ __typename?: 'Entry', id: string, date: string, body: string, createdAt: never, user: { __typename?: 'User', id: string, firstName: string, lastName: string }, events: Array<{ __typename?: 'Event', id: string, title: string }>, tags: Array<{ __typename?: 'Tag', id: string, name: string, color: string }>, subjects: Array<{ __typename?: 'Competence', id: string, name: string, color: string }> }> } };
 
 
 export const GetEntriesDocument = gql`

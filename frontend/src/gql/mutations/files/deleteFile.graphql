@@ -1,8 +1,7 @@
 mutation deleteFile($id: ID!) {
-  deleteFile(input: { id: $id }) {
-    success
-    file {
-      id
+    deleteFile(input: { id: $id }) {
+        file {
+            ...file
+        }
     }
-  }
 }

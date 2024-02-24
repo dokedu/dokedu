@@ -1,0 +1,11 @@
+fragment organisation on Organisation {
+    id
+    name
+    legalName
+    applications
+    phone
+    website
+    owner {
+        ...user
+    }
+}

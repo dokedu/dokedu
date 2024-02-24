@@ -29,7 +29,7 @@ func (ts *TestSuite) Test_SignIn() {
 	ts.Equal("max@dokedu.org", res.User.Email.String)
 
 	// the token should now be in the db
-	cnt, err := ts.DB.NewSelect().Table("sessions").Where("token = ?", res.Token).Count(ts.Ctx())
+	cnt, err := ts.DB.GLOBAL_SessionCountByToken(ts.Ctx(), res.Token)
 	ts.NoError(err)
 	ts.Equal(1, cnt)
 

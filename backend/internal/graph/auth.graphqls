@@ -1,0 +1,62 @@
+input SignInInput {
+  email: String!
+  password: String!
+}
+
+type SignInPayload {
+  user: User!
+  token: String!
+  organisation: Organisation!
+}
+
+input SignUpInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+}
+
+type InviteDetailsPayload {
+  email: String!
+  firstName: String!
+  lastName: String!
+}
+
+extend type Query {
+  inviteDetails(token: String!): InviteDetailsPayload!
+}
+
+input ResetPasswordInput {
+  token: String
+  password: String!
+}
+
+type ResetPasswordPayload {
+  user: User!
+  token: String!
+  organisation: Organisation!
+}
+
+input ForgotPasswordInput {
+  email: String!
+}
+
+type ForgotPasswordPayload {
+  success: Boolean!
+}
+
+
+
+extend type Mutation {
+  sendUserInvite(id: ID!): Boolean!
+  acceptInvite(token: String!, input: SignUpInput!): SignInPayload!
+
+  signIn(input: SignInInput!): SignInPayload!
+
+  resetPassword(input: ResetPasswordInput!): ResetPasswordPayload!
+  forgotPassword(input: ForgotPasswordInput!): Boolean!
+
+  signOut: Boolean!
+
+  updatePassword(oldPassword: String!, newPassword: String!): Boolean!
+}

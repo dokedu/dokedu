@@ -1,11 +1,11 @@
 mutation signIn($email: String!, $password: String!) {
-  signIn(input: { email: $email, password: $password }) {
-    token
-    enabled_apps
-    language
-    setupComplete
-    user {
-      ...user
+    signIn(input: { email: $email, password: $password }) {
+        token
+        user {
+            ...user
+        }
+        organisation {
+            ...organisation
+        }
     }
-  }
 }

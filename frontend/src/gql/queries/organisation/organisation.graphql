@@ -1,7 +1,5 @@
 query organisation {
-  organisation {
-    id
-    name
-    legalName
-  }
+    organisation {
+        ...organisation
+    }
 }
