@@ -31,3 +31,9 @@ WHERE organisation_id = @organisation_id AND deleted_at IS NULL
 ORDER BY created_at DESC
 LIMIT @_limit
 OFFSET @_offset;
+
+-- name: UpdateReportStatusAndFileId :one
+UPDATE reports
+SET status = @status, file_id = @file_id
+WHERE id = @id AND organisation_id = @organisation_id AND deleted_at IS NULL
+RETURNING *;

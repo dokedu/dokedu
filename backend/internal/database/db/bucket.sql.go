@@ -98,6 +98,33 @@ func (q *Queries) CreateBucket(ctx context.Context, arg CreateBucketParams) (Buc
 	return i, err
 }
 
+const createBucketWithoutUser = `-- name: CreateBucketWithoutUser :one
+INSERT INTO buckets (name, shared, organisation_id)
+VALUES ($1, $2, $3)
+RETURNING id, name, shared, organisation_id, created_at, deleted_at, user_id
+`
+
+type CreateBucketWithoutUserParams struct {
+	Name           string `db:"name"`
+	Shared         bool   `db:"shared"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) CreateBucketWithoutUser(ctx context.Context, arg CreateBucketWithoutUserParams) (Bucket, error) {
+	row := q.db.QueryRow(ctx, createBucketWithoutUser, arg.Name, arg.Shared, arg.OrganisationID)
+	var i Bucket
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Shared,
+		&i.OrganisationID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.UserID,
+	)
+	return i, err
+}
+
 const createInternalBucket = `-- name: CreateInternalBucket :one
 INSERT INTO buckets (name, shared, organisation_id)
 VALUES ($1, $2, $3)

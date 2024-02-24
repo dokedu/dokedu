@@ -12,3 +12,21 @@ sql:
         overrides:
           - db_type: "timestamptz"
             go_type: "time.Time"
+          - db_type: jsonb
+            go_type:
+              import: "encoding/json"
+              type: "RawMessage"
+          - db_type: jsonb
+            go_type:
+              import: "encoding/json"
+              type: "RawMessage"
+            nullable: true
+          - db_type: json
+            go_type:
+              import: "encoding/json"
+              type: "RawMessage"
+          - db_type: json
+            go_type:
+              import: "encoding/json"
+              type: "RawMessage"
+            nullable: true

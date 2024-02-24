@@ -30,3 +30,9 @@ FROM entry_events
 WHERE eu.user_id = @user_id
   AND entry_events.deleted_at IS NULL
   AND entry_events.organisation_id = @organisation_id;
+
+-- name: EntryEventList :many
+SELECT *
+FROM entry_events
+WHERE organisation_id = @organisation_id
+  AND deleted_at IS NULL;

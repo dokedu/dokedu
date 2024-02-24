@@ -54,7 +54,7 @@ func (r *mutationResolver) SendUserInvite(ctx context.Context, id string) (bool,
 		return false, err
 	}
 
-	err = r.Mailer.SendInvite(user.Email.String, user.FirstName, organisation.Name, currentUser.Language, token)
+	err = r.Mailer.SendInvite(user.Email.String, user.FirstName, organisation.Name, currentUser.Language.UserLang, token)
 	if err != nil {
 		return false, err
 	}
@@ -167,7 +167,7 @@ func (r *mutationResolver) ForgotPassword(ctx context.Context, input model.Forgo
 	}
 
 	// Send the email to the user
-	err = r.Mailer.SendPasswordReset(input.Email, user.FirstName, user.Language, token)
+	err = r.Mailer.SendPasswordReset(input.Email, user.FirstName, user.Language.UserLang, token)
 	if err != nil {
 		return false, nil
 	}

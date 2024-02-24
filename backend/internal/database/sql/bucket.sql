@@ -15,6 +15,11 @@ INSERT INTO buckets (name, shared, organisation_id, user_id)
 VALUES (@name, @shared, @organisation_id, @user_id)
 RETURNING *;
 
+-- name: CreateBucketWithoutUser :one
+INSERT INTO buckets (name, shared, organisation_id)
+VALUES (@name, @shared, @organisation_id)
+RETURNING *;
+
 -- name: UpdateBucketName :one
 UPDATE buckets
 SET name = @name

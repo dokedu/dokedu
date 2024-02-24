@@ -12,3 +12,7 @@ VALUES (@event_id, @competence_id, @organisation_id)
 ON CONFLICT (event_id, competence_id, organisation_id) DO UPDATE SET deleted_at = (SELECT CASE WHEN deleted_at IS NULL THEN NOW() END)
 RETURNING *;
 
+-- name: EventCompetenceList :many
+SELECT *
+FROM event_competences
+WHERE organisation_id = @organisation_id AND deleted_at IS NULL;

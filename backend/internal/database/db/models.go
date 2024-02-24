@@ -6,6 +6,7 @@ package db
 
 import (
 	"database/sql/driver"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -755,7 +756,7 @@ type Report struct {
 	Kind           ReportKind         `db:"kind"`
 	From           time.Time          `db:"from"`
 	To             time.Time          `db:"to"`
-	Meta           []byte             `db:"meta"`
+	Meta           json.RawMessage    `db:"meta"`
 	FilterTags     []string           `db:"filter_tags"`
 	FileID         pgtype.Text        `db:"file_id"`
 	UserID         string             `db:"user_id"`
@@ -772,7 +773,7 @@ type ReportTemplate struct {
 	Format         string             `db:"format"`
 	Template       string             `db:"template"`
 	Component      bool               `db:"component"`
-	Settings       []byte             `db:"settings"`
+	Settings       json.RawMessage    `db:"settings"`
 	OrganisationID string             `db:"organisation_id"`
 	CreatedAt      pgtype.Timestamptz `db:"created_at"`
 }

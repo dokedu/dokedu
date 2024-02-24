@@ -7,6 +7,8 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createEntry = `-- name: CreateEntry :one
@@ -103,4 +105,86 @@ func (q *Queries) EntryCountByUserId(ctx context.Context, arg EntryCountByUserId
 	var count int64
 	err := row.Scan(&count)
 	return count, err
+}
+
+const entryList = `-- name: EntryList :many
+SELECT id, date, body, user_id, created_at, deleted_at, organisation_id FROM entries
+WHERE organisation_id = $1 AND deleted_at IS NULL
+ORDER BY date DESC
+`
+
+func (q *Queries) EntryList(ctx context.Context, organisationID string) ([]Entry, error) {
+	rows, err := q.db.Query(ctx, entryList, organisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Entry
+	for rows.Next() {
+		var i Entry
+		if err := rows.Scan(
+			&i.ID,
+			&i.Date,
+			&i.Body,
+			&i.UserID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.OrganisationID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const rEPORT_EntryList = `-- name: REPORT_EntryList :many
+SELECT entries.id, entries.date, entries.body, entries.user_id, entries.created_at, entries.deleted_at, entries.organisation_id
+FROM entries
+JOIN public.entry_users eu ON entries.id = eu.entry_id AND eu.user_id = $1
+WHERE date >= $2 AND date <= $3 AND entries.organisation_id = $4 AND deleted_at IS NULL
+ORDER BY date DESC
+`
+
+type REPORT_EntryListParams struct {
+	UserID         string      `db:"user_id"`
+	StartDate      pgtype.Date `db:"start_date"`
+	EndDate        pgtype.Date `db:"end_date"`
+	OrganisationID string      `db:"organisation_id"`
+}
+
+func (q *Queries) REPORT_EntryList(ctx context.Context, arg REPORT_EntryListParams) ([]Entry, error) {
+	rows, err := q.db.Query(ctx, rEPORT_EntryList,
+		arg.UserID,
+		arg.StartDate,
+		arg.EndDate,
+		arg.OrganisationID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Entry
+	for rows.Next() {
+		var i Entry
+		if err := rows.Scan(
+			&i.ID,
+			&i.Date,
+			&i.Body,
+			&i.UserID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.OrganisationID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

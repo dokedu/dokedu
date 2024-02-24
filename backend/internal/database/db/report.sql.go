@@ -7,7 +7,10 @@ package db
 
 import (
 	"context"
+	"encoding/json"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createReport = `-- name: CreateReport :one
@@ -17,16 +20,16 @@ RETURNING id, status, format, kind, "from", "to", meta, filter_tags, file_id, us
 `
 
 type CreateReportParams struct {
-	Status         ReportStatus `db:"status"`
-	Format         ReportFormat `db:"format"`
-	Kind           ReportKind   `db:"kind"`
-	From           time.Time    `db:"_from"`
-	To             time.Time    `db:"_to"`
-	Meta           []byte       `db:"meta"`
-	FilterTags     []string     `db:"filter_tags"`
-	UserID         string       `db:"user_id"`
-	StudentUserID  string       `db:"student_user_id"`
-	OrganisationID string       `db:"organisation_id"`
+	Status         ReportStatus    `db:"status"`
+	Format         ReportFormat    `db:"format"`
+	Kind           ReportKind      `db:"kind"`
+	From           time.Time       `db:"_from"`
+	To             time.Time       `db:"_to"`
+	Meta           json.RawMessage `db:"meta"`
+	FilterTags     []string        `db:"filter_tags"`
+	UserID         string          `db:"user_id"`
+	StudentUserID  string          `db:"student_user_id"`
+	OrganisationID string          `db:"organisation_id"`
 }
 
 func (q *Queries) CreateReport(ctx context.Context, arg CreateReportParams) (Report, error) {
@@ -229,4 +232,45 @@ func (q *Queries) ReportList(ctx context.Context, arg ReportListParams) ([]Repor
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateReportStatusAndFileId = `-- name: UpdateReportStatusAndFileId :one
+UPDATE reports
+SET status = $1, file_id = $2
+WHERE id = $3 AND organisation_id = $4 AND deleted_at IS NULL
+RETURNING id, status, format, kind, "from", "to", meta, filter_tags, file_id, user_id, student_user_id, organisation_id, created_at, deleted_at
+`
+
+type UpdateReportStatusAndFileIdParams struct {
+	Status         ReportStatus `db:"status"`
+	FileID         pgtype.Text  `db:"file_id"`
+	ID             string       `db:"id"`
+	OrganisationID string       `db:"organisation_id"`
+}
+
+func (q *Queries) UpdateReportStatusAndFileId(ctx context.Context, arg UpdateReportStatusAndFileIdParams) (Report, error) {
+	row := q.db.QueryRow(ctx, updateReportStatusAndFileId,
+		arg.Status,
+		arg.FileID,
+		arg.ID,
+		arg.OrganisationID,
+	)
+	var i Report
+	err := row.Scan(
+		&i.ID,
+		&i.Status,
+		&i.Format,
+		&i.Kind,
+		&i.From,
+		&i.To,
+		&i.Meta,
+		&i.FilterTags,
+		&i.FileID,
+		&i.UserID,
+		&i.StudentUserID,
+		&i.OrganisationID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
 }

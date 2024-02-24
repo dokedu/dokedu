@@ -58,6 +58,95 @@ func (q *Queries) CreateUserStudent(ctx context.Context, arg CreateUserStudentPa
 	return i, err
 }
 
+const deleteUserStudent = `-- name: DeleteUserStudent :one
+UPDATE user_students
+SET deleted_at = now()
+WHERE user_id = $1
+  AND organisation_id = $2
+RETURNING id, user_id, organisation_id, left_at, grade, birthday, nationality, comments, joined_at, created_at, deleted_at, birthplace, emoji, missed_hours, missed_hours_excused
+`
+
+type DeleteUserStudentParams struct {
+	UserID         string `db:"user_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) DeleteUserStudent(ctx context.Context, arg DeleteUserStudentParams) (UserStudent, error) {
+	row := q.db.QueryRow(ctx, deleteUserStudent, arg.UserID, arg.OrganisationID)
+	var i UserStudent
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.OrganisationID,
+		&i.LeftAt,
+		&i.Grade,
+		&i.Birthday,
+		&i.Nationality,
+		&i.Comments,
+		&i.JoinedAt,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.Birthplace,
+		&i.Emoji,
+		&i.MissedHours,
+		&i.MissedHoursExcused,
+	)
+	return i, err
+}
+
+const updateUserStudent = `-- name: UpdateUserStudent :one
+UPDATE user_students
+SET grade = $1, birthday = $2, left_at = $3, joined_at = $4, emoji = $5, missed_hours = $6, missed_hours_excused = $7
+WHERE user_id = $8
+  AND organisation_id = $9
+RETURNING id, user_id, organisation_id, left_at, grade, birthday, nationality, comments, joined_at, created_at, deleted_at, birthplace, emoji, missed_hours, missed_hours_excused
+`
+
+type UpdateUserStudentParams struct {
+	Grade              int32              `db:"grade"`
+	Birthday           pgtype.Date        `db:"birthday"`
+	LeftAt             pgtype.Timestamptz `db:"left_at"`
+	JoinedAt           pgtype.Timestamptz `db:"joined_at"`
+	Emoji              pgtype.Text        `db:"emoji"`
+	MissedHours        pgtype.Int4        `db:"missed_hours"`
+	MissedHoursExcused pgtype.Int4        `db:"missed_hours_excused"`
+	UserID             string             `db:"user_id"`
+	OrganisationID     string             `db:"organisation_id"`
+}
+
+func (q *Queries) UpdateUserStudent(ctx context.Context, arg UpdateUserStudentParams) (UserStudent, error) {
+	row := q.db.QueryRow(ctx, updateUserStudent,
+		arg.Grade,
+		arg.Birthday,
+		arg.LeftAt,
+		arg.JoinedAt,
+		arg.Emoji,
+		arg.MissedHours,
+		arg.MissedHoursExcused,
+		arg.UserID,
+		arg.OrganisationID,
+	)
+	var i UserStudent
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.OrganisationID,
+		&i.LeftAt,
+		&i.Grade,
+		&i.Birthday,
+		&i.Nationality,
+		&i.Comments,
+		&i.JoinedAt,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.Birthplace,
+		&i.Emoji,
+		&i.MissedHours,
+		&i.MissedHoursExcused,
+	)
+	return i, err
+}
+
 const userStudentByUserId = `-- name: UserStudentByUserId :one
 SELECT id, user_id, organisation_id, left_at, grade, birthday, nationality, comments, joined_at, created_at, deleted_at, birthplace, emoji, missed_hours, missed_hours_excused
 FROM user_students

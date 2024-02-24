@@ -2,9 +2,15 @@ package testsuite
 
 import (
 	"context"
-	"github.com/dokedu/dokedu/backend/internal/database/db"
-	"github.com/jackc/pgx/v5/pgtype"
 	"testing"
+
+	"github.com/jackc/pgx/v5/pgtype"
+
+	"github.com/dokedu/dokedu/backend/internal/database/db"
+
+	gonanoid "github.com/matoous/go-nanoid/v2"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/dokedu/dokedu/backend/internal/database"
 	"github.com/dokedu/dokedu/backend/internal/graph"
@@ -12,9 +18,6 @@ import (
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 	"github.com/dokedu/dokedu/backend/internal/modules/meilisearch"
 	"github.com/dokedu/dokedu/backend/internal/modules/minio"
-	gonanoid "github.com/matoous/go-nanoid/v2"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
 )
 
 type TestSuite struct {
@@ -125,7 +128,11 @@ func (ts *TestSuite) MockOrganisationWithOwner() (org *db.Organisation, user *db
 	if err != nil {
 		return nil, nil
 	}
-	defer tx.Rollback(ts.Ctx())
+	defer func() {
+		if err := tx.Rollback(ts.Ctx()); err != nil {
+			ts.Error(err)
+		}
+	}()
 
 	qtx := ts.DB.WithTx(tx)
 

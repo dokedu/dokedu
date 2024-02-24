@@ -191,6 +191,88 @@ func (q *Queries) CompetenceListByIds(ctx context.Context, arg CompetenceListByI
 	return items, nil
 }
 
+const competenceListOrderedBySortOrder = `-- name: CompetenceListOrderedBySortOrder :many
+SELECT id, name, competence_id, competence_type, organisation_id, grades, color, curriculum_id, created_at, deleted_at, sort_order, created_by
+FROM competences
+WHERE organisation_id = $1
+  AND deleted_at IS NULL
+ORDER BY sort_order
+`
+
+func (q *Queries) CompetenceListOrderedBySortOrder(ctx context.Context, organisationID string) ([]Competence, error) {
+	rows, err := q.db.Query(ctx, competenceListOrderedBySortOrder, organisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Competence
+	for rows.Next() {
+		var i Competence
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CompetenceID,
+			&i.CompetenceType,
+			&i.OrganisationID,
+			&i.Grades,
+			&i.Color,
+			&i.CurriculumID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.SortOrder,
+			&i.CreatedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const competenceListOrderedBySortOrderAndName = `-- name: CompetenceListOrderedBySortOrderAndName :many
+SELECT id, name, competence_id, competence_type, organisation_id, grades, color, curriculum_id, created_at, deleted_at, sort_order, created_by
+FROM competences
+WHERE organisation_id = $1
+  AND deleted_at IS NULL
+ORDER BY sort_order, name
+`
+
+func (q *Queries) CompetenceListOrderedBySortOrderAndName(ctx context.Context, organisationID string) ([]Competence, error) {
+	rows, err := q.db.Query(ctx, competenceListOrderedBySortOrderAndName, organisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Competence
+	for rows.Next() {
+		var i Competence
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CompetenceID,
+			&i.CompetenceType,
+			&i.OrganisationID,
+			&i.Grades,
+			&i.Color,
+			&i.CurriculumID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.SortOrder,
+			&i.CreatedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const competenceTree = `-- name: CompetenceTree :one
 SELECT get_competence_tree
 FROM get_competence_tree($1::text[])
@@ -271,6 +353,33 @@ func (q *Queries) CreateSubjectCompetence(ctx context.Context, arg CreateSubject
 		arg.Grades,
 		arg.CreatedBy,
 	)
+	var i Competence
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CompetenceID,
+		&i.CompetenceType,
+		&i.OrganisationID,
+		&i.Grades,
+		&i.Color,
+		&i.CurriculumID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.SortOrder,
+		&i.CreatedBy,
+	)
+	return i, err
+}
+
+const gLOBAL_CompetenceByIdWithDeleted = `-- name: GLOBAL_CompetenceByIdWithDeleted :one
+SELECT id, name, competence_id, competence_type, organisation_id, grades, color, curriculum_id, created_at, deleted_at, sort_order, created_by
+FROM competences
+WHERE id = $1
+LIMIT 1
+`
+
+func (q *Queries) GLOBAL_CompetenceByIdWithDeleted(ctx context.Context, id string) (Competence, error) {
+	row := q.db.QueryRow(ctx, gLOBAL_CompetenceByIdWithDeleted, id)
 	var i Competence
 	err := row.Scan(
 		&i.ID,

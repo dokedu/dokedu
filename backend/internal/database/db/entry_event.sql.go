@@ -86,6 +86,40 @@ func (q *Queries) EntryEventCountByUserId(ctx context.Context, arg EntryEventCou
 	return count, err
 }
 
+const entryEventList = `-- name: EntryEventList :many
+SELECT id, entry_id, event_id, organisation_id, created_at, deleted_at
+FROM entry_events
+WHERE organisation_id = $1
+  AND deleted_at IS NULL
+`
+
+func (q *Queries) EntryEventList(ctx context.Context, organisationID string) ([]EntryEvent, error) {
+	rows, err := q.db.Query(ctx, entryEventList, organisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []EntryEvent
+	for rows.Next() {
+		var i EntryEvent
+		if err := rows.Scan(
+			&i.ID,
+			&i.EntryID,
+			&i.EventID,
+			&i.OrganisationID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const eventListByEntryEventByEntryId = `-- name: EventListByEntryEventByEntryId :many
 SELECT events.id, events.image_file_id, events.organisation_id, events.title, events.body, events.starts_at, events.ends_at, events.recurrence, events.created_at, events.deleted_at
 FROM events

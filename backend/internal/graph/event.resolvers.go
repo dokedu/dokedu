@@ -304,23 +304,39 @@ func (r *queryResolver) ExportEvents(ctx context.Context, input model.ExportEven
 
 	orgId := currentUser.OrganisationID
 
-	from := input.From
-	to := input.To
+	// TODO: might not work
+	from, err := time.Parse(time.RFC3339, input.From)
+	to, err := time.Parse(time.RFC3339, input.To)
 	deleted := input.Deleted
 
 	// TODO: another day, another fix
 	events, err := r.DB.ExportEvents(ctx, db.ExportEventsParams{
 		OrganisationID: orgId,
-		From:           pgtype.Date{Time: from, Valid: true},
-		To:             pgtype.Date{Time: to, Valid: true},
+		From:           from,
+		To:             to,
 		ShowArchived:   deleted,
 	})
 	if err != nil {
 		return nil, err
 	}
 
+	//parse events to model.ExportEventsPayload
+
+	var payload []*model.ExportEventsPayload
+	for _, event := range events {
+		payload = append(payload, &model.ExportEventsPayload{
+			ID:       event.ID,
+			Title:    event.Title,
+			Body:     event.Body,
+			StartsAt: event.StartsAt.String(),
+			EndsAt:   event.EndsAt.String(),
+			Subjects: string(event.Subjects),
+		})
+
+	}
+
 	// TODO: properly map the events to the payload
-	return events, nil
+	return []*model.ExportEventsPayload{}, nil
 }
 
 // Event returns EventResolver implementation.

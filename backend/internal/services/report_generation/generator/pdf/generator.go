@@ -6,10 +6,11 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"html/template"
 	"os"
 	"path/filepath"
+
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 
 	"github.com/dokedu/dokedu/backend/internal/services/report_generation/config"
 
@@ -199,14 +200,12 @@ type CompetencesData struct {
 }
 
 func (g *Generator) pageContextData(report db.Report) (*CompetencesData, error) {
-	var student db.User
-	err := g.cfg.DB.NewSelect().Model(&student).Where("id = ?", report.StudentUserID).Scan(context.Background())
+	student, err := g.cfg.DB.GLOBAL_UserById(context.Background(), report.StudentUserID)
 	if err != nil {
 		return nil, err
 	}
 
-	var teacher db.User
-	err = g.cfg.DB.NewSelect().Model(&teacher).Where("id = ?", report.UserID).Scan(context.Background())
+	teacher, err := g.cfg.DB.GLOBAL_UserById(context.Background(), report.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -233,13 +232,10 @@ func (g *Generator) generateHTML(report db.Report, data any) error {
 	}
 
 	reports := new(bytes.Buffer)
-	var reportTemplate db.ReportTemplate
-	err = g.cfg.DB.
-		NewSelect().
-		Model(&reportTemplate).
-		Where("name = ?", report.Kind).
-		Where("organisation_id = ?", report.OrganisationID).
-		Scan(context.Background())
+	reportTemplate, err := g.cfg.DB.ReportTemplateByName(context.Background(), db.ReportTemplateByNameParams{
+		Name:           string(report.Kind),
+		OrganisationID: report.OrganisationID,
+	})
 	if err != nil {
 		return err
 	}

@@ -109,6 +109,41 @@ func (q *Queries) CreateUserWithId(ctx context.Context, arg CreateUserWithIdPara
 	return i, err
 }
 
+const deleteUserById = `-- name: DeleteUserById :one
+UPDATE users
+SET deleted_at = now()
+WHERE id = $1
+  AND organisation_id = $2
+RETURNING id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
+`
+
+type DeleteUserByIdParams struct {
+	ID             string `db:"id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) DeleteUserById(ctx context.Context, arg DeleteUserByIdParams) (User, error) {
+	row := q.db.QueryRow(ctx, deleteUserById, arg.ID, arg.OrganisationID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Role,
+		&i.OrganisationID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Password,
+		&i.RecoveryToken,
+		&i.RecoverySentAt,
+		&i.AvatarFileID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.Language,
+		&i.Sex,
+	)
+	return i, err
+}
+
 const gLOBAL_DeleteUserByEmail = `-- name: GLOBAL_DeleteUserByEmail :one
 UPDATE users
 SET deleted_at = now()
@@ -175,6 +210,34 @@ WHERE id = $1 AND deleted_at IS NULL
 
 func (q *Queries) GLOBAL_UserById(ctx context.Context, id string) (User, error) {
 	row := q.db.QueryRow(ctx, gLOBAL_UserById, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Role,
+		&i.OrganisationID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Password,
+		&i.RecoveryToken,
+		&i.RecoverySentAt,
+		&i.AvatarFileID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.Language,
+		&i.Sex,
+	)
+	return i, err
+}
+
+const gLOBAL_UserByIdWithDeleted = `-- name: GLOBAL_UserByIdWithDeleted :one
+SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
+FROM users
+WHERE id = $1
+`
+
+func (q *Queries) GLOBAL_UserByIdWithDeleted(ctx context.Context, id string) (User, error) {
+	row := q.db.QueryRow(ctx, gLOBAL_UserByIdWithDeleted, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -332,6 +395,84 @@ func (q *Queries) GLOBAL_UsersByIds(ctx context.Context, ids []string) ([]User, 
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateUser = `-- name: UpdateUser :one
+UPDATE users
+SET first_name = $1, last_name = $2
+WHERE id = $3
+  AND organisation_id = $4
+RETURNING id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
+`
+
+type UpdateUserParams struct {
+	FirstName      string `db:"first_name"`
+	LastName       string `db:"last_name"`
+	ID             string `db:"id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUser,
+		arg.FirstName,
+		arg.LastName,
+		arg.ID,
+		arg.OrganisationID,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Role,
+		&i.OrganisationID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Password,
+		&i.RecoveryToken,
+		&i.RecoverySentAt,
+		&i.AvatarFileID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.Language,
+		&i.Sex,
+	)
+	return i, err
+}
+
+const updateUserLanguage = `-- name: UpdateUserLanguage :one
+UPDATE users
+SET language = $1
+WHERE id = $2
+  AND organisation_id = $3
+RETURNING id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
+`
+
+type UpdateUserLanguageParams struct {
+	Language       NullUserLang `db:"language"`
+	ID             string       `db:"id"`
+	OrganisationID string       `db:"organisation_id"`
+}
+
+func (q *Queries) UpdateUserLanguage(ctx context.Context, arg UpdateUserLanguageParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUserLanguage, arg.Language, arg.ID, arg.OrganisationID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Role,
+		&i.OrganisationID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Password,
+		&i.RecoveryToken,
+		&i.RecoverySentAt,
+		&i.AvatarFileID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.Language,
+		&i.Sex,
+	)
+	return i, err
 }
 
 const updateUserPassword = `-- name: UpdateUserPassword :one
@@ -563,28 +704,15 @@ func (q *Queries) UserListByRole(ctx context.Context, arg UserListByRoleParams) 
 	return items, nil
 }
 
-const userListCount = `-- name: UserListCount :many
+const userListCount = `-- name: UserListCount :one
 SELECT COUNT(*)
 FROM users
 WHERE organisation_id = $1 AND deleted_at IS NULL
 `
 
-func (q *Queries) UserListCount(ctx context.Context, organisationID string) ([]int64, error) {
-	rows, err := q.db.Query(ctx, userListCount, organisationID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []int64
-	for rows.Next() {
-		var count int64
-		if err := rows.Scan(&count); err != nil {
-			return nil, err
-		}
-		items = append(items, count)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) UserListCount(ctx context.Context, organisationID string) (int64, error) {
+	row := q.db.QueryRow(ctx, userListCount, organisationID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }

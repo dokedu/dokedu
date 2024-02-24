@@ -16,3 +16,15 @@ WHERE id = @id AND organisation_id = @organisation_id AND deleted_at IS NULL;
 -- name: EntryCountByUserId :one
 SELECT COUNT(*) FROM entries
 WHERE user_id = @user_id AND organisation_id = @organisation_id AND deleted_at IS NULL;
+
+-- name: EntryList :many
+SELECT * FROM entries
+WHERE organisation_id = @organisation_id AND deleted_at IS NULL
+ORDER BY date DESC;
+
+-- name: REPORT_EntryList :many
+SELECT entries.*
+FROM entries
+JOIN public.entry_users eu ON entries.id = eu.entry_id AND eu.user_id = @user_id
+WHERE date >= @start_date AND date <= @end_date AND entries.organisation_id = @organisation_id AND deleted_at IS NULL
+ORDER BY date DESC;

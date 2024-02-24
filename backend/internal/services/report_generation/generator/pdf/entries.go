@@ -3,12 +3,13 @@ package pdf
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
-	"github.com/dokedu/dokedu/backend/internal/database/db"
+	"github.com/jackc/pgx/v5/pgtype"
 
-	"github.com/uptrace/bun"
+	"github.com/dokedu/dokedu/backend/internal/helper"
+
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 )
 
 type ReportData struct {
@@ -34,23 +35,43 @@ func (g *Generator) EntriesReportData(report db.Report) (*ReportData, error) {
 
 	var reportData ReportData
 
-	var entries []db.Entry
-	err := g.cfg.DB.
-		NewSelect().
-		Model(&entries).
-		Join("JOIN entry_users eu ON eu.entry_id = entry.id").
-		Where("eu.user_id = ?", report.StudentUserID).
-		Where("date >= ?", report.From).
-		Where("date <= ?", report.To).
-		Order("date DESC").
-		Scan(ctx)
+	//var entries []db.Entry
+	//err := g.cfg.DB.
+	//	NewSelect().
+	//	Model(&entries).
+	//	Join("JOIN entry_users eu ON eu.entry_id = entry.id").
+	//	Where("eu.user_id = ?", report.StudentUserID).
+	//	Where("date >= ?", report.From).
+	//	Where("date <= ?", report.To).
+	//	Order("date DESC").
+	//	Scan(ctx)
+	entries, err := g.cfg.DB.REPORT_EntryList(ctx, db.REPORT_EntryListParams{
+		UserID:         report.StudentUserID,
+		StartDate:      pgtype.Date{Time: report.From, Valid: true},
+		EndDate:        pgtype.Date{Time: report.To, Valid: true},
+		OrganisationID: report.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	competences, err := g.cfg.DB.CompetenceList(ctx, report.OrganisationID)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, entry := range entries {
-		var userCompetences []db.UserCompetence
-		err = g.cfg.DB.NewSelect().Model(&userCompetences).Where("user_id = ?", report.StudentUserID).Where("entry_id = ?", entry.ID).Scan(ctx)
+		//var userCompetences []db.UserCompetence
+		//err = g.cfg.DB.NewSelect().
+		//	Model(&userCompetences).
+		//	Where("user_id = ?", report.StudentUserID).
+		//	Where("entry_id = ?", entry.ID).
+		//	Scan(ctx)
+		userCompetences, err := g.cfg.DB.UserCompetenceListByEntryAndUser(ctx, db.UserCompetenceListByEntryAndUserParams{
+			EntryID:        pgtype.Text{String: entry.ID, Valid: true},
+			UserID:         report.StudentUserID,
+			OrganisationID: report.OrganisationID,
+		})
 		if err != nil {
 			return nil, err
 		}
@@ -66,13 +87,11 @@ func (g *Generator) EntriesReportData(report db.Report) (*ReportData, error) {
 		}
 
 		for _, userCompetence := range userCompetences {
-			parents, err := competenceParents(g.cfg.DB, userCompetence.CompetenceID)
-			if err != nil {
-				return nil, err
-			}
+			parents := helper.FindRecursiveCompetenceParents(competences, userCompetence.CompetenceID)
 
 			var competence db.Competence
-			err = g.cfg.DB.NewSelect().Model(&competence).Where("id = ?", userCompetence.CompetenceID).WhereAllWithDeleted().Scan(ctx)
+			//err = g.cfg.DB.NewSelect().Model(&competence).Where("id = ?", userCompetence.CompetenceID).WhereAllWithDeleted().Scan(ctx)
+			competence, err := g.cfg.DB.GLOBAL_CompetenceByIdWithDeleted(ctx, userCompetence.CompetenceID)
 			if err != nil {
 				return nil, err
 			}
@@ -124,8 +143,9 @@ func (g *Generator) EntriesReportData(report db.Report) (*ReportData, error) {
 			})
 		}
 
-		var user db.User
-		err = g.cfg.DB.NewSelect().Model(&user).Where("id = ?", entry.UserID).WhereAllWithDeleted().Scan(ctx)
+		//var user db.User
+		//err = g.cfg.DB.NewSelect().Model(&user).Where("id = ?", entry.UserID).WhereAllWithDeleted().Scan(ctx)
+		user, err := g.cfg.DB.GLOBAL_UserByIdWithDeleted(ctx, entry.UserID)
 		if err != nil {
 			return nil, err
 		}
@@ -133,7 +153,7 @@ func (g *Generator) EntriesReportData(report db.Report) (*ReportData, error) {
 		createdAt := entry.CreatedAt.Format("02.01.2006 15:04")
 		// format dd.mm.yyyy whereas date is right now yyyy-mm-dd and a string
 		var date time.Time
-		date, err = time.Parse("2006-01-02", entry.Date)
+		date, err = time.Parse("2006-01-02", entry.Date.Time.String())
 		if err != nil {
 			return nil, err
 		}
@@ -164,20 +184,4 @@ func (g *Generator) EntriesReportData(report db.Report) (*ReportData, error) {
 	}
 
 	return &reportData, nil
-}
-
-func competenceParents(bun *bun.DB, competenceID string) ([]db.Competence, error) {
-	ctx := context.Background()
-	query := `SELECT * FROM get_competence_tree_reverse(?)`
-
-	// query without new lines
-	q := strings.ReplaceAll(query, "\n", " ")
-
-	var parents []db.Competence
-	err := bun.NewRaw(q, competenceID).Scan(ctx, &parents)
-	if err != nil {
-		return nil, err
-	}
-
-	return parents, nil
 }

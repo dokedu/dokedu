@@ -6,6 +6,15 @@ WHERE entry_id = @entry_id
   AND deleted_at IS NULL
 ORDER BY competence_id DESC;
 
+-- name: UserCompetenceListByEntryAndUser :many
+SELECT *
+FROM user_competences
+WHERE entry_id = @entry_id
+  AND user_id = @user_id
+  AND organisation_id = @organisation_id
+  AND deleted_at IS NULL
+ORDER BY competence_id DESC;
+
 -- name: UpsertUserCompetence :one
 INSERT INTO user_competences (entry_id, organisation_id, competence_id, level, user_id)
 VALUES (@entry_id, @organisation_id, @competence_id, @level, @user_id)
@@ -15,8 +24,8 @@ RETURNING *;
 -- name: CompetenceListByUserCompetenceByEntry :many
 SELECT *
 FROM competences
-JOIN public.user_competences uc ON competences.id = uc.competence_id
-JOIN public.entries e ON uc.entry_id = e.id
+         JOIN public.user_competences uc ON competences.id = uc.competence_id
+         JOIN public.entries e ON uc.entry_id = e.id
 WHERE uc.user_id = @user_id
   AND uc.organisation_id = @organisation_id
   AND uc.entry_id = @entry_id
@@ -26,7 +35,7 @@ WHERE uc.user_id = @user_id
 
 -- name: DeleteUserCompetences :many
 UPDATE user_competences
-SET deleted_at = now()
+SET deleted_at = NOW()
 WHERE user_id = @user_id
   AND entry_id = @entry_id
   AND organisation_id = @organisation_id
@@ -34,7 +43,7 @@ RETURNING *;
 
 -- name: DeleteEntryCompetences :many
 UPDATE user_competences
-SET deleted_at = now()
+SET deleted_at = NOW()
 WHERE entry_id = @entry_id
   AND organisation_id = @organisation_id
 RETURNING *;
@@ -68,3 +77,30 @@ FROM user_competences
 WHERE user_id = @user_id
   AND organisation_id = @organisation_id
   AND deleted_at IS NULL;
+
+-- name: UserCompetenceList :many
+SELECT *
+FROM user_competences
+WHERE organisation_id = @organisation_id
+  AND deleted_at IS NULL;
+
+-- name: UserCompetenceForCompetenceReport :many
+SELECT *
+FROM user_competences
+WHERE user_id = @user_id
+  AND organisation_id = @organisation_id
+  AND deleted_at IS NULL
+  AND created_at >= @start_date
+  AND created_at <= (DATE @ end_date + 1)
+ORDER BY created_at DESC;
+
+-- name: REPORT_UserCompetenceListByUserId :many
+SELECT *
+FROM user_competences
+WHERE user_id = @user_id
+  AND organisation_id = @organisation_id
+  AND deleted_at IS NULL
+  AND created_at >= @start_date
+  AND created_at <= (DATE @ end_date + 1)
+ORDER BY created_at DESC;
+

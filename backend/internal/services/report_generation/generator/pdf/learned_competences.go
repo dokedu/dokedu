@@ -3,9 +3,8 @@ package pdf
 import (
 	"context"
 	"fmt"
-	"github.com/dokedu/dokedu/backend/internal/database/db"
 
-	"github.com/uptrace/bun"
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 )
 
 func (g *Generator) LearnedCompetencesReportData(report db.Report) (*CompetencesTemplateData, error) {
@@ -16,15 +15,21 @@ func (g *Generator) LearnedCompetencesReportData(report db.Report) (*Competences
 		return nil, err
 	}
 
-	var userCompetences []db.UserCompetence
-	err = g.cfg.DB.NewSelect().
-		Model(&userCompetences).
-		Where("user_id = ?", report.StudentUserID).
-		Where("organisation_id = ?", report.OrganisationID).
-		Where("created_at >= ?", report.From).
-		Where("created_at <= (DATE ? + 1)", report.To).
-		Order("created_at DESC").
-		Scan(ctx)
+	//var userCompetences []db.UserCompetence
+	//err = g.cfg.DB.NewSelect().
+	//	Model(&userCompetences).
+	//	Where("user_id = ?", report.StudentUserID).
+	//	Where("organisation_id = ?", report.OrganisationID).
+	//	Where("created_at >= ?", report.From).
+	//	Where("created_at <= (DATE ? + 1)", report.To).
+	//	Order("created_at DESC").
+	//	Scan(ctx)
+	userCompetences, err := g.cfg.DB.REPORT_UserCompetenceListByUserId(ctx, db.REPORT_UserCompetenceListByUserIdParams{
+		UserID:         report.StudentUserID,
+		OrganisationID: report.OrganisationID,
+		StartDate:      report.From,
+		EndDate:        report.To,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -42,23 +47,28 @@ Outer:
 		userCompetenceIds = append(userCompetenceIds, uc.CompetenceID)
 	}
 
-	var competences []db.Competence
-	err = g.cfg.DB.NewSelect().
-		Model(&competences).
-		Where("organisation_id = ?", report.OrganisationID).
-		Where("id IN (?)", bun.In(userCompetenceIds)).
-		Order("sort_order").
-		Order("name").
-		Scan(ctx)
+	//var competences []db.Competence
+	//err = g.cfg.DB.NewSelect().
+	//	Model(&competences).
+	//	Where("organisation_id = ?", report.OrganisationID).
+	//	Where("id IN (?)", bun.In(userCompetenceIds)).
+	//	Order("sort_order").
+	//	Order("name").
+	//	Scan(ctx)
+	competences, err := g.cfg.DB.CompetenceListByIds(ctx, db.CompetenceListByIdsParams{
+		Ids:            userCompetenceIds,
+		OrganisationID: report.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var allCompetences []db.Competence
-	err = g.cfg.DB.NewSelect().
-		Model(&allCompetences).
-		Where("organisation_id = ?", report.OrganisationID).
-		Order("sort_order").Scan(ctx)
+	//var allCompetences []db.Competence
+	//err = g.cfg.DB.NewSelect().
+	//	Model(&allCompetences).
+	//	Where("organisation_id = ?", report.OrganisationID).
+	//	Order("sort_order").Scan(ctx)
+	allCompetences, err := g.cfg.DB.CompetenceListOrderedBySortOrder(ctx, report.OrganisationID)
 	if err != nil {
 		return nil, err
 	}

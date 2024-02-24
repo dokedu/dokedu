@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/samber/lo"
+
 	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
-	"github.com/samber/lo"
 
 	"github.com/graph-gophers/dataloader"
 	"github.com/uptrace/bun"

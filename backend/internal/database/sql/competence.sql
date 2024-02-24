@@ -80,7 +80,27 @@ WHERE id = $1
   AND organisation_id = $2
 LIMIT 1;
 
+-- name: GLOBAL_CompetenceByIdWithDeleted :one
+SELECT *
+FROM competences
+WHERE id = $1
+LIMIT 1;
+
 -- name: CreateSubjectCompetence :one
 INSERT INTO competences (name, competence_id, competence_type, organisation_id, grades, created_by)
 VALUES (@name, @competence_id, @competence_type, @organisation_id, @grades, @created_by)
 RETURNING *;
+
+-- name: CompetenceListOrderedBySortOrderAndName :many
+SELECT *
+FROM competences
+WHERE organisation_id = $1
+  AND deleted_at IS NULL
+ORDER BY sort_order, name;
+
+-- name: CompetenceListOrderedBySortOrder :many
+SELECT *
+FROM competences
+WHERE organisation_id = $1
+  AND deleted_at IS NULL
+ORDER BY sort_order;

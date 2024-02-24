@@ -36,6 +36,39 @@ func (q *Queries) CreateEventCompetence(ctx context.Context, arg CreateEventComp
 	return i, err
 }
 
+const eventCompetenceList = `-- name: EventCompetenceList :many
+SELECT id, event_id, competence_id, created_at, deleted_at, organisation_id
+FROM event_competences
+WHERE organisation_id = $1 AND deleted_at IS NULL
+`
+
+func (q *Queries) EventCompetenceList(ctx context.Context, organisationID string) ([]EventCompetence, error) {
+	rows, err := q.db.Query(ctx, eventCompetenceList, organisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []EventCompetence
+	for rows.Next() {
+		var i EventCompetence
+		if err := rows.Scan(
+			&i.ID,
+			&i.EventID,
+			&i.CompetenceID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.OrganisationID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const eventCompetenceListByEventId = `-- name: EventCompetenceListByEventId :many
 SELECT competences.id, competences.name, competences.competence_id, competences.competence_type, competences.organisation_id, competences.grades, competences.color, competences.curriculum_id, competences.created_at, competences.deleted_at, competences.sort_order, competences.created_by
 FROM competences

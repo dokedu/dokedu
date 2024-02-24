@@ -3,8 +3,9 @@ package pdf
 import (
 	"context"
 	"fmt"
-	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"time"
+
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 )
 
 type CompetenceStruct struct {
@@ -44,13 +45,9 @@ type internData struct {
 
 func (g *Generator) preloadAllEntriesReportData(ctx context.Context, o db.Organisation) (*internData, error) {
 	var data internData
+	var err error
 
-	err := g.cfg.DB.
-		NewSelect().
-		Model(&data.Entries).
-		Where("organisation_id = ?", o.ID).
-		Order("date DESC").
-		Scan(ctx)
+	data.Entries, err = g.cfg.DB.EntryList(ctx, o.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +59,8 @@ func (g *Generator) preloadAllEntriesReportData(ctx context.Context, o db.Organi
 		data.EntriesMap[data.Entries[i].ID] = &data.Entries[i]
 	}
 
-	err = g.cfg.DB.NewSelect().Model(&data.EntryEvents).Where("organisation_id = ?", o.ID).Scan(ctx)
+	//err = g.cfg.DB.NewSelect().Model(&data.EntryEvents).Where("organisation_id = ?", o.ID).Scan(ctx)
+	data.EntryEvents, err = g.cfg.DB.EntryEventList(ctx, o.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -81,17 +79,20 @@ func (g *Generator) preloadAllEntriesReportData(ctx context.Context, o db.Organi
 		data.EventsMapByEntry[data.EntryEvents[i].EntryID] = data.EventsMap[data.EntryEvents[i].EventID]
 	}
 
-	err = g.cfg.DB.NewSelect().Model(&data.Events).Where("organisation_id = ?", o.ID).Scan(ctx)
+	//err = g.cfg.DB.NewSelect().Model(&data.Events).Where("organisation_id = ?", o.ID).Scan(ctx)
+	data.Events, err = g.cfg.DB.EventList(ctx, o.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	err = g.cfg.DB.NewSelect().Model(&data.EventCompetences).Where("organisation_id = ?", o.ID).Scan(ctx)
+	//err = g.cfg.DB.NewSelect().Model(&data.EventCompetences).Where("organisation_id = ?", o.ID).Scan(ctx)
+	data.EventCompetences, err = g.cfg.DB.EventCompetenceList(ctx, o.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	err = g.cfg.DB.NewSelect().Model(&data.Competences).Where("organisation_id = ?", o.ID).Scan(ctx)
+	//err = g.cfg.DB.NewSelect().Model(&data.Competences).Where("organisation_id = ?", o.ID).Scan(ctx)
+	data.Competences, err = g.cfg.DB.CompetenceList(ctx, o.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +112,8 @@ func (g *Generator) preloadAllEntriesReportData(ctx context.Context, o db.Organi
 		}
 	}
 
-	err = g.cfg.DB.NewSelect().Model(&data.UserCompetences).Where("organisation_id = ?", o.ID).Scan(ctx)
+	//err = g.cfg.DB.NewSelect().Model(&data.UserCompetences).Where("organisation_id = ?", o.ID).Scan(ctx)
+	data.UserCompetences, err = g.cfg.DB.UserCompetenceList(ctx, o.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -214,7 +216,8 @@ func (g *Generator) AllEntriesReportData(report db.Report) (*AllReportData, erro
 	ctx := context.Background()
 
 	var organisation db.Organisation
-	err := g.cfg.DB.NewSelect().Model(&organisation).Where("id = ?", report.OrganisationID).Scan(ctx)
+	//err := g.cfg.DB.NewSelect().Model(&organisation).Where("id = ?", report.OrganisationID).Scan(ctx)
+	organisation, err := g.cfg.DB.GLOBAL_OrganisationById(ctx, report.OrganisationID)
 	if err != nil {
 		return nil, err
 	}
@@ -240,7 +243,7 @@ func (g *Generator) AllEntriesReportData(report db.Report) (*AllReportData, erro
 		}
 
 		createdAt := data.Entries[i].CreatedAt.Format("02.01.2006 15:04")
-		date, err := time.Parse("2006-01-02", data.Entries[i].Date)
+		date, err := time.Parse("2006-01-02", data.Entries[i].Date.Time.String())
 		if err != nil {
 			return nil, err
 		}
@@ -257,7 +260,7 @@ func (g *Generator) AllEntriesReportData(report db.Report) (*AllReportData, erro
 	return &reportData, nil
 }
 
-func formatGrades(grades []int) string {
+func formatGrades(grades []int32) string {
 	switch len(grades) {
 	case 0:
 		return "-"

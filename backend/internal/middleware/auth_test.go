@@ -3,12 +3,13 @@ package middleware_test
 import (
 	"errors"
 	"fmt"
-	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"io"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 
 	"github.com/labstack/echo/v4"
 	gonanoid "github.com/matoous/go-nanoid/v2"

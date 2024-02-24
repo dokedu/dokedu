@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -152,18 +153,99 @@ func (q *Queries) EventList(ctx context.Context, organisationID string) ([]Event
 }
 
 const exportEvents = `-- name: ExportEvents :many
-SELECT export_events
-FROM export_events($1, $2, $3, $4)
+WITH _competences AS (
+    -- way 1: directly linked via event event_competences>competences
+    SELECT DISTINCT ON (e.id, c.id) e.id AS event_id,
+                                    c.id,
+                                    c.name,
+                                    c.competence_id,
+                                    c.grades
+    FROM events e
+             INNER JOIN event_competences ec ON e.id = ec.event_id
+             INNER JOIN competences c ON ec.competence_id = c.id
+    WHERE e.organisation_id = $1
+      AND e.starts_at >= $2
+      AND e.ends_at <= $3
+      AND ($4 OR e.deleted_at IS NULL)
+      AND c.deleted_at IS NULL
+    -- union both ways.
+    UNION
+    DISTINCT
+    -- way 2: indirect via entry_events>events>eac>competences
+    SELECT DISTINCT ON (e.id, c.id) e.id, c.id, c.name, c.competence_id, c.grades
+    FROM events e
+             INNER JOIN entry_events ee ON e.id = ee.event_id
+             INNER JOIN entries en ON ee.entry_id = en.id
+             INNER JOIN user_competences eac ON en.id = eac.entry_id
+             INNER JOIN competences c ON eac.competence_id = c.id
+    WHERE e.organisation_id = $1
+      AND e.starts_at >= $2
+      AND e.ends_at <= $3
+      AND ($4 OR e.deleted_at IS NULL)
+      AND en.deleted_at IS NULL
+      AND eac.deleted_at IS NULL
+      AND c.deleted_at IS NULL),
+
+     -- next, for each found competence, fetch the whole competence tree
+     _competence_trees AS (SELECT c.event_id,
+                                  c.id,
+                                  c.name,
+                                  c.competence_id,
+                                  c.grades,
+                                  JSONB_AGG(b) AS competence_tree
+                           FROM _competences c,
+                                -- use lateral sub query (to get all rows from the function)
+                                LATERAL (SELECT get_competence_tree FROM get_competence_tree(c.id)) b
+                           -- since the lateral sub query produces multiple rows, we need to group by & use json aggregation
+                           GROUP BY c.event_id, c.id, c.name, c.competence_id, c.grades),
+
+     -- for each found competence, fetch the subject (last entry in competence tree).
+     -- we then group them by subject, and store the competences using the jsonb_agg
+     _subjects AS (SELECT ct.event_id,
+                          jsonb_array_element(ct.competence_tree,
+                                              JSONB_ARRAY_LENGTH(ct.competence_tree) - 1) ->
+                          'id'          AS subject_id,
+                          jsonb_array_element(ct.competence_tree,
+                                              JSONB_ARRAY_LENGTH(ct.competence_tree) - 1) ->
+                          'name'        AS subject_name,
+                          JSONB_AGG(ct) AS competences
+                   FROM _competence_trees ct
+                   GROUP BY ct.event_id, subject_id, subject_name)
+SELECT e.id,
+       e.title,
+       e.body,
+       e.starts_at,
+       e.ends_at,
+       JSONB_AGG(s) FILTER ( WHERE s IS NOT NULL ) AS subjects
+FROM events e
+         LEFT JOIN _subjects s ON e.id = s.event_id
+WHERE e.organisation_id = $1
+  AND e.starts_at >= $2
+  AND e.ends_at <= $3
+  AND ($4 OR e.deleted_at IS NULL)
+GROUP BY e.id, e.title
+ORDER BY e.ends_at
 `
 
 type ExportEventsParams struct {
 	OrganisationID string      `db:"_organisation_id"`
-	From           pgtype.Date `db:"_from"`
-	To             pgtype.Date `db:"_to"`
-	ShowArchived   bool        `db:"_show_archived"`
+	From           time.Time   `db:"_from"`
+	To             time.Time   `db:"_to"`
+	ShowArchived   interface{} `db:"_show_archived"`
 }
 
-func (q *Queries) ExportEvents(ctx context.Context, arg ExportEventsParams) ([]interface{}, error) {
+type ExportEventsRow struct {
+	ID       string          `db:"id"`
+	Title    string          `db:"title"`
+	Body     string          `db:"body"`
+	StartsAt time.Time       `db:"starts_at"`
+	EndsAt   time.Time       `db:"ends_at"`
+	Subjects json.RawMessage `db:"subjects"`
+}
+
+// finally, using all of this info, we can run the main query. select all events again, and group by event so
+// all of their found subjects land in a final jsonb_agg.
+func (q *Queries) ExportEvents(ctx context.Context, arg ExportEventsParams) ([]ExportEventsRow, error) {
 	rows, err := q.db.Query(ctx, exportEvents,
 		arg.OrganisationID,
 		arg.From,
@@ -174,13 +256,20 @@ func (q *Queries) ExportEvents(ctx context.Context, arg ExportEventsParams) ([]i
 		return nil, err
 	}
 	defer rows.Close()
-	var items []interface{}
+	var items []ExportEventsRow
 	for rows.Next() {
-		var export_events interface{}
-		if err := rows.Scan(&export_events); err != nil {
+		var i ExportEventsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Body,
+			&i.StartsAt,
+			&i.EndsAt,
+			&i.Subjects,
+		); err != nil {
 			return nil, err
 		}
-		items = append(items, export_events)
+		items = append(items, i)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

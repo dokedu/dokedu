@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 )
 
 type Competence struct {
@@ -30,33 +32,39 @@ type CompetencesTemplateData struct {
 func (g *Generator) BaseCompetencesReportData(ctx context.Context, report db.Report) (*CompetencesTemplateData, error) {
 	var data CompetencesTemplateData
 
-	var student db.User
-	err := g.cfg.DB.NewSelect().Model(&student).Where("id = ?", report.StudentUserID).Scan(ctx)
+	//var student db.User
+	//err := g.cfg.DB.NewSelect().Model(&student).Where("id = ?", report.StudentUserID).Scan(ctx)
+	student, err := g.cfg.DB.GLOBAL_UserById(ctx, report.StudentUserID)
 	if err != nil {
 		return nil, err
 	}
 
-	var userStudent db.UserStudent
-	err = g.cfg.DB.NewSelect().Model(&userStudent).Where("user_id = ?", report.StudentUserID).Scan(ctx)
+	//var userStudent db.UserStudent
+	//err = g.cfg.DB.NewSelect().Model(&userStudent).Where("user_id = ?", report.StudentUserID).Scan(ctx)
+	userStudent, err := g.cfg.DB.UserStudentByUserId(ctx, db.UserStudentByUserIdParams{
+		ID:             report.StudentUserID,
+		OrganisationID: report.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	data.StudentName = fmt.Sprintf("%s %s", student.FirstName, student.LastName)
-	data.StudentBirthday = userStudent.Birthday.Format("02.01.2006")
+	data.StudentBirthday = userStudent.Birthday.Time.Format("02.01.2006")
 	data.StudentGrade = strconv.Itoa(int(userStudent.Grade))
-	data.StudentMissedHours = strconv.Itoa(int(userStudent.MissedHours))
-	data.StudentMissedHoursExcused = strconv.Itoa(int(userStudent.MissedHoursExcused))
+	data.StudentMissedHours = strconv.Itoa(int(userStudent.MissedHours.Int32))
+	data.StudentMissedHoursExcused = strconv.Itoa(int(userStudent.MissedHoursExcused.Int32))
 
-	var organisation db.Organisation
-	err = g.cfg.DB.NewSelect().Model(&organisation).Where("id = ?", report.OrganisationID).Scan(ctx)
+	//var organisation db.Organisation
+	//err = g.cfg.DB.NewSelect().Model(&organisation).Where("id = ?", report.OrganisationID).Scan(ctx)
+	organisation, err := g.cfg.DB.GLOBAL_OrganisationById(ctx, report.OrganisationID)
 	if err != nil {
 		return nil, err
 	}
 
 	data.OrganisationName = organisation.Name
 	data.OrganisationAddress = organisation.Address
-	data.OrganisationLogoURL = organisation.LogoURL
+	data.OrganisationLogoURL = organisation.LogoUrl
 
 	date := report.CreatedAt
 	if date.Month() < 8 {
@@ -77,26 +85,17 @@ func (g *Generator) CompetencesReportData(report db.Report) (*CompetencesTemplat
 		return nil, err
 	}
 
-	var competences []db.Competence
-	err = g.cfg.DB.NewSelect().
-		Model(&competences).
-		Where("organisation_id = ?", report.OrganisationID).
-		Order("sort_order").
-		Order("name").
-		Scan(ctx)
+	competences, err := g.cfg.DB.CompetenceListOrderedBySortOrderAndName(ctx, report.OrganisationID)
 	if err != nil {
 		return nil, err
 	}
 
-	var userCompetences []db.UserCompetence
-	err = g.cfg.DB.NewSelect().
-		Model(&userCompetences).
-		Where("user_id = ?", report.StudentUserID).
-		Where("organisation_id = ?", report.OrganisationID).
-		Where("created_at >= ?", report.From).
-		Where("created_at <= (DATE ? + 1)", report.To).
-		Order("created_at DESC").
-		Scan(ctx)
+	userCompetences, err := g.cfg.DB.UserCompetenceForCompetenceReport(ctx, db.UserCompetenceForCompetenceReportParams{
+		UserID:         report.StudentUserID,
+		OrganisationID: report.OrganisationID,
+		StartDate:      report.From,
+		EndDate:        report.To,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +151,7 @@ func Subjects(competences []db.Competence) []db.Competence {
 	// sort subjects by sort_order
 	for i := range subjects {
 		for j := range subjects {
-			if subjects[i].SortOrder < subjects[j].SortOrder {
+			if subjects[i].SortOrder.Int32 < subjects[j].SortOrder.Int32 {
 				subjects[i], subjects[j] = subjects[j], subjects[i]
 			}
 		}
@@ -169,7 +168,7 @@ func GetCompetenceByParent(competences map[string][]db.Competence, parent db.Com
 	// sort competences by sort_order
 	for i := range result {
 		for j := range result {
-			if result[i].SortOrder < result[j].SortOrder {
+			if result[i].SortOrder.Int32 < result[j].SortOrder.Int32 {
 				result[i], result[j] = result[j], result[i]
 			}
 		}
@@ -209,7 +208,7 @@ func (g *Generator) populateCompetences(report db.Report, parent db.Competence, 
 		if len(userLevels) == 0 {
 			data[i].Level = 0
 		} else {
-			data[i].Level = userLevels[0].Level
+			data[i].Level = int(userLevels[0].Level)
 		}
 
 		for i := range competences {

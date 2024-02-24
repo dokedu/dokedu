@@ -6,14 +6,14 @@ package graph
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5/pgtype"
 	"slices"
 	"time"
 
 	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
-	"github.com/xuri/excelize/v2"
+	"github.com/jackc/pgx/v5/pgtype"
+	excelize "github.com/xuri/excelize/v2"
 )
 
 // ImportStudents imports students from an Excel file.
@@ -180,6 +180,12 @@ LoopRows:
 	}, nil
 }
 
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
 func (r *mutationResolver) createUserFromRow(row []string, organisationID string) *db.User {
 	var user db.User
 	user.FirstName = row[0]

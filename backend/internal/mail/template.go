@@ -3,8 +3,9 @@ package mail
 import (
 	"bytes"
 	"embed"
-	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"html/template"
+
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 )
 
 //go:embed templates/*

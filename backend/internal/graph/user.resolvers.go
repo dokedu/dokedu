@@ -6,12 +6,18 @@ package graph
 
 import (
 	"context"
+	"database/sql"
 	"errors"
-	"fmt"
+	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
+	"github.com/dokedu/dokedu/backend/internal/helper"
+	"github.com/dokedu/dokedu/backend/internal/middleware"
+	"github.com/jackc/pgx/v5/pgtype"
+	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 // CreateUser is the resolver for the createUser field.
@@ -21,51 +27,42 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 		return nil, nil
 	}
 
-	var organisation db.Organisation
-	err = r.DB.NewSelect().Model(&organisation).Where("id = ?", currentUser.OrganisationID).Scan(ctx)
+	organisation, err := r.DB.GLOBAL_OrganisationById(ctx, currentUser.OrganisationID)
 	if err != nil {
 		return nil, err
 	}
 
-	//// check if the email is in the allowed domains
-	//if isStringInArray(input.Email, organisation.AllowedDomains) {
-	//	return nil, errors.New("email is not in the allowed domains (allowed domains: " + strings.Join(organisation.AllowedDomains, ", ") + ")")
-	//}
-
-	var count int
-	count, err = r.DB.NewSelect().Model(&db.User{}).Where("organisation_id = ?", currentUser.OrganisationID).Where("email = ?", input.Email).Count(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if count > 0 {
-		return nil, errors.New("email is already in the database")
-	}
-
-	// create a new user
-	user := db.User{
-		OrganisationID: currentUser.OrganisationID,
+	userParams := db.CreateUserParams{
 		Role:           input.Role,
-		Email:          sql.NullString{String: input.Email, Valid: true},
+		Email:          pgtype.Text{String: input.Email, Valid: true},
 		FirstName:      input.FirstName,
 		LastName:       input.LastName,
+		OrganisationID: currentUser.OrganisationID,
 	}
 
-	// insert the user into the database
-	err = r.DB.NewInsert().Model(&user).Returning("*").Scan(ctx)
+	user, err := r.DB.CreateUser(ctx, userParams)
+	// TODO: check if returns error because user already exists with the email
 	if err != nil {
 		return nil, err
 	}
 
 	// Email the user
-	token := nanoid.Must(32)
-	_, err = r.DB.NewUpdate().Model(&user).Set("recovery_token = ?", token).Set("recovery_sent_at = now()").Where("id = ?", user.ID).Exec(ctx)
+	token := gonanoid.Must(32)
+	//_, err = r.DB.NewUpdate().Model(&user).Set("recovery_token = ?", token).Set("recovery_sent_at = now()").Where("id = ?", user.ID).Exec(ctx)
+	recoveryTokenParams := db.UpdateUserRecoveryTokenParams{
+		ID:            user.ID,
+		RecoveryToken: pgtype.Text{String: token, Valid: true},
+	}
+	r.DB.UpdateUserRecoveryToken(ctx, recoveryTokenParams)
 	if err != nil {
 		return nil, err
 	}
 
-	err = r.Mailer.SendInvite(input.Email, user.FirstName, organisation.Name, currentUser.Language, token)
-	if err != nil {
-		return nil, err
+	if input.Email != "" {
+		err = r.Mailer.SendInvite(input.Email, user.FirstName, organisation.Name, currentUser.Language.UserLang, token)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &user, nil
@@ -78,62 +75,48 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 		return nil, nil
 	}
 
-	// update the user
-	user := db.User{
+	updateUserParams := db.UpdateUserParams{
 		ID:             input.ID,
-		OrganisationID: currentUser.OrganisationID,
 		FirstName:      input.FirstName,
 		LastName:       input.LastName,
+		OrganisationID: currentUser.OrganisationID,
 	}
-
-	_, err = r.DB.NewUpdate().
-		Model(&user).
-		OmitZero().
-		WherePK().
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Returning("*").
-		Exec(ctx)
+	user, err := r.DB.UpdateUser(ctx, updateUserParams)
 	if err != nil {
 		return nil, err
 	}
 
 	// Update the user_student if the role is student
 	if user.Role == "student" {
-		student := db.UserStudent{
+		studentParams := db.UpdateUserStudentParams{
 			UserID:         user.ID,
 			OrganisationID: currentUser.OrganisationID,
 		}
 
 		// Check the optional fields
 		if input.Grade != nil {
-			student.Grade = int32(*input.Grade)
+			studentParams.Grade = int32(*input.Grade)
 		}
 		if input.Birthday != nil {
-			student.Birthday = bun.NullTime{Time: *input.Birthday}
+			studentParams.Birthday = pgtype.Date{Time: *input.Birthday}
 		}
 		if input.JoinedAt != nil {
-			student.JoinedAt = bun.NullTime{Time: *input.JoinedAt}
+			studentParams.JoinedAt = pgtype.Timestamptz{Time: *input.JoinedAt}
 		}
 		if input.LeftAt != nil {
-			student.LeftAt = bun.NullTime{Time: *input.LeftAt}
+			studentParams.LeftAt = pgtype.Timestamptz{Time: *input.LeftAt}
 		}
 		if input.Emoji != nil {
-			student.Emoji = sql.NullString{String: *input.Emoji, Valid: true}
+			studentParams.Emoji = pgtype.Text{String: *input.Emoji, Valid: true}
 		}
 		if input.MissedHours != nil {
-			student.MissedHours = int32(*input.MissedHours)
+			studentParams.MissedHours = pgtype.Int4{Int32: int32(*input.MissedHours), Valid: true}
 		}
 		if input.MissedHoursExcused != nil {
-			student.MissedHoursExcused = int32(*input.MissedHoursExcused)
+			studentParams.MissedHoursExcused = pgtype.Int4{Int32: int32(*input.MissedHoursExcused), Valid: true}
 		}
 
-		_, err = r.DB.NewUpdate().
-			Model(&student).
-			OmitZero().
-			Where("user_id = ?", user.ID).
-			Where("organisation_id = ?", currentUser.OrganisationID).
-			Returning("*").
-			Exec(ctx)
+		_, err = r.DB.UpdateUserStudent(ctx, studentParams)
 		if err != nil {
 			return nil, nil
 		}
@@ -149,59 +132,33 @@ func (r *mutationResolver) ArchiveUser(ctx context.Context, id string) (*db.User
 		return nil, nil
 	}
 
-	// check whether the user is already archived
-	count, err := r.DB.NewSelect().Model(&db.User{}).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Where("deleted_at IS NOT NULL").Count(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if count > 0 {
-		return nil, errors.New("user is already archived")
-	}
-
-	user := &db.User{
+	// Delete the user by setting the deleted_at field to the current time
+	user, err := r.DB.DeleteUserById(ctx, db.DeleteUserByIdParams{
 		ID:             id,
 		OrganisationID: currentUser.OrganisationID,
-		DeletedAt: bun.NullTime{
-			Time: time.Now(),
-		},
-	}
-
-	// archive the user by setting the deleted_at field to the current time
-	res, err := r.DB.NewUpdate().Model(user).Column("deleted_at").Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Returning("*").Exec(ctx)
+	})
 	if err != nil {
 		return nil, err
-	}
-	affected, err := res.RowsAffected()
-	if err != nil {
-		return nil, err
-	}
-	if affected == 0 {
-		return nil, errors.New("user not found")
 	}
 
 	// If the user is a student, we also need to archive the user_student
-	if user.Role == "student" {
-		student := db.UserStudent{
+	if user.Role == db.UserRoleStudent {
+		_, err = r.DB.DeleteUserStudent(ctx, db.DeleteUserStudentParams{
 			UserID:         user.ID,
 			OrganisationID: currentUser.OrganisationID,
-			DeletedAt: bun.NullTime{
-				Time: time.Now(),
-			},
-		}
-
-		_, err = r.DB.NewUpdate().Model(&student).Column("deleted_at").Where("user_id = ?", user.ID).Where("organisation_id = ?", currentUser.OrganisationID).Exec(ctx)
+		})
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	// Remove the sessions for the user
-	_, err = r.DB.NewDelete().Model(&db.Session{}).Where("user_id = ?", user.ID).Exec(ctx)
+	err = r.DB.GLOBAL_DeleteSessionsByUserID(ctx, user.ID)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, err
 	}
 
-	return user, nil
+	return &user, nil
 }
 
 // UpdateUserLanguage is the resolver for the updateUserLanguage field.
@@ -212,24 +169,16 @@ func (r *mutationResolver) UpdateUserLanguage(ctx context.Context, language mode
 		return nil, nil
 	}
 
-	updatedUser := db.User{
+	user, err := r.DB.UpdateUserLanguage(ctx, db.UpdateUserLanguageParams{
 		ID:             currentUser.ID,
+		Language:       db.NullUserLang{UserLang: db.UserLang(language), Valid: true},
 		OrganisationID: currentUser.OrganisationID,
-		Language:       language,
-	}
-
-	// update the user
-	_, err = r.DB.NewUpdate().
-		Model(&updatedUser).
-		Column("language").
-		Where("id = ?", currentUser.ID).
-		Where("organisation_id = ?", currentUser.OrganisationID).
-		Exec(ctx)
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	return &updatedUser, nil
+	return &user, nil
 }
 
 // Users is the resolver for the users field.
@@ -243,32 +192,35 @@ func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filt
 
 	// query the users
 	var users []*db.User
-	query := r.DB.NewSelect().
-		Model(&users).
+	query := r.DB.NewQueryBuilder().
+		Select("*").
+		From("users").
 		Where("organisation_id = ?", currentUser.OrganisationID).
-		Limit(pageLimit).
-		Offset(pageOffset)
+		Limit(uint64(pageLimit)).
+		Offset(uint64(pageOffset))
 
 	if filter != nil {
 		if filter.Role != nil && len(filter.Role) > 0 {
-			query.Where("role IN (?)", bun.In(filter.Role))
+			query.Where("role IN (?)", filter.Role)
 		}
 		if filter.OrderBy != nil {
 			switch *filter.OrderBy {
 			case model.UserOrderByFirstNameAsc:
-				query.OrderExpr("first_name ASC, last_name ASC")
+				query.OrderBy("first_name ASC, last_name ASC")
 			case model.UserOrderByFirstNameDesc:
-				query.OrderExpr("first_name DESC, last_name DESC")
+				query.OrderBy("first_name DESC, last_name DESC")
 			case model.UserOrderByLastNameAsc:
-				query.OrderExpr("last_name ASC, first_name ASC")
+				query.OrderBy("last_name ASC, first_name ASC")
 			case model.UserOrderByLastNameDesc:
-				query.OrderExpr("last_name DESC, first_name DESC")
+				query.OrderBy("last_name DESC, first_name DESC")
 			default:
-				query.OrderExpr("last_name ASC, first_name ASC")
+				query.OrderBy("last_name ASC, first_name ASC")
 			}
 		}
-		if filter.ShowDeleted != nil && *filter.ShowDeleted == true {
-			query.WhereDeleted()
+		if filter.ShowDeleted != nil && *filter.ShowDeleted {
+			query.Where("deleted_at IS NOT NULL")
+		} else {
+			query.Where("deleted_at IS NULL")
 		}
 	}
 
@@ -278,12 +230,19 @@ func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filt
 		query.Where("first_name ILIKE ? OR last_name ILIKE ? OR first_name || last_name ILIKE ? OR last_name || first_name ILIKE ?", "%"+withoutSpace+"%", "%"+withoutSpace+"%", "%"+withoutSpace+"%", "%"+withoutSpace+"%")
 	}
 
-	count, err := query.ScanAndCount(ctx)
+	err = query.Scan()
 	if err != nil {
 		return nil, err
 	}
 
-	pageInfo, err := helper.CreatePageInfo(pageOffset, pageLimit, count)
+	// TODO: properly query all user
+	// count := 10_000
+	count, err := r.DB.UserListCount(ctx, currentUser.OrganisationID)
+	if err != nil {
+		return nil, err
+	}
+
+	pageInfo, err := helper.CreatePageInfo(pageOffset, pageLimit, int(count))
 	if err != nil {
 		return nil, err
 	}
@@ -291,7 +250,7 @@ func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filt
 	return &model.UserConnection{
 		Edges:      users,
 		PageInfo:   pageInfo,
-		TotalCount: count,
+		TotalCount: int(count),
 	}, nil
 }
 
@@ -303,7 +262,10 @@ func (r *queryResolver) User(ctx context.Context, id string) (*db.User, error) {
 	}
 
 	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", id).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	user, err = r.DB.UserById(ctx, db.UserByIdParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -318,13 +280,7 @@ func (r *queryResolver) Me(ctx context.Context) (*db.User, error) {
 		return nil, nil
 	}
 
-	var user db.User
-	err = r.DB.NewSelect().Model(&user).Where("id = ?", currentUser.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
+	return &currentUser.User, nil
 }
 
 // Email is the resolver for the email field.
@@ -343,8 +299,11 @@ func (r *userResolver) Student(ctx context.Context, obj *db.User) (*db.UserStude
 		return nil, nil
 	}
 
-	var userStudent db.UserStudent
-	err = r.DB.NewSelect().Model(&userStudent).Where("user_id = ?", obj.ID).Where("organisation_id = ?", currentUser.OrganisationID).Scan(ctx)
+	//var userStudent db.UserStudent
+	userStudent, err := r.DB.UserStudentByUserId(ctx, db.UserStudentByUserIdParams{
+		ID:             obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -357,12 +316,24 @@ func (r *userResolver) Student(ctx context.Context, obj *db.User) (*db.UserStude
 
 // Language is the resolver for the language field.
 func (r *userResolver) Language(ctx context.Context, obj *db.User) (*model.UserLanguage, error) {
-	panic(fmt.Errorf("not implemented: Language - language"))
+	if obj.Language.Valid {
+		switch obj.Language.UserLang {
+		case db.UserLangEn:
+			lgn := model.UserLanguageEn
+			return &lgn, nil
+		case db.UserLangDe:
+			lgn := model.UserLanguageDe
+			return &lgn, nil
+		default:
+			return nil, errors.New("unknown language")
+		}
+	}
+	return nil, nil
 }
 
 // DeletedAt is the resolver for the deletedAt field.
 func (r *userResolver) DeletedAt(ctx context.Context, obj *db.User) (*time.Time, error) {
-	if obj.DeletedAt.IsZero() {
+	if obj.DeletedAt.Valid {
 		return &obj.DeletedAt.Time, nil
 	}
 

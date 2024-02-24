@@ -13,6 +13,11 @@ SELECT *
 FROM users
 WHERE id = $1 AND deleted_at IS NULL;
 
+-- name: GLOBAL_UserByIdWithDeleted :one
+SELECT *
+FROM users
+WHERE id = $1;
+
 -- name: GLOBAL_UserByEmail :one
 SELECT *
 FROM users
@@ -40,7 +45,7 @@ SELECT *
 FROM users
 WHERE organisation_id = $1 AND deleted_at IS NULL;
 
--- name: UserListCount :many
+-- name: UserListCount :one
 SELECT COUNT(*)
 FROM users
 WHERE organisation_id = $1 AND deleted_at IS NULL;
@@ -87,4 +92,25 @@ UPDATE users
 SET deleted_at = now()
 WHERE email = lower($1)
   AND deleted_at IS NULL
+RETURNING *;
+
+-- name: UpdateUser :one
+UPDATE users
+SET first_name = @first_name, last_name = @last_name
+WHERE id = @id
+  AND organisation_id = @organisation_id
+RETURNING *;
+
+-- name: DeleteUserById :one
+UPDATE users
+SET deleted_at = now()
+WHERE id = @id
+  AND organisation_id = @organisation_id
+RETURNING *;
+
+-- name: UpdateUserLanguage :one
+UPDATE users
+SET language = @language
+WHERE id = @id
+  AND organisation_id = @organisation_id
 RETURNING *;

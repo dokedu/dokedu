@@ -4,11 +4,12 @@ import (
 	"container/list"
 	"context"
 	"fmt"
-	"github.com/dokedu/dokedu/backend/internal/database/db"
 	"log/slog"
 	"net/http"
 	"os"
 	"sync"
+
+	"github.com/dokedu/dokedu/backend/internal/database/db"
 
 	"github.com/dokedu/dokedu/backend/internal/services/report_generation/config"
 	"github.com/dokedu/dokedu/backend/internal/services/report_generation/generator/pdf"

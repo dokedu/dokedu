@@ -25,3 +25,17 @@ FROM user_students
 WHERE id = @id
   AND organisation_id = @organisation_id
 LIMIT 1;
+
+-- name: UpdateUserStudent :one
+UPDATE user_students
+SET grade = @grade, birthday = @birthday, left_at = @left_at, joined_at = @joined_at, emoji = @emoji, missed_hours = @missed_hours, missed_hours_excused = @missed_hours_excused
+WHERE user_id = @user_id
+  AND organisation_id = @organisation_id
+RETURNING *;
+
+-- name: DeleteUserStudent :one
+UPDATE user_students
+SET deleted_at = now()
+WHERE user_id = @user_id
+  AND organisation_id = @organisation_id
+RETURNING *;

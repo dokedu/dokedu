@@ -15,8 +15,8 @@ import (
 const competenceListByUserCompetenceByEntry = `-- name: CompetenceListByUserCompetenceByEntry :many
 SELECT competences.id, name, competences.competence_id, competence_type, competences.organisation_id, grades, color, curriculum_id, competences.created_at, competences.deleted_at, sort_order, competences.created_by, uc.id, level, uc.user_id, entry_id, uc.competence_id, uc.created_at, uc.created_by, uc.deleted_at, uc.organisation_id, e.id, date, body, e.user_id, e.created_at, e.deleted_at, e.organisation_id
 FROM competences
-JOIN public.user_competences uc ON competences.id = uc.competence_id
-JOIN public.entries e ON uc.entry_id = e.id
+         JOIN public.user_competences uc ON competences.id = uc.competence_id
+         JOIN public.entries e ON uc.entry_id = e.id
 WHERE uc.user_id = $1
   AND uc.organisation_id = $2
   AND uc.entry_id = $3
@@ -150,7 +150,7 @@ func (q *Queries) CreateUserCompetenceWithoutEntry(ctx context.Context, arg Crea
 
 const deleteEntryCompetences = `-- name: DeleteEntryCompetences :many
 UPDATE user_competences
-SET deleted_at = now()
+SET deleted_at = NOW()
 WHERE entry_id = $1
   AND organisation_id = $2
 RETURNING id, level, user_id, entry_id, competence_id, created_at, created_by, deleted_at, organisation_id
@@ -193,7 +193,7 @@ func (q *Queries) DeleteEntryCompetences(ctx context.Context, arg DeleteEntryCom
 
 const deleteUserCompetences = `-- name: DeleteUserCompetences :many
 UPDATE user_competences
-SET deleted_at = now()
+SET deleted_at = NOW()
 WHERE user_id = $1
   AND entry_id = $2
   AND organisation_id = $3
@@ -208,6 +208,59 @@ type DeleteUserCompetencesParams struct {
 
 func (q *Queries) DeleteUserCompetences(ctx context.Context, arg DeleteUserCompetencesParams) ([]UserCompetence, error) {
 	rows, err := q.db.Query(ctx, deleteUserCompetences, arg.UserID, arg.EntryID, arg.OrganisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserCompetence
+	for rows.Next() {
+		var i UserCompetence
+		if err := rows.Scan(
+			&i.ID,
+			&i.Level,
+			&i.UserID,
+			&i.EntryID,
+			&i.CompetenceID,
+			&i.CreatedAt,
+			&i.CreatedBy,
+			&i.DeletedAt,
+			&i.OrganisationID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const rEPORT_UserCompetenceListByUserId = `-- name: REPORT_UserCompetenceListByUserId :many
+SELECT id, level, user_id, entry_id, competence_id, created_at, created_by, deleted_at, organisation_id
+FROM user_competences
+WHERE user_id = $1
+  AND organisation_id = $2
+  AND deleted_at IS NULL
+  AND created_at >= $3
+  AND created_at <= (DATE $4 + 1)
+ORDER BY created_at DESC
+`
+
+type REPORT_UserCompetenceListByUserIdParams struct {
+	UserID         string    `db:"user_id"`
+	OrganisationID string    `db:"organisation_id"`
+	StartDate      time.Time `db:"start_date"`
+	EndDate        time.Time `db:"+end_date"`
+}
+
+func (q *Queries) REPORT_UserCompetenceListByUserId(ctx context.Context, arg REPORT_UserCompetenceListByUserIdParams) ([]UserCompetence, error) {
+	rows, err := q.db.Query(ctx, rEPORT_UserCompetenceListByUserId,
+		arg.UserID,
+		arg.OrganisationID,
+		arg.StartDate,
+		arg.EndDate,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -344,6 +397,142 @@ func (q *Queries) UserCompetenceCountByUserId(ctx context.Context, arg UserCompe
 	var count int64
 	err := row.Scan(&count)
 	return count, err
+}
+
+const userCompetenceForCompetenceReport = `-- name: UserCompetenceForCompetenceReport :many
+SELECT id, level, user_id, entry_id, competence_id, created_at, created_by, deleted_at, organisation_id
+FROM user_competences
+WHERE user_id = $1
+  AND organisation_id = $2
+  AND deleted_at IS NULL
+  AND created_at >= $3
+  AND created_at <= (DATE $4 + 1)
+ORDER BY created_at DESC
+`
+
+type UserCompetenceForCompetenceReportParams struct {
+	UserID         string    `db:"user_id"`
+	OrganisationID string    `db:"organisation_id"`
+	StartDate      time.Time `db:"start_date"`
+	EndDate        time.Time `db:"+end_date"`
+}
+
+func (q *Queries) UserCompetenceForCompetenceReport(ctx context.Context, arg UserCompetenceForCompetenceReportParams) ([]UserCompetence, error) {
+	rows, err := q.db.Query(ctx, userCompetenceForCompetenceReport,
+		arg.UserID,
+		arg.OrganisationID,
+		arg.StartDate,
+		arg.EndDate,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserCompetence
+	for rows.Next() {
+		var i UserCompetence
+		if err := rows.Scan(
+			&i.ID,
+			&i.Level,
+			&i.UserID,
+			&i.EntryID,
+			&i.CompetenceID,
+			&i.CreatedAt,
+			&i.CreatedBy,
+			&i.DeletedAt,
+			&i.OrganisationID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const userCompetenceList = `-- name: UserCompetenceList :many
+SELECT id, level, user_id, entry_id, competence_id, created_at, created_by, deleted_at, organisation_id
+FROM user_competences
+WHERE organisation_id = $1
+  AND deleted_at IS NULL
+`
+
+func (q *Queries) UserCompetenceList(ctx context.Context, organisationID string) ([]UserCompetence, error) {
+	rows, err := q.db.Query(ctx, userCompetenceList, organisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserCompetence
+	for rows.Next() {
+		var i UserCompetence
+		if err := rows.Scan(
+			&i.ID,
+			&i.Level,
+			&i.UserID,
+			&i.EntryID,
+			&i.CompetenceID,
+			&i.CreatedAt,
+			&i.CreatedBy,
+			&i.DeletedAt,
+			&i.OrganisationID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const userCompetenceListByEntryAndUser = `-- name: UserCompetenceListByEntryAndUser :many
+SELECT id, level, user_id, entry_id, competence_id, created_at, created_by, deleted_at, organisation_id
+FROM user_competences
+WHERE entry_id = $1
+  AND user_id = $2
+  AND organisation_id = $3
+  AND deleted_at IS NULL
+ORDER BY competence_id DESC
+`
+
+type UserCompetenceListByEntryAndUserParams struct {
+	EntryID        pgtype.Text `db:"entry_id"`
+	UserID         string      `db:"user_id"`
+	OrganisationID string      `db:"organisation_id"`
+}
+
+func (q *Queries) UserCompetenceListByEntryAndUser(ctx context.Context, arg UserCompetenceListByEntryAndUserParams) ([]UserCompetence, error) {
+	rows, err := q.db.Query(ctx, userCompetenceListByEntryAndUser, arg.EntryID, arg.UserID, arg.OrganisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserCompetence
+	for rows.Next() {
+		var i UserCompetence
+		if err := rows.Scan(
+			&i.ID,
+			&i.Level,
+			&i.UserID,
+			&i.EntryID,
+			&i.CompetenceID,
+			&i.CreatedAt,
+			&i.CreatedBy,
+			&i.DeletedAt,
+			&i.OrganisationID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const userCompetenceListByEntryId = `-- name: UserCompetenceListByEntryId :many
