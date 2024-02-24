@@ -85,7 +85,7 @@ input UpdateFileInput {
 }
 
 type UpdateFilePayload {
-    name: String
+    file: File!
 }
 
 input DeleteFileInput {

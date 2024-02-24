@@ -400,7 +400,7 @@ type ComplexityRoot struct {
 	}
 
 	UpdateFilePayload struct {
-		Name func(childComplexity int) int
+		File func(childComplexity int) int
 	}
 
 	UpdateFilePermissionPayload struct {
@@ -2776,12 +2776,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.TagConnection.TotalCount(childComplexity), true
 
-	case "UpdateFilePayload.name":
-		if e.complexity.UpdateFilePayload.Name == nil {
+	case "UpdateFilePayload.file":
+		if e.complexity.UpdateFilePayload.File == nil {
 			break
 		}
 
-		return e.complexity.UpdateFilePayload.Name(childComplexity), true
+		return e.complexity.UpdateFilePayload.File(childComplexity), true
 
 	case "UpdateFilePermissionPayload.filePermission":
 		if e.complexity.UpdateFilePermissionPayload.FilePermission == nil {
@@ -11570,8 +11570,8 @@ func (ec *executionContext) fieldContext_Mutation_updateFile(ctx context.Context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "name":
-				return ec.fieldContext_UpdateFilePayload_name(ctx, field)
+			case "file":
+				return ec.fieldContext_UpdateFilePayload_file(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UpdateFilePayload", field.Name)
 		},
@@ -18684,8 +18684,8 @@ func (ec *executionContext) fieldContext_TagConnection_totalCount(ctx context.Co
 	return fc, nil
 }
 
-func (ec *executionContext) _UpdateFilePayload_name(ctx context.Context, field graphql.CollectedField, obj *model.UpdateFilePayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UpdateFilePayload_name(ctx, field)
+func (ec *executionContext) _UpdateFilePayload_file(ctx context.Context, field graphql.CollectedField, obj *model.UpdateFilePayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdateFilePayload_file(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -18698,28 +18698,55 @@ func (ec *executionContext) _UpdateFilePayload_name(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
+		return obj.File, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*db.File)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdatabaseᚋdbᚐFile(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UpdateFilePayload_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_UpdateFilePayload_file(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UpdateFilePayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_File_id(ctx, field)
+			case "size":
+				return ec.fieldContext_File_size(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "type":
+				return ec.fieldContext_File_type(ctx, field)
+			case "mime":
+				return ec.fieldContext_File_mime(ctx, field)
+			case "parent":
+				return ec.fieldContext_File_parent(ctx, field)
+			case "parentsRecursive":
+				return ec.fieldContext_File_parentsRecursive(ctx, field)
+			case "children":
+				return ec.fieldContext_File_children(ctx, field)
+			case "permissions":
+				return ec.fieldContext_File_permissions(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_File_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_File_deletedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
 		},
 	}
 	return fc, nil
@@ -29940,8 +29967,11 @@ func (ec *executionContext) _UpdateFilePayload(ctx context.Context, sel ast.Sele
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("UpdateFilePayload")
-		case "name":
-			out.Values[i] = ec._UpdateFilePayload_name(ctx, field, obj)
+		case "file":
+			out.Values[i] = ec._UpdateFilePayload_file(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

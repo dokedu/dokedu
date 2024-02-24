@@ -392,7 +392,7 @@ type UpdateFileInput struct {
 }
 
 type UpdateFilePayload struct {
-	Name *string `json:"name,omitempty"`
+	File *db.File `json:"file"`
 }
 
 type UpdateFilePermissionInput struct {

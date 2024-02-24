@@ -1,16 +1,11 @@
-query files($offset: Int, $limit: Int, $filter: FilesFilterInput) {
-  files(input: $filter, limit: $limit, offset: $offset) {
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
+query files($input: FileFilterInput!) {
+    files(input: $input) {
+        pageInfo {
+            hasNextPage
+            hasPreviousPage
+        }
+        edges {
+            ...file
+        }
     }
-    edges {
-      id
-      name
-      fileType
-      MIMEType
-      size
-      createdAt
-    }
-  }
 }

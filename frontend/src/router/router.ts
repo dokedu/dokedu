@@ -31,6 +31,7 @@ router.beforeEach(async (to) => {
           return { name: "/settings/profile" }
         }
       }
+
       // redirect to last opened page
       if (lastOpenedPage.value) {
         return lastOpenedPage.value

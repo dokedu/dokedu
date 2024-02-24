@@ -1,0 +1,7 @@
+mutation updateFile($input: UpdateFileInput!) {
+    updateFile(input: $input) {
+        file {
+            ...file
+        }
+    }
+}

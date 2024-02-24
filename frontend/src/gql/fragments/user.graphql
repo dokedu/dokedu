@@ -1,8 +1,9 @@
 fragment user on User {
-  id
-  role
-  email
-  firstName
-  lastName
-  organisationId
+    id
+    role
+    email
+    firstName
+    lastName
+    organisationId
+    language
 }
