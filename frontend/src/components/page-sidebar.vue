@@ -48,7 +48,8 @@ import { computed, ref, watch } from "vue"
 import { Globe, HelpCircle, LogOut, Settings } from "lucide-vue-next"
 import { onClickOutside, useStorage } from "@vueuse/core"
 import { useRoute } from "vue-router/auto"
-import { type AppLink, apps } from "./d-sidebar/d-sidebar"
+import { apps } from "./d-sidebar/d-sidebar"
+import type { AppLink } from "./d-sidebar/d-sidebar"
 import i18n from "@/i18n"
 import { useAuth } from "@/composables/auth"
 import useActiveApp from "@/composables/useActiveApp"
@@ -84,7 +85,7 @@ const { executeMutation: updateLanguage } = useUpdateUserLanguageMutation()
 
 function getPreferredLanguage() {
   const languages = navigator.languages
-  const supported = ["en", "de"]
+  const supported = ["EN", "DE"]
 
   for (const lang of languages) {
     if (supported.includes(lang)) {
@@ -92,7 +93,7 @@ function getPreferredLanguage() {
     }
   }
 
-  return "en"
+  return "EN"
 }
 
 // Using the language from the local storage
@@ -105,7 +106,7 @@ const languageOptions: { [key: string]: UserLanguage } = {
 }
 
 watch(language, async () => {
-  i18n.global.locale.value = language.value as "en" | "de"
+  i18n.global.locale.value = language.value as "EN" | "DE"
 
   // Update the language in the backend
   await updateLanguage({ language: languageOptions[language.value] })

@@ -1,27 +1,23 @@
 <template>
   <div id="element" class="flex w-full flex-col">
     <MPageHeader />
-    <div class="flex-1 divide-y divide-neutral-200 overflow-scroll text-sm">
-      <router-link
-        v-for="entry in data?.entries.edges"
-        :to="{ name: '/m/record/entries/[id]', params: { id: `${entry?.id}` } }"
-        class="flex flex-col gap-2 p-4 text-neutral-700"
-      >
-        <div class="line-clamp-3">
-          {{ entry?.body }}
-        </div>
-        <div class="flex gap-1 text-xs text-neutral-500">
-          <div>{{ `${entry?.user.firstName} ${entry?.user.lastName}` }}</div>
-          <div>⋅</div>
-          <div>{{ toLocateDateString(entry?.createdAt) }}</div>
-        </div>
-      </router-link>
-      <div class="flex flex-col gap-2 p-4 text-center text-xs text-neutral-500">
-        <div class="mx-auto max-w-xs">
-          Im Moment zeigen wir nur die letzten 10 Einträge. Demnächst kannst du alle Einträge auf deinem Smartphone
-          sehen.
-        </div>
-      </div>
+    <div ref="el" class="flex-1 divide-y divide-neutral-200 overflow-scroll text-sm">
+      <template v-for="result in results">
+        <router-link
+          v-for="entry in result.data?.entries.edges"
+          :to="{ name: '/m/record/entries/[id]', params: { id: `${entry?.id}` } }"
+          class="flex flex-col gap-2 p-4 text-neutral-700"
+        >
+          <div class="line-clamp-3">
+            {{ entry?.body }}
+          </div>
+          <div class="flex gap-1 text-xs text-neutral-500">
+            <div>{{ `${entry?.user.firstName} ${entry?.user.lastName}` }}</div>
+            <div>⋅</div>
+            <div>{{ toLocateDateString(entry?.createdAt) }}</div>
+          </div>
+        </router-link>
+      </template>
     </div>
     <MPageFooter>
       <div
@@ -49,11 +45,50 @@ import MPageHeader from "@/components/mobile/m-page-header.vue"
 import MPageFooter from "@/components/mobile/m-page-footer.vue"
 import { Plus } from "lucide-vue-next"
 import { useRouter } from "vue-router/auto"
-import { useMGetEntriesQuery } from "@/gql/queries/entries/mGetEntries"
+import { MGetEntriesDocument, useMGetEntriesQuery } from "@/gql/queries/entries/mGetEntries"
 import { useCreateEntryDraftMutation } from "@/gql/mutations/entries/createEntryDraft"
 import { EntrySortBy } from "@/gql/schema"
+import { useInfiniteScroll } from "@vueuse/core"
+import { ref } from "vue"
+import { urqlClient } from "@/main"
 
 const { executeMutation: createEntryDraft } = useCreateEntryDraftMutation()
+
+const el = ref<HTMLElement | null>(null)
+
+const offset = ref(0)
+const hasNextPage = ref(true)
+
+const results = ref([
+  useMGetEntriesQuery({
+    variables: {
+      order: EntrySortBy.CreatedAtDesc,
+      limit: 10,
+      offset: offset.value
+    }
+  })
+])
+
+useInfiniteScroll(
+  el,
+  async () => {
+    if (!hasNextPage.value) return
+    offset.value += 10
+    // load more
+    const res = await urqlClient.executeQuery({
+      query: MGetEntriesDocument,
+      key: Math.random(),
+      variables: {
+        order: EntrySortBy.CreatedAtDesc,
+        limit: 10,
+        offset: offset.value
+      }
+    })
+    hasNextPage.value = res.data.entries.pageInfo.hasNextPage
+    results.value.push(res)
+  },
+  { distance: 2 }
+)
 
 const router = useRouter()
 
@@ -62,13 +97,6 @@ async function createEntry() {
 
   await router.push({ name: "/m/record/entries/[id]", params: { id: data?.createEntry?.id as string } })
 }
-
-const { data } = useMGetEntriesQuery({
-  variables: {
-    order: EntrySortBy.CreatedAtDesc,
-    limit: 10
-  }
-})
 
 function toLocateDateString(date: string) {
   return new Date(date).toLocaleDateString("de-DE", {

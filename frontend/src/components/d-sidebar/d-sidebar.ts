@@ -1,13 +1,11 @@
 import { computed } from "vue"
 
 import {
-  Globe,
   CopyCheck,
   Folder,
   Grid,
   HardDrive,
   Landmark,
-  Mails,
   Pen,
   PieChart,
   School,
@@ -176,16 +174,6 @@ export const apps = computed<App[]>(() => [
         icon: Landmark,
         name: i18n.global.t("billing"),
         route: "/admin/billing/"
-      },
-      {
-        icon: Mails,
-        name: i18n.global.t("group", 2),
-        route: "/admin/groups"
-      },
-      {
-        icon: Globe,
-        name: i18n.global.t("domain", 2),
-        route: "/admin/domains"
       }
     ]
   },
