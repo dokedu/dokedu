@@ -17,7 +17,6 @@ import (
 	"github.com/dokedu/dokedu/backend/internal/modules/meilisearch"
 	"github.com/dokedu/dokedu/backend/internal/modules/minio"
 	"github.com/dokedu/dokedu/backend/internal/msg"
-	"github.com/dokedu/dokedu/backend/internal/services/chat_message_processor"
 	"github.com/dokedu/dokedu/backend/internal/services/report_generation"
 	"github.com/dokedu/dokedu/backend/internal/services/report_generation/config"
 	"github.com/dokedu/dokedu/backend/internal/subscription"
@@ -54,8 +53,6 @@ func main() {
 	chatMessageChan := make(chan *db.Chat)
 	subscriptionHandler := subscription.NewHandler(dbClient)
 
-	chatMessageProcessor := chat_message_processor.NewChatMessageProcessor(dbClient, subscriptionHandler, chatMessageChan)
-
 	repGen := report_generation.NewReportGenerationService(config.ReportGenerationConfig{
 		DB:    dbClient,
 		MinIO: minioClient,
@@ -84,14 +81,13 @@ func main() {
 	e.Use(middleware.Auth(dbClient))
 
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
-		DB:                   dbClient,
-		MinioClient:          minioClient,
-		Mailer:               mailer,
-		ReportService:        repGen,
-		Meili:                meili,
-		ChatMessageChan:      chatMessageChan,
-		SubscriptionHandler:  subscriptionHandler,
-		ChatMessageProcessor: chatMessageProcessor,
+		DB:                  dbClient,
+		MinioClient:         minioClient,
+		Mailer:              mailer,
+		ReportService:       repGen,
+		Meili:               meili,
+		ChatMessageChan:     chatMessageChan,
+		SubscriptionHandler: subscriptionHandler,
 	}}))
 
 	var gb int64 = 1 << 30

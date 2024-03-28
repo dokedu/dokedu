@@ -222,4 +222,8 @@ func (r *subscriptionResolver) ReportCreatedOrUpdated(ctx context.Context) (<-ch
 // Report returns ReportResolver implementation.
 func (r *Resolver) Report() ReportResolver { return &reportResolver{r} }
 
+// Subscription returns SubscriptionResolver implementation.
+func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionResolver{r} }
+
 type reportResolver struct{ *Resolver }
+type subscriptionResolver struct{ *Resolver }

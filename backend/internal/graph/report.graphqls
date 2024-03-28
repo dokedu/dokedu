@@ -59,6 +59,6 @@ extend type Mutation {
     createReport(input: CreateReportInput!): [Report]!
 }
 
-extend type Subscription {
-    reportCreatedOrUpdated: Report!
+ type Subscription {
+    reportCreatedOrUpdated: Report! @deprecated
 }

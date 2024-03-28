@@ -127,10 +127,6 @@ type CompetenceConnection {
     totalCount: Int!
 }
 
-
-
-
-
 type UserStudent {
     id: ID!
     leftAt: Time
@@ -265,8 +261,6 @@ input CreateStudentInput {
     joinedAt: Time
     emoji: String
 }
-
-
 
 input CreateTagInput {
     name: String!

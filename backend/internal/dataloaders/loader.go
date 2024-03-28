@@ -30,9 +30,8 @@ func NewLoaders(conn *bun.DB) *Loaders {
 	// define the data loader
 	reader := &Reader{conn: conn}
 	loaders := &Loaders{
-		CompetenceLoader:  dataloader.NewBatchedLoader(reader.GetCompetenceParents),
-		UserLoader:        dataloader.NewBatchedLoader(reader.GetUser),
-		ChatMessageLoader: dataloader.NewBatchedLoader(reader.getChatMessageView),
+		CompetenceLoader: dataloader.NewBatchedLoader(reader.GetCompetenceParents),
+		UserLoader:       dataloader.NewBatchedLoader(reader.GetUser),
 	}
 	return loaders
 }

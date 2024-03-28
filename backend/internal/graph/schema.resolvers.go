@@ -21,7 +21,6 @@ import (
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 	meili "github.com/dokedu/dokedu/backend/internal/modules/meilisearch"
 	"github.com/dokedu/dokedu/backend/internal/msg"
-
 	nanoid "github.com/matoous/go-nanoid/v2"
 	meilisearch "github.com/meilisearch/meilisearch-go"
 	"github.com/uptrace/bun"
