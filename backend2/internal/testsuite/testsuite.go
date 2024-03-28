@@ -61,7 +61,16 @@ func (ts *TestSuite) Ctx() context.Context {
 	return ctx
 }
 
-func (ts *TestSuite) CtxWithUser(email string) context.Context {
+func (ts *TestSuite) CtxWithUser(id string) context.Context {
+	ctx := ts.Ctx()
+	user, err := ts.DB.GLOBAL_UserFindByID(ctx, id)
+	ts.NoError(err)
+
+	ctx = context.WithValue(ctx, middleware.UserCtxKey, &middleware.UserContext{User: user})
+	return ctx
+}
+
+func (ts *TestSuite) CtxWithUserEmail(email string) context.Context {
 	ctx := ts.Ctx()
 	user, err := ts.DB.GLOBAL_UserFindByEmail(ctx, email)
 	ts.NoError(err)

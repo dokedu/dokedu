@@ -4,6 +4,21 @@
 
 scalar Time
 
+
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
+    | FIELD_DEFINITION
+
+directive @goTag(
+    key: String!
+    value: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
+directive @goModel(
+    model: String
+    models: [String!]
+    forceGenerate: Boolean
+) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+
 enum UserRole {
     owner
     admin
@@ -264,7 +279,7 @@ input CreateStudentInput {
 
 input CreateTagInput {
     name: String!
-    color: String!
+    color: String! @goTag(key: "validate", value: "required,oneof=red green blue yellow purple pink orange")
 }
 
 input ResetPasswordInput {
@@ -324,7 +339,7 @@ extend type Mutation {
     createStudent(input: CreateStudentInput!): User!
 
     createUserCompetence(input: CreateUserCompetenceInput!): UserCompetence!
-    archiveUserCompetence(id: ID!): UserCompetence!
+    archiveUserCompetence(id: ID!): UserCompetence! @deprecated
 
     createTag(input: CreateTagInput!): Tag!
     archiveTag(id: ID!): Tag!

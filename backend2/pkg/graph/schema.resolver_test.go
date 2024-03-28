@@ -160,7 +160,7 @@ func (ts *TestSuite) Test_SignOut() {
 	_, err = ts.DB.GLOBAL_SessionFindByToken(ts.Ctx(), session.Token)
 	ts.NoError(err)
 
-	_, err = ts.Resolver.Mutation().SignOut(ts.CtxWithUser(user.Email.String))
+	_, err = ts.Resolver.Mutation().SignOut(ts.CtxWithUser(user.ID))
 	ts.NoError(err)
 
 	// now the session is deleted
@@ -184,12 +184,12 @@ func (ts *TestSuite) Test_CreateUser() {
 
 	// doesn't work if the user is not an admin
 	teacher := ts.MockTeacherForOrganisation(ts.FirstOrganisationID())
-	_, err = createUser(ts.CtxWithUser(teacher.Email.String))
+	_, err = createUser(ts.CtxWithUser(teacher.ID))
 	ts.ErrorIs(err, msg.ErrUnauthorized)
 
 	// works if the user is an admin
 	admin := ts.MockAdminForOrganisation(ts.FirstOrganisationID())
-	user, err := createUser(ts.CtxWithUser(admin.Email.String))
+	user, err := createUser(ts.CtxWithUser(admin.ID))
 	ts.NoError(err)
 
 	ts.AssertMailReceived(user.Email.String, user.RecoveryToken.String, "Create your account")
@@ -234,21 +234,21 @@ func (ts *TestSuite) Test_UpdateUser() {
 	ts.ErrorIs(err, msg.ErrUnauthorized)
 
 	// doesn't work if the user is not an admin
-	_, _, err = updateUser(ts.CtxWithUser(teacher.Email.String), teacher.ID, 0)
+	_, _, err = updateUser(ts.CtxWithUser(teacher.ID), teacher.ID, 0)
 	ts.ErrorIs(err, msg.ErrUnauthorized)
 
 	// works if the user is an admin
-	user, newFirstName, err := updateUser(ts.CtxWithUser(admin.Email.String), teacher.ID, 0)
+	user, newFirstName, err := updateUser(ts.CtxWithUser(admin.ID), teacher.ID, 0)
 	ts.NoError(err)
 	ts.Equal(newFirstName, user.FirstName)
 
 	// works for students
-	user, newFirstName, err = updateUser(ts.CtxWithUser(admin.Email.String), student.ID, 0)
+	user, newFirstName, err = updateUser(ts.CtxWithUser(admin.ID), student.ID, 0)
 	ts.NoError(err)
 	ts.Equal(newFirstName, user.FirstName)
 
 	gradeShould := rand.Intn(12) + 1
-	user, newFirstName, err = updateUser(ts.CtxWithUser(admin.Email.String), student.ID, gradeShould)
+	user, newFirstName, err = updateUser(ts.CtxWithUser(admin.ID), student.ID, gradeShould)
 	ts.NoError(err)
 	ts.Equal(newFirstName, user.FirstName)
 
@@ -271,15 +271,15 @@ func (ts *TestSuite) Test_ArchiveUser() {
 	ts.ErrorIs(err, msg.ErrUnauthorized)
 
 	// doesn't work if the user is not an admin
-	err = deleteUser(ts.CtxWithUser(teacher.Email.String), teacher.ID)
+	err = deleteUser(ts.CtxWithUser(teacher.ID), teacher.ID)
 	ts.ErrorIs(err, msg.ErrUnauthorized)
 
 	// works if the user is an admin
-	err = deleteUser(ts.CtxWithUser(admin.Email.String), teacher.ID)
+	err = deleteUser(ts.CtxWithUser(admin.ID), teacher.ID)
 	ts.NoError(err)
 
 	// works for students
-	err = deleteUser(ts.CtxWithUser(admin.Email.String), student.ID)
+	err = deleteUser(ts.CtxWithUser(admin.ID), student.ID)
 	ts.NoError(err)
 
 	// user is deleted
@@ -301,22 +301,22 @@ func (ts *TestSuite) Test_UpdateUserLanguage() {
 	ts.ErrorIs(err, msg.ErrUnauthorized)
 
 	// works for admin and teacher
-	_, err = ts.Resolver.Mutation().UpdateUserLanguage(ts.CtxWithUser(admin.Email.String), db.UserLangEn)
+	_, err = ts.Resolver.Mutation().UpdateUserLanguage(ts.CtxWithUser(admin.ID), db.UserLangEn)
 	ts.NoError(err)
 	lang := ts.Query1("SELECT language FROM users WHERE id = $1", admin.ID).(string)
 	ts.Equal("en", lang)
 
-	_, err = ts.Resolver.Mutation().UpdateUserLanguage(ts.CtxWithUser(admin.Email.String), db.UserLangDe)
+	_, err = ts.Resolver.Mutation().UpdateUserLanguage(ts.CtxWithUser(admin.ID), db.UserLangDe)
 	ts.NoError(err)
 	lang = ts.Query1("SELECT language FROM users WHERE id = $1", admin.ID).(string)
 	ts.Equal("de", lang)
 
-	_, err = ts.Resolver.Mutation().UpdateUserLanguage(ts.CtxWithUser(teacher.Email.String), db.UserLangEn)
+	_, err = ts.Resolver.Mutation().UpdateUserLanguage(ts.CtxWithUser(teacher.ID), db.UserLangEn)
 	ts.NoError(err)
 	lang = ts.Query1("SELECT language FROM users WHERE id = $1", teacher.ID).(string)
 	ts.Equal("en", lang)
 
-	_, err = ts.Resolver.Mutation().UpdateUserLanguage(ts.CtxWithUser(teacher.Email.String), db.UserLangDe)
+	_, err = ts.Resolver.Mutation().UpdateUserLanguage(ts.CtxWithUser(teacher.ID), db.UserLangDe)
 	ts.NoError(err)
 	lang = ts.Query1("SELECT language FROM users WHERE id = $1", teacher.ID).(string)
 	ts.Equal("de", lang)
@@ -331,11 +331,11 @@ func (ts *TestSuite) Test_SendUserInvite() {
 	ts.ErrorIs(err, msg.ErrUnauthorized)
 
 	// doesn't work if the user is not an admin
-	_, err = ts.Resolver.Mutation().SendUserInvite(ts.CtxWithUser(teacher.Email.String), teacher.ID)
+	_, err = ts.Resolver.Mutation().SendUserInvite(ts.CtxWithUser(teacher.ID), teacher.ID)
 	ts.ErrorIs(err, msg.ErrUnauthorized)
 
 	// works if the user is an admin
-	_, err = ts.Resolver.Mutation().SendUserInvite(ts.CtxWithUser(admin.Email.String), teacher.ID)
+	_, err = ts.Resolver.Mutation().SendUserInvite(ts.CtxWithUser(admin.ID), teacher.ID)
 	ts.NoError(err)
 
 	// invite is sent
@@ -361,18 +361,18 @@ func (ts *TestSuite) Test_CreateStudent() {
 	ts.ErrorIs(err, msg.ErrUnauthorized)
 
 	// doesn't work if the user is not an admin
-	_, err = createStudent(ts.CtxWithUser(teacher.Email.String), 1)
+	_, err = createStudent(ts.CtxWithUser(teacher.ID), 1)
 	ts.ErrorIs(err, msg.ErrUnauthorized)
 
 	// error on invalid grade, does not create a dangling user
 	cnt := ts.Query1("SELECT COUNT(*) FROM users").(int64)
-	_, err = createStudent(ts.CtxWithUser(admin.Email.String), 0)
+	_, err = createStudent(ts.CtxWithUser(admin.ID), 0)
 	ts.Error(err)
 	cnt2 := ts.Query1("SELECT COUNT(*) FROM users").(int64)
 	ts.Equal(cnt, cnt2)
 
 	// works if the user is an admin
-	user, err := createStudent(ts.CtxWithUser(admin.Email.String), 1)
+	user, err := createStudent(ts.CtxWithUser(admin.ID), 1)
 	ts.NoError(err)
 	ts.Equal(db.UserRoleStudent, user.Role)
 }
@@ -396,13 +396,37 @@ func (ts *TestSuite) Test_CreateUserCompetence() {
 	ts.ErrorIs(err, msg.ErrUnauthorized)
 
 	// works if the user is a teacher
-	_, err = createUserCompetence(ts.CtxWithUser(teacher.Email.String), student.ID, competence.ID)
+	_, err = createUserCompetence(ts.CtxWithUser(teacher.ID), student.ID, competence.ID)
 	ts.NoError(err)
 
 	// students cannot create competences for others, only themselves
-	_, err = createUserCompetence(ts.CtxWithUser(student.Email.String), student2.ID, competence.ID)
+	_, err = createUserCompetence(ts.CtxWithUser(student.ID), student2.ID, competence.ID)
 	ts.ErrorIs(err, msg.ErrUnauthorized)
 
-	_, err = createUserCompetence(ts.CtxWithUser(student2.Email.String), student2.ID, competence.ID)
+	_, err = createUserCompetence(ts.CtxWithUser(student2.ID), student2.ID, competence.ID)
+	ts.NoError(err)
+}
+
+func (ts *TestSuite) Test_CreateTag() {
+	teacher := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "teacher")
+	student := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "student")
+
+	// error on unauthorized
+	_, err := ts.Resolver.Mutation().CreateTag(ts.Ctx(), model.CreateTagInput{Name: gonanoid.Must(8), Color: "blue"})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// students are not allowed to create tags
+	_, err = ts.Resolver.Mutation().CreateTag(ts.CtxWithUser(student.ID), model.CreateTagInput{Name: gonanoid.Must(8), Color: "blue"})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// error if the color is invalid
+	_, err = ts.Resolver.Mutation().CreateTag(ts.CtxWithUser(teacher.ID), model.CreateTagInput{Name: gonanoid.Must(8), Color: "invalid"})
+	ts.ErrorIs(err, msg.ErrInvalidInput)
+
+	// works for teachers
+	_, err = ts.Resolver.Mutation().CreateTag(ts.CtxWithUser(teacher.ID), model.CreateTagInput{
+		Name:  gonanoid.Must(8),
+		Color: "blue",
+	})
 	ts.NoError(err)
 }

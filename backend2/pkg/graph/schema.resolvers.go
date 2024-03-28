@@ -455,7 +455,31 @@ func (r *mutationResolver) ArchiveUserCompetence(ctx context.Context, id string)
 
 // CreateTag is the resolver for the createTag field.
 func (r *mutationResolver) CreateTag(ctx context.Context, input model.CreateTagInput) (*db.Tag, error) {
-	panic(fmt.Errorf("not implemented: CreateTag - createTag"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok || !user.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	err := r.Validate(input)
+	if err != nil {
+		return nil, err
+	}
+
+	color := input.Color
+	if color == "" {
+		color = "blue"
+	}
+
+	createdTag, err := r.DB.TagCreate(ctx, db.TagCreateParams{
+		Name:           input.Name,
+		Color:          color,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &createdTag, nil
 }
 
 // ArchiveTag is the resolver for the archiveTag field.
