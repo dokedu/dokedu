@@ -1,0 +1,140 @@
+type Entry {
+    id: ID!
+    date: String!
+    body: String
+    createdAt: Time!
+    deletedAt: Time
+
+    user: User!
+    users: [User!]!
+    events: [Event!]!
+    files: [File!]!
+    tags: [Tag!]!
+    userCompetences: [UserCompetence!]!
+    subjects: [Competence!]!
+}
+
+type EntryConnection {
+    edges: [Entry!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+input EntryFilterInput {
+    authors: [ID]
+    users: [ID]
+    tags: [ID]
+    competences: [ID]
+    from: Time
+    to: Time
+    deleted: Boolean
+}
+
+enum EntrySortBy {
+    date_ASC
+    date_DESC
+    createdAt_ASC
+    createdAt_DESC
+}
+
+extend type Query {
+    entry(id: ID!): Entry!
+    entries(limit: Int, offset: Int, filter: EntryFilterInput, sortBy: EntrySortBy, search: String): EntryConnection!
+}
+
+input CreateUserCompetenceInput {
+    level: Int!
+    userId: ID!
+    competenceId: ID!
+}
+
+input UpdateEntryInput {
+    id: ID!
+    date: String
+    body: String
+}
+
+input UpdateUserCompetenceInput {
+    level: Int!
+    userId: ID!
+    competenceId: ID!
+}
+
+input CreateEntryTagInput {
+    entryId: ID!
+    tagId: ID!
+}
+
+input CreateEntryFileInput {
+    entryId: ID!
+    fileId: ID!
+}
+
+input CreateEntryUserInput {
+    entryId: ID!
+    userId: ID!
+}
+
+input CreateEntryEventInput {
+    entryId: ID!
+    eventId: ID!
+}
+
+input CreateEntryCompetenceInput {
+    entryId: ID!
+    competenceId: ID!
+}
+
+input DeleteEntryTagInput {
+    entryId: ID!
+    tagId: ID!
+}
+
+input DeleteEntryFileInput {
+    entryId: ID!
+    fileId: ID!
+}
+
+input DeleteEntryUserInput {
+    entryId: ID!
+    userId: ID!
+}
+
+input DeleteEntryEventInput {
+    entryId: ID!
+    eventId: ID!
+}
+
+input DeleteEntryCompetenceInput {
+    entryId: ID!
+    competenceId: ID!
+}
+
+input UpdateEntryUserCompetenceLevel {
+    entryId: ID!
+    competenceId: ID!
+    level: Int!
+}
+
+extend type Mutation {
+    createEntry: Entry!
+    updateEntry(input: UpdateEntryInput!): Entry!
+    archiveEntry(id: ID!): Entry!
+
+    createEntryTag(input: CreateEntryTagInput!): Entry!
+    createEntryFile(input: CreateEntryFileInput!): Entry!
+    createEntryUser(input: CreateEntryUserInput!): Entry!
+    createEntryEvent(input: CreateEntryEventInput!): Entry!
+    createEntryCompetence(input: CreateEntryCompetenceInput!): Entry!
+
+    deleteEntryTag(input: DeleteEntryTagInput!): Entry!
+    deleteEntryFile(input: DeleteEntryFileInput!): Entry!
+    deleteEntryUser(input: DeleteEntryUserInput!): Entry!
+    deleteEntryEvent(input: DeleteEntryEventInput!): Entry!
+    deleteEntryCompetence(input: DeleteEntryCompetenceInput!): Entry!
+
+    updateEntryUserCompetenceLevel(input: UpdateEntryUserCompetenceLevel!): Entry!
+
+    uploadFileToEntry(entryId: ID!, file: Upload!): Entry!
+    removeFileFromEntry(entryId: ID!, fileId: ID!): File!
+}

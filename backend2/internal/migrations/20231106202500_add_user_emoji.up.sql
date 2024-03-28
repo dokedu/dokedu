@@ -1,0 +1,1 @@
+ALTER TABLE user_students ADD COLUMN emoji TEXT NULL;

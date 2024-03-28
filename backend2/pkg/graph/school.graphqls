@@ -1,0 +1,125 @@
+type Subject {
+    id: ID!
+    name: String!
+}
+
+type SubjectConnection {
+    edges: [Subject!]!
+    totalCount: Int!
+    pageInfo: PageInfo!
+}
+
+input CreateSubjectInput {
+    name: String!
+}
+
+input UpdateSubjectInput {
+    id: ID!
+    name: String!
+}
+
+extend type Query {
+    subjects(limit: Int, offset: Int): SubjectConnection!
+    subject(id: ID!): Subject!
+}
+
+extend type Mutation {
+    createSubject(input: CreateSubjectInput!): Subject!
+    updateSubject(input: UpdateSubjectInput!): Subject!
+    deleteSubject(id: ID!): Subject!
+}
+
+###
+
+type SchoolYear {
+    id: ID!
+    year: Int!
+    description: String!
+}
+
+type SchoolYearConnection {
+    edges: [SchoolYear!]!
+    totalCount: Int!
+    pageInfo: PageInfo!
+}
+
+input CreateSchoolYearInput {
+    year: Int!
+}
+
+input UpdateSchoolYearInput {
+    id: ID!
+    year: Int!
+}
+
+extend type Query {
+    schoolYears(limit: Int, offset: Int): SchoolYearConnection!
+    schoolYear(id: ID!): SchoolYear!
+}
+
+extend type Mutation {
+    createSchoolYear(input: CreateSchoolYearInput!): SchoolYear!
+    updateSchoolYear(input: UpdateSchoolYearInput!): SchoolYear!
+    deleteSchoolYear(id: ID!): SchoolYear!
+}
+
+###
+
+type UserStudentGrades {
+    id: ID!
+    student: UserStudent!
+    subject: Subject!
+    grade: Int!
+    schoolYear: SchoolYear!
+}
+
+type UserStudentGradesConnection {
+    edges: [UserStudentGrades!]!
+    totalCount: Int!
+    pageInfo: PageInfo!
+}
+
+input CreateUserStudentGradesInput {
+    student: ID!
+    subject: ID!
+    grade: Int!
+    schoolYear: ID!
+}
+
+input UpdateUserStudentGradesInput {
+    id: ID!
+    grade: Int!
+}
+
+extend type Query {
+    userStudentGrades(limit: Int, offset: Int): UserStudentGradesConnection!
+    userStudentGrade(id: ID!): UserStudentGrades!
+}
+
+extend type Mutation {
+    updateUserStudentGrade(input: UpdateUserStudentGradesInput!): UserStudentGrades!
+}
+
+###
+
+enum ImportStudentsError {
+    HEADER_WRONG
+    FORMAT_WRONG
+    DATA_WRONG
+    GRADE_WRONG
+    PERMISSION_DENIED
+}
+
+type ImportStudentsPayload {
+    usersCreated: Int!
+    usersExisted: Int!
+    errors: [ImportStudentsError!]!
+}
+
+input ImportStudentsInput {
+    file: Upload!
+}
+
+extend type Mutation {
+    importStudents(input: ImportStudentsInput!): ImportStudentsPayload!
+}

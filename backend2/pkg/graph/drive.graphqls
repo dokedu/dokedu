@@ -1,0 +1,109 @@
+scalar Upload
+
+enum FileType {
+    blob
+    folder @deprecated
+}
+
+type Bucket {
+    id: ID! @deprecated
+    name: String!
+    user: User!
+    shared: Boolean!
+    createdAt: Time!
+    deletedAt: Time
+
+    files: [File!]!
+}
+
+type File {
+    id: ID!
+    name: String!
+    fileType: FileType! @deprecated
+    MIMEType: String!
+    size: Int!
+    bucket: Bucket! @deprecated
+    parent: File @deprecated
+    createdAt: Time!
+    deletedAt: Time
+
+    parents: [File!]! @deprecated
+
+    files: [File!]! @deprecated
+}
+
+input FilesFilterInput {
+    parentId: String
+    bucketId: String
+    myBucket: Boolean
+}
+
+extend type Query {
+    file(id: ID!): File!
+}
+
+input FileUploadInput {
+    file: Upload!
+    """
+    The folder to upload the file to if empty the file will be uploaded to the root folder of the user.
+    """
+    parentId: ID
+    """
+    The shared drive to upload the file to if empty the file will be uploaded to the root folder of the user.
+    """
+    bucketId: ID
+}
+
+
+input GenerateFileURLInput {
+    id: ID!
+}
+
+type PreviewFilePayload {
+    url: String!
+}
+
+type DeleteFilePayload {
+    success: Boolean!
+    file: File!
+}
+
+input DownloadFileInput {
+    id: ID!
+}
+
+input DownloadFilesInput {
+    ids: [ID!]!
+}
+
+type DownloadFilePayload {
+    url: String!
+}
+
+type DownloadFilesPayload {
+    """
+    The url to download a zip file containing all the files.
+    """
+    url: String!
+}
+
+
+input DeleteFileInput {
+    id: ID!
+}
+
+input DeleteFilesInput {
+    ids: [ID!]!
+}
+
+input PreviewFileInput {
+    id: ID!
+}
+
+extend type Mutation {
+    uploadFile(input: FileUploadInput!): File! @deprecated
+
+    deleteFile(input: DeleteFileInput!): DeleteFilePayload! @deprecated
+
+    previewFile(input: PreviewFileInput!): PreviewFilePayload! @deprecated
+}
