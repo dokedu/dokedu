@@ -1,19 +1,23 @@
 package services
 
-import "github.com/dokedu/dokedu/backend/pkg/services/database"
+import (
+	"github.com/dokedu/dokedu/backend/pkg/services/database"
+	"github.com/dokedu/dokedu/backend/pkg/services/mail"
+)
 
 type Config struct {
 	Database database.Config
+	Mail     mail.Config
 }
 
 type Services struct {
-	DB *database.DB
+	DB   *database.DB
+	Mail mail.Mailer
 }
 
 func New(cfg Config) (*Services, error) {
-	db := database.New(cfg.Database)
-
 	return &Services{
-		DB: db,
+		DB:   database.New(cfg.Database),
+		Mail: mail.New(cfg.Mail),
 	}, nil
 }

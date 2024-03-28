@@ -2,8 +2,12 @@ package testsuite
 
 import (
 	"context"
+	"fmt"
+	"io"
+	"net/http"
 	"testing"
 
+	"github.com/caarlos0/env/v10"
 	"github.com/jackc/pgx/v5/pgtype"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/stretchr/testify/assert"
@@ -21,23 +25,23 @@ type TestSuite struct {
 	Resolver *graph.Resolver
 	DB       *database.DB
 }
+type Config struct {
+	Services services.Config
+}
 
 func New() (*TestSuite, error) {
-	svc, err := services.New(services.Config{
-		Database: database.Config{
-			Database: "postgres",
-			Username: "postgres",
-			Password: "postgres",
-			Host:     "localhost",
-			Port:     "5432",
-		},
-	})
+	var cfg Config
+	err := env.Parse(&cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	svc, err := services.New(cfg.Services)
 	if err != nil {
 		panic(err)
 	}
 
 	resolver := graph.Resolver{DB: svc.DB, Services: svc}
-
 	ts := &TestSuite{
 		Suite:    new(suite.Suite),
 		Resolver: &resolver,
@@ -116,4 +120,18 @@ func (ts *TestSuite) MockUserForOrganisation(organisationID string, role string)
 	}
 
 	return user
+}
+
+func (ts *TestSuite) AssertMailReceived(email string, contains ...string) {
+	res, err := http.Get("http://localhost:8025/api/v2/search?kind=to&query=" + email)
+	defer func() { _ = res.Body.Close() }()
+	ts.NoError(err)
+	ts.Equal(200, res.StatusCode)
+
+	str, err := io.ReadAll(res.Body)
+	ts.NoError(err)
+
+	for _, c := range contains {
+		ts.Contains(string(str), c, fmt.Sprintf("email to %s should contain %s", email, c))
+	}
 }

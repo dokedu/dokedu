@@ -119,6 +119,8 @@ func (ts *TestSuite) Test_ForgotPassword() {
 	token := ts.Query1("SELECT recovery_token FROM users WHERE id = $1", user.ID).(string)
 	ts.NotEmpty(token)
 
+	ts.AssertMailReceived(user.Email.String, token, "Change my password")
+
 	// recovery token cannot be used after 1 day
 	ts.Exec("UPDATE users SET recovery_sent_at = now() - interval '2 days' WHERE id = $1", user.ID)
 	_, err = ts.Resolver.Mutation().ResetPassword(ts.Ctx(), model.ResetPasswordInput{
@@ -190,7 +192,7 @@ func (ts *TestSuite) Test_CreateUser() {
 	user, err := createUser(ts.CtxWithUser(admin.Email.String))
 	ts.NoError(err)
 
-	// todo: check email
+	ts.AssertMailReceived(user.Email.String, user.RecoveryToken.String, "Create your account")
 
 	ts.Equal(db.UserRoleTeacher, user.Role)
 

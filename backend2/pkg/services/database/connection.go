@@ -18,9 +18,9 @@ type DB struct {
 }
 
 type Config struct {
-	Database string `env:"DB_DATABASE"`
-	Username string `env:"DB_USERNAME"`
-	Password string `env:"DB_PASSWORD"`
+	Database string `env:"DB_NAME"`
+	Username string `env:"DB_USER"`
+	Password string `env:"DB_PASS"`
 	Host     string `env:"DB_HOST"`
 	Port     string `env:"DB_PORT"`
 }

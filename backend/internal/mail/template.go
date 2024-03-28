@@ -26,7 +26,7 @@ func PasswordResetMailTemplate(name string, link string, language db.UserLanguag
 	}
 
 	out := new(bytes.Buffer)
-	err = t.ExecuteTemplate(out, "password_reset.gohtml", data)
+	err = t.ExecuteTemplate(out, "de_password_reset.gohtml", data)
 
 	if err != nil {
 		return "", err
@@ -52,7 +52,7 @@ func InviteMailTemplate(name string, link string, organisation string, language 
 	}
 
 	out := new(bytes.Buffer)
-	err = t.ExecuteTemplate(out, "invite.gohtml", data)
+	err = t.ExecuteTemplate(out, "de_invite.gohtml", data)
 
 	if err != nil {
 		return "", err

@@ -5,6 +5,7 @@ go 1.22.1
 require (
 	github.com/99designs/gqlgen v0.17.45
 	github.com/Masterminds/squirrel v1.5.4
+	github.com/caarlos0/env/v10 v10.0.0
 	github.com/jackc/pgx/v5 v5.5.5
 	github.com/matoous/go-nanoid/v2 v2.0.0
 	github.com/samber/lo v1.39.0

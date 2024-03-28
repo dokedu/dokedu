@@ -148,12 +148,11 @@ func (r *mutationResolver) ForgotPassword(ctx context.Context, input model.Forgo
 		return nil, err
 	}
 
-	// TODO:
 	// Send the email to the user
-	//err = r.Mailer.SendPasswordReset(input.Email, user.FirstName, user.Language.UserLang, token)
-	//if err != nil {
-	//	return false, nil
-	//}
+	err = r.Services.Mail.SendPasswordReset(input.Email, user.FirstName, user.LanguageOrDefault(), token)
+	if err != nil {
+		return nil, err
+	}
 
 	return &model.ForgotPasswordPayload{Success: true}, nil
 }
@@ -206,7 +205,10 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 		return nil, err
 	}
 
-	// todo: send invite email to the user
+	err = r.Services.Mail.SendInvite(input.Email, createdUser.FirstName, user.FirstName, user.LanguageOrDefault(), token)
+	if err != nil {
+		return nil, err
+	}
 
 	return &createdUser, nil
 }
