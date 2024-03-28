@@ -11,6 +11,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 
+	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
 	"github.com/dokedu/dokedu/backend/pkg/graph/model"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
 )
@@ -150,7 +151,7 @@ func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, fi
 	panic(fmt.Errorf("not implemented: Entries - entries"))
 }
 
-// Entry returns EntryResolver implementation.
-func (r *Resolver) Entry() EntryResolver { return &entryResolver{r} }
+// Entry returns generated.EntryResolver implementation.
+func (r *Resolver) Entry() generated.EntryResolver { return &entryResolver{r} }
 
 type entryResolver struct{ *Resolver }

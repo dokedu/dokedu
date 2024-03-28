@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
 	"github.com/dokedu/dokedu/backend/pkg/graph/model"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
 )
@@ -78,11 +79,11 @@ func (r *queryResolver) File(ctx context.Context, id string) (*db.File, error) {
 	panic(fmt.Errorf("not implemented: File - file"))
 }
 
-// Bucket returns BucketResolver implementation.
-func (r *Resolver) Bucket() BucketResolver { return &bucketResolver{r} }
+// Bucket returns generated.BucketResolver implementation.
+func (r *Resolver) Bucket() generated.BucketResolver { return &bucketResolver{r} }
 
-// File returns FileResolver implementation.
-func (r *Resolver) File() FileResolver { return &fileResolver{r} }
+// File returns generated.FileResolver implementation.
+func (r *Resolver) File() generated.FileResolver { return &fileResolver{r} }
 
 type bucketResolver struct{ *Resolver }
 type fileResolver struct{ *Resolver }

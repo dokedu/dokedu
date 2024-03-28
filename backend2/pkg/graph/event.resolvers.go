@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
 	"github.com/dokedu/dokedu/backend/pkg/graph/model"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
 )
@@ -63,7 +64,7 @@ func (r *queryResolver) ExportEvents(ctx context.Context, input model.ExportEven
 	panic(fmt.Errorf("not implemented: ExportEvents - exportEvents"))
 }
 
-// Event returns EventResolver implementation.
-func (r *Resolver) Event() EventResolver { return &eventResolver{r} }
+// Event returns generated.EventResolver implementation.
+func (r *Resolver) Event() generated.EventResolver { return &eventResolver{r} }
 
 type eventResolver struct{ *Resolver }

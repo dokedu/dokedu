@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
 	"github.com/dokedu/dokedu/backend/pkg/graph/model"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
 )
@@ -87,7 +88,7 @@ func (r *schoolYearResolver) Description(ctx context.Context, obj *db.SchoolYear
 	panic(fmt.Errorf("not implemented: Description - description"))
 }
 
-// SchoolYear returns SchoolYearResolver implementation.
-func (r *Resolver) SchoolYear() SchoolYearResolver { return &schoolYearResolver{r} }
+// SchoolYear returns generated.SchoolYearResolver implementation.
+func (r *Resolver) SchoolYear() generated.SchoolYearResolver { return &schoolYearResolver{r} }
 
 type schoolYearResolver struct{ *Resolver }

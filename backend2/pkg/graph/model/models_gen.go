@@ -110,7 +110,7 @@ type CreateSubjectInput struct {
 
 type CreateTagInput struct {
 	Name  string `json:"name"`
-	Color string `json:"color" validate:"required,oneof=red green blue yellow purple pink orange"`
+	Color string `json:"color"`
 }
 
 type CreateUserCompetenceInput struct {

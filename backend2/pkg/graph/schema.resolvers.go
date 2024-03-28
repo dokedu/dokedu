@@ -14,6 +14,7 @@ import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
 	"github.com/dokedu/dokedu/backend/pkg/graph/model"
 	"github.com/dokedu/dokedu/backend/pkg/middleware"
 	"github.com/dokedu/dokedu/backend/pkg/msg"
@@ -785,26 +786,28 @@ func (r *userStudentResolver) MissedHoursExcused(ctx context.Context, obj *db.Us
 	panic(fmt.Errorf("not implemented: MissedHoursExcused - missedHoursExcused"))
 }
 
-// Competence returns CompetenceResolver implementation.
-func (r *Resolver) Competence() CompetenceResolver { return &competenceResolver{r} }
+// Competence returns generated.CompetenceResolver implementation.
+func (r *Resolver) Competence() generated.CompetenceResolver { return &competenceResolver{r} }
 
-// Mutation returns MutationResolver implementation.
-func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
-// Query returns QueryResolver implementation.
-func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
+// Query returns generated.QueryResolver implementation.
+func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
-// Tag returns TagResolver implementation.
-func (r *Resolver) Tag() TagResolver { return &tagResolver{r} }
+// Tag returns generated.TagResolver implementation.
+func (r *Resolver) Tag() generated.TagResolver { return &tagResolver{r} }
 
-// User returns UserResolver implementation.
-func (r *Resolver) User() UserResolver { return &userResolver{r} }
+// User returns generated.UserResolver implementation.
+func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
 
-// UserCompetence returns UserCompetenceResolver implementation.
-func (r *Resolver) UserCompetence() UserCompetenceResolver { return &userCompetenceResolver{r} }
+// UserCompetence returns generated.UserCompetenceResolver implementation.
+func (r *Resolver) UserCompetence() generated.UserCompetenceResolver {
+	return &userCompetenceResolver{r}
+}
 
-// UserStudent returns UserStudentResolver implementation.
-func (r *Resolver) UserStudent() UserStudentResolver { return &userStudentResolver{r} }
+// UserStudent returns generated.UserStudentResolver implementation.
+func (r *Resolver) UserStudent() generated.UserStudentResolver { return &userStudentResolver{r} }
 
 type competenceResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }

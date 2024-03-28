@@ -4,8 +4,8 @@ schema:
 
 # Where should the generated server code go?
 exec:
-  filename: pkg/graph/generated.go
-  package: graph
+  filename: pkg/graph/generated/generated.go
+  package: generated
 
 # Uncomment to enable federation
 # federation:

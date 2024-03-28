@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
 )
 
@@ -37,7 +38,9 @@ func (r *userAttendanceResolver) Date(ctx context.Context, obj *db.UserAttendanc
 	panic(fmt.Errorf("not implemented: Date - date"))
 }
 
-// UserAttendance returns UserAttendanceResolver implementation.
-func (r *Resolver) UserAttendance() UserAttendanceResolver { return &userAttendanceResolver{r} }
+// UserAttendance returns generated.UserAttendanceResolver implementation.
+func (r *Resolver) UserAttendance() generated.UserAttendanceResolver {
+	return &userAttendanceResolver{r}
+}
 
 type userAttendanceResolver struct{ *Resolver }

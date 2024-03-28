@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
 	"github.com/dokedu/dokedu/backend/pkg/graph/model"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
 )
@@ -27,7 +28,7 @@ func (r *queryResolver) Organisation(ctx context.Context) (*db.Organisation, err
 	panic(fmt.Errorf("not implemented: Organisation - organisation"))
 }
 
-// Organisation returns OrganisationResolver implementation.
-func (r *Resolver) Organisation() OrganisationResolver { return &organisationResolver{r} }
+// Organisation returns generated.OrganisationResolver implementation.
+func (r *Resolver) Organisation() generated.OrganisationResolver { return &organisationResolver{r} }
 
 type organisationResolver struct{ *Resolver }

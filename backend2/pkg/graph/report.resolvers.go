@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
 	"github.com/dokedu/dokedu/backend/pkg/graph/model"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
 )
@@ -58,11 +59,11 @@ func (r *subscriptionResolver) ReportCreatedOrUpdated(ctx context.Context) (<-ch
 	panic(fmt.Errorf("not implemented: ReportCreatedOrUpdated - reportCreatedOrUpdated"))
 }
 
-// Report returns ReportResolver implementation.
-func (r *Resolver) Report() ReportResolver { return &reportResolver{r} }
+// Report returns generated.ReportResolver implementation.
+func (r *Resolver) Report() generated.ReportResolver { return &reportResolver{r} }
 
-// Subscription returns SubscriptionResolver implementation.
-func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionResolver{r} }
+// Subscription returns generated.SubscriptionResolver implementation.
+func (r *Resolver) Subscription() generated.SubscriptionResolver { return &subscriptionResolver{r} }
 
 type reportResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
