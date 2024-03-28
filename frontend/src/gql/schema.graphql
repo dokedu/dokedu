@@ -8,72 +8,13 @@ input AddEventCompetenceInput {
   eventId: ID!
 }
 
-input AddUserToChatInput {
-  chatId: ID!
-  userId: ID!
-}
-
 type Bucket {
   createdAt: Time!
   deletedAt: Time
   files: [File!]!
-  id: ID!
+  id: ID! @deprecated
   name: String!
-  permission: FilePermission
   shared: Boolean!
-  user: User!
-}
-
-type BucketConnection {
-  edges: [Bucket!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-input BucketFilterInput {
-  shared: Boolean
-}
-
-type Chat {
-  createdAt: Time!
-  deletedAt: Time
-  id: ID!
-  lastMessage: ChatMessage
-  messages: [ChatMessage!]!
-  name: String
-  type: ChatType!
-  unreadMessageCount: Int!
-  userCount: Int!
-  users: [User!]!
-}
-
-type ChatConnection {
-  edges: [Chat]
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type ChatMessage {
-  chat: Chat!
-  createdAt: Time!
-  id: ID!
-  isEdited: Boolean!
-  isSeen: Boolean!
-  message: String!
-  user: User!
-}
-
-enum ChatType {
-  CHANNEL
-  GROUP
-  PRIVATE
-}
-
-type ChatUser {
-  chat: Chat!
-  createdAt: Time!
-  deletedAt: Time
-  id: ID!
   user: User!
 }
 
@@ -126,60 +67,9 @@ enum CompetenceType {
   subject
 }
 
-input CopyFileInput {
-  id: ID!
-  targetId: ID!
-}
-
-input CopyFilesInput {
-  ids: [ID!]!
-  targetId: ID!
-}
-
-type CopyFilesPayload {
-  files: [File!]!
-}
-
-input CreateChatInput {
-  name: String
-}
-
 input CreateCompetenceInput {
   name: String!
   parentId: ID!
-}
-
-input CreateDomainInput {
-  name: String!
-}
-
-input CreateEmailAccountInput {
-  description: String
-  name: String!
-  quota: Int
-  type: EmailAccountType!
-}
-
-input CreateEmailForwardingInput {
-  origin: String!
-  target: String!
-}
-
-input CreateEmailGroupInput {
-  description: String
-  members: [String]
-  name: String!
-}
-
-input CreateEmailGroupMemberInput {
-  memberOf: String!
-  name: String!
-}
-
-input CreateEmailInput {
-  address: String!
-  name: String!
-  type: EmailType!
 }
 
 input CreateEntryCompetenceInput {
@@ -216,12 +106,6 @@ input CreateEventInput {
   title: String!
 }
 
-input CreateFolderInput {
-  bucketId: ID
-  name: String!
-  parentId: ID
-}
-
 input CreateReportInput {
   allUsers: Boolean
   filterTags: [ID!]!
@@ -234,13 +118,6 @@ input CreateReportInput {
 
 input CreateSchoolYearInput {
   year: Int!
-}
-
-input CreateShareInput {
-  bucketId: ID
-  fileId: ID
-  permission: FilePermission!
-  user: ID!
 }
 
 input CreateStudentInput {
@@ -285,30 +162,6 @@ input CreateUserStudentGradesInput {
   subject: ID!
 }
 
-input DeleteChatInput {
-  id: ID!
-}
-
-input DeleteDomainInput {
-  id: ID!
-}
-
-input DeleteEmailAccountInput {
-  id: ID!
-}
-
-input DeleteEmailForwardingInput {
-  id: ID!
-}
-
-input DeleteEmailGroupMemberInput {
-  id: ID!
-}
-
-input DeleteEmailInput {
-  id: ID!
-}
-
 input DeleteEntryCompetenceInput {
   competenceId: ID!
   entryId: ID!
@@ -347,29 +200,6 @@ input DeleteFilesInput {
   ids: [ID!]!
 }
 
-type DeleteFilesPayload {
-  files: [File!]!
-  success: Boolean!
-}
-
-input DeleteShareInput {
-  bucketId: ID
-  fileId: ID
-  user: ID!
-}
-
-type Domain {
-  createdAt: String!
-  id: ID!
-  name: String!
-}
-
-type DomainConnection {
-  edges: [Domain]
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
 input DownloadFileInput {
   id: ID!
 }
@@ -385,84 +215,6 @@ input DownloadFilesInput {
 type DownloadFilesPayload {
   """The url to download a zip file containing all the files."""
   url: String!
-}
-
-input EditChatMessageInput {
-  id: ID!
-  message: String!
-}
-
-type Email {
-  address: String!
-  createdAt: String!
-  id: ID!
-  name: String!
-  type: EmailType!
-}
-
-type EmailAccount {
-  active: Boolean
-  createdAt: String!
-  description: String
-  id: ID!
-  members: [EmailGroupMember]
-  name: String!
-  quota: Int
-  type: EmailAccountType!
-  user: User
-}
-
-type EmailAccountConnection {
-  edges: [EmailAccount]
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-input EmailAccountFilter {
-  type: EmailAccountType
-}
-
-enum EmailAccountType {
-  GROUP
-  INDIVIDUAL
-}
-
-type EmailConnection {
-  edges: [Email]
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type EmailForwarding {
-  createdAt: String!
-  id: ID!
-  origin: String!
-  target: String!
-}
-
-type EmailForwardingConnection {
-  edges: [EmailForwarding]
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type EmailGroupMember {
-  createdAt: String!
-  id: ID!
-  memberOf: String!
-  name: String!
-}
-
-type EmailGroupMemberConnection {
-  edges: [EmailGroupMember]
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-enum EmailType {
-  ALIAS
-  LIST
-  PRIMARY
 }
 
 type Entry {
@@ -552,27 +304,16 @@ type ExportEventsPayload {
 
 type File {
   MIMEType: String!
-  bucket: Bucket!
+  bucket: Bucket! @deprecated
   createdAt: Time!
   deletedAt: Time
-  fileType: FileType!
-  files: [File!]!
+  fileType: FileType! @deprecated
+  files: [File!]! @deprecated
   id: ID!
   name: String!
-  parent: File
-  parents: [File!]!
+  parent: File @deprecated
+  parents: [File!]! @deprecated
   size: Int!
-}
-
-type FileConnection {
-  edges: [File!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-enum FilePermission {
-  Manager
-  Viewer
 }
 
 enum FileType {
@@ -635,39 +376,14 @@ type InviteDetailsPayload {
   lastName: String!
 }
 
-input MoveFileInput {
-  id: ID!
-  targetId: ID
-}
-
-input MoveFilesInput {
-  ids: [ID!]!
-  targetId: ID!
-}
-
-type MoveFilesPayload {
-  files: [File!]!
-}
-
 type Mutation {
   acceptInvite(input: SignUpInput!, token: String!): SignInPayload!
-  addFileShare(input: ShareFileInput!): File!
-  addUserToChat(input: AddUserToChatInput!): ChatUser!
   archiveEntry(id: ID!): Entry!
   archiveEvent(id: ID!): Event!
   archiveTag(id: ID!): Tag!
   archiveUser(id: ID!): User!
   archiveUserCompetence(id: ID!): UserCompetence!
-  copyFile(input: CopyFileInput!): File!
-  copyFiles(input: CopyFilesInput!): CopyFilesPayload!
-  createChat(input: CreateChatInput!): Chat!
   createCompetence(input: CreateCompetenceInput!): Competence!
-  createDomain(input: CreateDomainInput!): Domain
-  createEmail(input: CreateEmailInput!): Email
-  createEmailAccount(input: CreateEmailAccountInput!): EmailAccount
-  createEmailForwarding(input: CreateEmailForwardingInput!): EmailForwarding
-  createEmailGroup(input: CreateEmailGroupInput!): EmailAccount
-  createEmailGroupMember(input: CreateEmailGroupMemberInput!): EmailGroupMember
   createEntry: Entry!
   createEntryCompetence(input: CreateEntryCompetenceInput!): Entry!
   createEntryEvent(input: CreateEntryEventInput!): Entry!
@@ -675,63 +391,34 @@ type Mutation {
   createEntryTag(input: CreateEntryTagInput!): Entry!
   createEntryUser(input: CreateEntryUserInput!): Entry!
   createEvent(input: CreateEventInput!): Event!
-  createFolder(input: CreateFolderInput!): File!
-  createPrivatChat(userId: ID!): Chat!
   createReport(input: CreateReportInput!): [Report]!
   createSchoolYear(input: CreateSchoolYearInput!): SchoolYear!
-  createShare(input: CreateShareInput!): ShareUser!
-  createSharedDrive(name: String!): Bucket!
   createStudent(input: CreateStudentInput!): User!
   createSubject(input: CreateSubjectInput!): Subject!
   createTag(input: CreateTagInput!): Tag!
   createUser(input: CreateUserInput!): User!
   createUserCompetence(input: CreateUserCompetenceInput!): UserCompetence!
-  deleteChat(input: DeleteChatInput!): Chat!
-  deleteDomain(input: DeleteDomainInput!): Domain
-  deleteEmail(input: DeleteEmailInput!): Email
-  deleteEmailAccount(input: DeleteEmailAccountInput!): EmailAccount
-  deleteEmailForwarding(input: DeleteEmailForwardingInput!): EmailForwarding
-  deleteEmailGroup(id: ID!): EmailAccount
-  deleteEmailGroupMember(input: DeleteEmailGroupMemberInput!): EmailGroupMember
   deleteEntryCompetence(input: DeleteEntryCompetenceInput!): Entry!
   deleteEntryEvent(input: DeleteEntryEventInput!): Entry!
   deleteEntryFile(input: DeleteEntryFileInput!): Entry!
   deleteEntryTag(input: DeleteEntryTagInput!): Entry!
   deleteEntryUser(input: DeleteEntryUserInput!): Entry!
-  deleteFile(input: DeleteFileInput!): DeleteFilePayload!
-  deleteFiles(input: DeleteFilesInput!): DeleteFilesPayload!
+  deleteFile(input: DeleteFileInput!): DeleteFilePayload! @deprecated
   deleteSchoolYear(id: ID!): SchoolYear!
-  deleteShare(input: DeleteShareInput!): ShareUser!
-  deleteSharedDrive(id: ID!): Bucket!
   deleteSubject(id: ID!): Subject!
-  downloadFile(input: DownloadFileInput!): DownloadFilePayload!
-  downloadFiles(input: DownloadFilesInput!): DownloadFilesPayload!
-  editChatMessage(input: EditChatMessageInput!): ChatMessage!
-  editShare(input: CreateShareInput!): ShareUser!
   forgotPassword(input: ForgotPasswordInput!): ForgotPasswordPayload!
   importStudents(input: ImportStudentsInput!): ImportStudentsPayload!
-  markMessageAsRead(messageId: ID!): ChatMessage!
-  moveFile(input: MoveFileInput!): File!
-  moveFiles(input: MoveFilesInput!): MoveFilesPayload!
-  previewFile(input: PreviewFileInput!): PreviewFilePayload!
+  previewFile(input: PreviewFileInput!): PreviewFilePayload! @deprecated
   removeFileFromEntry(entryId: ID!, fileId: ID!): File!
-  removeFileShare(input: ID!): File!
-  removeUserFromChat(input: RemoveUserFromChatInput!): ChatUser!
-  renameFile(input: RenameFileInput!): File!
-  renameSharedDrive(input: RenameSharedDriveInput!): Bucket!
   resetPassword(input: ResetPasswordInput!): ResetPasswordPayload!
-  sendMessage(input: SendMessageInput!): ChatMessage!
   sendUserInvite(id: ID!): Boolean!
   setUserAttendanceState(date: Time!, state: UserAttendanceState!, userId: ID!): UserAttendance!
   signIn(input: SignInInput!): SignInPayload!
   signOut: Boolean!
   toggleEventCompetence(input: AddEventCompetenceInput!): Event!
-  updateChat(input: UpdateChatInput!): Chat!
   updateCompetence(input: UpdateCompetenceInput!): Competence!
   updateCompetenceSorting(input: UpdateCompetenceSortingInput!): [Competence]!
   updateDailyAttendance(date: Time!, state: UserAttendanceState!): [UserAttendance!]!
-  updateEmailAccount(input: UpdateEmailAccountInput!): EmailAccount
-  updateEmailGroup(input: UpdateEmailGroupInput!): EmailAccount
   updateEntry(input: UpdateEntryInput!): Entry!
   updateEntryUserCompetenceLevel(input: UpdateEntryUserCompetenceLevel!): Entry!
   updateEvent(input: UpdateEventInput!): Event!
@@ -743,13 +430,8 @@ type Mutation {
   updateUser(input: UpdateUserInput!): User!
   updateUserLanguage(language: UserLanguage!): User!
   updateUserStudentGrade(input: UpdateUserStudentGradesInput!): UserStudentGrades!
-  uploadFile(input: FileUploadInput!): File!
+  uploadFile(input: FileUploadInput!): File! @deprecated
   uploadFileToEntry(entryId: ID!, file: Upload!): Entry!
-  uploadFiles(input: FileUploadInput!): UploadFilesPayload!
-}
-
-input MyFilesFilterInput {
-  parentId: String
 }
 
 type Organisation {
@@ -776,29 +458,14 @@ type PreviewFilePayload {
 }
 
 type Query {
-  EmailGroupMember(id: ID!): EmailGroupMember
-  EmailGroupMembers: EmailGroupMemberConnection
-  bucket(id: ID!): Bucket!
-  buckets(input: BucketFilterInput, limit: Int, offset: Int): BucketConnection!
-  chat(id: ID!): Chat!
-  chats(limit: Int, offset: Int): ChatConnection!
   competence(id: ID!): Competence!
   competences(filter: CompetenceFilterInput, limit: Int, offset: Int, search: String, sort: CompetenceSort): CompetenceConnection!
-  domain(id: ID!): Domain
-  domains: DomainConnection
-  email(id: ID!): Email
-  emailAccount(id: ID!): EmailAccount
-  emailAccounts(filter: EmailAccountFilter): EmailAccountConnection
-  emailForwarding(id: ID!): EmailForwarding
-  emailForwardings: EmailForwardingConnection
-  emails: EmailConnection
   entries(filter: EntryFilterInput, limit: Int, offset: Int, search: String, sortBy: EntrySortBy): EntryConnection!
   entry(id: ID!): Entry!
   event(id: ID!): Event!
   events(filter: EventFilterInput, limit: Int, offset: Int, order: EventOrderBy, search: String): EventConnection!
   exportEvents(input: ExportEventsInput!): [ExportEventsPayload]!
   file(id: ID!): File!
-  files(input: FilesFilterInput, limit: Int, offset: Int): FileConnection!
   inviteDetails(token: String!): InviteDetailsPayload!
   me: User!
   organisation: Organisation
@@ -806,7 +473,6 @@ type Query {
   reports(limit: Int, offset: Int): ReportConnection!
   schoolYear(id: ID!): SchoolYear!
   schoolYears(limit: Int, offset: Int): SchoolYearConnection!
-  shares(input: ShareInput): [ShareUser!]
   subject(id: ID!): Subject!
   subjects(limit: Int, offset: Int): SubjectConnection!
   tag(id: ID!): Tag!
@@ -818,21 +484,6 @@ type Query {
   userStudentGrades(limit: Int, offset: Int): UserStudentGradesConnection!
   userStudents(limit: Int, offset: Int): UserStudentConnection!
   users(filter: UserFilterInput, limit: Int, offset: Int, search: String): UserConnection!
-}
-
-input RemoveUserFromChatInput {
-  chatId: ID!
-  userId: ID!
-}
-
-input RenameFileInput {
-  id: ID!
-  name: String!
-}
-
-input RenameSharedDriveInput {
-  id: ID!
-  name: String!
 }
 
 type Report {
@@ -902,32 +553,6 @@ type SchoolYearConnection {
   totalCount: Int!
 }
 
-input SendMessageInput {
-  chatId: ID!
-  message: String!
-}
-
-input ShareFileInput {
-  emails: [String!]!
-  fileId: ID!
-  permission: FilePermission!
-  users: [ID!]!
-}
-
-input ShareInput {
-  bucketId: ID
-  fileId: ID
-}
-
-type ShareUser {
-  permission: FilePermission!
-  user: User!
-}
-
-input SharedDriveFilterInput {
-  folder: String
-}
-
 input SignInInput {
   email: String!
   password: String!
@@ -970,8 +595,7 @@ type SubjectConnection {
 }
 
 type Subscription {
-  messageAdded: ChatMessage!
-  reportCreatedOrUpdated: Report!
+  reportCreatedOrUpdated: Report! @deprecated
 }
 
 type Tag {
@@ -990,11 +614,6 @@ type TagConnection {
 
 scalar Time
 
-input UpdateChatInput {
-  id: ID!
-  name: String
-}
-
 input UpdateCompetenceInput {
   color: String
   id: ID!
@@ -1002,22 +621,6 @@ input UpdateCompetenceInput {
 
 input UpdateCompetenceSortingInput {
   competences: [SortCompetenceInput!]!
-}
-
-input UpdateEmailAccountInput {
-  active: Boolean
-  description: String
-  id: ID!
-  name: String
-  quota: Int
-  type: EmailAccountType
-}
-
-input UpdateEmailGroupInput {
-  description: String
-  id: ID!
-  members: [String]
-  name: String
 }
 
 input UpdateEntryInput {
@@ -1087,15 +690,10 @@ input UpdateUserStudentGradesInput {
 
 scalar Upload
 
-type UploadFilesPayload {
-  files: [File!]!
-}
-
 type User {
   createdAt: Time!
   deletedAt: Time
   email: String
-  emailAccounts: [EmailAccount]
   firstName: String!
   id: ID!
   inviteAccepted: Boolean!
@@ -1147,10 +745,6 @@ type UserConnection {
   edges: [User]
   pageInfo: PageInfo!
   totalCount: Int!
-}
-
-input UserFileFilterInput {
-  folderId: String
 }
 
 input UserFilterInput {

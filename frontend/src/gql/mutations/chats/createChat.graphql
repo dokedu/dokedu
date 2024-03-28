@@ -1,7 +1,0 @@
-mutation createChat($input: CreateChatInput!) {
-  createChat(input: $input) {
-    id
-    name
-    createdAt
-  }
-}

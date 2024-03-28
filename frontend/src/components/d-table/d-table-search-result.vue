@@ -41,7 +41,6 @@
 
 <script lang="ts" setup>
 import { ref, watch, toRef } from "vue"
-import { useMoveFileMutation } from "@/gql/mutations/files/moveFile"
 import type { File } from "@/gql/schema"
 import { useQuery } from "@urql/vue"
 
@@ -80,13 +79,6 @@ async function drop(event: DragEvent, row: File) {
 
   if (row.fileType !== "folder") return
   if (row.id === data) return
-
-  await moveFile({
-    input: {
-      id: data,
-      targetId: row.id
-    }
-  })
 }
 
 function dragover(_: DragEvent, row: File) {
@@ -109,8 +101,6 @@ const { data, fetching } = useQuery({
     additionalTypenames: (props.additionalTypenames || []) as string[]
   }
 })
-
-const { executeMutation: moveFile } = useMoveFileMutation()
 
 watch(data, () => {
   if (!data.value) return

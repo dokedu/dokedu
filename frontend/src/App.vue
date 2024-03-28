@@ -14,18 +14,11 @@ import Default from "./layout/default.vue"
 import Auth from "./layout/auth.vue"
 import None from "./layout/none.vue"
 import Mobile from "./layout/mobile.vue"
-import Chat from "./layout/chat.vue"
 import { useRoute } from "vue-router/auto"
 import { computed } from "vue"
 import { publicRoutes } from "./router/publicRoutes"
-import { onMounted } from "vue"
-import { identifyUser } from "./composables/auth"
 
 const route = useRoute()
-
-onMounted(() => {
-  identifyUser()
-})
 
 const layout = computed(() => {
   if (route.name === undefined) return null
@@ -41,8 +34,6 @@ const layout = computed(() => {
       return Auth
     case "none":
       return None
-    case "chat":
-      return Chat
     case "mobile":
       return Mobile
     default:

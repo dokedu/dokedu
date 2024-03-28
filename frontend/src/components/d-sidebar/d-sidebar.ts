@@ -113,45 +113,6 @@ export const apps = computed<App[]>(() => [
     ]
   },
   {
-    id: "drive",
-    beta: true,
-    icon: Folder,
-    allowedUserRoles: ["owner", "admin", "teacher"],
-    name: "Drive",
-    links: [
-      {
-        icon: HardDrive,
-        name: i18n.global.t("my_drive"),
-        route: "/drive/my-drive/"
-      },
-      {
-        icon: HardDrive,
-        name: i18n.global.t("shared_drives"),
-        route: "/drive/shared-drives/"
-      },
-      // {
-      //     icon: Users2,
-      //     name: i18n.global.t("shared_with_me"),
-      //     route: "/drive/shared-with-me/",
-      // },
-      // {
-      //   icon: Clock,
-      //   name: "Recent",
-      //   route: "admin-users",
-      // },
-      // {
-      //   icon: Star,
-      //   name: "Starred",
-      //   route: "admin-users",
-      // },
-      {
-        icon: Trash2,
-        name: i18n.global.t("trash"),
-        route: "/drive/trash/"
-      }
-    ]
-  },
-  {
     id: "admin",
     icon: Wrench,
     allowedUserRoles: ["owner", "admin"],
@@ -213,34 +174,6 @@ export const apps = computed<App[]>(() => [
       //   name: i18n.global.t("certificate", 2),
       //   route: "/school/certificates",
       // },
-    ]
-  },
-  {
-    id: "chat",
-    icon: MessageCircle,
-    beta: true,
-    allowedUserRoles: ["owner", "admin", "teacher", "student"],
-    name: "Chat",
-    links: [
-      {
-        icon: MessageCircle,
-        name: i18n.global.t("chat"),
-        route: "/chat/[tab]",
-        params: { tab: "chats" }
-      }
-    ]
-  },
-  {
-    id: "mail",
-    icon: MailOpenIcon,
-    allowedUserRoles: ["owner", "admin", "teacher", "student"],
-    name: "Mail",
-    links: [
-      {
-        icon: InboxIcon,
-        name: i18n.global.t("inbox"),
-        route: "/mail/"
-      }
     ]
   }
 ])

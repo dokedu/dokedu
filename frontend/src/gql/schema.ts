@@ -24,78 +24,15 @@ export type AddEventCompetenceInput = {
   eventId: Scalars['ID']['input'];
 };
 
-export type AddUserToChatInput = {
-  chatId: Scalars['ID']['input'];
-  userId: Scalars['ID']['input'];
-};
-
 export type Bucket = {
   __typename?: 'Bucket';
   createdAt: Scalars['Time']['output'];
   deletedAt?: Maybe<Scalars['Time']['output']>;
   files: Array<File>;
+  /** @deprecated No longer supported */
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
-  permission?: Maybe<FilePermission>;
   shared: Scalars['Boolean']['output'];
-  user: User;
-};
-
-export type BucketConnection = {
-  __typename?: 'BucketConnection';
-  edges: Array<Bucket>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
-};
-
-export type BucketFilterInput = {
-  shared?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-export type Chat = {
-  __typename?: 'Chat';
-  createdAt: Scalars['Time']['output'];
-  deletedAt?: Maybe<Scalars['Time']['output']>;
-  id: Scalars['ID']['output'];
-  lastMessage?: Maybe<ChatMessage>;
-  messages: Array<ChatMessage>;
-  name?: Maybe<Scalars['String']['output']>;
-  type: ChatType;
-  unreadMessageCount: Scalars['Int']['output'];
-  userCount: Scalars['Int']['output'];
-  users: Array<User>;
-};
-
-export type ChatConnection = {
-  __typename?: 'ChatConnection';
-  edges?: Maybe<Array<Maybe<Chat>>>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
-};
-
-export type ChatMessage = {
-  __typename?: 'ChatMessage';
-  chat: Chat;
-  createdAt: Scalars['Time']['output'];
-  id: Scalars['ID']['output'];
-  isEdited: Scalars['Boolean']['output'];
-  isSeen: Scalars['Boolean']['output'];
-  message: Scalars['String']['output'];
-  user: User;
-};
-
-export enum ChatType {
-  Channel = 'CHANNEL',
-  Group = 'GROUP',
-  Private = 'PRIVATE'
-}
-
-export type ChatUser = {
-  __typename?: 'ChatUser';
-  chat: Chat;
-  createdAt: Scalars['Time']['output'];
-  deletedAt?: Maybe<Scalars['Time']['output']>;
-  id: Scalars['ID']['output'];
   user: User;
 };
 
@@ -167,61 +104,9 @@ export enum CompetenceType {
   Subject = 'subject'
 }
 
-export type CopyFileInput = {
-  id: Scalars['ID']['input'];
-  targetId: Scalars['ID']['input'];
-};
-
-export type CopyFilesInput = {
-  ids: Array<Scalars['ID']['input']>;
-  targetId: Scalars['ID']['input'];
-};
-
-export type CopyFilesPayload = {
-  __typename?: 'CopyFilesPayload';
-  files: Array<File>;
-};
-
-export type CreateChatInput = {
-  name?: InputMaybe<Scalars['String']['input']>;
-};
-
 export type CreateCompetenceInput = {
   name: Scalars['String']['input'];
   parentId: Scalars['ID']['input'];
-};
-
-export type CreateDomainInput = {
-  name: Scalars['String']['input'];
-};
-
-export type CreateEmailAccountInput = {
-  description?: InputMaybe<Scalars['String']['input']>;
-  name: Scalars['String']['input'];
-  quota?: InputMaybe<Scalars['Int']['input']>;
-  type: EmailAccountType;
-};
-
-export type CreateEmailForwardingInput = {
-  origin: Scalars['String']['input'];
-  target: Scalars['String']['input'];
-};
-
-export type CreateEmailGroupInput = {
-  description?: InputMaybe<Scalars['String']['input']>;
-  members?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  name: Scalars['String']['input'];
-};
-
-export type CreateEmailGroupMemberInput = {
-  memberOf: Scalars['String']['input'];
-  name: Scalars['String']['input'];
-};
-
-export type CreateEmailInput = {
-  address: Scalars['String']['input'];
-  name: Scalars['String']['input'];
-  type: EmailType;
 };
 
 export type CreateEntryCompetenceInput = {
@@ -258,12 +143,6 @@ export type CreateEventInput = {
   title: Scalars['String']['input'];
 };
 
-export type CreateFolderInput = {
-  bucketId?: InputMaybe<Scalars['ID']['input']>;
-  name: Scalars['String']['input'];
-  parentId?: InputMaybe<Scalars['ID']['input']>;
-};
-
 export type CreateReportInput = {
   allUsers?: InputMaybe<Scalars['Boolean']['input']>;
   filterTags: Array<Scalars['ID']['input']>;
@@ -276,13 +155,6 @@ export type CreateReportInput = {
 
 export type CreateSchoolYearInput = {
   year: Scalars['Int']['input'];
-};
-
-export type CreateShareInput = {
-  bucketId?: InputMaybe<Scalars['ID']['input']>;
-  fileId?: InputMaybe<Scalars['ID']['input']>;
-  permission: FilePermission;
-  user: Scalars['ID']['input'];
 };
 
 export type CreateStudentInput = {
@@ -327,30 +199,6 @@ export type CreateUserStudentGradesInput = {
   subject: Scalars['ID']['input'];
 };
 
-export type DeleteChatInput = {
-  id: Scalars['ID']['input'];
-};
-
-export type DeleteDomainInput = {
-  id: Scalars['ID']['input'];
-};
-
-export type DeleteEmailAccountInput = {
-  id: Scalars['ID']['input'];
-};
-
-export type DeleteEmailForwardingInput = {
-  id: Scalars['ID']['input'];
-};
-
-export type DeleteEmailGroupMemberInput = {
-  id: Scalars['ID']['input'];
-};
-
-export type DeleteEmailInput = {
-  id: Scalars['ID']['input'];
-};
-
 export type DeleteEntryCompetenceInput = {
   competenceId: Scalars['ID']['input'];
   entryId: Scalars['ID']['input'];
@@ -390,32 +238,6 @@ export type DeleteFilesInput = {
   ids: Array<Scalars['ID']['input']>;
 };
 
-export type DeleteFilesPayload = {
-  __typename?: 'DeleteFilesPayload';
-  files: Array<File>;
-  success: Scalars['Boolean']['output'];
-};
-
-export type DeleteShareInput = {
-  bucketId?: InputMaybe<Scalars['ID']['input']>;
-  fileId?: InputMaybe<Scalars['ID']['input']>;
-  user: Scalars['ID']['input'];
-};
-
-export type Domain = {
-  __typename?: 'Domain';
-  createdAt: Scalars['String']['output'];
-  id: Scalars['ID']['output'];
-  name: Scalars['String']['output'];
-};
-
-export type DomainConnection = {
-  __typename?: 'DomainConnection';
-  edges?: Maybe<Array<Maybe<Domain>>>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
-};
-
 export type DownloadFileInput = {
   id: Scalars['ID']['input'];
 };
@@ -434,92 +256,6 @@ export type DownloadFilesPayload = {
   /** The url to download a zip file containing all the files. */
   url: Scalars['String']['output'];
 };
-
-export type EditChatMessageInput = {
-  id: Scalars['ID']['input'];
-  message: Scalars['String']['input'];
-};
-
-export type Email = {
-  __typename?: 'Email';
-  address: Scalars['String']['output'];
-  createdAt: Scalars['String']['output'];
-  id: Scalars['ID']['output'];
-  name: Scalars['String']['output'];
-  type: EmailType;
-};
-
-export type EmailAccount = {
-  __typename?: 'EmailAccount';
-  active?: Maybe<Scalars['Boolean']['output']>;
-  createdAt: Scalars['String']['output'];
-  description?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
-  members?: Maybe<Array<Maybe<EmailGroupMember>>>;
-  name: Scalars['String']['output'];
-  quota?: Maybe<Scalars['Int']['output']>;
-  type: EmailAccountType;
-  user?: Maybe<User>;
-};
-
-export type EmailAccountConnection = {
-  __typename?: 'EmailAccountConnection';
-  edges?: Maybe<Array<Maybe<EmailAccount>>>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
-};
-
-export type EmailAccountFilter = {
-  type?: InputMaybe<EmailAccountType>;
-};
-
-export enum EmailAccountType {
-  Group = 'GROUP',
-  Individual = 'INDIVIDUAL'
-}
-
-export type EmailConnection = {
-  __typename?: 'EmailConnection';
-  edges?: Maybe<Array<Maybe<Email>>>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
-};
-
-export type EmailForwarding = {
-  __typename?: 'EmailForwarding';
-  createdAt: Scalars['String']['output'];
-  id: Scalars['ID']['output'];
-  origin: Scalars['String']['output'];
-  target: Scalars['String']['output'];
-};
-
-export type EmailForwardingConnection = {
-  __typename?: 'EmailForwardingConnection';
-  edges?: Maybe<Array<Maybe<EmailForwarding>>>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
-};
-
-export type EmailGroupMember = {
-  __typename?: 'EmailGroupMember';
-  createdAt: Scalars['String']['output'];
-  id: Scalars['ID']['output'];
-  memberOf: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-};
-
-export type EmailGroupMemberConnection = {
-  __typename?: 'EmailGroupMemberConnection';
-  edges?: Maybe<Array<Maybe<EmailGroupMember>>>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
-};
-
-export enum EmailType {
-  Alias = 'ALIAS',
-  List = 'LIST',
-  Primary = 'PRIMARY'
-}
 
 export type Entry = {
   __typename?: 'Entry';
@@ -614,29 +350,22 @@ export type ExportEventsPayload = {
 export type File = {
   __typename?: 'File';
   MIMEType: Scalars['String']['output'];
+  /** @deprecated No longer supported */
   bucket: Bucket;
   createdAt: Scalars['Time']['output'];
   deletedAt?: Maybe<Scalars['Time']['output']>;
+  /** @deprecated No longer supported */
   fileType: FileType;
+  /** @deprecated No longer supported */
   files: Array<File>;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
+  /** @deprecated No longer supported */
   parent?: Maybe<File>;
+  /** @deprecated No longer supported */
   parents: Array<File>;
   size: Scalars['Int']['output'];
 };
-
-export type FileConnection = {
-  __typename?: 'FileConnection';
-  edges: Array<File>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
-};
-
-export enum FilePermission {
-  Manager = 'Manager',
-  Viewer = 'Viewer'
-}
 
 export enum FileType {
   Blob = 'blob',
@@ -696,41 +425,15 @@ export type InviteDetailsPayload = {
   lastName: Scalars['String']['output'];
 };
 
-export type MoveFileInput = {
-  id: Scalars['ID']['input'];
-  targetId?: InputMaybe<Scalars['ID']['input']>;
-};
-
-export type MoveFilesInput = {
-  ids: Array<Scalars['ID']['input']>;
-  targetId: Scalars['ID']['input'];
-};
-
-export type MoveFilesPayload = {
-  __typename?: 'MoveFilesPayload';
-  files: Array<File>;
-};
-
 export type Mutation = {
   __typename?: 'Mutation';
   acceptInvite: SignInPayload;
-  addFileShare: File;
-  addUserToChat: ChatUser;
   archiveEntry: Entry;
   archiveEvent: Event;
   archiveTag: Tag;
   archiveUser: User;
   archiveUserCompetence: UserCompetence;
-  copyFile: File;
-  copyFiles: CopyFilesPayload;
-  createChat: Chat;
   createCompetence: Competence;
-  createDomain?: Maybe<Domain>;
-  createEmail?: Maybe<Email>;
-  createEmailAccount?: Maybe<EmailAccount>;
-  createEmailForwarding?: Maybe<EmailForwarding>;
-  createEmailGroup?: Maybe<EmailAccount>;
-  createEmailGroupMember?: Maybe<EmailGroupMember>;
   createEntry: Entry;
   createEntryCompetence: Entry;
   createEntryEvent: Entry;
@@ -738,63 +441,36 @@ export type Mutation = {
   createEntryTag: Entry;
   createEntryUser: Entry;
   createEvent: Event;
-  createFolder: File;
-  createPrivatChat: Chat;
   createReport: Array<Maybe<Report>>;
   createSchoolYear: SchoolYear;
-  createShare: ShareUser;
-  createSharedDrive: Bucket;
   createStudent: User;
   createSubject: Subject;
   createTag: Tag;
   createUser: User;
   createUserCompetence: UserCompetence;
-  deleteChat: Chat;
-  deleteDomain?: Maybe<Domain>;
-  deleteEmail?: Maybe<Email>;
-  deleteEmailAccount?: Maybe<EmailAccount>;
-  deleteEmailForwarding?: Maybe<EmailForwarding>;
-  deleteEmailGroup?: Maybe<EmailAccount>;
-  deleteEmailGroupMember?: Maybe<EmailGroupMember>;
   deleteEntryCompetence: Entry;
   deleteEntryEvent: Entry;
   deleteEntryFile: Entry;
   deleteEntryTag: Entry;
   deleteEntryUser: Entry;
+  /** @deprecated No longer supported */
   deleteFile: DeleteFilePayload;
-  deleteFiles: DeleteFilesPayload;
   deleteSchoolYear: SchoolYear;
-  deleteShare: ShareUser;
-  deleteSharedDrive: Bucket;
   deleteSubject: Subject;
-  downloadFile: DownloadFilePayload;
-  downloadFiles: DownloadFilesPayload;
-  editChatMessage: ChatMessage;
-  editShare: ShareUser;
   forgotPassword: ForgotPasswordPayload;
   importStudents: ImportStudentsPayload;
-  markMessageAsRead: ChatMessage;
-  moveFile: File;
-  moveFiles: MoveFilesPayload;
+  /** @deprecated No longer supported */
   previewFile: PreviewFilePayload;
   removeFileFromEntry: File;
-  removeFileShare: File;
-  removeUserFromChat: ChatUser;
-  renameFile: File;
-  renameSharedDrive: Bucket;
   resetPassword: ResetPasswordPayload;
-  sendMessage: ChatMessage;
   sendUserInvite: Scalars['Boolean']['output'];
   setUserAttendanceState: UserAttendance;
   signIn: SignInPayload;
   signOut: Scalars['Boolean']['output'];
   toggleEventCompetence: Event;
-  updateChat: Chat;
   updateCompetence: Competence;
   updateCompetenceSorting: Array<Maybe<Competence>>;
   updateDailyAttendance: Array<UserAttendance>;
-  updateEmailAccount?: Maybe<EmailAccount>;
-  updateEmailGroup?: Maybe<EmailAccount>;
   updateEntry: Entry;
   updateEntryUserCompetenceLevel: Entry;
   updateEvent: Event;
@@ -806,25 +482,15 @@ export type Mutation = {
   updateUser: User;
   updateUserLanguage: User;
   updateUserStudentGrade: UserStudentGrades;
+  /** @deprecated No longer supported */
   uploadFile: File;
   uploadFileToEntry: Entry;
-  uploadFiles: UploadFilesPayload;
 };
 
 
 export type MutationAcceptInviteArgs = {
   input: SignUpInput;
   token: Scalars['String']['input'];
-};
-
-
-export type MutationAddFileShareArgs = {
-  input: ShareFileInput;
-};
-
-
-export type MutationAddUserToChatArgs = {
-  input: AddUserToChatInput;
 };
 
 
@@ -853,53 +519,8 @@ export type MutationArchiveUserCompetenceArgs = {
 };
 
 
-export type MutationCopyFileArgs = {
-  input: CopyFileInput;
-};
-
-
-export type MutationCopyFilesArgs = {
-  input: CopyFilesInput;
-};
-
-
-export type MutationCreateChatArgs = {
-  input: CreateChatInput;
-};
-
-
 export type MutationCreateCompetenceArgs = {
   input: CreateCompetenceInput;
-};
-
-
-export type MutationCreateDomainArgs = {
-  input: CreateDomainInput;
-};
-
-
-export type MutationCreateEmailArgs = {
-  input: CreateEmailInput;
-};
-
-
-export type MutationCreateEmailAccountArgs = {
-  input: CreateEmailAccountInput;
-};
-
-
-export type MutationCreateEmailForwardingArgs = {
-  input: CreateEmailForwardingInput;
-};
-
-
-export type MutationCreateEmailGroupArgs = {
-  input: CreateEmailGroupInput;
-};
-
-
-export type MutationCreateEmailGroupMemberArgs = {
-  input: CreateEmailGroupMemberInput;
 };
 
 
@@ -933,16 +554,6 @@ export type MutationCreateEventArgs = {
 };
 
 
-export type MutationCreateFolderArgs = {
-  input: CreateFolderInput;
-};
-
-
-export type MutationCreatePrivatChatArgs = {
-  userId: Scalars['ID']['input'];
-};
-
-
 export type MutationCreateReportArgs = {
   input: CreateReportInput;
 };
@@ -950,16 +561,6 @@ export type MutationCreateReportArgs = {
 
 export type MutationCreateSchoolYearArgs = {
   input: CreateSchoolYearInput;
-};
-
-
-export type MutationCreateShareArgs = {
-  input: CreateShareInput;
-};
-
-
-export type MutationCreateSharedDriveArgs = {
-  name: Scalars['String']['input'];
 };
 
 
@@ -985,41 +586,6 @@ export type MutationCreateUserArgs = {
 
 export type MutationCreateUserCompetenceArgs = {
   input: CreateUserCompetenceInput;
-};
-
-
-export type MutationDeleteChatArgs = {
-  input: DeleteChatInput;
-};
-
-
-export type MutationDeleteDomainArgs = {
-  input: DeleteDomainInput;
-};
-
-
-export type MutationDeleteEmailArgs = {
-  input: DeleteEmailInput;
-};
-
-
-export type MutationDeleteEmailAccountArgs = {
-  input: DeleteEmailAccountInput;
-};
-
-
-export type MutationDeleteEmailForwardingArgs = {
-  input: DeleteEmailForwardingInput;
-};
-
-
-export type MutationDeleteEmailGroupArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
-export type MutationDeleteEmailGroupMemberArgs = {
-  input: DeleteEmailGroupMemberInput;
 };
 
 
@@ -1053,48 +619,13 @@ export type MutationDeleteFileArgs = {
 };
 
 
-export type MutationDeleteFilesArgs = {
-  input: DeleteFilesInput;
-};
-
-
 export type MutationDeleteSchoolYearArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
-export type MutationDeleteShareArgs = {
-  input: DeleteShareInput;
-};
-
-
-export type MutationDeleteSharedDriveArgs = {
   id: Scalars['ID']['input'];
 };
 
 
 export type MutationDeleteSubjectArgs = {
   id: Scalars['ID']['input'];
-};
-
-
-export type MutationDownloadFileArgs = {
-  input: DownloadFileInput;
-};
-
-
-export type MutationDownloadFilesArgs = {
-  input: DownloadFilesInput;
-};
-
-
-export type MutationEditChatMessageArgs = {
-  input: EditChatMessageInput;
-};
-
-
-export type MutationEditShareArgs = {
-  input: CreateShareInput;
 };
 
 
@@ -1105,21 +636,6 @@ export type MutationForgotPasswordArgs = {
 
 export type MutationImportStudentsArgs = {
   input: ImportStudentsInput;
-};
-
-
-export type MutationMarkMessageAsReadArgs = {
-  messageId: Scalars['ID']['input'];
-};
-
-
-export type MutationMoveFileArgs = {
-  input: MoveFileInput;
-};
-
-
-export type MutationMoveFilesArgs = {
-  input: MoveFilesInput;
 };
 
 
@@ -1134,33 +650,8 @@ export type MutationRemoveFileFromEntryArgs = {
 };
 
 
-export type MutationRemoveFileShareArgs = {
-  input: Scalars['ID']['input'];
-};
-
-
-export type MutationRemoveUserFromChatArgs = {
-  input: RemoveUserFromChatInput;
-};
-
-
-export type MutationRenameFileArgs = {
-  input: RenameFileInput;
-};
-
-
-export type MutationRenameSharedDriveArgs = {
-  input: RenameSharedDriveInput;
-};
-
-
 export type MutationResetPasswordArgs = {
   input: ResetPasswordInput;
-};
-
-
-export type MutationSendMessageArgs = {
-  input: SendMessageInput;
 };
 
 
@@ -1186,11 +677,6 @@ export type MutationToggleEventCompetenceArgs = {
 };
 
 
-export type MutationUpdateChatArgs = {
-  input: UpdateChatInput;
-};
-
-
 export type MutationUpdateCompetenceArgs = {
   input: UpdateCompetenceInput;
 };
@@ -1204,16 +690,6 @@ export type MutationUpdateCompetenceSortingArgs = {
 export type MutationUpdateDailyAttendanceArgs = {
   date: Scalars['Time']['input'];
   state: UserAttendanceState;
-};
-
-
-export type MutationUpdateEmailAccountArgs = {
-  input: UpdateEmailAccountInput;
-};
-
-
-export type MutationUpdateEmailGroupArgs = {
-  input: UpdateEmailGroupInput;
 };
 
 
@@ -1284,15 +760,6 @@ export type MutationUploadFileToEntryArgs = {
   file: Scalars['Upload']['input'];
 };
 
-
-export type MutationUploadFilesArgs = {
-  input: FileUploadInput;
-};
-
-export type MyFilesFilterInput = {
-  parentId?: InputMaybe<Scalars['String']['input']>;
-};
-
 export type Organisation = {
   __typename?: 'Organisation';
   id: Scalars['ID']['output'];
@@ -1321,29 +788,14 @@ export type PreviewFilePayload = {
 
 export type Query = {
   __typename?: 'Query';
-  EmailGroupMember?: Maybe<EmailGroupMember>;
-  EmailGroupMembers?: Maybe<EmailGroupMemberConnection>;
-  bucket: Bucket;
-  buckets: BucketConnection;
-  chat: Chat;
-  chats: ChatConnection;
   competence: Competence;
   competences: CompetenceConnection;
-  domain?: Maybe<Domain>;
-  domains?: Maybe<DomainConnection>;
-  email?: Maybe<Email>;
-  emailAccount?: Maybe<EmailAccount>;
-  emailAccounts?: Maybe<EmailAccountConnection>;
-  emailForwarding?: Maybe<EmailForwarding>;
-  emailForwardings?: Maybe<EmailForwardingConnection>;
-  emails?: Maybe<EmailConnection>;
   entries: EntryConnection;
   entry: Entry;
   event: Event;
   events: EventConnection;
   exportEvents: Array<Maybe<ExportEventsPayload>>;
   file: File;
-  files: FileConnection;
   inviteDetails: InviteDetailsPayload;
   me: User;
   organisation?: Maybe<Organisation>;
@@ -1351,7 +803,6 @@ export type Query = {
   reports: ReportConnection;
   schoolYear: SchoolYear;
   schoolYears: SchoolYearConnection;
-  shares?: Maybe<Array<ShareUser>>;
   subject: Subject;
   subjects: SubjectConnection;
   tag: Tag;
@@ -1366,34 +817,6 @@ export type Query = {
 };
 
 
-export type QueryEmailGroupMemberArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
-export type QueryBucketArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
-export type QueryBucketsArgs = {
-  input?: InputMaybe<BucketFilterInput>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type QueryChatArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
-export type QueryChatsArgs = {
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
 export type QueryCompetenceArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1405,31 +828,6 @@ export type QueryCompetencesArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
   sort?: InputMaybe<CompetenceSort>;
-};
-
-
-export type QueryDomainArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
-export type QueryEmailArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
-export type QueryEmailAccountArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
-export type QueryEmailAccountsArgs = {
-  filter?: InputMaybe<EmailAccountFilter>;
-};
-
-
-export type QueryEmailForwardingArgs = {
-  id: Scalars['ID']['input'];
 };
 
 
@@ -1471,13 +869,6 @@ export type QueryFileArgs = {
 };
 
 
-export type QueryFilesArgs = {
-  input?: InputMaybe<FilesFilterInput>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
 export type QueryInviteDetailsArgs = {
   token: Scalars['String']['input'];
 };
@@ -1502,11 +893,6 @@ export type QuerySchoolYearArgs = {
 export type QuerySchoolYearsArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type QuerySharesArgs = {
-  input?: InputMaybe<ShareInput>;
 };
 
 
@@ -1570,21 +956,6 @@ export type QueryUsersArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type RemoveUserFromChatInput = {
-  chatId: Scalars['ID']['input'];
-  userId: Scalars['ID']['input'];
-};
-
-export type RenameFileInput = {
-  id: Scalars['ID']['input'];
-  name: Scalars['String']['input'];
-};
-
-export type RenameSharedDriveInput = {
-  id: Scalars['ID']['input'];
-  name: Scalars['String']['input'];
 };
 
 export type Report = {
@@ -1659,33 +1030,6 @@ export type SchoolYearConnection = {
   totalCount: Scalars['Int']['output'];
 };
 
-export type SendMessageInput = {
-  chatId: Scalars['ID']['input'];
-  message: Scalars['String']['input'];
-};
-
-export type ShareFileInput = {
-  emails: Array<Scalars['String']['input']>;
-  fileId: Scalars['ID']['input'];
-  permission: FilePermission;
-  users: Array<Scalars['ID']['input']>;
-};
-
-export type ShareInput = {
-  bucketId?: InputMaybe<Scalars['ID']['input']>;
-  fileId?: InputMaybe<Scalars['ID']['input']>;
-};
-
-export type ShareUser = {
-  __typename?: 'ShareUser';
-  permission: FilePermission;
-  user: User;
-};
-
-export type SharedDriveFilterInput = {
-  folder?: InputMaybe<Scalars['String']['input']>;
-};
-
 export type SignInInput = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -1732,7 +1076,7 @@ export type SubjectConnection = {
 
 export type Subscription = {
   __typename?: 'Subscription';
-  messageAdded: ChatMessage;
+  /** @deprecated No longer supported */
   reportCreatedOrUpdated: Report;
 };
 
@@ -1752,11 +1096,6 @@ export type TagConnection = {
   totalCount: Scalars['Int']['output'];
 };
 
-export type UpdateChatInput = {
-  id: Scalars['ID']['input'];
-  name?: InputMaybe<Scalars['String']['input']>;
-};
-
 export type UpdateCompetenceInput = {
   color?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['ID']['input'];
@@ -1764,22 +1103,6 @@ export type UpdateCompetenceInput = {
 
 export type UpdateCompetenceSortingInput = {
   competences: Array<SortCompetenceInput>;
-};
-
-export type UpdateEmailAccountInput = {
-  active?: InputMaybe<Scalars['Boolean']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
-  id: Scalars['ID']['input'];
-  name?: InputMaybe<Scalars['String']['input']>;
-  quota?: InputMaybe<Scalars['Int']['input']>;
-  type?: InputMaybe<EmailAccountType>;
-};
-
-export type UpdateEmailGroupInput = {
-  description?: InputMaybe<Scalars['String']['input']>;
-  id: Scalars['ID']['input'];
-  members?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UpdateEntryInput = {
@@ -1847,17 +1170,11 @@ export type UpdateUserStudentGradesInput = {
   id: Scalars['ID']['input'];
 };
 
-export type UploadFilesPayload = {
-  __typename?: 'UploadFilesPayload';
-  files: Array<File>;
-};
-
 export type User = {
   __typename?: 'User';
   createdAt: Scalars['Time']['output'];
   deletedAt?: Maybe<Scalars['Time']['output']>;
   email?: Maybe<Scalars['String']['output']>;
-  emailAccounts?: Maybe<Array<Maybe<EmailAccount>>>;
   firstName: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   inviteAccepted: Scalars['Boolean']['output'];
@@ -1913,10 +1230,6 @@ export type UserConnection = {
   edges?: Maybe<Array<Maybe<User>>>;
   pageInfo: PageInfo;
   totalCount: Scalars['Int']['output'];
-};
-
-export type UserFileFilterInput = {
-  folderId?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UserFilterInput = {
@@ -1993,40 +1306,21 @@ export type WithTypename<T extends { __typename?: any }> = Partial<T> & { __type
 
 export type GraphCacheKeysConfig = {
   Bucket?: (data: WithTypename<Bucket>) => null | string,
-  BucketConnection?: (data: WithTypename<BucketConnection>) => null | string,
-  Chat?: (data: WithTypename<Chat>) => null | string,
-  ChatConnection?: (data: WithTypename<ChatConnection>) => null | string,
-  ChatMessage?: (data: WithTypename<ChatMessage>) => null | string,
-  ChatUser?: (data: WithTypename<ChatUser>) => null | string,
   Competence?: (data: WithTypename<Competence>) => null | string,
   CompetenceConnection?: (data: WithTypename<CompetenceConnection>) => null | string,
   CompetenceTendency?: (data: WithTypename<CompetenceTendency>) => null | string,
-  CopyFilesPayload?: (data: WithTypename<CopyFilesPayload>) => null | string,
   DeleteFilePayload?: (data: WithTypename<DeleteFilePayload>) => null | string,
-  DeleteFilesPayload?: (data: WithTypename<DeleteFilesPayload>) => null | string,
-  Domain?: (data: WithTypename<Domain>) => null | string,
-  DomainConnection?: (data: WithTypename<DomainConnection>) => null | string,
   DownloadFilePayload?: (data: WithTypename<DownloadFilePayload>) => null | string,
   DownloadFilesPayload?: (data: WithTypename<DownloadFilesPayload>) => null | string,
-  Email?: (data: WithTypename<Email>) => null | string,
-  EmailAccount?: (data: WithTypename<EmailAccount>) => null | string,
-  EmailAccountConnection?: (data: WithTypename<EmailAccountConnection>) => null | string,
-  EmailConnection?: (data: WithTypename<EmailConnection>) => null | string,
-  EmailForwarding?: (data: WithTypename<EmailForwarding>) => null | string,
-  EmailForwardingConnection?: (data: WithTypename<EmailForwardingConnection>) => null | string,
-  EmailGroupMember?: (data: WithTypename<EmailGroupMember>) => null | string,
-  EmailGroupMemberConnection?: (data: WithTypename<EmailGroupMemberConnection>) => null | string,
   Entry?: (data: WithTypename<Entry>) => null | string,
   EntryConnection?: (data: WithTypename<EntryConnection>) => null | string,
   Event?: (data: WithTypename<Event>) => null | string,
   EventConnection?: (data: WithTypename<EventConnection>) => null | string,
   ExportEventsPayload?: (data: WithTypename<ExportEventsPayload>) => null | string,
   File?: (data: WithTypename<File>) => null | string,
-  FileConnection?: (data: WithTypename<FileConnection>) => null | string,
   ForgotPasswordPayload?: (data: WithTypename<ForgotPasswordPayload>) => null | string,
   ImportStudentsPayload?: (data: WithTypename<ImportStudentsPayload>) => null | string,
   InviteDetailsPayload?: (data: WithTypename<InviteDetailsPayload>) => null | string,
-  MoveFilesPayload?: (data: WithTypename<MoveFilesPayload>) => null | string,
   Organisation?: (data: WithTypename<Organisation>) => null | string,
   PageInfo?: (data: WithTypename<PageInfo>) => null | string,
   PreviewFilePayload?: (data: WithTypename<PreviewFilePayload>) => null | string,
@@ -2035,13 +1329,11 @@ export type GraphCacheKeysConfig = {
   ResetPasswordPayload?: (data: WithTypename<ResetPasswordPayload>) => null | string,
   SchoolYear?: (data: WithTypename<SchoolYear>) => null | string,
   SchoolYearConnection?: (data: WithTypename<SchoolYearConnection>) => null | string,
-  ShareUser?: (data: WithTypename<ShareUser>) => null | string,
   SignInPayload?: (data: WithTypename<SignInPayload>) => null | string,
   Subject?: (data: WithTypename<Subject>) => null | string,
   SubjectConnection?: (data: WithTypename<SubjectConnection>) => null | string,
   Tag?: (data: WithTypename<Tag>) => null | string,
   TagConnection?: (data: WithTypename<TagConnection>) => null | string,
-  UploadFilesPayload?: (data: WithTypename<UploadFilesPayload>) => null | string,
   User?: (data: WithTypename<User>) => null | string,
   UserAttendance?: (data: WithTypename<UserAttendance>) => null | string,
   UserCompetence?: (data: WithTypename<UserCompetence>) => null | string,
@@ -2055,29 +1347,14 @@ export type GraphCacheKeysConfig = {
 
 export type GraphCacheResolvers = {
   Query?: {
-    EmailGroupMember?: GraphCacheResolver<WithTypename<Query>, QueryEmailGroupMemberArgs, WithTypename<EmailGroupMember> | string>,
-    EmailGroupMembers?: GraphCacheResolver<WithTypename<Query>, Record<string, never>, WithTypename<EmailGroupMemberConnection> | string>,
-    bucket?: GraphCacheResolver<WithTypename<Query>, QueryBucketArgs, WithTypename<Bucket> | string>,
-    buckets?: GraphCacheResolver<WithTypename<Query>, QueryBucketsArgs, WithTypename<BucketConnection> | string>,
-    chat?: GraphCacheResolver<WithTypename<Query>, QueryChatArgs, WithTypename<Chat> | string>,
-    chats?: GraphCacheResolver<WithTypename<Query>, QueryChatsArgs, WithTypename<ChatConnection> | string>,
     competence?: GraphCacheResolver<WithTypename<Query>, QueryCompetenceArgs, WithTypename<Competence> | string>,
     competences?: GraphCacheResolver<WithTypename<Query>, QueryCompetencesArgs, WithTypename<CompetenceConnection> | string>,
-    domain?: GraphCacheResolver<WithTypename<Query>, QueryDomainArgs, WithTypename<Domain> | string>,
-    domains?: GraphCacheResolver<WithTypename<Query>, Record<string, never>, WithTypename<DomainConnection> | string>,
-    email?: GraphCacheResolver<WithTypename<Query>, QueryEmailArgs, WithTypename<Email> | string>,
-    emailAccount?: GraphCacheResolver<WithTypename<Query>, QueryEmailAccountArgs, WithTypename<EmailAccount> | string>,
-    emailAccounts?: GraphCacheResolver<WithTypename<Query>, QueryEmailAccountsArgs, WithTypename<EmailAccountConnection> | string>,
-    emailForwarding?: GraphCacheResolver<WithTypename<Query>, QueryEmailForwardingArgs, WithTypename<EmailForwarding> | string>,
-    emailForwardings?: GraphCacheResolver<WithTypename<Query>, Record<string, never>, WithTypename<EmailForwardingConnection> | string>,
-    emails?: GraphCacheResolver<WithTypename<Query>, Record<string, never>, WithTypename<EmailConnection> | string>,
     entries?: GraphCacheResolver<WithTypename<Query>, QueryEntriesArgs, WithTypename<EntryConnection> | string>,
     entry?: GraphCacheResolver<WithTypename<Query>, QueryEntryArgs, WithTypename<Entry> | string>,
     event?: GraphCacheResolver<WithTypename<Query>, QueryEventArgs, WithTypename<Event> | string>,
     events?: GraphCacheResolver<WithTypename<Query>, QueryEventsArgs, WithTypename<EventConnection> | string>,
     exportEvents?: GraphCacheResolver<WithTypename<Query>, QueryExportEventsArgs, Array<WithTypename<ExportEventsPayload> | string>>,
     file?: GraphCacheResolver<WithTypename<Query>, QueryFileArgs, WithTypename<File> | string>,
-    files?: GraphCacheResolver<WithTypename<Query>, QueryFilesArgs, WithTypename<FileConnection> | string>,
     inviteDetails?: GraphCacheResolver<WithTypename<Query>, QueryInviteDetailsArgs, WithTypename<InviteDetailsPayload> | string>,
     me?: GraphCacheResolver<WithTypename<Query>, Record<string, never>, WithTypename<User> | string>,
     organisation?: GraphCacheResolver<WithTypename<Query>, Record<string, never>, WithTypename<Organisation> | string>,
@@ -2085,7 +1362,6 @@ export type GraphCacheResolvers = {
     reports?: GraphCacheResolver<WithTypename<Query>, QueryReportsArgs, WithTypename<ReportConnection> | string>,
     schoolYear?: GraphCacheResolver<WithTypename<Query>, QuerySchoolYearArgs, WithTypename<SchoolYear> | string>,
     schoolYears?: GraphCacheResolver<WithTypename<Query>, QuerySchoolYearsArgs, WithTypename<SchoolYearConnection> | string>,
-    shares?: GraphCacheResolver<WithTypename<Query>, QuerySharesArgs, Array<WithTypename<ShareUser> | string>>,
     subject?: GraphCacheResolver<WithTypename<Query>, QuerySubjectArgs, WithTypename<Subject> | string>,
     subjects?: GraphCacheResolver<WithTypename<Query>, QuerySubjectsArgs, WithTypename<SubjectConnection> | string>,
     tag?: GraphCacheResolver<WithTypename<Query>, QueryTagArgs, WithTypename<Tag> | string>,
@@ -2104,47 +1380,8 @@ export type GraphCacheResolvers = {
     files?: GraphCacheResolver<WithTypename<Bucket>, Record<string, never>, Array<WithTypename<File> | string>>,
     id?: GraphCacheResolver<WithTypename<Bucket>, Record<string, never>, Scalars['ID'] | string>,
     name?: GraphCacheResolver<WithTypename<Bucket>, Record<string, never>, Scalars['String'] | string>,
-    permission?: GraphCacheResolver<WithTypename<Bucket>, Record<string, never>, FilePermission | string>,
     shared?: GraphCacheResolver<WithTypename<Bucket>, Record<string, never>, Scalars['Boolean'] | string>,
     user?: GraphCacheResolver<WithTypename<Bucket>, Record<string, never>, WithTypename<User> | string>
-  },
-  BucketConnection?: {
-    edges?: GraphCacheResolver<WithTypename<BucketConnection>, Record<string, never>, Array<WithTypename<Bucket> | string>>,
-    pageInfo?: GraphCacheResolver<WithTypename<BucketConnection>, Record<string, never>, WithTypename<PageInfo> | string>,
-    totalCount?: GraphCacheResolver<WithTypename<BucketConnection>, Record<string, never>, Scalars['Int'] | string>
-  },
-  Chat?: {
-    createdAt?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Scalars['Time'] | string>,
-    deletedAt?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Scalars['Time'] | string>,
-    id?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Scalars['ID'] | string>,
-    lastMessage?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, WithTypename<ChatMessage> | string>,
-    messages?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Array<WithTypename<ChatMessage> | string>>,
-    name?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Scalars['String'] | string>,
-    type?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, ChatType | string>,
-    unreadMessageCount?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Scalars['Int'] | string>,
-    userCount?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Scalars['Int'] | string>,
-    users?: GraphCacheResolver<WithTypename<Chat>, Record<string, never>, Array<WithTypename<User> | string>>
-  },
-  ChatConnection?: {
-    edges?: GraphCacheResolver<WithTypename<ChatConnection>, Record<string, never>, Array<WithTypename<Chat> | string>>,
-    pageInfo?: GraphCacheResolver<WithTypename<ChatConnection>, Record<string, never>, WithTypename<PageInfo> | string>,
-    totalCount?: GraphCacheResolver<WithTypename<ChatConnection>, Record<string, never>, Scalars['Int'] | string>
-  },
-  ChatMessage?: {
-    chat?: GraphCacheResolver<WithTypename<ChatMessage>, Record<string, never>, WithTypename<Chat> | string>,
-    createdAt?: GraphCacheResolver<WithTypename<ChatMessage>, Record<string, never>, Scalars['Time'] | string>,
-    id?: GraphCacheResolver<WithTypename<ChatMessage>, Record<string, never>, Scalars['ID'] | string>,
-    isEdited?: GraphCacheResolver<WithTypename<ChatMessage>, Record<string, never>, Scalars['Boolean'] | string>,
-    isSeen?: GraphCacheResolver<WithTypename<ChatMessage>, Record<string, never>, Scalars['Boolean'] | string>,
-    message?: GraphCacheResolver<WithTypename<ChatMessage>, Record<string, never>, Scalars['String'] | string>,
-    user?: GraphCacheResolver<WithTypename<ChatMessage>, Record<string, never>, WithTypename<User> | string>
-  },
-  ChatUser?: {
-    chat?: GraphCacheResolver<WithTypename<ChatUser>, Record<string, never>, WithTypename<Chat> | string>,
-    createdAt?: GraphCacheResolver<WithTypename<ChatUser>, Record<string, never>, Scalars['Time'] | string>,
-    deletedAt?: GraphCacheResolver<WithTypename<ChatUser>, Record<string, never>, Scalars['Time'] | string>,
-    id?: GraphCacheResolver<WithTypename<ChatUser>, Record<string, never>, Scalars['ID'] | string>,
-    user?: GraphCacheResolver<WithTypename<ChatUser>, Record<string, never>, WithTypename<User> | string>
   },
   Competence?: {
     color?: GraphCacheResolver<WithTypename<Competence>, Record<string, never>, Scalars['String'] | string>,
@@ -2169,82 +1406,15 @@ export type GraphCacheResolvers = {
     countLearnedCompetences?: GraphCacheResolver<WithTypename<CompetenceTendency>, Record<string, never>, Scalars['Int'] | string>,
     tendency?: GraphCacheResolver<WithTypename<CompetenceTendency>, Record<string, never>, Scalars['Float'] | string>
   },
-  CopyFilesPayload?: {
-    files?: GraphCacheResolver<WithTypename<CopyFilesPayload>, Record<string, never>, Array<WithTypename<File> | string>>
-  },
   DeleteFilePayload?: {
     file?: GraphCacheResolver<WithTypename<DeleteFilePayload>, Record<string, never>, WithTypename<File> | string>,
     success?: GraphCacheResolver<WithTypename<DeleteFilePayload>, Record<string, never>, Scalars['Boolean'] | string>
-  },
-  DeleteFilesPayload?: {
-    files?: GraphCacheResolver<WithTypename<DeleteFilesPayload>, Record<string, never>, Array<WithTypename<File> | string>>,
-    success?: GraphCacheResolver<WithTypename<DeleteFilesPayload>, Record<string, never>, Scalars['Boolean'] | string>
-  },
-  Domain?: {
-    createdAt?: GraphCacheResolver<WithTypename<Domain>, Record<string, never>, Scalars['String'] | string>,
-    id?: GraphCacheResolver<WithTypename<Domain>, Record<string, never>, Scalars['ID'] | string>,
-    name?: GraphCacheResolver<WithTypename<Domain>, Record<string, never>, Scalars['String'] | string>
-  },
-  DomainConnection?: {
-    edges?: GraphCacheResolver<WithTypename<DomainConnection>, Record<string, never>, Array<WithTypename<Domain> | string>>,
-    pageInfo?: GraphCacheResolver<WithTypename<DomainConnection>, Record<string, never>, WithTypename<PageInfo> | string>,
-    totalCount?: GraphCacheResolver<WithTypename<DomainConnection>, Record<string, never>, Scalars['Int'] | string>
   },
   DownloadFilePayload?: {
     url?: GraphCacheResolver<WithTypename<DownloadFilePayload>, Record<string, never>, Scalars['String'] | string>
   },
   DownloadFilesPayload?: {
     url?: GraphCacheResolver<WithTypename<DownloadFilesPayload>, Record<string, never>, Scalars['String'] | string>
-  },
-  Email?: {
-    address?: GraphCacheResolver<WithTypename<Email>, Record<string, never>, Scalars['String'] | string>,
-    createdAt?: GraphCacheResolver<WithTypename<Email>, Record<string, never>, Scalars['String'] | string>,
-    id?: GraphCacheResolver<WithTypename<Email>, Record<string, never>, Scalars['ID'] | string>,
-    name?: GraphCacheResolver<WithTypename<Email>, Record<string, never>, Scalars['String'] | string>,
-    type?: GraphCacheResolver<WithTypename<Email>, Record<string, never>, EmailType | string>
-  },
-  EmailAccount?: {
-    active?: GraphCacheResolver<WithTypename<EmailAccount>, Record<string, never>, Scalars['Boolean'] | string>,
-    createdAt?: GraphCacheResolver<WithTypename<EmailAccount>, Record<string, never>, Scalars['String'] | string>,
-    description?: GraphCacheResolver<WithTypename<EmailAccount>, Record<string, never>, Scalars['String'] | string>,
-    id?: GraphCacheResolver<WithTypename<EmailAccount>, Record<string, never>, Scalars['ID'] | string>,
-    members?: GraphCacheResolver<WithTypename<EmailAccount>, Record<string, never>, Array<WithTypename<EmailGroupMember> | string>>,
-    name?: GraphCacheResolver<WithTypename<EmailAccount>, Record<string, never>, Scalars['String'] | string>,
-    quota?: GraphCacheResolver<WithTypename<EmailAccount>, Record<string, never>, Scalars['Int'] | string>,
-    type?: GraphCacheResolver<WithTypename<EmailAccount>, Record<string, never>, EmailAccountType | string>,
-    user?: GraphCacheResolver<WithTypename<EmailAccount>, Record<string, never>, WithTypename<User> | string>
-  },
-  EmailAccountConnection?: {
-    edges?: GraphCacheResolver<WithTypename<EmailAccountConnection>, Record<string, never>, Array<WithTypename<EmailAccount> | string>>,
-    pageInfo?: GraphCacheResolver<WithTypename<EmailAccountConnection>, Record<string, never>, WithTypename<PageInfo> | string>,
-    totalCount?: GraphCacheResolver<WithTypename<EmailAccountConnection>, Record<string, never>, Scalars['Int'] | string>
-  },
-  EmailConnection?: {
-    edges?: GraphCacheResolver<WithTypename<EmailConnection>, Record<string, never>, Array<WithTypename<Email> | string>>,
-    pageInfo?: GraphCacheResolver<WithTypename<EmailConnection>, Record<string, never>, WithTypename<PageInfo> | string>,
-    totalCount?: GraphCacheResolver<WithTypename<EmailConnection>, Record<string, never>, Scalars['Int'] | string>
-  },
-  EmailForwarding?: {
-    createdAt?: GraphCacheResolver<WithTypename<EmailForwarding>, Record<string, never>, Scalars['String'] | string>,
-    id?: GraphCacheResolver<WithTypename<EmailForwarding>, Record<string, never>, Scalars['ID'] | string>,
-    origin?: GraphCacheResolver<WithTypename<EmailForwarding>, Record<string, never>, Scalars['String'] | string>,
-    target?: GraphCacheResolver<WithTypename<EmailForwarding>, Record<string, never>, Scalars['String'] | string>
-  },
-  EmailForwardingConnection?: {
-    edges?: GraphCacheResolver<WithTypename<EmailForwardingConnection>, Record<string, never>, Array<WithTypename<EmailForwarding> | string>>,
-    pageInfo?: GraphCacheResolver<WithTypename<EmailForwardingConnection>, Record<string, never>, WithTypename<PageInfo> | string>,
-    totalCount?: GraphCacheResolver<WithTypename<EmailForwardingConnection>, Record<string, never>, Scalars['Int'] | string>
-  },
-  EmailGroupMember?: {
-    createdAt?: GraphCacheResolver<WithTypename<EmailGroupMember>, Record<string, never>, Scalars['String'] | string>,
-    id?: GraphCacheResolver<WithTypename<EmailGroupMember>, Record<string, never>, Scalars['ID'] | string>,
-    memberOf?: GraphCacheResolver<WithTypename<EmailGroupMember>, Record<string, never>, Scalars['String'] | string>,
-    name?: GraphCacheResolver<WithTypename<EmailGroupMember>, Record<string, never>, Scalars['String'] | string>
-  },
-  EmailGroupMemberConnection?: {
-    edges?: GraphCacheResolver<WithTypename<EmailGroupMemberConnection>, Record<string, never>, Array<WithTypename<EmailGroupMember> | string>>,
-    pageInfo?: GraphCacheResolver<WithTypename<EmailGroupMemberConnection>, Record<string, never>, WithTypename<PageInfo> | string>,
-    totalCount?: GraphCacheResolver<WithTypename<EmailGroupMemberConnection>, Record<string, never>, Scalars['Int'] | string>
   },
   Entry?: {
     body?: GraphCacheResolver<WithTypename<Entry>, Record<string, never>, Scalars['String'] | string>,
@@ -2303,11 +1473,6 @@ export type GraphCacheResolvers = {
     parents?: GraphCacheResolver<WithTypename<File>, Record<string, never>, Array<WithTypename<File> | string>>,
     size?: GraphCacheResolver<WithTypename<File>, Record<string, never>, Scalars['Int'] | string>
   },
-  FileConnection?: {
-    edges?: GraphCacheResolver<WithTypename<FileConnection>, Record<string, never>, Array<WithTypename<File> | string>>,
-    pageInfo?: GraphCacheResolver<WithTypename<FileConnection>, Record<string, never>, WithTypename<PageInfo> | string>,
-    totalCount?: GraphCacheResolver<WithTypename<FileConnection>, Record<string, never>, Scalars['Int'] | string>
-  },
   ForgotPasswordPayload?: {
     success?: GraphCacheResolver<WithTypename<ForgotPasswordPayload>, Record<string, never>, Scalars['Boolean'] | string>
   },
@@ -2320,9 +1485,6 @@ export type GraphCacheResolvers = {
     email?: GraphCacheResolver<WithTypename<InviteDetailsPayload>, Record<string, never>, Scalars['String'] | string>,
     firstName?: GraphCacheResolver<WithTypename<InviteDetailsPayload>, Record<string, never>, Scalars['String'] | string>,
     lastName?: GraphCacheResolver<WithTypename<InviteDetailsPayload>, Record<string, never>, Scalars['String'] | string>
-  },
-  MoveFilesPayload?: {
-    files?: GraphCacheResolver<WithTypename<MoveFilesPayload>, Record<string, never>, Array<WithTypename<File> | string>>
   },
   Organisation?: {
     id?: GraphCacheResolver<WithTypename<Organisation>, Record<string, never>, Scalars['ID'] | string>,
@@ -2377,10 +1539,6 @@ export type GraphCacheResolvers = {
     pageInfo?: GraphCacheResolver<WithTypename<SchoolYearConnection>, Record<string, never>, WithTypename<PageInfo> | string>,
     totalCount?: GraphCacheResolver<WithTypename<SchoolYearConnection>, Record<string, never>, Scalars['Int'] | string>
   },
-  ShareUser?: {
-    permission?: GraphCacheResolver<WithTypename<ShareUser>, Record<string, never>, FilePermission | string>,
-    user?: GraphCacheResolver<WithTypename<ShareUser>, Record<string, never>, WithTypename<User> | string>
-  },
   SignInPayload?: {
     enabled_apps?: GraphCacheResolver<WithTypename<SignInPayload>, Record<string, never>, Array<Scalars['String'] | string>>,
     language?: GraphCacheResolver<WithTypename<SignInPayload>, Record<string, never>, Scalars['String'] | string>,
@@ -2409,14 +1567,10 @@ export type GraphCacheResolvers = {
     pageInfo?: GraphCacheResolver<WithTypename<TagConnection>, Record<string, never>, WithTypename<PageInfo> | string>,
     totalCount?: GraphCacheResolver<WithTypename<TagConnection>, Record<string, never>, Scalars['Int'] | string>
   },
-  UploadFilesPayload?: {
-    files?: GraphCacheResolver<WithTypename<UploadFilesPayload>, Record<string, never>, Array<WithTypename<File> | string>>
-  },
   User?: {
     createdAt?: GraphCacheResolver<WithTypename<User>, Record<string, never>, Scalars['Time'] | string>,
     deletedAt?: GraphCacheResolver<WithTypename<User>, Record<string, never>, Scalars['Time'] | string>,
     email?: GraphCacheResolver<WithTypename<User>, Record<string, never>, Scalars['String'] | string>,
-    emailAccounts?: GraphCacheResolver<WithTypename<User>, Record<string, never>, Array<WithTypename<EmailAccount> | string>>,
     firstName?: GraphCacheResolver<WithTypename<User>, Record<string, never>, Scalars['String'] | string>,
     id?: GraphCacheResolver<WithTypename<User>, Record<string, never>, Scalars['ID'] | string>,
     inviteAccepted?: GraphCacheResolver<WithTypename<User>, Record<string, never>, Scalars['Boolean'] | string>,
@@ -2491,23 +1645,12 @@ export type GraphCacheResolvers = {
 
 export type GraphCacheOptimisticUpdaters = {
   acceptInvite?: GraphCacheOptimisticMutationResolver<MutationAcceptInviteArgs, WithTypename<SignInPayload>>,
-  addFileShare?: GraphCacheOptimisticMutationResolver<MutationAddFileShareArgs, WithTypename<File>>,
-  addUserToChat?: GraphCacheOptimisticMutationResolver<MutationAddUserToChatArgs, WithTypename<ChatUser>>,
   archiveEntry?: GraphCacheOptimisticMutationResolver<MutationArchiveEntryArgs, WithTypename<Entry>>,
   archiveEvent?: GraphCacheOptimisticMutationResolver<MutationArchiveEventArgs, WithTypename<Event>>,
   archiveTag?: GraphCacheOptimisticMutationResolver<MutationArchiveTagArgs, WithTypename<Tag>>,
   archiveUser?: GraphCacheOptimisticMutationResolver<MutationArchiveUserArgs, WithTypename<User>>,
   archiveUserCompetence?: GraphCacheOptimisticMutationResolver<MutationArchiveUserCompetenceArgs, WithTypename<UserCompetence>>,
-  copyFile?: GraphCacheOptimisticMutationResolver<MutationCopyFileArgs, WithTypename<File>>,
-  copyFiles?: GraphCacheOptimisticMutationResolver<MutationCopyFilesArgs, WithTypename<CopyFilesPayload>>,
-  createChat?: GraphCacheOptimisticMutationResolver<MutationCreateChatArgs, WithTypename<Chat>>,
   createCompetence?: GraphCacheOptimisticMutationResolver<MutationCreateCompetenceArgs, WithTypename<Competence>>,
-  createDomain?: GraphCacheOptimisticMutationResolver<MutationCreateDomainArgs, Maybe<WithTypename<Domain>>>,
-  createEmail?: GraphCacheOptimisticMutationResolver<MutationCreateEmailArgs, Maybe<WithTypename<Email>>>,
-  createEmailAccount?: GraphCacheOptimisticMutationResolver<MutationCreateEmailAccountArgs, Maybe<WithTypename<EmailAccount>>>,
-  createEmailForwarding?: GraphCacheOptimisticMutationResolver<MutationCreateEmailForwardingArgs, Maybe<WithTypename<EmailForwarding>>>,
-  createEmailGroup?: GraphCacheOptimisticMutationResolver<MutationCreateEmailGroupArgs, Maybe<WithTypename<EmailAccount>>>,
-  createEmailGroupMember?: GraphCacheOptimisticMutationResolver<MutationCreateEmailGroupMemberArgs, Maybe<WithTypename<EmailGroupMember>>>,
   createEntry?: GraphCacheOptimisticMutationResolver<Record<string, never>, WithTypename<Entry>>,
   createEntryCompetence?: GraphCacheOptimisticMutationResolver<MutationCreateEntryCompetenceArgs, WithTypename<Entry>>,
   createEntryEvent?: GraphCacheOptimisticMutationResolver<MutationCreateEntryEventArgs, WithTypename<Entry>>,
@@ -2515,63 +1658,34 @@ export type GraphCacheOptimisticUpdaters = {
   createEntryTag?: GraphCacheOptimisticMutationResolver<MutationCreateEntryTagArgs, WithTypename<Entry>>,
   createEntryUser?: GraphCacheOptimisticMutationResolver<MutationCreateEntryUserArgs, WithTypename<Entry>>,
   createEvent?: GraphCacheOptimisticMutationResolver<MutationCreateEventArgs, WithTypename<Event>>,
-  createFolder?: GraphCacheOptimisticMutationResolver<MutationCreateFolderArgs, WithTypename<File>>,
-  createPrivatChat?: GraphCacheOptimisticMutationResolver<MutationCreatePrivatChatArgs, WithTypename<Chat>>,
   createReport?: GraphCacheOptimisticMutationResolver<MutationCreateReportArgs, Array<WithTypename<Report>>>,
   createSchoolYear?: GraphCacheOptimisticMutationResolver<MutationCreateSchoolYearArgs, WithTypename<SchoolYear>>,
-  createShare?: GraphCacheOptimisticMutationResolver<MutationCreateShareArgs, WithTypename<ShareUser>>,
-  createSharedDrive?: GraphCacheOptimisticMutationResolver<MutationCreateSharedDriveArgs, WithTypename<Bucket>>,
   createStudent?: GraphCacheOptimisticMutationResolver<MutationCreateStudentArgs, WithTypename<User>>,
   createSubject?: GraphCacheOptimisticMutationResolver<MutationCreateSubjectArgs, WithTypename<Subject>>,
   createTag?: GraphCacheOptimisticMutationResolver<MutationCreateTagArgs, WithTypename<Tag>>,
   createUser?: GraphCacheOptimisticMutationResolver<MutationCreateUserArgs, WithTypename<User>>,
   createUserCompetence?: GraphCacheOptimisticMutationResolver<MutationCreateUserCompetenceArgs, WithTypename<UserCompetence>>,
-  deleteChat?: GraphCacheOptimisticMutationResolver<MutationDeleteChatArgs, WithTypename<Chat>>,
-  deleteDomain?: GraphCacheOptimisticMutationResolver<MutationDeleteDomainArgs, Maybe<WithTypename<Domain>>>,
-  deleteEmail?: GraphCacheOptimisticMutationResolver<MutationDeleteEmailArgs, Maybe<WithTypename<Email>>>,
-  deleteEmailAccount?: GraphCacheOptimisticMutationResolver<MutationDeleteEmailAccountArgs, Maybe<WithTypename<EmailAccount>>>,
-  deleteEmailForwarding?: GraphCacheOptimisticMutationResolver<MutationDeleteEmailForwardingArgs, Maybe<WithTypename<EmailForwarding>>>,
-  deleteEmailGroup?: GraphCacheOptimisticMutationResolver<MutationDeleteEmailGroupArgs, Maybe<WithTypename<EmailAccount>>>,
-  deleteEmailGroupMember?: GraphCacheOptimisticMutationResolver<MutationDeleteEmailGroupMemberArgs, Maybe<WithTypename<EmailGroupMember>>>,
   deleteEntryCompetence?: GraphCacheOptimisticMutationResolver<MutationDeleteEntryCompetenceArgs, WithTypename<Entry>>,
   deleteEntryEvent?: GraphCacheOptimisticMutationResolver<MutationDeleteEntryEventArgs, WithTypename<Entry>>,
   deleteEntryFile?: GraphCacheOptimisticMutationResolver<MutationDeleteEntryFileArgs, WithTypename<Entry>>,
   deleteEntryTag?: GraphCacheOptimisticMutationResolver<MutationDeleteEntryTagArgs, WithTypename<Entry>>,
   deleteEntryUser?: GraphCacheOptimisticMutationResolver<MutationDeleteEntryUserArgs, WithTypename<Entry>>,
   deleteFile?: GraphCacheOptimisticMutationResolver<MutationDeleteFileArgs, WithTypename<DeleteFilePayload>>,
-  deleteFiles?: GraphCacheOptimisticMutationResolver<MutationDeleteFilesArgs, WithTypename<DeleteFilesPayload>>,
   deleteSchoolYear?: GraphCacheOptimisticMutationResolver<MutationDeleteSchoolYearArgs, WithTypename<SchoolYear>>,
-  deleteShare?: GraphCacheOptimisticMutationResolver<MutationDeleteShareArgs, WithTypename<ShareUser>>,
-  deleteSharedDrive?: GraphCacheOptimisticMutationResolver<MutationDeleteSharedDriveArgs, WithTypename<Bucket>>,
   deleteSubject?: GraphCacheOptimisticMutationResolver<MutationDeleteSubjectArgs, WithTypename<Subject>>,
-  downloadFile?: GraphCacheOptimisticMutationResolver<MutationDownloadFileArgs, WithTypename<DownloadFilePayload>>,
-  downloadFiles?: GraphCacheOptimisticMutationResolver<MutationDownloadFilesArgs, WithTypename<DownloadFilesPayload>>,
-  editChatMessage?: GraphCacheOptimisticMutationResolver<MutationEditChatMessageArgs, WithTypename<ChatMessage>>,
-  editShare?: GraphCacheOptimisticMutationResolver<MutationEditShareArgs, WithTypename<ShareUser>>,
   forgotPassword?: GraphCacheOptimisticMutationResolver<MutationForgotPasswordArgs, WithTypename<ForgotPasswordPayload>>,
   importStudents?: GraphCacheOptimisticMutationResolver<MutationImportStudentsArgs, WithTypename<ImportStudentsPayload>>,
-  markMessageAsRead?: GraphCacheOptimisticMutationResolver<MutationMarkMessageAsReadArgs, WithTypename<ChatMessage>>,
-  moveFile?: GraphCacheOptimisticMutationResolver<MutationMoveFileArgs, WithTypename<File>>,
-  moveFiles?: GraphCacheOptimisticMutationResolver<MutationMoveFilesArgs, WithTypename<MoveFilesPayload>>,
   previewFile?: GraphCacheOptimisticMutationResolver<MutationPreviewFileArgs, WithTypename<PreviewFilePayload>>,
   removeFileFromEntry?: GraphCacheOptimisticMutationResolver<MutationRemoveFileFromEntryArgs, WithTypename<File>>,
-  removeFileShare?: GraphCacheOptimisticMutationResolver<MutationRemoveFileShareArgs, WithTypename<File>>,
-  removeUserFromChat?: GraphCacheOptimisticMutationResolver<MutationRemoveUserFromChatArgs, WithTypename<ChatUser>>,
-  renameFile?: GraphCacheOptimisticMutationResolver<MutationRenameFileArgs, WithTypename<File>>,
-  renameSharedDrive?: GraphCacheOptimisticMutationResolver<MutationRenameSharedDriveArgs, WithTypename<Bucket>>,
   resetPassword?: GraphCacheOptimisticMutationResolver<MutationResetPasswordArgs, WithTypename<ResetPasswordPayload>>,
-  sendMessage?: GraphCacheOptimisticMutationResolver<MutationSendMessageArgs, WithTypename<ChatMessage>>,
   sendUserInvite?: GraphCacheOptimisticMutationResolver<MutationSendUserInviteArgs, Scalars['Boolean']>,
   setUserAttendanceState?: GraphCacheOptimisticMutationResolver<MutationSetUserAttendanceStateArgs, WithTypename<UserAttendance>>,
   signIn?: GraphCacheOptimisticMutationResolver<MutationSignInArgs, WithTypename<SignInPayload>>,
   signOut?: GraphCacheOptimisticMutationResolver<Record<string, never>, Scalars['Boolean']>,
   toggleEventCompetence?: GraphCacheOptimisticMutationResolver<MutationToggleEventCompetenceArgs, WithTypename<Event>>,
-  updateChat?: GraphCacheOptimisticMutationResolver<MutationUpdateChatArgs, WithTypename<Chat>>,
   updateCompetence?: GraphCacheOptimisticMutationResolver<MutationUpdateCompetenceArgs, WithTypename<Competence>>,
   updateCompetenceSorting?: GraphCacheOptimisticMutationResolver<MutationUpdateCompetenceSortingArgs, Array<WithTypename<Competence>>>,
   updateDailyAttendance?: GraphCacheOptimisticMutationResolver<MutationUpdateDailyAttendanceArgs, Array<WithTypename<UserAttendance>>>,
-  updateEmailAccount?: GraphCacheOptimisticMutationResolver<MutationUpdateEmailAccountArgs, Maybe<WithTypename<EmailAccount>>>,
-  updateEmailGroup?: GraphCacheOptimisticMutationResolver<MutationUpdateEmailGroupArgs, Maybe<WithTypename<EmailAccount>>>,
   updateEntry?: GraphCacheOptimisticMutationResolver<MutationUpdateEntryArgs, WithTypename<Entry>>,
   updateEntryUserCompetenceLevel?: GraphCacheOptimisticMutationResolver<MutationUpdateEntryUserCompetenceLevelArgs, WithTypename<Entry>>,
   updateEvent?: GraphCacheOptimisticMutationResolver<MutationUpdateEventArgs, WithTypename<Event>>,
@@ -2584,35 +1698,19 @@ export type GraphCacheOptimisticUpdaters = {
   updateUserLanguage?: GraphCacheOptimisticMutationResolver<MutationUpdateUserLanguageArgs, WithTypename<User>>,
   updateUserStudentGrade?: GraphCacheOptimisticMutationResolver<MutationUpdateUserStudentGradeArgs, WithTypename<UserStudentGrades>>,
   uploadFile?: GraphCacheOptimisticMutationResolver<MutationUploadFileArgs, WithTypename<File>>,
-  uploadFileToEntry?: GraphCacheOptimisticMutationResolver<MutationUploadFileToEntryArgs, WithTypename<Entry>>,
-  uploadFiles?: GraphCacheOptimisticMutationResolver<MutationUploadFilesArgs, WithTypename<UploadFilesPayload>>
+  uploadFileToEntry?: GraphCacheOptimisticMutationResolver<MutationUploadFileToEntryArgs, WithTypename<Entry>>
 };
 
 export type GraphCacheUpdaters = {
   Query?: {
-    EmailGroupMember?: GraphCacheUpdateResolver<{ EmailGroupMember: Maybe<WithTypename<EmailGroupMember>> }, QueryEmailGroupMemberArgs>,
-    EmailGroupMembers?: GraphCacheUpdateResolver<{ EmailGroupMembers: Maybe<WithTypename<EmailGroupMemberConnection>> }, Record<string, never>>,
-    bucket?: GraphCacheUpdateResolver<{ bucket: WithTypename<Bucket> }, QueryBucketArgs>,
-    buckets?: GraphCacheUpdateResolver<{ buckets: WithTypename<BucketConnection> }, QueryBucketsArgs>,
-    chat?: GraphCacheUpdateResolver<{ chat: WithTypename<Chat> }, QueryChatArgs>,
-    chats?: GraphCacheUpdateResolver<{ chats: WithTypename<ChatConnection> }, QueryChatsArgs>,
     competence?: GraphCacheUpdateResolver<{ competence: WithTypename<Competence> }, QueryCompetenceArgs>,
     competences?: GraphCacheUpdateResolver<{ competences: WithTypename<CompetenceConnection> }, QueryCompetencesArgs>,
-    domain?: GraphCacheUpdateResolver<{ domain: Maybe<WithTypename<Domain>> }, QueryDomainArgs>,
-    domains?: GraphCacheUpdateResolver<{ domains: Maybe<WithTypename<DomainConnection>> }, Record<string, never>>,
-    email?: GraphCacheUpdateResolver<{ email: Maybe<WithTypename<Email>> }, QueryEmailArgs>,
-    emailAccount?: GraphCacheUpdateResolver<{ emailAccount: Maybe<WithTypename<EmailAccount>> }, QueryEmailAccountArgs>,
-    emailAccounts?: GraphCacheUpdateResolver<{ emailAccounts: Maybe<WithTypename<EmailAccountConnection>> }, QueryEmailAccountsArgs>,
-    emailForwarding?: GraphCacheUpdateResolver<{ emailForwarding: Maybe<WithTypename<EmailForwarding>> }, QueryEmailForwardingArgs>,
-    emailForwardings?: GraphCacheUpdateResolver<{ emailForwardings: Maybe<WithTypename<EmailForwardingConnection>> }, Record<string, never>>,
-    emails?: GraphCacheUpdateResolver<{ emails: Maybe<WithTypename<EmailConnection>> }, Record<string, never>>,
     entries?: GraphCacheUpdateResolver<{ entries: WithTypename<EntryConnection> }, QueryEntriesArgs>,
     entry?: GraphCacheUpdateResolver<{ entry: WithTypename<Entry> }, QueryEntryArgs>,
     event?: GraphCacheUpdateResolver<{ event: WithTypename<Event> }, QueryEventArgs>,
     events?: GraphCacheUpdateResolver<{ events: WithTypename<EventConnection> }, QueryEventsArgs>,
     exportEvents?: GraphCacheUpdateResolver<{ exportEvents: Array<WithTypename<ExportEventsPayload>> }, QueryExportEventsArgs>,
     file?: GraphCacheUpdateResolver<{ file: WithTypename<File> }, QueryFileArgs>,
-    files?: GraphCacheUpdateResolver<{ files: WithTypename<FileConnection> }, QueryFilesArgs>,
     inviteDetails?: GraphCacheUpdateResolver<{ inviteDetails: WithTypename<InviteDetailsPayload> }, QueryInviteDetailsArgs>,
     me?: GraphCacheUpdateResolver<{ me: WithTypename<User> }, Record<string, never>>,
     organisation?: GraphCacheUpdateResolver<{ organisation: Maybe<WithTypename<Organisation>> }, Record<string, never>>,
@@ -2620,7 +1718,6 @@ export type GraphCacheUpdaters = {
     reports?: GraphCacheUpdateResolver<{ reports: WithTypename<ReportConnection> }, QueryReportsArgs>,
     schoolYear?: GraphCacheUpdateResolver<{ schoolYear: WithTypename<SchoolYear> }, QuerySchoolYearArgs>,
     schoolYears?: GraphCacheUpdateResolver<{ schoolYears: WithTypename<SchoolYearConnection> }, QuerySchoolYearsArgs>,
-    shares?: GraphCacheUpdateResolver<{ shares: Maybe<Array<WithTypename<ShareUser>>> }, QuerySharesArgs>,
     subject?: GraphCacheUpdateResolver<{ subject: WithTypename<Subject> }, QuerySubjectArgs>,
     subjects?: GraphCacheUpdateResolver<{ subjects: WithTypename<SubjectConnection> }, QuerySubjectsArgs>,
     tag?: GraphCacheUpdateResolver<{ tag: WithTypename<Tag> }, QueryTagArgs>,
@@ -2635,23 +1732,12 @@ export type GraphCacheUpdaters = {
   },
   Mutation?: {
     acceptInvite?: GraphCacheUpdateResolver<{ acceptInvite: WithTypename<SignInPayload> }, MutationAcceptInviteArgs>,
-    addFileShare?: GraphCacheUpdateResolver<{ addFileShare: WithTypename<File> }, MutationAddFileShareArgs>,
-    addUserToChat?: GraphCacheUpdateResolver<{ addUserToChat: WithTypename<ChatUser> }, MutationAddUserToChatArgs>,
     archiveEntry?: GraphCacheUpdateResolver<{ archiveEntry: WithTypename<Entry> }, MutationArchiveEntryArgs>,
     archiveEvent?: GraphCacheUpdateResolver<{ archiveEvent: WithTypename<Event> }, MutationArchiveEventArgs>,
     archiveTag?: GraphCacheUpdateResolver<{ archiveTag: WithTypename<Tag> }, MutationArchiveTagArgs>,
     archiveUser?: GraphCacheUpdateResolver<{ archiveUser: WithTypename<User> }, MutationArchiveUserArgs>,
     archiveUserCompetence?: GraphCacheUpdateResolver<{ archiveUserCompetence: WithTypename<UserCompetence> }, MutationArchiveUserCompetenceArgs>,
-    copyFile?: GraphCacheUpdateResolver<{ copyFile: WithTypename<File> }, MutationCopyFileArgs>,
-    copyFiles?: GraphCacheUpdateResolver<{ copyFiles: WithTypename<CopyFilesPayload> }, MutationCopyFilesArgs>,
-    createChat?: GraphCacheUpdateResolver<{ createChat: WithTypename<Chat> }, MutationCreateChatArgs>,
     createCompetence?: GraphCacheUpdateResolver<{ createCompetence: WithTypename<Competence> }, MutationCreateCompetenceArgs>,
-    createDomain?: GraphCacheUpdateResolver<{ createDomain: Maybe<WithTypename<Domain>> }, MutationCreateDomainArgs>,
-    createEmail?: GraphCacheUpdateResolver<{ createEmail: Maybe<WithTypename<Email>> }, MutationCreateEmailArgs>,
-    createEmailAccount?: GraphCacheUpdateResolver<{ createEmailAccount: Maybe<WithTypename<EmailAccount>> }, MutationCreateEmailAccountArgs>,
-    createEmailForwarding?: GraphCacheUpdateResolver<{ createEmailForwarding: Maybe<WithTypename<EmailForwarding>> }, MutationCreateEmailForwardingArgs>,
-    createEmailGroup?: GraphCacheUpdateResolver<{ createEmailGroup: Maybe<WithTypename<EmailAccount>> }, MutationCreateEmailGroupArgs>,
-    createEmailGroupMember?: GraphCacheUpdateResolver<{ createEmailGroupMember: Maybe<WithTypename<EmailGroupMember>> }, MutationCreateEmailGroupMemberArgs>,
     createEntry?: GraphCacheUpdateResolver<{ createEntry: WithTypename<Entry> }, Record<string, never>>,
     createEntryCompetence?: GraphCacheUpdateResolver<{ createEntryCompetence: WithTypename<Entry> }, MutationCreateEntryCompetenceArgs>,
     createEntryEvent?: GraphCacheUpdateResolver<{ createEntryEvent: WithTypename<Entry> }, MutationCreateEntryEventArgs>,
@@ -2659,63 +1745,34 @@ export type GraphCacheUpdaters = {
     createEntryTag?: GraphCacheUpdateResolver<{ createEntryTag: WithTypename<Entry> }, MutationCreateEntryTagArgs>,
     createEntryUser?: GraphCacheUpdateResolver<{ createEntryUser: WithTypename<Entry> }, MutationCreateEntryUserArgs>,
     createEvent?: GraphCacheUpdateResolver<{ createEvent: WithTypename<Event> }, MutationCreateEventArgs>,
-    createFolder?: GraphCacheUpdateResolver<{ createFolder: WithTypename<File> }, MutationCreateFolderArgs>,
-    createPrivatChat?: GraphCacheUpdateResolver<{ createPrivatChat: WithTypename<Chat> }, MutationCreatePrivatChatArgs>,
     createReport?: GraphCacheUpdateResolver<{ createReport: Array<WithTypename<Report>> }, MutationCreateReportArgs>,
     createSchoolYear?: GraphCacheUpdateResolver<{ createSchoolYear: WithTypename<SchoolYear> }, MutationCreateSchoolYearArgs>,
-    createShare?: GraphCacheUpdateResolver<{ createShare: WithTypename<ShareUser> }, MutationCreateShareArgs>,
-    createSharedDrive?: GraphCacheUpdateResolver<{ createSharedDrive: WithTypename<Bucket> }, MutationCreateSharedDriveArgs>,
     createStudent?: GraphCacheUpdateResolver<{ createStudent: WithTypename<User> }, MutationCreateStudentArgs>,
     createSubject?: GraphCacheUpdateResolver<{ createSubject: WithTypename<Subject> }, MutationCreateSubjectArgs>,
     createTag?: GraphCacheUpdateResolver<{ createTag: WithTypename<Tag> }, MutationCreateTagArgs>,
     createUser?: GraphCacheUpdateResolver<{ createUser: WithTypename<User> }, MutationCreateUserArgs>,
     createUserCompetence?: GraphCacheUpdateResolver<{ createUserCompetence: WithTypename<UserCompetence> }, MutationCreateUserCompetenceArgs>,
-    deleteChat?: GraphCacheUpdateResolver<{ deleteChat: WithTypename<Chat> }, MutationDeleteChatArgs>,
-    deleteDomain?: GraphCacheUpdateResolver<{ deleteDomain: Maybe<WithTypename<Domain>> }, MutationDeleteDomainArgs>,
-    deleteEmail?: GraphCacheUpdateResolver<{ deleteEmail: Maybe<WithTypename<Email>> }, MutationDeleteEmailArgs>,
-    deleteEmailAccount?: GraphCacheUpdateResolver<{ deleteEmailAccount: Maybe<WithTypename<EmailAccount>> }, MutationDeleteEmailAccountArgs>,
-    deleteEmailForwarding?: GraphCacheUpdateResolver<{ deleteEmailForwarding: Maybe<WithTypename<EmailForwarding>> }, MutationDeleteEmailForwardingArgs>,
-    deleteEmailGroup?: GraphCacheUpdateResolver<{ deleteEmailGroup: Maybe<WithTypename<EmailAccount>> }, MutationDeleteEmailGroupArgs>,
-    deleteEmailGroupMember?: GraphCacheUpdateResolver<{ deleteEmailGroupMember: Maybe<WithTypename<EmailGroupMember>> }, MutationDeleteEmailGroupMemberArgs>,
     deleteEntryCompetence?: GraphCacheUpdateResolver<{ deleteEntryCompetence: WithTypename<Entry> }, MutationDeleteEntryCompetenceArgs>,
     deleteEntryEvent?: GraphCacheUpdateResolver<{ deleteEntryEvent: WithTypename<Entry> }, MutationDeleteEntryEventArgs>,
     deleteEntryFile?: GraphCacheUpdateResolver<{ deleteEntryFile: WithTypename<Entry> }, MutationDeleteEntryFileArgs>,
     deleteEntryTag?: GraphCacheUpdateResolver<{ deleteEntryTag: WithTypename<Entry> }, MutationDeleteEntryTagArgs>,
     deleteEntryUser?: GraphCacheUpdateResolver<{ deleteEntryUser: WithTypename<Entry> }, MutationDeleteEntryUserArgs>,
     deleteFile?: GraphCacheUpdateResolver<{ deleteFile: WithTypename<DeleteFilePayload> }, MutationDeleteFileArgs>,
-    deleteFiles?: GraphCacheUpdateResolver<{ deleteFiles: WithTypename<DeleteFilesPayload> }, MutationDeleteFilesArgs>,
     deleteSchoolYear?: GraphCacheUpdateResolver<{ deleteSchoolYear: WithTypename<SchoolYear> }, MutationDeleteSchoolYearArgs>,
-    deleteShare?: GraphCacheUpdateResolver<{ deleteShare: WithTypename<ShareUser> }, MutationDeleteShareArgs>,
-    deleteSharedDrive?: GraphCacheUpdateResolver<{ deleteSharedDrive: WithTypename<Bucket> }, MutationDeleteSharedDriveArgs>,
     deleteSubject?: GraphCacheUpdateResolver<{ deleteSubject: WithTypename<Subject> }, MutationDeleteSubjectArgs>,
-    downloadFile?: GraphCacheUpdateResolver<{ downloadFile: WithTypename<DownloadFilePayload> }, MutationDownloadFileArgs>,
-    downloadFiles?: GraphCacheUpdateResolver<{ downloadFiles: WithTypename<DownloadFilesPayload> }, MutationDownloadFilesArgs>,
-    editChatMessage?: GraphCacheUpdateResolver<{ editChatMessage: WithTypename<ChatMessage> }, MutationEditChatMessageArgs>,
-    editShare?: GraphCacheUpdateResolver<{ editShare: WithTypename<ShareUser> }, MutationEditShareArgs>,
     forgotPassword?: GraphCacheUpdateResolver<{ forgotPassword: WithTypename<ForgotPasswordPayload> }, MutationForgotPasswordArgs>,
     importStudents?: GraphCacheUpdateResolver<{ importStudents: WithTypename<ImportStudentsPayload> }, MutationImportStudentsArgs>,
-    markMessageAsRead?: GraphCacheUpdateResolver<{ markMessageAsRead: WithTypename<ChatMessage> }, MutationMarkMessageAsReadArgs>,
-    moveFile?: GraphCacheUpdateResolver<{ moveFile: WithTypename<File> }, MutationMoveFileArgs>,
-    moveFiles?: GraphCacheUpdateResolver<{ moveFiles: WithTypename<MoveFilesPayload> }, MutationMoveFilesArgs>,
     previewFile?: GraphCacheUpdateResolver<{ previewFile: WithTypename<PreviewFilePayload> }, MutationPreviewFileArgs>,
     removeFileFromEntry?: GraphCacheUpdateResolver<{ removeFileFromEntry: WithTypename<File> }, MutationRemoveFileFromEntryArgs>,
-    removeFileShare?: GraphCacheUpdateResolver<{ removeFileShare: WithTypename<File> }, MutationRemoveFileShareArgs>,
-    removeUserFromChat?: GraphCacheUpdateResolver<{ removeUserFromChat: WithTypename<ChatUser> }, MutationRemoveUserFromChatArgs>,
-    renameFile?: GraphCacheUpdateResolver<{ renameFile: WithTypename<File> }, MutationRenameFileArgs>,
-    renameSharedDrive?: GraphCacheUpdateResolver<{ renameSharedDrive: WithTypename<Bucket> }, MutationRenameSharedDriveArgs>,
     resetPassword?: GraphCacheUpdateResolver<{ resetPassword: WithTypename<ResetPasswordPayload> }, MutationResetPasswordArgs>,
-    sendMessage?: GraphCacheUpdateResolver<{ sendMessage: WithTypename<ChatMessage> }, MutationSendMessageArgs>,
     sendUserInvite?: GraphCacheUpdateResolver<{ sendUserInvite: Scalars['Boolean'] }, MutationSendUserInviteArgs>,
     setUserAttendanceState?: GraphCacheUpdateResolver<{ setUserAttendanceState: WithTypename<UserAttendance> }, MutationSetUserAttendanceStateArgs>,
     signIn?: GraphCacheUpdateResolver<{ signIn: WithTypename<SignInPayload> }, MutationSignInArgs>,
     signOut?: GraphCacheUpdateResolver<{ signOut: Scalars['Boolean'] }, Record<string, never>>,
     toggleEventCompetence?: GraphCacheUpdateResolver<{ toggleEventCompetence: WithTypename<Event> }, MutationToggleEventCompetenceArgs>,
-    updateChat?: GraphCacheUpdateResolver<{ updateChat: WithTypename<Chat> }, MutationUpdateChatArgs>,
     updateCompetence?: GraphCacheUpdateResolver<{ updateCompetence: WithTypename<Competence> }, MutationUpdateCompetenceArgs>,
     updateCompetenceSorting?: GraphCacheUpdateResolver<{ updateCompetenceSorting: Array<WithTypename<Competence>> }, MutationUpdateCompetenceSortingArgs>,
     updateDailyAttendance?: GraphCacheUpdateResolver<{ updateDailyAttendance: Array<WithTypename<UserAttendance>> }, MutationUpdateDailyAttendanceArgs>,
-    updateEmailAccount?: GraphCacheUpdateResolver<{ updateEmailAccount: Maybe<WithTypename<EmailAccount>> }, MutationUpdateEmailAccountArgs>,
-    updateEmailGroup?: GraphCacheUpdateResolver<{ updateEmailGroup: Maybe<WithTypename<EmailAccount>> }, MutationUpdateEmailGroupArgs>,
     updateEntry?: GraphCacheUpdateResolver<{ updateEntry: WithTypename<Entry> }, MutationUpdateEntryArgs>,
     updateEntryUserCompetenceLevel?: GraphCacheUpdateResolver<{ updateEntryUserCompetenceLevel: WithTypename<Entry> }, MutationUpdateEntryUserCompetenceLevelArgs>,
     updateEvent?: GraphCacheUpdateResolver<{ updateEvent: WithTypename<Event> }, MutationUpdateEventArgs>,
@@ -2728,11 +1785,9 @@ export type GraphCacheUpdaters = {
     updateUserLanguage?: GraphCacheUpdateResolver<{ updateUserLanguage: WithTypename<User> }, MutationUpdateUserLanguageArgs>,
     updateUserStudentGrade?: GraphCacheUpdateResolver<{ updateUserStudentGrade: WithTypename<UserStudentGrades> }, MutationUpdateUserStudentGradeArgs>,
     uploadFile?: GraphCacheUpdateResolver<{ uploadFile: WithTypename<File> }, MutationUploadFileArgs>,
-    uploadFileToEntry?: GraphCacheUpdateResolver<{ uploadFileToEntry: WithTypename<Entry> }, MutationUploadFileToEntryArgs>,
-    uploadFiles?: GraphCacheUpdateResolver<{ uploadFiles: WithTypename<UploadFilesPayload> }, MutationUploadFilesArgs>
+    uploadFileToEntry?: GraphCacheUpdateResolver<{ uploadFileToEntry: WithTypename<Entry> }, MutationUploadFileToEntryArgs>
   },
   Subscription?: {
-    messageAdded?: GraphCacheUpdateResolver<{ messageAdded: WithTypename<ChatMessage> }, Record<string, never>>,
     reportCreatedOrUpdated?: GraphCacheUpdateResolver<{ reportCreatedOrUpdated: WithTypename<Report> }, Record<string, never>>
   },
   Bucket?: {
@@ -2741,47 +1796,8 @@ export type GraphCacheUpdaters = {
     files?: GraphCacheUpdateResolver<Maybe<WithTypename<Bucket>>, Record<string, never>>,
     id?: GraphCacheUpdateResolver<Maybe<WithTypename<Bucket>>, Record<string, never>>,
     name?: GraphCacheUpdateResolver<Maybe<WithTypename<Bucket>>, Record<string, never>>,
-    permission?: GraphCacheUpdateResolver<Maybe<WithTypename<Bucket>>, Record<string, never>>,
     shared?: GraphCacheUpdateResolver<Maybe<WithTypename<Bucket>>, Record<string, never>>,
     user?: GraphCacheUpdateResolver<Maybe<WithTypename<Bucket>>, Record<string, never>>
-  },
-  BucketConnection?: {
-    edges?: GraphCacheUpdateResolver<Maybe<WithTypename<BucketConnection>>, Record<string, never>>,
-    pageInfo?: GraphCacheUpdateResolver<Maybe<WithTypename<BucketConnection>>, Record<string, never>>,
-    totalCount?: GraphCacheUpdateResolver<Maybe<WithTypename<BucketConnection>>, Record<string, never>>
-  },
-  Chat?: {
-    createdAt?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>,
-    deletedAt?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>,
-    id?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>,
-    lastMessage?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>,
-    messages?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>,
-    name?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>,
-    type?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>,
-    unreadMessageCount?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>,
-    userCount?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>,
-    users?: GraphCacheUpdateResolver<Maybe<WithTypename<Chat>>, Record<string, never>>
-  },
-  ChatConnection?: {
-    edges?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatConnection>>, Record<string, never>>,
-    pageInfo?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatConnection>>, Record<string, never>>,
-    totalCount?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatConnection>>, Record<string, never>>
-  },
-  ChatMessage?: {
-    chat?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatMessage>>, Record<string, never>>,
-    createdAt?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatMessage>>, Record<string, never>>,
-    id?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatMessage>>, Record<string, never>>,
-    isEdited?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatMessage>>, Record<string, never>>,
-    isSeen?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatMessage>>, Record<string, never>>,
-    message?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatMessage>>, Record<string, never>>,
-    user?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatMessage>>, Record<string, never>>
-  },
-  ChatUser?: {
-    chat?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatUser>>, Record<string, never>>,
-    createdAt?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatUser>>, Record<string, never>>,
-    deletedAt?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatUser>>, Record<string, never>>,
-    id?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatUser>>, Record<string, never>>,
-    user?: GraphCacheUpdateResolver<Maybe<WithTypename<ChatUser>>, Record<string, never>>
   },
   Competence?: {
     color?: GraphCacheUpdateResolver<Maybe<WithTypename<Competence>>, Record<string, never>>,
@@ -2806,82 +1822,15 @@ export type GraphCacheUpdaters = {
     countLearnedCompetences?: GraphCacheUpdateResolver<Maybe<WithTypename<CompetenceTendency>>, Record<string, never>>,
     tendency?: GraphCacheUpdateResolver<Maybe<WithTypename<CompetenceTendency>>, Record<string, never>>
   },
-  CopyFilesPayload?: {
-    files?: GraphCacheUpdateResolver<Maybe<WithTypename<CopyFilesPayload>>, Record<string, never>>
-  },
   DeleteFilePayload?: {
     file?: GraphCacheUpdateResolver<Maybe<WithTypename<DeleteFilePayload>>, Record<string, never>>,
     success?: GraphCacheUpdateResolver<Maybe<WithTypename<DeleteFilePayload>>, Record<string, never>>
-  },
-  DeleteFilesPayload?: {
-    files?: GraphCacheUpdateResolver<Maybe<WithTypename<DeleteFilesPayload>>, Record<string, never>>,
-    success?: GraphCacheUpdateResolver<Maybe<WithTypename<DeleteFilesPayload>>, Record<string, never>>
-  },
-  Domain?: {
-    createdAt?: GraphCacheUpdateResolver<Maybe<WithTypename<Domain>>, Record<string, never>>,
-    id?: GraphCacheUpdateResolver<Maybe<WithTypename<Domain>>, Record<string, never>>,
-    name?: GraphCacheUpdateResolver<Maybe<WithTypename<Domain>>, Record<string, never>>
-  },
-  DomainConnection?: {
-    edges?: GraphCacheUpdateResolver<Maybe<WithTypename<DomainConnection>>, Record<string, never>>,
-    pageInfo?: GraphCacheUpdateResolver<Maybe<WithTypename<DomainConnection>>, Record<string, never>>,
-    totalCount?: GraphCacheUpdateResolver<Maybe<WithTypename<DomainConnection>>, Record<string, never>>
   },
   DownloadFilePayload?: {
     url?: GraphCacheUpdateResolver<Maybe<WithTypename<DownloadFilePayload>>, Record<string, never>>
   },
   DownloadFilesPayload?: {
     url?: GraphCacheUpdateResolver<Maybe<WithTypename<DownloadFilesPayload>>, Record<string, never>>
-  },
-  Email?: {
-    address?: GraphCacheUpdateResolver<Maybe<WithTypename<Email>>, Record<string, never>>,
-    createdAt?: GraphCacheUpdateResolver<Maybe<WithTypename<Email>>, Record<string, never>>,
-    id?: GraphCacheUpdateResolver<Maybe<WithTypename<Email>>, Record<string, never>>,
-    name?: GraphCacheUpdateResolver<Maybe<WithTypename<Email>>, Record<string, never>>,
-    type?: GraphCacheUpdateResolver<Maybe<WithTypename<Email>>, Record<string, never>>
-  },
-  EmailAccount?: {
-    active?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailAccount>>, Record<string, never>>,
-    createdAt?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailAccount>>, Record<string, never>>,
-    description?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailAccount>>, Record<string, never>>,
-    id?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailAccount>>, Record<string, never>>,
-    members?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailAccount>>, Record<string, never>>,
-    name?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailAccount>>, Record<string, never>>,
-    quota?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailAccount>>, Record<string, never>>,
-    type?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailAccount>>, Record<string, never>>,
-    user?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailAccount>>, Record<string, never>>
-  },
-  EmailAccountConnection?: {
-    edges?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailAccountConnection>>, Record<string, never>>,
-    pageInfo?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailAccountConnection>>, Record<string, never>>,
-    totalCount?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailAccountConnection>>, Record<string, never>>
-  },
-  EmailConnection?: {
-    edges?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailConnection>>, Record<string, never>>,
-    pageInfo?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailConnection>>, Record<string, never>>,
-    totalCount?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailConnection>>, Record<string, never>>
-  },
-  EmailForwarding?: {
-    createdAt?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailForwarding>>, Record<string, never>>,
-    id?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailForwarding>>, Record<string, never>>,
-    origin?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailForwarding>>, Record<string, never>>,
-    target?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailForwarding>>, Record<string, never>>
-  },
-  EmailForwardingConnection?: {
-    edges?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailForwardingConnection>>, Record<string, never>>,
-    pageInfo?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailForwardingConnection>>, Record<string, never>>,
-    totalCount?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailForwardingConnection>>, Record<string, never>>
-  },
-  EmailGroupMember?: {
-    createdAt?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailGroupMember>>, Record<string, never>>,
-    id?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailGroupMember>>, Record<string, never>>,
-    memberOf?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailGroupMember>>, Record<string, never>>,
-    name?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailGroupMember>>, Record<string, never>>
-  },
-  EmailGroupMemberConnection?: {
-    edges?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailGroupMemberConnection>>, Record<string, never>>,
-    pageInfo?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailGroupMemberConnection>>, Record<string, never>>,
-    totalCount?: GraphCacheUpdateResolver<Maybe<WithTypename<EmailGroupMemberConnection>>, Record<string, never>>
   },
   Entry?: {
     body?: GraphCacheUpdateResolver<Maybe<WithTypename<Entry>>, Record<string, never>>,
@@ -2940,11 +1889,6 @@ export type GraphCacheUpdaters = {
     parents?: GraphCacheUpdateResolver<Maybe<WithTypename<File>>, Record<string, never>>,
     size?: GraphCacheUpdateResolver<Maybe<WithTypename<File>>, Record<string, never>>
   },
-  FileConnection?: {
-    edges?: GraphCacheUpdateResolver<Maybe<WithTypename<FileConnection>>, Record<string, never>>,
-    pageInfo?: GraphCacheUpdateResolver<Maybe<WithTypename<FileConnection>>, Record<string, never>>,
-    totalCount?: GraphCacheUpdateResolver<Maybe<WithTypename<FileConnection>>, Record<string, never>>
-  },
   ForgotPasswordPayload?: {
     success?: GraphCacheUpdateResolver<Maybe<WithTypename<ForgotPasswordPayload>>, Record<string, never>>
   },
@@ -2957,9 +1901,6 @@ export type GraphCacheUpdaters = {
     email?: GraphCacheUpdateResolver<Maybe<WithTypename<InviteDetailsPayload>>, Record<string, never>>,
     firstName?: GraphCacheUpdateResolver<Maybe<WithTypename<InviteDetailsPayload>>, Record<string, never>>,
     lastName?: GraphCacheUpdateResolver<Maybe<WithTypename<InviteDetailsPayload>>, Record<string, never>>
-  },
-  MoveFilesPayload?: {
-    files?: GraphCacheUpdateResolver<Maybe<WithTypename<MoveFilesPayload>>, Record<string, never>>
   },
   Organisation?: {
     id?: GraphCacheUpdateResolver<Maybe<WithTypename<Organisation>>, Record<string, never>>,
@@ -3014,10 +1955,6 @@ export type GraphCacheUpdaters = {
     pageInfo?: GraphCacheUpdateResolver<Maybe<WithTypename<SchoolYearConnection>>, Record<string, never>>,
     totalCount?: GraphCacheUpdateResolver<Maybe<WithTypename<SchoolYearConnection>>, Record<string, never>>
   },
-  ShareUser?: {
-    permission?: GraphCacheUpdateResolver<Maybe<WithTypename<ShareUser>>, Record<string, never>>,
-    user?: GraphCacheUpdateResolver<Maybe<WithTypename<ShareUser>>, Record<string, never>>
-  },
   SignInPayload?: {
     enabled_apps?: GraphCacheUpdateResolver<Maybe<WithTypename<SignInPayload>>, Record<string, never>>,
     language?: GraphCacheUpdateResolver<Maybe<WithTypename<SignInPayload>>, Record<string, never>>,
@@ -3046,14 +1983,10 @@ export type GraphCacheUpdaters = {
     pageInfo?: GraphCacheUpdateResolver<Maybe<WithTypename<TagConnection>>, Record<string, never>>,
     totalCount?: GraphCacheUpdateResolver<Maybe<WithTypename<TagConnection>>, Record<string, never>>
   },
-  UploadFilesPayload?: {
-    files?: GraphCacheUpdateResolver<Maybe<WithTypename<UploadFilesPayload>>, Record<string, never>>
-  },
   User?: {
     createdAt?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>,
     deletedAt?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>,
     email?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>,
-    emailAccounts?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>,
     firstName?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>,
     id?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>,
     inviteAccepted?: GraphCacheUpdateResolver<Maybe<WithTypename<User>>, Record<string, never>>,

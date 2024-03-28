@@ -5,7 +5,6 @@ import router from "@/router/router"
 import { urqlClient } from "@/main"
 import { computed } from "vue"
 import i18n from "@/i18n"
-import { $posthog } from "@/plugins/posthog"
 import type { UserFragment } from "@/gql/fragments/user"
 
 export const user = useStorage<UserFragment | null>("user", null, undefined, {
@@ -56,30 +55,9 @@ async function signIn({ email, password }: SignInInput): Promise<{ error?: Error
   // Set the i18n locale to the user's language
   i18n.global.locale.value = language.value as unknown as any
 
-  identifyUser()
-
-  afterSignInHandleRedirect()
+  await afterSignInHandleRedirect()
 
   return {}
-}
-
-export function identifyUser() {
-  if (!user.value) return
-  if (!$posthog) return
-
-  try {
-    $posthog.identify(
-      user.value.id, // Replace 'distinct_id' with your user's unique identifier
-      {
-        id: user.value.id,
-        email: user.value.email,
-        name: user.value.firstName + " " + user.value.lastName
-      } // optional: set additional user properties
-    )
-    $posthog.group("company", user.value.organisationId)
-  } catch (e) {
-    console.error(e)
-  }
 }
 
 async function afterSignInHandleRedirect() {
@@ -89,10 +67,6 @@ async function afterSignInHandleRedirect() {
     } else {
       return await router.push({ name: "/record/entries/" })
     }
-  } else if (enabledApps.value.includes("drive")) {
-    return await router.push({ name: "/drive/my-drive/" })
-  } else if (enabledApps.value.includes("mail")) {
-    return await router.push({ name: "/mail/" })
   } else {
     return await router.push({ name: "/settings/profile" })
   }
@@ -108,13 +82,6 @@ async function signOut() {
   user.value = null
   token.value = null
   enabledApps.value = []
-
-  try {
-    $posthog?.reset()
-  } catch (e) {
-    console.error(e)
-  }
-
   await router.push({ name: "/login" })
 }
 
