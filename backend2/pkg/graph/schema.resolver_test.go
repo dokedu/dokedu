@@ -419,14 +419,161 @@ func (ts *TestSuite) Test_CreateTag() {
 	_, err = ts.Resolver.Mutation().CreateTag(ts.CtxWithUser(student.ID), model.CreateTagInput{Name: gonanoid.Must(8), Color: "blue"})
 	ts.ErrorIs(err, msg.ErrUnauthorized)
 
-	// error if the color is invalid
-	_, err = ts.Resolver.Mutation().CreateTag(ts.CtxWithUser(teacher.ID), model.CreateTagInput{Name: gonanoid.Must(8), Color: "invalid"})
-	ts.ErrorIs(err, msg.ErrInvalidInput)
-
 	// works for teachers
 	_, err = ts.Resolver.Mutation().CreateTag(ts.CtxWithUser(teacher.ID), model.CreateTagInput{
 		Name:  gonanoid.Must(8),
 		Color: "blue",
 	})
 	ts.NoError(err)
+}
+
+func (ts *TestSuite) Test_ArchiveTag() {
+	teacher := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "teacher")
+	student := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "student")
+
+	tag, err := ts.Resolver.Mutation().CreateTag(ts.CtxWithUser(teacher.ID), model.CreateTagInput{Name: gonanoid.Must(8), Color: "blue"})
+	ts.NoError(err)
+
+	// error on unauthorized
+	_, err = ts.Resolver.Mutation().ArchiveTag(ts.Ctx(), tag.ID)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// students are not allowed to archive tags
+	_, err = ts.Resolver.Mutation().ArchiveTag(ts.CtxWithUser(student.ID), tag.ID)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// works for teachers
+	_, err = ts.Resolver.Mutation().ArchiveTag(ts.CtxWithUser(teacher.ID), tag.ID)
+	ts.NoError(err)
+}
+
+func (ts *TestSuite) Test_UpdateTag() {
+	teacher := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "teacher")
+	student := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "student")
+
+	tag, err := ts.Resolver.Mutation().CreateTag(ts.CtxWithUser(teacher.ID), model.CreateTagInput{Name: gonanoid.Must(8), Color: "blue"})
+	ts.NoError(err)
+
+	updateTag := func(ctx context.Context, id string, name string, color string) (*db.Tag, error) {
+		return ts.Resolver.Mutation().UpdateTag(ctx, id, model.CreateTagInput{
+			Name:  name,
+			Color: color,
+		})
+	}
+
+	// error on unauthorized
+	_, err = updateTag(ts.Ctx(), tag.ID, gonanoid.Must(8), "red")
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// students are not allowed to update tags
+	_, err = updateTag(ts.CtxWithUser(student.ID), tag.ID, gonanoid.Must(8), "red")
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// works for teachers
+	newName := gonanoid.Must(8)
+	updatedTag, err := updateTag(ts.CtxWithUser(teacher.ID), tag.ID, newName, "red")
+	ts.NoError(err)
+	ts.Equal(newName, updatedTag.Name)
+}
+
+func (ts *TestSuite) Test_CreateCompetence() {
+	teacher := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "teacher")
+	student := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "student")
+	parent := ts.FirstSubjectForOrganisation(ts.FirstOrganisationID())
+
+	createCompetence := func(ctx context.Context, name string, parentID string) (*db.Competence, error) {
+		return ts.Resolver.Mutation().CreateCompetence(ctx, model.CreateCompetenceInput{
+			Name:     name,
+			ParentID: parentID,
+		})
+	}
+
+	// error on unauthorized
+	_, err := createCompetence(ts.Ctx(), gonanoid.Must(8), parent.ID)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// students are not allowed to create competences
+	_, err = createCompetence(ts.CtxWithUser(student.ID), gonanoid.Must(8), parent.ID)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// error on invalid parent
+	_, err = createCompetence(ts.CtxWithUser(teacher.ID), gonanoid.Must(8), "invalid")
+	ts.Error(err)
+
+	// works for teachers
+	_, err = createCompetence(ts.CtxWithUser(teacher.ID), gonanoid.Must(8), parent.ID)
+	ts.NoError(err)
+}
+
+func (ts *TestSuite) Test_UpdateCompetence() {
+	teacher := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "teacher")
+	student := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "student")
+	comp := ts.FirstCompetenceForOrganisation(ts.FirstOrganisationID())
+
+	updateCompetence := func(ctx context.Context, id string, color string) (*db.Competence, error) {
+		return ts.Resolver.Mutation().UpdateCompetence(ctx, model.UpdateCompetenceInput{
+			ID:    id,
+			Color: &color,
+		})
+	}
+
+	// error on unauthorized
+	_, err := updateCompetence(ts.Ctx(), comp.ID, gonanoid.Must(8))
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// students are not allowed to update competences
+	_, err = updateCompetence(ts.CtxWithUser(student.ID), comp.ID, gonanoid.Must(8))
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// works for teachers
+	updatedComp, err := updateCompetence(ts.CtxWithUser(teacher.ID), comp.ID, "gray")
+	ts.NoError(err)
+	ts.Equal("gray", updatedComp.Color.String)
+
+	updatedComp, err = updateCompetence(ts.CtxWithUser(teacher.ID), comp.ID, "blue")
+	ts.NoError(err)
+	ts.Equal("blue", updatedComp.Color.String)
+}
+
+func (ts *TestSuite) Test_UpdateCompetenceSorting() {
+	teacher := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "teacher")
+	student := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "student")
+
+	// error on unauthorized
+	_, err := ts.Resolver.Mutation().UpdateCompetenceSorting(ts.Ctx(), model.UpdateCompetenceSortingInput{})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// students are not allowed to update competences
+	_, err = ts.Resolver.Mutation().UpdateCompetenceSorting(ts.CtxWithUser(student.ID), model.UpdateCompetenceSortingInput{})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// works for teachers
+	competences, err := ts.DB.CompetencesFindOrderedBySortOrderAndName(ts.Ctx(), teacher.OrganisationID)
+	ts.NoError(err)
+
+	// shuffle the competences
+	newCompetenceOrder := make(map[string]int)
+	for _, comp := range competences {
+		newCompetenceOrder[comp.ID] = rand.Intn(10000)
+	}
+
+	// build update map
+	update := model.UpdateCompetenceSortingInput{Competences: make([]model.SortCompetenceInput, len(competences))}
+	for i, comp := range competences {
+		update.Competences[i] = model.SortCompetenceInput{ID: comp.ID, SortOrder: newCompetenceOrder[comp.ID]}
+	}
+
+	_, err = ts.Resolver.Mutation().UpdateCompetenceSorting(ts.CtxWithUser(teacher.ID), update)
+	ts.NoError(err)
+
+	// check if the competences are sorted correctly
+	competences, err = ts.DB.CompetencesFindOrderedBySortOrderAndName(ts.Ctx(), teacher.OrganisationID)
+	ts.NoError(err)
+
+	for i, comp := range competences {
+		ts.Equal(int32(newCompetenceOrder[comp.ID]), comp.SortOrder.Int32)
+		if i > 0 {
+			ts.Greater(comp.SortOrder.Int32, competences[i-1].SortOrder.Int32)
+		}
+	}
 }

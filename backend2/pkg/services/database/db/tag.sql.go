@@ -92,6 +92,41 @@ func (q *Queries) TagSoftDelete(ctx context.Context, arg TagSoftDeleteParams) (T
 	return i, err
 }
 
+const tagUpdate = `-- name: TagUpdate :one
+UPDATE tags
+SET name = $1,
+    color = $2::text
+WHERE id = $3
+  AND organisation_id = $4
+RETURNING id, name, color, organisation_id, created_at, deleted_at
+`
+
+type TagUpdateParams struct {
+	Name           string `db:"name"`
+	Color          string `db:"color"`
+	ID             string `db:"id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) TagUpdate(ctx context.Context, arg TagUpdateParams) (Tag, error) {
+	row := q.db.QueryRow(ctx, tagUpdate,
+		arg.Name,
+		arg.Color,
+		arg.ID,
+		arg.OrganisationID,
+	)
+	var i Tag
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Color,
+		&i.OrganisationID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const tagUpsert = `-- name: TagUpsert :one
 INSERT INTO tags (name, color, organisation_id)
 VALUES ($1, $2, $3)

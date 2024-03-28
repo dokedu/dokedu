@@ -111,6 +111,15 @@ func (ts *TestSuite) FirstCompetenceForOrganisation(organisationID string) db.Co
 	ts.NoError(err)
 	return comp
 }
+func (ts *TestSuite) FirstSubjectForOrganisation(organisationID string) db.Competence {
+	id := ts.Query1("SELECT id FROM competences WHERE organisation_id = $1 and competence_id is null LIMIT 1", organisationID).(string)
+	comp, err := ts.DB.CompetenceFindById(ts.Ctx(), db.CompetenceFindByIdParams{
+		ID:             id,
+		OrganisationID: organisationID,
+	})
+	ts.NoError(err)
+	return comp
+}
 
 func (ts *TestSuite) MockAdminForOrganisation(organisationID string) db.User {
 	return ts.MockUserForOrganisation(organisationID, "admin")

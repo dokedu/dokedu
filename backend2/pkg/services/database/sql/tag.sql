@@ -18,6 +18,14 @@ ON CONFLICT (name, organisation_id) DO UPDATE
     SET color = @color
 RETURNING *;
 
+-- name: TagUpdate :one
+UPDATE tags
+SET name = @name,
+    color = @color::text
+WHERE id = @id
+  AND organisation_id = @organisation_id
+RETURNING *;
+
 -- name: TagSoftDelete :one
 UPDATE tags
 SET deleted_at = now()

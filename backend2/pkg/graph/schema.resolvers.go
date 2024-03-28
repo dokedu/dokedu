@@ -460,11 +460,6 @@ func (r *mutationResolver) CreateTag(ctx context.Context, input model.CreateTagI
 		return nil, msg.ErrUnauthorized
 	}
 
-	err := r.Validate(input)
-	if err != nil {
-		return nil, err
-	}
-
 	color := input.Color
 	if color == "" {
 		color = "blue"
@@ -484,12 +479,40 @@ func (r *mutationResolver) CreateTag(ctx context.Context, input model.CreateTagI
 
 // ArchiveTag is the resolver for the archiveTag field.
 func (r *mutationResolver) ArchiveTag(ctx context.Context, id string) (*db.Tag, error) {
-	panic(fmt.Errorf("not implemented: ArchiveTag - archiveTag"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok || !user.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	tag, err := r.DB.TagSoftDelete(ctx, db.TagSoftDeleteParams{
+		ID:             id,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &tag, nil
 }
 
 // UpdateTag is the resolver for the updateTag field.
 func (r *mutationResolver) UpdateTag(ctx context.Context, id string, input model.CreateTagInput) (*db.Tag, error) {
-	panic(fmt.Errorf("not implemented: UpdateTag - updateTag"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok || !user.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	tag, err := r.DB.TagUpdate(ctx, db.TagUpdateParams{
+		Name:           input.Name,
+		Color:          input.Color,
+		ID:             id,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &tag, nil
 }
 
 // UpdatePassword is the resolver for the updatePassword field.
@@ -499,17 +522,92 @@ func (r *mutationResolver) UpdatePassword(ctx context.Context, oldPassword strin
 
 // UpdateCompetence is the resolver for the updateCompetence field.
 func (r *mutationResolver) UpdateCompetence(ctx context.Context, input model.UpdateCompetenceInput) (*db.Competence, error) {
-	panic(fmt.Errorf("not implemented: UpdateCompetence - updateCompetence"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok || !user.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	// todo: color should be required
+	if input.Color == nil {
+		return nil, nil
+	}
+
+	competence, err := r.DB.CompetenceUpdateColor(ctx, db.CompetenceUpdateColorParams{
+		Color:          *input.Color,
+		CompetenceID:   input.ID,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &competence, nil
 }
 
 // UpdateCompetenceSorting is the resolver for the updateCompetenceSorting field.
 func (r *mutationResolver) UpdateCompetenceSorting(ctx context.Context, input model.UpdateCompetenceSortingInput) ([]*db.Competence, error) {
-	panic(fmt.Errorf("not implemented: UpdateCompetenceSorting - updateCompetenceSorting"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok || !user.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	competences := make([]*db.Competence, len(input.Competences))
+	err := r.DB.InTx(ctx, func(ctx context.Context, q *db.Queries) error {
+		for i, competenceInput := range input.Competences {
+			competence, err := r.DB.CompetenceUpdateSortOrder(ctx, db.CompetenceUpdateSortOrderParams{
+				SortOrder:      int32(competenceInput.SortOrder),
+				CompetenceID:   competenceInput.ID,
+				OrganisationID: user.OrganisationID,
+			})
+			if err != nil {
+				return err
+			}
+
+			competences[i] = &competence
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return competences, nil
 }
 
 // CreateCompetence is the resolver for the createCompetence field.
 func (r *mutationResolver) CreateCompetence(ctx context.Context, input model.CreateCompetenceInput) (*db.Competence, error) {
-	panic(fmt.Errorf("not implemented: CreateCompetence - createCompetence"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok || !user.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	// find subject
+	subject, err := r.DB.CompetenceFindById(ctx, db.CompetenceFindByIdParams{
+		ID:             input.ParentID,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	defaultGrades := make([]int32, 10)
+	for i := range 10 {
+		defaultGrades[i] = int32(i + 1)
+	}
+
+	competence, err := r.DB.CompetenceCreate(ctx, db.CompetenceCreateParams{
+		Name:           input.Name,
+		CompetenceID:   pgtype.Text{Valid: true, String: subject.ID},
+		CompetenceType: db.CompetenceTypeCompetence,
+		OrganisationID: user.OrganisationID,
+		Grades:         defaultGrades,
+		CreatedBy:      pgtype.Text{Valid: true, String: user.ID},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &competence, nil
 }
 
 // Users is the resolver for the users field.

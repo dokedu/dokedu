@@ -279,7 +279,7 @@ input CreateStudentInput {
 
 input CreateTagInput {
     name: String!
-    color: String! @goTag(key: "validate", value: "required,oneof=red green blue yellow purple pink orange")
+    color: String!
 }
 
 input ResetPasswordInput {
@@ -305,6 +305,8 @@ type ForgotPasswordPayload {
 
 input UpdateCompetenceInput {
     id: ID!
+
+    # todo: color should be required
     color: String
 }
 
@@ -345,7 +347,7 @@ extend type Mutation {
     archiveTag(id: ID!): Tag!
     updateTag(id: ID!, input: CreateTagInput!): Tag!
 
-    updatePassword(oldPassword: String!, newPassword: String!): Boolean!
+    updatePassword(oldPassword: String!, newPassword: String!): Boolean! @deprecated
 
     updateCompetence(input: UpdateCompetenceInput!): Competence!
 
