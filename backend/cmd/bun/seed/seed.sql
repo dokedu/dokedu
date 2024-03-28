@@ -62,15 +62,6 @@ $$;
 INSERT INTO users (id, role, first_name, last_name, organisation_id)
 VALUES ('FryR3qHm3jZkfzfmwheis', 'bot', 'Dokedu AI', '', 'u2wHWUbnWUaUUjBeNvQ4u');
 
-INSERT INTO chats (id, organisation_id)
-VALUES ('kBcB3_bLMXIvmXC8xzqMo', 'u2wHWUbnWUaUUjBeNvQ4u');
-
-INSERT INTO chat_users (chat_id, user_id, organisation_id)
-VALUES ('kBcB3_bLMXIvmXC8xzqMo', 'FryR3qHm3jZkfzfmwheis', 'u2wHWUbnWUaUUjBeNvQ4u');
-
-INSERT INTO chat_users (chat_id, user_id, organisation_id)
-VALUES ('kBcB3_bLMXIvmXC8xzqMo', 'u2wHWUbnWUaUUjBeNvQ4u', 'u2wHWUbnWUaUUjBeNvQ4u');
-
 -- Student users
 DO
 $$
