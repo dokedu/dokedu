@@ -324,23 +324,128 @@ func (r *mutationResolver) ArchiveUser(ctx context.Context, id string) (*db.User
 }
 
 // UpdateUserLanguage is the resolver for the updateUserLanguage field.
-func (r *mutationResolver) UpdateUserLanguage(ctx context.Context, language model.UserLanguage) (*db.User, error) {
-	panic(fmt.Errorf("not implemented: UpdateUserLanguage - updateUserLanguage"))
+func (r *mutationResolver) UpdateUserLanguage(ctx context.Context, language db.UserLang) (*db.User, error) {
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	var err error
+	user.User, err = r.DB.UserUpdateLanguage(ctx, db.UserUpdateLanguageParams{
+		Language:       language,
+		ID:             user.ID,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &user.User, nil
 }
 
 // SendUserInvite is the resolver for the sendUserInvite field.
 func (r *mutationResolver) SendUserInvite(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented: SendUserInvite - sendUserInvite"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok || !user.HasPermissionAdmin() {
+		return false, msg.ErrUnauthorized
+	}
+
+	// try to find the user
+	userToBeInvited, err := r.DB.UserFindByID(ctx, db.UserFindByIDParams{
+		ID:             id,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return false, err
+	}
+
+	// set the password recovery token and send the email
+	token := gonanoid.Must(32)
+	_, err = r.DB.UserUpdateRecoveryToken(ctx, db.UserUpdateRecoveryTokenParams{
+		RecoveryToken:  token,
+		ID:             userToBeInvited.ID,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return false, err
+	}
+
+	err = r.Services.Mail.SendInvite(userToBeInvited.Email.String, userToBeInvited.FirstName, userToBeInvited.FirstName, userToBeInvited.LanguageOrDefault(), token)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 // CreateStudent is the resolver for the createStudent field.
 func (r *mutationResolver) CreateStudent(ctx context.Context, input model.CreateStudentInput) (*db.User, error) {
-	panic(fmt.Errorf("not implemented: CreateStudent - createStudent"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok || !user.HasPermissionAdmin() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	var createdUser db.User
+	var err error
+	err = r.DB.InTx(ctx, func(ctx context.Context, q *db.Queries) error {
+		// create the user
+		createdUser, err = q.UserCreate(ctx, db.UserCreateParams{
+			Role:           db.UserRoleStudent,
+			OrganisationID: user.OrganisationID,
+			FirstName:      input.FirstName,
+			LastName:       input.LastName,
+		})
+		if err != nil {
+			return err
+		}
+
+		// create the student
+		_, err = q.UserStudentCreate(ctx, db.UserStudentCreateParams{
+			UserID:         createdUser.ID,
+			OrganisationID: user.OrganisationID,
+			LeftAt:         OptionalTimestamp(input.LeftAt),
+			Grade:          int32(input.Grade),
+			Birthday:       OptionalDate(input.Birthday),
+			JoinedAt:       OptionalTimestamp(input.JoinedAt),
+			Emoji:          OptionalString(input.Emoji),
+		})
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &createdUser, nil
 }
 
 // CreateUserCompetence is the resolver for the createUserCompetence field.
 func (r *mutationResolver) CreateUserCompetence(ctx context.Context, input model.CreateUserCompetenceInput) (*db.UserCompetence, error) {
-	panic(fmt.Errorf("not implemented: CreateUserCompetence - createUserCompetence"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	// if the user is not a teacher, they can only create user competences for themselves
+	if !user.HasPermissionTeacher() && user.ID != input.UserID {
+		return nil, msg.ErrUnauthorized
+	}
+
+	userCompetence, err := r.DB.UserCompetenceCreateWithoutEntry(ctx, db.UserCompetenceCreateWithoutEntryParams{
+		Level:          int32(input.Level),
+		UserID:         input.UserID,
+		CompetenceID:   input.CompetenceID,
+		CreatedBy:      pgtype.Text{Valid: true, String: user.ID},
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &userCompetence, nil
 }
 
 // ArchiveUserCompetence is the resolver for the archiveUserCompetence field.
@@ -454,7 +559,7 @@ func (r *userResolver) Student(ctx context.Context, obj *db.User) (*db.UserStude
 }
 
 // Language is the resolver for the language field.
-func (r *userResolver) Language(ctx context.Context, obj *db.User) (*model.UserLanguage, error) {
+func (r *userResolver) Language(ctx context.Context, obj *db.User) (*db.UserLang, error) {
 	panic(fmt.Errorf("not implemented: Language - language"))
 }
 

@@ -239,6 +239,42 @@ func (q *Queries) UserUpdate(ctx context.Context, arg UserUpdateParams) (User, e
 	return i, err
 }
 
+const userUpdateLanguage = `-- name: UserUpdateLanguage :one
+UPDATE users
+SET language = $1::user_lang
+WHERE id = $2
+  AND organisation_id = $3
+RETURNING id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
+`
+
+type UserUpdateLanguageParams struct {
+	Language       UserLang `db:"language"`
+	ID             string   `db:"id"`
+	OrganisationID string   `db:"organisation_id"`
+}
+
+func (q *Queries) UserUpdateLanguage(ctx context.Context, arg UserUpdateLanguageParams) (User, error) {
+	row := q.db.QueryRow(ctx, userUpdateLanguage, arg.Language, arg.ID, arg.OrganisationID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Role,
+		&i.OrganisationID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Password,
+		&i.RecoveryToken,
+		&i.RecoverySentAt,
+		&i.AvatarFileID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.Language,
+		&i.Sex,
+	)
+	return i, err
+}
+
 const userUpdatePassword = `-- name: UserUpdatePassword :one
 UPDATE users
 SET password = $3::text, recovery_token = NULL, recovery_sent_at = NULL

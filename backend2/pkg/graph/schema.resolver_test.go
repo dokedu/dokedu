@@ -291,3 +291,118 @@ func (ts *TestSuite) Test_ArchiveUser() {
 	})
 	ts.ErrorIs(err, pgx.ErrNoRows)
 }
+
+func (ts *TestSuite) Test_UpdateUserLanguage() {
+	admin := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "admin")
+	teacher := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "teacher")
+
+	// doesn't work if the user is not logged in
+	_, err := ts.Resolver.Mutation().UpdateUserLanguage(ts.Ctx(), db.UserLangEn)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// works for admin and teacher
+	_, err = ts.Resolver.Mutation().UpdateUserLanguage(ts.CtxWithUser(admin.Email.String), db.UserLangEn)
+	ts.NoError(err)
+	lang := ts.Query1("SELECT language FROM users WHERE id = $1", admin.ID).(string)
+	ts.Equal("en", lang)
+
+	_, err = ts.Resolver.Mutation().UpdateUserLanguage(ts.CtxWithUser(admin.Email.String), db.UserLangDe)
+	ts.NoError(err)
+	lang = ts.Query1("SELECT language FROM users WHERE id = $1", admin.ID).(string)
+	ts.Equal("de", lang)
+
+	_, err = ts.Resolver.Mutation().UpdateUserLanguage(ts.CtxWithUser(teacher.Email.String), db.UserLangEn)
+	ts.NoError(err)
+	lang = ts.Query1("SELECT language FROM users WHERE id = $1", teacher.ID).(string)
+	ts.Equal("en", lang)
+
+	_, err = ts.Resolver.Mutation().UpdateUserLanguage(ts.CtxWithUser(teacher.Email.String), db.UserLangDe)
+	ts.NoError(err)
+	lang = ts.Query1("SELECT language FROM users WHERE id = $1", teacher.ID).(string)
+	ts.Equal("de", lang)
+}
+
+func (ts *TestSuite) Test_SendUserInvite() {
+	admin := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "admin")
+	teacher := ts.MockTeacherForOrganisation(ts.FirstOrganisationID())
+
+	// doesn't work if the user is not logged in
+	_, err := ts.Resolver.Mutation().SendUserInvite(ts.Ctx(), teacher.ID)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// doesn't work if the user is not an admin
+	_, err = ts.Resolver.Mutation().SendUserInvite(ts.CtxWithUser(teacher.Email.String), teacher.ID)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// works if the user is an admin
+	_, err = ts.Resolver.Mutation().SendUserInvite(ts.CtxWithUser(admin.Email.String), teacher.ID)
+	ts.NoError(err)
+
+	// invite is sent
+	resetToken := ts.Query1("SELECT recovery_token FROM users WHERE id = $1", teacher.ID).(string)
+	ts.NotEmpty(resetToken)
+	ts.AssertMailReceived(teacher.Email.String, resetToken, "Create your account")
+}
+
+func (ts *TestSuite) Test_CreateStudent() {
+	admin := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "admin")
+	teacher := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "teacher")
+
+	createStudent := func(ctx context.Context, grade int) (*db.User, error) {
+		return ts.Resolver.Mutation().CreateStudent(ctx, model.CreateStudentInput{
+			FirstName: gonanoid.Must(32),
+			LastName:  "tester",
+			Grade:     grade,
+		})
+	}
+
+	// doesn't work if the user is not logged in
+	_, err := createStudent(ts.Ctx(), 1)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// doesn't work if the user is not an admin
+	_, err = createStudent(ts.CtxWithUser(teacher.Email.String), 1)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// error on invalid grade, does not create a dangling user
+	cnt := ts.Query1("SELECT COUNT(*) FROM users").(int64)
+	_, err = createStudent(ts.CtxWithUser(admin.Email.String), 0)
+	ts.Error(err)
+	cnt2 := ts.Query1("SELECT COUNT(*) FROM users").(int64)
+	ts.Equal(cnt, cnt2)
+
+	// works if the user is an admin
+	user, err := createStudent(ts.CtxWithUser(admin.Email.String), 1)
+	ts.NoError(err)
+	ts.Equal(db.UserRoleStudent, user.Role)
+}
+
+func (ts *TestSuite) Test_CreateUserCompetence() {
+	teacher := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "teacher")
+	student := ts.MockUserForOrganisation(ts.FirstOrganisationID(), "student")
+	student2 := ts.MockUserForOrganisation(ts.FirstOrganisationID(), "student")
+	competence := ts.FirstCompetenceForOrganisation(ts.FirstOrganisationID())
+
+	createUserCompetence := func(ctx context.Context, userID string, competenceID string) (*db.UserCompetence, error) {
+		return ts.Resolver.Mutation().CreateUserCompetence(ctx, model.CreateUserCompetenceInput{
+			Level:        1,
+			UserID:       userID,
+			CompetenceID: competenceID,
+		})
+	}
+
+	// doesn't work if the user is not logged in
+	_, err := createUserCompetence(ts.Ctx(), teacher.ID, competence.ID)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// works if the user is a teacher
+	_, err = createUserCompetence(ts.CtxWithUser(teacher.Email.String), student.ID, competence.ID)
+	ts.NoError(err)
+
+	// students cannot create competences for others, only themselves
+	_, err = createUserCompetence(ts.CtxWithUser(student.Email.String), student2.ID, competence.ID)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	_, err = createUserCompetence(ts.CtxWithUser(student2.Email.String), student2.ID, competence.ID)
+	ts.NoError(err)
+}

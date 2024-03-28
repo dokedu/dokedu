@@ -699,47 +699,6 @@ func (e SortDirection) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type UserLanguage string
-
-const (
-	UserLanguageEn UserLanguage = "en"
-	UserLanguageDe UserLanguage = "de"
-)
-
-var AllUserLanguage = []UserLanguage{
-	UserLanguageEn,
-	UserLanguageDe,
-}
-
-func (e UserLanguage) IsValid() bool {
-	switch e {
-	case UserLanguageEn, UserLanguageDe:
-		return true
-	}
-	return false
-}
-
-func (e UserLanguage) String() string {
-	return string(e)
-}
-
-func (e *UserLanguage) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = UserLanguage(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid UserLanguage", str)
-	}
-	return nil
-}
-
-func (e UserLanguage) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
 type UserOrderBy string
 
 const (

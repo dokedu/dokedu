@@ -58,6 +58,9 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
+  UserLanguage:
+    model:
+      - github.com/dokedu/dokedu/backend/pkg/services/database/db.UserLang
   Chat:
     fields:
       name:

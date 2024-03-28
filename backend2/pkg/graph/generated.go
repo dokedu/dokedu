@@ -245,7 +245,7 @@ type ComplexityRoot struct {
 		UpdateSubject                  func(childComplexity int, input model.UpdateSubjectInput) int
 		UpdateTag                      func(childComplexity int, id string, input model.CreateTagInput) int
 		UpdateUser                     func(childComplexity int, input model.UpdateUserInput) int
-		UpdateUserLanguage             func(childComplexity int, language model.UserLanguage) int
+		UpdateUserLanguage             func(childComplexity int, language db.UserLang) int
 		UpdateUserStudentGrade         func(childComplexity int, input model.UpdateUserStudentGradesInput) int
 		UploadFile                     func(childComplexity int, input model.FileUploadInput) int
 		UploadFileToEntry              func(childComplexity int, entryID string, file graphql.Upload) int
@@ -543,7 +543,7 @@ type MutationResolver interface {
 	CreateUser(ctx context.Context, input model.CreateUserInput) (*db.User, error)
 	UpdateUser(ctx context.Context, input model.UpdateUserInput) (*db.User, error)
 	ArchiveUser(ctx context.Context, id string) (*db.User, error)
-	UpdateUserLanguage(ctx context.Context, language model.UserLanguage) (*db.User, error)
+	UpdateUserLanguage(ctx context.Context, language db.UserLang) (*db.User, error)
 	SendUserInvite(ctx context.Context, id string) (bool, error)
 	CreateStudent(ctx context.Context, input model.CreateStudentInput) (*db.User, error)
 	CreateUserCompetence(ctx context.Context, input model.CreateUserCompetenceInput) (*db.UserCompetence, error)
@@ -619,7 +619,7 @@ type UserResolver interface {
 	Email(ctx context.Context, obj *db.User) (*string, error)
 
 	Student(ctx context.Context, obj *db.User) (*db.UserStudent, error)
-	Language(ctx context.Context, obj *db.User) (*model.UserLanguage, error)
+	Language(ctx context.Context, obj *db.User) (*db.UserLang, error)
 
 	DeletedAt(ctx context.Context, obj *db.User) (*time.Time, error)
 
@@ -1861,7 +1861,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateUserLanguage(childComplexity, args["language"].(model.UserLanguage)), true
+		return e.complexity.Mutation.UpdateUserLanguage(childComplexity, args["language"].(db.UserLang)), true
 
 	case "Mutation.updateUserStudentGrade":
 		if e.complexity.Mutation.UpdateUserStudentGrade == nil {
@@ -4026,10 +4026,10 @@ func (ec *executionContext) field_Mutation_updateTag_args(ctx context.Context, r
 func (ec *executionContext) field_Mutation_updateUserLanguage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.UserLanguage
+	var arg0 db.UserLang
 	if tmp, ok := rawArgs["language"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("language"))
-		arg0, err = ec.unmarshalNUserLanguage2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋgraphᚋmodelᚐUserLanguage(ctx, tmp)
+		arg0, err = ec.unmarshalNUserLanguage2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐUserLang(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -11396,7 +11396,7 @@ func (ec *executionContext) _Mutation_updateUserLanguage(ctx context.Context, fi
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateUserLanguage(rctx, fc.Args["language"].(model.UserLanguage))
+		return ec.resolvers.Mutation().UpdateUserLanguage(rctx, fc.Args["language"].(db.UserLang))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -17658,9 +17658,9 @@ func (ec *executionContext) _User_language(ctx context.Context, field graphql.Co
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.UserLanguage)
+	res := resTmp.(*db.UserLang)
 	fc.Result = res
-	return ec.marshalOUserLanguage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋgraphᚋmodelᚐUserLanguage(ctx, field.Selections, res)
+	return ec.marshalOUserLanguage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐUserLang(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_language(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -31100,14 +31100,20 @@ func (ec *executionContext) marshalNUserConnection2ᚖgithubᚗcomᚋdokeduᚋdo
 	return ec._UserConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNUserLanguage2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋgraphᚋmodelᚐUserLanguage(ctx context.Context, v interface{}) (model.UserLanguage, error) {
-	var res model.UserLanguage
-	err := res.UnmarshalGQL(v)
+func (ec *executionContext) unmarshalNUserLanguage2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐUserLang(ctx context.Context, v interface{}) (db.UserLang, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	res := db.UserLang(tmp)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUserLanguage2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋgraphᚋmodelᚐUserLanguage(ctx context.Context, sel ast.SelectionSet, v model.UserLanguage) graphql.Marshaler {
-	return v
+func (ec *executionContext) marshalNUserLanguage2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐUserLang(ctx context.Context, sel ast.SelectionSet, v db.UserLang) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) unmarshalNUserRole2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐUserRole(ctx context.Context, v interface{}) (db.UserRole, error) {
@@ -32164,20 +32170,21 @@ func (ec *executionContext) unmarshalOUserFilterInput2ᚖgithubᚗcomᚋdokedu�
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOUserLanguage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋgraphᚋmodelᚐUserLanguage(ctx context.Context, v interface{}) (*model.UserLanguage, error) {
+func (ec *executionContext) unmarshalOUserLanguage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐUserLang(ctx context.Context, v interface{}) (*db.UserLang, error) {
 	if v == nil {
 		return nil, nil
 	}
-	var res = new(model.UserLanguage)
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
+	tmp, err := graphql.UnmarshalString(v)
+	res := db.UserLang(tmp)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOUserLanguage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋgraphᚋmodelᚐUserLanguage(ctx context.Context, sel ast.SelectionSet, v *model.UserLanguage) graphql.Marshaler {
+func (ec *executionContext) marshalOUserLanguage2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐUserLang(ctx context.Context, sel ast.SelectionSet, v *db.UserLang) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return v
+	res := graphql.MarshalString(string(*v))
+	return res
 }
 
 func (ec *executionContext) unmarshalOUserOrderBy2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋgraphᚋmodelᚐUserOrderBy(ctx context.Context, v interface{}) (*model.UserOrderBy, error) {

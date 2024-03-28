@@ -2,10 +2,13 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
@@ -25,10 +28,51 @@ type Config struct {
 	Port     string `env:"DB_PORT"`
 }
 
+var typeNamesToRegister = []string{
+	// enum types
+	"user_lang",
+}
+var typesToRegister []*pgtype.Type
+var typesToRegisterLock = &sync.Mutex{}
+
 func New(cfg Config) *DB {
 	ctx := context.Background()
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.Database)
-	pool, err := pgxpool.New(ctx, dsn)
+	config, err := pgxpool.ParseConfig(dsn)
+	if err != nil {
+		panic(err)
+	}
+	config.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
+		typesToRegisterLock.Lock()
+		defer typesToRegisterLock.Unlock()
+
+		if len(typesToRegister) == 0 {
+			for _, s := range typeNamesToRegister {
+				t, err := conn.LoadType(ctx, s)
+				if err != nil {
+					return fmt.Errorf("error while trying to register type %s: %w", s, err)
+				}
+				typesToRegister = append(typesToRegister, t)
+				conn.TypeMap().RegisterType(t)
+
+				t2, err := conn.LoadType(ctx, "_"+s)
+				if err != nil {
+					return fmt.Errorf("error while trying to register type _%s: %w", s, err)
+				}
+
+				typesToRegister = append(typesToRegister, t2)
+				conn.TypeMap().RegisterType(t2)
+			}
+		} else {
+			for _, t := range typesToRegister {
+				conn.TypeMap().RegisterType(t)
+			}
+		}
+
+		return nil
+	}
+
+	pool, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
 		panic(err)
 	}
@@ -40,6 +84,38 @@ func New(cfg Config) *DB {
 }
 func (d *DB) NewQueryBuilder() squirrel.StatementBuilderType {
 	return squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
+}
+func (d *DB) BeginTx(ctx context.Context) (pgx.Tx, *db.Queries, error) {
+	tx, err := d.DB.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return tx, d.Queries.WithTx(tx), nil
+}
+func (d *DB) InTx(ctx context.Context, fn func(ctx context.Context, q *db.Queries) error) (err error) {
+	var tx pgx.Tx
+	var store *db.Queries
+	tx, store, err = d.BeginTx(ctx)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		errRollback := tx.Rollback(ctx)
+		if errRollback == nil || errors.Is(errRollback, pgx.ErrTxClosed) {
+			return
+		}
+
+		err = errors.Join(err, fmt.Errorf("failed to roll back transaction: %w", errRollback))
+	}()
+
+	err = fn(ctx, store)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
 }
 
 func ExecUpdate(dbI *DB, ctx context.Context, query squirrel.UpdateBuilder) error {

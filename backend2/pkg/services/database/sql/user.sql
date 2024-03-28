@@ -31,6 +31,13 @@ WHERE id = @id
   AND organisation_id = @organisation_id
 RETURNING *;
 
+-- name: UserUpdateLanguage :one
+UPDATE users
+SET language = @language::user_lang
+WHERE id = @id
+  AND organisation_id = @organisation_id
+RETURNING *;
+
 -- name: UserCreate :one
 INSERT INTO users (role, organisation_id, first_name, last_name, email)
 VALUES (@role, @organisation_id, @first_name, @last_name, @email)
