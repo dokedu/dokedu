@@ -12,6 +12,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 	gonanoid "github.com/matoous/go-nanoid/v2"
+	"github.com/samber/lo"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
@@ -22,39 +23,130 @@ import (
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
 )
 
-// Type is the resolver for the type field.
-func (r *competenceResolver) Type(ctx context.Context, obj *db.Competence) (db.CompetenceType, error) {
-	panic(fmt.Errorf("not implemented: Type - type"))
-}
-
 // Color is the resolver for the color field.
 func (r *competenceResolver) Color(ctx context.Context, obj *db.Competence) (string, error) {
-	panic(fmt.Errorf("not implemented: Color - color"))
+	if !obj.Color.Valid {
+		return "blue", nil
+	}
+
+	return obj.Color.String, nil
 }
 
 // Parents is the resolver for the parents field.
 func (r *competenceResolver) Parents(ctx context.Context, obj *db.Competence) ([]db.Competence, error) {
-	panic(fmt.Errorf("not implemented: Parents - parents"))
+	parents, err := r.DB.Loader(ctx).CompetenceParents().Load(ctx, obj.ID)()
+	if err != nil {
+		return nil, err
+	}
+
+	return parents, nil
 }
 
 // SortOrder is the resolver for the sortOrder field.
 func (r *competenceResolver) SortOrder(ctx context.Context, obj *db.Competence) (int, error) {
-	panic(fmt.Errorf("not implemented: SortOrder - sortOrder"))
+	if !obj.SortOrder.Valid {
+		return 0, nil
+	}
+
+	return int(obj.SortOrder.Int32), nil
 }
 
 // Competences is the resolver for the competences field.
 func (r *competenceResolver) Competences(ctx context.Context, obj *db.Competence, search *string, sort *model.CompetenceSort) ([]*db.Competence, error) {
-	panic(fmt.Errorf("not implemented: Competences - competences"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	query := r.DB.
+		NewQueryBuilder().
+		Select("*").
+		From("competences").
+		Where("competence_id = ?", obj.ID).
+		Where("organisation_id = ?", user.OrganisationID)
+
+	if sort != nil {
+		switch sort.Field {
+		case model.CompetenceSortFieldSortOrder:
+			query = query.OrderBy("sort_order ASC")
+			query = query.OrderBy("name ASC")
+		case model.CompetenceSortFieldName:
+			query = query.OrderBy("name ASC")
+		case model.CompetenceSortFieldCreatedAt:
+			query = query.OrderBy("created_at ASC")
+		}
+	}
+
+	if search != nil && *search != "" {
+		query = query.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", *search))
+	}
+
+	competences, err := database.ScanSelectMany[db.Competence](r.DB, ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	return lo.ToSlicePtr(competences), nil
 }
 
 // UserCompetences is the resolver for the userCompetences field.
 func (r *competenceResolver) UserCompetences(ctx context.Context, obj *db.Competence, userID *string) ([]*db.UserCompetence, error) {
-	panic(fmt.Errorf("not implemented: UserCompetences - userCompetences"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok || !user.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	if userID == nil {
+		return []*db.UserCompetence{}, nil
+	}
+
+	userCompetences, err := r.DB.UserCompetenceFindByUserIdAndCompetenceID(ctx, db.UserCompetenceFindByUserIdAndCompetenceIDParams{
+		UserID:         *userID,
+		CompetenceID:   obj.ID,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return lo.ToSlicePtr(userCompetences), nil
 }
 
 // Tendency is the resolver for the tendency field.
 func (r *competenceResolver) Tendency(ctx context.Context, obj *db.Competence, userID string) (*model.CompetenceTendency, error) {
-	panic(fmt.Errorf("not implemented: Tendency - tendency"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok || !user.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	if obj.CompetenceType == db.CompetenceTypeCompetence {
+		return nil, nil
+	}
+
+	childrenCount, err := r.DB.CompetenceChildrenCount(ctx, db.CompetenceChildrenCountParams{
+		CompetenceID:   pgtype.Text{String: obj.ID, Valid: true},
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	userCompetenceCount, err := r.DB.UserCompetenceCount(ctx, db.UserCompetenceCountParams{
+		OrganisationID: user.OrganisationID,
+		UserID:         userID,
+		CompetenceID:   obj.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var tendency model.CompetenceTendency
+	tendency.CountLearnedCompetences = int(userCompetenceCount)
+	tendency.CountChildCompetences = int(childrenCount)
+
+	tendency.Tendency = float64(tendency.CountLearnedCompetences) / float64(tendency.CountChildCompetences)
+
+	return &tendency, nil
 }
 
 // SignIn is the resolver for the signIn field.

@@ -58,6 +58,7 @@ func NewFromT(t *testing.T) *TestSuite {
 
 func (ts *TestSuite) Ctx() context.Context {
 	ctx := context.Background()
+	ctx = database.ContextWithLoader(ctx, ts.DB)
 	return ctx
 }
 
@@ -97,13 +98,13 @@ func (ts *TestSuite) FirstOrganisationID() string {
 	return ts.Query1("SELECT id FROM organisations LIMIT 1").(string)
 }
 func (ts *TestSuite) FirstUserForOrganisation(organisationID, role string) db.User {
-	id := ts.Query1("SELECT id FROM users WHERE organisation_id = $1 AND role = $2 LIMIT 1", organisationID, role).(string)
+	id := ts.Query1("SELECT id FROM users WHERE organisation_id = $1 AND role = $2 AND deleted_at IS NULL LIMIT 1", organisationID, role).(string)
 	user, err := ts.DB.GLOBAL_UserFindByID(ts.Ctx(), id)
 	ts.NoError(err)
 	return user
 }
 func (ts *TestSuite) FirstCompetenceForOrganisation(organisationID string) db.Competence {
-	id := ts.Query1("SELECT id FROM competences WHERE organisation_id = $1 LIMIT 1", organisationID).(string)
+	id := ts.Query1("SELECT id FROM competences WHERE organisation_id = $1 AND deleted_at IS NULL LIMIT 1", organisationID).(string)
 	comp, err := ts.DB.CompetenceFindById(ts.Ctx(), db.CompetenceFindByIdParams{
 		ID:             id,
 		OrganisationID: organisationID,
@@ -112,7 +113,7 @@ func (ts *TestSuite) FirstCompetenceForOrganisation(organisationID string) db.Co
 	return comp
 }
 func (ts *TestSuite) FirstSubjectForOrganisation(organisationID string) db.Competence {
-	id := ts.Query1("SELECT id FROM competences WHERE organisation_id = $1 and competence_id is null LIMIT 1", organisationID).(string)
+	id := ts.Query1("SELECT id FROM competences WHERE organisation_id = $1 AND competence_id IS NULL AND deleted_at IS NULL LIMIT 1", organisationID).(string)
 	comp, err := ts.DB.CompetenceFindById(ts.Ctx(), db.CompetenceFindByIdParams{
 		ID:             id,
 		OrganisationID: organisationID,

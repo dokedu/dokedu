@@ -104,3 +104,18 @@ FROM competences
 WHERE organisation_id = $1
   AND deleted_at IS NULL
 ORDER BY sort_order;
+
+-- name: CompetencesFindParents :many
+WITH RECURSIVE parents AS (SELECT ID AS orig_id, ID, COMPETENCE_ID
+                           FROM competences c1
+                           WHERE id = ANY(@ids::text[]) AND c1.organisation_id = $1
+                           UNION ALL
+                           SELECT p.orig_id, c2.id, c2.competence_id
+                           FROM competences c2
+                                    INNER JOIN parents p ON p.competence_id = c2.id
+                           WHERE c2.organisation_id = $1
+                           )
+
+SELECT orig_id, (array_agg(id) FILTER ( WHERE orig_id != id ))::text[] AS PARENTS
+FROM parents
+GROUP BY orig_id;

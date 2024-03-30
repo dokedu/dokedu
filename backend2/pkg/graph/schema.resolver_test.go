@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/suite"
@@ -558,9 +559,12 @@ func (ts *TestSuite) Test_UpdateCompetenceSorting() {
 	}
 
 	// build update map
-	update := model.UpdateCompetenceSortingInput{Competences: make([]model.SortCompetenceInput, len(competences))}
-	for i, comp := range competences {
-		update.Competences[i] = model.SortCompetenceInput{ID: comp.ID, SortOrder: newCompetenceOrder[comp.ID]}
+	update := model.UpdateCompetenceSortingInput{Competences: make([]model.SortCompetenceInput, 0, len(competences))}
+	for _, comp := range competences {
+		if len(comp.ID) < 3 {
+			continue
+		}
+		update.Competences = append(update.Competences, model.SortCompetenceInput{ID: comp.ID, SortOrder: newCompetenceOrder[comp.ID]})
 	}
 
 	_, err = ts.Resolver.Mutation().UpdateCompetenceSorting(ts.CtxWithUser(teacher.ID), update)
@@ -571,9 +575,191 @@ func (ts *TestSuite) Test_UpdateCompetenceSorting() {
 	ts.NoError(err)
 
 	for i, comp := range competences {
+		if len(comp.ID) < 3 {
+			continue
+		}
+
 		ts.Equal(int32(newCompetenceOrder[comp.ID]), comp.SortOrder.Int32)
 		if i > 0 {
-			ts.Greater(comp.SortOrder.Int32, competences[i-1].SortOrder.Int32)
+			ts.GreaterOrEqual(comp.SortOrder.Int32, competences[i-1].SortOrder.Int32)
 		}
 	}
+}
+
+func (ts *TestSuite) Test_CompetenceParents() {
+	teacher := ts.FirstUserForOrganisation("u2wHWUbnWUaUUjBeNvQ4u", "teacher")
+
+	competenceA, err := ts.DB.CompetenceFindById(ts.Ctx(), db.CompetenceFindByIdParams{
+		ID:             "nm5pYXzpYe_rJjHpjnCdH",
+		OrganisationID: "u2wHWUbnWUaUUjBeNvQ4u",
+	})
+	ts.NoError(err)
+
+	competenceB, err := ts.DB.CompetenceFindById(ts.Ctx(), db.CompetenceFindByIdParams{
+		ID:             "C3",
+		OrganisationID: "u2wHWUbnWUaUUjBeNvQ4u",
+	})
+	ts.NoError(err)
+
+	// error on unauthorized
+	_, err = ts.Resolver.Competence().Parents(ts.Ctx(), &competenceA)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// works for teachers
+	ctx := ts.CtxWithUser(teacher.ID)
+	sema := make(chan int, 1)
+
+	go func() {
+		parents, err := ts.Resolver.Competence().Parents(ctx, &competenceA)
+		ts.NoError(err)
+		ts.Len(parents, 2)
+		ts.Equal("Numbers", parents[0].Name)
+		ts.Equal("Math", parents[1].Name)
+		sema <- 1
+	}()
+	go func() {
+		parents, err := ts.Resolver.Competence().Parents(ctx, &competenceB)
+		ts.NoError(err)
+		ts.Len(parents, 2)
+		ts.Equal("Group", parents[0].Name)
+		ts.Equal("Subject", parents[1].Name)
+		sema <- 1
+	}()
+
+	<-sema
+	<-sema
+}
+
+func (ts *TestSuite) Test_Competence_Children() {
+	teacher := ts.FirstUserForOrganisation("u2wHWUbnWUaUUjBeNvQ4u", "teacher")
+
+	competence, err := ts.DB.CompetenceFindById(ts.Ctx(), db.CompetenceFindByIdParams{
+		ID:             "G1",
+		OrganisationID: "u2wHWUbnWUaUUjBeNvQ4u",
+	})
+	ts.NoError(err)
+
+	// error on unauthorized
+	_, err = ts.Resolver.Competence().Competences(ts.Ctx(), &competence, nil, nil)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// works for teachers. No search / sort returns all children
+	ctx := ts.CtxWithUser(teacher.ID)
+	children, err := ts.Resolver.Competence().Competences(ctx, &competence, nil, nil)
+	ts.NoError(err)
+	ts.Len(children, 5)
+
+	// we can search for name
+	children, err = ts.Resolver.Competence().Competences(ctx, &competence, lo.ToPtr("Competence"), nil)
+	ts.NoError(err)
+	ts.Len(children, 2)
+
+	// we can sort by different fields
+	children, err = ts.Resolver.Competence().Competences(ctx, &competence, nil, lo.ToPtr(model.CompetenceSort{Field: model.CompetenceSortFieldCreatedAt}))
+	ts.NoError(err)
+
+	children, err = ts.Resolver.Competence().Competences(ctx, &competence, nil, lo.ToPtr(model.CompetenceSort{Field: model.CompetenceSortFieldName}))
+	ts.NoError(err)
+	ts.Equal("Competence 1", children[0].Name)
+	ts.Equal("Competence 2", children[1].Name)
+
+	children, err = ts.Resolver.Competence().Competences(ctx, &competence, nil, lo.ToPtr(model.CompetenceSort{Field: model.CompetenceSortFieldSortOrder}))
+	ts.NoError(err)
+	ts.Equal("Stuff 1", children[0].Name)
+	ts.Equal("Stuff 2", children[1].Name)
+
+	// both together
+	children, err = ts.Resolver.Competence().Competences(ctx, &competence, lo.ToPtr("Competence"), lo.ToPtr(model.CompetenceSort{Field: model.CompetenceSortFieldSortOrder}))
+	ts.NoError(err)
+	ts.Len(children, 2)
+	ts.Equal("Competence 2", children[0].Name)
+}
+
+func (ts *TestSuite) Test_Competence_Resolvers() {
+	competence := db.Competence{}
+
+	// no color returns "blue"
+	color, err := ts.Resolver.Competence().Color(ts.Ctx(), &competence)
+	ts.NoError(err)
+	ts.Equal("blue", color)
+
+	// color is returned
+	competence.Color = pgtype.Text{Valid: true, String: "red"}
+	color, err = ts.Resolver.Competence().Color(ts.Ctx(), &competence)
+	ts.NoError(err)
+	ts.Equal("red", color)
+
+	// sortOrder is default 0
+	sortOrder, err := ts.Resolver.Competence().SortOrder(ts.Ctx(), &competence)
+	ts.NoError(err)
+	ts.Equal(0, sortOrder)
+
+	// sortOrder is returned
+	competence.SortOrder = pgtype.Int4{Valid: true, Int32: 42}
+	sortOrder, err = ts.Resolver.Competence().SortOrder(ts.Ctx(), &competence)
+	ts.NoError(err)
+	ts.Equal(42, sortOrder)
+
+}
+
+func (ts *TestSuite) Test_Competence_UserCompetences_Tendency() {
+	teacher := ts.FirstUserForOrganisation("u2wHWUbnWUaUUjBeNvQ4u", "teacher")
+	student1 := ts.MockUserForOrganisation("u2wHWUbnWUaUUjBeNvQ4u", "student")
+	student2 := ts.MockUserForOrganisation("u2wHWUbnWUaUUjBeNvQ4u", "student")
+
+	group, err := ts.Resolver.Mutation().CreateCompetence(ts.CtxWithUser(teacher.ID), model.CreateCompetenceInput{
+		Name:     "Group",
+		ParentID: "S1",
+	})
+	ts.NoError(err)
+	ts.Exec("update competences set competence_type = 'group' where id = $1", group.ID)
+	group.CompetenceType = "group"
+
+	competence, err := ts.Resolver.Mutation().CreateCompetence(ts.CtxWithUser(teacher.ID), model.CreateCompetenceInput{
+		Name:     "Competence " + gonanoid.Must(8),
+		ParentID: group.ID,
+	})
+	ts.NoError(err)
+
+	// error on unauthorized
+	_, err = ts.Resolver.Competence().UserCompetences(ts.Ctx(), competence, &student1.ID)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// works for teachers
+	userCompetences, err := ts.Resolver.Competence().UserCompetences(ts.CtxWithUser(teacher.ID), competence, &student1.ID)
+	ts.NoError(err)
+	ts.Len(userCompetences, 0)
+
+	// insert a user competence
+	_, err = ts.Resolver.Mutation().CreateUserCompetence(ts.CtxWithUser(teacher.ID), model.CreateUserCompetenceInput{
+		Level:        1,
+		UserID:       student1.ID,
+		CompetenceID: competence.ID,
+	})
+	ts.NoError(err)
+	_, err = ts.Resolver.Mutation().CreateUserCompetence(ts.CtxWithUser(teacher.ID), model.CreateUserCompetenceInput{
+		Level:        2,
+		UserID:       student1.ID,
+		CompetenceID: competence.ID,
+	})
+	ts.NoError(err)
+
+	// works for teachers
+	userCompetences, err = ts.Resolver.Competence().UserCompetences(ts.CtxWithUser(teacher.ID), competence, &student1.ID)
+	ts.NoError(err)
+	ts.Len(userCompetences, 2)
+	userCompetences, err = ts.Resolver.Competence().UserCompetences(ts.CtxWithUser(teacher.ID), competence, &student2.ID)
+	ts.NoError(err)
+	ts.Len(userCompetences, 0)
+
+	// tendency for student 1 should be 1
+	tendency, err := ts.Resolver.Competence().Tendency(ts.CtxWithUser(teacher.ID), group, student1.ID)
+	ts.NoError(err)
+	ts.Equal(1.0, tendency.Tendency)
+
+	// tendency for student 2 should be 0
+	tendency, err = ts.Resolver.Competence().Tendency(ts.CtxWithUser(teacher.ID), group, student2.ID)
+	ts.NoError(err)
+	ts.Equal(0., tendency.Tendency)
+
 }

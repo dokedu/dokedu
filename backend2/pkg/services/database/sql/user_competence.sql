@@ -104,3 +104,5 @@ WHERE user_id = @user_id
   AND created_at <= (DATE @ end_date + 1)
 ORDER BY created_at DESC;
 
+-- name: UserCompetenceTendency :many
+-- tendency is the ratio of learned competences to all competences of a group

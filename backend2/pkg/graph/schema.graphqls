@@ -62,7 +62,7 @@ enum CompetenceType {
 type Competence {
     id: ID!
     name: String!
-    type: CompetenceType!
+    type: CompetenceType! @goField(name: "CompetenceType")
     grades: [Int!]!
     color: String!
     createdAt: Time!

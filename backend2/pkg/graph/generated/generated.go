@@ -76,6 +76,7 @@ type ComplexityRoot struct {
 
 	Competence struct {
 		Color           func(childComplexity int) int
+		CompetenceType  func(childComplexity int) int
 		Competences     func(childComplexity int, search *string, sort *model.CompetenceSort) int
 		CreatedAt       func(childComplexity int) int
 		Grades          func(childComplexity int) int
@@ -84,7 +85,6 @@ type ComplexityRoot struct {
 		Parents         func(childComplexity int) int
 		SortOrder       func(childComplexity int) int
 		Tendency        func(childComplexity int, userID string) int
-		Type            func(childComplexity int) int
 		UserCompetences func(childComplexity int, userID *string) int
 	}
 
@@ -468,8 +468,6 @@ type BucketResolver interface {
 	Files(ctx context.Context, obj *db.Bucket) ([]db.File, error)
 }
 type CompetenceResolver interface {
-	Type(ctx context.Context, obj *db.Competence) (db.CompetenceType, error)
-
 	Color(ctx context.Context, obj *db.Competence) (string, error)
 
 	Parents(ctx context.Context, obj *db.Competence) ([]db.Competence, error)
@@ -729,6 +727,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Competence.Color(childComplexity), true
 
+	case "Competence.type":
+		if e.complexity.Competence.CompetenceType == nil {
+			break
+		}
+
+		return e.complexity.Competence.CompetenceType(childComplexity), true
+
 	case "Competence.competences":
 		if e.complexity.Competence.Competences == nil {
 			break
@@ -794,13 +799,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Competence.Tendency(childComplexity, args["userId"].(string)), true
-
-	case "Competence.type":
-		if e.complexity.Competence.Type == nil {
-			break
-		}
-
-		return e.complexity.Competence.Type(childComplexity), true
 
 	case "Competence.userCompetences":
 		if e.complexity.Competence.UserCompetences == nil {
@@ -3669,7 +3667,7 @@ enum CompetenceType {
 type Competence {
     id: ID!
     name: String!
-    type: CompetenceType!
+    type: CompetenceType! @goField(name: "CompetenceType")
     grades: [Int!]!
     color: String!
     createdAt: Time!
@@ -6085,7 +6083,7 @@ func (ec *executionContext) _Competence_type(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Competence().Type(rctx, obj)
+		return obj.CompetenceType, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6106,8 +6104,8 @@ func (ec *executionContext) fieldContext_Competence_type(ctx context.Context, fi
 	fc = &graphql.FieldContext{
 		Object:     "Competence",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type CompetenceType does not have child fields")
 		},
@@ -25094,41 +25092,10 @@ func (ec *executionContext) _Competence(ctx context.Context, sel ast.SelectionSe
 				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "type":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Competence_type(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Competence_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
 			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "grades":
 			out.Values[i] = ec._Competence_grades(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

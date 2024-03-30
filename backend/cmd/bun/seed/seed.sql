@@ -15,7 +15,9 @@ FROM new_org
 WHERE users.id = (SELECT id FROM new_user);
 
 INSERT INTO users (role, first_name, last_name, organisation_id, password, email)
-VALUES ('owner', 'Max', 'Never', 'u2wHWUbnWUaUUjBeNvQ4u', crypt('password', gen_salt('bf')), 'max@dokedu.org');
+VALUES ('owner', 'Max', 'Never', 'u2wHWUbnWUaUUjBeNvQ4u', crypt('password', gen_salt('bf')), 'max@dokedu.org'),
+       ('teacher', 'Alice', 'Smith', 'u2wHWUbnWUaUUjBeNvQ4u', crypt('password', gen_salt('bf')), 'alice@dokedu.org'),
+       ('admin', 'Bob', 'Johnson', 'u2wHWUbnWUaUUjBeNvQ4u', crypt('password', gen_salt('bf')), 'bob@dokedu.org');
 
 -- English
 INSERT INTO competences (id, name, organisation_id, competence_type, competence_id, grades)
@@ -38,6 +40,16 @@ VALUES ('nm5pYXzpYe_rJjHpjnCdH', 'can count to 10', 'u2wHWUbnWUaUUjBeNvQ4u', 'co
 INSERT INTO competences (id, name, organisation_id, competence_type, competence_id, grades)
 VALUES (nanoid(), 'can multiply by 2', 'u2wHWUbnWUaUUjBeNvQ4u', 'competence', 'GFCWc0Wv7lqCciCPI6ngg',
         '{1,2,3}');
+
+-- Test
+INSERT INTO competences (id, name, organisation_id, competence_type, competence_id, grades, sort_order)
+VALUES ('S1', 'Subject', 'u2wHWUbnWUaUUjBeNvQ4u', 'subject', NULL, '{1,2,3}', 1),
+       ('G1', 'Group', 'u2wHWUbnWUaUUjBeNvQ4u', 'group', 'S1', '{1,2,3}', 1),
+       ('C1', 'Competence 1', 'u2wHWUbnWUaUUjBeNvQ4u', 'competence', 'G1', '{1,2,3}', 5),
+       ('C2', 'Competence 2', 'u2wHWUbnWUaUUjBeNvQ4u', 'competence', 'G1', '{1,2,3}', 4),
+       ('C3', 'Stuff 1', 'u2wHWUbnWUaUUjBeNvQ4u', 'competence', 'G1', '{1,2,3}', 1),
+       ('C4', 'Stuff 2', 'u2wHWUbnWUaUUjBeNvQ4u', 'competence', 'G1', '{1,2,3}', 2),
+       ('C5', 'Stuff 3', 'u2wHWUbnWUaUUjBeNvQ4u', 'competence', 'G1', '{1,2,3}', 3);
 
 -- Students
 DO

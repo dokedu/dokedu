@@ -61,6 +61,9 @@ models:
   UserLanguage:
     model:
       - github.com/dokedu/dokedu/backend/pkg/services/database/db.UserLang
+  CompetenceType:
+    model:
+      - github.com/dokedu/dokedu/backend/pkg/services/database/db.CompetenceType
   Chat:
     fields:
       name:

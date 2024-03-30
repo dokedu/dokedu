@@ -400,6 +400,52 @@ func (q *Queries) CompetencesFindOrderedBySortOrderAndName(ctx context.Context, 
 	return items, nil
 }
 
+const competencesFindParents = `-- name: CompetencesFindParents :many
+WITH RECURSIVE parents AS (SELECT ID AS orig_id, ID, COMPETENCE_ID
+                           FROM competences c1
+                           WHERE id = ANY($2::text[]) AND c1.organisation_id = $1
+                           UNION ALL
+                           SELECT p.orig_id, c2.id, c2.competence_id
+                           FROM competences c2
+                                    INNER JOIN parents p ON p.competence_id = c2.id
+                           WHERE c2.organisation_id = $1
+                           )
+
+SELECT orig_id, (array_agg(id) FILTER ( WHERE orig_id != id ))::text[] AS PARENTS
+FROM parents
+GROUP BY orig_id
+`
+
+type CompetencesFindParentsParams struct {
+	OrganisationID string   `db:"organisation_id"`
+	Ids            []string `db:"ids"`
+}
+
+type CompetencesFindParentsRow struct {
+	OrigID  string   `db:"orig_id"`
+	Parents []string `db:"parents"`
+}
+
+func (q *Queries) CompetencesFindParents(ctx context.Context, arg CompetencesFindParentsParams) ([]CompetencesFindParentsRow, error) {
+	rows, err := q.db.Query(ctx, competencesFindParents, arg.OrganisationID, arg.Ids)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CompetencesFindParentsRow
+	for rows.Next() {
+		var i CompetencesFindParentsRow
+		if err := rows.Scan(&i.OrigID, &i.Parents); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const competencesListOrderedBySortOrder = `-- name: CompetencesListOrderedBySortOrder :many
 SELECT id, name, competence_id, competence_type, organisation_id, grades, color, curriculum_id, created_at, deleted_at, sort_order, created_by
 FROM competences

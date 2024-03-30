@@ -118,6 +118,10 @@ func (d *DB) InTx(ctx context.Context, fn func(ctx context.Context, q *db.Querie
 	return tx.Commit(ctx)
 }
 
+func (d *DB) Loader(ctx context.Context) *Dataloader {
+	return LoaderFromContext(ctx)
+}
+
 func ExecUpdate(dbI *DB, ctx context.Context, query squirrel.UpdateBuilder) error {
 	sql, args, err := query.ToSql()
 	if err != nil {
