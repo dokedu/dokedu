@@ -7,6 +7,10 @@ package graph
 import (
 	"context"
 	"fmt"
+	"github.com/dokedu/dokedu/backend/pkg/middleware"
+	"github.com/dokedu/dokedu/backend/pkg/msg"
+	"mime"
+	"path/filepath"
 	"time"
 
 	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
@@ -16,37 +20,94 @@ import (
 
 // User is the resolver for the user field.
 func (r *bucketResolver) User(ctx context.Context, obj *db.Bucket) (*db.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	// If the bucket is not owned by a user, return nil.
+	if !obj.UserID.Valid {
+		return nil, nil
+	}
+
+	user, err := r.DB.Loader(ctx).Users().Load(ctx, obj.ID)()
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 // DeletedAt is the resolver for the deletedAt field.
 func (r *bucketResolver) DeletedAt(ctx context.Context, obj *db.Bucket) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
+	if !obj.DeletedAt.Time.IsZero() {
+		return nil, nil
+	}
+
+	return &obj.DeletedAt.Time, nil
 }
 
 // Files is the resolver for the files field.
 func (r *bucketResolver) Files(ctx context.Context, obj *db.Bucket) ([]db.File, error) {
-	panic(fmt.Errorf("not implemented: Files - files"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	files, err := r.DB.FileListByBucketID(ctx, db.FileListByBucketIDParams{
+		BucketID:       obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return files, nil
 }
 
 // MIMEType is the resolver for the MIMEType field.
 func (r *fileResolver) MIMEType(ctx context.Context, obj *db.File) (string, error) {
-	panic(fmt.Errorf("not implemented: MIMEType - MIMEType"))
+	if !obj.MimeType.Valid {
+		return obj.MimeType.String, nil
+	}
+
+	return mime.TypeByExtension(filepath.Ext(obj.Name)), nil
 }
 
 // Bucket is the resolver for the bucket field.
 func (r *fileResolver) Bucket(ctx context.Context, obj *db.File) (*db.Bucket, error) {
-	panic(fmt.Errorf("not implemented: Bucket - bucket"))
+	bucket, err := r.DB.BucketByID(ctx, db.BucketByIDParams{
+		ID:             obj.BucketID,
+		OrganisationID: obj.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &bucket, nil
 }
 
 // Parent is the resolver for the parent field.
 func (r *fileResolver) Parent(ctx context.Context, obj *db.File) (*db.File, error) {
-	panic(fmt.Errorf("not implemented: Parent - parent"))
+	if !obj.ParentID.Valid {
+		return nil, nil
+	}
+
+	parent, err := r.DB.FileByID(ctx, db.FileByIDParams{
+		ID:             obj.ParentID.String,
+		OrganisationID: obj.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &parent, nil
 }
 
 // DeletedAt is the resolver for the deletedAt field.
 func (r *fileResolver) DeletedAt(ctx context.Context, obj *db.File) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
+	if !obj.DeletedAt.Time.IsZero() {
+		return nil, nil
+	}
+
+	return &obj.DeletedAt.Time, nil
 }
 
 // Parents is the resolver for the parents field.

@@ -49,3 +49,10 @@ SET deleted_at = NOW()
 WHERE id = $1
   AND organisation_id = $2
 RETURNING *;
+
+-- name: UsersFindByID :many
+SELECT *
+FROM users
+WHERE id = ANY (@ids::text[])
+AND organisation_id = @organisation_id
+AND deleted_at is null;

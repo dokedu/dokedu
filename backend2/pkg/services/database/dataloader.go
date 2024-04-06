@@ -23,6 +23,7 @@ type Dataloader struct {
 
 	competences       *dataloader.Loader[string, db.Competence]
 	competenceParents *dataloader.Loader[string, []db.Competence]
+	users             *dataloader.Loader[string, db.User]
 }
 
 func ContextWithLoader(ctx context.Context, db *DB) context.Context {
@@ -137,4 +138,46 @@ func (d *Dataloader) CompetenceParents() *dataloader.Loader[string, []db.Compete
 	}
 
 	return d.competenceParents
+}
+
+func (d *Dataloader) Users() *dataloader.Loader[string, db.User] {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	if d.users == nil {
+		d.users = dataloader.NewBatchedLoader[string, db.User](func(ctx context.Context, keys []string) []*dataloader.Result[db.User] {
+			user, ok := middleware.GetUser(ctx)
+			if !ok {
+				return ErrorResult[db.User](keys, msg.ErrUnauthorized)
+			}
+
+			users, err := d.db.UsersFindByID(ctx, db.UsersFindByIDParams{
+				OrganisationID: user.OrganisationID,
+				Ids:            keys,
+			})
+
+			if err != nil {
+				return ErrorResult[db.User](keys, err)
+			}
+
+			userByID := make(map[string]db.User, len(users))
+			for _, user := range users {
+				userByID[user.ID] = user
+			}
+
+			results := make([]*dataloader.Result[db.User], len(keys))
+			for i, key := range keys {
+				user, ok := userByID[key]
+				if !ok {
+					results[i] = &dataloader.Result[db.User]{Error: pgx.ErrNoRows}
+					continue
+				}
+
+				results[i] = &dataloader.Result[db.User]{Data: user}
+			}
+
+			return results
+		})
+	}
+	return d.users
 }
