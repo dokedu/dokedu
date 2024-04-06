@@ -150,6 +150,53 @@ func (ts *TestSuite) MockUserForOrganisation(organisationID string, role string)
 	return user
 }
 
+// MockOrganisationWithOwner creates a new organisation + owner user
+func (ts *TestSuite) MockOrganisationWithOwner() (org db.Organisation, user db.User) {
+	name := gonanoid.Must(12)
+
+	err := ts.DB.InTx(ts.Ctx(), func(ctx context.Context, q *db.Queries) error {
+		ownerID := gonanoid.Must(32)
+
+		var err error
+		org, err = q.GLOBAL_OrganisationCreate(ctx, db.GLOBAL_OrganisationCreateParams{
+			Name:           name,
+			LegalName:      name,
+			Website:        name,
+			Phone:          name,
+			OwnerID:        ownerID,
+			AllowedDomains: []string{},
+			EnabledApps:    []string{"record", "school", "admin"},
+		})
+		if err != nil {
+			return err
+		}
+
+		user, err = q.UserCreate(ctx, db.UserCreateParams{
+			Role:           db.UserRoleOwner,
+			OrganisationID: org.ID,
+			FirstName:      gonanoid.Must(32),
+			LastName:       "tester",
+			Email:          pgtype.Text{Valid: true, String: ownerID + "@dokedu.org"},
+		})
+		if err != nil {
+			return err
+		}
+
+		org, err = q.GLOBAL_OrganisationUpdateOwnerID(ctx, db.GLOBAL_OrganisationUpdateOwnerIDParams{
+			ID:      org.ID,
+			OwnerID: user.ID,
+		})
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	ts.NoError(err)
+
+	return org, user
+}
+
 func (ts *TestSuite) AssertMailReceived(email string, contains ...string) {
 	res, err := http.Get("http://localhost:8025/api/v2/search?kind=to&query=" + email)
 	defer func() { _ = res.Body.Close() }()

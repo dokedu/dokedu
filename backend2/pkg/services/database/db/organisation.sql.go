@@ -9,12 +9,90 @@ import (
 	"context"
 )
 
+const gLOBAL_OrganisationCreate = `-- name: GLOBAL_OrganisationCreate :one
+INSERT INTO organisations (name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps)
+VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps, created_at, deleted_at, setup_complete, address, logo_url, stripe_customer_id, stripe_subscription_id
+`
+
+type GLOBAL_OrganisationCreateParams struct {
+	Name           string   `db:"name"`
+	LegalName      string   `db:"legal_name"`
+	Website        string   `db:"website"`
+	Phone          string   `db:"phone"`
+	OwnerID        string   `db:"owner_id"`
+	AllowedDomains []string `db:"allowed_domains"`
+	EnabledApps    []string `db:"enabled_apps"`
+}
+
+func (q *Queries) GLOBAL_OrganisationCreate(ctx context.Context, arg GLOBAL_OrganisationCreateParams) (Organisation, error) {
+	row := q.db.QueryRow(ctx, gLOBAL_OrganisationCreate,
+		arg.Name,
+		arg.LegalName,
+		arg.Website,
+		arg.Phone,
+		arg.OwnerID,
+		arg.AllowedDomains,
+		arg.EnabledApps,
+	)
+	var i Organisation
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.LegalName,
+		&i.Website,
+		&i.Phone,
+		&i.OwnerID,
+		&i.AllowedDomains,
+		&i.EnabledApps,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.SetupComplete,
+		&i.Address,
+		&i.LogoUrl,
+		&i.StripeCustomerID,
+		&i.StripeSubscriptionID,
+	)
+	return i, err
+}
+
 const gLOBAL_OrganisationFindByID = `-- name: GLOBAL_OrganisationFindByID :one
 SELECT id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps, created_at, deleted_at, setup_complete, address, logo_url, stripe_customer_id, stripe_subscription_id FROM organisations WHERE id = $1
 `
 
 func (q *Queries) GLOBAL_OrganisationFindByID(ctx context.Context, id string) (Organisation, error) {
 	row := q.db.QueryRow(ctx, gLOBAL_OrganisationFindByID, id)
+	var i Organisation
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.LegalName,
+		&i.Website,
+		&i.Phone,
+		&i.OwnerID,
+		&i.AllowedDomains,
+		&i.EnabledApps,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.SetupComplete,
+		&i.Address,
+		&i.LogoUrl,
+		&i.StripeCustomerID,
+		&i.StripeSubscriptionID,
+	)
+	return i, err
+}
+
+const gLOBAL_OrganisationUpdateOwnerID = `-- name: GLOBAL_OrganisationUpdateOwnerID :one
+UPDATE organisations SET owner_id = $2 WHERE id = $1 RETURNING id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps, created_at, deleted_at, setup_complete, address, logo_url, stripe_customer_id, stripe_subscription_id
+`
+
+type GLOBAL_OrganisationUpdateOwnerIDParams struct {
+	ID      string `db:"id"`
+	OwnerID string `db:"owner_id"`
+}
+
+func (q *Queries) GLOBAL_OrganisationUpdateOwnerID(ctx context.Context, arg GLOBAL_OrganisationUpdateOwnerIDParams) (Organisation, error) {
+	row := q.db.QueryRow(ctx, gLOBAL_OrganisationUpdateOwnerID, arg.ID, arg.OwnerID)
 	var i Organisation
 	err := row.Scan(
 		&i.ID,

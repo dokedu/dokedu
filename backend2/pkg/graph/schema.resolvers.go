@@ -17,6 +17,7 @@ import (
 
 	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
 	"github.com/dokedu/dokedu/backend/pkg/graph/model"
+	"github.com/dokedu/dokedu/backend/pkg/helper"
 	"github.com/dokedu/dokedu/backend/pkg/middleware"
 	"github.com/dokedu/dokedu/backend/pkg/msg"
 	"github.com/dokedu/dokedu/backend/pkg/services/database"
@@ -705,17 +706,73 @@ func (r *mutationResolver) CreateCompetence(ctx context.Context, input model.Cre
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filter *model.UserFilterInput, search *string) (*model.UserConnection, error) {
-	panic(fmt.Errorf("not implemented: Users - users"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	query := r.DB.NewQueryBuilder().Select("*").From("users").Where("organisation_id = ?", user.OrganisationID)
+	if search != nil && *search != "" {
+		query = query.Where("first_name ILIKE ? or last_name ILIKE ?", fmt.Sprintf("%%%s%%", *search), fmt.Sprintf("%%%s%%", *search))
+	}
+
+	l, o := helper.PaginationInput(limit, offset)
+	query = query.Limit(l + 1).Offset(o)
+
+	if filter != nil {
+		if len(filter.Role) > 0 {
+			query = query.Where("role IN (?)", filter.Role)
+		}
+
+		if filter.OrderBy != nil {
+			switch *filter.OrderBy {
+			case model.UserOrderByFirstNameAsc:
+				query = query.OrderBy("first_name ASC")
+			case model.UserOrderByFirstNameDesc:
+				query = query.OrderBy("first_name DESC")
+			case model.UserOrderByLastNameAsc:
+				query = query.OrderBy("last_name ASC")
+			case model.UserOrderByLastNameDesc:
+				query = query.OrderBy("last_name DESC")
+			}
+		}
+	}
+
+	if filter == nil || filter.ShowDeleted == nil || !*filter.ShowDeleted {
+		query = query.Where("deleted_at IS NULL")
+	}
+
+	users, err := database.ScanSelectMany[db.User](r.DB, ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	edges, pageInfo := helper.PaginationOutput(l, o, users)
+	return &model.UserConnection{
+		Edges:    edges,
+		PageInfo: pageInfo,
+	}, nil
 }
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*db.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	foundUser, err := r.DB.UserFindByID(ctx, db.UserFindByIDParams{ID: id, OrganisationID: user.OrganisationID})
+	return &foundUser, err
 }
 
 // Me is the resolver for the me field.
 func (r *queryResolver) Me(ctx context.Context) (*db.User, error) {
-	panic(fmt.Errorf("not implemented: Me - me"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	return &user.User, nil
 }
 
 // Competence is the resolver for the competence field.

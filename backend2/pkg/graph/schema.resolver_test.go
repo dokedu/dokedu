@@ -763,3 +763,29 @@ func (ts *TestSuite) Test_Competence_UserCompetences_Tendency() {
 	ts.Equal(0., tendency.Tendency)
 
 }
+
+func (ts *TestSuite) Test_Users() {
+	org, owner := ts.MockOrganisationWithOwner()
+	teacher := ts.MockTeacherForOrganisation(org.ID)
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	// error on unauthorized
+	_, err := ts.Resolver.Query().Users(ts.Ctx(), nil, nil, nil, nil)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// works to retrieve all users from an organisation
+	users, err := ts.Resolver.Query().Users(ts.CtxWithUser(owner.ID), nil, nil, nil, nil)
+	ts.NoError(err)
+
+	ts.Len(users.Edges, 3)
+	ts.Equal(owner.ID, users.Edges[0].ID)
+	ts.Equal(teacher.ID, users.Edges[1].ID)
+	ts.Equal(student.ID, users.Edges[2].ID)
+
+	// can use pagination to only get the second user
+	users, err = ts.Resolver.Query().Users(ts.CtxWithUser(owner.ID), lo.ToPtr(1), lo.ToPtr(1), nil, nil)
+	ts.NoError(err)
+	ts.Len(users.Edges, 1)
+	ts.Equal(teacher.ID, users.Edges[0].ID)
+
+}
