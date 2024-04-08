@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/samber/lo"
@@ -777,7 +778,18 @@ func (r *queryResolver) Me(ctx context.Context) (*db.User, error) {
 
 // Competence is the resolver for the competence field.
 func (r *queryResolver) Competence(ctx context.Context, id string) (*db.Competence, error) {
-	panic(fmt.Errorf("not implemented: Competence - competence"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	competence, err := r.DB.CompetenceFindById(ctx, db.CompetenceFindByIdParams{ID: id, OrganisationID: user.OrganisationID})
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, msg.ErrNotFound
+	}
+
+	return &competence, err
 }
 
 // Competences is the resolver for the competences field.
