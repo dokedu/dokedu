@@ -57,7 +57,7 @@ function makeClient() {
             return false
           },
           didAuthError(error, _operation) {
-            return error.graphQLErrors.some((e) => e.extensions?.code === "UNAUTHENTICATED")
+            return error.graphQLErrors.some((e) => e.extensions?.code === "UNAUTHORIZED")
           },
           async refreshAuth() {
             const route = router.currentRoute.value

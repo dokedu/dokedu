@@ -18,14 +18,8 @@ import Chat from "./layout/chat.vue"
 import { useRoute } from "vue-router/auto"
 import { computed } from "vue"
 import { publicRoutes } from "./router/publicRoutes"
-import { onMounted } from "vue"
-import { identifyUser } from "./composables/auth"
 
 const route = useRoute()
-
-onMounted(() => {
-  identifyUser()
-})
 
 const layout = computed(() => {
   if (route.name === undefined) return null
