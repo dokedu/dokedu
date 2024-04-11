@@ -2,9 +2,9 @@ FROM alpine as base
 RUN apk add --no-cache chromium
 RUN apk add --no-cache ca-certificates postgresql-client curl tini bash gnupg
 
-RUN wget 'https://fonts.google.com/download?family=Inter|Mali' -O googlefonts.zip
-RUN unzip googlefonts.zip -d /usr/share/fonts/googlefonts/
-RUN rm -f googlefonts.zip
+#RUN wget 'https://fonts.google.com/download?family=Inter|Mali' -O googlefonts.zip
+#RUN unzip googlefonts.zip -d /usr/share/fonts/googlefonts/
+#RUN rm -f googlefonts.zip
 
 RUN wget 'https://storage.dokedu.org/public/klsunEvScZuDDQRWjPmNfN78XylqXiKE.ttf' -O mgdr.tff
 RUN mv mgdr.tff /usr/share/fonts/googlefonts/
