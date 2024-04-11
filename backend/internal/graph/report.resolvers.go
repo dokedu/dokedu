@@ -160,7 +160,7 @@ func (r *reportResolver) User(ctx context.Context, obj *db.Report) (*db.User, er
 		return nil, nil
 	}
 
-	var user *db.User
+	var user db.User
 	err = r.DB.NewSelect().
 		Model(&user).
 		Where("id = ?", obj.UserID).
@@ -171,7 +171,7 @@ func (r *reportResolver) User(ctx context.Context, obj *db.Report) (*db.User, er
 		return nil, err
 	}
 
-	return user, nil
+	return &user, nil
 }
 
 // StudentUser is the resolver for the studentUser field.
