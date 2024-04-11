@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dokedu/dokedu/backend/internal/dataloaders"
 	"github.com/dokedu/dokedu/backend/internal/db"
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	"github.com/dokedu/dokedu/backend/internal/helper"
@@ -161,7 +160,13 @@ func (r *reportResolver) User(ctx context.Context, obj *db.Report) (*db.User, er
 		return nil, nil
 	}
 
-	user, err := dataloaders.GetUser(ctx, obj.UserID, currentUser)
+	var user *db.User
+	err = r.DB.NewSelect().
+		Model(&user).
+		Where("id = ?", obj.UserID).
+		Where("organisation_id = ?", currentUser.OrganisationID).
+		WhereAllWithDeleted().
+		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
