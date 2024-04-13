@@ -1115,3 +1115,42 @@ func (ts *TestSuite) Test_UserStudents() {
 	ts.Equal(student.ID, userStudents.Edges[0].UserID)
 	ts.Equal(student2.ID, userStudents.Edges[1].UserID)
 }
+
+func (ts *TestSuite) Test_UserStudent() {
+	org, owner := ts.MockOrganisationWithOwner()
+	teacher := ts.MockTeacherForOrganisation(org.ID)
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	// Unauthorized access by non-user
+	userStudent, err := ts.Resolver.Query().UserStudent(ts.Ctx(), student.ID)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+	ts.Nil(userStudent)
+
+	// Owner can read and see the user student
+	userStudent, err = ts.Resolver.Query().UserStudent(ts.CtxWithUser(owner.ID), student.ID)
+	ts.NoError(err)
+	ts.Equal(student.ID, userStudent.UserID)
+
+	// Teacher can read and see the user student
+	userStudent, err = ts.Resolver.Query().UserStudent(ts.CtxWithUser(teacher.ID), student.ID)
+	ts.NoError(err)
+	ts.Equal(student.ID, userStudent.UserID)
+
+	// Student can read and see their own user student
+	userStudent, err = ts.Resolver.Query().UserStudent(ts.CtxWithUser(student.ID), student.ID)
+	ts.NoError(err)
+	ts.Equal(student.ID, userStudent.UserID)
+
+	// Create another student and see if student can see it
+	student2 := ts.MockUserForOrganisation(org.ID, "student")
+
+	// Student cannot read student2
+	userStudent, err = ts.Resolver.Query().UserStudent(ts.CtxWithUser(student.ID), student2.ID)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+	ts.Nil(userStudent)
+
+	// Teacher should see all students
+	userStudent, err = ts.Resolver.Query().UserStudent(ts.CtxWithUser(teacher.ID), student2.ID)
+	ts.NoError(err)
+	ts.Equal(student2.ID, userStudent.UserID)
+}

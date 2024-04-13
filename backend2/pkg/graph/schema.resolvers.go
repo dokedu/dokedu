@@ -936,7 +936,25 @@ func (r *queryResolver) UserStudents(ctx context.Context, limit *int, offset *in
 
 // UserStudent is the resolver for the userStudent field.
 func (r *queryResolver) UserStudent(ctx context.Context, id string) (*db.UserStudent, error) {
-	panic(fmt.Errorf("not implemented: UserStudent - userStudent"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	// Students can only see their own user student
+	if !user.HasPermissionTeacher() && user.ID != id {
+		return nil, msg.ErrUnauthorized
+	}
+
+	userStudent, err := r.DB.UserStudentFindByActualUserID(ctx, db.UserStudentFindByActualUserIDParams{
+		UserID:         id,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &userStudent, nil
 }
 
 // InviteDetails is the resolver for the inviteDetails field.
