@@ -83,3 +83,83 @@ func (q *Queries) EventFindById(ctx context.Context, arg EventFindByIdParams) (E
 	)
 	return i, err
 }
+
+const eventSoftDelete = `-- name: EventSoftDelete :one
+UPDATE events
+SET deleted_at = NOW()
+WHERE id = $1
+  AND organisation_id = $2
+RETURNING id, image_file_id, organisation_id, title, body, starts_at, ends_at, recurrence, created_at, deleted_at
+`
+
+type EventSoftDeleteParams struct {
+	ID             string `db:"id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) EventSoftDelete(ctx context.Context, arg EventSoftDeleteParams) (Event, error) {
+	row := q.db.QueryRow(ctx, eventSoftDelete, arg.ID, arg.OrganisationID)
+	var i Event
+	err := row.Scan(
+		&i.ID,
+		&i.ImageFileID,
+		&i.OrganisationID,
+		&i.Title,
+		&i.Body,
+		&i.StartsAt,
+		&i.EndsAt,
+		&i.Recurrence,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const eventUpdate = `-- name: EventUpdate :one
+UPDATE events
+SET title         = COALESCE($1, title),
+    image_file_id = COALESCE($2, image_file_id),
+    body          = COALESCE($3, body),
+    starts_at     = COALESCE($4, starts_at),
+    ends_at       = COALESCE($5, ends_at)
+WHERE id = $6
+  AND organisation_id = $7
+  AND deleted_at IS NULL
+RETURNING id, image_file_id, organisation_id, title, body, starts_at, ends_at, recurrence, created_at, deleted_at
+`
+
+type EventUpdateParams struct {
+	Title          pgtype.Text        `db:"title"`
+	ImageFileID    pgtype.Text        `db:"image_file_id"`
+	Body           pgtype.Text        `db:"body"`
+	StartsAt       pgtype.Timestamptz `db:"starts_at"`
+	EndsAt         pgtype.Timestamptz `db:"ends_at"`
+	ID             string             `db:"id"`
+	OrganisationID string             `db:"organisation_id"`
+}
+
+func (q *Queries) EventUpdate(ctx context.Context, arg EventUpdateParams) (Event, error) {
+	row := q.db.QueryRow(ctx, eventUpdate,
+		arg.Title,
+		arg.ImageFileID,
+		arg.Body,
+		arg.StartsAt,
+		arg.EndsAt,
+		arg.ID,
+		arg.OrganisationID,
+	)
+	var i Event
+	err := row.Scan(
+		&i.ID,
+		&i.ImageFileID,
+		&i.OrganisationID,
+		&i.Title,
+		&i.Body,
+		&i.StartsAt,
+		&i.EndsAt,
+		&i.Recurrence,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}

@@ -12,6 +12,7 @@ import (
 	"github.com/dokedu/dokedu/backend/pkg/middleware"
 	"github.com/dokedu/dokedu/backend/pkg/msg"
 	"github.com/jackc/pgx/v5"
+	"github.com/samber/lo"
 	"time"
 
 	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
@@ -70,7 +71,47 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input model.CreateEv
 
 // UpdateEvent is the resolver for the updateEvent field.
 func (r *mutationResolver) UpdateEvent(ctx context.Context, input model.UpdateEventInput) (*db.Event, error) {
-	panic(fmt.Errorf("not implemented: UpdateEvent - updateEvent"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	if !user.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	updateParams := db.EventUpdateParams{
+		ID:             input.ID,
+		OrganisationID: user.OrganisationID,
+	}
+
+	if input.Title != nil {
+		updateParams.Title = OptionalString(input.Title)
+	}
+
+	if input.Image != nil {
+		// TODO: upload image
+	}
+
+	if input.Body != nil {
+		updateParams.Body = OptionalString(input.Body)
+	}
+
+	if input.StartsAt != nil {
+		// TODO: this ain't pretty
+		updateParams.StartsAt = OptionalTimestamp(lo.ToPtr(OptionalTimeFromString(input.StartsAt)))
+	}
+
+	if input.EndsAt != nil {
+		// TODO: this ain't pretty
+		updateParams.EndsAt = OptionalTimestamp(lo.ToPtr(OptionalTimeFromString(input.EndsAt)))
+	}
+
+	event, err := r.DB.EventUpdate(ctx, updateParams)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, msg.ErrNotFound
+	}
+	return &event, err
 }
 
 // ToggleEventCompetence is the resolver for the toggleEventCompetence field.
@@ -80,7 +121,23 @@ func (r *mutationResolver) ToggleEventCompetence(ctx context.Context, input mode
 
 // ArchiveEvent is the resolver for the archiveEvent field.
 func (r *mutationResolver) ArchiveEvent(ctx context.Context, id string) (*db.Event, error) {
-	panic(fmt.Errorf("not implemented: ArchiveEvent - archiveEvent"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	if !user.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	event, err := r.DB.EventSoftDelete(ctx, db.EventSoftDeleteParams{
+		ID:             id,
+		OrganisationID: user.OrganisationID,
+	})
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, msg.ErrNotFound
+	}
+	return &event, err
 }
 
 // Event is the resolver for the event field.

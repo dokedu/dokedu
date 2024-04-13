@@ -33,6 +33,19 @@ func OptionalDate(t *time.Time) pgtype.Date {
 	return pgtype.Date{Time: *t, Valid: true}
 }
 
+func OptionalTimeFromString(t *string) time.Time {
+	if t == nil {
+		return time.Time{}
+	}
+
+	parsedTime, err := time.Parse("2006-01-02 15:04:05", *t)
+	if err != nil {
+		return time.Time{}
+	}
+
+	return parsedTime
+}
+
 func OptionalString(s *string) pgtype.Text {
 	if s == nil {
 		return pgtype.Text{Valid: false}

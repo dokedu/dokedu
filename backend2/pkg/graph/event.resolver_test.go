@@ -2,8 +2,10 @@ package graph_test
 
 import (
 	"github.com/dokedu/dokedu/backend/pkg/graph"
+	"github.com/dokedu/dokedu/backend/pkg/graph/model"
 	"github.com/dokedu/dokedu/backend/pkg/msg"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
+	"github.com/samber/lo"
 	"time"
 )
 
@@ -96,7 +98,61 @@ func (ts *TestSuite) Test_CreateEvent() {
 }
 
 func (ts *TestSuite) Test_UpdateEvent() {
-	ts.Fail("not implemented")
+	org, owner := ts.MockOrganisationWithOwner()
+	teacher := ts.MockTeacherForOrganisation(org.ID)
+	student := ts.MockUserForOrganisation(org.ID, "student")
+	_, owner2 := ts.MockOrganisationWithOwner()
+
+	// Create a valid event
+	validEvent, err := ts.DB.EventCreate(ts.CtxWithUser(owner.ID), db.EventCreateParams{
+		ImageFileID:    graph.OptionalString(nil),
+		Title:          "Event",
+		Body:           "Body",
+		StartsAt:       time.Now(),
+		EndsAt:         time.Now().Add(time.Hour),
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+
+	// Unauthorized access by non-user
+	updatedEvent, err := ts.Resolver.Mutation().UpdateEvent(ts.Ctx(), model.UpdateEventInput{
+		ID:   validEvent.ID,
+		Body: lo.ToPtr("New body"),
+	})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+	ts.Nil(updatedEvent)
+
+	// Unauthorized access by a user without permission
+	updatedEvent, err = ts.Resolver.Mutation().UpdateEvent(ts.CtxWithUser(owner2.ID), model.UpdateEventInput{
+		ID:   validEvent.ID,
+		Body: lo.ToPtr("New body"),
+	})
+	ts.ErrorIs(err, msg.ErrNotFound)
+	ts.Nil(updatedEvent)
+
+	// Owner can update the event
+	updatedEvent, err = ts.Resolver.Mutation().UpdateEvent(ts.CtxWithUser(owner.ID), model.UpdateEventInput{
+		ID:   validEvent.ID,
+		Body: lo.ToPtr("New body 2"),
+	})
+	ts.NoError(err)
+	ts.Equal("New body 2", updatedEvent.Body)
+
+	// Teacher can update the event
+	updatedEvent, err = ts.Resolver.Mutation().UpdateEvent(ts.CtxWithUser(teacher.ID), model.UpdateEventInput{
+		ID:   validEvent.ID,
+		Body: lo.ToPtr("New body 3"),
+	})
+	ts.NoError(err)
+	ts.Equal("New body 3", updatedEvent.Body)
+
+	// Student cannot update the event
+	updatedEvent, err = ts.Resolver.Mutation().UpdateEvent(ts.CtxWithUser(student.ID), model.UpdateEventInput{
+		ID:   validEvent.ID,
+		Body: lo.ToPtr("New body 4"),
+	})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+	ts.Nil(updatedEvent)
 }
 
 func (ts *TestSuite) Test_ToggleEventCompetence() {
@@ -104,7 +160,47 @@ func (ts *TestSuite) Test_ToggleEventCompetence() {
 }
 
 func (ts *TestSuite) Test_ArchiveEvent() {
-	ts.Fail("not implemented")
+	org, owner := ts.MockOrganisationWithOwner()
+	teacher := ts.MockTeacherForOrganisation(org.ID)
+	student := ts.MockUserForOrganisation(org.ID, "student")
+	_, owner2 := ts.MockOrganisationWithOwner()
+
+	// Create a valid event
+	validEvent, err := ts.DB.EventCreate(ts.CtxWithUser(owner.ID), db.EventCreateParams{
+		ImageFileID:    graph.OptionalString(nil),
+		Title:          "Event",
+		Body:           "Body",
+		StartsAt:       time.Now(),
+		EndsAt:         time.Now().Add(time.Hour),
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+
+	// Unauthorized access by non-user
+	archivedEvent, err := ts.Resolver.Mutation().ArchiveEvent(ts.Ctx(), validEvent.ID)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+	ts.Nil(archivedEvent)
+
+	// Unauthorized access by a user without permission
+	archivedEvent, err = ts.Resolver.Mutation().ArchiveEvent(ts.CtxWithUser(owner2.ID), validEvent.ID)
+	ts.ErrorIs(err, msg.ErrNotFound)
+	ts.Nil(archivedEvent)
+
+	// Owner can archive the event
+	archivedEvent, err = ts.Resolver.Mutation().ArchiveEvent(ts.CtxWithUser(owner.ID), validEvent.ID)
+	ts.NoError(err)
+	ts.NotNil(archivedEvent)
+	ts.Equal(validEvent.ID, archivedEvent.ID)
+
+	// Teacher can archive the event
+	archivedEvent, err = ts.Resolver.Mutation().ArchiveEvent(ts.CtxWithUser(teacher.ID), validEvent.ID)
+	ts.NoError(err)
+	ts.NotNil(archivedEvent)
+	ts.Equal(validEvent.ID, archivedEvent.ID)
+
+	// Student cannot archive the event
+	archivedEvent, err = ts.Resolver.Mutation().ArchiveEvent(ts.CtxWithUser(student.ID), validEvent.ID)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
 }
 
 func (ts *TestSuite) Test_Event() {
