@@ -1067,3 +1067,51 @@ func (ts *TestSuite) Test_Tags() {
 	ts.Len(tags.Edges, 1)
 	ts.Equal("test2", tags.Edges[0].Name)
 }
+
+// Test_UserStudents tests the user students resolver
+// Owner can read and see all user students.
+// Teacher can read and see all user students.
+// Students can read and see their own user students but not other students.
+func (ts *TestSuite) Test_UserStudents() {
+	org, owner := ts.MockOrganisationWithOwner()
+	teacher := ts.MockTeacherForOrganisation(org.ID)
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	// Unauthorized access by non-user
+	userStudents, err := ts.Resolver.Query().UserStudents(ts.Ctx(), nil, nil)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+	ts.Nil(userStudents)
+
+	// Owner can read and see all user students
+	userStudents, err = ts.Resolver.Query().UserStudents(ts.CtxWithUser(owner.ID), nil, nil)
+	ts.NoError(err)
+	ts.Len(userStudents.Edges, 1)
+	ts.Equal(student.ID, userStudents.Edges[0].UserID)
+
+	// Teacher can read and see all user students
+	userStudents, err = ts.Resolver.Query().UserStudents(ts.CtxWithUser(teacher.ID), nil, nil)
+	ts.NoError(err)
+	ts.Len(userStudents.Edges, 1)
+	ts.Equal(student.ID, userStudents.Edges[0].UserID)
+
+	// Student can read and see their own user students but not other students
+	userStudents, err = ts.Resolver.Query().UserStudents(ts.CtxWithUser(student.ID), nil, nil)
+	ts.NoError(err)
+	ts.Len(userStudents.Edges, 1)
+	ts.Equal(student.ID, userStudents.Edges[0].UserID)
+
+	// Create another student and see if student can see it
+	student2 := ts.MockUserForOrganisation(org.ID, "student")
+
+	userStudents, err = ts.Resolver.Query().UserStudents(ts.CtxWithUser(student.ID), nil, nil)
+	ts.NoError(err)
+	ts.Len(userStudents.Edges, 1)
+	ts.Equal(student.ID, userStudents.Edges[0].UserID)
+
+	// Teacher should see all students
+	userStudents, err = ts.Resolver.Query().UserStudents(ts.CtxWithUser(teacher.ID), nil, nil)
+	ts.NoError(err)
+	ts.Len(userStudents.Edges, 2)
+	ts.Equal(student.ID, userStudents.Edges[0].UserID)
+	ts.Equal(student2.ID, userStudents.Edges[1].UserID)
+}

@@ -907,7 +907,31 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int, searc
 
 // UserStudents is the resolver for the userStudents field.
 func (r *queryResolver) UserStudents(ctx context.Context, limit *int, offset *int) (*model.UserStudentConnection, error) {
-	panic(fmt.Errorf("not implemented: UserStudents - userStudents"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	query := r.DB.NewQueryBuilder().Select("*").From("user_students").Where("organisation_id = ?", user.OrganisationID)
+
+	if !user.HasPermissionTeacher() {
+		query = query.Where("user_id = ?", user.ID)
+	}
+
+	l, o := helper.PaginationInput(limit, offset)
+	query = query.Limit(l + 1).Offset(o)
+
+	userStudents, err := database.ScanSelectMany[db.UserStudent](r.DB, ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	edges, pageInfo := helper.PaginationOutput(l, o, userStudents)
+	return &model.UserStudentConnection{
+		Edges:    edges,
+		PageInfo: pageInfo,
+	}, nil
+
 }
 
 // UserStudent is the resolver for the userStudent field.
