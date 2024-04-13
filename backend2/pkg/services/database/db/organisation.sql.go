@@ -113,3 +113,50 @@ func (q *Queries) GLOBAL_OrganisationUpdateOwnerID(ctx context.Context, arg GLOB
 	)
 	return i, err
 }
+
+const organisationUpdate = `-- name: OrganisationUpdate :one
+UPDATE organisations
+SET name = CASE WHEN $1::text <> '' THEN $1::text ELSE name END,
+    legal_name = CASE WHEN $2::text <> ''THEN $2::text ELSE legal_name END,
+    website = CASE WHEN $3::text <> '' THEN $3::text ELSE website END,
+    phone = CASE WHEN $4::text <> '' THEN $4::text ELSE phone END
+WHERE id = $5
+RETURNING id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps, created_at, deleted_at, setup_complete, address, logo_url, stripe_customer_id, stripe_subscription_id
+`
+
+type OrganisationUpdateParams struct {
+	Name           string `db:"name"`
+	LegalName      string `db:"legal_name"`
+	Website        string `db:"website"`
+	Phone          string `db:"phone"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) OrganisationUpdate(ctx context.Context, arg OrganisationUpdateParams) (Organisation, error) {
+	row := q.db.QueryRow(ctx, organisationUpdate,
+		arg.Name,
+		arg.LegalName,
+		arg.Website,
+		arg.Phone,
+		arg.OrganisationID,
+	)
+	var i Organisation
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.LegalName,
+		&i.Website,
+		&i.Phone,
+		&i.OwnerID,
+		&i.AllowedDomains,
+		&i.EnabledApps,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.SetupComplete,
+		&i.Address,
+		&i.LogoUrl,
+		&i.StripeCustomerID,
+		&i.StripeSubscriptionID,
+	)
+	return i, err
+}
