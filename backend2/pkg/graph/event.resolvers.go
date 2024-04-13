@@ -6,7 +6,11 @@ package graph
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
+	"github.com/dokedu/dokedu/backend/pkg/middleware"
+	"github.com/dokedu/dokedu/backend/pkg/msg"
 	"time"
 
 	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
@@ -16,17 +20,46 @@ import (
 
 // Image is the resolver for the image field.
 func (r *eventResolver) Image(ctx context.Context, obj *db.Event) (*db.File, error) {
-	panic(fmt.Errorf("not implemented: Image - image"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	if !obj.ImageFileID.Valid {
+		return nil, nil
+	}
+
+	file, err := r.DB.FileByID(ctx, db.FileByIDParams{
+		ID:             obj.ImageFileID.String,
+		OrganisationID: user.OrganisationID,
+	})
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, msg.ErrNotFound
+	}
+	return &file, err
 }
 
 // DeletedAt is the resolver for the deletedAt field.
 func (r *eventResolver) DeletedAt(ctx context.Context, obj *db.Event) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
+	if !obj.DeletedAt.Time.IsZero() {
+		return &obj.DeletedAt.Time, nil
+	}
+
+	return nil, nil
 }
 
 // Competences is the resolver for the competences field.
 func (r *eventResolver) Competences(ctx context.Context, obj *db.Event) ([]db.Competence, error) {
-	panic(fmt.Errorf("not implemented: Competences - competences"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	competences, err := r.DB.CompetencesFindByEventID(ctx, db.CompetencesFindByEventIDParams{
+		EventID:        obj.ID,
+		OrganisationID: user.OrganisationID,
+	})
+	return competences, err
 }
 
 // CreateEvent is the resolver for the createEvent field.

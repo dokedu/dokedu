@@ -313,6 +313,54 @@ func (q *Queries) CompetencesFind(ctx context.Context, organisationID string) ([
 	return items, nil
 }
 
+const competencesFindByEventID = `-- name: CompetencesFindByEventID :many
+SELECT c.id, c.name, c.competence_id, c.competence_type, c.organisation_id, c.grades, c.color, c.curriculum_id, c.created_at, c.deleted_at, c.sort_order, c.created_by
+FROM competences c
+         JOIN public.event_competences ec ON c.id = ec.competence_id AND ec.event_id = $1
+WHERE c.organisation_id = $2
+  AND ec.organisation_id = $2
+  AND c.deleted_at IS NULL
+  AND ec.deleted_at IS NULL
+`
+
+type CompetencesFindByEventIDParams struct {
+	EventID        string `db:"event_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) CompetencesFindByEventID(ctx context.Context, arg CompetencesFindByEventIDParams) ([]Competence, error) {
+	rows, err := q.db.Query(ctx, competencesFindByEventID, arg.EventID, arg.OrganisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Competence
+	for rows.Next() {
+		var i Competence
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CompetenceID,
+			&i.CompetenceType,
+			&i.OrganisationID,
+			&i.Grades,
+			&i.Color,
+			&i.CurriculumID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.SortOrder,
+			&i.CreatedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const competencesFindByID = `-- name: CompetencesFindByID :many
 SELECT id, name, competence_id, competence_type, organisation_id, grades, color, curriculum_id, created_at, deleted_at, sort_order, created_by
 FROM competences
@@ -403,15 +451,15 @@ func (q *Queries) CompetencesFindOrderedBySortOrderAndName(ctx context.Context, 
 const competencesFindParents = `-- name: CompetencesFindParents :many
 WITH RECURSIVE parents AS (SELECT ID AS orig_id, ID, COMPETENCE_ID
                            FROM competences c1
-                           WHERE id = ANY($2::text[]) AND c1.organisation_id = $1
+                           WHERE id = ANY ($2::text[])
+                             AND c1.organisation_id = $1
                            UNION ALL
                            SELECT p.orig_id, c2.id, c2.competence_id
                            FROM competences c2
                                     INNER JOIN parents p ON p.competence_id = c2.id
-                           WHERE c2.organisation_id = $1
-                           )
+                           WHERE c2.organisation_id = $1)
 
-SELECT orig_id, (array_agg(id) FILTER ( WHERE orig_id != id ))::text[] AS PARENTS
+SELECT orig_id, (ARRAY_AGG(id) FILTER ( WHERE orig_id != id ))::text[] AS PARENTS
 FROM parents
 GROUP BY orig_id
 `

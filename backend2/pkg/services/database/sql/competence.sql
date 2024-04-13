@@ -108,14 +108,23 @@ ORDER BY sort_order;
 -- name: CompetencesFindParents :many
 WITH RECURSIVE parents AS (SELECT ID AS orig_id, ID, COMPETENCE_ID
                            FROM competences c1
-                           WHERE id = ANY(@ids::text[]) AND c1.organisation_id = $1
+                           WHERE id = ANY (@ids::text[])
+                             AND c1.organisation_id = $1
                            UNION ALL
                            SELECT p.orig_id, c2.id, c2.competence_id
                            FROM competences c2
                                     INNER JOIN parents p ON p.competence_id = c2.id
-                           WHERE c2.organisation_id = $1
-                           )
+                           WHERE c2.organisation_id = $1)
 
-SELECT orig_id, (array_agg(id) FILTER ( WHERE orig_id != id ))::text[] AS PARENTS
+SELECT orig_id, (ARRAY_AGG(id) FILTER ( WHERE orig_id != id ))::text[] AS PARENTS
 FROM parents
 GROUP BY orig_id;
+
+-- name: CompetencesFindByEventID :many
+SELECT c.*
+FROM competences c
+         JOIN public.event_competences ec ON c.id = ec.competence_id AND ec.event_id = @event_id
+WHERE c.organisation_id = @organisation_id
+  AND ec.organisation_id = @organisation_id
+  AND c.deleted_at IS NULL
+  AND ec.deleted_at IS NULL;

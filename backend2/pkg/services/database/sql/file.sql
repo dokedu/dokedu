@@ -16,3 +16,8 @@ SELECT *
 FROM files
 WHERE id = @id
 AND organisation_id = @organisation_id;
+
+-- name: FileCreate :one
+INSERT INTO files (name, file_type, mime_type, size, bucket_id, parent_id, organisation_id)
+VALUES (@name, @file_type, @mime_type, @size, @bucket_id, @parent_id, @organisation_id)
+RETURNING *;
