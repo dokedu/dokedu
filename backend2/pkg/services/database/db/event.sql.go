@@ -51,3 +51,35 @@ func (q *Queries) EventCreate(ctx context.Context, arg EventCreateParams) (Event
 	)
 	return i, err
 }
+
+const eventFindById = `-- name: EventFindById :one
+SELECT id, image_file_id, organisation_id, title, body, starts_at, ends_at, recurrence, created_at, deleted_at
+FROM events
+WHERE id = $1
+  AND organisation_id = $2
+  AND deleted_at IS NULL
+LIMIT 1
+`
+
+type EventFindByIdParams struct {
+	ID             string `db:"id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) EventFindById(ctx context.Context, arg EventFindByIdParams) (Event, error) {
+	row := q.db.QueryRow(ctx, eventFindById, arg.ID, arg.OrganisationID)
+	var i Event
+	err := row.Scan(
+		&i.ID,
+		&i.ImageFileID,
+		&i.OrganisationID,
+		&i.Title,
+		&i.Body,
+		&i.StartsAt,
+		&i.EndsAt,
+		&i.Recurrence,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}

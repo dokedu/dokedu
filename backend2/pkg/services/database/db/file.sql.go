@@ -7,6 +7,8 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const bucketByID = `-- name: BucketByID :one
@@ -50,6 +52,48 @@ type FileByIDParams struct {
 
 func (q *Queries) FileByID(ctx context.Context, arg FileByIDParams) (File, error) {
 	row := q.db.QueryRow(ctx, fileByID, arg.ID, arg.OrganisationID)
+	var i File
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.FileType,
+		&i.MimeType,
+		&i.Size,
+		&i.BucketID,
+		&i.ParentID,
+		&i.OrganisationID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const fileCreate = `-- name: FileCreate :one
+INSERT INTO files (name, file_type, mime_type, size, bucket_id, parent_id, organisation_id)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING id, name, file_type, mime_type, size, bucket_id, parent_id, organisation_id, created_at, deleted_at
+`
+
+type FileCreateParams struct {
+	Name           string      `db:"name"`
+	FileType       FileType    `db:"file_type"`
+	MimeType       pgtype.Text `db:"mime_type"`
+	Size           int64       `db:"size"`
+	BucketID       string      `db:"bucket_id"`
+	ParentID       pgtype.Text `db:"parent_id"`
+	OrganisationID string      `db:"organisation_id"`
+}
+
+func (q *Queries) FileCreate(ctx context.Context, arg FileCreateParams) (File, error) {
+	row := q.db.QueryRow(ctx, fileCreate,
+		arg.Name,
+		arg.FileType,
+		arg.MimeType,
+		arg.Size,
+		arg.BucketID,
+		arg.ParentID,
+		arg.OrganisationID,
+	)
 	var i File
 	err := row.Scan(
 		&i.ID,

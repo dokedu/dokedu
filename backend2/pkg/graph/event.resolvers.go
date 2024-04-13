@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"github.com/dokedu/dokedu/backend/pkg/middleware"
 	"github.com/dokedu/dokedu/backend/pkg/msg"
+	"github.com/jackc/pgx/v5"
 	"time"
 
 	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
@@ -84,7 +85,19 @@ func (r *mutationResolver) ArchiveEvent(ctx context.Context, id string) (*db.Eve
 
 // Event is the resolver for the event field.
 func (r *queryResolver) Event(ctx context.Context, id string) (*db.Event, error) {
-	panic(fmt.Errorf("not implemented: Event - event"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	event, err := r.DB.EventFindById(ctx, db.EventFindByIdParams{
+		ID:             id,
+		OrganisationID: user.OrganisationID,
+	})
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, msg.ErrNotFound
+	}
+	return &event, err
 }
 
 // Events is the resolver for the events field.
