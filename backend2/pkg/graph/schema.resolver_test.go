@@ -1309,3 +1309,113 @@ func (ts *TestSuite) Test_UserCompetence_Resolvers() {
 	ts.NotNil(createdBy)
 	ts.Equal(teacher.ID, createdBy.ID)
 }
+
+func (ts *TestSuite) Test_UserStudent_Resolvers() {
+	org, owner := ts.MockOrganisationWithOwner()
+	//teacher := ts.MockTeacherForOrganisation(org.ID)
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	// LeftAt resolver
+	leftAt, err := ts.Resolver.UserStudent().LeftAt(ts.CtxWithUser(owner.ID), &db.UserStudent{
+		UserID:         student.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+	ts.Nil(leftAt)
+
+	// Birthday resolver
+	birthday, err := ts.Resolver.UserStudent().Birthday(ts.CtxWithUser(owner.ID), &db.UserStudent{
+		UserID:         student.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+	ts.Nil(birthday)
+
+	// Nationality resolver
+	nationality, err := ts.Resolver.UserStudent().Nationality(ts.CtxWithUser(owner.ID), &db.UserStudent{
+		UserID:         student.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+	ts.Nil(nationality)
+
+	// Comments resolver
+	comments, err := ts.Resolver.UserStudent().Comments(ts.CtxWithUser(owner.ID), &db.UserStudent{
+		UserID:         student.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+	ts.Nil(comments)
+
+	// JoinedAt resolver
+	joinedAt, err := ts.Resolver.UserStudent().JoinedAt(ts.CtxWithUser(owner.ID), &db.UserStudent{
+		UserID:         student.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+	ts.Nil(joinedAt)
+
+	// DeletedAt resolver
+	deletedAt, err := ts.Resolver.UserStudent().DeletedAt(ts.CtxWithUser(owner.ID), &db.UserStudent{
+		UserID:         student.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+	ts.Nil(deletedAt)
+
+	// EntriesCount resolver
+	entriesCount, err := ts.Resolver.UserStudent().EntriesCount(ts.CtxWithUser(owner.ID), &db.UserStudent{
+		UserID:         student.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+	ts.Equal(0, entriesCount)
+
+	// CompetencesCount resolver
+	competencesCount, err := ts.Resolver.UserStudent().CompetencesCount(ts.CtxWithUser(owner.ID), &db.UserStudent{
+		UserID:         student.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+	ts.Equal(0, competencesCount)
+
+	// EventsCount resolver
+	eventsCount, err := ts.Resolver.UserStudent().EventsCount(ts.CtxWithUser(owner.ID), &db.UserStudent{
+		UserID:         student.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+	ts.Equal(0, eventsCount)
+
+	// Emoji resolver
+	emoji, err := ts.Resolver.UserStudent().Emoji(ts.CtxWithUser(owner.ID), &db.UserStudent{
+		UserID:         student.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+	ts.Nil(emoji)
+
+	// User resolver
+	user, err := ts.Resolver.UserStudent().User(ts.CtxWithUser(owner.ID), &db.UserStudent{
+		UserID:         student.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+	ts.NotNil(user)
+
+	// MissedHours resolver
+	missedHours, err := ts.Resolver.UserStudent().MissedHours(ts.CtxWithUser(owner.ID), &db.UserStudent{
+		UserID:         student.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+	ts.Equal(0, missedHours)
+
+	// MissedHoursExcused resolver
+	missedHoursExcused, err := ts.Resolver.UserStudent().MissedHoursExcused(ts.CtxWithUser(owner.ID), &db.UserStudent{
+		UserID:         student.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+	ts.Equal(0, missedHoursExcused)
+}

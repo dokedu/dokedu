@@ -1133,67 +1133,154 @@ func (r *userCompetenceResolver) CreatedBy(ctx context.Context, obj *db.UserComp
 
 // LeftAt is the resolver for the leftAt field.
 func (r *userStudentResolver) LeftAt(ctx context.Context, obj *db.UserStudent) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: LeftAt - leftAt"))
+	if !obj.LeftAt.Time.IsZero() {
+		return &obj.LeftAt.Time, nil
+	}
+	return nil, nil
 }
 
 // Birthday is the resolver for the birthday field.
 func (r *userStudentResolver) Birthday(ctx context.Context, obj *db.UserStudent) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: Birthday - birthday"))
+	if !obj.Birthday.Time.IsZero() {
+		return &obj.Birthday.Time, nil
+	}
+
+	return nil, nil
 }
 
 // Nationality is the resolver for the nationality field.
 func (r *userStudentResolver) Nationality(ctx context.Context, obj *db.UserStudent) (*string, error) {
-	panic(fmt.Errorf("not implemented: Nationality - nationality"))
+	if !obj.Nationality.Valid {
+		return nil, nil
+	}
+
+	return &obj.Nationality.String, nil
 }
 
 // Comments is the resolver for the comments field.
 func (r *userStudentResolver) Comments(ctx context.Context, obj *db.UserStudent) (*string, error) {
-	panic(fmt.Errorf("not implemented: Comments - comments"))
+	if !obj.Comments.Valid {
+		return nil, nil
+	}
+
+	return &obj.Comments.String, nil
 }
 
 // JoinedAt is the resolver for the joinedAt field.
 func (r *userStudentResolver) JoinedAt(ctx context.Context, obj *db.UserStudent) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: JoinedAt - joinedAt"))
+	if !obj.JoinedAt.Time.IsZero() {
+		return &obj.JoinedAt.Time, nil
+	}
+
+	return nil, nil
 }
 
 // DeletedAt is the resolver for the deletedAt field.
 func (r *userStudentResolver) DeletedAt(ctx context.Context, obj *db.UserStudent) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
+	if !obj.DeletedAt.Time.IsZero() {
+		return &obj.DeletedAt.Time, nil
+	}
+
+	return nil, nil
 }
 
 // EntriesCount is the resolver for the entriesCount field.
 func (r *userStudentResolver) EntriesCount(ctx context.Context, obj *db.UserStudent) (int, error) {
-	panic(fmt.Errorf("not implemented: EntriesCount - entriesCount"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return 0, msg.ErrUnauthorized
+	}
+
+	count, err := r.DB.EntryUserCountByUserID(ctx, db.EntryUserCountByUserIDParams{
+		UserID:         obj.UserID,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return int(count), nil
 }
 
 // CompetencesCount is the resolver for the competencesCount field.
 func (r *userStudentResolver) CompetencesCount(ctx context.Context, obj *db.UserStudent) (int, error) {
-	panic(fmt.Errorf("not implemented: CompetencesCount - competencesCount"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return 0, msg.ErrUnauthorized
+	}
+
+	count, err := r.DB.UserCompetenceCountByUserID(ctx, db.UserCompetenceCountByUserIDParams{
+		UserID:         obj.UserID,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return int(count), nil
 }
 
 // EventsCount is the resolver for the eventsCount field.
 func (r *userStudentResolver) EventsCount(ctx context.Context, obj *db.UserStudent) (int, error) {
-	panic(fmt.Errorf("not implemented: EventsCount - eventsCount"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return 0, msg.ErrUnauthorized
+	}
+
+	count, err := r.DB.EntryEventCountByUserID(ctx, db.EntryEventCountByUserIDParams{
+		UserID:         obj.UserID,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return int(count), nil
 }
 
 // Emoji is the resolver for the emoji field.
 func (r *userStudentResolver) Emoji(ctx context.Context, obj *db.UserStudent) (*string, error) {
-	panic(fmt.Errorf("not implemented: Emoji - emoji"))
+	if obj.Emoji.Valid {
+		return &obj.Emoji.String, nil
+	}
+
+	return nil, nil
 }
 
 // User is the resolver for the user field.
 func (r *userStudentResolver) User(ctx context.Context, obj *db.UserStudent) (*db.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	userStudentUser, err := r.DB.UserFindByID(ctx, db.UserFindByIDParams{
+		ID:             obj.UserID,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &userStudentUser, nil
 }
 
 // MissedHours is the resolver for the missedHours field.
 func (r *userStudentResolver) MissedHours(ctx context.Context, obj *db.UserStudent) (int, error) {
-	panic(fmt.Errorf("not implemented: MissedHours - missedHours"))
+	if !obj.MissedHours.Valid {
+		return 0, nil
+	}
+
+	return int(obj.MissedHours.Int32), nil
 }
 
 // MissedHoursExcused is the resolver for the missedHoursExcused field.
 func (r *userStudentResolver) MissedHoursExcused(ctx context.Context, obj *db.UserStudent) (int, error) {
-	panic(fmt.Errorf("not implemented: MissedHoursExcused - missedHoursExcused"))
+	if !obj.MissedHoursExcused.Valid {
+		return 0, nil
+	}
+
+	return int(obj.MissedHoursExcused.Int32), nil
 }
 
 // Competence returns generated.CompetenceResolver implementation.

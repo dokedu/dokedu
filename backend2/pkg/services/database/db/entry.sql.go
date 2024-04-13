@@ -44,6 +44,28 @@ func (q *Queries) EntryCreate(ctx context.Context, arg EntryCreateParams) (Entry
 	return i, err
 }
 
+const entryEventCountByUserID = `-- name: EntryEventCountByUserID :one
+SELECT COUNT(*)
+FROM entry_events ee
+         JOIN public.entry_users eu ON ee.entry_id = eu.entry_id
+WHERE eu.user_id = $1
+  AND ee.organisation_id = $2
+  AND ee.deleted_at IS NULL
+  AND eu.deleted_at IS NULL
+`
+
+type EntryEventCountByUserIDParams struct {
+	UserID         string `db:"user_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) EntryEventCountByUserID(ctx context.Context, arg EntryEventCountByUserIDParams) (int64, error) {
+	row := q.db.QueryRow(ctx, entryEventCountByUserID, arg.UserID, arg.OrganisationID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const entryFindById = `-- name: EntryFindById :one
 SELECT id, date, body, user_id, created_at, deleted_at, organisation_id
 FROM entries
