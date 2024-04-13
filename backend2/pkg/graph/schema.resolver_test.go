@@ -1016,3 +1016,54 @@ func (ts *TestSuite) Test_Tag() {
 	ts.ErrorIs(err, msg.ErrNotFound)
 	ts.Nil(tag)
 }
+
+func (ts *TestSuite) Test_Tags() {
+	org, owner := ts.MockOrganisationWithOwner()
+	teacher := ts.MockTeacherForOrganisation(org.ID)
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	createTag := func(ctx context.Context, name string) (db.Tag, error) {
+		return ts.DB.TagCreate(context.Background(), db.TagCreateParams{
+			Name:           name,
+			OrganisationID: org.ID,
+			Color:          "blue",
+		})
+	}
+
+	// Unauthorized access by non-user
+	tags, err := ts.Resolver.Query().Tags(ts.Ctx(), nil, nil, nil)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+	ts.Nil(tags)
+
+	// create a tag
+	tagItem, err := createTag(ts.CtxWithUser(owner.ID), "test")
+	ts.NoError(err)
+
+	// Owner can read and see the tag
+	tags, err = ts.Resolver.Query().Tags(ts.CtxWithUser(owner.ID), nil, nil, nil)
+	ts.NoError(err)
+	ts.Len(tags.Edges, 1)
+	ts.Equal(tagItem.Name, tags.Edges[0].Name)
+
+	// Teacher can read and see the tag
+	tags, err = ts.Resolver.Query().Tags(ts.CtxWithUser(teacher.ID), nil, nil, nil)
+	ts.NoError(err)
+	ts.Len(tags.Edges, 1)
+	ts.Equal("test", tags.Edges[0].Name)
+
+	// Student can read and see the tag
+	tags, err = ts.Resolver.Query().Tags(ts.CtxWithUser(student.ID), nil, nil, nil)
+	ts.NoError(err)
+	ts.Len(tags.Edges, 1)
+	ts.Equal("test", tags.Edges[0].Name)
+
+	// Test search for tag
+	// create a tag with a different name
+	_, err = createTag(ts.CtxWithUser(owner.ID), "test2")
+	ts.NoError(err)
+
+	tags, err = ts.Resolver.Query().Tags(ts.CtxWithUser(owner.ID), nil, nil, lo.ToPtr("test2"))
+	ts.NoError(err)
+	ts.Len(tags.Edges, 1)
+	ts.Equal("test2", tags.Edges[0].Name)
+}

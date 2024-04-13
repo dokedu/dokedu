@@ -876,7 +876,33 @@ func (r *queryResolver) Tag(ctx context.Context, id string) (*db.Tag, error) {
 
 // Tags is the resolver for the tags field.
 func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int, search *string) (*model.TagConnection, error) {
-	panic(fmt.Errorf("not implemented: Tags - tags"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	query := r.DB.NewQueryBuilder().Select("*").From("tags").Where("organisation_id = ?", user.OrganisationID)
+
+	if search != nil && *search != "" {
+		query = query.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", *search))
+	}
+
+	l, o := helper.PaginationInput(limit, offset)
+	query = query.Limit(l + 1).Offset(o)
+
+	// Default sorting
+	query = query.OrderBy("created_at DESC")
+
+	tags, err := database.ScanSelectMany[db.Tag](r.DB, ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	edges, pageInfo := helper.PaginationOutput(l, o, tags)
+	return &model.TagConnection{
+		Edges:    edges,
+		PageInfo: pageInfo,
+	}, nil
 }
 
 // UserStudents is the resolver for the userStudents field.
