@@ -22,6 +22,16 @@ func (ts *TestSuite) Test_UpdateOrganisation() {
 	})
 	ts.ErrorIs(err, msg.ErrUnauthorized)
 
+	// user can only update their own organisation
+	_, err = ts.Resolver.Mutation().UpdateOrganisation(ts.CtxWithUser(owner.ID), model.UpdateOrganisationInput{
+		ID:        "invalid id",
+		Name:      lo.ToPtr("New name"),
+		LegalName: lo.ToPtr("New legal name"),
+		Website:   lo.ToPtr("New website"),
+		Phone:     lo.ToPtr("New phone"),
+	})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
 	// update the organisation
 	updatedOrg, err := ts.Resolver.Mutation().UpdateOrganisation(ts.CtxWithUser(owner.ID), model.UpdateOrganisationInput{
 		ID:        org.ID,

@@ -52,11 +52,7 @@ func (r *mutationResolver) UpdateOrganisation(ctx context.Context, input model.U
 	}
 
 	org, err := r.DB.OrganisationUpdate(ctx, updateParams)
-	if err != nil {
-		return nil, err
-	}
-
-	return &org, nil
+	return &org, err
 }
 
 // Owner is the resolver for the owner field.
@@ -70,12 +66,7 @@ func (r *organisationResolver) Owner(ctx context.Context, obj *db.Organisation) 
 		ID:             obj.OwnerID,
 		OrganisationID: user.OrganisationID,
 	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &owner, nil
+	return &owner, err
 }
 
 // Organisation is the resolver for the organisation field.
@@ -86,11 +77,7 @@ func (r *queryResolver) Organisation(ctx context.Context) (*db.Organisation, err
 	}
 
 	org, err := r.DB.GLOBAL_OrganisationFindByID(ctx, user.OrganisationID)
-	if err != nil {
-		return nil, err
-	}
-
-	return &org, nil
+	return &org, err
 }
 
 // Organisation returns generated.OrganisationResolver implementation.
