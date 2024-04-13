@@ -326,3 +326,94 @@ func (q *Queries) UserStudentUpdate(ctx context.Context, arg UserStudentUpdatePa
 	)
 	return i, err
 }
+
+const userStudentsAllWithDeleted = `-- name: UserStudentsAllWithDeleted :many
+SELECT id, user_id, organisation_id, left_at, grade, birthday, nationality, comments, joined_at, created_at, deleted_at, birthplace, emoji, missed_hours, missed_hours_excused
+FROM user_students
+WHERE organisation_id = $1
+`
+
+func (q *Queries) UserStudentsAllWithDeleted(ctx context.Context, organisationID string) ([]UserStudent, error) {
+	rows, err := q.db.Query(ctx, userStudentsAllWithDeleted, organisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserStudent
+	for rows.Next() {
+		var i UserStudent
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.OrganisationID,
+			&i.LeftAt,
+			&i.Grade,
+			&i.Birthday,
+			&i.Nationality,
+			&i.Comments,
+			&i.JoinedAt,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.Birthplace,
+			&i.Emoji,
+			&i.MissedHours,
+			&i.MissedHoursExcused,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const userStudentsFindByID = `-- name: UserStudentsFindByID :many
+SELECT id, user_id, organisation_id, left_at, grade, birthday, nationality, comments, joined_at, created_at, deleted_at, birthplace, emoji, missed_hours, missed_hours_excused
+FROM user_students
+WHERE id = ANY($1::text[])
+  AND organisation_id = $2
+  AND deleted_at is null
+`
+
+type UserStudentsFindByIDParams struct {
+	Ids            []string `db:"ids"`
+	OrganisationID string   `db:"organisation_id"`
+}
+
+func (q *Queries) UserStudentsFindByID(ctx context.Context, arg UserStudentsFindByIDParams) ([]UserStudent, error) {
+	rows, err := q.db.Query(ctx, userStudentsFindByID, arg.Ids, arg.OrganisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserStudent
+	for rows.Next() {
+		var i UserStudent
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.OrganisationID,
+			&i.LeftAt,
+			&i.Grade,
+			&i.Birthday,
+			&i.Nationality,
+			&i.Comments,
+			&i.JoinedAt,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.Birthplace,
+			&i.Emoji,
+			&i.MissedHours,
+			&i.MissedHoursExcused,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

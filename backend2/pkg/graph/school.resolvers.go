@@ -7,88 +7,413 @@ package graph
 import (
 	"context"
 	"fmt"
+	"slices"
+	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
+	excelize "github.com/xuri/excelize/v2"
 
 	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
 	"github.com/dokedu/dokedu/backend/pkg/graph/model"
+	"github.com/dokedu/dokedu/backend/pkg/helper"
+	"github.com/dokedu/dokedu/backend/pkg/middleware"
+	"github.com/dokedu/dokedu/backend/pkg/msg"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
 )
 
 // CreateSubject is the resolver for the createSubject field.
 func (r *mutationResolver) CreateSubject(ctx context.Context, input model.CreateSubjectInput) (*db.Subject, error) {
-	panic(fmt.Errorf("not implemented: CreateSubject - createSubject"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok || !user.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	subject, err := r.DB.SubjectCreate(ctx, db.SubjectCreateParams{
+		Name:           input.Name,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &subject, nil
 }
 
 // UpdateSubject is the resolver for the updateSubject field.
 func (r *mutationResolver) UpdateSubject(ctx context.Context, input model.UpdateSubjectInput) (*db.Subject, error) {
-	panic(fmt.Errorf("not implemented: UpdateSubject - updateSubject"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok || !user.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	subject, err := r.DB.SubjectUpdate(ctx, db.SubjectUpdateParams{
+		ID:             input.ID,
+		Name:           input.Name,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &subject, nil
 }
 
 // DeleteSubject is the resolver for the deleteSubject field.
 func (r *mutationResolver) DeleteSubject(ctx context.Context, id string) (*db.Subject, error) {
-	panic(fmt.Errorf("not implemented: DeleteSubject - deleteSubject"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok || !user.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	subject, err := r.DB.SubjectSoftDelete(ctx, db.SubjectSoftDeleteParams{
+		ID:             id,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &subject, nil
 }
 
 // CreateSchoolYear is the resolver for the createSchoolYear field.
 func (r *mutationResolver) CreateSchoolYear(ctx context.Context, input model.CreateSchoolYearInput) (*db.SchoolYear, error) {
-	panic(fmt.Errorf("not implemented: CreateSchoolYear - createSchoolYear"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok || !user.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	schoolYear, err := r.DB.SchoolYearCreate(ctx, db.SchoolYearCreateParams{
+		Year:           int32(input.Year),
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &schoolYear, nil
 }
 
 // UpdateSchoolYear is the resolver for the updateSchoolYear field.
 func (r *mutationResolver) UpdateSchoolYear(ctx context.Context, input model.UpdateSchoolYearInput) (*db.SchoolYear, error) {
-	panic(fmt.Errorf("not implemented: UpdateSchoolYear - updateSchoolYear"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok || !user.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	schoolYear, err := r.DB.SchoolYearUpdate(ctx, db.SchoolYearUpdateParams{
+		ID:             input.ID,
+		OrganisationID: user.OrganisationID,
+		Year:           int32(input.Year),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &schoolYear, nil
 }
 
 // DeleteSchoolYear is the resolver for the deleteSchoolYear field.
 func (r *mutationResolver) DeleteSchoolYear(ctx context.Context, id string) (*db.SchoolYear, error) {
-	panic(fmt.Errorf("not implemented: DeleteSchoolYear - deleteSchoolYear"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok || !user.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	schoolYear, err := r.DB.SchoolYearSoftDelete(ctx, db.SchoolYearSoftDeleteParams{
+		ID:             id,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &schoolYear, nil
 }
 
 // UpdateUserStudentGrade is the resolver for the updateUserStudentGrade field.
-func (r *mutationResolver) UpdateUserStudentGrade(ctx context.Context, input model.UpdateUserStudentGradesInput) (*model.UserStudentGrades, error) {
+func (r *mutationResolver) UpdateUserStudentGrade(ctx context.Context, input model.UpdateUserStudentGradesInput) (*db.UserStudentGrade, error) {
 	panic(fmt.Errorf("not implemented: UpdateUserStudentGrade - updateUserStudentGrade"))
 }
 
 // ImportStudents is the resolver for the importStudents field.
 func (r *mutationResolver) ImportStudents(ctx context.Context, input model.ImportStudentsInput) (*model.ImportStudentsPayload, error) {
-	panic(fmt.Errorf("not implemented: ImportStudents - importStudents"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok || !currentUser.HasPermissionAdmin() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	// Validate file content type
+	allowedContentTypes := []string{"application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
+	if !slices.Contains(allowedContentTypes, input.File.ContentType) {
+		return nil, msg.ErrStudentsImportWrongFormat
+	}
+
+	// Open Excel file
+	file := input.File.File
+	f, err := excelize.OpenReader(file)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get first sheet
+	sheetMap := f.GetSheetMap()
+	var firstSheet string
+	for _, sheet := range sheetMap {
+		firstSheet = sheet
+		break
+	}
+
+	// Get rows from first sheet
+	rows, err := f.GetRows(firstSheet)
+	if err != nil {
+		return nil, err
+	}
+
+	// Validate headers
+	allowedHeaders := []string{"Vorname", "Nachname", "Geburtsdatum"}
+	headers := rows[0]
+	for _, header := range headers {
+		if !slices.Contains(allowedHeaders, header) {
+			return nil, msg.ErrStudentsImportWrongHeader
+		}
+	}
+
+	// Get existing users and students
+	existingUsers, err := r.DB.UsersAllWithDeleted(ctx, currentUser.OrganisationID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a map of existing students by first/last name
+	type userKey struct {
+		first string
+		last  string
+	}
+	existingStudentsByName := make(map[userKey]bool)
+	for _, student := range existingUsers {
+		existingStudentsByName[userKey{student.FirstName, student.LastName}] = true
+	}
+
+	// Create new users and students
+	var createdUserCount int
+	var existingUserCount int
+
+	err = r.DB.InTx(ctx, func(ctx context.Context, q *db.Queries) error {
+	LoopRows:
+		for _, row := range rows[1:] {
+			if len(row) == 0 {
+				continue
+			}
+
+			firstName := row[0]
+			lastName := row[1]
+
+			// Check if user already exists
+			_, exists := existingStudentsByName[userKey{firstName, lastName}]
+			if exists {
+				existingUserCount++
+				continue LoopRows
+			}
+
+			user, err := q.UserCreate(ctx, db.UserCreateParams{
+				Role:           db.UserRoleStudent,
+				OrganisationID: currentUser.OrganisationID,
+				FirstName:      row[0],
+				LastName:       row[1],
+			})
+			if err != nil {
+				return err
+			}
+			existingStudentsByName[userKey{firstName, lastName}] = true
+			createdUserCount++
+
+			// the 2nd row is in format dd.mm.yyyy
+			birthday, err := time.Parse("02.01.2006", row[2])
+			if err != nil {
+				return err
+			}
+
+			_, err = q.UserStudentCreate(ctx, db.UserStudentCreateParams{
+				UserID:         user.ID,
+				OrganisationID: currentUser.OrganisationID,
+				Grade:          1,
+				Birthday:       pgtype.Date{Valid: true, Time: birthday},
+			})
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.ImportStudentsPayload{
+		UsersCreated: createdUserCount,
+		UsersExisted: existingUserCount,
+	}, nil
 }
 
 // Subjects is the resolver for the subjects field.
 func (r *queryResolver) Subjects(ctx context.Context, limit *int, offset *int) (*model.SubjectConnection, error) {
-	panic(fmt.Errorf("not implemented: Subjects - subjects"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	l, o := helper.PaginationInput(limit, offset)
+	subjects, err := r.DB.SubjectsAllPaginated(ctx, db.SubjectsAllPaginatedParams{
+		OrganisationID: user.OrganisationID,
+		Offset:         int32(o),
+		Limit:          int32(l) + 1,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	subjects, pageInfo := helper.PaginationOutput(l, o, subjects)
+	return &model.SubjectConnection{
+		Edges:      subjects,
+		TotalCount: 0,
+		PageInfo:   pageInfo,
+	}, nil
 }
 
 // Subject is the resolver for the subject field.
 func (r *queryResolver) Subject(ctx context.Context, id string) (*db.Subject, error) {
-	panic(fmt.Errorf("not implemented: Subject - subject"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	subject, err := r.DB.SubjectFindByID(ctx, db.SubjectFindByIDParams{
+		ID:             id,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &subject, nil
 }
 
 // SchoolYears is the resolver for the schoolYears field.
 func (r *queryResolver) SchoolYears(ctx context.Context, limit *int, offset *int) (*model.SchoolYearConnection, error) {
-	panic(fmt.Errorf("not implemented: SchoolYears - schoolYears"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	l, o := helper.PaginationInput(limit, offset)
+	years, err := r.DB.SchoolYearAllPaginated(ctx, db.SchoolYearAllPaginatedParams{
+		OrganisationID: user.OrganisationID,
+		Offset:         int32(o),
+		Limit:          int32(l) + 1,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	years, pageInfo := helper.PaginationOutput(l, o, years)
+	return &model.SchoolYearConnection{
+		Edges:    years,
+		PageInfo: pageInfo,
+	}, nil
 }
 
 // SchoolYear is the resolver for the schoolYear field.
 func (r *queryResolver) SchoolYear(ctx context.Context, id string) (*db.SchoolYear, error) {
-	panic(fmt.Errorf("not implemented: SchoolYear - schoolYear"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	year, err := r.DB.SchoolYearFindByID(ctx, db.SchoolYearFindByIDParams{
+		ID:             id,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &year, nil
 }
 
 // UserStudentGrades is the resolver for the userStudentGrades field.
 func (r *queryResolver) UserStudentGrades(ctx context.Context, limit *int, offset *int) (*model.UserStudentGradesConnection, error) {
-	panic(fmt.Errorf("not implemented: UserStudentGrades - userStudentGrades"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok || !user.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	l, o := helper.PaginationInput(limit, offset)
+	grades, err := r.DB.UserStudentGradesAllPaginated(ctx, db.UserStudentGradesAllPaginatedParams{
+		OrganisationID: user.OrganisationID,
+		Offset:         int32(o),
+		Limit:          int32(l) + 1,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	grades, pageInfo := helper.PaginationOutput(l, o, grades)
+	return &model.UserStudentGradesConnection{
+		Edges:    grades,
+		PageInfo: pageInfo,
+	}, nil
 }
 
 // UserStudentGrade is the resolver for the userStudentGrade field.
-func (r *queryResolver) UserStudentGrade(ctx context.Context, id string) (*model.UserStudentGrades, error) {
-	panic(fmt.Errorf("not implemented: UserStudentGrade - userStudentGrade"))
+func (r *queryResolver) UserStudentGrade(ctx context.Context, id string) (*db.UserStudentGrade, error) {
+	user, ok := middleware.GetUser(ctx)
+	if !ok || !user.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	grade, err := r.DB.UserStudentGradeFindByID(ctx, db.UserStudentGradeFindByIDParams{
+		ID:             id,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &grade, nil
 }
 
 // Description is the resolver for the description field.
 func (r *schoolYearResolver) Description(ctx context.Context, obj *db.SchoolYear) (string, error) {
-	panic(fmt.Errorf("not implemented: Description - description"))
+	return obj.Description.String, nil
+}
+
+// Student is the resolver for the student field.
+func (r *userStudentGradesResolver) Student(ctx context.Context, obj *db.UserStudentGrade) (*db.UserStudent, error) {
+	student, err := r.DB.Loader(ctx).UserStudents().Load(ctx, obj.UserStudentID)()
+	return &student, err
+}
+
+// Subject is the resolver for the subject field.
+func (r *userStudentGradesResolver) Subject(ctx context.Context, obj *db.UserStudentGrade) (*db.Subject, error) {
+	subject, err := r.DB.Loader(ctx).Subjects().Load(ctx, obj.SubjectID)()
+	return &subject, err
+}
+
+// SchoolYear is the resolver for the schoolYear field.
+func (r *userStudentGradesResolver) SchoolYear(ctx context.Context, obj *db.UserStudentGrade) (*db.SchoolYear, error) {
+	year, err := r.DB.Loader(ctx).SchoolYears().Load(ctx, obj.SchoolYearID)()
+	return &year, err
 }
 
 // SchoolYear returns generated.SchoolYearResolver implementation.
 func (r *Resolver) SchoolYear() generated.SchoolYearResolver { return &schoolYearResolver{r} }
 
+// UserStudentGrades returns generated.UserStudentGradesResolver implementation.
+func (r *Resolver) UserStudentGrades() generated.UserStudentGradesResolver {
+	return &userStudentGradesResolver{r}
+}
+
 type schoolYearResolver struct{ *Resolver }
+type userStudentGradesResolver struct{ *Resolver }

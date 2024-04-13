@@ -14,11 +14,13 @@ type ErrorWithCode struct {
 }
 
 var (
-	ErrInvalidEmailOrPassword = errors.New("invalid email or password")
-	ErrInvalidRecoveryToken   = ErrWithCode("INVALID_RECOVERY_TOKEN", "invalid recovery token")
-	ErrUnauthorized           = ErrWithCode("UNAUTHORIZED", "not allowed to perform this action")
-	ErrInvalidInput           = ErrWithCode("INVALID_INPUT", "invalid input")
-	ErrNotFound               = ErrWithCode("NOT_FOUND", "not found")
+	ErrInvalidEmailOrPassword    = errors.New("invalid email or password")
+	ErrInvalidRecoveryToken      = ErrWithCode("INVALID_RECOVERY_TOKEN", "invalid recovery token")
+	ErrUnauthorized              = ErrWithCode("UNAUTHORIZED", "not allowed to perform this action")
+	ErrInvalidInput              = ErrWithCode("INVALID_INPUT", "invalid input")
+	ErrNotFound                  = ErrWithCode("NOT_FOUND", "not found")
+	ErrStudentsImportWrongFormat = ErrWithCode("STUDENTS_IMPORT_WRONG_FORMAT", "wrong format for students import")
+	ErrStudentsImportWrongHeader = ErrWithCode("STUDENTS_IMPORT_WRONG_HEADER", "wrong header for students import")
 )
 
 func ErrWithCode(code string, message string) ErrorWithCode {

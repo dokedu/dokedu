@@ -1,12 +1,14 @@
 package graph_test
 
 import (
+	"time"
+
+	"github.com/samber/lo"
+
 	"github.com/dokedu/dokedu/backend/pkg/graph"
 	"github.com/dokedu/dokedu/backend/pkg/graph/model"
 	"github.com/dokedu/dokedu/backend/pkg/msg"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
-	"github.com/samber/lo"
-	"time"
 )
 
 func (ts *TestSuite) Test_Event_Resolvers() {
@@ -201,6 +203,7 @@ func (ts *TestSuite) Test_ArchiveEvent() {
 	// Student cannot archive the event
 	archivedEvent, err = ts.Resolver.Mutation().ArchiveEvent(ts.CtxWithUser(student.ID), validEvent.ID)
 	ts.ErrorIs(err, msg.ErrUnauthorized)
+	ts.Nil(archivedEvent)
 }
 
 func (ts *TestSuite) Test_Event() {

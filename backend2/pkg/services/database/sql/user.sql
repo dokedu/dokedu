@@ -10,6 +10,9 @@ SELECT * FROM users WHERE recovery_token = @recovery_token::text AND recovery_se
 -- name: UserFindByID :one
 SELECT * FROM users WHERE id = $1 and organisation_id = $2 and deleted_at is null;
 
+-- name: UsersAllWithDeleted :many
+SELECT * FROM users WHERE organisation_id = @organisation_id;
+
 -- name: UserUpdatePassword :one
 UPDATE users
 SET password = @password::text, recovery_token = NULL, recovery_sent_at = NULL

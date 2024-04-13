@@ -1,9 +1,10 @@
 package graph_test
 
 import (
+	"github.com/samber/lo"
+
 	"github.com/dokedu/dokedu/backend/pkg/graph/model"
 	"github.com/dokedu/dokedu/backend/pkg/msg"
-	"github.com/samber/lo"
 )
 
 func (ts *TestSuite) Test_UpdateOrganisation() {

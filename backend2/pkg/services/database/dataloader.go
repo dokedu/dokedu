@@ -24,6 +24,9 @@ type Dataloader struct {
 	competences       *dataloader.Loader[string, db.Competence]
 	competenceParents *dataloader.Loader[string, []db.Competence]
 	users             *dataloader.Loader[string, db.User]
+	userStudents      *dataloader.Loader[string, db.UserStudent]
+	subjects          *dataloader.Loader[string, db.Subject]
+	schoolYears       *dataloader.Loader[string, db.SchoolYear]
 }
 
 func ContextWithLoader(ctx context.Context, db *DB) context.Context {
@@ -180,4 +183,128 @@ func (d *Dataloader) Users() *dataloader.Loader[string, db.User] {
 		})
 	}
 	return d.users
+}
+
+func (d *Dataloader) UserStudents() *dataloader.Loader[string, db.UserStudent] {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	if d.userStudents == nil {
+		d.userStudents = dataloader.NewBatchedLoader[string, db.UserStudent](func(ctx context.Context, keys []string) []*dataloader.Result[db.UserStudent] {
+			user, ok := middleware.GetUser(ctx)
+			if !ok {
+				return ErrorResult[db.UserStudent](keys, msg.ErrUnauthorized)
+			}
+
+			userStudents, err := d.db.UserStudentsFindByID(ctx, db.UserStudentsFindByIDParams{
+				OrganisationID: user.OrganisationID,
+				Ids:            keys,
+			})
+			if err != nil {
+				return ErrorResult[db.UserStudent](keys, err)
+			}
+
+			userStudentByID := make(map[string]db.UserStudent, len(userStudents))
+			for _, userStudent := range userStudents {
+				userStudentByID[userStudent.ID] = userStudent
+			}
+
+			results := make([]*dataloader.Result[db.UserStudent], len(keys))
+			for i, key := range keys {
+				userStudent, ok := userStudentByID[key]
+				if !ok {
+					results[i] = &dataloader.Result[db.UserStudent]{Error: pgx.ErrNoRows}
+					continue
+				}
+
+				results[i] = &dataloader.Result[db.UserStudent]{Data: userStudent}
+			}
+
+			return results
+		})
+	}
+	return d.userStudents
+}
+
+func (d *Dataloader) Subjects() *dataloader.Loader[string, db.Subject] {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	if d.subjects == nil {
+		d.subjects = dataloader.NewBatchedLoader[string, db.Subject](func(ctx context.Context, keys []string) []*dataloader.Result[db.Subject] {
+			user, ok := middleware.GetUser(ctx)
+			if !ok {
+				return ErrorResult[db.Subject](keys, msg.ErrUnauthorized)
+			}
+
+			subjects, err := d.db.SubjectsFindByID(ctx, db.SubjectsFindByIDParams{
+				OrganisationID: user.OrganisationID,
+				Ids:            keys,
+			})
+			if err != nil {
+				return ErrorResult[db.Subject](keys, err)
+			}
+
+			subjectByID := make(map[string]db.Subject, len(subjects))
+			for _, subject := range subjects {
+				subjectByID[subject.ID] = subject
+			}
+
+			results := make([]*dataloader.Result[db.Subject], len(keys))
+			for i, key := range keys {
+				subject, ok := subjectByID[key]
+				if !ok {
+					results[i] = &dataloader.Result[db.Subject]{Error: pgx.ErrNoRows}
+					continue
+				}
+
+				results[i] = &dataloader.Result[db.Subject]{Data: subject}
+			}
+
+			return results
+		})
+	}
+	return d.subjects
+}
+
+func (d *Dataloader) SchoolYears() *dataloader.Loader[string, db.SchoolYear] {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	if d.schoolYears == nil {
+		d.schoolYears = dataloader.NewBatchedLoader[string, db.SchoolYear](func(ctx context.Context, keys []string) []*dataloader.Result[db.SchoolYear] {
+			user, ok := middleware.GetUser(ctx)
+			if !ok {
+				return ErrorResult[db.SchoolYear](keys, msg.ErrUnauthorized)
+			}
+
+			schoolYears, err := d.db.SchoolYearsFindByID(ctx, db.SchoolYearsFindByIDParams{
+				OrganisationID: user.OrganisationID,
+				Ids:            keys,
+			})
+			if err != nil {
+				return ErrorResult[db.SchoolYear](keys, err)
+			}
+
+			schoolYearByID := make(map[string]db.SchoolYear, len(schoolYears))
+			for _, schoolYear := range schoolYears {
+				schoolYearByID[schoolYear.ID] = schoolYear
+			}
+
+			results := make([]*dataloader.Result[db.SchoolYear], len(keys))
+			for i, key := range keys {
+				schoolYear, ok := schoolYearByID[key]
+				if !ok {
+					results[i] = &dataloader.Result[db.SchoolYear]{Error: pgx.ErrNoRows}
+					continue
+				}
+
+				results[i] = &dataloader.Result[db.SchoolYear]{Data: schoolYear}
+			}
+
+			return results
+		})
+	}
+
+	return d.schoolYears
 }

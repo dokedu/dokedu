@@ -9,6 +9,18 @@ FROM user_students
 WHERE organisation_id = @organisation_id AND deleted_at is null
 LIMIT @_limit OFFSET @_offset;
 
+-- name: UserStudentsFindByID :many
+SELECT *
+FROM user_students
+WHERE id = ANY(@ids::text[])
+  AND organisation_id = @organisation_id
+  AND deleted_at is null;
+
+-- name: UserStudentsAllWithDeleted :many
+SELECT *
+FROM user_students
+WHERE organisation_id = @organisation_id;
+
 -- TODO: should this not be `UserStudentsFind` (mind the plural)?
 -- name: UserStudentFind :many
 SELECT *

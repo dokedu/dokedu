@@ -1,8 +1,6 @@
 package helper
 
 import (
-	"github.com/samber/lo"
-
 	"github.com/dokedu/dokedu/backend/pkg/graph/model"
 )
 
@@ -31,7 +29,7 @@ func PaginationInput(limit, offset *int) (uint64, uint64) {
 // PaginationOutput takes the limit and data, and returns the data and a pageinfo (indicating if there are more pages)
 // if the length of data is greater than the limit, it means there are more pages
 // the data will be sliced to the limit
-func PaginationOutput[T any](limit, offset uint64, data []T) ([]*T, model.PageInfo) {
+func PaginationOutput[T any](limit, offset uint64, data []T) ([]T, model.PageInfo) {
 	var hasNextPage bool
 
 	if uint64(len(data)) > limit {
@@ -46,7 +44,7 @@ func PaginationOutput[T any](limit, offset uint64, data []T) ([]*T, model.PageIn
 		p = int(offset / limit)
 	}
 
-	return lo.ToSlicePtr(data), model.PageInfo{
+	return data, model.PageInfo{
 		HasNextPage:     hasNextPage,
 		HasPreviousPage: false,
 		CurrentPage:     p + 1,

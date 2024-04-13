@@ -9,14 +9,15 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/dokedu/dokedu/backend/pkg/middleware"
-	"github.com/dokedu/dokedu/backend/pkg/msg"
-	"github.com/jackc/pgx/v5"
-	"github.com/samber/lo"
 	"time"
+
+	pgx "github.com/jackc/pgx/v5"
+	"github.com/samber/lo"
 
 	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
 	"github.com/dokedu/dokedu/backend/pkg/graph/model"
+	"github.com/dokedu/dokedu/backend/pkg/middleware"
+	"github.com/dokedu/dokedu/backend/pkg/msg"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
 )
 

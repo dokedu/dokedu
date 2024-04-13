@@ -112,7 +112,7 @@ func (ts *TestSuite) FirstCompetenceForOrganisation(organisationID string) db.Co
 	ts.NoError(err)
 	return comp
 }
-func (ts *TestSuite) FirstSubjectForOrganisation(organisationID string) db.Competence {
+func (ts *TestSuite) FirstSubjectCompetenceForOrganisation(organisationID string) db.Competence {
 	id := ts.Query1("SELECT id FROM competences WHERE organisation_id = $1 AND competence_id IS NULL AND deleted_at IS NULL LIMIT 1", organisationID).(string)
 	comp, err := ts.DB.CompetenceFindById(ts.Ctx(), db.CompetenceFindByIdParams{
 		ID:             id,
@@ -120,6 +120,36 @@ func (ts *TestSuite) FirstSubjectForOrganisation(organisationID string) db.Compe
 	})
 	ts.NoError(err)
 	return comp
+}
+
+func (ts *TestSuite) FirstSubjectForOrganisation(organisationID string) db.Subject {
+	id := ts.Query1("SELECT id FROM subjects WHERE organisation_id = $1 AND deleted_at IS NULL LIMIT 1", organisationID).(string)
+	sub, err := ts.DB.SubjectFindByID(ts.Ctx(), db.SubjectFindByIDParams{
+		ID:             id,
+		OrganisationID: organisationID,
+	})
+	ts.NoError(err)
+	return sub
+}
+
+func (ts *TestSuite) FirstSchoolYearForOrganisation(organisationID string) db.SchoolYear {
+	id := ts.Query1("SELECT id FROM school_years WHERE organisation_id = $1 AND deleted_at IS NULL LIMIT 1", organisationID).(string)
+	sy, err := ts.DB.SchoolYearFindByID(ts.Ctx(), db.SchoolYearFindByIDParams{
+		ID:             id,
+		OrganisationID: organisationID,
+	})
+	ts.NoError(err)
+	return sy
+}
+
+func (ts *TestSuite) FirstUserStudentGradeForOrganisation(organisationID string) db.UserStudentGrade {
+	id := ts.Query1("SELECT id FROM user_student_grades WHERE organisation_id = $1 AND deleted_at IS NULL LIMIT 1", organisationID).(string)
+	ug, err := ts.DB.UserStudentGradeFindByID(ts.Ctx(), db.UserStudentGradeFindByIDParams{
+		ID:             id,
+		OrganisationID: organisationID,
+	})
+	ts.NoError(err)
+	return ug
 }
 
 func (ts *TestSuite) MockAdminForOrganisation(organisationID string) db.User {

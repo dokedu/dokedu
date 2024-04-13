@@ -6,11 +6,11 @@ package graph
 
 import (
 	"context"
-	"github.com/dokedu/dokedu/backend/pkg/middleware"
-	"github.com/dokedu/dokedu/backend/pkg/msg"
 
 	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
 	"github.com/dokedu/dokedu/backend/pkg/graph/model"
+	"github.com/dokedu/dokedu/backend/pkg/middleware"
+	"github.com/dokedu/dokedu/backend/pkg/msg"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
 )
 

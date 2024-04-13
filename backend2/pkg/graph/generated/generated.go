@@ -15,10 +15,11 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/dokedu/dokedu/backend/pkg/graph/model"
-	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+
+	"github.com/dokedu/dokedu/backend/pkg/graph/model"
+	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -57,6 +58,7 @@ type ResolverRoot interface {
 	UserAttendance() UserAttendanceResolver
 	UserCompetence() UserCompetenceResolver
 	UserStudent() UserStudentResolver
+	UserStudentGrades() UserStudentGradesResolver
 }
 
 type DirectiveRoot struct {
@@ -557,7 +559,7 @@ type MutationResolver interface {
 	CreateSchoolYear(ctx context.Context, input model.CreateSchoolYearInput) (*db.SchoolYear, error)
 	UpdateSchoolYear(ctx context.Context, input model.UpdateSchoolYearInput) (*db.SchoolYear, error)
 	DeleteSchoolYear(ctx context.Context, id string) (*db.SchoolYear, error)
-	UpdateUserStudentGrade(ctx context.Context, input model.UpdateUserStudentGradesInput) (*model.UserStudentGrades, error)
+	UpdateUserStudentGrade(ctx context.Context, input model.UpdateUserStudentGradesInput) (*db.UserStudentGrade, error)
 	ImportStudents(ctx context.Context, input model.ImportStudentsInput) (*model.ImportStudentsPayload, error)
 }
 type OrganisationResolver interface {
@@ -589,7 +591,7 @@ type QueryResolver interface {
 	SchoolYears(ctx context.Context, limit *int, offset *int) (*model.SchoolYearConnection, error)
 	SchoolYear(ctx context.Context, id string) (*db.SchoolYear, error)
 	UserStudentGrades(ctx context.Context, limit *int, offset *int) (*model.UserStudentGradesConnection, error)
-	UserStudentGrade(ctx context.Context, id string) (*model.UserStudentGrades, error)
+	UserStudentGrade(ctx context.Context, id string) (*db.UserStudentGrade, error)
 }
 type ReportResolver interface {
 	Meta(ctx context.Context, obj *db.Report) (string, error)
@@ -649,6 +651,12 @@ type UserStudentResolver interface {
 	User(ctx context.Context, obj *db.UserStudent) (*db.User, error)
 	MissedHours(ctx context.Context, obj *db.UserStudent) (int, error)
 	MissedHoursExcused(ctx context.Context, obj *db.UserStudent) (int, error)
+}
+type UserStudentGradesResolver interface {
+	Student(ctx context.Context, obj *db.UserStudentGrade) (*db.UserStudent, error)
+	Subject(ctx context.Context, obj *db.UserStudentGrade) (*db.Subject, error)
+
+	SchoolYear(ctx context.Context, obj *db.UserStudentGrade) (*db.SchoolYear, error)
 }
 
 type executableSchema struct {
@@ -13539,9 +13547,9 @@ func (ec *executionContext) _Mutation_updateUserStudentGrade(ctx context.Context
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.UserStudentGrades)
+	res := resTmp.(*db.UserStudentGrade)
 	fc.Result = res
-	return ec.marshalNUserStudentGrades2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋgraphᚋmodelᚐUserStudentGrades(ctx, field.Selections, res)
+	return ec.marshalNUserStudentGrades2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐUserStudentGrade(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateUserStudentGrade(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -15841,9 +15849,9 @@ func (ec *executionContext) _Query_userStudentGrade(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.UserStudentGrades)
+	res := resTmp.(*db.UserStudentGrade)
 	fc.Result = res
-	return ec.marshalNUserStudentGrades2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋgraphᚋmodelᚐUserStudentGrades(ctx, field.Selections, res)
+	return ec.marshalNUserStudentGrades2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐUserStudentGrade(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_userStudentGrade(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -20599,7 +20607,7 @@ func (ec *executionContext) fieldContext_UserStudentConnection_totalCount(ctx co
 	return fc, nil
 }
 
-func (ec *executionContext) _UserStudentGrades_id(ctx context.Context, field graphql.CollectedField, obj *model.UserStudentGrades) (ret graphql.Marshaler) {
+func (ec *executionContext) _UserStudentGrades_id(ctx context.Context, field graphql.CollectedField, obj *db.UserStudentGrade) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UserStudentGrades_id(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -20643,7 +20651,7 @@ func (ec *executionContext) fieldContext_UserStudentGrades_id(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _UserStudentGrades_student(ctx context.Context, field graphql.CollectedField, obj *model.UserStudentGrades) (ret graphql.Marshaler) {
+func (ec *executionContext) _UserStudentGrades_student(ctx context.Context, field graphql.CollectedField, obj *db.UserStudentGrade) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UserStudentGrades_student(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -20657,7 +20665,7 @@ func (ec *executionContext) _UserStudentGrades_student(ctx context.Context, fiel
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Student, nil
+		return ec.resolvers.UserStudentGrades().Student(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -20669,17 +20677,17 @@ func (ec *executionContext) _UserStudentGrades_student(ctx context.Context, fiel
 		}
 		return graphql.Null
 	}
-	res := resTmp.(db.UserStudent)
+	res := resTmp.(*db.UserStudent)
 	fc.Result = res
-	return ec.marshalNUserStudent2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐUserStudent(ctx, field.Selections, res)
+	return ec.marshalNUserStudent2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐUserStudent(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserStudentGrades_student(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserStudentGrades",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -20721,7 +20729,7 @@ func (ec *executionContext) fieldContext_UserStudentGrades_student(ctx context.C
 	return fc, nil
 }
 
-func (ec *executionContext) _UserStudentGrades_subject(ctx context.Context, field graphql.CollectedField, obj *model.UserStudentGrades) (ret graphql.Marshaler) {
+func (ec *executionContext) _UserStudentGrades_subject(ctx context.Context, field graphql.CollectedField, obj *db.UserStudentGrade) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UserStudentGrades_subject(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -20735,7 +20743,7 @@ func (ec *executionContext) _UserStudentGrades_subject(ctx context.Context, fiel
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Subject, nil
+		return ec.resolvers.UserStudentGrades().Subject(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -20747,17 +20755,17 @@ func (ec *executionContext) _UserStudentGrades_subject(ctx context.Context, fiel
 		}
 		return graphql.Null
 	}
-	res := resTmp.(db.Subject)
+	res := resTmp.(*db.Subject)
 	fc.Result = res
-	return ec.marshalNSubject2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐSubject(ctx, field.Selections, res)
+	return ec.marshalNSubject2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐSubject(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserStudentGrades_subject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserStudentGrades",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -20771,7 +20779,7 @@ func (ec *executionContext) fieldContext_UserStudentGrades_subject(ctx context.C
 	return fc, nil
 }
 
-func (ec *executionContext) _UserStudentGrades_grade(ctx context.Context, field graphql.CollectedField, obj *model.UserStudentGrades) (ret graphql.Marshaler) {
+func (ec *executionContext) _UserStudentGrades_grade(ctx context.Context, field graphql.CollectedField, obj *db.UserStudentGrade) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UserStudentGrades_grade(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -20797,9 +20805,9 @@ func (ec *executionContext) _UserStudentGrades_grade(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(int32)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserStudentGrades_grade(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -20815,7 +20823,7 @@ func (ec *executionContext) fieldContext_UserStudentGrades_grade(ctx context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _UserStudentGrades_schoolYear(ctx context.Context, field graphql.CollectedField, obj *model.UserStudentGrades) (ret graphql.Marshaler) {
+func (ec *executionContext) _UserStudentGrades_schoolYear(ctx context.Context, field graphql.CollectedField, obj *db.UserStudentGrade) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UserStudentGrades_schoolYear(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -20829,7 +20837,7 @@ func (ec *executionContext) _UserStudentGrades_schoolYear(ctx context.Context, f
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.SchoolYear, nil
+		return ec.resolvers.UserStudentGrades().SchoolYear(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -20841,17 +20849,17 @@ func (ec *executionContext) _UserStudentGrades_schoolYear(ctx context.Context, f
 		}
 		return graphql.Null
 	}
-	res := resTmp.(db.SchoolYear)
+	res := resTmp.(*db.SchoolYear)
 	fc.Result = res
-	return ec.marshalNSchoolYear2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐSchoolYear(ctx, field.Selections, res)
+	return ec.marshalNSchoolYear2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐSchoolYear(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserStudentGrades_schoolYear(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserStudentGrades",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -20893,9 +20901,9 @@ func (ec *executionContext) _UserStudentGradesConnection_edges(ctx context.Conte
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]model.UserStudentGrades)
+	res := resTmp.([]db.UserStudentGrade)
 	fc.Result = res
-	return ec.marshalNUserStudentGrades2ᚕgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋgraphᚋmodelᚐUserStudentGradesᚄ(ctx, field.Selections, res)
+	return ec.marshalNUserStudentGrades2ᚕgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐUserStudentGradeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserStudentGradesConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -29900,7 +29908,7 @@ func (ec *executionContext) _UserStudentConnection(ctx context.Context, sel ast.
 
 var userStudentGradesImplementors = []string{"UserStudentGrades"}
 
-func (ec *executionContext) _UserStudentGrades(ctx context.Context, sel ast.SelectionSet, obj *model.UserStudentGrades) graphql.Marshaler {
+func (ec *executionContext) _UserStudentGrades(ctx context.Context, sel ast.SelectionSet, obj *db.UserStudentGrade) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, userStudentGradesImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -29912,28 +29920,121 @@ func (ec *executionContext) _UserStudentGrades(ctx context.Context, sel ast.Sele
 		case "id":
 			out.Values[i] = ec._UserStudentGrades_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "student":
-			out.Values[i] = ec._UserStudentGrades_student(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UserStudentGrades_student(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "subject":
-			out.Values[i] = ec._UserStudentGrades_subject(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UserStudentGrades_subject(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "grade":
 			out.Values[i] = ec._UserStudentGrades_grade(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "schoolYear":
-			out.Values[i] = ec._UserStudentGrades_schoolYear(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UserStudentGrades_schoolYear(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -32036,11 +32137,11 @@ func (ec *executionContext) marshalNUserStudentConnection2ᚖgithubᚗcomᚋdoke
 	return ec._UserStudentConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNUserStudentGrades2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋgraphᚋmodelᚐUserStudentGrades(ctx context.Context, sel ast.SelectionSet, v model.UserStudentGrades) graphql.Marshaler {
+func (ec *executionContext) marshalNUserStudentGrades2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐUserStudentGrade(ctx context.Context, sel ast.SelectionSet, v db.UserStudentGrade) graphql.Marshaler {
 	return ec._UserStudentGrades(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUserStudentGrades2ᚕgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋgraphᚋmodelᚐUserStudentGradesᚄ(ctx context.Context, sel ast.SelectionSet, v []model.UserStudentGrades) graphql.Marshaler {
+func (ec *executionContext) marshalNUserStudentGrades2ᚕgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐUserStudentGradeᚄ(ctx context.Context, sel ast.SelectionSet, v []db.UserStudentGrade) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -32064,7 +32165,7 @@ func (ec *executionContext) marshalNUserStudentGrades2ᚕgithubᚗcomᚋdokedu�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUserStudentGrades2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋgraphᚋmodelᚐUserStudentGrades(ctx, sel, v[i])
+			ret[i] = ec.marshalNUserStudentGrades2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐUserStudentGrade(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -32084,7 +32185,7 @@ func (ec *executionContext) marshalNUserStudentGrades2ᚕgithubᚗcomᚋdokedu�
 	return ret
 }
 
-func (ec *executionContext) marshalNUserStudentGrades2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋgraphᚋmodelᚐUserStudentGrades(ctx context.Context, sel ast.SelectionSet, v *model.UserStudentGrades) graphql.Marshaler {
+func (ec *executionContext) marshalNUserStudentGrades2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋpkgᚋservicesᚋdatabaseᚋdbᚐUserStudentGrade(ctx context.Context, sel ast.SelectionSet, v *db.UserStudentGrade) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")

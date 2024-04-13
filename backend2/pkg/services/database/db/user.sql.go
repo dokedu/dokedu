@@ -373,6 +373,45 @@ func (q *Queries) UserUpdateRecoveryToken(ctx context.Context, arg UserUpdateRec
 	return i, err
 }
 
+const usersAllWithDeleted = `-- name: UsersAllWithDeleted :many
+SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex FROM users WHERE organisation_id = $1
+`
+
+func (q *Queries) UsersAllWithDeleted(ctx context.Context, organisationID string) ([]User, error) {
+	rows, err := q.db.Query(ctx, usersAllWithDeleted, organisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Role,
+			&i.OrganisationID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.Password,
+			&i.RecoveryToken,
+			&i.RecoverySentAt,
+			&i.AvatarFileID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.Language,
+			&i.Sex,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const usersFindByID = `-- name: UsersFindByID :many
 SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
 FROM users

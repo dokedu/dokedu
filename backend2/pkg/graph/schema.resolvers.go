@@ -11,6 +11,12 @@ import (
 	"fmt"
 	"time"
 
+	pgx "github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
+	gonanoid "github.com/matoous/go-nanoid/v2"
+	"github.com/samber/lo"
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
 	"github.com/dokedu/dokedu/backend/pkg/graph/model"
 	"github.com/dokedu/dokedu/backend/pkg/helper"
@@ -18,11 +24,6 @@ import (
 	"github.com/dokedu/dokedu/backend/pkg/msg"
 	"github.com/dokedu/dokedu/backend/pkg/services/database"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
-	pgx "github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
-	gonanoid "github.com/matoous/go-nanoid/v2"
-	"github.com/samber/lo"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // Color is the resolver for the color field.
@@ -750,7 +751,7 @@ func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filt
 
 	edges, pageInfo := helper.PaginationOutput(l, o, users)
 	return &model.UserConnection{
-		Edges:    edges,
+		Edges:    lo.ToSlicePtr(edges),
 		PageInfo: pageInfo,
 	}, nil
 }
@@ -849,7 +850,7 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 
 	edges, pageInfo := helper.PaginationOutput(l, o, competences)
 	return &model.CompetenceConnection{
-		Edges:    edges,
+		Edges:    lo.ToSlicePtr(edges),
 		PageInfo: pageInfo,
 	}, nil
 }
@@ -898,7 +899,7 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int, searc
 
 	edges, pageInfo := helper.PaginationOutput(l, o, tags)
 	return &model.TagConnection{
-		Edges:    edges,
+		Edges:    lo.ToSlicePtr(edges),
 		PageInfo: pageInfo,
 	}, nil
 }
@@ -926,7 +927,7 @@ func (r *queryResolver) UserStudents(ctx context.Context, limit *int, offset *in
 
 	edges, pageInfo := helper.PaginationOutput(l, o, userStudents)
 	return &model.UserStudentConnection{
-		Edges:    edges,
+		Edges:    lo.ToSlicePtr(edges),
 		PageInfo: pageInfo,
 	}, nil
 }

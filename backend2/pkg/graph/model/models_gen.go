@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
+
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
 )
 
@@ -463,18 +464,10 @@ type UserStudentConnection struct {
 	TotalCount int               `json:"totalCount"`
 }
 
-type UserStudentGrades struct {
-	ID         string         `json:"id"`
-	Student    db.UserStudent `json:"student"`
-	Subject    db.Subject     `json:"subject"`
-	Grade      int            `json:"grade"`
-	SchoolYear db.SchoolYear  `json:"schoolYear"`
-}
-
 type UserStudentGradesConnection struct {
-	Edges      []UserStudentGrades `json:"edges"`
-	TotalCount int                 `json:"totalCount"`
-	PageInfo   PageInfo            `json:"pageInfo"`
+	Edges      []db.UserStudentGrade `json:"edges"`
+	TotalCount int                   `json:"totalCount"`
+	PageInfo   PageInfo              `json:"pageInfo"`
 }
 
 type CompetenceSortField string

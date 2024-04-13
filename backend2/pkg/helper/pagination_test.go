@@ -22,38 +22,31 @@ func TestTestSuite(t *testing.T) {
 }
 
 func (t *TestSuite) Test_PaginationInput() {
-	limit, offset, page := helper.PaginationInput(nil, nil)
+	limit, offset := helper.PaginationInput(nil, nil)
 	t.Equal(uint64(100), limit)
 	t.Equal(uint64(0), offset)
-	t.Equal(1, page)
 
-	limit, offset, page = helper.PaginationInput(nil, lo.ToPtr(10))
+	limit, offset = helper.PaginationInput(nil, lo.ToPtr(10))
 	t.Equal(uint64(100), limit)
 	t.Equal(uint64(10), offset)
-	t.Equal(1, page)
 
-	limit, offset, page = helper.PaginationInput(lo.ToPtr(10), nil)
+	limit, offset = helper.PaginationInput(lo.ToPtr(10), nil)
 	t.Equal(uint64(10), limit)
 	t.Equal(uint64(0), offset)
-	t.Equal(1, page)
 
-	limit, offset, page = helper.PaginationInput(lo.ToPtr(10), lo.ToPtr(10))
+	limit, offset = helper.PaginationInput(lo.ToPtr(10), lo.ToPtr(10))
 	t.Equal(uint64(10), limit)
 	t.Equal(uint64(10), offset)
-	t.Equal(2, page)
 
-	limit, offset, page = helper.PaginationInput(lo.ToPtr(10), lo.ToPtr(20))
+	limit, offset = helper.PaginationInput(lo.ToPtr(10), lo.ToPtr(20))
 	t.Equal(uint64(10), limit)
 	t.Equal(uint64(20), offset)
-	t.Equal(3, page)
 
-	limit, offset, page = helper.PaginationInput(lo.ToPtr(10), lo.ToPtr(21))
+	limit, offset = helper.PaginationInput(lo.ToPtr(10), lo.ToPtr(21))
 	t.Equal(uint64(10), limit)
 	t.Equal(uint64(21), offset)
-	t.Equal(3, page)
 
-	limit, offset, page = helper.PaginationInput(lo.ToPtr(20), lo.ToPtr(21))
+	limit, offset = helper.PaginationInput(lo.ToPtr(20), lo.ToPtr(21))
 	t.Equal(uint64(20), limit)
 	t.Equal(uint64(21), offset)
-	t.Equal(2, page)
 }

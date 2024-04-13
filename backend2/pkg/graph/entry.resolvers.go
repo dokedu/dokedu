@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
+
 	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
 	"github.com/dokedu/dokedu/backend/pkg/graph/model"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"

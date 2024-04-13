@@ -3,10 +3,11 @@ package graph_test
 import (
 	"context"
 	"fmt"
-	"github.com/dokedu/dokedu/backend/pkg/graph"
 	"math/rand"
 	"testing"
 	"time"
+
+	"github.com/dokedu/dokedu/backend/pkg/graph"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -482,7 +483,7 @@ func (ts *TestSuite) Test_UpdateTag() {
 func (ts *TestSuite) Test_CreateCompetence() {
 	teacher := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "teacher")
 	student := ts.FirstUserForOrganisation(ts.FirstOrganisationID(), "student")
-	parent := ts.FirstSubjectForOrganisation(ts.FirstOrganisationID())
+	parent := ts.FirstSubjectCompetenceForOrganisation(ts.FirstOrganisationID())
 
 	createCompetence := func(ctx context.Context, name string, parentID string) (*db.Competence, error) {
 		return ts.Resolver.Mutation().CreateCompetence(ctx, model.CreateCompetenceInput{
@@ -659,6 +660,7 @@ func (ts *TestSuite) Test_Competence_Children() {
 	// we can sort by different fields
 	children, err = ts.Resolver.Competence().Competences(ctx, &competence, nil, lo.ToPtr(model.CompetenceSort{Field: model.CompetenceSortFieldCreatedAt}))
 	ts.NoError(err)
+	ts.NotEmpty(children)
 
 	children, err = ts.Resolver.Competence().Competences(ctx, &competence, nil, lo.ToPtr(model.CompetenceSort{Field: model.CompetenceSortFieldName}))
 	ts.NoError(err)
@@ -701,7 +703,6 @@ func (ts *TestSuite) Test_Competence_Resolvers() {
 	sortOrder, err = ts.Resolver.Competence().SortOrder(ts.Ctx(), &competence)
 	ts.NoError(err)
 	ts.Equal(42, sortOrder)
-
 }
 
 func (ts *TestSuite) Test_Competence_UserCompetences_Tendency() {
@@ -763,7 +764,6 @@ func (ts *TestSuite) Test_Competence_UserCompetences_Tendency() {
 	tendency, err = ts.Resolver.Competence().Tendency(ts.CtxWithUser(teacher.ID), group, student2.ID)
 	ts.NoError(err)
 	ts.Equal(0., tendency.Tendency)
-
 }
 
 func (ts *TestSuite) Test_Users() {

@@ -64,6 +64,9 @@ models:
   CompetenceType:
     model:
       - github.com/dokedu/dokedu/backend/pkg/services/database/db.CompetenceType
+  UserStudentGrades:
+    model:
+      - github.com/dokedu/dokedu/backend/pkg/services/database/db.UserStudentGrade
   Chat:
     fields:
       name:
