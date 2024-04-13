@@ -18,6 +18,7 @@ var (
 	ErrInvalidRecoveryToken   = ErrWithCode("INVALID_RECOVERY_TOKEN", "invalid recovery token")
 	ErrUnauthorized           = ErrWithCode("UNAUTHORIZED", "not allowed to perform this action")
 	ErrInvalidInput           = ErrWithCode("INVALID_INPUT", "invalid input")
+	ErrNotFound               = ErrWithCode("NOT_FOUND", "not found")
 )
 
 func ErrWithCode(code string, message string) ErrorWithCode {

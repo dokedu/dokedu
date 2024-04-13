@@ -789,3 +789,23 @@ func (ts *TestSuite) Test_Users() {
 	ts.Equal(teacher.ID, users.Edges[0].ID)
 
 }
+
+func (ts *TestSuite) Test_Competence() {
+	org, owner := ts.MockOrganisationWithOwner()
+	teacher := ts.MockTeacherForOrganisation(org.ID)
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	_, err := ts.Resolver.Query().Competence(ts.Ctx(), "invalid")
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	_, err = ts.Resolver.Query().Competence(ts.CtxWithUser(owner.ID), "invalid")
+	ts.ErrorIs(err, msg.ErrNotFound)
+
+	_, err = ts.Resolver.Query().Competence(ts.CtxWithUser(teacher.ID), "invalid")
+	ts.ErrorIs(err, msg.ErrNotFound)
+
+	_, err = ts.Resolver.Query().Competence(ts.CtxWithUser(student.ID), "invalid")
+	ts.ErrorIs(err, msg.ErrNotFound)
+
+	// TODO: test with valid competence with all the different users (owner, teacher, student)
+}
