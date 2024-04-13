@@ -1,0 +1,34 @@
+version: '3.7'
+name: dokedu
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+  s3:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: password
+    volumes:
+        - ./tmp/s3:/data
+    command: server --console-address ":9001" /data
+  meilisearch:
+    image: getmeili/meilisearch:v1.2
+    ports:
+      - "7700:7700"
+    environment:
+      MEILI_MASTER_KEY: "master"
+    volumes:
+      - ./tmp/meilisearch:/meili_data
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"

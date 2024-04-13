@@ -79,7 +79,7 @@ func (ts *TestSuite) Test_ResetPassword() {
 	ts.ErrorIs(err, msg.ErrInvalidRecoveryToken)
 
 	// works with a valid token
-	ts.Exec("UPDATE users SET recovery_token = 'aaaaa', recovery_sent_at = now() WHERE id = $1;", user.ID)
+	ts.Exec("UPDATE users SET recovery_token = 'aaaaa', recovery_sent_at = NOW() WHERE id = $1;", user.ID)
 	_, err = ts.Resolver.Mutation().ResetPassword(ts.Ctx(), model.ResetPasswordInput{
 		Token:    lo.ToPtr("aaaaa"),
 		Password: "newpassword2",
@@ -123,7 +123,7 @@ func (ts *TestSuite) Test_ForgotPassword() {
 	ts.AssertMailReceived(user.Email.String, token, "Change my password")
 
 	// recovery token cannot be used after 1 day
-	ts.Exec("UPDATE users SET recovery_sent_at = now() - interval '2 days' WHERE id = $1", user.ID)
+	ts.Exec("UPDATE users SET recovery_sent_at = NOW() - INTERVAL '2 days' WHERE id = $1", user.ID)
 	_, err = ts.Resolver.Mutation().ResetPassword(ts.Ctx(), model.ResetPasswordInput{
 		Token:    lo.ToPtr(token),
 		Password: "newpassword",
@@ -131,7 +131,7 @@ func (ts *TestSuite) Test_ForgotPassword() {
 	ts.ErrorIs(err, msg.ErrInvalidRecoveryToken)
 
 	// recovery token can be used within 1 day
-	ts.Exec("UPDATE users SET recovery_sent_at = now() WHERE id = $1", user.ID)
+	ts.Exec("UPDATE users SET recovery_sent_at = NOW() WHERE id = $1", user.ID)
 	_, err = ts.Resolver.Mutation().ResetPassword(ts.Ctx(), model.ResetPasswordInput{
 		Token:    lo.ToPtr(token),
 		Password: "newpassword",
@@ -712,7 +712,7 @@ func (ts *TestSuite) Test_Competence_UserCompetences_Tendency() {
 		ParentID: "S1",
 	})
 	ts.NoError(err)
-	ts.Exec("update competences set competence_type = 'group' where id = $1", group.ID)
+	ts.Exec("UPDATE competences SET competence_type = 'group' WHERE id = $1", group.ID)
 	group.CompetenceType = "group"
 
 	competence, err := ts.Resolver.Mutation().CreateCompetence(ts.CtxWithUser(teacher.ID), model.CreateCompetenceInput{
@@ -787,17 +787,40 @@ func (ts *TestSuite) Test_Users() {
 	ts.NoError(err)
 	ts.Len(users.Edges, 1)
 	ts.Equal(teacher.ID, users.Edges[0].ID)
-
 }
 
 func (ts *TestSuite) Test_Competence() {
+	_, owner2 := ts.MockOrganisationWithOwner()
+
 	org, owner := ts.MockOrganisationWithOwner()
 	teacher := ts.MockTeacherForOrganisation(org.ID)
 	student := ts.MockUserForOrganisation(org.ID, "student")
 
-	_, err := ts.Resolver.Query().Competence(ts.Ctx(), "invalid")
+	// Create a valid competence
+	validCompetence, err := ts.DB.CompetenceCreate(context.Background(), db.CompetenceCreateParams{
+		Name:           "Invalid Competence",
+		CompetenceID:   pgtype.Text{},
+		CompetenceType: db.CompetenceTypeCompetence,
+		OrganisationID: org.ID,
+		Grades:         []int32{1, 2, 3, 4},
+		Color:          pgtype.Text{},
+		CreatedBy:      pgtype.Text{},
+	})
+	ts.NoError(err)
+
+	// Unauthorized access by non-user
+	_, err = ts.Resolver.Query().Competence(ts.Ctx(), validCompetence.ID)
 	ts.ErrorIs(err, msg.ErrUnauthorized)
 
+	// Unauthorized access by a user without permission
+	_, err = ts.Resolver.Query().Competence(ts.Ctx(), "invalid")
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// Unauthorized access by a user with permission
+	_, err = ts.Resolver.Query().Competence(ts.CtxWithUser(owner2.ID), validCompetence.ID)
+	ts.ErrorIs(err, msg.ErrNotFound)
+
+	// Not found errors for invalid competence ID
 	_, err = ts.Resolver.Query().Competence(ts.CtxWithUser(owner.ID), "invalid")
 	ts.ErrorIs(err, msg.ErrNotFound)
 
@@ -807,5 +830,19 @@ func (ts *TestSuite) Test_Competence() {
 	_, err = ts.Resolver.Query().Competence(ts.CtxWithUser(student.ID), "invalid")
 	ts.ErrorIs(err, msg.ErrNotFound)
 
-	// TODO: test with valid competence with all the different users (owner, teacher, student)
+	// Access valid competence with different roles
+	// Owner access
+	competence, err := ts.Resolver.Query().Competence(ts.CtxWithUser(owner.ID), validCompetence.ID)
+	ts.NoError(err)
+	ts.NotNil(competence)
+
+	// Teacher access
+	competence, err = ts.Resolver.Query().Competence(ts.CtxWithUser(teacher.ID), validCompetence.ID)
+	ts.NoError(err)
+	ts.NotNil(competence)
+
+	// Student access
+	competence, err = ts.Resolver.Query().Competence(ts.CtxWithUser(student.ID), validCompetence.ID)
+	ts.NoError(err)
+	ts.NotNil(competence)
 }
