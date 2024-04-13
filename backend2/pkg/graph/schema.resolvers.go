@@ -8,13 +8,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
-
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
-	gonanoid "github.com/matoous/go-nanoid/v2"
-	"github.com/samber/lo"
-	"golang.org/x/crypto/bcrypt"
 
 	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
 	"github.com/dokedu/dokedu/backend/pkg/graph/model"
@@ -23,6 +18,11 @@ import (
 	"github.com/dokedu/dokedu/backend/pkg/msg"
 	"github.com/dokedu/dokedu/backend/pkg/services/database"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
+	pgx "github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
+	gonanoid "github.com/matoous/go-nanoid/v2"
+	"github.com/samber/lo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Color is the resolver for the color field.
@@ -794,7 +794,66 @@ func (r *queryResolver) Competence(ctx context.Context, id string) (*db.Competen
 
 // Competences is the resolver for the competences field.
 func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int, filter *model.CompetenceFilterInput, search *string, sort *model.CompetenceSort) (*model.CompetenceConnection, error) {
-	panic(fmt.Errorf("not implemented: Competences - competences"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	query := r.DB.NewQueryBuilder().Select("*").From("competences").Where("organisation_id = ?", user.OrganisationID)
+
+	// TODO: Search should use Meilisearch instead of the database
+	if search != nil && *search != "" {
+		query = query.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", *search))
+	}
+
+	l, o := helper.PaginationInput(limit, offset)
+	query = query.Limit(l + 1).Offset(o)
+
+	if filter != nil {
+		if len(filter.Type) > 0 {
+			types := make([]string, len(filter.Type))
+			for i, t := range filter.Type {
+				types[i] = string(*t)
+			}
+			query = query.Where("competence_type = ANY (?)", types)
+		}
+		if len(filter.Parents) > 0 {
+			query = query.Where("competence_id = ANY (?)", filter.Parents)
+		}
+	}
+
+	if sort != nil {
+		var orderBy string
+		switch sort.Field {
+		case model.CompetenceSortFieldCreatedAt:
+			orderBy = "created_at " + string(sort.Order)
+			break
+		case model.CompetenceSortFieldName:
+			orderBy = "name " + string(sort.Order)
+			break
+		case model.CompetenceSortFieldSortOrder:
+			orderBy = "sort_order " + string(sort.Order)
+			break
+		}
+
+		query = query.OrderBy(orderBy)
+	} else {
+		// Default sorting if none provided
+		query = query.OrderBy("created_at DESC")
+	}
+	res, args, _ := query.ToSql()
+	slog.Info("slq", "query", res, "args", args)
+
+	competences, err := database.ScanSelectMany[db.Competence](r.DB, ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	edges, pageInfo := helper.PaginationOutput(l, o, competences)
+	return &model.CompetenceConnection{
+		Edges:    edges,
+		PageInfo: pageInfo,
+	}, nil
 }
 
 // Tag is the resolver for the tag field.

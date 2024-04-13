@@ -2,6 +2,8 @@ package graph_test
 
 import (
 	"context"
+	"fmt"
+	"github.com/dokedu/dokedu/backend/pkg/graph"
 	"math/rand"
 	"testing"
 	"time"
@@ -845,4 +847,133 @@ func (ts *TestSuite) Test_Competence() {
 	competence, err = ts.Resolver.Query().Competence(ts.CtxWithUser(student.ID), validCompetence.ID)
 	ts.NoError(err)
 	ts.NotNil(competence)
+}
+
+func (ts *TestSuite) Test_Competences() {
+	org, owner := ts.MockOrganisationWithOwner()
+	teacher := ts.MockTeacherForOrganisation(org.ID)
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	createCompetence := func(ctx context.Context, name string, parentID *string, competenceType db.CompetenceType) (db.Competence, error) {
+		return ts.DB.CompetenceCreate(context.Background(), db.CompetenceCreateParams{
+			Name:           name,
+			CompetenceID:   graph.OptionalString(parentID),
+			CompetenceType: competenceType,
+			OrganisationID: org.ID,
+			Grades:         []int32{1, 2, 3, 4},
+			Color:          pgtype.Text{},
+		})
+	}
+
+	// Unauthorized access by non-user
+	_, err := ts.Resolver.Query().Competences(ts.Ctx(), nil, nil, nil, nil, nil)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// create 10 competences
+	for i := 1; i <= 10; i++ {
+		var competenceType db.CompetenceType
+		if i%2 == 0 {
+			competenceType = db.CompetenceTypeSubject
+		} else {
+			competenceType = db.CompetenceTypeGroup
+		}
+		_, err = createCompetence(ts.CtxWithUser(owner.ID), fmt.Sprintf("Competence %d", i), nil, competenceType)
+		ts.NoError(err)
+	}
+
+	// All users can read and see all competences of the organisation
+	competences, err := ts.Resolver.Query().Competences(ts.CtxWithUser(owner.ID), nil, nil, nil, nil, nil)
+	ts.NoError(err)
+	ts.Len(competences.Edges, 10)
+
+	// Has no next page
+	ts.False(competences.PageInfo.HasNextPage)
+
+	// Teacher can read and see all competences of the organisation
+	competences, err = ts.Resolver.Query().Competences(ts.CtxWithUser(teacher.ID), nil, nil, nil, nil, nil)
+	ts.NoError(err)
+	ts.Len(competences.Edges, 10)
+
+	// Student can read and see all competences of the organisation
+	competences, err = ts.Resolver.Query().Competences(ts.CtxWithUser(student.ID), nil, nil, nil, nil, nil)
+	ts.NoError(err)
+	ts.Len(competences.Edges, 10)
+
+	// Test limit for owner
+	competences, err = ts.Resolver.Query().Competences(ts.CtxWithUser(owner.ID), lo.ToPtr(5), nil, nil, nil, nil)
+	ts.NoError(err)
+	ts.Len(competences.Edges, 5)
+
+	// Has next page
+	ts.True(competences.PageInfo.HasNextPage)
+
+	// Test offset for owner
+	competences, err = ts.Resolver.Query().Competences(ts.CtxWithUser(owner.ID), nil, lo.ToPtr(5), nil, nil, nil)
+	ts.NoError(err)
+	ts.Len(competences.Edges, 5)
+
+	// Has no next page
+	ts.False(competences.PageInfo.HasNextPage)
+
+	// Test search
+	competences, err = ts.Resolver.Query().Competences(ts.CtxWithUser(owner.ID), nil, nil, nil, lo.ToPtr("Competence 7"), nil)
+	ts.NoError(err)
+	ts.Len(competences.Edges, 1)
+
+	// Test sorting by created at asc
+	competences, err = ts.Resolver.Query().Competences(ts.CtxWithUser(owner.ID), nil, nil, nil, nil, lo.ToPtr(model.CompetenceSort{Field: model.CompetenceSortFieldCreatedAt, Order: model.SortDirectionAsc}))
+	ts.NoError(err)
+	ts.Len(competences.Edges, 10)
+	ts.Equal("Competence 1", competences.Edges[0].Name)
+
+	// Test sorting by created at desc
+	competences, err = ts.Resolver.Query().Competences(ts.CtxWithUser(owner.ID), nil, nil, nil, nil, lo.ToPtr(model.CompetenceSort{Field: model.CompetenceSortFieldCreatedAt, Order: model.SortDirectionDesc}))
+	ts.NoError(err)
+	ts.Len(competences.Edges, 10)
+	ts.Equal("Competence 10", competences.Edges[0].Name)
+
+	// Filter by competence type
+	competences, err = ts.Resolver.Query().Competences(ts.CtxWithUser(owner.ID), nil, nil, &model.CompetenceFilterInput{
+		Type: []*db.CompetenceType{lo.ToPtr(db.CompetenceTypeGroup)},
+	}, nil, nil)
+	ts.NoError(err)
+	ts.Len(competences.Edges, 5)
+
+	// Combine filter and sorting and limit
+	competences, err = ts.Resolver.Query().Competences(ts.CtxWithUser(owner.ID), lo.ToPtr(5), nil, &model.CompetenceFilterInput{
+		Type: []*db.CompetenceType{lo.ToPtr(db.CompetenceTypeGroup)},
+	}, nil, lo.ToPtr(model.CompetenceSort{Field: model.CompetenceSortFieldCreatedAt, Order: model.SortDirectionDesc}))
+	ts.NoError(err)
+	ts.Len(competences.Edges, 5)
+	ts.Equal("Competence 9", competences.Edges[0].Name)
+
+	// test filtering of competence_id
+	// 1. create a new competence subject
+	// 2. create a new competence group with the subject as parent
+	org2, owner2 := ts.MockOrganisationWithOwner()
+
+	createCompetenceFunc := func(ctx context.Context, name string, parentID *string, competenceType db.CompetenceType) (db.Competence, error) {
+		return ts.DB.CompetenceCreate(context.Background(), db.CompetenceCreateParams{
+			Name:           name,
+			CompetenceID:   graph.OptionalString(parentID),
+			CompetenceType: competenceType,
+			OrganisationID: org2.ID,
+			Grades:         []int32{1, 2, 3, 4},
+			Color:          pgtype.Text{},
+			CreatedBy:      graph.OptionalString(lo.ToPtr(owner2.ID)),
+		})
+	}
+
+	subject, err := createCompetenceFunc(ts.CtxWithUser(owner2.ID), "Subject", nil, db.CompetenceTypeSubject)
+	ts.NoError(err)
+	_, err = createCompetenceFunc(ts.CtxWithUser(owner2.ID), "Group", &subject.ID, db.CompetenceTypeGroup)
+	ts.NoError(err)
+
+	// test filtering of
+	competences, err = ts.Resolver.Query().Competences(ts.CtxWithUser(owner2.ID), nil, nil, &model.CompetenceFilterInput{
+		Parents: []*string{lo.ToPtr(subject.ID)},
+	}, nil, nil)
+	ts.NoError(err)
+	ts.Len(competences.Edges, 1)
+	ts.Equal("Group", competences.Edges[0].Name)
 }

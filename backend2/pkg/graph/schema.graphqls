@@ -190,7 +190,7 @@ input UserFilterInput {
 input CompetenceFilterInput {
     type: [CompetenceType]
     parents: [ID]
-    userId: ID
+    userId: ID @deprecated(reason: "never used")
 }
 
 
