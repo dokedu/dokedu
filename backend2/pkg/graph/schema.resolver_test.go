@@ -977,3 +977,42 @@ func (ts *TestSuite) Test_Competences() {
 	ts.Len(competences.Edges, 1)
 	ts.Equal("Group", competences.Edges[0].Name)
 }
+
+func (ts *TestSuite) Test_Tag() {
+	org, owner := ts.MockOrganisationWithOwner()
+	teacher := ts.MockTeacherForOrganisation(org.ID)
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	createTag := func(ctx context.Context, name string) (db.Tag, error) {
+		return ts.DB.TagCreate(context.Background(), db.TagCreateParams{
+			Name:           name,
+			OrganisationID: org.ID,
+			Color:          "blue",
+		})
+	}
+
+	// Unauthorized access by non-user
+	tag, err := ts.Resolver.Query().Tag(ts.Ctx(), "test")
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+	ts.Nil(tag)
+
+	// create a tag
+	tagItem, err := createTag(ts.CtxWithUser(owner.ID), "test")
+	ts.NoError(err)
+
+	// Teacher can read and see the tag
+	tag, err = ts.Resolver.Query().Tag(ts.CtxWithUser(teacher.ID), tagItem.ID)
+	ts.NoError(err)
+	ts.Equal("test", tag.Name)
+
+	// Student can read and see the tag
+	tag, err = ts.Resolver.Query().Tag(ts.CtxWithUser(student.ID), tagItem.ID)
+	ts.NoError(err)
+	ts.Equal("test", tag.Name)
+
+	// Not found by user from different organisation
+	_, owner2 := ts.MockOrganisationWithOwner()
+	tag, err = ts.Resolver.Query().Tag(ts.CtxWithUser(owner2.ID), tagItem.ID)
+	ts.ErrorIs(err, msg.ErrNotFound)
+	ts.Nil(tag)
+}

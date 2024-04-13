@@ -858,7 +858,20 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 
 // Tag is the resolver for the tag field.
 func (r *queryResolver) Tag(ctx context.Context, id string) (*db.Tag, error) {
-	panic(fmt.Errorf("not implemented: Tag - tag"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	tag, err := r.DB.TagFindById(ctx, db.TagFindByIdParams{
+		ID:             id,
+		OrganisationID: user.OrganisationID,
+	})
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, msg.ErrNotFound
+	}
+
+	return &tag, err
 }
 
 // Tags is the resolver for the tags field.
