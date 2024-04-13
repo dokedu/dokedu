@@ -1015,7 +1015,20 @@ func (r *userResolver) Email(ctx context.Context, obj *db.User) (*string, error)
 
 // Student is the resolver for the student field.
 func (r *userResolver) Student(ctx context.Context, obj *db.User) (*db.UserStudent, error) {
-	panic(fmt.Errorf("not implemented: Student - student"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	userStudent, err := r.DB.UserStudentFindByActualUserID(ctx, db.UserStudentFindByActualUserIDParams{
+		UserID:         obj.ID,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &userStudent, nil
 }
 
 // Language is the resolver for the language field.

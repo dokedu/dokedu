@@ -1220,6 +1220,7 @@ func (ts *TestSuite) Test_Tag_Resolvers() {
 func (ts *TestSuite) Test_User_Resolvers() {
 	org, owner := ts.MockOrganisationWithOwner()
 	user := ts.MockTeacherForOrganisation(org.ID)
+	student := ts.MockUserForOrganisation(org.ID, "student")
 
 	// Email resolver
 	email, err := ts.Resolver.User().Email(ts.CtxWithUser(owner.ID), &user)
@@ -1227,14 +1228,15 @@ func (ts *TestSuite) Test_User_Resolvers() {
 	ts.NotEmpty(email)
 
 	// Student resolver
-	student, err := ts.Resolver.User().Student(ts.CtxWithUser(owner.ID), &user)
+	studentStudent, err := ts.Resolver.User().Student(ts.CtxWithUser(owner.ID), &student)
 	ts.NoError(err)
-	ts.NotNil(student)
+	ts.NotNil(studentStudent)
+	ts.Equal(student.ID, studentStudent.UserID)
 
 	// Language resolver (with default fallback)
 	language, err := ts.Resolver.User().Language(ts.CtxWithUser(owner.ID), &user)
 	ts.NoError(err)
-	ts.Equal("en", language)
+	ts.Equal(lo.ToPtr(db.UserLangEn), language)
 
 	// DeletedAt resolver
 	createdAt, err := ts.Resolver.User().DeletedAt(ts.CtxWithUser(owner.ID), &user)
