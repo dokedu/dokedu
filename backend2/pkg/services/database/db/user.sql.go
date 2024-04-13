@@ -162,6 +162,32 @@ func (q *Queries) UserFindByID(ctx context.Context, arg UserFindByIDParams) (Use
 	return i, err
 }
 
+const userInviteDetailsByRecoveryToken = `-- name: UserInviteDetailsByRecoveryToken :one
+SELECT id, email, first_name, last_name
+FROM users
+WHERE recovery_token = $1::text AND recovery_sent_at > NOW() - INTERVAL '1 day' and deleted_at is null
+LIMIT 1
+`
+
+type UserInviteDetailsByRecoveryTokenRow struct {
+	ID        string      `db:"id"`
+	Email     pgtype.Text `db:"email"`
+	FirstName string      `db:"first_name"`
+	LastName  string      `db:"last_name"`
+}
+
+func (q *Queries) UserInviteDetailsByRecoveryToken(ctx context.Context, recoveryToken string) (UserInviteDetailsByRecoveryTokenRow, error) {
+	row := q.db.QueryRow(ctx, userInviteDetailsByRecoveryToken, recoveryToken)
+	var i UserInviteDetailsByRecoveryTokenRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.FirstName,
+		&i.LastName,
+	)
+	return i, err
+}
+
 const userSoftDelete = `-- name: UserSoftDelete :one
 UPDATE users
 SET deleted_at = NOW()

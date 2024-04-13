@@ -56,3 +56,9 @@ FROM users
 WHERE id = ANY (@ids::text[])
 AND organisation_id = @organisation_id
 AND deleted_at is null;
+
+-- name: UserInviteDetailsByRecoveryToken :one
+SELECT id, email, first_name, last_name
+FROM users
+WHERE recovery_token = @recovery_token::text AND recovery_sent_at > NOW() - INTERVAL '1 day' and deleted_at is null
+LIMIT 1;

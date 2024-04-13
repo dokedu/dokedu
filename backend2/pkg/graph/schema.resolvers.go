@@ -8,7 +8,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
 	"time"
 
 	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
@@ -841,8 +840,6 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 		// Default sorting if none provided
 		query = query.OrderBy("created_at DESC")
 	}
-	res, args, _ := query.ToSql()
-	slog.Info("slq", "query", res, "args", args)
 
 	competences, err := database.ScanSelectMany[db.Competence](r.DB, ctx, query)
 	if err != nil {
@@ -959,7 +956,22 @@ func (r *queryResolver) UserStudent(ctx context.Context, id string) (*db.UserStu
 
 // InviteDetails is the resolver for the inviteDetails field.
 func (r *queryResolver) InviteDetails(ctx context.Context, token string) (*model.InviteDetailsPayload, error) {
-	panic(fmt.Errorf("not implemented: InviteDetails - inviteDetails"))
+	// TODO: should we rate limit this?
+
+	userDetails, err := r.DB.UserInviteDetailsByRecoveryToken(ctx, token)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, msg.ErrNotFound
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.InviteDetailsPayload{
+		Email:     userDetails.Email.String,
+		FirstName: userDetails.FirstName,
+		LastName:  userDetails.LastName,
+	}, nil
 }
 
 // Color is the resolver for the color field.

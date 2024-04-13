@@ -1154,3 +1154,37 @@ func (ts *TestSuite) Test_UserStudent() {
 	ts.NoError(err)
 	ts.Equal(student2.ID, userStudent.UserID)
 }
+
+func (ts *TestSuite) Test_InviteDetails() {
+	org, owner := ts.MockOrganisationWithOwner()
+
+	// Update recovery token
+	user, err := ts.DB.UserUpdateRecoveryToken(ts.CtxWithUser(owner.ID), db.UserUpdateRecoveryTokenParams{
+		RecoveryToken:  gonanoid.Must(32),
+		ID:             owner.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+	ts.NotEmpty(user.RecoveryToken)
+
+	details, err := ts.Resolver.Query().InviteDetails(ts.CtxWithUser(owner.ID), user.RecoveryToken.String)
+	ts.NoError(err)
+	ts.NotEmpty(details.Email)
+	ts.NotEmpty(details.FirstName)
+	ts.NotEmpty(details.LastName)
+
+	// Invalid token for authorized user should return an error
+	details, err = ts.Resolver.Query().InviteDetails(ts.Ctx(), "invalid")
+	ts.ErrorIs(err, msg.ErrNotFound)
+	ts.Nil(details)
+
+	// Invalid token should return an error
+	details, err = ts.Resolver.Query().InviteDetails(ts.CtxWithUser(owner.ID), "invalid")
+	ts.ErrorIs(err, msg.ErrNotFound)
+	ts.Nil(details)
+
+	// Invalid token for unauthorized user should return an error
+	details, err = ts.Resolver.Query().InviteDetails(ts.Ctx(), "invalid")
+	ts.ErrorIs(err, msg.ErrNotFound)
+	ts.Nil(details)
+}
