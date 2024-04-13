@@ -1216,3 +1216,96 @@ func (ts *TestSuite) Test_Tag_Resolvers() {
 	ts.NoError(err)
 	ts.NotEmpty(createdAt)
 }
+
+func (ts *TestSuite) Test_User_Resolvers() {
+	org, owner := ts.MockOrganisationWithOwner()
+	user := ts.MockTeacherForOrganisation(org.ID)
+
+	// Email resolver
+	email, err := ts.Resolver.User().Email(ts.CtxWithUser(owner.ID), &user)
+	ts.NoError(err)
+	ts.NotEmpty(email)
+
+	// Student resolver
+	student, err := ts.Resolver.User().Student(ts.CtxWithUser(owner.ID), &user)
+	ts.NoError(err)
+	ts.NotNil(student)
+
+	// Language resolver (with default fallback)
+	language, err := ts.Resolver.User().Language(ts.CtxWithUser(owner.ID), &user)
+	ts.NoError(err)
+	ts.Equal("en", language)
+
+	// DeletedAt resolver
+	createdAt, err := ts.Resolver.User().DeletedAt(ts.CtxWithUser(owner.ID), &user)
+	ts.NoError(err)
+	ts.Nil(createdAt)
+
+	// DeletedAt resolver for deleted user
+	user.DeletedAt = graph.OptionalTimestamp(lo.ToPtr(time.Now()))
+	createdAt, err = ts.Resolver.User().DeletedAt(ts.CtxWithUser(owner.ID), &user)
+	ts.NoError(err)
+	ts.NotEmpty(createdAt)
+	user.DeletedAt = graph.OptionalTimestamp(nil)
+
+	// InviteAccepted resolver
+	accepted, err := ts.Resolver.User().InviteAccepted(ts.CtxWithUser(owner.ID), &user)
+	ts.NoError(err)
+	ts.False(accepted)
+}
+
+func (ts *TestSuite) Test_UserCompetence_Resolvers() {
+	org, owner := ts.MockOrganisationWithOwner()
+	teacher := ts.MockTeacherForOrganisation(org.ID)
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	// UserCompetence resolver
+	competence, err := ts.DB.CompetenceCreate(ts.CtxWithUser(owner.ID), db.CompetenceCreateParams{
+		Name:           "Competence 1",
+		OrganisationID: org.ID,
+		CompetenceType: db.CompetenceTypeCompetence,
+		Grades:         []int32{1, 2, 3, 4},
+	})
+	ts.NoError(err)
+
+	userCompetence, err := ts.DB.UserCompetenceCreateWithoutEntry(ts.CtxWithUser(owner.ID), db.UserCompetenceCreateWithoutEntryParams{
+		Level:          1,
+		UserID:         student.ID,
+		CompetenceID:   competence.ID,
+		OrganisationID: org.ID,
+		CreatedBy:      pgtype.Text{String: teacher.ID, Valid: true},
+	})
+	ts.NoError(err)
+
+	competenceFromUserCompetence, err := ts.Resolver.UserCompetence().Competence(ts.CtxWithUser(owner.ID), &userCompetence)
+	ts.NoError(err)
+	ts.NotNil(competenceFromUserCompetence)
+
+	// Entry resolver
+	entry, err := ts.DB.EntryCreate(ts.CtxWithUser(teacher.ID), db.EntryCreateParams{
+		Date:           pgtype.Date{Time: time.Now(), Valid: true},
+		Body:           "test",
+		UserID:         teacher.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+
+	userCompetence.EntryID = pgtype.Text{String: entry.ID, Valid: true}
+
+	entryFromUserCompetence, err := ts.Resolver.UserCompetence().Entry(ts.CtxWithUser(owner.ID), &userCompetence)
+	ts.NoError(err)
+	ts.NotNil(entryFromUserCompetence)
+	ts.Equal(entry.ID, entryFromUserCompetence.ID)
+
+	// User resolver
+	userCompetenceUser, err := ts.Resolver.UserCompetence().User(ts.CtxWithUser(owner.ID), &userCompetence)
+	ts.NoError(err)
+	ts.NotNil(userCompetenceUser)
+	ts.Equal(student.ID, userCompetenceUser.ID)
+
+	// CreatedBy resolver
+	createdBy, err := ts.Resolver.UserCompetence().CreatedBy(ts.CtxWithUser(owner.ID), &userCompetence)
+	ts.NoError(err)
+	ts.NotNil(createdBy)
+	ts.Equal(teacher.ID, createdBy.ID)
+}

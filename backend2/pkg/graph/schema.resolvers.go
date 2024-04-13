@@ -6,6 +6,7 @@ package graph
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -928,7 +929,6 @@ func (r *queryResolver) UserStudents(ctx context.Context, limit *int, offset *in
 		Edges:    edges,
 		PageInfo: pageInfo,
 	}, nil
-
 }
 
 // UserStudent is the resolver for the userStudent field.
@@ -1006,7 +1006,11 @@ func (r *tagResolver) DeletedAt(ctx context.Context, obj *db.Tag) (*time.Time, e
 
 // Email is the resolver for the email field.
 func (r *userResolver) Email(ctx context.Context, obj *db.User) (*string, error) {
-	panic(fmt.Errorf("not implemented: Email - email"))
+	if obj.Email.Valid {
+		return &obj.Email.String, nil
+	}
+
+	return nil, nil
 }
 
 // Student is the resolver for the student field.
@@ -1016,17 +1020,29 @@ func (r *userResolver) Student(ctx context.Context, obj *db.User) (*db.UserStude
 
 // Language is the resolver for the language field.
 func (r *userResolver) Language(ctx context.Context, obj *db.User) (*db.UserLang, error) {
-	panic(fmt.Errorf("not implemented: Language - language"))
+	if obj.Language.Valid {
+		return &obj.Language.UserLang, nil
+	}
+
+	return nil, nil
 }
 
 // DeletedAt is the resolver for the deletedAt field.
 func (r *userResolver) DeletedAt(ctx context.Context, obj *db.User) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
+	if !obj.DeletedAt.Time.IsZero() {
+		return &obj.DeletedAt.Time, nil
+	}
+	return nil, nil
 }
 
 // InviteAccepted is the resolver for the inviteAccepted field.
 func (r *userResolver) InviteAccepted(ctx context.Context, obj *db.User) (bool, error) {
-	panic(fmt.Errorf("not implemented: InviteAccepted - inviteAccepted"))
+	// If the password field is set, then the user accepted his invite
+	if obj.Password.Valid {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 // LastSeenAt is the resolver for the lastSeenAt field.
@@ -1036,22 +1052,83 @@ func (r *userResolver) LastSeenAt(ctx context.Context, obj *db.User) (*time.Time
 
 // Competence is the resolver for the competence field.
 func (r *userCompetenceResolver) Competence(ctx context.Context, obj *db.UserCompetence) (*db.Competence, error) {
-	panic(fmt.Errorf("not implemented: Competence - competence"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	competence, err := r.DB.CompetenceFindById(ctx, db.CompetenceFindByIdParams{
+		ID:             obj.CompetenceID,
+		OrganisationID: user.OrganisationID,
+	})
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, msg.ErrNotFound
+	}
+
+	return &competence, err
 }
 
 // Entry is the resolver for the entry field.
 func (r *userCompetenceResolver) Entry(ctx context.Context, obj *db.UserCompetence) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: Entry - entry"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	if !obj.EntryID.Valid {
+		return nil, nil
+	}
+
+	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
+		ID:             obj.EntryID.String,
+		OrganisationID: user.OrganisationID,
+	})
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, msg.ErrNotFound
+	}
+
+	return &entry, err
 }
 
 // User is the resolver for the user field.
 func (r *userCompetenceResolver) User(ctx context.Context, obj *db.UserCompetence) (*db.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	userCompetenceUser, err := r.DB.UserFindByID(ctx, db.UserFindByIDParams{
+		ID:             obj.UserID,
+		OrganisationID: user.OrganisationID,
+	})
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, msg.ErrNotFound
+	}
+
+	return &userCompetenceUser, err
 }
 
 // CreatedBy is the resolver for the createdBy field.
 func (r *userCompetenceResolver) CreatedBy(ctx context.Context, obj *db.UserCompetence) (*db.User, error) {
-	panic(fmt.Errorf("not implemented: CreatedBy - createdBy"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	if !obj.CreatedBy.Valid {
+		return nil, nil
+	}
+
+	createdBy, err := r.DB.UserFindByID(ctx, db.UserFindByIDParams{
+		ID:             obj.CreatedBy.String,
+		OrganisationID: user.OrganisationID,
+	})
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, msg.ErrNotFound
+	}
+
+	return &createdBy, err
 }
 
 // LeftAt is the resolver for the leftAt field.

@@ -3654,7 +3654,7 @@ type User {
 
     inviteAccepted: Boolean!
 
-    lastSeenAt: Time
+    lastSeenAt: Time @deprecated
 }
 
 enum CompetenceType {
