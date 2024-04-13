@@ -1188,3 +1188,31 @@ func (ts *TestSuite) Test_InviteDetails() {
 	ts.ErrorIs(err, msg.ErrNotFound)
 	ts.Nil(details)
 }
+
+func (ts *TestSuite) Test_Tag_Resolvers() {
+	org, owner := ts.MockOrganisationWithOwner()
+
+	tag, err := ts.DB.TagCreate(ts.CtxWithUser(owner.ID), db.TagCreateParams{
+		Name:           gonanoid.Must(8),
+		OrganisationID: org.ID,
+		Color:          "red",
+	})
+	ts.NoError(err)
+
+	// Color resolver
+	color, err := ts.Resolver.Tag().Color(ts.CtxWithUser(owner.ID), &tag)
+	ts.NoError(err)
+	ts.NotEmpty(color)
+	ts.Equal("red", color)
+
+	// DeletedAt resolver
+	createdAt, err := ts.Resolver.Tag().DeletedAt(ts.CtxWithUser(owner.ID), &tag)
+	ts.NoError(err)
+	ts.Nil(createdAt)
+
+	// DeletedAt resolver for deleted tag
+	tag.DeletedAt = graph.OptionalTimestamp(lo.ToPtr(time.Now()))
+	createdAt, err = ts.Resolver.Tag().DeletedAt(ts.CtxWithUser(owner.ID), &tag)
+	ts.NoError(err)
+	ts.NotEmpty(createdAt)
+}

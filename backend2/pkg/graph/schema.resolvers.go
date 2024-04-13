@@ -976,12 +976,32 @@ func (r *queryResolver) InviteDetails(ctx context.Context, token string) (*model
 
 // Color is the resolver for the color field.
 func (r *tagResolver) Color(ctx context.Context, obj *db.Tag) (string, error) {
-	panic(fmt.Errorf("not implemented: Color - color"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return "", msg.ErrUnauthorized
+	}
+
+	tag, err := r.DB.TagFindById(ctx, db.TagFindByIdParams{
+		ID:             obj.ID,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return "blue", err
+	}
+
+	if !tag.Color.Valid {
+		return "blue", errors.New("tag has no color")
+	}
+
+	return tag.Color.String, nil
 }
 
 // DeletedAt is the resolver for the deletedAt field.
 func (r *tagResolver) DeletedAt(ctx context.Context, obj *db.Tag) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
+	if !obj.DeletedAt.Time.IsZero() {
+		return &obj.DeletedAt.Time, nil
+	}
+	return nil, nil
 }
 
 // Email is the resolver for the email field.
