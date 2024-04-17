@@ -192,6 +192,7 @@ type Entry struct {
 	UserID         string       `json:"user_id"`
 	OrganisationID string       `json:"organisation_id"`
 	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"updated_at"`
 	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
