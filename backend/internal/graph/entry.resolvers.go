@@ -238,12 +238,15 @@ func (r *mutationResolver) UpdateEntry(ctx context.Context, input model.UpdateEn
 
 	var entry db.Entry
 	entry.ID = input.ID
+	entry.UpdatedAt = time.Now()
 
 	q := r.DB.NewUpdate().
 		Model(&entry).
 		Where("organisation_id = ?", currentUser.OrganisationID).
 		Where("id = ?", input.ID).
 		Returning("*")
+
+	q = q.Column("updated_at")
 
 	if input.Date != nil {
 		entry.Date = *input.Date
@@ -275,11 +278,13 @@ func (r *mutationResolver) ArchiveEntry(ctx context.Context, id string) (*db.Ent
 		ID:             id,
 		OrganisationID: currentUser.OrganisationID,
 		DeletedAt:      bun.NullTime{Time: time.Now()},
+		UpdatedAt:      time.Now(),
 	}
 	_, err = r.DB.
 		NewUpdate().
 		Model(&entry).
 		Column("deleted_at").
+		Column("updated_at").
 		Where("id = ?", id).
 		Where("organisation_id = ?", currentUser.OrganisationID).
 		Exec(ctx)

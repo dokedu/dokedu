@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/dokedu/dokedu/backend/internal/rest"
 	"log"
 	"log/slog"
 	"net/http"
@@ -138,6 +139,15 @@ func main() {
 		srv.ServeHTTP(c.Response(), c.Request())
 		return nil
 	})
+
+	restServer := rest.NewRESTServer(rest.Config{
+		DB: dbClient,
+	})
+
+	// Offline Sync Endpoints
+	e.POST("/sign_in", restServer.SignIn)
+	e.POST("/sync_push", restServer.SyncEntries)
+	e.GET("/sync_pull", restServer.SyncPull)
 
 	// Add a health check endpoint
 	e.GET("/up", func(e echo.Context) error {
