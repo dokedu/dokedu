@@ -94,3 +94,31 @@ func (q *Queries) EntryFindById(ctx context.Context, arg EntryFindByIdParams) (E
 	)
 	return i, err
 }
+
+const entrySoftDelete = `-- name: EntrySoftDelete :one
+UPDATE entries
+SET deleted_at = now()
+WHERE id = $1
+  AND organisation_id = $2
+RETURNING id, date, body, user_id, created_at, deleted_at, organisation_id
+`
+
+type EntrySoftDeleteParams struct {
+	ID             string `db:"id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) EntrySoftDelete(ctx context.Context, arg EntrySoftDeleteParams) (Entry, error) {
+	row := q.db.QueryRow(ctx, entrySoftDelete, arg.ID, arg.OrganisationID)
+	var i Entry
+	err := row.Scan(
+		&i.ID,
+		&i.Date,
+		&i.Body,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.OrganisationID,
+	)
+	return i, err
+}

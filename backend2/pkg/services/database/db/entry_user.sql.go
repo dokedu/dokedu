@@ -28,3 +28,54 @@ func (q *Queries) EntryUserCountByUserID(ctx context.Context, arg EntryUserCount
 	err := row.Scan(&count)
 	return count, err
 }
+
+const usersFindByEntryUserEntryID = `-- name: UsersFindByEntryUserEntryID :many
+SELECT users.id, users.role, users.organisation_id, users.first_name, users.last_name, users.email, users.password, users.recovery_token, users.recovery_sent_at, users.avatar_file_id, users.created_at, users.deleted_at, users.language, users.sex
+FROM users
+         JOIN public.entry_users eu ON users.id = eu.user_id
+         JOIN public.entries e ON eu.entry_id = e.id AND e.id = $1
+WHERE users.organisation_id = $2
+  AND eu.deleted_at IS NULL
+  AND e.deleted_at IS NULL
+  AND users.deleted_at IS NULL
+`
+
+type UsersFindByEntryUserEntryIDParams struct {
+	EntryID        string `db:"entry_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) UsersFindByEntryUserEntryID(ctx context.Context, arg UsersFindByEntryUserEntryIDParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, usersFindByEntryUserEntryID, arg.EntryID, arg.OrganisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Role,
+			&i.OrganisationID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.Password,
+			&i.RecoveryToken,
+			&i.RecoverySentAt,
+			&i.AvatarFileID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.Language,
+			&i.Sex,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

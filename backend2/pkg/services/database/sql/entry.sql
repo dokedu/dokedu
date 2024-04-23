@@ -19,3 +19,10 @@ WHERE eu.user_id = @user_id
   AND ee.organisation_id = @organisation_id
   AND ee.deleted_at IS NULL
   AND eu.deleted_at IS NULL;
+
+-- name: EntrySoftDelete :one
+UPDATE entries
+SET deleted_at = now()
+WHERE id = @id
+  AND organisation_id = @organisation_id
+RETURNING *;

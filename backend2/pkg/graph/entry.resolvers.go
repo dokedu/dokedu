@@ -18,37 +18,56 @@ import (
 
 // Date is the resolver for the date field.
 func (r *entryResolver) Date(ctx context.Context, obj *db.Entry) (string, error) {
-	panic(fmt.Errorf("not implemented: Date - date"))
+	if obj.Date.Valid {
+		return obj.Date.Time.Format("02.01.2006"), nil
+	}
+	return "", nil
 }
 
 // DeletedAt is the resolver for the deletedAt field.
 func (r *entryResolver) DeletedAt(ctx context.Context, obj *db.Entry) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
+	if obj.DeletedAt.Valid {
+		return &obj.DeletedAt.Time, nil
+	}
+	return nil, nil
 }
 
 // User is the resolver for the user field.
 func (r *entryResolver) User(ctx context.Context, obj *db.Entry) (*db.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	user, err := r.DB.Loader(ctx).Users().Load(ctx, obj.UserID)()
+	return &user, err
 }
 
 // Users is the resolver for the users field.
 func (r *entryResolver) Users(ctx context.Context, obj *db.Entry) ([]db.User, error) {
-	panic(fmt.Errorf("not implemented: Users - users"))
+	return r.DB.UsersFindByEntryUserEntryID(ctx, db.UsersFindByEntryUserEntryIDParams{
+		EntryID:        obj.ID,
+		OrganisationID: obj.OrganisationID,
+	})
 }
 
 // Events is the resolver for the events field.
 func (r *entryResolver) Events(ctx context.Context, obj *db.Entry) ([]db.Event, error) {
-	panic(fmt.Errorf("not implemented: Events - events"))
+	return r.DB.EventsFindByEntryEventEntryID(ctx, db.EventsFindByEntryEventEntryIDParams{
+		EntryID:        obj.ID,
+		OrganisationID: obj.OrganisationID,
+	})
 }
 
 // Files is the resolver for the files field.
 func (r *entryResolver) Files(ctx context.Context, obj *db.Entry) ([]db.File, error) {
-	panic(fmt.Errorf("not implemented: Files - files"))
+	return r.DB.FilesFindByEntryFileEntryID(ctx, db.FilesFindByEntryFileEntryIDParams{
+		EntryID:        obj.ID,
+		OrganisationID: obj.OrganisationID,
+	})
 }
 
 // Tags is the resolver for the tags field.
 func (r *entryResolver) Tags(ctx context.Context, obj *db.Entry) ([]db.Tag, error) {
-	panic(fmt.Errorf("not implemented: Tags - tags"))
+	return r.DB.TagsFindByEntryTagEntryID(ctx, db.TagsFindByEntryTagEntryIDParams{
+		EntryID:        obj.ID,
+		OrganisationID: obj.OrganisationID,
+	})
 }
 
 // UserCompetences is the resolver for the userCompetences field.
