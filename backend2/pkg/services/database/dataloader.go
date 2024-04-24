@@ -1,8 +1,10 @@
-package database
+package dataloaders
 
 import (
 	"context"
 	"errors"
+	"github.com/dokedu/dokedu/backend/pkg/services/database"
+	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
 	"sync"
 
 	"github.com/graph-gophers/dataloader/v7"
@@ -10,7 +12,6 @@ import (
 
 	"github.com/dokedu/dokedu/backend/pkg/middleware"
 	"github.com/dokedu/dokedu/backend/pkg/msg"
-	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
 )
 
 type ContextKey string
@@ -18,7 +19,7 @@ type ContextKey string
 const DataloaderKey ContextKey = "dataloader"
 
 type Dataloader struct {
-	db *DB
+	db *database.DB
 	mu sync.Mutex
 
 	competences       *dataloader.Loader[string, db.Competence]
@@ -29,7 +30,7 @@ type Dataloader struct {
 	schoolYears       *dataloader.Loader[string, db.SchoolYear]
 }
 
-func ContextWithLoader(ctx context.Context, db *DB) context.Context {
+func ContextWithLoader(ctx context.Context, db *database.DB) context.Context {
 	return context.WithValue(ctx, DataloaderKey, &Dataloader{
 		db: db,
 	})
