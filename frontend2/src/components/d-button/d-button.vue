@@ -60,7 +60,7 @@ const buttonClasses = computed(() => {
     md: ['px-3 py-1.5 text-sm']
   }
 
-  return [...baseClasses, ...typeClasses[props.variant || ''], ...sizeClasses[props.size || '']]
+  return [...baseClasses, ...typeClasses[props.variant! || ''], ...sizeClasses[props.size || '']]
 })
 
 const iconLeftClasses = computed(() => {

@@ -46,6 +46,7 @@
     "typescript": "~5.4.0",
     "unplugin-vue-router": "^0.8.6",
     "vite": "^5.2.8",
+    "vite-plugin-pwa": "^0.19.8",
     "vue-tsc": "^2.0.11"
   }
 }
