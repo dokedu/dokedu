@@ -7,6 +7,9 @@ package graph
 import (
 	"context"
 	"fmt"
+	"github.com/dokedu/dokedu/backend/pkg/middleware"
+	"github.com/dokedu/dokedu/backend/pkg/msg"
+	"github.com/samber/lo"
 	"time"
 
 	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
@@ -30,12 +33,21 @@ func (r *queryResolver) UserAttendanceOverview(ctx context.Context, date time.Ti
 
 // User is the resolver for the user field.
 func (r *userAttendanceResolver) User(ctx context.Context, obj *db.UserAttendance) (*db.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	user, err := r.DB.Loader(ctx).Users(currentUser.User).Load(ctx, obj.UserID)()
+	return &user, err
 }
 
 // Date is the resolver for the date field.
 func (r *userAttendanceResolver) Date(ctx context.Context, obj *db.UserAttendance) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: Date - date"))
+	if obj.Date.Valid {
+		return lo.ToPtr(obj.Date.Time), nil
+	}
+	return nil, nil
 }
 
 // UserAttendance returns generated.UserAttendanceResolver implementation.

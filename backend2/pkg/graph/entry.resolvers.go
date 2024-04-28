@@ -89,14 +89,70 @@ func (r *entryResolver) Tags(ctx context.Context, obj *db.Entry) ([]db.Tag, erro
 
 // UserCompetences is the resolver for the userCompetences field.
 func (r *entryResolver) UserCompetences(ctx context.Context, obj *db.Entry) ([]db.UserCompetence, error) {
-	// TODO: implement UserCompetences - userCompetences
-	panic(fmt.Errorf("not implemented: UserCompetences - userCompetences"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	userCompetences, err := r.DB.UserCompetenceFindByEntryID(ctx, db.UserCompetenceFindByEntryIDParams{
+		EntryID:        obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return userCompetences, nil
 }
 
 // Subjects is the resolver for the subjects field.
 func (r *entryResolver) Subjects(ctx context.Context, obj *db.Entry) ([]db.Competence, error) {
-	// TODO: implement Subjects - subjects
-	panic(fmt.Errorf("not implemented: Subjects - subjects"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	competences, err := r.DB.CompetenceAll(ctx, currentUser.OrganisationID)
+	if err != nil {
+		return nil, err
+	}
+
+	userCompetences, err := r.DB.UserCompetenceFindByEntryID(ctx, db.UserCompetenceFindByEntryIDParams{
+		EntryID:        obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var subjects []db.Competence
+
+	competenceMap := make(map[string]db.Competence, len(competences))
+	for _, c := range competences {
+		competenceMap[c.ID] = c
+	}
+
+	// TODO: test this (most likely it will not work)
+	for _, userCompetence := range userCompetences {
+		currentID := userCompetence.CompetenceID
+		iterations := 0
+		for {
+			iterations++
+
+			if iterations > 10_000 {
+				return nil, errors.New("too many iterations")
+			}
+
+			competence, exists := competenceMap[currentID]
+			if !exists || !competence.CompetenceID.Valid {
+				subjects = append(subjects, competence)
+				break
+			}
+			currentID = competence.CompetenceID.String
+		}
+	}
+
+	return subjects, nil
 }
 
 // CreateEntry is the resolver for the createEntry field.

@@ -128,3 +128,9 @@ WHERE c.organisation_id = @organisation_id
   AND ec.organisation_id = @organisation_id
   AND c.deleted_at IS NULL
   AND ec.deleted_at IS NULL;
+
+-- name: CompetenceAll :many
+SELECT *
+FROM competences
+WHERE organisation_id = $1
+  AND deleted_at IS NULL;

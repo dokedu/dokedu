@@ -11,6 +11,46 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const competenceAll = `-- name: CompetenceAll :many
+SELECT id, name, competence_id, competence_type, organisation_id, grades, color, curriculum_id, created_at, deleted_at, sort_order, created_by
+FROM competences
+WHERE organisation_id = $1
+  AND deleted_at IS NULL
+`
+
+func (q *Queries) CompetenceAll(ctx context.Context, organisationID string) ([]Competence, error) {
+	rows, err := q.db.Query(ctx, competenceAll, organisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Competence
+	for rows.Next() {
+		var i Competence
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CompetenceID,
+			&i.CompetenceType,
+			&i.OrganisationID,
+			&i.Grades,
+			&i.Color,
+			&i.CurriculumID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.SortOrder,
+			&i.CreatedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const competenceChildrenCount = `-- name: CompetenceChildrenCount :one
 WITH RECURSIVE child_competences AS
                    (SELECT id, competence_type
