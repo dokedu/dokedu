@@ -1,5 +1,5 @@
 <template>
-  <component :is="componentType" tabindex="0" :class="buttonClasses">
+  <component :is="componentType" tabindex="0" :class="buttonClasses" :type>
     <component v-if="iconLeft" :is="iconLeft" :size="18" :class="iconLeftClasses" />
     <slot />
     <component v-if="iconRight" :is="iconRight" :size="18" />
@@ -17,6 +17,7 @@ export interface Props {
   variant?: 'transparent' | 'outline' | 'primary'
   size?: 'xs' | 'sm' | 'md'
   to?: RouteLocationRaw
+  type: 'submit' | 'button'
   submit?: boolean
   iconLeft?: Icon
   iconRight?: Icon
@@ -33,13 +34,13 @@ const componentType = computed(() => {
 })
 
 const props = withDefaults(defineProps<Props>(), {
-  type: 'primary',
+  variant: 'primary',
   size: 'md'
 })
 
 const buttonClasses = computed(() => {
   const baseClasses = [
-    'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 transition-color group relative inline-flex select-none items-center justify-center gap-2 overflow-hidden rounded-lg border'
+    'focus-visible:outline text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 transition-color group relative inline-flex select-none items-center justify-center gap-2 overflow-hidden rounded-lg border'
   ]
 
   const typeClasses = {
@@ -60,7 +61,7 @@ const buttonClasses = computed(() => {
     md: ['px-3 py-1.5 text-sm']
   }
 
-  return [...baseClasses, ...typeClasses[props.variant! || ''], ...sizeClasses[props.size || '']]
+  return [...baseClasses, ...typeClasses[props.variant || ''], ...sizeClasses[props.size || '']]
 })
 
 const iconLeftClasses = computed(() => {

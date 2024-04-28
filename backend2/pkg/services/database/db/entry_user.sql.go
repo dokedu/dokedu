@@ -29,6 +29,62 @@ func (q *Queries) EntryUserCountByUserID(ctx context.Context, arg EntryUserCount
 	return count, err
 }
 
+const entryUserCreate = `-- name: EntryUserCreate :one
+INSERT INTO entry_users (entry_id, user_id, organisation_id)
+VALUES ($1, $2, $3)
+ON CONFLICT (entry_id, user_id, organisation_id) DO UPDATE SET deleted_at = NULL
+RETURNING id, entry_id, user_id, created_at, deleted_at, organisation_id
+`
+
+type EntryUserCreateParams struct {
+	EntryID        string `db:"entry_id"`
+	UserID         string `db:"user_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) EntryUserCreate(ctx context.Context, arg EntryUserCreateParams) (EntryUser, error) {
+	row := q.db.QueryRow(ctx, entryUserCreate, arg.EntryID, arg.UserID, arg.OrganisationID)
+	var i EntryUser
+	err := row.Scan(
+		&i.ID,
+		&i.EntryID,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.OrganisationID,
+	)
+	return i, err
+}
+
+const entryUserSoftDelete = `-- name: EntryUserSoftDelete :one
+UPDATE entry_users
+SET deleted_at = NOW()
+WHERE entry_id = $1
+  AND user_id = $2
+  AND organisation_id = $3
+RETURNING id, entry_id, user_id, created_at, deleted_at, organisation_id
+`
+
+type EntryUserSoftDeleteParams struct {
+	EntryID        string `db:"entry_id"`
+	UserID         string `db:"user_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) EntryUserSoftDelete(ctx context.Context, arg EntryUserSoftDeleteParams) (EntryUser, error) {
+	row := q.db.QueryRow(ctx, entryUserSoftDelete, arg.EntryID, arg.UserID, arg.OrganisationID)
+	var i EntryUser
+	err := row.Scan(
+		&i.ID,
+		&i.EntryID,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.OrganisationID,
+	)
+	return i, err
+}
+
 const usersFindByEntryUserEntryID = `-- name: UsersFindByEntryUserEntryID :many
 SELECT users.id, users.role, users.organisation_id, users.first_name, users.last_name, users.email, users.password, users.recovery_token, users.recovery_sent_at, users.avatar_file_id, users.created_at, users.deleted_at, users.language, users.sex
 FROM users

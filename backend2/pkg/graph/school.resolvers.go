@@ -391,19 +391,31 @@ func (r *schoolYearResolver) Description(ctx context.Context, obj *db.SchoolYear
 
 // Student is the resolver for the student field.
 func (r *userStudentGradesResolver) Student(ctx context.Context, obj *db.UserStudentGrade) (*db.UserStudent, error) {
-	student, err := r.DB.Loader(ctx).UserStudents().Load(ctx, obj.UserStudentID)()
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+	student, err := r.DB.Loader(ctx).UserStudents(currentUser.User).Load(ctx, obj.UserStudentID)()
 	return &student, err
 }
 
 // Subject is the resolver for the subject field.
 func (r *userStudentGradesResolver) Subject(ctx context.Context, obj *db.UserStudentGrade) (*db.Subject, error) {
-	subject, err := r.DB.Loader(ctx).Subjects().Load(ctx, obj.SubjectID)()
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+	subject, err := r.DB.Loader(ctx).Subjects(currentUser.User).Load(ctx, obj.SubjectID)()
 	return &subject, err
 }
 
 // SchoolYear is the resolver for the schoolYear field.
 func (r *userStudentGradesResolver) SchoolYear(ctx context.Context, obj *db.UserStudentGrade) (*db.SchoolYear, error) {
-	year, err := r.DB.Loader(ctx).SchoolYears().Load(ctx, obj.SchoolYearID)()
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+	year, err := r.DB.Loader(ctx).SchoolYears(currentUser.User).Load(ctx, obj.SchoolYearID)()
 	return &year, err
 }
 

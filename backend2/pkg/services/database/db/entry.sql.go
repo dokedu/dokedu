@@ -97,7 +97,7 @@ func (q *Queries) EntryFindById(ctx context.Context, arg EntryFindByIdParams) (E
 
 const entrySoftDelete = `-- name: EntrySoftDelete :one
 UPDATE entries
-SET deleted_at = now()
+SET deleted_at = NOW()
 WHERE id = $1
   AND organisation_id = $2
 RETURNING id, date, body, user_id, created_at, deleted_at, organisation_id
@@ -110,6 +110,47 @@ type EntrySoftDeleteParams struct {
 
 func (q *Queries) EntrySoftDelete(ctx context.Context, arg EntrySoftDeleteParams) (Entry, error) {
 	row := q.db.QueryRow(ctx, entrySoftDelete, arg.ID, arg.OrganisationID)
+	var i Entry
+	err := row.Scan(
+		&i.ID,
+		&i.Date,
+		&i.Body,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.OrganisationID,
+	)
+	return i, err
+}
+
+const entryUpdate = `-- name: EntryUpdate :one
+UPDATE entries
+SET date = CASE WHEN NOT $1::bool THEN date ELSE $2 END,
+    body = CASE WHEN NOT $3::bool THEN body ELSE $4::text END
+WHERE id = $5
+  AND organisation_id = $6
+  AND deleted_at IS NULL
+RETURNING id, date, body, user_id, created_at, deleted_at, organisation_id
+`
+
+type EntryUpdateParams struct {
+	SetDate        bool        `db:"set_date"`
+	Date           pgtype.Date `db:"date"`
+	SetBody        bool        `db:"set_body"`
+	Body           string      `db:"body"`
+	ID             string      `db:"id"`
+	OrganisationID string      `db:"organisation_id"`
+}
+
+func (q *Queries) EntryUpdate(ctx context.Context, arg EntryUpdateParams) (Entry, error) {
+	row := q.db.QueryRow(ctx, entryUpdate,
+		arg.SetDate,
+		arg.Date,
+		arg.SetBody,
+		arg.Body,
+		arg.ID,
+		arg.OrganisationID,
+	)
 	var i Entry
 	err := row.Scan(
 		&i.ID,

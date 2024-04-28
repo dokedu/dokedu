@@ -7,12 +7,16 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const gLOBAL_UserFindByEmail = `-- name: GLOBAL_UserFindByEmail :one
-SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex FROM users WHERE LOWER(email) = LOWER($1::text) and deleted_at is null
+SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
+FROM users
+WHERE LOWER(email) = LOWER($1::text)
+  AND deleted_at IS NULL
 `
 
 func (q *Queries) GLOBAL_UserFindByEmail(ctx context.Context, email string) (User, error) {
@@ -38,7 +42,10 @@ func (q *Queries) GLOBAL_UserFindByEmail(ctx context.Context, email string) (Use
 }
 
 const gLOBAL_UserFindByID = `-- name: GLOBAL_UserFindByID :one
-SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex FROM users WHERE id = $1 and deleted_at is null
+SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
+FROM users
+WHERE id = $1
+  AND deleted_at IS NULL
 `
 
 func (q *Queries) GLOBAL_UserFindByID(ctx context.Context, id string) (User, error) {
@@ -64,7 +71,11 @@ func (q *Queries) GLOBAL_UserFindByID(ctx context.Context, id string) (User, err
 }
 
 const gLOBAL_UserFindByRecoveryToken = `-- name: GLOBAL_UserFindByRecoveryToken :one
-SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex FROM users WHERE recovery_token = $1::text AND recovery_sent_at > NOW() - INTERVAL '1 day' and deleted_at is null
+SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
+FROM users
+WHERE recovery_token = $1::text
+  AND recovery_sent_at > NOW() - INTERVAL '1 day'
+  AND deleted_at IS NULL
 `
 
 func (q *Queries) GLOBAL_UserFindByRecoveryToken(ctx context.Context, recoveryToken string) (User, error) {
@@ -132,7 +143,11 @@ func (q *Queries) UserCreate(ctx context.Context, arg UserCreateParams) (User, e
 }
 
 const userFindByID = `-- name: UserFindByID :one
-SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex FROM users WHERE id = $1 and organisation_id = $2 and deleted_at is null
+SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
+FROM users
+WHERE id = $1
+  AND organisation_id = $2
+  AND deleted_at IS NULL
 `
 
 type UserFindByIDParams struct {
@@ -162,10 +177,154 @@ func (q *Queries) UserFindByID(ctx context.Context, arg UserFindByIDParams) (Use
 	return i, err
 }
 
+const userFindBySessionToken = `-- name: UserFindBySessionToken :one
+SELECT users.id, users.role, users.organisation_id, users.first_name, users.last_name, users.email, users.password, users.recovery_token, users.recovery_sent_at, users.avatar_file_id, users.created_at, users.deleted_at, users.language, users.sex
+FROM users
+         JOIN sessions s ON users.id = s.user_id
+WHERE s.token = $1::text
+  AND s.deleted_at IS NULL
+LIMIT 1
+`
+
+func (q *Queries) UserFindBySessionToken(ctx context.Context, token string) (User, error) {
+	row := q.db.QueryRow(ctx, userFindBySessionToken, token)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Role,
+		&i.OrganisationID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Password,
+		&i.RecoveryToken,
+		&i.RecoverySentAt,
+		&i.AvatarFileID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.Language,
+		&i.Sex,
+	)
+	return i, err
+}
+
+const userFindByUserEntry = `-- name: UserFindByUserEntry :many
+SELECT users.id, role, users.organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, users.created_at, users.deleted_at, language, sex, eu.id, entry_id, user_id, eu.created_at, eu.deleted_at, eu.organisation_id
+FROM users
+         JOIN public.entry_users eu ON users.id = eu.user_id
+WHERE eu.deleted_at IS NULL
+  AND eu.entry_id = $1
+  AND users.organisation_id = $2
+  AND users.deleted_at IS NULL
+`
+
+type UserFindByUserEntryParams struct {
+	EntryID        string `db:"entry_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+type UserFindByUserEntryRow struct {
+	ID               string             `db:"id"`
+	Role             UserRole           `db:"role"`
+	OrganisationID   string             `db:"organisation_id"`
+	FirstName        string             `db:"first_name"`
+	LastName         string             `db:"last_name"`
+	Email            pgtype.Text        `db:"email"`
+	Password         pgtype.Text        `db:"password"`
+	RecoveryToken    pgtype.Text        `db:"recovery_token"`
+	RecoverySentAt   pgtype.Timestamptz `db:"recovery_sent_at"`
+	AvatarFileID     pgtype.Text        `db:"avatar_file_id"`
+	CreatedAt        time.Time          `db:"created_at"`
+	DeletedAt        pgtype.Timestamptz `db:"deleted_at"`
+	Language         NullUserLang       `db:"language"`
+	Sex              pgtype.Text        `db:"sex"`
+	ID_2             string             `db:"id_2"`
+	EntryID          string             `db:"entry_id"`
+	UserID           string             `db:"user_id"`
+	CreatedAt_2      time.Time          `db:"created_at_2"`
+	DeletedAt_2      pgtype.Timestamptz `db:"deleted_at_2"`
+	OrganisationID_2 string             `db:"organisation_id_2"`
+}
+
+func (q *Queries) UserFindByUserEntry(ctx context.Context, arg UserFindByUserEntryParams) ([]UserFindByUserEntryRow, error) {
+	rows, err := q.db.Query(ctx, userFindByUserEntry, arg.EntryID, arg.OrganisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserFindByUserEntryRow
+	for rows.Next() {
+		var i UserFindByUserEntryRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Role,
+			&i.OrganisationID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.Password,
+			&i.RecoveryToken,
+			&i.RecoverySentAt,
+			&i.AvatarFileID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.Language,
+			&i.Sex,
+			&i.ID_2,
+			&i.EntryID,
+			&i.UserID,
+			&i.CreatedAt_2,
+			&i.DeletedAt_2,
+			&i.OrganisationID_2,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const userFindByValidSessionToken = `-- name: UserFindByValidSessionToken :one
+SELECT users.id, users.role, users.organisation_id, users.first_name, users.last_name, users.email, users.password, users.recovery_token, users.recovery_sent_at, users.avatar_file_id, users.created_at, users.deleted_at, users.language, users.sex
+FROM users
+         JOIN sessions s ON users.id = s.user_id
+WHERE s.token = $1::text
+  AND s.deleted_at IS NULL
+  AND s.created_at > NOW() - INTERVAL '7 days'
+LIMIT 1
+`
+
+func (q *Queries) UserFindByValidSessionToken(ctx context.Context, token string) (User, error) {
+	row := q.db.QueryRow(ctx, userFindByValidSessionToken, token)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Role,
+		&i.OrganisationID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Password,
+		&i.RecoveryToken,
+		&i.RecoverySentAt,
+		&i.AvatarFileID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.Language,
+		&i.Sex,
+	)
+	return i, err
+}
+
 const userInviteDetailsByRecoveryToken = `-- name: UserInviteDetailsByRecoveryToken :one
 SELECT id, email, first_name, last_name
 FROM users
-WHERE recovery_token = $1::text AND recovery_sent_at > NOW() - INTERVAL '1 day' and deleted_at is null
+WHERE recovery_token = $1::text
+  AND recovery_sent_at > NOW() - INTERVAL '1 day'
+  AND deleted_at IS NULL
 LIMIT 1
 `
 
@@ -225,7 +384,8 @@ func (q *Queries) UserSoftDelete(ctx context.Context, arg UserSoftDeleteParams) 
 
 const userUpdate = `-- name: UserUpdate :one
 UPDATE users
-SET first_name = $1, last_name = $2
+SET first_name = $1,
+    last_name  = $2
 WHERE id = $3
   AND organisation_id = $4
 RETURNING id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
@@ -303,7 +463,9 @@ func (q *Queries) UserUpdateLanguage(ctx context.Context, arg UserUpdateLanguage
 
 const userUpdatePassword = `-- name: UserUpdatePassword :one
 UPDATE users
-SET password = $3::text, recovery_token = NULL, recovery_sent_at = NULL
+SET password         = $3::text,
+    recovery_token   = NULL,
+    recovery_sent_at = NULL
 WHERE id = $1
   AND organisation_id = $2
 RETURNING id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
@@ -339,7 +501,8 @@ func (q *Queries) UserUpdatePassword(ctx context.Context, arg UserUpdatePassword
 
 const userUpdateRecoveryToken = `-- name: UserUpdateRecoveryToken :one
 UPDATE users
-SET recovery_token = $3::text, recovery_sent_at = NOW()
+SET recovery_token   = $3::text,
+    recovery_sent_at = NOW()
 WHERE id = $1
   AND organisation_id = $2
 RETURNING id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
@@ -374,7 +537,9 @@ func (q *Queries) UserUpdateRecoveryToken(ctx context.Context, arg UserUpdateRec
 }
 
 const usersAllWithDeleted = `-- name: UsersAllWithDeleted :many
-SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex FROM users WHERE organisation_id = $1
+SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
+FROM users
+WHERE organisation_id = $1
 `
 
 func (q *Queries) UsersAllWithDeleted(ctx context.Context, organisationID string) ([]User, error) {
@@ -416,8 +581,8 @@ const usersFindByID = `-- name: UsersFindByID :many
 SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
 FROM users
 WHERE id = ANY ($1::text[])
-AND organisation_id = $2
-AND deleted_at is null
+  AND organisation_id = $2
+  AND deleted_at IS NULL
 `
 
 type UsersFindByIDParams struct {

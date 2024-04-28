@@ -22,7 +22,16 @@ WHERE eu.user_id = @user_id
 
 -- name: EntrySoftDelete :one
 UPDATE entries
-SET deleted_at = now()
+SET deleted_at = NOW()
 WHERE id = @id
   AND organisation_id = @organisation_id
+RETURNING *;
+
+-- name: EntryUpdate :one
+UPDATE entries
+SET date = CASE WHEN NOT @set_date::bool THEN date ELSE @date END,
+    body = CASE WHEN NOT @set_body::bool THEN body ELSE @body::text END
+WHERE id = @id
+  AND organisation_id = @organisation_id
+  AND deleted_at IS NULL
 RETURNING *;

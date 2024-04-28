@@ -1,17 +1,13 @@
-package dataloaders
+package database
 
 import (
 	"context"
 	"errors"
-	"github.com/dokedu/dokedu/backend/pkg/services/database"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
 	"sync"
 
 	"github.com/graph-gophers/dataloader/v7"
 	"github.com/jackc/pgx/v5"
-
-	"github.com/dokedu/dokedu/backend/pkg/middleware"
-	"github.com/dokedu/dokedu/backend/pkg/msg"
 )
 
 type ContextKey string
@@ -19,7 +15,7 @@ type ContextKey string
 const DataloaderKey ContextKey = "dataloader"
 
 type Dataloader struct {
-	db *database.DB
+	db *DB
 	mu sync.Mutex
 
 	competences       *dataloader.Loader[string, db.Competence]
@@ -30,7 +26,7 @@ type Dataloader struct {
 	schoolYears       *dataloader.Loader[string, db.SchoolYear]
 }
 
-func ContextWithLoader(ctx context.Context, db *database.DB) context.Context {
+func ContextWithLoader(ctx context.Context, db *DB) context.Context {
 	return context.WithValue(ctx, DataloaderKey, &Dataloader{
 		db: db,
 	})
@@ -53,17 +49,12 @@ func ErrorResult[V any](keys []string, err error) []*dataloader.Result[V] {
 	return results
 }
 
-func (d *Dataloader) Competences() *dataloader.Loader[string, db.Competence] {
+func (d *Dataloader) Competences(user db.User) *dataloader.Loader[string, db.Competence] {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
 	if d.competences == nil {
 		d.competences = dataloader.NewBatchedLoader[string, db.Competence](func(ctx context.Context, keys []string) []*dataloader.Result[db.Competence] {
-			user, ok := middleware.GetUser(ctx)
-			if !ok {
-				return ErrorResult[db.Competence](keys, msg.ErrUnauthorized)
-			}
-
 			competences, err := d.db.CompetencesFindByID(ctx, db.CompetencesFindByIDParams{
 				OrganisationID: user.OrganisationID,
 				Ids:            keys,
@@ -94,17 +85,12 @@ func (d *Dataloader) Competences() *dataloader.Loader[string, db.Competence] {
 	return d.competences
 }
 
-func (d *Dataloader) CompetenceParents() *dataloader.Loader[string, []db.Competence] {
+func (d *Dataloader) CompetenceParents(user db.User) *dataloader.Loader[string, []db.Competence] {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
 	if d.competenceParents == nil {
 		d.competenceParents = dataloader.NewBatchedLoader[string, []db.Competence](func(ctx context.Context, keys []string) []*dataloader.Result[[]db.Competence] {
-			user, ok := middleware.GetUser(ctx)
-			if !ok {
-				return ErrorResult[[]db.Competence](keys, msg.ErrUnauthorized)
-			}
-
 			// fetch the parentInfo (id, parentIds) for each competence
 			parentInfos, err := d.db.CompetencesFindParents(ctx, db.CompetencesFindParentsParams{
 				OrganisationID: user.OrganisationID,
@@ -117,7 +103,7 @@ func (d *Dataloader) CompetenceParents() *dataloader.Loader[string, []db.Compete
 			// use the competence loader to fetch the parent competences
 			parentsByChildID := make(map[string]dataloader.ThunkMany[db.Competence], len(parentInfos))
 			for _, parentInfo := range parentInfos {
-				parentsByChildID[parentInfo.OrigID] = d.Competences().LoadMany(ctx, parentInfo.Parents)
+				parentsByChildID[parentInfo.OrigID] = d.Competences(user).LoadMany(ctx, parentInfo.Parents)
 			}
 
 			results := make([]*dataloader.Result[[]db.Competence], len(keys))
@@ -144,17 +130,13 @@ func (d *Dataloader) CompetenceParents() *dataloader.Loader[string, []db.Compete
 	return d.competenceParents
 }
 
-func (d *Dataloader) Users() *dataloader.Loader[string, db.User] {
+// TODO: passing the user is a bit dangerous, as once a user is passed it will be used for all queries, even if another user is passed later, similar to ctx
+func (d *Dataloader) Users(user db.User) *dataloader.Loader[string, db.User] {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
 	if d.users == nil {
 		d.users = dataloader.NewBatchedLoader[string, db.User](func(ctx context.Context, keys []string) []*dataloader.Result[db.User] {
-			user, ok := middleware.GetUser(ctx)
-			if !ok {
-				return ErrorResult[db.User](keys, msg.ErrUnauthorized)
-			}
-
 			users, err := d.db.UsersFindByID(ctx, db.UsersFindByIDParams{
 				OrganisationID: user.OrganisationID,
 				Ids:            keys,
@@ -186,17 +168,12 @@ func (d *Dataloader) Users() *dataloader.Loader[string, db.User] {
 	return d.users
 }
 
-func (d *Dataloader) UserStudents() *dataloader.Loader[string, db.UserStudent] {
+func (d *Dataloader) UserStudents(user db.User) *dataloader.Loader[string, db.UserStudent] {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
 	if d.userStudents == nil {
 		d.userStudents = dataloader.NewBatchedLoader[string, db.UserStudent](func(ctx context.Context, keys []string) []*dataloader.Result[db.UserStudent] {
-			user, ok := middleware.GetUser(ctx)
-			if !ok {
-				return ErrorResult[db.UserStudent](keys, msg.ErrUnauthorized)
-			}
-
 			userStudents, err := d.db.UserStudentsFindByID(ctx, db.UserStudentsFindByIDParams{
 				OrganisationID: user.OrganisationID,
 				Ids:            keys,
@@ -227,17 +204,12 @@ func (d *Dataloader) UserStudents() *dataloader.Loader[string, db.UserStudent] {
 	return d.userStudents
 }
 
-func (d *Dataloader) Subjects() *dataloader.Loader[string, db.Subject] {
+func (d *Dataloader) Subjects(user db.User) *dataloader.Loader[string, db.Subject] {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
 	if d.subjects == nil {
 		d.subjects = dataloader.NewBatchedLoader[string, db.Subject](func(ctx context.Context, keys []string) []*dataloader.Result[db.Subject] {
-			user, ok := middleware.GetUser(ctx)
-			if !ok {
-				return ErrorResult[db.Subject](keys, msg.ErrUnauthorized)
-			}
-
 			subjects, err := d.db.SubjectsFindByID(ctx, db.SubjectsFindByIDParams{
 				OrganisationID: user.OrganisationID,
 				Ids:            keys,
@@ -268,17 +240,12 @@ func (d *Dataloader) Subjects() *dataloader.Loader[string, db.Subject] {
 	return d.subjects
 }
 
-func (d *Dataloader) SchoolYears() *dataloader.Loader[string, db.SchoolYear] {
+func (d *Dataloader) SchoolYears(user db.User) *dataloader.Loader[string, db.SchoolYear] {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
 	if d.schoolYears == nil {
 		d.schoolYears = dataloader.NewBatchedLoader[string, db.SchoolYear](func(ctx context.Context, keys []string) []*dataloader.Result[db.SchoolYear] {
-			user, ok := middleware.GetUser(ctx)
-			if !ok {
-				return ErrorResult[db.SchoolYear](keys, msg.ErrUnauthorized)
-			}
-
 			schoolYears, err := d.db.SchoolYearsFindByID(ctx, db.SchoolYearsFindByIDParams{
 				OrganisationID: user.OrganisationID,
 				Ids:            keys,

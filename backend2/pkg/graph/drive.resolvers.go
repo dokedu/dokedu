@@ -6,6 +6,8 @@ package graph
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"mime"
 	"path/filepath"
@@ -20,12 +22,16 @@ import (
 
 // User is the resolver for the user field.
 func (r *bucketResolver) User(ctx context.Context, obj *db.Bucket) (*db.User, error) {
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
 	// If the bucket is not owned by a user, return nil.
 	if !obj.UserID.Valid {
 		return nil, nil
 	}
 
-	user, err := r.DB.Loader(ctx).Users().Load(ctx, obj.ID)()
+	user, err := r.DB.Loader(ctx).Users(currentUser.User).Load(ctx, obj.ID)()
 	if err != nil {
 		return nil, err
 	}
@@ -112,12 +118,38 @@ func (r *fileResolver) DeletedAt(ctx context.Context, obj *db.File) (*time.Time,
 
 // Parents is the resolver for the parents field.
 func (r *fileResolver) Parents(ctx context.Context, obj *db.File) ([]db.File, error) {
-	panic(fmt.Errorf("not implemented: Parents - parents"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	files, err := r.DB.FileListByBucketID(ctx, db.FileListByBucketIDParams{
+		BucketID:       obj.BucketID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return files, nil
 }
 
 // Files is the resolver for the files field.
 func (r *fileResolver) Files(ctx context.Context, obj *db.File) ([]db.File, error) {
-	panic(fmt.Errorf("not implemented: Files - files"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	files, err := r.DB.FileFindByParentID(ctx, db.FileFindByParentIDParams{
+		ID:             obj.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return files, nil
 }
 
 // UploadFile is the resolver for the uploadFile field.
@@ -137,7 +169,19 @@ func (r *mutationResolver) PreviewFile(ctx context.Context, input model.PreviewF
 
 // File is the resolver for the file field.
 func (r *queryResolver) File(ctx context.Context, id string) (*db.File, error) {
-	panic(fmt.Errorf("not implemented: File - file"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	file, err := r.DB.FileByID(ctx, db.FileByIDParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, msg.ErrNotFound
+	}
+	return &file, err
 }
 
 // Bucket returns generated.BucketResolver implementation.

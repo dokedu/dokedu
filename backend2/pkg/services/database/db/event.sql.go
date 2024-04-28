@@ -52,6 +52,42 @@ func (q *Queries) EventCreate(ctx context.Context, arg EventCreateParams) (Event
 	return i, err
 }
 
+const eventExport = `-- name: EventExport :many
+SELECT export_events($1, $2, $3, $4)
+`
+
+type EventExportParams struct {
+	OrganisationID string      `db:"_organisation_id"`
+	From           pgtype.Date `db:"_from"`
+	To             pgtype.Date `db:"_to"`
+	Deleted        bool        `db:"_deleted"`
+}
+
+func (q *Queries) EventExport(ctx context.Context, arg EventExportParams) ([]interface{}, error) {
+	rows, err := q.db.Query(ctx, eventExport,
+		arg.OrganisationID,
+		arg.From,
+		arg.To,
+		arg.Deleted,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []interface{}
+	for rows.Next() {
+		var export_events interface{}
+		if err := rows.Scan(&export_events); err != nil {
+			return nil, err
+		}
+		items = append(items, export_events)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const eventFindById = `-- name: EventFindById :one
 SELECT id, image_file_id, organisation_id, title, body, starts_at, ends_at, recurrence, created_at, deleted_at
 FROM events

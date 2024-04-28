@@ -45,7 +45,7 @@ async function submit() {
     <form @submit.prevent="submit" class="mx-auto flex max-w-[300px] flex-col gap-4 pt-24">
       <d-input label="Email" type="email" v-model="email" placeholder="Your email" />
       <d-input label="Password" type="password" v-model="password" placeholder="Your password" />
-      <d-button variant="primary" size="md" submit>Login</d-button>
+      <d-button type="submit" variant="primary" size="md" submit>Login</d-button>
     </form>
   </div>
 </template>

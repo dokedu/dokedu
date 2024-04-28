@@ -3,6 +3,12 @@ The @defer directive may be specified on a fragment spread to imply de-prioritiz
 """
 directive @defer(if: Boolean = true, label: String) on FRAGMENT_SPREAD | INLINE_FRAGMENT
 
+directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @goModel(forceGenerate: Boolean, model: String, models: [String!]) on ENUM | INPUT_OBJECT | INTERFACE | OBJECT | SCALAR | UNION
+
+directive @goTag(key: String!, value: String) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
 input AddEventCompetenceInput {
   competenceId: ID!
   eventId: ID!
@@ -377,12 +383,12 @@ type InviteDetailsPayload {
 }
 
 type Mutation {
-  acceptInvite(input: SignUpInput!, token: String!): SignInPayload!
+  acceptInvite(input: SignUpInput!, token: String!): SignInPayload! @deprecated
   archiveEntry(id: ID!): Entry!
   archiveEvent(id: ID!): Event!
   archiveTag(id: ID!): Tag!
   archiveUser(id: ID!): User!
-  archiveUserCompetence(id: ID!): UserCompetence!
+  archiveUserCompetence(id: ID!): UserCompetence! @deprecated
   createCompetence(input: CreateCompetenceInput!): Competence!
   createEntry: Entry!
   createEntryCompetence(input: CreateEntryCompetenceInput!): Entry!
@@ -423,7 +429,7 @@ type Mutation {
   updateEntryUserCompetenceLevel(input: UpdateEntryUserCompetenceLevel!): Entry!
   updateEvent(input: UpdateEventInput!): Event!
   updateOrganisation(input: UpdateOrganisationInput!): Organisation!
-  updatePassword(newPassword: String!, oldPassword: String!): Boolean!
+  updatePassword(newPassword: String!, oldPassword: String!): Boolean! @deprecated
   updateSchoolYear(input: UpdateSchoolYearInput!): SchoolYear!
   updateSubject(input: UpdateSubjectInput!): Subject!
   updateTag(id: ID!, input: CreateTagInput!): Tag!
@@ -559,7 +565,7 @@ input SignInInput {
 }
 
 type SignInPayload {
-  enabled_apps: [String!]!
+  enabled_apps: [String!]! @deprecated
   language: String!
   setupComplete: Boolean!
   token: String!
@@ -699,7 +705,7 @@ type User {
   inviteAccepted: Boolean!
   language: UserLanguage
   lastName: String!
-  lastSeenAt: Time
+  lastSeenAt: Time @deprecated
   organisationId: ID!
   role: UserRole!
   student: UserStudent

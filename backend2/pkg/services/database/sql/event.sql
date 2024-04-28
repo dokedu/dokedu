@@ -29,3 +29,6 @@ WHERE id = @id
   AND organisation_id = @organisation_id
   AND deleted_at IS NULL
 RETURNING *;
+
+-- name: EventExport :many
+SELECT export_events(@_organisation_id, @_from, @_to, @_deleted);

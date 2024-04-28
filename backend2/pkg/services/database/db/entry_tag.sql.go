@@ -9,6 +9,62 @@ import (
 	"context"
 )
 
+const entryTagCreate = `-- name: EntryTagCreate :one
+INSERT INTO entry_tags (entry_id, tag_id, organisation_id)
+VALUES ($1, $2, $3)
+ON CONFLICT (entry_id, tag_id) DO UPDATE SET deleted_at = NULL
+RETURNING id, entry_id, tag_id, organisation_id, created_at, deleted_at
+`
+
+type EntryTagCreateParams struct {
+	EntryID        string `db:"entry_id"`
+	TagID          string `db:"tag_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) EntryTagCreate(ctx context.Context, arg EntryTagCreateParams) (EntryTag, error) {
+	row := q.db.QueryRow(ctx, entryTagCreate, arg.EntryID, arg.TagID, arg.OrganisationID)
+	var i EntryTag
+	err := row.Scan(
+		&i.ID,
+		&i.EntryID,
+		&i.TagID,
+		&i.OrganisationID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const entryTagSoftDelete = `-- name: EntryTagSoftDelete :one
+UPDATE entry_tags
+SET deleted_at = NOW()
+WHERE entry_id = $1
+  AND tag_id = $2
+  AND organisation_id = $3
+RETURNING id, entry_id, tag_id, organisation_id, created_at, deleted_at
+`
+
+type EntryTagSoftDeleteParams struct {
+	EntryID        string `db:"entry_id"`
+	TagID          string `db:"tag_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) EntryTagSoftDelete(ctx context.Context, arg EntryTagSoftDeleteParams) (EntryTag, error) {
+	row := q.db.QueryRow(ctx, entryTagSoftDelete, arg.EntryID, arg.TagID, arg.OrganisationID)
+	var i EntryTag
+	err := row.Scan(
+		&i.ID,
+		&i.EntryID,
+		&i.TagID,
+		&i.OrganisationID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const tagsFindByEntryTagEntryID = `-- name: TagsFindByEntryTagEntryID :many
 SELECT tags.id, tags.name, tags.color, tags.organisation_id, tags.created_at, tags.deleted_at
 FROM tags

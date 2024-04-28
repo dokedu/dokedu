@@ -37,7 +37,11 @@ func (r *competenceResolver) Color(ctx context.Context, obj *db.Competence) (str
 
 // Parents is the resolver for the parents field.
 func (r *competenceResolver) Parents(ctx context.Context, obj *db.Competence) ([]db.Competence, error) {
-	parents, err := r.DB.Loader(ctx).CompetenceParents().Load(ctx, obj.ID)()
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+	parents, err := r.DB.Loader(ctx).CompetenceParents(currentUser.User).Load(ctx, obj.ID)()
 	if err != nil {
 		return nil, err
 	}

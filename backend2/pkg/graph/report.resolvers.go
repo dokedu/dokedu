@@ -16,42 +16,52 @@ import (
 
 // CreateReport is the resolver for the createReport field.
 func (r *mutationResolver) CreateReport(ctx context.Context, input model.CreateReportInput) ([]*db.Report, error) {
+	// TODO: implement CreateReport - createReport
 	panic(fmt.Errorf("not implemented: CreateReport - createReport"))
 }
 
 // Report is the resolver for the report field.
 func (r *queryResolver) Report(ctx context.Context, id string) (*db.Report, error) {
+	// TODO: implement Report - report
 	panic(fmt.Errorf("not implemented: Report - report"))
 }
 
 // Reports is the resolver for the reports field.
 func (r *queryResolver) Reports(ctx context.Context, limit *int, offset *int) (*model.ReportConnection, error) {
+	// TODO: implement Reports - reports
 	panic(fmt.Errorf("not implemented: Reports - reports"))
 }
 
 // Meta is the resolver for the meta field.
 func (r *reportResolver) Meta(ctx context.Context, obj *db.Report) (string, error) {
+	// TODO: implement Meta - meta
 	panic(fmt.Errorf("not implemented: Meta - meta"))
 }
 
 // User is the resolver for the user field.
 func (r *reportResolver) User(ctx context.Context, obj *db.Report) (*db.User, error) {
+	// TODO: implement User - user
 	panic(fmt.Errorf("not implemented: User - user"))
 }
 
 // StudentUser is the resolver for the studentUser field.
 func (r *reportResolver) StudentUser(ctx context.Context, obj *db.Report) (*db.User, error) {
+	// TODO: implement StudentUser - studentUser
 	panic(fmt.Errorf("not implemented: StudentUser - studentUser"))
 }
 
 // File is the resolver for the file field.
 func (r *reportResolver) File(ctx context.Context, obj *db.Report) (*db.File, error) {
+	// TODO: implement File - file
 	panic(fmt.Errorf("not implemented: File - file"))
 }
 
 // DeletedAt is the resolver for the deletedAt field.
 func (r *reportResolver) DeletedAt(ctx context.Context, obj *db.Report) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented: DeletedAt - deletedAt"))
+	if obj.DeletedAt.Valid {
+		return &obj.DeletedAt.Time, nil
+	}
+	return nil, nil
 }
 
 // ReportCreatedOrUpdated is the resolver for the reportCreatedOrUpdated field.

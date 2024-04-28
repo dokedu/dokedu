@@ -427,11 +427,13 @@ export type InviteDetailsPayload = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  /** @deprecated No longer supported */
   acceptInvite: SignInPayload;
   archiveEntry: Entry;
   archiveEvent: Event;
   archiveTag: Tag;
   archiveUser: User;
+  /** @deprecated No longer supported */
   archiveUserCompetence: UserCompetence;
   createCompetence: Competence;
   createEntry: Entry;
@@ -475,6 +477,7 @@ export type Mutation = {
   updateEntryUserCompetenceLevel: Entry;
   updateEvent: Event;
   updateOrganisation: Organisation;
+  /** @deprecated No longer supported */
   updatePassword: Scalars['Boolean']['output'];
   updateSchoolYear: SchoolYear;
   updateSubject: Subject;
@@ -1037,6 +1040,7 @@ export type SignInInput = {
 
 export type SignInPayload = {
   __typename?: 'SignInPayload';
+  /** @deprecated No longer supported */
   enabled_apps: Array<Scalars['String']['output']>;
   language: Scalars['String']['output'];
   setupComplete: Scalars['Boolean']['output'];
@@ -1180,6 +1184,7 @@ export type User = {
   inviteAccepted: Scalars['Boolean']['output'];
   language?: Maybe<UserLanguage>;
   lastName: Scalars['String']['output'];
+  /** @deprecated No longer supported */
   lastSeenAt?: Maybe<Scalars['Time']['output']>;
   organisationId: Scalars['ID']['output'];
   role: UserRole;

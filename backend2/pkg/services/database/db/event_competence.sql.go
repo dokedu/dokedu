@@ -34,3 +34,30 @@ func (q *Queries) EventCompetenceCreate(ctx context.Context, arg EventCompetence
 	)
 	return i, err
 }
+
+const eventCompetenceToggle = `-- name: EventCompetenceToggle :one
+INSERT INTO event_competences (event_id, competence_id, organisation_id)
+VALUES ($1, $2, $3)
+ON CONFLICT (event_id, competence_id, organisation_id) DO UPDATE SET deleted_at = NULL
+RETURNING id, event_id, competence_id, created_at, deleted_at, organisation_id
+`
+
+type EventCompetenceToggleParams struct {
+	EventID        string `db:"event_id"`
+	CompetenceID   string `db:"competence_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) EventCompetenceToggle(ctx context.Context, arg EventCompetenceToggleParams) (EventCompetence, error) {
+	row := q.db.QueryRow(ctx, eventCompetenceToggle, arg.EventID, arg.CompetenceID, arg.OrganisationID)
+	var i EventCompetence
+	err := row.Scan(
+		&i.ID,
+		&i.EventID,
+		&i.CompetenceID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.OrganisationID,
+	)
+	return i, err
+}

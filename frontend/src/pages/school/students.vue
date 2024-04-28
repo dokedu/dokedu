@@ -152,8 +152,7 @@ watch(showDeleted, () => {
   ]
 })
 
-const goToStudent = <Type extends { id: string }>(row: Type) => {
+function goToStudent<Type extends { id: string }>(row: Type) {
   router.push({ name: "/school/students/[id]", params: { id: row.id } })
 }
 </script>
-```

@@ -21,3 +21,11 @@ AND organisation_id = @organisation_id;
 INSERT INTO files (name, file_type, mime_type, size, bucket_id, parent_id, organisation_id)
 VALUES (@name, @file_type, @mime_type, @size, @bucket_id, @parent_id, @organisation_id)
 RETURNING *;
+
+-- name: FileFindByParentID :many
+SELECT *
+FROM files
+WHERE id = @id
+AND organisation_id = @organisation_id
+AND parent_id = @parent_id
+AND deleted_at IS NULL;

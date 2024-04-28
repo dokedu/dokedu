@@ -1,7 +1,7 @@
 -- name: UserCompetenceFindByEntryID :many
 SELECT *
 FROM user_competences
-WHERE entry_id = @entry_id
+WHERE entry_id = @entry_id::text
   AND organisation_id = @organisation_id
   AND deleted_at IS NULL
 ORDER BY competence_id DESC;
@@ -52,7 +52,7 @@ RETURNING *;
 UPDATE user_competences
 SET level = @level
 WHERE competence_id = @competence_id
-  AND entry_id = @entry_id
+  AND entry_id = @entry_id::text
   AND organisation_id = @organisation_id
   AND deleted_at IS NULL
 RETURNING *;
@@ -104,5 +104,24 @@ WHERE user_id = @user_id
   AND created_at <= (DATE @ end_date + 1)
 ORDER BY created_at DESC;
 
--- name: UserCompetenceTendency :many
--- tendency is the ratio of learned competences to all competences of a group
+-- name: UserCompetenceCreate :one
+INSERT INTO user_competences (level, user_id, competence_id, entry_id, created_by, organisation_id)
+VALUES (@level, @user_id, @competence_id, @entry_id, @created_by, @organisation_id)
+ON CONFLICT (user_id, competence_id, entry_id) DO UPDATE SET deleted_at = NULL AND level = @level
+RETURNING *;
+
+-- name: UserCompetenceSoftDeleteByUserAndEntry :many
+UPDATE user_competences
+SET deleted_at = NOW()
+WHERE user_id = @user_id
+  AND entry_id = @entry_id::text
+  AND organisation_id = @organisation_id
+RETURNING *;
+
+-- name: UserCompetenceSoftDeleteByCompetenceAndEntry :many
+UPDATE user_competences
+SET deleted_at = NOW()
+WHERE competence_id = @competence_id
+  AND entry_id = @entry_id::text
+  AND organisation_id = @organisation_id
+RETURNING *;

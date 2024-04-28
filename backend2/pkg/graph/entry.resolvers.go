@@ -6,8 +6,21 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/minio/minio-go/v7"
+	"mime"
+	"path/filepath"
 	"time"
+
+	"github.com/dokedu/dokedu/backend/pkg/helper"
+	"github.com/dokedu/dokedu/backend/pkg/middleware"
+	"github.com/dokedu/dokedu/backend/pkg/msg"
+	"github.com/dokedu/dokedu/backend/pkg/services/database"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/samber/lo"
+	"github.com/uptrace/bun"
 
 	"github.com/99designs/gqlgen/graphql"
 
@@ -34,7 +47,11 @@ func (r *entryResolver) DeletedAt(ctx context.Context, obj *db.Entry) (*time.Tim
 
 // User is the resolver for the user field.
 func (r *entryResolver) User(ctx context.Context, obj *db.Entry) (*db.User, error) {
-	user, err := r.DB.Loader(ctx).Users().Load(ctx, obj.UserID)()
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+	user, err := r.DB.Loader(ctx).Users(currentUser.User).Load(ctx, obj.UserID)()
 	return &user, err
 }
 
@@ -72,32 +89,114 @@ func (r *entryResolver) Tags(ctx context.Context, obj *db.Entry) ([]db.Tag, erro
 
 // UserCompetences is the resolver for the userCompetences field.
 func (r *entryResolver) UserCompetences(ctx context.Context, obj *db.Entry) ([]db.UserCompetence, error) {
+	// TODO: implement UserCompetences - userCompetences
 	panic(fmt.Errorf("not implemented: UserCompetences - userCompetences"))
 }
 
 // Subjects is the resolver for the subjects field.
 func (r *entryResolver) Subjects(ctx context.Context, obj *db.Entry) ([]db.Competence, error) {
+	// TODO: implement Subjects - subjects
 	panic(fmt.Errorf("not implemented: Subjects - subjects"))
 }
 
 // CreateEntry is the resolver for the createEntry field.
 func (r *mutationResolver) CreateEntry(ctx context.Context) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: CreateEntry - createEntry"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	var entry db.Entry
+	entry.UserID = currentUser.ID
+
+	entry, err := r.DB.EntryCreate(ctx, db.EntryCreateParams{
+		Date:           pgtype.Date{Valid: true, Time: time.Now()},
+		Body:           "",
+		UserID:         currentUser.ID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &entry, nil
 }
 
 // UpdateEntry is the resolver for the updateEntry field.
 func (r *mutationResolver) UpdateEntry(ctx context.Context, input model.UpdateEntryInput) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: UpdateEntry - updateEntry"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+	if !user.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	params := db.EntryUpdateParams{
+		ID:             input.ID,
+		OrganisationID: user.OrganisationID,
+	}
+
+	if input.Date != nil {
+		parsedDate, err := time.Parse("02.01.2006", *input.Date)
+		if err != nil {
+			return nil, err
+		}
+		params.Date = OptionalDate(lo.ToPtr(parsedDate))
+		params.SetDate = true
+	}
+	if input.Body != nil {
+		params.Body = *input.Body
+		params.SetBody = true
+	}
+
+	entry, err := r.DB.EntryUpdate(ctx, params)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, msg.ErrNotFound
+	}
+
+	return &entry, nil
 }
 
 // ArchiveEntry is the resolver for the archiveEntry field.
 func (r *mutationResolver) ArchiveEntry(ctx context.Context, id string) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: ArchiveEntry - archiveEntry"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	entry, err := r.DB.EntrySoftDelete(ctx, db.EntrySoftDeleteParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, msg.ErrNotFound
+	}
+	return &entry, err
 }
 
 // CreateEntryTag is the resolver for the createEntryTag field.
 func (r *mutationResolver) CreateEntryTag(ctx context.Context, input model.CreateEntryTagInput) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: CreateEntryTag - createEntryTag"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	_, err := r.DB.EntryTagCreate(ctx, db.EntryTagCreateParams{
+		EntryID:        input.EntryID,
+		TagID:          input.TagID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	return &entry, err
 }
 
 // CreateEntryFile is the resolver for the createEntryFile field.
@@ -107,67 +206,429 @@ func (r *mutationResolver) CreateEntryFile(ctx context.Context, input model.Crea
 
 // CreateEntryUser is the resolver for the createEntryUser field.
 func (r *mutationResolver) CreateEntryUser(ctx context.Context, input model.CreateEntryUserInput) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: CreateEntryUser - createEntryUser"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	_, err := r.DB.EntryUserCreate(ctx, db.EntryUserCreateParams{
+		EntryID:        input.EntryID,
+		UserID:         input.UserID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	return &entry, err
 }
 
 // CreateEntryEvent is the resolver for the createEntryEvent field.
 func (r *mutationResolver) CreateEntryEvent(ctx context.Context, input model.CreateEntryEventInput) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: CreateEntryEvent - createEntryEvent"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	_, err := r.DB.EntryEventCreate(ctx, db.EntryEventCreateParams{
+		EntryID:        input.EntryID,
+		EventID:        input.EventID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	return &entry, err
 }
 
 // CreateEntryCompetence is the resolver for the createEntryCompetence field.
 func (r *mutationResolver) CreateEntryCompetence(ctx context.Context, input model.CreateEntryCompetenceInput) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: CreateEntryCompetence - createEntryCompetence"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	err = r.DB.InTx(ctx, func(ctx context.Context, q *db.Queries) error {
+		entryUsers, err := r.DB.UserFindByUserEntry(ctx, db.UserFindByUserEntryParams{
+			EntryID:        input.EntryID,
+			OrganisationID: currentUser.OrganisationID,
+		})
+
+		// TODO: turn this into a single sql query
+		for _, entryUser := range entryUsers {
+			_, err = r.DB.UserCompetenceCreate(ctx, db.UserCompetenceCreateParams{
+				UserID:         entryUser.ID,
+				CompetenceID:   input.CompetenceID,
+				EntryID:        pgtype.Text{Valid: true, String: input.EntryID},
+				Level:          1,
+				OrganisationID: currentUser.OrganisationID,
+				CreatedBy:      pgtype.Text{Valid: true, String: currentUser.ID},
+			})
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+
+	return &entry, err
 }
 
 // DeleteEntryTag is the resolver for the deleteEntryTag field.
 func (r *mutationResolver) DeleteEntryTag(ctx context.Context, input model.DeleteEntryTagInput) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: DeleteEntryTag - deleteEntryTag"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	_, err := r.DB.EntryTagSoftDelete(ctx, db.EntryTagSoftDeleteParams{
+		EntryID:        input.EntryID,
+		TagID:          input.TagID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	return &entry, err
 }
 
 // DeleteEntryFile is the resolver for the deleteEntryFile field.
 func (r *mutationResolver) DeleteEntryFile(ctx context.Context, input model.DeleteEntryFileInput) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: DeleteEntryFile - deleteEntryFile"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	_, err := r.DB.EntryFileSoftDelete(ctx, db.EntryFileSoftDeleteParams{
+		EntryID:        input.EntryID,
+		FileID:         input.FileID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+
+	return &entry, err
 }
 
 // DeleteEntryUser is the resolver for the deleteEntryUser field.
 func (r *mutationResolver) DeleteEntryUser(ctx context.Context, input model.DeleteEntryUserInput) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: DeleteEntryUser - deleteEntryUser"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.DB.InTx(ctx, func(ctx context.Context, q *db.Queries) error {
+		_, err := r.DB.EntryUserSoftDelete(ctx, db.EntryUserSoftDeleteParams{
+			EntryID:        input.EntryID,
+			UserID:         input.UserID,
+			OrganisationID: currentUser.OrganisationID,
+		})
+		if err != nil {
+			return err
+		}
+
+		// remove user competences for this entry for this user
+		_, err = r.DB.UserCompetenceSoftDeleteByUserAndEntry(ctx, db.UserCompetenceSoftDeleteByUserAndEntryParams{
+			UserID:         input.UserID,
+			EntryID:        input.EntryID,
+			OrganisationID: currentUser.OrganisationID,
+		})
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &entry, err
 }
 
 // DeleteEntryEvent is the resolver for the deleteEntryEvent field.
 func (r *mutationResolver) DeleteEntryEvent(ctx context.Context, input model.DeleteEntryEventInput) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: DeleteEntryEvent - deleteEntryEvent"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.DB.EntryEventSoftDelete(ctx, db.EntryEventSoftDeleteParams{
+		EntryID:        input.EntryID,
+		EventID:        input.EventID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &entry, err
 }
 
 // DeleteEntryCompetence is the resolver for the deleteEntryCompetence field.
 func (r *mutationResolver) DeleteEntryCompetence(ctx context.Context, input model.DeleteEntryCompetenceInput) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: DeleteEntryCompetence - deleteEntryCompetence"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.DB.UserCompetenceSoftDeleteByCompetenceAndEntry(ctx, db.UserCompetenceSoftDeleteByCompetenceAndEntryParams{
+		EntryID:        input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &entry, err
 }
 
 // UpdateEntryUserCompetenceLevel is the resolver for the updateEntryUserCompetenceLevel field.
 func (r *mutationResolver) UpdateEntryUserCompetenceLevel(ctx context.Context, input model.UpdateEntryUserCompetenceLevel) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: UpdateEntryUserCompetenceLevel - updateEntryUserCompetenceLevel"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.DB.UserCompetenceUpdateLevels(ctx, db.UserCompetenceUpdateLevelsParams{
+		Level:          int32(input.Level),
+		EntryID:        input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &entry, err
 }
 
 // UploadFileToEntry is the resolver for the uploadFileToEntry field.
 func (r *mutationResolver) UploadFileToEntry(ctx context.Context, entryID string, file graphql.Upload) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: UploadFileToEntry - uploadFileToEntry"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
+		ID:             entryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var bucket db.Bucket
+
+	bucket, err = r.DB.BucketForEntryFiles(ctx, currentUser.OrganisationID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		bucket, err = r.DB.BucketForEntryFilesCreate(ctx, currentUser.OrganisationID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	fileParams := db.FileCreateParams{
+		Name:           file.Filename,
+		FileType:       db.FileTypeBlob,
+		MimeType:       pgtype.Text{String: mime.TypeByExtension(filepath.Ext(file.Filename)), Valid: true},
+		Size:           file.Size,
+		BucketID:       bucket.ID,
+		OrganisationID: currentUser.OrganisationID,
+	}
+
+	err = r.DB.InTx(ctx, func(ctx context.Context, q *db.Queries) error {
+		fileCreated, err2 := r.DB.FileCreate(ctx, fileParams)
+		if err2 != nil {
+			return err2
+		}
+
+		entryFileParams := db.EntryFileCreateParams{
+			EntryID:        entry.ID,
+			FileID:         fileCreated.ID,
+			OrganisationID: currentUser.OrganisationID,
+		}
+
+		_, err2 = r.DB.EntryFileCreate(ctx, entryFileParams)
+		if err2 != nil {
+			return err2
+		}
+
+		_, err2 = r.Services.Minio.PutObject(ctx, bucket.ID, fileCreated.ID, file.File, fileCreated.Size, minio.PutObjectOptions{
+			ContentType: file.ContentType,
+		})
+		if err2 != nil {
+			return errors.New("failed to upload file")
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &entry, nil
 }
 
 // RemoveFileFromEntry is the resolver for the removeFileFromEntry field.
 func (r *mutationResolver) RemoveFileFromEntry(ctx context.Context, entryID string, fileID string) (*db.File, error) {
-	panic(fmt.Errorf("not implemented: RemoveFileFromEntry - removeFileFromEntry"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	_, err := r.DB.EntryFileSoftDelete(ctx, db.EntryFileSoftDeleteParams{
+		EntryID:        entryID,
+		FileID:         fileID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	file, err := r.DB.FileByID(ctx, db.FileByIDParams{
+		ID:             fileID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &file, nil
 }
 
 // Entry is the resolver for the entry field.
 func (r *queryResolver) Entry(ctx context.Context, id string) (*db.Entry, error) {
-	panic(fmt.Errorf("not implemented: Entry - entry"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, msg.ErrNotFound
+	}
+	return &entry, err
 }
 
 // Entries is the resolver for the entries field.
 func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, filter *model.EntryFilterInput, sortBy *model.EntrySortBy, search *string) (*model.EntryConnection, error) {
-	panic(fmt.Errorf("not implemented: Entries - entries"))
+	currentUser, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	l, o := helper.PaginationInput(limit, offset)
+	query := r.DB.NewQueryBuilder().Select("*").From("entries").Where("organisation_id = ?", currentUser.OrganisationID).Limit(l + 1).Offset(o)
+	query = query.Where("entries.deleted_at IS NULL")
+
+	if filter != nil {
+		if filter.Users != nil && len(filter.Users) > 0 {
+			query = query.Where("user_id IN (?)", bun.In(filter.Users))
+		}
+		if filter.Authors != nil && len(filter.Authors) > 0 {
+			query = query.Where("user_id IN (?)", bun.In(filter.Authors))
+		}
+		if filter.Tags != nil && len(filter.Tags) > 0 {
+			query = query.Where("tag_id IN (?)", bun.In(filter.Tags))
+			query = query.Where("(SELECT COUNT(DISTINCT tag_id) FROM entry_tags et2 WHERE et2.entry_id = \"entries\".id) >= ?", len(filter.Tags))
+		}
+	}
+
+	if sortBy != nil {
+		switch *sortBy {
+		case model.EntrySortByCreatedAtAsc:
+			query = query.OrderBy("created_at ASC")
+		case model.EntrySortByCreatedAtDesc:
+			query = query.OrderBy("created_at DESC")
+		case model.EntrySortByDateAsc:
+			query = query.OrderBy("date ASC")
+		case model.EntrySortByDateDesc:
+			query = query.OrderBy("date DESC")
+		default:
+			query = query.OrderBy("created_at DESC")
+		}
+	}
+
+	if search != nil && *search != "" {
+		query = query.Where("body ILIKE ?", fmt.Sprintf("%%%s%%", *search))
+	}
+
+	entries, err := database.ScanSelectMany[db.Entry](r.DB, ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	edges, pageInfo := helper.PaginationOutput(l, o, entries)
+	return &model.EntryConnection{
+		Edges:      edges,
+		PageInfo:   pageInfo,
+		TotalCount: 0,
+	}, nil
 }
 
 // Entry returns generated.EntryResolver implementation.

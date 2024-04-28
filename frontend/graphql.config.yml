@@ -2,5 +2,5 @@ schema: src/gql/schema.graphql
 extensions:
   endpoints:
     Default GraphQL Endpoint:
-      url: http://localhost:1323/query
+      url: http://localhost:8080/graph
       introspect: true

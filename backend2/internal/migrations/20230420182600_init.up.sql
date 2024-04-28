@@ -127,7 +127,6 @@ CREATE TABLE shares
     deleted_at      timestamptz     NULL
 );
 
--- TODO: this is a new table, so we need to properly migrate the data
 CREATE TABLE user_students
 (
     id              text        DEFAULT nanoid() NOT NULL PRIMARY KEY,

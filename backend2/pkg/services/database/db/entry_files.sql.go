@@ -9,6 +9,62 @@ import (
 	"context"
 )
 
+const entryFileCreate = `-- name: EntryFileCreate :one
+INSERT INTO entry_files (entry_id, file_id, organisation_id)
+VALUES ($1, $2, $3)
+ON CONFLICT (entry_id, file_id, organisation_id) DO UPDATE SET deleted_at = NULL
+RETURNING id, entry_id, file_id, created_at, deleted_at, organisation_id
+`
+
+type EntryFileCreateParams struct {
+	EntryID        string `db:"entry_id"`
+	FileID         string `db:"file_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) EntryFileCreate(ctx context.Context, arg EntryFileCreateParams) (EntryFile, error) {
+	row := q.db.QueryRow(ctx, entryFileCreate, arg.EntryID, arg.FileID, arg.OrganisationID)
+	var i EntryFile
+	err := row.Scan(
+		&i.ID,
+		&i.EntryID,
+		&i.FileID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.OrganisationID,
+	)
+	return i, err
+}
+
+const entryFileSoftDelete = `-- name: EntryFileSoftDelete :one
+UPDATE entry_files
+SET deleted_at = NOW()
+WHERE entry_id = $1
+  AND file_id = $2
+  AND organisation_id = $3
+RETURNING id, entry_id, file_id, created_at, deleted_at, organisation_id
+`
+
+type EntryFileSoftDeleteParams struct {
+	EntryID        string `db:"entry_id"`
+	FileID         string `db:"file_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) EntryFileSoftDelete(ctx context.Context, arg EntryFileSoftDeleteParams) (EntryFile, error) {
+	row := q.db.QueryRow(ctx, entryFileSoftDelete, arg.EntryID, arg.FileID, arg.OrganisationID)
+	var i EntryFile
+	err := row.Scan(
+		&i.ID,
+		&i.EntryID,
+		&i.FileID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.OrganisationID,
+	)
+	return i, err
+}
+
 const filesFindByEntryFileEntryID = `-- name: FilesFindByEntryFileEntryID :many
 SELECT files.id, files.name, files.file_type, files.mime_type, files.size, files.bucket_id, files.parent_id, files.organisation_id, files.created_at, files.deleted_at
 FROM files

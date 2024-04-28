@@ -1,7 +1,7 @@
 import type { CodegenConfig } from "@graphql-codegen/cli"
 
 const config: CodegenConfig = {
-  schema: "http://localhost:1323/query",
+  schema: "http://localhost:8080/graph",
   documents: "src/gql/**/*.graphql",
   watch: true,
   config: {

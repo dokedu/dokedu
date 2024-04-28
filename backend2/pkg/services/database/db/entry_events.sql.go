@@ -9,6 +9,62 @@ import (
 	"context"
 )
 
+const entryEventCreate = `-- name: EntryEventCreate :one
+INSERT INTO entry_events (entry_id, event_id, organisation_id)
+VALUES ($1, $2, $3)
+ON CONFLICT (entry_id, event_id, organisation_id) DO UPDATE SET deleted_at = NULL
+RETURNING id, entry_id, event_id, organisation_id, created_at, deleted_at
+`
+
+type EntryEventCreateParams struct {
+	EntryID        string `db:"entry_id"`
+	EventID        string `db:"event_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) EntryEventCreate(ctx context.Context, arg EntryEventCreateParams) (EntryEvent, error) {
+	row := q.db.QueryRow(ctx, entryEventCreate, arg.EntryID, arg.EventID, arg.OrganisationID)
+	var i EntryEvent
+	err := row.Scan(
+		&i.ID,
+		&i.EntryID,
+		&i.EventID,
+		&i.OrganisationID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const entryEventSoftDelete = `-- name: EntryEventSoftDelete :one
+UPDATE entry_events
+SET deleted_at = NOW()
+WHERE entry_id = $1
+  AND event_id = $2
+  AND organisation_id = $3
+RETURNING id, entry_id, event_id, organisation_id, created_at, deleted_at
+`
+
+type EntryEventSoftDeleteParams struct {
+	EntryID        string `db:"entry_id"`
+	EventID        string `db:"event_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) EntryEventSoftDelete(ctx context.Context, arg EntryEventSoftDeleteParams) (EntryEvent, error) {
+	row := q.db.QueryRow(ctx, entryEventSoftDelete, arg.EntryID, arg.EventID, arg.OrganisationID)
+	var i EntryEvent
+	err := row.Scan(
+		&i.ID,
+		&i.EntryID,
+		&i.EventID,
+		&i.OrganisationID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const eventsFindByEntryEventEntryID = `-- name: EventsFindByEntryEventEntryID :many
 SELECT events.id, events.image_file_id, events.organisation_id, events.title, events.body, events.starts_at, events.ends_at, events.recurrence, events.created_at, events.deleted_at
 FROM events

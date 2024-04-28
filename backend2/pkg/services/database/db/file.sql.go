@@ -110,6 +110,52 @@ func (q *Queries) FileCreate(ctx context.Context, arg FileCreateParams) (File, e
 	return i, err
 }
 
+const fileFindByParentID = `-- name: FileFindByParentID :many
+SELECT id, name, file_type, mime_type, size, bucket_id, parent_id, organisation_id, created_at, deleted_at
+FROM files
+WHERE id = $1
+AND organisation_id = $2
+AND parent_id = $3
+AND deleted_at IS NULL
+`
+
+type FileFindByParentIDParams struct {
+	ID             string      `db:"id"`
+	OrganisationID string      `db:"organisation_id"`
+	ParentID       pgtype.Text `db:"parent_id"`
+}
+
+func (q *Queries) FileFindByParentID(ctx context.Context, arg FileFindByParentIDParams) ([]File, error) {
+	rows, err := q.db.Query(ctx, fileFindByParentID, arg.ID, arg.OrganisationID, arg.ParentID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []File
+	for rows.Next() {
+		var i File
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.FileType,
+			&i.MimeType,
+			&i.Size,
+			&i.BucketID,
+			&i.ParentID,
+			&i.OrganisationID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const fileListByBucketID = `-- name: FileListByBucketID :many
 SELECT id, name, file_type, mime_type, size, bucket_id, parent_id, organisation_id, created_at, deleted_at
 FROM files

@@ -46,7 +46,6 @@
       </template>
     </DTable>
   </PageWrapper>
-  <!-- requesting download file toast -->
   <div
     v-if="downloadingFilesCount > 0"
     class="fixed bottom-4 right-4 flex select-none gap-2 rounded-md bg-white px-4 py-2 text-sm shadow-md"

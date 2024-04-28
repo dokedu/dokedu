@@ -184,6 +184,46 @@ func (q *Queries) UserCompetenceCountByUserID(ctx context.Context, arg UserCompe
 	return count, err
 }
 
+const userCompetenceCreate = `-- name: UserCompetenceCreate :one
+INSERT INTO user_competences (level, user_id, competence_id, entry_id, created_by, organisation_id)
+VALUES ($1, $2, $3, $4, $5, $6)
+ON CONFLICT (user_id, competence_id, entry_id) DO UPDATE SET deleted_at = NULL AND level = $1
+RETURNING id, level, user_id, entry_id, competence_id, created_at, created_by, deleted_at, organisation_id
+`
+
+type UserCompetenceCreateParams struct {
+	Level          int32       `db:"level"`
+	UserID         string      `db:"user_id"`
+	CompetenceID   string      `db:"competence_id"`
+	EntryID        pgtype.Text `db:"entry_id"`
+	CreatedBy      pgtype.Text `db:"created_by"`
+	OrganisationID string      `db:"organisation_id"`
+}
+
+func (q *Queries) UserCompetenceCreate(ctx context.Context, arg UserCompetenceCreateParams) (UserCompetence, error) {
+	row := q.db.QueryRow(ctx, userCompetenceCreate,
+		arg.Level,
+		arg.UserID,
+		arg.CompetenceID,
+		arg.EntryID,
+		arg.CreatedBy,
+		arg.OrganisationID,
+	)
+	var i UserCompetence
+	err := row.Scan(
+		&i.ID,
+		&i.Level,
+		&i.UserID,
+		&i.EntryID,
+		&i.CompetenceID,
+		&i.CreatedAt,
+		&i.CreatedBy,
+		&i.DeletedAt,
+		&i.OrganisationID,
+	)
+	return i, err
+}
+
 const userCompetenceCreateWithoutEntry = `-- name: UserCompetenceCreateWithoutEntry :one
 INSERT INTO user_competences (level, user_id, competence_id, created_by, organisation_id)
 VALUES ($1, $2, $3, $4, $5)
@@ -307,15 +347,15 @@ func (q *Queries) UserCompetenceFindByEntryAndUser(ctx context.Context, arg User
 const userCompetenceFindByEntryID = `-- name: UserCompetenceFindByEntryID :many
 SELECT id, level, user_id, entry_id, competence_id, created_at, created_by, deleted_at, organisation_id
 FROM user_competences
-WHERE entry_id = $1
+WHERE entry_id = $1::text
   AND organisation_id = $2
   AND deleted_at IS NULL
 ORDER BY competence_id DESC
 `
 
 type UserCompetenceFindByEntryIDParams struct {
-	EntryID        pgtype.Text `db:"entry_id"`
-	OrganisationID string      `db:"organisation_id"`
+	EntryID        string `db:"entry_id"`
+	OrganisationID string `db:"organisation_id"`
 }
 
 func (q *Queries) UserCompetenceFindByEntryID(ctx context.Context, arg UserCompetenceFindByEntryIDParams) ([]UserCompetence, error) {
@@ -447,21 +487,111 @@ func (q *Queries) UserCompetenceForCompetenceReport(ctx context.Context, arg Use
 	return items, nil
 }
 
+const userCompetenceSoftDeleteByCompetenceAndEntry = `-- name: UserCompetenceSoftDeleteByCompetenceAndEntry :many
+UPDATE user_competences
+SET deleted_at = NOW()
+WHERE competence_id = $1
+  AND entry_id = $2::text
+  AND organisation_id = $3
+RETURNING id, level, user_id, entry_id, competence_id, created_at, created_by, deleted_at, organisation_id
+`
+
+type UserCompetenceSoftDeleteByCompetenceAndEntryParams struct {
+	CompetenceID   string `db:"competence_id"`
+	EntryID        string `db:"entry_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) UserCompetenceSoftDeleteByCompetenceAndEntry(ctx context.Context, arg UserCompetenceSoftDeleteByCompetenceAndEntryParams) ([]UserCompetence, error) {
+	rows, err := q.db.Query(ctx, userCompetenceSoftDeleteByCompetenceAndEntry, arg.CompetenceID, arg.EntryID, arg.OrganisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserCompetence
+	for rows.Next() {
+		var i UserCompetence
+		if err := rows.Scan(
+			&i.ID,
+			&i.Level,
+			&i.UserID,
+			&i.EntryID,
+			&i.CompetenceID,
+			&i.CreatedAt,
+			&i.CreatedBy,
+			&i.DeletedAt,
+			&i.OrganisationID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const userCompetenceSoftDeleteByUserAndEntry = `-- name: UserCompetenceSoftDeleteByUserAndEntry :many
+UPDATE user_competences
+SET deleted_at = NOW()
+WHERE user_id = $1
+  AND entry_id = $2::text
+  AND organisation_id = $3
+RETURNING id, level, user_id, entry_id, competence_id, created_at, created_by, deleted_at, organisation_id
+`
+
+type UserCompetenceSoftDeleteByUserAndEntryParams struct {
+	UserID         string `db:"user_id"`
+	EntryID        string `db:"entry_id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) UserCompetenceSoftDeleteByUserAndEntry(ctx context.Context, arg UserCompetenceSoftDeleteByUserAndEntryParams) ([]UserCompetence, error) {
+	rows, err := q.db.Query(ctx, userCompetenceSoftDeleteByUserAndEntry, arg.UserID, arg.EntryID, arg.OrganisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserCompetence
+	for rows.Next() {
+		var i UserCompetence
+		if err := rows.Scan(
+			&i.ID,
+			&i.Level,
+			&i.UserID,
+			&i.EntryID,
+			&i.CompetenceID,
+			&i.CreatedAt,
+			&i.CreatedBy,
+			&i.DeletedAt,
+			&i.OrganisationID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const userCompetenceUpdateLevels = `-- name: UserCompetenceUpdateLevels :many
 UPDATE user_competences
 SET level = $1
 WHERE competence_id = $2
-  AND entry_id = $3
+  AND entry_id = $3::text
   AND organisation_id = $4
   AND deleted_at IS NULL
 RETURNING id, level, user_id, entry_id, competence_id, created_at, created_by, deleted_at, organisation_id
 `
 
 type UserCompetenceUpdateLevelsParams struct {
-	Level          int32       `db:"level"`
-	CompetenceID   string      `db:"competence_id"`
-	EntryID        pgtype.Text `db:"entry_id"`
-	OrganisationID string      `db:"organisation_id"`
+	Level          int32  `db:"level"`
+	CompetenceID   string `db:"competence_id"`
+	EntryID        string `db:"entry_id"`
+	OrganisationID string `db:"organisation_id"`
 }
 
 func (q *Queries) UserCompetenceUpdateLevels(ctx context.Context, arg UserCompetenceUpdateLevelsParams) ([]UserCompetence, error) {
