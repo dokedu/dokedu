@@ -68,7 +68,7 @@ func HttpStuff() {
 
 	router.HandleFunc("GET /playground", playground.Handler("GraphQL playground", "/graph"))
 
-	router.HandleFunc("GET /up", handleUpRequest)
+	router.HandleFunc("GET /healthz", handleUpRequest)
 
 	server := http.Server{
 		Addr:    ":8080",
