@@ -12,6 +12,7 @@ import (
 	"github.com/dokedu/dokedu/backend/pkg/services"
 	"github.com/dokedu/dokedu/backend/pkg/services/database"
 	"github.com/dokedu/dokedu/backend/pkg/services/mail"
+	"github.com/dokedu/dokedu/backend/pkg/services/minio"
 	"log/slog"
 	"net/http"
 	"os"
@@ -30,7 +31,14 @@ func HttpStuff() {
 
 	s, err := services.New(services.Config{
 		Database: dbCfg,
-		Mail:     mail.Config{},
+		Minio: minio.Config{
+			Host:      os.Getenv("MINIO_HOST"),
+			Port:      os.Getenv("MINIO_PORT"),
+			AccessKey: os.Getenv("MINIO_ACCESS_KEY_ID"),
+			SecretKey: os.Getenv("MINIO_SECRET_ACCESS_KEY"),
+			SSL:       false,
+		},
+		Mail: mail.Config{},
 	})
 	if err != nil {
 		panic(err)
@@ -44,6 +52,9 @@ func HttpStuff() {
 	srv.SetErrorPresenter(msg.ErrPresenter)
 	srv.AddTransport(transport.POST{})
 	srv.Use(extension.Introspection{})
+
+	// TODO: srv.Transport bois (see old backend)
+	// but we won't need websockets anymore (for now)
 
 	// middleware for cors
 	router := http.NewServeMux()

@@ -184,8 +184,14 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 
 	// todo: return more data
 	return &model.SignInPayload{
-		Token: token,
-		User:  user,
+		Token:    token,
+		User:     user,
+		Language: string(user.Language.UserLang),
+		EnabledApps: []string{
+			"record",
+			"school",
+			"admin",
+		},
 	}, nil
 }
 
