@@ -2,9 +2,11 @@ package middleware
 
 import (
 	"context"
+
+	"net/http"
+
 	"github.com/dokedu/dokedu/backend/pkg/services/database"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
-	"net/http"
 )
 
 type contextKey string

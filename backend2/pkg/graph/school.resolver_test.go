@@ -240,7 +240,7 @@ func (ts *TestSuite) Test_ImportStudents() {
 
 func (ts *TestSuite) Test_Subjects() {
 	student := ts.MockUserForOrganisation(ts.FirstOrganisationID(), "student")
-	allSubjectCount := ts.Query1("SELECT COUNT(*) FROM subjects WHERE organisation_id = $1 and deleted_at is  null", ts.FirstOrganisationID()).(int64)
+	allSubjectCount := ts.Query1("SELECT COUNT(*) FROM subjects WHERE organisation_id = $1 AND deleted_at IS  NULL", ts.FirstOrganisationID()).(int64)
 
 	// error on unauthorized
 	_, err := ts.Resolver.Query().Subjects(ts.Ctx(), nil, nil)
@@ -350,7 +350,7 @@ func (ts *TestSuite) Test_SchoolYear() {
 func (ts *TestSuite) Test_UserStudentGrades() {
 	teacher := ts.MockTeacherForOrganisation(ts.FirstOrganisationID())
 	student := ts.MockUserForOrganisation(ts.FirstOrganisationID(), "student")
-	gradeCount := ts.Query1("SELECT COUNT(*) FROM user_student_grades WHERE organisation_id = $1 and deleted_at is null", ts.FirstOrganisationID()).(int64)
+	gradeCount := ts.Query1("SELECT COUNT(*) FROM user_student_grades WHERE organisation_id = $1 AND deleted_at IS NULL", ts.FirstOrganisationID()).(int64)
 
 	// error on unauthorized
 	_, err := ts.Resolver.Query().UserStudentGrades(ts.Ctx(), nil, nil)
@@ -419,5 +419,4 @@ func (ts *TestSuite) Test_UserStudentGrade() {
 	ts.NoError(err)
 	ts.Equal(grade.UserStudentID, graphStudent.ID)
 	ts.NotEmpty(graphStudent.UserID)
-
 }

@@ -3,8 +3,10 @@ package database
 import (
 	"context"
 	"errors"
-	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
+
 	"sync"
+
+	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
 
 	"github.com/graph-gophers/dataloader/v7"
 	"github.com/jackc/pgx/v5"

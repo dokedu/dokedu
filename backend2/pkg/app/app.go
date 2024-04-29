@@ -1,10 +1,15 @@
 package app
 
 import (
+	"log/slog"
+	"net/http"
+	"os"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
+
 	"github.com/dokedu/dokedu/backend/pkg/graph"
 	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
 	"github.com/dokedu/dokedu/backend/pkg/middleware"
@@ -13,9 +18,6 @@ import (
 	"github.com/dokedu/dokedu/backend/pkg/services/database"
 	"github.com/dokedu/dokedu/backend/pkg/services/mail"
 	"github.com/dokedu/dokedu/backend/pkg/services/minio"
-	"log/slog"
-	"net/http"
-	"os"
 )
 
 func HttpStuff() {
@@ -76,7 +78,10 @@ func HttpStuff() {
 	}
 
 	slog.Info("Starting server on port 8080")
-	server.ListenAndServe()
+	err = server.ListenAndServe()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func handleUpRequest(w http.ResponseWriter, r *http.Request) {

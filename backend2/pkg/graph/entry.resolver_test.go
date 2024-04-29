@@ -1,10 +1,12 @@
 package graph_test
 
 import (
+	"time"
+
+	"github.com/samber/lo"
+
 	"github.com/dokedu/dokedu/backend/pkg/graph"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
-	"github.com/samber/lo"
-	"time"
 )
 
 func (ts *TestSuite) Test_Entry_Resolvers_Date() {
