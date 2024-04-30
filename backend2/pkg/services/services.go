@@ -21,9 +21,15 @@ type Services struct {
 }
 
 func New(cfg Config) (*Services, error) {
-	return &Services{
-		DB:    database.New(cfg.Database),
-		Minio: minio.New(cfg.Minio),
-		Mail:  mail.New(cfg.Mail),
-	}, nil
+	var err error
+	svc := &Services{
+		DB:   database.New(cfg.Database),
+		Mail: mail.New(cfg.Mail),
+	}
+	svc.Minio, err = minio.New(cfg.Minio)
+	if err != nil {
+		return nil, err
+	}
+
+	return svc, nil
 }

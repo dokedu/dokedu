@@ -21,11 +21,7 @@ type DB struct {
 }
 
 type Config struct {
-	Database string `env:"DB_NAME"`
-	Username string `env:"DB_USER"`
-	Password string `env:"DB_PASS"`
-	Host     string `env:"DB_HOST"`
-	Port     string `env:"DB_PORT"`
+	DSN string `env:"DB_DSN"`
 }
 
 var typeNamesToRegister = []string{
@@ -37,8 +33,7 @@ var typesToRegisterLock = &sync.Mutex{}
 
 func New(cfg Config) *DB {
 	ctx := context.Background()
-	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.Database)
-	config, err := pgxpool.ParseConfig(dsn)
+	config, err := pgxpool.ParseConfig(cfg.DSN)
 	if err != nil {
 		panic(err)
 	}

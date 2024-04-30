@@ -1,12 +1,11 @@
 package app
 
 import (
-	"log/slog"
 	"net/http"
-	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 
@@ -15,76 +14,53 @@ import (
 	"github.com/dokedu/dokedu/backend/pkg/middleware"
 	"github.com/dokedu/dokedu/backend/pkg/msg"
 	"github.com/dokedu/dokedu/backend/pkg/services"
-	"github.com/dokedu/dokedu/backend/pkg/services/database"
-	"github.com/dokedu/dokedu/backend/pkg/services/mail"
-	"github.com/dokedu/dokedu/backend/pkg/services/minio"
 )
 
-func HttpStuff() {
-	dbCfg := database.Config{
-		Database: os.Getenv("DB_NAME"),
-		Username: os.Getenv("DB_USER"),
-		Password: os.Getenv("DB_PASS"),
-		Host:     os.Getenv("DB_HOST"),
-		Port:     os.Getenv("DB_PORT"),
-	}
+const gb = 1 << 30
 
-	client := database.New(dbCfg)
+type App struct {
+	Server   *http.Server
+	Resolver *graph.Resolver
+}
 
-	s, err := services.New(services.Config{
-		Database: dbCfg,
-		Minio: minio.Config{
-			Host:      os.Getenv("MINIO_HOST"),
-			Port:      os.Getenv("MINIO_PORT"),
-			AccessKey: os.Getenv("MINIO_ACCESS_KEY_ID"),
-			SecretKey: os.Getenv("MINIO_SECRET_ACCESS_KEY"),
-			SSL:       false,
-		},
-		Mail: mail.Config{},
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	srv := handler.New(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{
-		DB:       client,
-		Services: s,
-	}}))
+func New(svc *services.Services) App {
+	resolver := &graph.Resolver{DB: svc.DB, Services: svc}
+	srv := handler.New(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
 
 	srv.SetErrorPresenter(msg.ErrPresenter)
+	srv.AddTransport(transport.GET{})
 	srv.AddTransport(transport.POST{})
+	srv.AddTransport(transport.MultipartForm{
+		MaxMemory:     5 * gb,
+		MaxUploadSize: 5 * gb,
+	})
 	srv.Use(extension.Introspection{})
-
-	// TODO: srv.Transport bois (see old backend)
-	// but we won't need websockets anymore (for now)
+	srv.SetQueryCache(lru.New(1000))
 
 	// middleware for cors
 	router := http.NewServeMux()
 
 	stack := middleware.CreateStack(
 		middleware.CORS,
-		middleware.Auth(client),
+		middleware.Auth(svc.DB),
 	)
 
 	router.HandleFunc("POST /graph", srv.ServeHTTP)
-
 	router.HandleFunc("GET /playground", playground.Handler("GraphQL playground", "/graph"))
+	router.HandleFunc("GET /healthz", healthHandler)
 
-	router.HandleFunc("GET /healthz", handleUpRequest)
-
-	server := http.Server{
+	server := &http.Server{
 		Addr:    ":8080",
 		Handler: stack(router),
 	}
 
-	slog.Info("Starting server on port 8080")
-	err = server.ListenAndServe()
-	if err != nil {
-		panic(err)
+	return App{
+		Server:   server,
+		Resolver: resolver,
 	}
 }
 
-func handleUpRequest(w http.ResponseWriter, r *http.Request) {
+func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte("OK"))
 }

@@ -7,12 +7,13 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/caarlos0/env/v10"
 	"github.com/jackc/pgx/v5/pgtype"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/dokedu/dokedu/backend/internal/config"
+	"github.com/dokedu/dokedu/backend/pkg/app"
 	"github.com/dokedu/dokedu/backend/pkg/graph"
 	"github.com/dokedu/dokedu/backend/pkg/middleware"
 	"github.com/dokedu/dokedu/backend/pkg/services"
@@ -30,21 +31,20 @@ type Config struct {
 }
 
 func New() (*TestSuite, error) {
-	var cfg Config
-	err := env.Parse(&cfg)
+	cfg, err := config.Load()
 	if err != nil {
 		return nil, err
 	}
 
 	svc, err := services.New(cfg.Services)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	resolver := graph.Resolver{DB: svc.DB, Services: svc}
+	application := app.New(svc)
 	ts := &TestSuite{
 		Suite:    new(suite.Suite),
-		Resolver: &resolver,
+		Resolver: application.Resolver,
 		DB:       svc.DB,
 	}
 	return ts, nil
