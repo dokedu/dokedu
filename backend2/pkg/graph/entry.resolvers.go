@@ -8,19 +8,21 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/minio/minio-go/v7"
 	"mime"
 	"path/filepath"
 	"time"
+
+	"github.com/minio/minio-go/v7"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/samber/lo"
+	"github.com/uptrace/bun"
 
 	"github.com/dokedu/dokedu/backend/pkg/helper"
 	"github.com/dokedu/dokedu/backend/pkg/middleware"
 	"github.com/dokedu/dokedu/backend/pkg/msg"
 	"github.com/dokedu/dokedu/backend/pkg/services/database"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/samber/lo"
-	"github.com/uptrace/bun"
 
 	"github.com/99designs/gqlgen/graphql"
 
@@ -132,7 +134,6 @@ func (r *entryResolver) Subjects(ctx context.Context, obj *db.Entry) ([]db.Compe
 		competenceMap[c.ID] = c
 	}
 
-	// TODO: test this (most likely it will not work)
 	for _, userCompetence := range userCompetences {
 		currentID := userCompetence.CompetenceID
 		iterations := 0
@@ -151,6 +152,11 @@ func (r *entryResolver) Subjects(ctx context.Context, obj *db.Entry) ([]db.Compe
 			currentID = competence.CompetenceID.String
 		}
 	}
+
+	// Ensure subjects are unique (by id)
+	subjects = lo.UniqBy(subjects, func(s db.Competence) string {
+		return s.ID
+	})
 
 	return subjects, nil
 }

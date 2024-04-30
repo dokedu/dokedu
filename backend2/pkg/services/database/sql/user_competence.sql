@@ -106,8 +106,8 @@ ORDER BY created_at DESC;
 
 -- name: UserCompetenceCreate :one
 INSERT INTO user_competences (level, user_id, competence_id, entry_id, created_by, organisation_id)
-VALUES (@level, @user_id, @competence_id, @entry_id, @created_by, @organisation_id)
-ON CONFLICT (user_id, competence_id, entry_id) DO UPDATE SET deleted_at = NULL AND level = @level
+VALUES (@_level, @user_id, @competence_id, @entry_id, @created_by, @organisation_id)
+ON CONFLICT (user_id, competence_id, entry_id) DO UPDATE SET deleted_at = NULL, level = @_level
 RETURNING *;
 
 -- name: UserCompetenceSoftDeleteByUserAndEntry :many

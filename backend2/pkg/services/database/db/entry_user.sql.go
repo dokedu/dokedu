@@ -32,7 +32,7 @@ func (q *Queries) EntryUserCountByUserID(ctx context.Context, arg EntryUserCount
 const entryUserCreate = `-- name: EntryUserCreate :one
 INSERT INTO entry_users (entry_id, user_id, organisation_id)
 VALUES ($1, $2, $3)
-ON CONFLICT (entry_id, user_id, organisation_id) DO UPDATE SET deleted_at = NULL
+ON CONFLICT (entry_id, user_id) DO UPDATE SET deleted_at = NULL
 RETURNING id, entry_id, user_id, created_at, deleted_at, organisation_id
 `
 

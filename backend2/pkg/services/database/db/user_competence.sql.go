@@ -187,12 +187,12 @@ func (q *Queries) UserCompetenceCountByUserID(ctx context.Context, arg UserCompe
 const userCompetenceCreate = `-- name: UserCompetenceCreate :one
 INSERT INTO user_competences (level, user_id, competence_id, entry_id, created_by, organisation_id)
 VALUES ($1, $2, $3, $4, $5, $6)
-ON CONFLICT (user_id, competence_id, entry_id) DO UPDATE SET deleted_at = NULL AND level = $1
+ON CONFLICT (user_id, competence_id, entry_id) DO UPDATE SET deleted_at = NULL, level = $1
 RETURNING id, level, user_id, entry_id, competence_id, created_at, created_by, deleted_at, organisation_id
 `
 
 type UserCompetenceCreateParams struct {
-	Level          int32       `db:"level"`
+	Level          int32       `db:"_level"`
 	UserID         string      `db:"user_id"`
 	CompetenceID   string      `db:"competence_id"`
 	EntryID        pgtype.Text `db:"entry_id"`
