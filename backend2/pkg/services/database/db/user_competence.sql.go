@@ -19,7 +19,7 @@ WHERE user_id = $1
   AND organisation_id = $2
   AND deleted_at IS NULL
   AND created_at >= $3
-  AND created_at <= (DATE $4 + 1)
+  AND created_at <= (($4::timestamptz)::date + 1)
 ORDER BY created_at DESC
 `
 
@@ -27,7 +27,7 @@ type REPORT_UserCompetenceListByUserIdParams struct {
 	UserID         string    `db:"user_id"`
 	OrganisationID string    `db:"organisation_id"`
 	StartDate      time.Time `db:"start_date"`
-	EndDate        time.Time `db:"+end_date"`
+	EndDate        time.Time `db:"end_date"`
 }
 
 func (q *Queries) REPORT_UserCompetenceListByUserId(ctx context.Context, arg REPORT_UserCompetenceListByUserIdParams) ([]UserCompetence, error) {
@@ -494,7 +494,7 @@ WHERE user_id = $1
   AND organisation_id = $2
   AND deleted_at IS NULL
   AND created_at >= $3
-  AND created_at <= (DATE $4 + 1)
+  AND created_at <= (($4::timestamptz)::date + 1)
 ORDER BY created_at DESC
 `
 
@@ -502,7 +502,7 @@ type UserCompetenceForCompetenceReportParams struct {
 	UserID         string    `db:"user_id"`
 	OrganisationID string    `db:"organisation_id"`
 	StartDate      time.Time `db:"start_date"`
-	EndDate        time.Time `db:"+end_date"`
+	EndDate        time.Time `db:"end_date"`
 }
 
 func (q *Queries) UserCompetenceForCompetenceReport(ctx context.Context, arg UserCompetenceForCompetenceReportParams) ([]UserCompetence, error) {

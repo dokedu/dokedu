@@ -154,20 +154,19 @@ func (q *Queries) UserStudentFindByActualUserID(ctx context.Context, arg UserStu
 const userStudentFindByUserID = `-- name: UserStudentFindByUserID :one
 SELECT id, user_id, organisation_id, left_at, grade, birthday, nationality, comments, joined_at, created_at, deleted_at, birthplace, emoji, missed_hours, missed_hours_excused
 FROM user_students
-WHERE id = $1
+WHERE user_id = $1
   AND organisation_id = $2
   AND deleted_at is null
 LIMIT 1
 `
 
 type UserStudentFindByUserIDParams struct {
-	ID             string `db:"id"`
+	UserID         string `db:"user_id"`
 	OrganisationID string `db:"organisation_id"`
 }
 
-// TODO: should this not filter by `user_id` instead of `id`? In theory it could be the same, but in practice it is not
 func (q *Queries) UserStudentFindByUserID(ctx context.Context, arg UserStudentFindByUserIDParams) (UserStudent, error) {
-	row := q.db.QueryRow(ctx, userStudentFindByUserID, arg.ID, arg.OrganisationID)
+	row := q.db.QueryRow(ctx, userStudentFindByUserID, arg.UserID, arg.OrganisationID)
 	var i UserStudent
 	err := row.Scan(
 		&i.ID,

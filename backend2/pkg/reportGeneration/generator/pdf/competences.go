@@ -41,7 +41,7 @@ func (g *Generator) BaseCompetencesReportData(ctx context.Context, report db.Rep
 	}
 
 	userStudent, err := g.svc.DB.UserStudentFindByUserID(ctx, db.UserStudentFindByUserIDParams{
-		ID:             report.StudentUserID,
+		UserID:         report.StudentUserID,
 		OrganisationID: report.OrganisationID,
 	})
 	if err != nil {

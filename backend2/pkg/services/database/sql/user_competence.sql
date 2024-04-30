@@ -101,7 +101,7 @@ WHERE user_id = @user_id
   AND organisation_id = @organisation_id
   AND deleted_at IS NULL
   AND created_at >= @start_date
-  AND created_at <= (DATE @ end_date + 1)
+  AND created_at <= ((@end_date::timestamptz)::date + 1)
 ORDER BY created_at DESC;
 
 -- name: REPORT_UserCompetenceListByUserId :many
@@ -111,7 +111,7 @@ WHERE user_id = @user_id
   AND organisation_id = @organisation_id
   AND deleted_at IS NULL
   AND created_at >= @start_date
-  AND created_at <= (DATE @ end_date + 1)
+  AND created_at <= ((@end_date::timestamptz)::date + 1)
 ORDER BY created_at DESC;
 
 -- name: UserCompetenceCreate :one
