@@ -9,6 +9,7 @@ LIMIT 1;
 -- name: TagCreate :one
 INSERT INTO tags (name, color, organisation_id)
 VALUES (@name, @color::text, @organisation_id)
+ON CONFLICT (name, organisation_id) DO UPDATE SET deleted_at = NULL
 RETURNING *;
 
 -- name: TagUpsert :one

@@ -14,6 +14,7 @@ import (
 const tagCreate = `-- name: TagCreate :one
 INSERT INTO tags (name, color, organisation_id)
 VALUES ($1, $2::text, $3)
+ON CONFLICT (name, organisation_id) DO UPDATE SET deleted_at = NULL
 RETURNING id, name, color, organisation_id, created_at, deleted_at
 `
 

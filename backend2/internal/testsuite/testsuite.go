@@ -41,7 +41,7 @@ func New() (*TestSuite, error) {
 		return nil, err
 	}
 
-	application := app.New(svc)
+	application := app.New(svc, nil)
 	ts := &TestSuite{
 		Suite:    new(suite.Suite),
 		Resolver: application.Resolver,

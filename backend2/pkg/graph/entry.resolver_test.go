@@ -482,7 +482,52 @@ func (ts *TestSuite) Test_CreateEntryTag() {
 }
 
 func (ts *TestSuite) Test_CreateEntryFile() {
-	ts.Fail("not implemented")
+	org, owner := ts.MockOrganisationWithOwner()
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	entry, err := ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(owner.ID))
+	ts.NoError(err)
+
+	bucket, err := ts.DB.BucketForEntryFiles(ts.CtxWithUser(owner.ID), org.ID)
+	ts.NoError(err)
+	ts.NotNil(bucket)
+
+	file, err := ts.DB.FileCreate(ts.CtxWithUser(owner.ID), db.FileCreateParams{
+		Name:           "File",
+		FileType:       db.FileTypeBlob,
+		MimeType:       pgtype.Text{Valid: true, String: "application/pdf"},
+		Size:           100,
+		BucketID:       bucket.ID,
+		ParentID:       pgtype.Text{Valid: true, String: entry.ID},
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+	ts.NotNil(file)
+
+	// Owner can create an entry file
+	_, err = ts.Resolver.Mutation().CreateEntryFile(ts.CtxWithUser(owner.ID), model.CreateEntryFileInput{
+		EntryID: entry.ID,
+		FileID:  file.ID,
+	})
+	ts.NoError(err)
+
+	// Students cannot create entry files for another user's entry
+	_, err = ts.Resolver.Mutation().CreateEntryFile(ts.CtxWithUser(student.ID), model.CreateEntryFileInput{
+		EntryID: entry.ID,
+		FileID:  file.ID,
+	})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// Students can create entry files for their own entry
+	entry, err = ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(student.ID))
+	ts.NoError(err)
+
+	entry, err = ts.Resolver.Mutation().CreateEntryFile(ts.CtxWithUser(student.ID), model.CreateEntryFileInput{
+		EntryID: entry.ID,
+		FileID:  file.ID,
+	})
+	ts.NoError(err)
+	ts.NotNil(entry)
 }
 
 func (ts *TestSuite) Test_CreateEntryUser() {

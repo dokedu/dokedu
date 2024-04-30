@@ -892,6 +892,9 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int, searc
 
 	query := r.DB.NewQueryBuilder().Select("*").From("tags").Where("organisation_id = ?", user.OrganisationID)
 
+	// TODO: add test to ensure this check exists
+	query = query.Where("deleted_at IS NULL")
+
 	if search != nil && *search != "" {
 		query = query.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", *search))
 	}
@@ -901,6 +904,7 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int, searc
 
 	// Default sorting
 	query = query.OrderBy("created_at DESC")
+	query = query.OrderBy("name ASC")
 
 	tags, err := database.ScanSelectMany[db.Tag](r.DB, ctx, query)
 	if err != nil {
