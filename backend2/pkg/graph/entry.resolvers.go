@@ -17,7 +17,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/samber/lo"
-	"github.com/uptrace/bun"
 
 	"github.com/dokedu/dokedu/backend/pkg/helper"
 	"github.com/dokedu/dokedu/backend/pkg/middleware"
@@ -190,7 +189,17 @@ func (r *mutationResolver) UpdateEntry(ctx context.Context, input model.UpdateEn
 	if !ok {
 		return nil, msg.ErrUnauthorized
 	}
-	if !user.HasPermissionTeacher() {
+
+	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
+		ID:             input.ID,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// students can only update their own entry, teachers can update any entry
+	if !user.HasPermissionTeacher() && entry.UserID != user.ID {
 		return nil, msg.ErrUnauthorized
 	}
 
@@ -212,7 +221,7 @@ func (r *mutationResolver) UpdateEntry(ctx context.Context, input model.UpdateEn
 		params.SetBody = true
 	}
 
-	entry, err := r.DB.EntryUpdate(ctx, params)
+	entry, err = r.DB.EntryUpdate(ctx, params)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, msg.ErrNotFound
 	}
@@ -227,7 +236,20 @@ func (r *mutationResolver) ArchiveEntry(ctx context.Context, id string) (*db.Ent
 		return nil, msg.ErrUnauthorized
 	}
 
-	entry, err := r.DB.EntrySoftDelete(ctx, db.EntrySoftDeleteParams{
+	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
+		ID:             id,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// students can only archive their own entry, teachers can archive any entry
+	if !currentUser.HasPermissionTeacher() && entry.UserID != currentUser.ID {
+		return nil, msg.ErrUnauthorized
+	}
+
+	entry, err = r.DB.EntrySoftDelete(ctx, db.EntrySoftDeleteParams{
 		ID:             id,
 		OrganisationID: currentUser.OrganisationID,
 	})
@@ -244,7 +266,20 @@ func (r *mutationResolver) CreateEntryTag(ctx context.Context, input model.Creat
 		return nil, msg.ErrUnauthorized
 	}
 
-	_, err := r.DB.EntryTagCreate(ctx, db.EntryTagCreateParams{
+	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// students can only create entry tags for their own entry, teachers can create entry tags for any entry
+	if !currentUser.HasPermissionTeacher() && entry.UserID != currentUser.ID {
+		return nil, msg.ErrUnauthorized
+	}
+
+	_, err = r.DB.EntryTagCreate(ctx, db.EntryTagCreateParams{
 		EntryID:        input.EntryID,
 		TagID:          input.TagID,
 		OrganisationID: currentUser.OrganisationID,
@@ -252,11 +287,6 @@ func (r *mutationResolver) CreateEntryTag(ctx context.Context, input model.Creat
 	if err != nil {
 		return nil, err
 	}
-
-	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
-		ID:             input.EntryID,
-		OrganisationID: currentUser.OrganisationID,
-	})
 
 	return &entry, err
 }
@@ -272,6 +302,12 @@ func (r *mutationResolver) CreateEntryUser(ctx context.Context, input model.Crea
 	if !ok {
 		return nil, msg.ErrUnauthorized
 	}
+
+	if !currentUser.HasPermissionTeacher() {
+		return nil, msg.ErrUnauthorized
+	}
+
+	// TODO: ensure the user_competences for that entry are updated (ie. a competence is added for the user for each existing competence of the entry)
 
 	_, err := r.DB.EntryUserCreate(ctx, db.EntryUserCreateParams{
 		EntryID:        input.EntryID,
@@ -298,20 +334,27 @@ func (r *mutationResolver) CreateEntryEvent(ctx context.Context, input model.Cre
 		return nil, msg.ErrUnauthorized
 	}
 
-	_, err := r.DB.EntryEventCreate(ctx, db.EntryEventCreateParams{
-		EntryID:        input.EntryID,
-		EventID:        input.EventID,
-		OrganisationID: currentUser.OrganisationID,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
 	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
 		ID:             input.EntryID,
 		OrganisationID: currentUser.OrganisationID,
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	// students can only create entry events for their own entry, teachers can create entry events for any entry
+	if !currentUser.HasPermissionTeacher() && entry.UserID != currentUser.ID {
+		return nil, msg.ErrUnauthorized
+	}
+
+	_, err = r.DB.EntryEventCreate(ctx, db.EntryEventCreateParams{
+		EntryID:        input.EntryID,
+		EventID:        input.EventID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	return &entry, err
 }
@@ -327,6 +370,13 @@ func (r *mutationResolver) CreateEntryCompetence(ctx context.Context, input mode
 		ID:             input.EntryID,
 		OrganisationID: currentUser.OrganisationID,
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	if !currentUser.HasPermissionTeacher() && entry.UserID != currentUser.ID {
+		return nil, msg.ErrUnauthorized
+	}
 
 	err = r.DB.InTx(ctx, func(ctx context.Context, q *db.Queries) error {
 		entryUsers, err := r.DB.UserFindByUserEntry(ctx, db.UserFindByUserEntryParams{
@@ -362,7 +412,19 @@ func (r *mutationResolver) DeleteEntryTag(ctx context.Context, input model.Delet
 		return nil, msg.ErrUnauthorized
 	}
 
-	_, err := r.DB.EntryTagSoftDelete(ctx, db.EntryTagSoftDeleteParams{
+	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
+		ID:             input.EntryID,
+		OrganisationID: currentUser.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if !currentUser.HasPermissionTeacher() && entry.UserID != currentUser.ID {
+		return nil, msg.ErrUnauthorized
+	}
+
+	_, err = r.DB.EntryTagSoftDelete(ctx, db.EntryTagSoftDeleteParams{
 		EntryID:        input.EntryID,
 		TagID:          input.TagID,
 		OrganisationID: currentUser.OrganisationID,
@@ -370,11 +432,6 @@ func (r *mutationResolver) DeleteEntryTag(ctx context.Context, input model.Delet
 	if err != nil {
 		return nil, err
 	}
-
-	entry, err := r.DB.EntryFindById(ctx, db.EntryFindByIdParams{
-		ID:             input.EntryID,
-		OrganisationID: currentUser.OrganisationID,
-	})
 
 	return &entry, err
 }
@@ -407,6 +464,10 @@ func (r *mutationResolver) DeleteEntryFile(ctx context.Context, input model.Dele
 func (r *mutationResolver) DeleteEntryUser(ctx context.Context, input model.DeleteEntryUserInput) (*db.Entry, error) {
 	currentUser, ok := middleware.GetUser(ctx)
 	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	if !currentUser.HasPermissionTeacher() {
 		return nil, msg.ErrUnauthorized
 	}
 
@@ -458,6 +519,10 @@ func (r *mutationResolver) DeleteEntryEvent(ctx context.Context, input model.Del
 		return nil, err
 	}
 
+	if !currentUser.HasPermissionTeacher() && entry.UserID != currentUser.ID {
+		return nil, msg.ErrUnauthorized
+	}
+
 	_, err = r.DB.EntryEventSoftDelete(ctx, db.EntryEventSoftDeleteParams{
 		EntryID:        input.EntryID,
 		EventID:        input.EventID,
@@ -483,6 +548,10 @@ func (r *mutationResolver) DeleteEntryCompetence(ctx context.Context, input mode
 	})
 	if err != nil {
 		return nil, err
+	}
+
+	if !currentUser.HasPermissionTeacher() && entry.UserID != currentUser.ID {
+		return nil, msg.ErrUnauthorized
 	}
 
 	_, err = r.DB.UserCompetenceSoftDeleteByCompetenceAndEntry(ctx, db.UserCompetenceSoftDeleteByCompetenceAndEntryParams{
@@ -511,10 +580,15 @@ func (r *mutationResolver) UpdateEntryUserCompetenceLevel(ctx context.Context, i
 		return nil, err
 	}
 
+	if !currentUser.HasPermissionTeacher() && entry.UserID != currentUser.ID {
+		return nil, msg.ErrUnauthorized
+	}
+
 	_, err = r.DB.UserCompetenceUpdateLevels(ctx, db.UserCompetenceUpdateLevelsParams{
 		Level:          int32(input.Level),
 		EntryID:        input.EntryID,
 		OrganisationID: currentUser.OrganisationID,
+		CompetenceID:   input.CompetenceID,
 	})
 	if err != nil {
 		return nil, err
@@ -634,6 +708,11 @@ func (r *queryResolver) Entry(ctx context.Context, id string) (*db.Entry, error)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, msg.ErrNotFound
 	}
+
+	if !currentUser.HasPermissionTeacher() && entry.UserID != currentUser.ID {
+		return nil, msg.ErrUnauthorized
+	}
+
 	return &entry, err
 }
 
@@ -645,35 +724,45 @@ func (r *queryResolver) Entries(ctx context.Context, limit *int, offset *int, fi
 	}
 
 	l, o := helper.PaginationInput(limit, offset)
-	query := r.DB.NewQueryBuilder().Select("*").From("entries").Where("organisation_id = ?", currentUser.OrganisationID).Limit(l + 1).Offset(o)
+	query := r.DB.NewQueryBuilder().Select("entries.*").From("entries").Where("entries.organisation_id = ?", currentUser.OrganisationID).Limit(l + 1).Offset(o)
 	query = query.Where("entries.deleted_at IS NULL")
 
+	if !currentUser.HasPermissionTeacher() {
+		query = query.Where("entries.user_id = ?", currentUser.ID)
+	}
+
 	if filter != nil {
-		if filter.Users != nil && len(filter.Users) > 0 {
-			query = query.Where("user_id IN (?)", bun.In(filter.Users))
-		}
-		if filter.Authors != nil && len(filter.Authors) > 0 {
-			query = query.Where("user_id IN (?)", bun.In(filter.Authors))
+		if currentUser.HasPermissionTeacher() {
+			if filter.Users != nil && len(filter.Users) > 0 {
+				query = query.Join("entry_users ON entry_users.entry_id = entries.id")
+				query = query.Where("entry_users.user_id = ANY (?)", filter.Users)
+			}
+
+			if filter.Authors != nil && len(filter.Authors) > 0 {
+				query = query.Where("entries.user_id = ANY (?)", filter.Authors)
+			}
 		}
 		if filter.Tags != nil && len(filter.Tags) > 0 {
-			query = query.Where("tag_id IN (?)", bun.In(filter.Tags))
-			query = query.Where("(SELECT COUNT(DISTINCT tag_id) FROM entry_tags et2 WHERE et2.entry_id = \"entries\".id) >= ?", len(filter.Tags))
+			query = query.Join("entry_tags", "entry_tags.entry_id = entries.id")
+			query = query.Where("entry_tags.tag_id = ANY (?)", filter.Tags)
 		}
 	}
 
 	if sortBy != nil {
 		switch *sortBy {
 		case model.EntrySortByCreatedAtAsc:
-			query = query.OrderBy("created_at ASC")
+			query = query.OrderBy("entries.created_at ASC")
 		case model.EntrySortByCreatedAtDesc:
-			query = query.OrderBy("created_at DESC")
+			query = query.OrderBy("entries.created_at DESC")
 		case model.EntrySortByDateAsc:
-			query = query.OrderBy("date ASC")
+			query = query.OrderBy("entries.date ASC")
 		case model.EntrySortByDateDesc:
-			query = query.OrderBy("date DESC")
+			query = query.OrderBy("entries.date DESC")
 		default:
-			query = query.OrderBy("created_at DESC")
+			query = query.OrderBy("entries.created_at DESC")
 		}
+	} else {
+		query = query.OrderBy("entries.created_at DESC")
 	}
 
 	if search != nil && *search != "" {

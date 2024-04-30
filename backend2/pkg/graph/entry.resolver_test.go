@@ -1,12 +1,16 @@
 package graph_test
 
 import (
+	"context"
+	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/samber/lo"
 
 	"github.com/dokedu/dokedu/backend/pkg/graph"
+	"github.com/dokedu/dokedu/backend/pkg/graph/model"
+	"github.com/dokedu/dokedu/backend/pkg/msg"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
 )
 
@@ -328,19 +332,153 @@ func (ts *TestSuite) Test_Entry_Resolvers_Subjects() {
 }
 
 func (ts *TestSuite) Test_Entry_CreateEntry() {
-	ts.Fail("not implemented")
+	org, owner := ts.MockOrganisationWithOwner()
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	entry, err := ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(owner.ID))
+	ts.NoError(err)
+	ts.NotNil(entry)
+	ts.Equal(entry.OrganisationID, org.ID)
+	ts.Equal(entry.UserID, owner.ID)
+
+	// Students can also create entries
+	entry, err = ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(student.ID))
+	ts.NoError(err)
+	ts.NotNil(entry)
+	ts.Equal(entry.OrganisationID, org.ID)
+	ts.Equal(entry.UserID, student.ID)
 }
 
 func (ts *TestSuite) Test_Entry_UpdateEntry() {
-	ts.Fail("not implemented")
+	org, owner := ts.MockOrganisationWithOwner()
+	teacher := ts.MockTeacherForOrganisation(org.ID)
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	entry, err := ts.DB.EntryCreate(ts.CtxWithUser(owner.ID), db.EntryCreateParams{
+		Date:           graph.OptionalDate(lo.ToPtr(time.Now())),
+		Body:           "test",
+		UserID:         owner.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+
+	updatedEntry, err := ts.Resolver.Mutation().UpdateEntry(ts.CtxWithUser(owner.ID), model.UpdateEntryInput{
+		ID:   entry.ID,
+		Body: lo.ToPtr("new body"),
+	})
+	ts.NoError(err)
+	ts.Equal("new body", updatedEntry.Body)
+
+	// Teacher can update the entry
+	updatedEntry, err = ts.Resolver.Mutation().UpdateEntry(ts.CtxWithUser(teacher.ID), model.UpdateEntryInput{
+		ID:   entry.ID,
+		Body: lo.ToPtr("new body 2"),
+	})
+	ts.NoError(err)
+	ts.Equal("new body 2", updatedEntry.Body)
+
+	// Student cannot update the entry
+	_, err = ts.Resolver.Mutation().UpdateEntry(ts.CtxWithUser(student.ID), model.UpdateEntryInput{
+		ID:   entry.ID,
+		Body: lo.ToPtr("new body 3"),
+	})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// Student can update their own entry
+	entry2, err := ts.DB.EntryCreate(ts.CtxWithUser(student.ID), db.EntryCreateParams{
+		Date:           graph.OptionalDate(lo.ToPtr(time.Now())),
+		Body:           "test",
+		UserID:         student.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+
+	updatedEntry, err = ts.Resolver.Mutation().UpdateEntry(ts.CtxWithUser(student.ID), model.UpdateEntryInput{
+		ID:   entry2.ID,
+		Body: lo.ToPtr("new body 5"),
+	})
+	ts.NoError(err)
+	ts.Equal("new body 5", updatedEntry.Body)
 }
 
 func (ts *TestSuite) Test_Entry_ArchiveEntry() {
-	ts.Fail("not implemented")
+	org, owner := ts.MockOrganisationWithOwner()
+	teacher := ts.MockTeacherForOrganisation(org.ID)
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	// Owner can archive the entry
+	entry, err := ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(owner.ID))
+	ts.NoError(err)
+
+	archivedEntry, err := ts.Resolver.Mutation().ArchiveEntry(ts.CtxWithUser(owner.ID), entry.ID)
+	ts.NoError(err)
+	ts.NotNil(archivedEntry)
+	ts.Equal(entry.ID, archivedEntry.ID)
+
+	// Teacher can archive the entry
+	entry, err = ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(owner.ID))
+	ts.NoError(err)
+
+	archivedEntry, err = ts.Resolver.Mutation().ArchiveEntry(ts.CtxWithUser(teacher.ID), entry.ID)
+	ts.NoError(err)
+	ts.NotNil(archivedEntry)
+	ts.Equal(entry.ID, archivedEntry.ID)
+
+	// Student cannot archive the entry
+	entry, err = ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(owner.ID))
+	ts.NoError(err)
+
+	_, err = ts.Resolver.Mutation().ArchiveEntry(ts.CtxWithUser(student.ID), entry.ID)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// If the entry is created by the student, they can archive it
+	entry, err = ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(student.ID))
+	ts.NoError(err)
+
+	archivedEntry, err = ts.Resolver.Mutation().ArchiveEntry(ts.CtxWithUser(student.ID), entry.ID)
+	ts.NoError(err)
+	ts.NotNil(archivedEntry)
+	ts.Equal(entry.ID, archivedEntry.ID)
 }
 
 func (ts *TestSuite) Test_CreateEntryTag() {
-	ts.Fail("not implemented")
+	org, owner := ts.MockOrganisationWithOwner()
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	entry, err := ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(owner.ID))
+	ts.NoError(err)
+
+	tag, err := ts.DB.TagCreate(ts.CtxWithUser(owner.ID), db.TagCreateParams{
+		Name:           "Tag",
+		OrganisationID: org.ID,
+		Color:          "blue",
+	})
+	ts.NoError(err)
+
+	entry, err = ts.Resolver.Mutation().CreateEntryTag(ts.CtxWithUser(owner.ID), model.CreateEntryTagInput{
+		EntryID: entry.ID,
+		TagID:   tag.ID,
+	})
+	ts.NoError(err)
+	ts.NotNil(entry)
+
+	// Students cannot create entry tags for another user's entry
+	_, err = ts.Resolver.Mutation().CreateEntryTag(ts.CtxWithUser(student.ID), model.CreateEntryTagInput{
+		EntryID: entry.ID,
+		TagID:   tag.ID,
+	})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// Students can create entry tags for their own entry
+	entry, err = ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(student.ID))
+	ts.NoError(err)
+
+	entry, err = ts.Resolver.Mutation().CreateEntryTag(ts.CtxWithUser(student.ID), model.CreateEntryTagInput{
+		EntryID: entry.ID,
+		TagID:   tag.ID,
+	})
+	ts.NoError(err)
+	ts.NotNil(entry)
 }
 
 func (ts *TestSuite) Test_CreateEntryFile() {
@@ -348,19 +486,179 @@ func (ts *TestSuite) Test_CreateEntryFile() {
 }
 
 func (ts *TestSuite) Test_CreateEntryUser() {
-	ts.Fail("not implemented")
+	org, owner := ts.MockOrganisationWithOwner()
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	entry, err := ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(owner.ID))
+	ts.NoError(err)
+
+	entryUser, err := ts.Resolver.Mutation().CreateEntryUser(ts.CtxWithUser(owner.ID), model.CreateEntryUserInput{
+		EntryID: entry.ID,
+		UserID:  student.ID,
+	})
+	ts.NoError(err)
+	ts.NotNil(entryUser)
+
+	// Students cannot create entry users
+	_, err = ts.Resolver.Mutation().CreateEntryUser(ts.CtxWithUser(student.ID), model.CreateEntryUserInput{
+		EntryID: entry.ID,
+		UserID:  student.ID,
+	})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// Students cannot create entry users for their own entry
+	entry, err = ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(student.ID))
+	ts.NoError(err)
+
+	entryUser, err = ts.Resolver.Mutation().CreateEntryUser(ts.CtxWithUser(student.ID), model.CreateEntryUserInput{
+		EntryID: entry.ID,
+		UserID:  student.ID,
+	})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
 }
 
 func (ts *TestSuite) Test_CreateEntryEvent() {
-	ts.Fail("not implemented")
+	org, owner := ts.MockOrganisationWithOwner()
+	teacher := ts.MockTeacherForOrganisation(org.ID)
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	entry, err := ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(owner.ID))
+	ts.NoError(err)
+
+	event, err := ts.DB.EventCreate(ts.CtxWithUser(teacher.ID), db.EventCreateParams{
+		ImageFileID:    graph.OptionalString(nil),
+		Title:          "Event",
+		Body:           "Body",
+		StartsAt:       time.Now(),
+		EndsAt:         time.Now().Add(time.Hour),
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+
+	// Owner can create an entry event
+	entry, err = ts.Resolver.Mutation().CreateEntryEvent(ts.CtxWithUser(owner.ID), model.CreateEntryEventInput{
+		EntryID: entry.ID,
+		EventID: event.ID,
+	})
+	ts.NoError(err)
+	ts.NotNil(entry)
+
+	// Students cannot create entry events for another user's entry
+	_, err = ts.Resolver.Mutation().CreateEntryEvent(ts.CtxWithUser(student.ID), model.CreateEntryEventInput{
+		EntryID: entry.ID,
+		EventID: event.ID,
+	})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// Students can create entry events for their own entry
+	entry, err = ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(student.ID))
+	ts.NoError(err)
+
+	entry, err = ts.Resolver.Mutation().CreateEntryEvent(ts.CtxWithUser(student.ID), model.CreateEntryEventInput{
+		EntryID: entry.ID,
+		EventID: event.ID,
+	})
+	ts.NoError(err)
+	ts.NotNil(entry)
 }
 
 func (ts *TestSuite) Test_CreateEntryCompetence() {
-	ts.Fail("not implemented")
+	org, owner := ts.MockOrganisationWithOwner()
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	entry, err := ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(owner.ID))
+	ts.NoError(err)
+
+	competence, err := ts.DB.CompetenceCreate(ts.CtxWithUser(student.ID), db.CompetenceCreateParams{
+		Name:           "Competence",
+		OrganisationID: org.ID,
+		Grades:         []int32{1, 2, 3, 4},
+		CompetenceID:   graph.OptionalString(nil),
+		CompetenceType: db.CompetenceTypeCompetence,
+	})
+	ts.NoError(err)
+
+	// Owner can create an entry competence
+	entry, err = ts.Resolver.Mutation().CreateEntryCompetence(ts.CtxWithUser(owner.ID), model.CreateEntryCompetenceInput{
+		EntryID:      entry.ID,
+		CompetenceID: competence.ID,
+	})
+	ts.NoError(err)
+	ts.NotNil(entry)
+
+	// Students cannot create entry competences for another user's entry
+	_, err = ts.Resolver.Mutation().CreateEntryCompetence(ts.CtxWithUser(student.ID), model.CreateEntryCompetenceInput{
+		EntryID:      entry.ID,
+		CompetenceID: competence.ID,
+	})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// Students can create entry competences for their own entry
+	entry, err = ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(student.ID))
+	ts.NoError(err)
+
+	entry, err = ts.Resolver.Mutation().CreateEntryCompetence(ts.CtxWithUser(student.ID), model.CreateEntryCompetenceInput{
+		EntryID:      entry.ID,
+		CompetenceID: competence.ID,
+	})
+	ts.NoError(err)
+	ts.NotNil(entry)
 }
 
 func (ts *TestSuite) Test_DeleteEntryTag() {
-	ts.Fail("not implemented")
+	org, owner := ts.MockOrganisationWithOwner()
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	entry, err := ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(owner.ID))
+	ts.NoError(err)
+
+	tag, err := ts.DB.TagCreate(ts.CtxWithUser(owner.ID), db.TagCreateParams{
+		Name:           "Tag",
+		OrganisationID: org.ID,
+		Color:          "blue",
+	})
+	ts.NoError(err)
+
+	createEntryTag := func(ctx context.Context, entryID string, tagID string) (*db.Entry, error) {
+		return ts.Resolver.Mutation().CreateEntryTag(ctx, model.CreateEntryTagInput{
+			EntryID: entryID,
+			TagID:   tagID,
+		})
+	}
+
+	_, err = createEntryTag(ts.CtxWithUser(owner.ID), entry.ID, tag.ID)
+	ts.NoError(err)
+
+	// Owner can delete an entry tag
+	_, err = ts.Resolver.Mutation().DeleteEntryTag(ts.CtxWithUser(owner.ID), model.DeleteEntryTagInput{
+		EntryID: entry.ID,
+		TagID:   tag.ID,
+	})
+	ts.NoError(err)
+
+	// Students cannot delete entry tags for another user's entry
+	_, err = createEntryTag(ts.CtxWithUser(owner.ID), entry.ID, tag.ID)
+	ts.NoError(err)
+
+	_, err = ts.Resolver.Mutation().DeleteEntryTag(ts.CtxWithUser(student.ID), model.DeleteEntryTagInput{
+		EntryID: entry.ID,
+		TagID:   tag.ID,
+	})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// Students can delete entry tags for their own entry
+	entry, err = ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(student.ID))
+	ts.NoError(err)
+
+	_, err = createEntryTag(ts.CtxWithUser(student.ID), entry.ID, tag.ID)
+	ts.NoError(err)
+
+	entry, err = ts.Resolver.Mutation().DeleteEntryTag(ts.CtxWithUser(student.ID), model.DeleteEntryTagInput{
+		EntryID: entry.ID,
+		TagID:   tag.ID,
+	})
+	ts.NoError(err)
+	ts.NotNil(entry)
 }
 
 func (ts *TestSuite) Test_DeleteEntryFile() {
@@ -368,19 +666,225 @@ func (ts *TestSuite) Test_DeleteEntryFile() {
 }
 
 func (ts *TestSuite) Test_DeleteEntryUser() {
-	ts.Fail("not implemented")
+	org, owner := ts.MockOrganisationWithOwner()
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	entry, err := ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(owner.ID))
+	ts.NoError(err)
+
+	_, err = ts.Resolver.Mutation().CreateEntryUser(ts.CtxWithUser(owner.ID), model.CreateEntryUserInput{
+		EntryID: entry.ID,
+		UserID:  student.ID,
+	})
+	ts.NoError(err)
+
+	// Owner can delete an entry user
+	_, err = ts.Resolver.Mutation().DeleteEntryUser(ts.CtxWithUser(owner.ID), model.DeleteEntryUserInput{
+		EntryID: entry.ID,
+		UserID:  student.ID,
+	})
+	ts.NoError(err)
+
+	// Students cannot delete entry users for another user's entry
+	_, err = ts.Resolver.Mutation().DeleteEntryUser(ts.CtxWithUser(student.ID), model.DeleteEntryUserInput{
+		EntryID: entry.ID,
+		UserID:  student.ID,
+	})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// Students cannot delete entry users for their own entry
+	entry, err = ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(student.ID))
+	ts.NoError(err)
+
+	_, err = ts.Resolver.Mutation().DeleteEntryUser(ts.CtxWithUser(student.ID), model.DeleteEntryUserInput{
+		EntryID: entry.ID,
+		UserID:  student.ID,
+	})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
 }
 
 func (ts *TestSuite) Test_DeleteEntryEvent() {
-	ts.Fail("not implemented")
+	org, owner := ts.MockOrganisationWithOwner()
+	teacher := ts.MockTeacherForOrganisation(org.ID)
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	entry, err := ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(owner.ID))
+	ts.NoError(err)
+
+	event, err := ts.DB.EventCreate(ts.CtxWithUser(teacher.ID), db.EventCreateParams{
+		ImageFileID:    graph.OptionalString(nil),
+		Title:          "Event",
+		Body:           "Body",
+		StartsAt:       time.Now(),
+		EndsAt:         time.Now().Add(time.Hour),
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+
+	_, err = ts.Resolver.Mutation().CreateEntryEvent(ts.CtxWithUser(owner.ID), model.CreateEntryEventInput{
+		EntryID: entry.ID,
+		EventID: event.ID,
+	})
+	ts.NoError(err)
+
+	// Owner can delete an entry event
+	_, err = ts.Resolver.Mutation().DeleteEntryEvent(ts.CtxWithUser(owner.ID), model.DeleteEntryEventInput{
+		EntryID: entry.ID,
+		EventID: event.ID,
+	})
+	ts.NoError(err)
+
+	// Students cannot delete entry events for another user's entry
+	_, err = ts.Resolver.Mutation().DeleteEntryEvent(ts.CtxWithUser(student.ID), model.DeleteEntryEventInput{
+		EntryID: entry.ID,
+		EventID: event.ID,
+	})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// Students can delete entry events for their own entry
+	entry, err = ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(student.ID))
+	ts.NoError(err)
+
+	_, err = ts.DB.EntryEventCreate(ts.CtxWithUser(teacher.ID), db.EntryEventCreateParams{
+		EntryID:        entry.ID,
+		EventID:        event.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+
+	_, err = ts.Resolver.Mutation().DeleteEntryEvent(ts.CtxWithUser(student.ID), model.DeleteEntryEventInput{
+		EntryID: entry.ID,
+		EventID: event.ID,
+	})
+	ts.NoError(err)
 }
 
 func (ts *TestSuite) Test_DeleteEntryCompetence() {
-	ts.Fail("not implemented")
+	org, owner := ts.MockOrganisationWithOwner()
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	entry, err := ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(owner.ID))
+	ts.NoError(err)
+
+	competence, err := ts.DB.CompetenceCreate(ts.CtxWithUser(student.ID), db.CompetenceCreateParams{
+		Name:           "Competence",
+		OrganisationID: org.ID,
+		Grades:         []int32{1, 2, 3, 4},
+		CompetenceID:   graph.OptionalString(nil),
+		CompetenceType: db.CompetenceTypeCompetence,
+	})
+	ts.NoError(err)
+
+	_, err = ts.DB.UserCompetenceCreate(ts.CtxWithUser(student.ID), db.UserCompetenceCreateParams{
+		Level:          1,
+		UserID:         student.ID,
+		EntryID:        pgtype.Text{Valid: true, String: entry.ID},
+		CompetenceID:   competence.ID,
+		OrganisationID: org.ID,
+		CreatedBy:      pgtype.Text{Valid: true, String: owner.ID},
+	})
+	ts.NoError(err)
+
+	// Owner can delete an entry competence
+	_, err = ts.Resolver.Mutation().DeleteEntryCompetence(ts.CtxWithUser(owner.ID), model.DeleteEntryCompetenceInput{
+		EntryID:      entry.ID,
+		CompetenceID: competence.ID,
+	})
+	ts.NoError(err)
+
+	// Students cannot delete entry competences for another user's entry
+	_, err = ts.Resolver.Mutation().DeleteEntryCompetence(ts.CtxWithUser(student.ID), model.DeleteEntryCompetenceInput{
+		EntryID:      entry.ID,
+		CompetenceID: competence.ID,
+	})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// Students can delete entry competences for their own entry
+	entry, err = ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(student.ID))
+	ts.NoError(err)
+
+	_, err = ts.DB.UserCompetenceCreate(ts.CtxWithUser(student.ID), db.UserCompetenceCreateParams{
+		Level:          1,
+		UserID:         student.ID,
+		EntryID:        pgtype.Text{Valid: true, String: entry.ID},
+		CompetenceID:   competence.ID,
+		OrganisationID: org.ID,
+		CreatedBy:      pgtype.Text{Valid: true, String: owner.ID},
+	})
+	ts.NoError(err)
 }
 
 func (ts *TestSuite) Test_UpdateEntryUserCompetenceLevel() {
-	ts.Fail("not implemented")
+	org, owner := ts.MockOrganisationWithOwner()
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	entry, err := ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(owner.ID))
+	ts.NoError(err)
+
+	competence, err := ts.DB.CompetenceCreate(ts.CtxWithUser(student.ID), db.CompetenceCreateParams{
+		Name:           "Competence",
+		OrganisationID: org.ID,
+		Grades:         []int32{1, 2, 3, 4},
+		CompetenceID:   graph.OptionalString(nil),
+		CompetenceType: db.CompetenceTypeCompetence,
+	})
+	ts.NoError(err)
+
+	_, err = ts.DB.UserCompetenceCreate(ts.CtxWithUser(owner.ID), db.UserCompetenceCreateParams{
+		Level:          1,
+		UserID:         student.ID,
+		EntryID:        pgtype.Text{Valid: true, String: entry.ID},
+		CompetenceID:   competence.ID,
+		OrganisationID: org.ID,
+		CreatedBy:      pgtype.Text{Valid: true, String: owner.ID},
+	})
+	ts.NoError(err)
+
+	// Owner can update an entry user competence level
+	_, err = ts.Resolver.Mutation().UpdateEntryUserCompetenceLevel(ts.CtxWithUser(owner.ID), model.UpdateEntryUserCompetenceLevel{
+		EntryID:      entry.ID,
+		CompetenceID: competence.ID,
+		Level:        2,
+	})
+	ts.NoError(err)
+
+	entryCompetences, err := ts.DB.UserCompetenceFindByUserIdAndCompetenceID(ts.CtxWithUser(owner.ID), db.UserCompetenceFindByUserIdAndCompetenceIDParams{
+		UserID:         student.ID,
+		CompetenceID:   competence.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+	ts.Len(entryCompetences, 1)
+	ts.Equal(int32(2), entryCompetences[0].Level)
+
+	// Student cannot update the entry user competence level for another user's entry
+	_, err = ts.Resolver.Mutation().UpdateEntryUserCompetenceLevel(ts.CtxWithUser(student.ID), model.UpdateEntryUserCompetenceLevel{
+		EntryID:      entry.ID,
+		CompetenceID: competence.ID,
+		Level:        2,
+	})
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// Student can update the entry user competence level for their own entry
+	entry, err = ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(student.ID))
+	ts.NoError(err)
+
+	_, err = ts.DB.UserCompetenceCreate(ts.CtxWithUser(student.ID), db.UserCompetenceCreateParams{
+		Level:          1,
+		UserID:         student.ID,
+		EntryID:        pgtype.Text{Valid: true, String: entry.ID},
+		CompetenceID:   competence.ID,
+		OrganisationID: org.ID,
+		CreatedBy:      pgtype.Text{Valid: true, String: owner.ID},
+	})
+	ts.NoError(err)
+
+	_, err = ts.Resolver.Mutation().UpdateEntryUserCompetenceLevel(ts.CtxWithUser(student.ID), model.UpdateEntryUserCompetenceLevel{
+		EntryID:      entry.ID,
+		CompetenceID: competence.ID,
+		Level:        2,
+	})
+	ts.NoError(err)
 }
 
 func (ts *TestSuite) Test_UploadFileToEntry() {
@@ -392,9 +896,138 @@ func (ts *TestSuite) Test_RemoveFileFromEntry() {
 }
 
 func (ts *TestSuite) Test_Entry() {
-	ts.Fail("not implemented")
+	org, owner := ts.MockOrganisationWithOwner()
+	teacher := ts.MockTeacherForOrganisation(org.ID)
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	entry, err := ts.DB.EntryCreate(ts.CtxWithUser(owner.ID), db.EntryCreateParams{
+		Date:           pgtype.Date{Valid: true, Time: time.Now()},
+		Body:           "test",
+		UserID:         owner.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+
+	// Owner can see the entry
+	queryEntry, err := ts.Resolver.Query().Entry(ts.CtxWithUser(owner.ID), entry.ID)
+	ts.NoError(err)
+	ts.Equal(queryEntry.ID, entry.ID)
+
+	// Teacher can see the entry
+	queryEntry, err = ts.Resolver.Query().Entry(ts.CtxWithUser(teacher.ID), entry.ID)
+	ts.NoError(err)
+	ts.Equal(queryEntry.ID, entry.ID)
+
+	// Student cannot see the entry
+	_, err = ts.Resolver.Query().Entry(ts.CtxWithUser(student.ID), entry.ID)
+	ts.ErrorIs(err, msg.ErrUnauthorized)
+
+	// Student can see their own entries
+	entry, err = ts.DB.EntryCreate(ts.CtxWithUser(student.ID), db.EntryCreateParams{
+		Date:           pgtype.Date{Valid: true, Time: time.Now()},
+		Body:           "test",
+		UserID:         student.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+
+	queryEntry, err = ts.Resolver.Query().Entry(ts.CtxWithUser(student.ID), entry.ID)
+	ts.NoError(err)
+	ts.Equal(queryEntry.ID, entry.ID)
 }
 
 func (ts *TestSuite) Test_Entries() {
-	ts.Fail("not implemented")
+	org, owner := ts.MockOrganisationWithOwner()
+	teacher := ts.MockTeacherForOrganisation(org.ID)
+	student := ts.MockUserForOrganisation(org.ID, "student")
+
+	createEntry := func(ctx context.Context, userID string, body string) (db.Entry, error) {
+		return ts.DB.EntryCreate(ctx, db.EntryCreateParams{
+			Date:           pgtype.Date{Valid: true, Time: time.Now()},
+			Body:           body,
+			UserID:         userID,
+			OrganisationID: org.ID,
+		})
+	}
+
+	// Owner can see all entries
+	// create 10 entries
+	for i := 1; i <= 10; i++ {
+		entry, err := createEntry(ts.CtxWithUser(owner.ID), owner.ID, fmt.Sprintf("entry-%d", i))
+		ts.NoError(err)
+		ts.Equal(entry.ID, entry.ID)
+	}
+
+	entries, err := ts.Resolver.Query().Entries(ts.CtxWithUser(owner.ID), nil, nil, nil, nil, nil)
+	ts.NoError(err)
+	ts.Len(entries.Edges, 10)
+
+	// Teacher can see all entries
+	// create 10 entries
+	for i := 1; i <= 10; i++ {
+		entry, err := createEntry(ts.CtxWithUser(teacher.ID), teacher.ID, fmt.Sprintf("entry-%d", i))
+		ts.NoError(err)
+		ts.Equal(entry.ID, entry.ID)
+	}
+
+	entries, err = ts.Resolver.Query().Entries(ts.CtxWithUser(teacher.ID), nil, nil, nil, nil, nil)
+	ts.NoError(err)
+	ts.Len(entries.Edges, 20)
+
+	// Student cannot see all entries
+	entries, err = ts.Resolver.Query().Entries(ts.CtxWithUser(student.ID), nil, nil, nil, nil, nil)
+	ts.NoError(err)
+	ts.Len(entries.Edges, 0)
+
+	// Student can see their own entries
+	// create 10 entries
+	for i := 1; i <= 10; i++ {
+		entry, err := createEntry(ts.CtxWithUser(student.ID), student.ID, fmt.Sprintf("entry-%d", i))
+		ts.NoError(err)
+		ts.Equal(entry.ID, entry.ID)
+	}
+	entries, err = ts.Resolver.Query().Entries(ts.CtxWithUser(student.ID), nil, nil, nil, nil, nil)
+	ts.NoError(err)
+	ts.Len(entries.Edges, 10)
+	// first entry should be entry-1
+	ts.Equal(entries.Edges[0].Body, "entry-10")
+
+	// sort direction
+	sortDirection := model.EntrySortByCreatedAtDesc
+	entries, err = ts.Resolver.Query().Entries(ts.CtxWithUser(student.ID), nil, nil, nil, &sortDirection, nil)
+	ts.NoError(err)
+	ts.Len(entries.Edges, 10)
+	// first entry should be entry-10
+	ts.Equal(entries.Edges[0].Body, "entry-10")
+
+	// sort direction
+	sortDirection = model.EntrySortByCreatedAtAsc
+	entries, err = ts.Resolver.Query().Entries(ts.CtxWithUser(student.ID), nil, nil, nil, &sortDirection, nil)
+	ts.NoError(err)
+	ts.Len(entries.Edges, 10)
+	// first entry should be entry-1
+	ts.Equal(entries.Edges[0].Body, "entry-1")
+
+	// Owner filter by user teacher should only return 10 entries
+	filter := model.EntryFilterInput{Authors: lo.ToSlicePtr([]string{teacher.ID})}
+	entries, err = ts.Resolver.Query().Entries(ts.CtxWithUser(owner.ID), lo.ToPtr(10), nil, &filter, nil, nil)
+	ts.NoError(err)
+	ts.Len(entries.Edges, 10)
+
+	// Teacher create an entry and add the student as a entry_user to it and filter by the student should only return 1 entry
+	entry, err := createEntry(ts.CtxWithUser(teacher.ID), student.ID, "entry-11")
+	ts.NoError(err)
+
+	_, err = ts.DB.EntryUserCreate(ts.CtxWithUser(teacher.ID), db.EntryUserCreateParams{
+		EntryID:        entry.ID,
+		UserID:         student.ID,
+		OrganisationID: org.ID,
+	})
+	ts.NoError(err)
+
+	filter = model.EntryFilterInput{Users: lo.ToSlicePtr([]string{student.ID})}
+	entries, err = ts.Resolver.Query().Entries(ts.CtxWithUser(teacher.ID), lo.ToPtr(10), nil, &filter, nil, nil)
+	ts.NoError(err)
+	ts.Len(entries.Edges, 1)
+	ts.Equal(entries.Edges[0].Body, "entry-11")
 }
