@@ -34,10 +34,6 @@ func main() {
 	}
 
 	reportService := reportGeneration.NewReportGenerationService(s, context.Background(), 3)
-	if err != nil {
-		slog.Error("Failed to create report generation service", "err", err)
-		os.Exit(1)
-	}
 
 	cliApp := &cli.App{
 		Name: "dokedu",
@@ -48,6 +44,10 @@ func main() {
 					application := app.New(s, reportService)
 
 					reportService.GoStartLoop()
+					err = s.Meili.RefreshCompetenceIndexes(context.Background())
+					if err != nil {
+						return err
+					}
 
 					slog.Info("Starting server on port 8080")
 					return application.Server.ListenAndServe()
