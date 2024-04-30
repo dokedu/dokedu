@@ -53,20 +53,20 @@ func (g *Generator) UploadPDFToBucket(report db.Report, pdf []byte) error {
 
 	ioReader := bytes.NewReader(pdf)
 
-	// Upload the pdf to the bucket
-	_, err = g.svc.Minio.PutObject(ctx, bucket.ID, report.ID, ioReader, -1, minio.PutObjectOptions{
-		ContentType: "application/pdf",
-	})
-	if err != nil {
-		return err
-	}
-
 	file, err := g.svc.DB.FileCreate(ctx, db.FileCreateParams{
 		Name:           report.ID,
 		FileType:       db.FileTypeBlob,
 		MimeType:       pgtype.Text{Valid: true, String: "application/pdf"},
 		BucketID:       bucket.ID,
 		OrganisationID: report.OrganisationID,
+	})
+	if err != nil {
+		return err
+	}
+
+	// Upload the pdf to the bucket
+	_, err = g.svc.Minio.PutObject(ctx, bucket.ID, file.ID, ioReader, -1, minio.PutObjectOptions{
+		ContentType: "application/pdf",
 	})
 	if err != nil {
 		return err

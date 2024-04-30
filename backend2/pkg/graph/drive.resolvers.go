@@ -164,7 +164,25 @@ func (r *mutationResolver) DeleteFile(ctx context.Context, input model.DeleteFil
 
 // PreviewFile is the resolver for the previewFile field.
 func (r *mutationResolver) PreviewFile(ctx context.Context, input model.PreviewFileInput) (*model.PreviewFilePayload, error) {
-	panic(fmt.Errorf("not implemented: PreviewFile - previewFile"))
+	user, ok := middleware.GetUser(ctx)
+	if !ok {
+		return nil, msg.ErrUnauthorized
+	}
+
+	file, err := r.DB.FileByID(ctx, db.FileByIDParams{
+		ID:             input.ID,
+		OrganisationID: user.OrganisationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	presignedURL, err := r.Services.Minio.PresignedGetObject(ctx, file.BucketID, file.ID, time.Second*60, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.PreviewFilePayload{URL: presignedURL.String()}, nil
 }
 
 // File is the resolver for the file field.

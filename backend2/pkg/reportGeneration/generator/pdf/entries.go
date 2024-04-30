@@ -3,6 +3,7 @@ package pdf
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 
@@ -18,7 +19,7 @@ type ReportData struct {
 		User            db.User
 		UserCompetences []struct {
 			UserCompetence []db.UserCompetence
-			Parents        []db.Competence
+			Parents        []competenceTreeResult
 			Competence     db.Competence
 			Grades         string
 			AtLeastOne     bool
@@ -48,10 +49,13 @@ func (g *Generator) EntriesReportData(report db.Report) (*ReportData, error) {
 			UserID:         report.StudentUserID,
 			OrganisationID: report.OrganisationID,
 		})
+		if err != nil {
+			return nil, err
+		}
 
 		var userCompetencesStruct []struct {
 			UserCompetence []db.UserCompetence
-			Parents        []db.Competence
+			Parents        []competenceTreeResult
 			Competence     db.Competence
 			Grades         string
 			AtLeastOne     bool
@@ -60,7 +64,7 @@ func (g *Generator) EntriesReportData(report db.Report) (*ReportData, error) {
 		}
 
 		for _, userCompetence := range userCompetences {
-			parents, err := competenceParents(g.svc.DB, userCompetence.CompetenceID)
+			parents, err := competenceParents(g.svc.DB, userCompetence.CompetenceID, userCompetence.OrganisationID)
 			if err != nil {
 				return nil, err
 			}
@@ -103,7 +107,7 @@ func (g *Generator) EntriesReportData(report db.Report) (*ReportData, error) {
 
 			userCompetencesStruct = append(userCompetencesStruct, struct {
 				UserCompetence []db.UserCompetence
-				Parents        []db.Competence
+				Parents        []competenceTreeResult
 				Competence     db.Competence
 				Grades         string
 				AtLeastOne     bool
@@ -139,7 +143,7 @@ func (g *Generator) EntriesReportData(report db.Report) (*ReportData, error) {
 			User            db.User
 			UserCompetences []struct {
 				UserCompetence []db.UserCompetence
-				Parents        []db.Competence
+				Parents        []competenceTreeResult
 				Competence     db.Competence
 				Grades         string
 				AtLeastOne     bool
@@ -158,11 +162,23 @@ func (g *Generator) EntriesReportData(report db.Report) (*ReportData, error) {
 	return &reportData, nil
 }
 
-func competenceParents(dbCon *database.DB, competenceID string) ([]db.Competence, error) {
-	query := dbCon.NewQueryBuilder().Select("*").Suffix("get_competence_tree_reverse($1)", competenceID)
-	parents, err := database.ScanSelectMany[db.Competence](dbCon, context.Background(), query)
+type competenceTreeResult struct {
+	ID             string            `db:"id"`
+	Name           string            `db:"name"`
+	CompetenceType db.CompetenceType `db:"competence_type"`
+	Color          pgtype.Text       `db:"color"`
+	CompetenceID   pgtype.Text       `db:"competence_id"`
+	CreatedAt      time.Time         `db:"created_at"`
+	Grades         []string          `db:"grades"`
+}
+
+func competenceParents(dbCon *database.DB, competenceID string, organisationID string) ([]competenceTreeResult, error) {
+	query := dbCon.NewQueryBuilder().Select("*").Suffix("FROM get_competence_tree_reverse($1)", competenceID)
+
+	parents, err := database.ScanSelectMany[competenceTreeResult](dbCon, context.Background(), query)
 	if err != nil {
 		return nil, err
 	}
+
 	return parents, nil
 }

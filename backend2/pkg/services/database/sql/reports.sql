@@ -11,4 +11,19 @@ UPDATE reports SET status = @status WHERE id = @id RETURNING *;
 SELECT * FROM report_templates WHERE organisation_id = @organisation_id AND name = @name;
 
 -- name: ReportUpdateStatusDone :one
-UPDATE reports SET status = 'done' AND file_id = @file_id::text WHERE id = @id AND organisation_id = @organisation_id RETURNING *;
+UPDATE reports SET status = 'done', file_id = @file_id::text WHERE id = @id AND organisation_id = @organisation_id RETURNING *;
+
+-- name: ReportCreate :one
+INSERT INTO reports (status, format, kind, "from", "to", meta, filter_tags, file_id, user_id, student_user_id, organisation_id)
+VALUES ('pending', @format, @kind, @_from, @_to, @meta, @filter_tags, @file_id, @user_id, @student_user_id, @organisation_id)
+RETURNING *;
+
+-- name: ReportFindByID :one
+SELECT * FROM reports
+WHERE id = @id AND organisation_id = @organisation_id AND deleted_at IS NOT NULL;
+
+-- name: ReportsAllPaginated :many
+SELECT * FROM reports
+WHERE organisation_id = @organisation_id AND deleted_at IS NULL
+ORDER BY created_at DESC
+LIMIT @_limit OFFSET @_offset;

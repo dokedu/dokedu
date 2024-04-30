@@ -7,6 +7,10 @@ package db
 
 import (
 	"context"
+	"encoding/json"
+	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const gLOBAL_ReportFindByID = `-- name: GLOBAL_ReportFindByID :one
@@ -105,6 +109,90 @@ func (q *Queries) GLOBAL_ReportsUpdateStatus(ctx context.Context, arg GLOBAL_Rep
 	return i, err
 }
 
+const reportCreate = `-- name: ReportCreate :one
+INSERT INTO reports (status, format, kind, "from", "to", meta, filter_tags, file_id, user_id, student_user_id, organisation_id)
+VALUES ('pending', $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+RETURNING id, status, format, kind, "from", "to", meta, filter_tags, file_id, user_id, student_user_id, organisation_id, created_at, deleted_at
+`
+
+type ReportCreateParams struct {
+	Format         ReportFormat    `db:"format"`
+	Kind           ReportKind      `db:"kind"`
+	From           time.Time       `db:"_from"`
+	To             time.Time       `db:"_to"`
+	Meta           json.RawMessage `db:"meta"`
+	FilterTags     []string        `db:"filter_tags"`
+	FileID         pgtype.Text     `db:"file_id"`
+	UserID         string          `db:"user_id"`
+	StudentUserID  string          `db:"student_user_id"`
+	OrganisationID string          `db:"organisation_id"`
+}
+
+func (q *Queries) ReportCreate(ctx context.Context, arg ReportCreateParams) (Report, error) {
+	row := q.db.QueryRow(ctx, reportCreate,
+		arg.Format,
+		arg.Kind,
+		arg.From,
+		arg.To,
+		arg.Meta,
+		arg.FilterTags,
+		arg.FileID,
+		arg.UserID,
+		arg.StudentUserID,
+		arg.OrganisationID,
+	)
+	var i Report
+	err := row.Scan(
+		&i.ID,
+		&i.Status,
+		&i.Format,
+		&i.Kind,
+		&i.From,
+		&i.To,
+		&i.Meta,
+		&i.FilterTags,
+		&i.FileID,
+		&i.UserID,
+		&i.StudentUserID,
+		&i.OrganisationID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const reportFindByID = `-- name: ReportFindByID :one
+SELECT id, status, format, kind, "from", "to", meta, filter_tags, file_id, user_id, student_user_id, organisation_id, created_at, deleted_at FROM reports
+WHERE id = $1 AND organisation_id = $2 AND deleted_at IS NOT NULL
+`
+
+type ReportFindByIDParams struct {
+	ID             string `db:"id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) ReportFindByID(ctx context.Context, arg ReportFindByIDParams) (Report, error) {
+	row := q.db.QueryRow(ctx, reportFindByID, arg.ID, arg.OrganisationID)
+	var i Report
+	err := row.Scan(
+		&i.ID,
+		&i.Status,
+		&i.Format,
+		&i.Kind,
+		&i.From,
+		&i.To,
+		&i.Meta,
+		&i.FilterTags,
+		&i.FileID,
+		&i.UserID,
+		&i.StudentUserID,
+		&i.OrganisationID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const reportTemplateFindByName = `-- name: ReportTemplateFindByName :one
 SELECT id, name, description, format, template, component, settings, organisation_id, created_at FROM report_templates WHERE organisation_id = $1 AND name = $2
 `
@@ -132,7 +220,7 @@ func (q *Queries) ReportTemplateFindByName(ctx context.Context, arg ReportTempla
 }
 
 const reportUpdateStatusDone = `-- name: ReportUpdateStatusDone :one
-UPDATE reports SET status = 'done' AND file_id = $1::text WHERE id = $2 AND organisation_id = $3 RETURNING id, status, format, kind, "from", "to", meta, filter_tags, file_id, user_id, student_user_id, organisation_id, created_at, deleted_at
+UPDATE reports SET status = 'done', file_id = $1::text WHERE id = $2 AND organisation_id = $3 RETURNING id, status, format, kind, "from", "to", meta, filter_tags, file_id, user_id, student_user_id, organisation_id, created_at, deleted_at
 `
 
 type ReportUpdateStatusDoneParams struct {
@@ -161,4 +249,52 @@ func (q *Queries) ReportUpdateStatusDone(ctx context.Context, arg ReportUpdateSt
 		&i.DeletedAt,
 	)
 	return i, err
+}
+
+const reportsAllPaginated = `-- name: ReportsAllPaginated :many
+SELECT id, status, format, kind, "from", "to", meta, filter_tags, file_id, user_id, student_user_id, organisation_id, created_at, deleted_at FROM reports
+WHERE organisation_id = $1 AND deleted_at IS NULL
+ORDER BY created_at DESC
+LIMIT $3 OFFSET $2
+`
+
+type ReportsAllPaginatedParams struct {
+	OrganisationID string `db:"organisation_id"`
+	Offset         int32  `db:"_offset"`
+	Limit          int32  `db:"_limit"`
+}
+
+func (q *Queries) ReportsAllPaginated(ctx context.Context, arg ReportsAllPaginatedParams) ([]Report, error) {
+	rows, err := q.db.Query(ctx, reportsAllPaginated, arg.OrganisationID, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Report
+	for rows.Next() {
+		var i Report
+		if err := rows.Scan(
+			&i.ID,
+			&i.Status,
+			&i.Format,
+			&i.Kind,
+			&i.From,
+			&i.To,
+			&i.Meta,
+			&i.FilterTags,
+			&i.FileID,
+			&i.UserID,
+			&i.StudentUserID,
+			&i.OrganisationID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
