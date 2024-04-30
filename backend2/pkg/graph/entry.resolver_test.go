@@ -30,7 +30,8 @@ func (ts *TestSuite) Test_Entry_Resolvers_Date() {
 	resDate, err := ts.Resolver.Entry().Date(ts.CtxWithUser(owner.ID), &entry)
 	ts.NoError(err)
 
-	ts.Equal(date.Format("02.01.2006"), resDate)
+	// Expect the date to be formatted as "2006-01-02 00:00:00 +0000 UTC"
+	ts.Equal(date.Format("2006-01-02 00:00:00 +0000 UTC"), resDate)
 }
 
 func (ts *TestSuite) Test_Entry_Resolvers_DeletedAt() {

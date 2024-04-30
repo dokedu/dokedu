@@ -33,7 +33,7 @@ import (
 // Date is the resolver for the date field.
 func (r *entryResolver) Date(ctx context.Context, obj *db.Entry) (string, error) {
 	if obj.Date.Valid {
-		return obj.Date.Time.Format("02.01.2006"), nil
+		return obj.Date.Time.String(), nil
 	}
 	return "", nil
 }
@@ -209,7 +209,7 @@ func (r *mutationResolver) UpdateEntry(ctx context.Context, input model.UpdateEn
 	}
 
 	if input.Date != nil {
-		parsedDate, err := time.Parse("02.01.2006", *input.Date)
+		parsedDate, err := time.Parse("2006-01-02", *input.Date)
 		if err != nil {
 			return nil, err
 		}
