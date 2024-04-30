@@ -65,6 +65,39 @@ func (q *Queries) EntryEventSoftDelete(ctx context.Context, arg EntryEventSoftDe
 	return i, err
 }
 
+const entryEventsAll = `-- name: EntryEventsAll :many
+SELECT id, entry_id, event_id, organisation_id, created_at, deleted_at
+FROM entry_events
+WHERE organisation_id = $1
+`
+
+func (q *Queries) EntryEventsAll(ctx context.Context, organisationID string) ([]EntryEvent, error) {
+	rows, err := q.db.Query(ctx, entryEventsAll, organisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []EntryEvent
+	for rows.Next() {
+		var i EntryEvent
+		if err := rows.Scan(
+			&i.ID,
+			&i.EntryID,
+			&i.EventID,
+			&i.OrganisationID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const eventsFindByEntryEventEntryID = `-- name: EventsFindByEntryEventEntryID :many
 SELECT events.id, events.image_file_id, events.organisation_id, events.title, events.body, events.starts_at, events.ends_at, events.recurrence, events.created_at, events.deleted_at
 FROM events

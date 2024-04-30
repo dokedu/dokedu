@@ -313,6 +313,45 @@ func (q *Queries) CompetenceUpdateSortOrder(ctx context.Context, arg CompetenceU
 	return i, err
 }
 
+const competencesAll = `-- name: CompetencesAll :many
+SELECT id, name, competence_id, competence_type, organisation_id, grades, color, curriculum_id, created_at, deleted_at, sort_order, created_by
+FROM competences
+WHERE organisation_id = $1
+`
+
+func (q *Queries) CompetencesAll(ctx context.Context, organisationID string) ([]Competence, error) {
+	rows, err := q.db.Query(ctx, competencesAll, organisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Competence
+	for rows.Next() {
+		var i Competence
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CompetenceID,
+			&i.CompetenceType,
+			&i.OrganisationID,
+			&i.Grades,
+			&i.Color,
+			&i.CurriculumID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.SortOrder,
+			&i.CreatedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const competencesFind = `-- name: CompetencesFind :many
 SELECT id, name, competence_id, competence_type, organisation_id, grades, color, curriculum_id, created_at, deleted_at, sort_order, created_by
 FROM competences
@@ -416,6 +455,53 @@ type CompetencesFindByIDParams struct {
 
 func (q *Queries) CompetencesFindByID(ctx context.Context, arg CompetencesFindByIDParams) ([]Competence, error) {
 	rows, err := q.db.Query(ctx, competencesFindByID, arg.Ids, arg.OrganisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Competence
+	for rows.Next() {
+		var i Competence
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CompetenceID,
+			&i.CompetenceType,
+			&i.OrganisationID,
+			&i.Grades,
+			&i.Color,
+			&i.CurriculumID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.SortOrder,
+			&i.CreatedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const competencesFindByIDSortedBySortOrder = `-- name: CompetencesFindByIDSortedBySortOrder :many
+SELECT id, name, competence_id, competence_type, organisation_id, grades, color, curriculum_id, created_at, deleted_at, sort_order, created_by
+FROM competences
+WHERE id = ANY ($1::text[])
+  AND organisation_id = $2
+  AND deleted_at IS NULL
+ORDER BY sort_order, name
+`
+
+type CompetencesFindByIDSortedBySortOrderParams struct {
+	Ids            []string `db:"ids"`
+	OrganisationID string   `db:"organisation_id"`
+}
+
+func (q *Queries) CompetencesFindByIDSortedBySortOrder(ctx context.Context, arg CompetencesFindByIDSortedBySortOrderParams) ([]Competence, error) {
+	rows, err := q.db.Query(ctx, competencesFindByIDSortedBySortOrder, arg.Ids, arg.OrganisationID)
 	if err != nil {
 		return nil, err
 	}

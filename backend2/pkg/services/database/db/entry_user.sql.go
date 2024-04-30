@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 )
 
 const entryUserCountByUserID = `-- name: EntryUserCountByUserID :one
@@ -83,6 +84,47 @@ func (q *Queries) EntryUserSoftDelete(ctx context.Context, arg EntryUserSoftDele
 		&i.OrganisationID,
 	)
 	return i, err
+}
+
+const entryUsersFindEntryByUserIDForReport = `-- name: EntryUsersFindEntryByUserIDForReport :many
+SELECT e.id, e.date, e.body, e.user_id, e.created_at, e.deleted_at, e.organisation_id FROM entries e
+JOIN entry_users eu ON eu.entry_id = e.id
+WHERE eu.user_id = $1 AND date >= $2::timestamptz AND DATE <= $3::timestamptz
+ORDER BY date desc
+`
+
+type EntryUsersFindEntryByUserIDForReportParams struct {
+	UserID string    `db:"user_id"`
+	From   time.Time `db:"_from"`
+	To     time.Time `db:"_to"`
+}
+
+func (q *Queries) EntryUsersFindEntryByUserIDForReport(ctx context.Context, arg EntryUsersFindEntryByUserIDForReportParams) ([]Entry, error) {
+	rows, err := q.db.Query(ctx, entryUsersFindEntryByUserIDForReport, arg.UserID, arg.From, arg.To)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Entry
+	for rows.Next() {
+		var i Entry
+		if err := rows.Scan(
+			&i.ID,
+			&i.Date,
+			&i.Body,
+			&i.UserID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.OrganisationID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const usersFindByEntryUserEntryID = `-- name: UsersFindByEntryUserEntryID :many

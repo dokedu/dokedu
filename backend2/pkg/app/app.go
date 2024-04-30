@@ -13,6 +13,7 @@ import (
 	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
 	"github.com/dokedu/dokedu/backend/pkg/middleware"
 	"github.com/dokedu/dokedu/backend/pkg/msg"
+	"github.com/dokedu/dokedu/backend/pkg/reportGeneration"
 	"github.com/dokedu/dokedu/backend/pkg/services"
 )
 
@@ -23,8 +24,8 @@ type App struct {
 	Resolver *graph.Resolver
 }
 
-func New(svc *services.Services) App {
-	resolver := &graph.Resolver{DB: svc.DB, Services: svc}
+func New(svc *services.Services, reportService *reportGeneration.Service) App {
+	resolver := &graph.Resolver{DB: svc.DB, Services: svc, ReportGeneration: reportService}
 	srv := handler.New(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
 
 	srv.SetErrorPresenter(msg.ErrPresenter)

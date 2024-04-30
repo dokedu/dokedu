@@ -177,6 +177,40 @@ func (q *Queries) UserFindByID(ctx context.Context, arg UserFindByIDParams) (Use
 	return i, err
 }
 
+const userFindByIDWithDeleted = `-- name: UserFindByIDWithDeleted :one
+SELECT id, role, organisation_id, first_name, last_name, email, password, recovery_token, recovery_sent_at, avatar_file_id, created_at, deleted_at, language, sex
+FROM users
+WHERE id = $1
+  AND organisation_id = $2
+`
+
+type UserFindByIDWithDeletedParams struct {
+	ID             string `db:"id"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) UserFindByIDWithDeleted(ctx context.Context, arg UserFindByIDWithDeletedParams) (User, error) {
+	row := q.db.QueryRow(ctx, userFindByIDWithDeleted, arg.ID, arg.OrganisationID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Role,
+		&i.OrganisationID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Password,
+		&i.RecoveryToken,
+		&i.RecoverySentAt,
+		&i.AvatarFileID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.Language,
+		&i.Sex,
+	)
+	return i, err
+}
+
 const userFindBySessionToken = `-- name: UserFindBySessionToken :one
 SELECT users.id, users.role, users.organisation_id, users.first_name, users.last_name, users.email, users.password, users.recovery_token, users.recovery_sent_at, users.avatar_file_id, users.created_at, users.deleted_at, users.language, users.sex
 FROM users

@@ -11,6 +11,15 @@ FROM buckets
 WHERE id = @id
 AND organisation_id = @organisation_id;
 
+-- name: BucketByName :one
+SELECT *
+FROM buckets
+WHERE name = @name
+AND organisation_id = @organisation_id;
+
+-- name: BucketCreate :one
+INSERT INTO buckets (name, organisation_id) VALUES (@name, @organisation_id) RETURNING *;
+
 -- name: FileByID :one
 SELECT *
 FROM files

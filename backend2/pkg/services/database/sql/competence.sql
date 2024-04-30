@@ -5,6 +5,11 @@ WHERE id = $1
   AND organisation_id = $2
   AND deleted_at IS NULL;
 
+-- name: CompetencesAll :many
+SELECT *
+FROM competences
+WHERE organisation_id = $1;
+
 -- name: CompetenceTree :one
 SELECT *
 FROM get_competence_tree($1::text[]);
@@ -59,6 +64,14 @@ FROM competences
 WHERE id = ANY (@ids::text[])
   AND organisation_id = @organisation_id
   AND deleted_at IS NULL;
+
+-- name: CompetencesFindByIDSortedBySortOrder :many
+SELECT *
+FROM competences
+WHERE id = ANY (@ids::text[])
+  AND organisation_id = @organisation_id
+  AND deleted_at IS NULL
+ORDER BY sort_order, name;
 
 -- name: CompetenceUpdateSortOrder :one
 UPDATE competences

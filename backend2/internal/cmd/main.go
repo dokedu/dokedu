@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"log/slog"
@@ -15,6 +16,7 @@ import (
 	"github.com/dokedu/dokedu/backend/internal/config"
 	"github.com/dokedu/dokedu/backend/internal/migrations"
 	"github.com/dokedu/dokedu/backend/pkg/app"
+	"github.com/dokedu/dokedu/backend/pkg/reportGeneration"
 	"github.com/dokedu/dokedu/backend/pkg/services"
 )
 
@@ -31,13 +33,22 @@ func main() {
 		os.Exit(1)
 	}
 
+	reportService := reportGeneration.NewReportGenerationService(s, context.Background(), 3)
+	if err != nil {
+		slog.Error("Failed to create report generation service", "err", err)
+		os.Exit(1)
+	}
+
 	cliApp := &cli.App{
 		Name: "dokedu",
 		Commands: []*cli.Command{
 			{
 				Name: "app:start",
 				Action: func(c *cli.Context) error {
-					application := app.New(s)
+					application := app.New(s, reportService)
+
+					reportService.GoStartLoop()
+
 					slog.Info("Starting server on port 8080")
 					return application.Server.ListenAndServe()
 				},

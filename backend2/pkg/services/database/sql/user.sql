@@ -24,6 +24,12 @@ WHERE id = $1
   AND organisation_id = $2
   AND deleted_at IS NULL;
 
+-- name: UserFindByIDWithDeleted :one
+SELECT *
+FROM users
+WHERE id = $1
+  AND organisation_id = $2;
+
 -- name: UsersAllWithDeleted :many
 SELECT *
 FROM users

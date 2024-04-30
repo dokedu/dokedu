@@ -17,7 +17,7 @@ services:
       MINIO_ROOT_USER: minio
       MINIO_ROOT_PASSWORD: password
     volumes:
-        - ./tmp/s3:/data
+        - s3:/data
     command: server --console-address ":9001" /data
   meilisearch:
     image: getmeili/meilisearch:v1.2
@@ -26,9 +26,12 @@ services:
     environment:
       MEILI_MASTER_KEY: "master"
     volumes:
-      - ./tmp/meilisearch:/meili_data
+      - meilisearch:/meili_data
   mailhog:
     image: mailhog/mailhog
     ports:
       - "1025:1025"
       - "8025:8025"
+volumes:
+  meilisearch:
+  s3:

@@ -11,6 +11,41 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const entriesAll = `-- name: EntriesAll :many
+SELECT id, date, body, user_id, created_at, deleted_at, organisation_id
+FROM entries
+WHERE organisation_id = $1
+ORDER BY date DESC
+`
+
+func (q *Queries) EntriesAll(ctx context.Context, organisationID string) ([]Entry, error) {
+	rows, err := q.db.Query(ctx, entriesAll, organisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Entry
+	for rows.Next() {
+		var i Entry
+		if err := rows.Scan(
+			&i.ID,
+			&i.Date,
+			&i.Body,
+			&i.UserID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.OrganisationID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const entryCreate = `-- name: EntryCreate :one
 INSERT INTO entries (date, body, user_id, organisation_id)
 VALUES ($1, $2, $3, $4)

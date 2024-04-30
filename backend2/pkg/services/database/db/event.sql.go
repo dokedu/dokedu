@@ -199,3 +199,40 @@ func (q *Queries) EventUpdate(ctx context.Context, arg EventUpdateParams) (Event
 	)
 	return i, err
 }
+
+const eventsAll = `-- name: EventsAll :many
+SELECT id, image_file_id, organisation_id, title, body, starts_at, ends_at, recurrence, created_at, deleted_at
+FROM events
+WHERE organisation_id = $1
+`
+
+func (q *Queries) EventsAll(ctx context.Context, organisationID string) ([]Event, error) {
+	rows, err := q.db.Query(ctx, eventsAll, organisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Event
+	for rows.Next() {
+		var i Event
+		if err := rows.Scan(
+			&i.ID,
+			&i.ImageFileID,
+			&i.OrganisationID,
+			&i.Title,
+			&i.Body,
+			&i.StartsAt,
+			&i.EndsAt,
+			&i.Recurrence,
+			&i.CreatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

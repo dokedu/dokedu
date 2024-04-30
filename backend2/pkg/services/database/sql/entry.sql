@@ -6,6 +6,12 @@ WHERE id = @id
   AND deleted_at IS NULL
 LIMIT 1;
 
+-- name: EntriesAll :many
+SELECT *
+FROM entries
+WHERE organisation_id = @organisation_id
+ORDER BY date DESC;
+
 -- name: EntryCreate :one
 INSERT INTO entries (date, body, user_id, organisation_id)
 VALUES (@date, @body, @user_id, @organisation_id)

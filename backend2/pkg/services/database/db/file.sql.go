@@ -38,6 +38,57 @@ func (q *Queries) BucketByID(ctx context.Context, arg BucketByIDParams) (Bucket,
 	return i, err
 }
 
+const bucketByName = `-- name: BucketByName :one
+SELECT id, name, shared, organisation_id, created_at, deleted_at, user_id
+FROM buckets
+WHERE name = $1
+AND organisation_id = $2
+`
+
+type BucketByNameParams struct {
+	Name           string `db:"name"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) BucketByName(ctx context.Context, arg BucketByNameParams) (Bucket, error) {
+	row := q.db.QueryRow(ctx, bucketByName, arg.Name, arg.OrganisationID)
+	var i Bucket
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Shared,
+		&i.OrganisationID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.UserID,
+	)
+	return i, err
+}
+
+const bucketCreate = `-- name: BucketCreate :one
+INSERT INTO buckets (name, organisation_id) VALUES ($1, $2) RETURNING id, name, shared, organisation_id, created_at, deleted_at, user_id
+`
+
+type BucketCreateParams struct {
+	Name           string `db:"name"`
+	OrganisationID string `db:"organisation_id"`
+}
+
+func (q *Queries) BucketCreate(ctx context.Context, arg BucketCreateParams) (Bucket, error) {
+	row := q.db.QueryRow(ctx, bucketCreate, arg.Name, arg.OrganisationID)
+	var i Bucket
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Shared,
+		&i.OrganisationID,
+		&i.CreatedAt,
+		&i.DeletedAt,
+		&i.UserID,
+	)
+	return i, err
+}
+
 const fileByID = `-- name: FileByID :one
 SELECT id, name, file_type, mime_type, size, bucket_id, parent_id, organisation_id, created_at, deleted_at
 FROM files

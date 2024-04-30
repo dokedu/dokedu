@@ -15,6 +15,12 @@ WHERE users.organisation_id = @organisation_id
   AND e.deleted_at IS NULL
   AND users.deleted_at IS NULL;
 
+-- name: EntryUsersFindEntryByUserIDForReport :many
+SELECT e.* FROM entries e
+JOIN entry_users eu ON eu.entry_id = e.id
+WHERE eu.user_id = @user_id AND date >= @_from::timestamptz AND DATE <= @_to::timestamptz
+ORDER BY date desc;
+
 -- name: EntryUserCreate :one
 INSERT INTO entry_users (entry_id, user_id, organisation_id)
 VALUES (@entry_id, @user_id, @organisation_id)

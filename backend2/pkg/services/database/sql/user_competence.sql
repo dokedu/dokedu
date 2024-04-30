@@ -6,6 +6,16 @@ WHERE entry_id = @entry_id::text
   AND deleted_at IS NULL
 ORDER BY competence_id DESC;
 
+-- name: UserCompetenceFindByUserIDForReport :many
+SELECT *
+FROM user_competences
+WHERE user_id = @user_id
+  AND organisation_id = @organisation_id
+  AND deleted_at IS NULL
+  AND created_at >= @_from
+  AND created_at <= ((@_to::timestamptz)::DATE + 1)
+ORDER BY created_at DESC;
+
 -- name: UserCompetenceFindByEntryAndUser :many
 SELECT *
 FROM user_competences
@@ -125,3 +135,8 @@ WHERE competence_id = @competence_id
   AND entry_id = @entry_id::text
   AND organisation_id = @organisation_id
 RETURNING *;
+
+-- name: UserCompetencesAll :many
+SELECT *
+FROM user_competences
+WHERE organisation_id = @organisation_id;

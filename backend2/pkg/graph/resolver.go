@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"github.com/dokedu/dokedu/backend/pkg/msg"
+	"github.com/dokedu/dokedu/backend/pkg/reportGeneration"
 	"github.com/dokedu/dokedu/backend/pkg/services"
 	"github.com/dokedu/dokedu/backend/pkg/services/database"
 )
@@ -15,8 +16,9 @@ import (
 //go:generate go run github.com/99designs/gqlgen
 
 type Resolver struct {
-	DB       *database.DB
-	Services *services.Services
+	DB               *database.DB
+	Services         *services.Services
+	ReportGeneration *reportGeneration.Service
 }
 
 func OptionalTimestamp(t *time.Time) pgtype.Timestamptz {

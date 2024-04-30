@@ -61,3 +61,34 @@ func (q *Queries) EventCompetenceToggle(ctx context.Context, arg EventCompetence
 	)
 	return i, err
 }
+
+const eventCompetencesAll = `-- name: EventCompetencesAll :many
+SELECT id, event_id, competence_id, created_at, deleted_at, organisation_id FROM event_competences WHERE organisation_id = $1
+`
+
+func (q *Queries) EventCompetencesAll(ctx context.Context, organisationID string) ([]EventCompetence, error) {
+	rows, err := q.db.Query(ctx, eventCompetencesAll, organisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []EventCompetence
+	for rows.Next() {
+		var i EventCompetence
+		if err := rows.Scan(
+			&i.ID,
+			&i.EventID,
+			&i.CompetenceID,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.OrganisationID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

@@ -388,6 +388,59 @@ func (q *Queries) UserCompetenceFindByEntryID(ctx context.Context, arg UserCompe
 	return items, nil
 }
 
+const userCompetenceFindByUserIDForReport = `-- name: UserCompetenceFindByUserIDForReport :many
+SELECT id, level, user_id, entry_id, competence_id, created_at, created_by, deleted_at, organisation_id
+FROM user_competences
+WHERE user_id = $1
+  AND organisation_id = $2
+  AND deleted_at IS NULL
+  AND created_at >= $3
+  AND created_at <= (($4::timestamptz)::DATE + 1)
+ORDER BY created_at DESC
+`
+
+type UserCompetenceFindByUserIDForReportParams struct {
+	UserID         string    `db:"user_id"`
+	OrganisationID string    `db:"organisation_id"`
+	From           time.Time `db:"_from"`
+	To             time.Time `db:"_to"`
+}
+
+func (q *Queries) UserCompetenceFindByUserIDForReport(ctx context.Context, arg UserCompetenceFindByUserIDForReportParams) ([]UserCompetence, error) {
+	rows, err := q.db.Query(ctx, userCompetenceFindByUserIDForReport,
+		arg.UserID,
+		arg.OrganisationID,
+		arg.From,
+		arg.To,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserCompetence
+	for rows.Next() {
+		var i UserCompetence
+		if err := rows.Scan(
+			&i.ID,
+			&i.Level,
+			&i.UserID,
+			&i.EntryID,
+			&i.CompetenceID,
+			&i.CreatedAt,
+			&i.CreatedBy,
+			&i.DeletedAt,
+			&i.OrganisationID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const userCompetenceFindByUserIdAndCompetenceID = `-- name: UserCompetenceFindByUserIdAndCompetenceID :many
 SELECT id, level, user_id, entry_id, competence_id, created_at, created_by, deleted_at, organisation_id
 FROM user_competences
@@ -665,6 +718,42 @@ func (q *Queries) UserCompetenceUpsert(ctx context.Context, arg UserCompetenceUp
 		&i.OrganisationID,
 	)
 	return i, err
+}
+
+const userCompetencesAll = `-- name: UserCompetencesAll :many
+SELECT id, level, user_id, entry_id, competence_id, created_at, created_by, deleted_at, organisation_id
+FROM user_competences
+WHERE organisation_id = $1
+`
+
+func (q *Queries) UserCompetencesAll(ctx context.Context, organisationID string) ([]UserCompetence, error) {
+	rows, err := q.db.Query(ctx, userCompetencesAll, organisationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserCompetence
+	for rows.Next() {
+		var i UserCompetence
+		if err := rows.Scan(
+			&i.ID,
+			&i.Level,
+			&i.UserID,
+			&i.EntryID,
+			&i.CompetenceID,
+			&i.CreatedAt,
+			&i.CreatedBy,
+			&i.DeletedAt,
+			&i.OrganisationID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const userCompetencesSoftDeleteByEntry = `-- name: UserCompetencesSoftDeleteByEntry :many

@@ -21,3 +21,8 @@ WHERE entry_id = @entry_id
   AND event_id = @event_id
   AND organisation_id = @organisation_id
 RETURNING *;
+
+-- name: EntryEventsAll :many
+SELECT *
+FROM entry_events
+WHERE organisation_id = @organisation_id;
