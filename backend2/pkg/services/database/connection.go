@@ -27,6 +27,16 @@ type Config struct {
 var typeNamesToRegister = []string{
 	// enum types
 	"user_lang",
+	"user_role",
+	"chat_type",
+	"competence_type",
+	"file_permission",
+	"file_type",
+	"report_format",
+	"report_kind",
+	"report_status",
+	"user_attendance_state",
+	"user_student_school_history_action",
 }
 var typesToRegister []*pgtype.Type
 var typesToRegisterLock = &sync.Mutex{}

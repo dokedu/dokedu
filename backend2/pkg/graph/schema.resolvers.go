@@ -733,7 +733,7 @@ func (r *queryResolver) Users(ctx context.Context, limit *int, offset *int, filt
 
 	if filter != nil {
 		if len(filter.Role) > 0 {
-			query = query.Where("role IN (?)", filter.Role)
+			query = query.Where("role = any (?)", filter.Role)
 		}
 
 		if filter.OrderBy != nil {

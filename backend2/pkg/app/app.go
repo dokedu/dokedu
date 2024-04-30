@@ -44,6 +44,7 @@ func New(svc *services.Services, reportService *reportGeneration.Service) App {
 	stack := middleware.CreateStack(
 		middleware.CORS,
 		middleware.Auth(svc.DB),
+		middleware.Dataloader(svc),
 	)
 
 	router.HandleFunc("POST /graph", srv.ServeHTTP)
