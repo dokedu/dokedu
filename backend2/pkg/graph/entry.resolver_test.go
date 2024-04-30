@@ -489,7 +489,7 @@ func (ts *TestSuite) Test_CreateEntryFile() {
 	entry, err := ts.Resolver.Mutation().CreateEntry(ts.CtxWithUser(owner.ID))
 	ts.NoError(err)
 
-	bucket, err := ts.DB.BucketForEntryFiles(ts.CtxWithUser(owner.ID), org.ID)
+	bucket, err := ts.DB.BucketForEntryFilesCreate(ts.CtxWithUser(owner.ID), org.ID)
 	ts.NoError(err)
 	ts.NotNil(bucket)
 

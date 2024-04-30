@@ -11,7 +11,8 @@ import (
 
 const gLOBAL_OrganisationCreate = `-- name: GLOBAL_OrganisationCreate :one
 INSERT INTO organisations (name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps)
-VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps, created_at, deleted_at, setup_complete, address, logo_url, stripe_customer_id, stripe_subscription_id
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps, created_at, deleted_at, setup_complete, address, logo_url, stripe_customer_id, stripe_subscription_id
 `
 
 type GLOBAL_OrganisationCreateParams struct {
@@ -55,8 +56,51 @@ func (q *Queries) GLOBAL_OrganisationCreate(ctx context.Context, arg GLOBAL_Orga
 	return i, err
 }
 
+const gLOBAL_OrganisationFind = `-- name: GLOBAL_OrganisationFind :many
+SELECT id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps, created_at, deleted_at, setup_complete, address, logo_url, stripe_customer_id, stripe_subscription_id
+FROM organisations
+`
+
+func (q *Queries) GLOBAL_OrganisationFind(ctx context.Context) ([]Organisation, error) {
+	rows, err := q.db.Query(ctx, gLOBAL_OrganisationFind)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Organisation
+	for rows.Next() {
+		var i Organisation
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.LegalName,
+			&i.Website,
+			&i.Phone,
+			&i.OwnerID,
+			&i.AllowedDomains,
+			&i.EnabledApps,
+			&i.CreatedAt,
+			&i.DeletedAt,
+			&i.SetupComplete,
+			&i.Address,
+			&i.LogoUrl,
+			&i.StripeCustomerID,
+			&i.StripeSubscriptionID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const gLOBAL_OrganisationFindByID = `-- name: GLOBAL_OrganisationFindByID :one
-SELECT id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps, created_at, deleted_at, setup_complete, address, logo_url, stripe_customer_id, stripe_subscription_id FROM organisations WHERE id = $1
+SELECT id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps, created_at, deleted_at, setup_complete, address, logo_url, stripe_customer_id, stripe_subscription_id
+FROM organisations
+WHERE id = $1
 `
 
 func (q *Queries) GLOBAL_OrganisationFindByID(ctx context.Context, id string) (Organisation, error) {
@@ -83,7 +127,10 @@ func (q *Queries) GLOBAL_OrganisationFindByID(ctx context.Context, id string) (O
 }
 
 const gLOBAL_OrganisationUpdateOwnerID = `-- name: GLOBAL_OrganisationUpdateOwnerID :one
-UPDATE organisations SET owner_id = $2 WHERE id = $1 RETURNING id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps, created_at, deleted_at, setup_complete, address, logo_url, stripe_customer_id, stripe_subscription_id
+UPDATE organisations
+SET owner_id = $2
+WHERE id = $1
+RETURNING id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps, created_at, deleted_at, setup_complete, address, logo_url, stripe_customer_id, stripe_subscription_id
 `
 
 type GLOBAL_OrganisationUpdateOwnerIDParams struct {
@@ -116,10 +163,10 @@ func (q *Queries) GLOBAL_OrganisationUpdateOwnerID(ctx context.Context, arg GLOB
 
 const organisationUpdate = `-- name: OrganisationUpdate :one
 UPDATE organisations
-SET name = CASE WHEN $1::text <> '' THEN $1::text ELSE name END,
-    legal_name = CASE WHEN $2::text <> ''THEN $2::text ELSE legal_name END,
-    website = CASE WHEN $3::text <> '' THEN $3::text ELSE website END,
-    phone = CASE WHEN $4::text <> '' THEN $4::text ELSE phone END
+SET name       = CASE WHEN $1::text <> '' THEN $1::text ELSE name END,
+    legal_name = CASE WHEN $2::text <> '' THEN $2::text ELSE legal_name END,
+    website    = CASE WHEN $3::text <> '' THEN $3::text ELSE website END,
+    phone      = CASE WHEN $4::text <> '' THEN $4::text ELSE phone END
 WHERE id = $5
 RETURNING id, name, legal_name, website, phone, owner_id, allowed_domains, enabled_apps, created_at, deleted_at, setup_complete, address, logo_url, stripe_customer_id, stripe_subscription_id
 `

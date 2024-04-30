@@ -7,13 +7,16 @@ package graph
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	pgx "github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	gonanoid "github.com/matoous/go-nanoid/v2"
+	"github.com/meilisearch/meilisearch-go"
 	"github.com/samber/lo"
 	"golang.org/x/crypto/bcrypt"
 
@@ -24,6 +27,7 @@ import (
 	"github.com/dokedu/dokedu/backend/pkg/msg"
 	"github.com/dokedu/dokedu/backend/pkg/services/database"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
+	"github.com/dokedu/dokedu/backend/pkg/services/meili"
 )
 
 // Color is the resolver for the color field.
@@ -182,7 +186,6 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 		return nil, errors.New("unable to generate a token")
 	}
 
-	// todo: return more data
 	return &model.SignInPayload{
 		Token:    token,
 		User:     user,
@@ -810,15 +813,68 @@ func (r *queryResolver) Competences(ctx context.Context, limit *int, offset *int
 		return nil, msg.ErrUnauthorized
 	}
 
+	l, o := helper.PaginationInput(limit, offset)
+
 	query := r.DB.NewQueryBuilder().Select("*").From("competences").Where("organisation_id = ?", user.OrganisationID)
 
-	// TODO: Search should use Meilisearch instead of the database
+	var ids []string
+
 	if search != nil && *search != "" {
-		query = query.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", *search))
+		indexName := r.Services.Meili.FindCompetenceIndexByOrganisationID(user.OrganisationID)
+		filterStr := ""
+
+		if filter != nil {
+			if filter.Parents != nil && len(filter.Parents) > 0 {
+				var parents []string
+				for _, parent := range filter.Parents {
+					parents = append(parents, *parent)
+
+				}
+				filterStr += "parents IN [" + strings.Join(parents, ", ") + "]"
+			}
+
+			// TODO: code repeats, find more elegant solution
+			if filter.Type != nil && len(filter.Type) > 0 {
+				var types []string
+				for _, _type := range filter.Type {
+					types = append(types, string(*_type))
+
+				}
+				filterStr += "competence_type IN [" + strings.Join(types, ", ") + "]"
+			}
+		}
+
+		searchRequest := meilisearch.SearchRequest{
+			Limit: int64(l),
+		}
+
+		if filterStr != "" {
+			searchRequest.Filter = filterStr
+		}
+
+		term := *search
+
+		response, err := r.Services.Meili.Client.Index(indexName).SearchRaw(term, &searchRequest)
+		if err != nil {
+			return nil, err
+		}
+
+		var results meili.SearchResponseCompetence
+		err = json.Unmarshal(*response, &results)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, hit := range results.Hits {
+			ids = append(ids, hit.ID)
+		}
 	}
 
-	l, o := helper.PaginationInput(limit, offset)
 	query = query.Limit(l + 1).Offset(o)
+
+	if len(ids) > 0 {
+		query = query.Where("id = ANY (?)", ids)
+	}
 
 	if filter != nil {
 		if len(filter.Type) > 0 {

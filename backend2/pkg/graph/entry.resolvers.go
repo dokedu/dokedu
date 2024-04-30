@@ -307,14 +307,45 @@ func (r *mutationResolver) CreateEntryUser(ctx context.Context, input model.Crea
 		return nil, msg.ErrUnauthorized
 	}
 
-	// TODO: ensure the user_competences for that entry are updated (ie. a competence is added for the user for each existing competence of the entry)
+	// transaction
+	err := r.DB.InTx(ctx, func(ctx context.Context, q *db.Queries) error {
+		_, err := q.EntryUserCreate(ctx, db.EntryUserCreateParams{
+			EntryID:        input.EntryID,
+			UserID:         input.UserID,
+			OrganisationID: currentUser.OrganisationID,
+		})
+		if err != nil {
+			return err
+		}
 
-	_, err := r.DB.EntryUserCreate(ctx, db.EntryUserCreateParams{
-		EntryID:        input.EntryID,
-		UserID:         input.UserID,
-		OrganisationID: currentUser.OrganisationID,
+		userCompetences, err := q.UserCompetenceFindByEntryID(ctx, db.UserCompetenceFindByEntryIDParams{
+			EntryID:        input.EntryID,
+			OrganisationID: currentUser.OrganisationID,
+		})
+		if err != nil {
+			return err
+		}
+
+		uniqueUserCompetences := lo.UniqBy(userCompetences, func(uc db.UserCompetence) string {
+			return uc.CompetenceID
+		})
+
+		for _, uc := range uniqueUserCompetences {
+			_, err = q.UserCompetenceCreate(ctx, db.UserCompetenceCreateParams{
+				UserID:         input.UserID,
+				Level:          uc.Level,
+				CompetenceID:   uc.CompetenceID,
+				EntryID:        pgtype.Text{String: input.EntryID, Valid: true},
+				OrganisationID: currentUser.OrganisationID,
+				CreatedBy:      pgtype.Text{String: currentUser.ID, Valid: true},
+			})
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -557,6 +588,7 @@ func (r *mutationResolver) DeleteEntryCompetence(ctx context.Context, input mode
 	_, err = r.DB.UserCompetenceSoftDeleteByCompetenceAndEntry(ctx, db.UserCompetenceSoftDeleteByCompetenceAndEntryParams{
 		EntryID:        input.EntryID,
 		OrganisationID: currentUser.OrganisationID,
+		CompetenceID:   input.CompetenceID,
 	})
 	if err != nil {
 		return nil, err

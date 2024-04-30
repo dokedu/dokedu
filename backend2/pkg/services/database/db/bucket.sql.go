@@ -37,7 +37,6 @@ func (q *Queries) BucketForEntryFiles(ctx context.Context, organisationID string
 const bucketForEntryFilesCreate = `-- name: BucketForEntryFilesCreate :one
 INSERT INTO buckets (name, shared, organisation_id)
 VALUES ('entries', FALSE, $1)
-ON CONFLICT (name, shared, organisation_id) DO UPDATE SET deleted_at = NULL
 RETURNING id, name, shared, organisation_id, created_at, deleted_at, user_id
 `
 

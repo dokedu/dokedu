@@ -12,7 +12,8 @@ import (
 const gLOBAL_SessionCountByToken = `-- name: GLOBAL_SessionCountByToken :one
 SELECT COUNT(*)
 FROM sessions
-WHERE token = $1 AND deleted_at IS NULL
+WHERE token = $1
+  AND deleted_at IS NULL
 `
 
 func (q *Queries) GLOBAL_SessionCountByToken(ctx context.Context, token string) (int64, error) {
@@ -25,7 +26,8 @@ func (q *Queries) GLOBAL_SessionCountByToken(ctx context.Context, token string) 
 const gLOBAL_SessionCountByUserId = `-- name: GLOBAL_SessionCountByUserId :one
 SELECT COUNT(*)
 FROM sessions
-WHERE user_id = $1 AND deleted_at IS NULL
+WHERE user_id = $1
+  AND deleted_at IS NULL
 `
 
 func (q *Queries) GLOBAL_SessionCountByUserId(ctx context.Context, userID string) (int64, error) {
@@ -73,7 +75,8 @@ func (q *Queries) GLOBAL_SessionDeleteExpired(ctx context.Context) error {
 const gLOBAL_SessionFindByToken = `-- name: GLOBAL_SessionFindByToken :one
 SELECT id, user_id, token, created_at, deleted_at
 FROM sessions
-WHERE token = $1 AND deleted_at IS NULL
+WHERE token = $1
+  AND deleted_at IS NULL
 LIMIT 1
 `
 
