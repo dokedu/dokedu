@@ -12,7 +12,7 @@ import (
 const entryEventCreate = `-- name: EntryEventCreate :one
 INSERT INTO entry_events (entry_id, event_id, organisation_id)
 VALUES ($1, $2, $3)
-ON CONFLICT (entry_id, event_id, organisation_id) DO UPDATE SET deleted_at = NULL
+ON CONFLICT (entry_id, event_id) DO UPDATE SET deleted_at = NULL
 RETURNING id, entry_id, event_id, organisation_id, created_at, deleted_at
 `
 

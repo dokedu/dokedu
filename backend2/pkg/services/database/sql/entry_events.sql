@@ -11,7 +11,7 @@ WHERE events.organisation_id = @organisation_id
 -- name: EntryEventCreate :one
 INSERT INTO entry_events (entry_id, event_id, organisation_id)
 VALUES (@entry_id, @event_id, @organisation_id)
-ON CONFLICT (entry_id, event_id, organisation_id) DO UPDATE SET deleted_at = NULL
+ON CONFLICT (entry_id, event_id) DO UPDATE SET deleted_at = NULL
 RETURNING *;
 
 -- name: EntryEventSoftDelete :one

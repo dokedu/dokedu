@@ -24,7 +24,7 @@ ORDER BY date desc;
 -- name: EntryUserCreate :one
 INSERT INTO entry_users (entry_id, user_id, organisation_id)
 VALUES (@entry_id, @user_id, @organisation_id)
-ON CONFLICT (entry_id, user_id, organisation_id) DO UPDATE SET deleted_at = NULL
+ON CONFLICT (entry_id, user_id) DO UPDATE SET deleted_at = NULL
 RETURNING *;
 
 -- name: EntryUserSoftDelete :one
