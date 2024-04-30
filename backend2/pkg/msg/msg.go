@@ -6,6 +6,8 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type ErrorWithCode struct {
@@ -44,6 +46,10 @@ func ErrPresenter(ctx context.Context, err error) *gqlerror.Error {
 
 		defaultErr.Extensions["code"] = errWithCode.Code
 	}
+
+	span := trace.SpanFromContext(ctx)
+	span.RecordError(err)
+	span.SetStatus(codes.Error, "An error occurred. Check the events for more information.")
 
 	return defaultErr
 }

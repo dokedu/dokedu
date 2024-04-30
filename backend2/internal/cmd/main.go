@@ -18,6 +18,7 @@ import (
 	"github.com/dokedu/dokedu/backend/pkg/app"
 	"github.com/dokedu/dokedu/backend/pkg/reportGeneration"
 	"github.com/dokedu/dokedu/backend/pkg/services"
+	"github.com/dokedu/dokedu/backend/pkg/tracing"
 )
 
 func main() {
@@ -45,6 +46,7 @@ func main() {
 			{
 				Name: "app:start",
 				Action: func(c *cli.Context) error {
+					tracing.InitializeTracing(cfg.Tracing)
 					application := app.New(s, reportService)
 
 					reportService.GoStartLoop()

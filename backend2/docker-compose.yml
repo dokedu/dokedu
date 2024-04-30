@@ -31,6 +31,112 @@ services:
     ports:
       - "1025:1025"
       - "8025:8025"
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    ports:
+      - "14268:14268"  # jaeger ingest
+      - "3200:3200"   # tempo
+      - "9095:9095" # tempo grpc
+      - "4317:4317"  # otlp grpc
+      - "4318:4318"  # otlp http
+      - "9411:9411"   # zipkin
+    configs:
+      - source: tempo.yml
+        target: /etc/tempo.yaml
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    configs:
+      - source: grafana-datasources.yml
+        target: /etc/grafana/provisioning/datasources/datasources.yaml
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor traceQLStreaming metricsSummary
 volumes:
   meilisearch:
   s3:
+
+configs:
+  grafana-datasources.yml:
+    content: |
+      apiVersion: 1
+
+      datasources:
+        - name: Tempo
+          type: tempo
+          access: proxy
+          orgId: 1
+          url: http://tempo:3200
+          basicAuth: false
+          isDefault: true
+          version: 1
+          editable: false
+          apiVersion: 1
+          uid: tempo
+          jsonData:
+            httpMethod: GET
+  tempo.yml:
+    content: |
+      stream_over_http_enabled: true
+      server:
+        http_listen_port: 3200
+        log_level: info
+
+      query_frontend:
+        search:
+          duration_slo: 5s
+          throughput_bytes_slo: 1.073741824e+09
+        trace_by_id:
+          duration_slo: 5s
+
+      distributor:
+        receivers:                           # this configuration will listen on all ports and protocols that tempo is capable of.
+          jaeger:                            # the receives all come from the OpenTelemetry collector.  more configuration information can
+            protocols:                       # be found there: https://github.com/open-telemetry/opentelemetry-collector/tree/main/receiver
+              thrift_http:                   #
+              grpc:                          # for a production deployment you should only enable the receivers you need!
+              thrift_binary:
+              thrift_compact:
+          zipkin:
+          otlp:
+            protocols:
+              http:
+              grpc:
+          opencensus:
+
+      ingester:
+        max_block_duration: 5m               # cut the headblock when this much time passes. this is being set for demo purposes and should probably be left alone normally
+
+      compactor:
+        compaction:
+          block_retention: 1h                # overall Tempo trace retention. set for demo purposes
+
+      metrics_generator:
+        registry:
+          external_labels:
+            source: tempo
+            cluster: docker-compose
+        storage:
+          path: /var/tempo/generator/wal
+          remote_write:
+            - url: http://prometheus:9090/api/v1/write
+              send_exemplars: true
+        traces_storage:
+          path: /var/tempo/generator/traces
+
+      storage:
+        trace:
+          backend: local                     # backend configuration to use
+          wal:
+            path: /var/tempo/wal             # where to store the the wal locally
+          local:
+            path: /var/tempo/blocks
+
+      overrides:
+        defaults:
+          metrics_generator:
+            processors: [service-graphs, span-metrics, local-blocks] # enables metrics generator

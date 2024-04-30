@@ -3,10 +3,13 @@ package database
 import (
 	"context"
 	"errors"
-
 	"sync"
+	"time"
+
+	"github.com/graph-gophers/dataloader/v7/trace/otel"
 
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
+	"github.com/dokedu/dokedu/backend/pkg/tracing"
 
 	"github.com/graph-gophers/dataloader/v7"
 	"github.com/jackc/pgx/v5"
@@ -82,7 +85,7 @@ func (d *Dataloader) Competences(user db.User) *dataloader.Loader[string, db.Com
 			}
 
 			return results
-		})
+		}, DefaultOptions[string, db.Competence]()...)
 	}
 	return d.competences
 }
@@ -126,7 +129,7 @@ func (d *Dataloader) CompetenceParents(user db.User) *dataloader.Loader[string, 
 			}
 
 			return results
-		})
+		}, DefaultOptions[string, []db.Competence]()...)
 	}
 
 	return d.competenceParents
@@ -165,7 +168,7 @@ func (d *Dataloader) Users(user db.User) *dataloader.Loader[string, db.User] {
 			}
 
 			return results
-		})
+		}, DefaultOptions[string, db.User]()...)
 	}
 	return d.users
 }
@@ -201,7 +204,7 @@ func (d *Dataloader) UserStudents(user db.User) *dataloader.Loader[string, db.Us
 			}
 
 			return results
-		})
+		}, DefaultOptions[string, db.UserStudent]()...)
 	}
 	return d.userStudents
 }
@@ -237,7 +240,7 @@ func (d *Dataloader) Subjects(user db.User) *dataloader.Loader[string, db.Subjec
 			}
 
 			return results
-		})
+		}, DefaultOptions[string, db.Subject]()...)
 	}
 	return d.subjects
 }
@@ -273,8 +276,15 @@ func (d *Dataloader) SchoolYears(user db.User) *dataloader.Loader[string, db.Sch
 			}
 
 			return results
-		})
+		}, DefaultOptions[string, db.SchoolYear]()...)
 	}
 
 	return d.schoolYears
+}
+
+func DefaultOptions[K comparable, V any]() []dataloader.Option[K, V] {
+	return []dataloader.Option[K, V]{
+		dataloader.WithTracer[K, V](otel.NewTracer[K, V](tracing.Tracer)),
+		dataloader.WithWait[K, V](8 * time.Millisecond),
+	}
 }

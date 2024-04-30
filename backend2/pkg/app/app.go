@@ -1,13 +1,17 @@
 package app
 
 import (
+	"context"
 	"net/http"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/dokedu/dokedu/backend/pkg/graph"
 	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
@@ -15,6 +19,7 @@ import (
 	"github.com/dokedu/dokedu/backend/pkg/msg"
 	"github.com/dokedu/dokedu/backend/pkg/reportGeneration"
 	"github.com/dokedu/dokedu/backend/pkg/services"
+	"github.com/dokedu/dokedu/backend/pkg/tracing"
 )
 
 const gb = 1 << 30
@@ -37,6 +42,35 @@ func New(svc *services.Services, reportService *reportGeneration.Service) App {
 	})
 	srv.Use(extension.Introspection{})
 	srv.SetQueryCache(lru.New(1000))
+	srv.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+		operationName := graphql.GetOperationContext(ctx).OperationName
+		span := trace.SpanFromContext(ctx)
+		span.SetName("/graphql " + operationName)
+		span.AddEvent("GraphqlOperation started")
+
+		return next(ctx)
+	})
+	srv.AroundRootFields(func(ctx context.Context, next graphql.RootResolver) graphql.Marshaler {
+		name := graphql.GetRootFieldContext(ctx).Field.Name
+
+		ctx, span := tracing.Tracer.Start(ctx, name)
+		defer span.End()
+
+		span.End()
+
+		return next(ctx)
+	})
+	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+		if !graphql.GetFieldContext(ctx).IsResolver {
+			return next(ctx)
+		}
+
+		name := graphql.GetFieldContext(ctx).Field.Name
+		ctx, span := tracing.Tracer.Start(ctx, name)
+		defer span.End()
+
+		return next(ctx)
+	})
 
 	// middleware for cors
 	router := http.NewServeMux()
@@ -52,8 +86,17 @@ func New(svc *services.Services, reportService *reportGeneration.Service) App {
 	router.HandleFunc("GET /healthz", healthHandler)
 
 	server := &http.Server{
-		Addr:    ":8080",
-		Handler: stack(router),
+		Addr: ":8080",
+		Handler: otelhttp.NewHandler(stack(router), "", otelhttp.WithFilter(func(r *http.Request) bool {
+			switch {
+			case r.URL.Path == "/healthz",
+				r.URL.Path == "/playground",
+				r.Method == http.MethodOptions:
+				return false
+			default:
+				return true
+			}
+		})),
 	}
 
 	return App{

@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/exaring/otelpgx"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -47,6 +48,7 @@ func New(cfg Config) *DB {
 	if err != nil {
 		panic(err)
 	}
+	config.ConnConfig.Tracer = otelpgx.NewTracer()
 	config.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
 		typesToRegisterLock.Lock()
 		defer typesToRegisterLock.Unlock()

@@ -2,8 +2,10 @@ package middleware
 
 import (
 	"context"
-
 	"net/http"
+
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/dokedu/dokedu/backend/pkg/services/database"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
@@ -36,6 +38,9 @@ func Auth(conn *database.DB) func(http.Handler) http.Handler {
 				user,
 				token,
 			}
+
+			span := trace.SpanFromContext(ctx)
+			span.AddEvent("AuthMiddleware", trace.WithAttributes(attribute.String("user_id", user.ID)))
 
 			ctx = context.WithValue(ctx, UserCtxKey, userContext)
 			next.ServeHTTP(w, r.WithContext(ctx))
