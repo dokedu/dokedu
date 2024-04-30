@@ -9,18 +9,21 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/dokedu/dokedu/backend/pkg/helper"
-	"github.com/dokedu/dokedu/backend/pkg/services/database"
+	"time"
+
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/samber/lo"
-	"time"
+
+	"github.com/dokedu/dokedu/backend/pkg/helper"
+	"github.com/dokedu/dokedu/backend/pkg/services/database"
+
+	"github.com/jackc/pgx/v5"
 
 	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
 	"github.com/dokedu/dokedu/backend/pkg/graph/model"
 	"github.com/dokedu/dokedu/backend/pkg/middleware"
 	"github.com/dokedu/dokedu/backend/pkg/msg"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
-	"github.com/jackc/pgx/v5"
 )
 
 // Image is the resolver for the image field.
@@ -246,7 +249,11 @@ func (r *queryResolver) Events(ctx context.Context, limit *int, offset *int, fil
 		}
 		if filter.Deleted != nil {
 			query = query.Where("deleted_at IS NULL")
+		} else {
+			query = query.Where("deleted_at IS NULL")
 		}
+	} else {
+		query = query.Where("deleted_at IS NULL")
 	}
 
 	if search != nil && len(*search) > 0 {

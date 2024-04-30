@@ -182,7 +182,6 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 		return nil, errors.New("unable to generate a token")
 	}
 
-	// todo: return more data
 	return &model.SignInPayload{
 		Token:    token,
 		User:     user,

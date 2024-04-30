@@ -10,5 +10,4 @@ LIMIT 1;
 -- name: BucketForEntryFilesCreate :one
 INSERT INTO buckets (name, shared, organisation_id)
 VALUES ('entries', FALSE, @organisation_id)
-ON CONFLICT (name, shared, organisation_id) DO UPDATE SET deleted_at = NULL
 RETURNING *;

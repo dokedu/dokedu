@@ -7,10 +7,12 @@ package graph
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/samber/lo"
+
 	"github.com/dokedu/dokedu/backend/pkg/middleware"
 	"github.com/dokedu/dokedu/backend/pkg/msg"
-	"github.com/samber/lo"
-	"time"
 
 	"github.com/dokedu/dokedu/backend/pkg/graph/generated"
 	"github.com/dokedu/dokedu/backend/pkg/services/database/db"
@@ -28,7 +30,8 @@ func (r *mutationResolver) UpdateDailyAttendance(ctx context.Context, date time.
 
 // UserAttendanceOverview is the resolver for the userAttendanceOverview field.
 func (r *queryResolver) UserAttendanceOverview(ctx context.Context, date time.Time) ([]db.UserAttendance, error) {
-	panic(fmt.Errorf("not implemented: UserAttendanceOverview - userAttendanceOverview"))
+	var userAttendances []db.UserAttendance
+	return userAttendances, nil
 }
 
 // User is the resolver for the user field.

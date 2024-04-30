@@ -1,7 +1,8 @@
 -- name: GLOBAL_SessionFindByToken :one
 SELECT *
 FROM sessions
-WHERE token = $1 AND deleted_at IS NULL
+WHERE token = $1
+  AND deleted_at IS NULL
 LIMIT 1;
 
 -- name: GLOBAL_SessionsDeleteByUserID :exec
@@ -27,9 +28,11 @@ RETURNING *;
 -- name: GLOBAL_SessionCountByToken :one
 SELECT COUNT(*)
 FROM sessions
-WHERE token = $1 AND deleted_at IS NULL;
+WHERE token = $1
+  AND deleted_at IS NULL;
 
 -- name: GLOBAL_SessionCountByUserId :one
 SELECT COUNT(*)
 FROM sessions
-WHERE user_id = @user_id AND deleted_at IS NULL;
+WHERE user_id = @user_id
+  AND deleted_at IS NULL;

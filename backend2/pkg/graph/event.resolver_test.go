@@ -250,6 +250,7 @@ func (ts *TestSuite) Test_Event() {
 }
 
 func (ts *TestSuite) Test_Events() {
+	// test that deleted events are not returned
 	ts.Fail("not implemented")
 }
 
