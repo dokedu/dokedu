@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useQuery, gql, useMutation } from '@urql/vue'
+import { gql } from '@urql/core'
+import { useQuery,  useMutation } from '@urql/vue'
 import { useRoute, useRouter } from 'vue-router/auto'
-import DButton from '@/components/d-button/d-button.vue'
 
 const route = useRoute('/entries/[id]')
 const router = useRouter()
 
-const { data, error } = useQuery({
+const { data } = useQuery({
   query: gql`
     query entry($id: ID!) {
       entry(id: $id) {

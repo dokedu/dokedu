@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useQuery, gql } from '@urql/vue'
+import { useQuery, gql, useMutation } from '@urql/vue'
 import DButton from '@/components/d-button/d-button.vue'
 
 const { data, error } = useQuery({
@@ -16,8 +16,17 @@ const { data, error } = useQuery({
         }
       }
     }
-  `
+  `,
+  requestPolicy: "cache-and-network"
 })
+
+const { executeMutation: createEntry } = useMutation(gql`
+  mutation createEntry {
+    createEntry {
+      id
+    }
+  }
+`)
 
 const entries = computed(() => {
   return data?.value?.entries?.edges
@@ -31,6 +40,11 @@ function formatDate(date: string) {
     day: 'numeric'
   })
 }
+
+async function newEntry() {
+  const res = await createEntry()
+  console.log(res)
+}
 </script>
 
 <template>
@@ -38,7 +52,7 @@ function formatDate(date: string) {
     <div class="p-2 text-sm">
       <div class="mb-2 flex items-center justify-between">
         <div class="text-md px-2 font-semibold text-neutral-900">Entries</div>
-        <d-button variant="primary" size="sm">New entry</d-button>
+        <d-button variant="primary" size="sm" @click="newEntry">New entry</d-button>
       </div>
       <div class="divide-neutral-200">
         <router-link
