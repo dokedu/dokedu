@@ -17,7 +17,7 @@ const { data, error } = useQuery({
       }
     }
   `,
-  requestPolicy: "cache-and-network"
+  requestPolicy: 'cache-and-network'
 })
 
 const { executeMutation: createEntry } = useMutation(gql`

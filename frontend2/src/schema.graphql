@@ -81,7 +81,7 @@ type Entry {
 }
 
 type EntryConnection {
-    edges: [Entry!]!
+    edges: [Entry]
     pageInfo: PageInfo!
     totalCount: Int!
 }

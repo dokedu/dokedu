@@ -17,7 +17,7 @@ export interface Props {
   variant?: 'transparent' | 'outline' | 'primary'
   size?: 'xs' | 'sm' | 'md'
   to?: RouteLocationRaw
-  type: 'submit' | 'button'
+  type?: 'submit' | 'button'
   submit?: boolean
   iconLeft?: Icon
   iconRight?: Icon
@@ -35,6 +35,7 @@ const componentType = computed(() => {
 
 const props = withDefaults(defineProps<Props>(), {
   variant: 'primary',
+  type: 'button',
   size: 'md'
 })
 
