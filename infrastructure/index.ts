@@ -1,6 +1,7 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as kubernetes from '@pulumi/kubernetes'
 import * as random from "@pulumi/random";
+import {Ingress, Service} from "./util";
 
 const config = new pulumi.Config()
 const ghcrToken = config.requireSecret("ghcr")
@@ -16,7 +17,6 @@ const backendCredentials = new kubernetes.core.v1.Secret('backend-credentials', 
     password: backendCredentialsPassword.result
   },
   type: 'kubernetes.io/basic-auth'
-
 })
 
 const postgresCluster = new kubernetes.apiextensions.CustomResource('postgres', {
@@ -91,14 +91,11 @@ const minio = new kubernetes.apps.v1.Deployment('minio', {
     }
   }
 })
-
-const minioService = new kubernetes.core.v1.Service('minio', {
-  metadata: {namespace: namespace.metadata.name},
-  spec: {
-    ports: [{port: 9000, targetPort: 9000}],
-    selector: {app: 'minio'},
-  }
-}, {dependsOn: [minio]})
+const minioService = Service('minio', {
+  namespace: namespace.metadata.name,
+  port: 9000,
+  app: 'minio'
+})
 
 
 // meilisearch
@@ -119,16 +116,13 @@ const meilisearch = new kubernetes.apps.v1.Deployment('meilisearch', {
     }
   }
 })
-const meilisearchService = new kubernetes.core.v1.Service('meilisearch', {
-  metadata: {namespace: namespace.metadata.name},
-  spec: {
-    ports: [{port: 7700, targetPort: 7700}],
-    selector: {app: 'meilisearch'},
-  }
+const meilisearchService = Service('meilisearch', {
+  namespace: namespace.metadata.name,
+  port: 7700,
+  app: 'meilisearch'
 })
 
 // backend stuff
-
 const backend = new kubernetes.apps.v1.Deployment('backend', {
   metadata: {namespace: namespace.metadata.name, name: 'backend'},
   spec: {
@@ -156,45 +150,16 @@ const backend = new kubernetes.apps.v1.Deployment('backend', {
     }
   }
 })
-const backendService = new kubernetes.core.v1.Service('backend', {
-  metadata: {namespace: namespace.metadata.name},
-  spec: {
-    ports: [{port: 80, targetPort: 8080}],
-    selector: {app: 'backend'},
-  }
-}, {dependsOn: [backend]})
-const backendIngress = new kubernetes.networking.v1.Ingress('backend', {
-  metadata: {
-    namespace: namespace.metadata.name,
-    annotations: {
-      'pulumi.com/skipAwait': 'true',
-      'cert-manager.io/cluster-issuer': 'letsencrypt-prod',
-      'ingress.kubernetes.io/force-ssl-redirect': 'true',
-      'kubernetes.io/incress.class': 'contour',
-      'kubernetes.io/tls-acme': 'true'
-    }
-  },
-  spec: {
-    tls: [{
-      hosts: ["dokedu-api.felixhromadko.at"],
-      secretName: "backend-tls"
-    }],
-    rules: [{
-      host: 'dokedu-api.felixhromadko.at',
-      http: {
-        paths: [{
-          pathType: 'Prefix',
-          path: "/",
-          backend: {
-            service: {
-              name: backendService.metadata.name,
-              port: {number: 80}
-            }
-          }
-        }]
-      }
-    }]
-  }
+const backendService = Service('backend', {
+  namespace: namespace.metadata.name,
+  port: 80,
+  targetPort: 8080,
+  app: 'backend'
+})
+const backendIngress = Ingress('backend', {
+  namespace: namespace.metadata.name,
+  host: 'dokedu-api.felixhromadko.at',
+  service: {name: backendService.metadata.name, port: 80}
 })
 
 
@@ -217,43 +182,13 @@ const frontend = new kubernetes.apps.v1.Deployment('frontend', {
     }
   }
 })
-const frontendService = new kubernetes.core.v1.Service('frontend', {
-  metadata: {namespace: namespace.metadata.name},
-  spec: {
-    ports: [{port: 80, targetPort: 80}],
-    selector: {app: 'frontend'},
-  }
+const frontendService = Service('frontend', {
+  namespace: namespace.metadata.name,
+  port: 80,
+  app: 'frontend'
 })
-const frontendIngress = new kubernetes.networking.v1.Ingress('frontend', {
-  metadata: {
-    namespace: namespace.metadata.name,
-    annotations: {
-      'pulumi.com/skipAwait': 'true',
-      'cert-manager.io/cluster-issuer': 'letsencrypt-prod',
-      'ingress.kubernetes.io/force-ssl-redirect': 'true',
-      'kubernetes.io/incress.class': 'contour',
-      'kubernetes.io/tls-acme': 'true'
-    }
-  },
-  spec: {
-    tls: [{
-      hosts: ["dokedu.felixhromadko.at"],
-      secretName: "frontend-tls"
-    }],
-    rules: [{
-      host: 'dokedu.felixhromadko.at',
-      http: {
-        paths: [{
-          pathType: 'Prefix',
-          path: "/",
-          backend: {
-            service: {
-              name: frontendService.metadata.name,
-              port: {number: 80}
-            }
-          }
-        }]
-      }
-    }]
-  }
+const frontendIngress = Ingress('frontend', {
+  namespace: namespace.metadata.name,
+  host: 'dokedu.felixhromadko.at',
+  service: {name: frontendService.metadata.name, port: 80}
 })
