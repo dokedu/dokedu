@@ -290,7 +290,7 @@ func (ts *TestSuite) Test_ArchiveUser() {
 	_, err = ts.DB.GLOBAL_UserFindByID(ts.Ctx(), student.ID)
 	ts.ErrorIs(err, pgx.ErrNoRows)
 	_, err = ts.DB.UserStudentFindByUserID(ts.Ctx(), db.UserStudentFindByUserIDParams{
-		ID:             student.ID,
+		UserID:         student.ID,
 		OrganisationID: student.OrganisationID,
 	})
 	ts.ErrorIs(err, pgx.ErrNoRows)

@@ -1,0 +1,7 @@
+name: dokedu
+runtime: nodejs
+description: Deploy dokedu via pulumi
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: typescript
