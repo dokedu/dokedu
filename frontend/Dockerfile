@@ -6,13 +6,15 @@ COPY package-lock.json ./
 RUN npm install -g npm@9.7.1
 RUN npm install
 
-ARG VITE_API_URL="https://api.dokedu.org/query"
+ARG VITE_API_URL="__VITE_API_URL__"
 
 COPY . .
 RUN npm run build
 
 FROM caddy as prod
 WORKDIR /app
+COPY init.sh /app/
 COPY --from=builder /app/dist /app/
 COPY Caddyfile /app/
-CMD ["caddy", "run"]
+
+CMD ["sh", "/app/init.sh"]

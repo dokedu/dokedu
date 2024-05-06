@@ -174,8 +174,9 @@ const frontend = new kubernetes.apps.v1.Deployment('frontend', {
       spec: {
         containers: [{
           name: "frontend",
-          image: 'ghcr.io/felixhromadko/dokedufrontend:4',
+          image: 'ghcr.io/felixhromadko/dokedufrontend:5',
           ports: [{containerPort: 80}],
+          env: [{name: "API_URL", value: backendIngress.spec.rules[0].host.apply(h => `https://${h}/graph`)}]
         }],
         imagePullSecrets: [{name: ghcr.metadata.name}]
       }
