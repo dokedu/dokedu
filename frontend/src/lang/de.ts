@@ -63,7 +63,7 @@ export const de = {
   class: "Klasse | Klassen",
   print: "Drucken",
   active: "Aktive",
-  with_deleted: "Mit gelöschten",
+  with_deleted: "Mit archivierten",
   loading: "Lädt...",
   name: "Name",
   description: "Beschreibung",
@@ -139,7 +139,7 @@ export const de = {
   saved_successfully: "Erfolgreich gespeichert",
   created: "erstellt",
   updated: "aktualisiert",
-  delete: "Löschen",
+  delete: "Archivieren",
 
   first_name: "Vorname",
   last_name: "Nachname",
@@ -201,7 +201,7 @@ export const de = {
     "Bitte verwende einen Desktop-Browser, um diese Anwendung zu nutzen. Eine Mobile-Version ist in Arbeit und wird bald verfügbar sein.",
 
   settings: "Einstellungen",
-  show_deleted: "Gelöschte anzeigen",
+  show_deleted: "Archivierte anzeigen",
 
   previewing_not_supported: "Die Vorschau dieser Datei wird noch nicht unterstützt.",
   drop_file_here: "Datei hier ablegen",
@@ -259,7 +259,7 @@ export const de = {
   amount_group_members: "{amount} Mitglieder",
   last_seen: "Zuletzt gesehen vor {time}",
   online: "Online",
-  delete_chat_confirmation: "Willst du diesen Chat wirklich löschen?",
+  delete_chat_confirmation: "Willst du diesen Chat wirklich archivieren?",
   edit: "Bearbeiten",
   edit_message: "Nachricht bearbeiten",
   copy_text: "Text kopieren",

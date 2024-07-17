@@ -67,7 +67,7 @@ export const en = {
   class: "Class | Classes",
   print: "Print",
   active: "Active",
-  with_deleted: "With deleted",
+  with_deleted: "With archived...",
   loading: "Loading...",
   name: "Name",
   description: "Description",
@@ -143,7 +143,7 @@ export const en = {
   saved_successfully: "Saved successfully",
   created: "created",
   updated: "updated",
-  delete: "Delete",
+  delete: "Archive",
 
   first_name: "First name",
   last_name: "Last name",
@@ -203,13 +203,13 @@ export const en = {
     "Please use a desktop browser to use this application. A mobile version is in the works and will be available soon.",
 
   settings: "Settings",
-  show_deleted: "Show deleted",
+  show_deleted: "Show archived",
 
   previewing_not_supported: "Previewing this file is not supported yet.",
   drop_file_here: "Drop file here",
   or_use_new_button: 'or use the "New" button.',
   move_to_trash_q: "Move to trash?",
-  will_be_deleted_can_restore: '"{file}" will be deleted. You can restore it anytime.',
+  will_be_deleted_can_restore: '"{file}" will be archived. You can restore it anytime.',
   rename_file: "Rename file",
   share_drive: "Share drive",
   select_user: "Select user | Select users",
@@ -226,7 +226,7 @@ export const en = {
   shared_with_me: "Shared with me",
   trash: "Trash",
   trash_work_in_progress_title: "This page is still a work in progress.",
-  trash_work_in_progress_text: "It will be used to display the files that have been deleted by you.",
+  trash_work_in_progress_text: "It will be used to display the files that have been archived by you.",
 
   support: "Support",
 
@@ -260,7 +260,7 @@ export const en = {
   amount_group_members: "{amount} members",
   last_seen: "last seen {time} ago",
   online: "online",
-  delete_chat_confirmation: "Are you sure you want to delete this chat?",
+  delete_chat_confirmation: "Are you sure you want to archive this chat?",
   edit: "Edit",
   edit_message: "Edit Message",
   copy_text: "Copy Text",
