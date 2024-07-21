@@ -17,7 +17,13 @@
       <div v-show="errors.name" class="text-red-500 mt-2">{{ errors.name }}</div>
     </div>
     <div>
-      <DSelect label="Fach" v-model="parentId" v-model:search="subjectSearch" searchable :options="subjectsOptions" />
+      <DCombobox
+        placeholder="Fach"
+        v-model="parentId"
+        v-model:search="subjectSearch"
+        searchable
+        :options="subjectsOptions"
+      />
       <div v-show="errors.parentId" class="text-red-500 mt-2">{{ errors.parentId }}</div>
     </div>
     <button
@@ -31,12 +37,13 @@
 
 <script lang="ts" setup>
 import { Form, useForm, useField } from "vee-validate"
-import DSelect from "@/components/d-select/d-select.vue"
+import DCombobox from "../d-combobox/d-combobox.vue"
 import { computed, reactive, ref } from "vue"
 import { XIcon } from "lucide-vue-next"
 import * as yup from "yup"
 import { useSubjectsDataQuery } from "@/gql/queries/competences/subjectsData"
 import { useCreateCompetenceMutation } from "@/gql/mutations/competences/createCompetence"
+import { type Option } from "../d-combobox/d-combobox.vue"
 
 yup.setLocale({
   mixed: {
@@ -52,7 +59,7 @@ const subjectSearch = ref("")
 
 const schema = yup.object({
   name: yup.string().required().min(3).max(100).label("Name"),
-  parentId: yup.string().required().label("Fach")
+  parentId: yup.object().required().label("Fach")
 })
 
 const { handleSubmit, errors } = useForm({
@@ -60,11 +67,14 @@ const { handleSubmit, errors } = useForm({
 })
 
 const { value: name } = useField("name")
-const { value: parentId } = useField<string>("parentId")
+const { value: parentId } = useField<Option>("parentId")
 
 const onSubmit = handleSubmit(async (values) => {
   const { data, error } = await createCompetence({
-    input: values as { name: string; parentId: string }
+    input: {
+      name: values.name,
+      parentId: values.parentId.value
+    }
   })
 
   if (error) {

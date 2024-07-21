@@ -18,9 +18,9 @@
       </div>
       <div class="relative mt-4 flex items-center gap-4">
         <div class="min-w-16 text-neutral-400">{{ $t("color") }}</div>
-        <DSelect :options="colorOptions" :label="$t('tag', 2)" multiple v-model="color" class="w-full">
+        <DCombobox :options="colorOptions" :placeholder="$t('tag', 2)" v-model="color" class="w-full">
           <template #display="{ displayedLabel }">
-            <d-tag :color="color">
+            <d-tag :color="color.value">
               {{ displayedLabel }}
             </d-tag>
           </template>
@@ -29,7 +29,7 @@
               {{ option.label }}
             </d-tag>
           </template>
-        </DSelect>
+        </DCombobox>
       </div>
     </div>
     <div v-if="error" class="text-xs font-semibold text-red-600">{{ error }}</div>
@@ -44,12 +44,13 @@
 
 <script setup lang="ts">
 import DButton from "@/components/d-button/d-button.vue"
-import DSelect from "@/components/d-select/d-select.vue"
+import DCombobox from "../d-combobox/d-combobox.vue"
 import DTag from "@/components/d-tag/d-tag.vue"
 import { X } from "lucide-vue-next"
 import { toRef, ref, onMounted } from "vue"
 import type { Competence } from "@/gql/schema"
 import { useUpdateCompetenceMutation } from "@/gql/mutations/competences/updateCompetence"
+import type { Option } from "../d-combobox/d-combobox.vue"
 
 const dialog = ref<HTMLDialogElement>()
 const colors = [
@@ -89,7 +90,10 @@ const props = defineProps<Props>()
 const emit = defineEmits(["close", "updated"])
 
 const competence = toRef(props, "competence")
-const color = ref<string>(competence.value?.color as string)
+const color = ref<Option>({
+  label: capitalize(competence.value.color),
+  value: competence.value.color
+})
 const error = ref("")
 
 function capitalize(string: string) {
@@ -109,7 +113,7 @@ const onUpdate = async () => {
   const mutation = await updateCompetence({
     input: {
       id: competence.value.id,
-      color: color.value
+      color: color.value.value
     }
   })
   if (mutation.error) {
