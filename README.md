@@ -7,3 +7,4 @@ Dokedu is a software to support the efficient management and evaluation of learn
 <br />
 
 © 2019-present, Dokedu UG (haftungsbeschränkt)
+
