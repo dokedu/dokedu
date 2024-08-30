@@ -113,8 +113,8 @@ type ChatMessage struct {
 	UserID         string       `json:"user_id"`
 	Message        string       `json:"message"`
 	OrganisationID string       `json:"organisation_id"`
-	UpdatedAt      bun.NullTime `json:"updated_at"`
 	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime `json:"updated_at"`
 	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
@@ -126,8 +126,8 @@ type ChatMessageFile struct {
 	UserID        string       `json:"user_id"`
 	ChatMessageID string       `json:"message_id"`
 	FileID        string       `json:"file_id"`
-	UpdatedAt     bun.NullTime `json:"updated_at"`
 	CreatedAt     time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt     bun.NullTime `json:"updated_at"`
 	DeletedAt     bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
@@ -140,16 +140,18 @@ type ChatMessageReaction struct {
 	MessageID string       `json:"message_id"`
 	Reaction  string       `json:"reaction"`
 	CreatedAt time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt bun.NullTime `json:"updated_at"`
 	DeletedAt bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
 type ChatUser struct {
 	bun.BaseModel
 
-	ID             string `bun:",nullzero,pk" json:"id"`
-	ChatID         string `json:"chat_id"`
-	UserID         string `json:"user_id"`
-	OrganisationID string `json:"organisation_id"`
+	ID             string       `bun:",nullzero,pk" json:"id"`
+	ChatID         string       `json:"chat_id"`
+	UserID         string       `json:"user_id"`
+	OrganisationID string       `json:"organisation_id"`
+	UpdatedAt      bun.NullTime `json:"updated_at"`
 }
 
 type Competence struct {
@@ -166,6 +168,7 @@ type Competence struct {
 	CurriculumID   sql.NullString `json:"curriculum_id"`
 	CreatedBy      sql.NullString `json:"created_by"`
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime   `json:"updated_at"`
 	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
 }
 
@@ -180,7 +183,8 @@ type CompetenceNoNullString struct {
 	SortOrder      int            `json:"sort_order"`
 	CurriculumID   string         `json:"curriculum_id"`
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
-	DeletedAt      string         `bun:",soft_delete,nullzero"`
+	UpdatedAt      bun.NullTime   `json:"updated_at"`
+	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
 }
 
 type Entry struct {
@@ -192,6 +196,7 @@ type Entry struct {
 	UserID         string       `json:"user_id"`
 	OrganisationID string       `json:"organisation_id"`
 	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime `json:"updated_at"`
 	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
@@ -203,6 +208,7 @@ type EntryEvent struct {
 	EventID        string       `json:"event_id"`
 	OrganisationID string       `json:"organisation_id"`
 	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime `json:"updated_at"`
 	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
@@ -214,6 +220,7 @@ type EntryFile struct {
 	FileID         string       `json:"file_id"`
 	OrganisationID string       `json:"organisation_id"`
 	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime `json:"updated_at"`
 	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
@@ -225,6 +232,7 @@ type EntryTag struct {
 	TagID          string       `json:"tag_id"`
 	OrganisationID string       `json:"organisation_id"`
 	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime `json:"updated_at"`
 	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
@@ -236,6 +244,7 @@ type EntryUser struct {
 	UserID         string       `json:"user_id"`
 	OrganisationID string       `json:"organisation_id"`
 	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime `json:"updated_at"`
 	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
@@ -250,6 +259,7 @@ type UserCompetence struct {
 	OrganisationID string         `json:"organisation_id"`
 	CreatedBy      sql.NullString `json:"created_by,omitempty"`
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime   `json:"updated_at"`
 	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
 }
 
@@ -265,6 +275,7 @@ type Event struct {
 	EndsAt         time.Time      `json:"ends_at"`
 	Recurrence     []string       `bun:",array" json:"recurrence"`
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime   `json:"updated_at"`
 	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
 }
 
@@ -276,6 +287,7 @@ type EventCompetence struct {
 	CompetenceID   string       `json:"competence_id"`
 	OrganisationID string       `json:"organisation_id"`
 	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime `json:"updated_at"`
 	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
@@ -288,6 +300,7 @@ type Bucket struct {
 	Shared         bool           `json:"shared"`
 	OrganisationID string         `json:"organisation_id"`
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime   `json:"updated_at"`
 	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
 }
 
@@ -303,6 +316,7 @@ type File struct {
 	ParentID       sql.NullString `bun:",nullzero" json:"parent_id"`
 	OrganisationID string         `bun:",notnull" json:"organisation_id"`
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime   `json:"updated_at"`
 	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
 }
 
@@ -323,6 +337,7 @@ type Organisation struct {
 	AllowedDomains       []string       `bun:",array" json:"allowed_domains"`
 	EnabledApps          []string       `bun:",array" json:"enabled_apps"`
 	CreatedAt            time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt            bun.NullTime   `json:"updated_at"`
 	DeletedAt            bun.NullTime   `bun:",soft_delete,nullzero"`
 }
 
@@ -342,6 +357,7 @@ type Report struct {
 	StudentUserID  string          `json:"student_user_id"`
 	OrganisationID string          `json:"organisation_id"`
 	CreatedAt      time.Time       `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime    `json:"updated_at"`
 	DeletedAt      bun.NullTime    `bun:",soft_delete,nullzero"`
 }
 
@@ -357,6 +373,8 @@ type ReportTemplate struct {
 	Settings       json.RawMessage `json:"settings"`
 	OrganisationID string          `json:"organisation_id"`
 	CreatedAt      time.Time       `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime    `json:"updated_at"`
+	DeletedAt      bun.NullTime    `bun:",soft_delete,nullzero"`
 }
 
 type Share struct {
@@ -370,6 +388,7 @@ type Share struct {
 	Permission     string       `json:"permission"`
 	OrganisationID string       `json:"organisation_id"`
 	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime `json:"updated_at"`
 	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
@@ -381,6 +400,7 @@ type Tag struct {
 	Color          sql.NullString `json:"color"`
 	OrganisationID string         `json:"organisation_id"`
 	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime   `json:"updated_at"`
 	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
 }
 
@@ -398,9 +418,10 @@ type User struct {
 	RecoveryToken  sql.NullString `json:"recovery_token"`
 	RecoverySentAt bun.NullTime   `json:"recovery_sent_at"`
 	AvatarFileID   sql.NullString `json:"avatar_file_id"`
-	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
-	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero" json:"deleted_at"`
 	Language       UserLanguage   `bun:",nullzero" json:"language"`
+	CreatedAt      time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime   `json:"updated_at"`
+	DeletedAt      bun.NullTime   `bun:",soft_delete,nullzero"`
 }
 
 type UserFiles struct {
@@ -410,8 +431,9 @@ type UserFiles struct {
 	OrganisationID string       `json:"organisation_id"`
 	UserID         string       `json:"user_id"`
 	FileID         string       `json:"file_id"`
-	UpdatedAt      bun.NullTime `json:"updated_at"`
 	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime `json:"updated_at"`
+	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
 type UserStudent struct {
@@ -428,10 +450,11 @@ type UserStudent struct {
 	JoinedAt           bun.NullTime   `bun:",nullzero" json:"joined_at"`
 	MissedHours        int32          `json:"missed_hours"`
 	MissedHoursExcused int32          `json:"missed_hours_excused"`
-	CreatedAt          time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
-	DeletedAt          bun.NullTime   `bun:",soft_delete,nullzero"`
 	Birthplace         sql.NullString `json:"birthplace"`
 	Emoji              sql.NullString `json:"emoji"`
+	CreatedAt          time.Time      `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt          bun.NullTime   `json:"updated_at"`
+	DeletedAt          bun.NullTime   `bun:",soft_delete,nullzero"`
 }
 
 type Session struct {
@@ -441,6 +464,7 @@ type Session struct {
 	UserID    string       `json:"user_id"`
 	Token     string       `json:"token"`
 	CreatedAt time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt bun.NullTime `json:"updated_at"`
 	DeletedAt bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
@@ -464,16 +488,20 @@ type EmailAccount struct {
 	UserID         sql.NullString   `json:"user_id"`
 	OrganisationID string           `json:"organisation_id"`
 	CreatedAt      time.Time        `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime     `json:"updated_at"`
+	DeletedAt      bun.NullTime     `bun:",soft_delete,nullzero"`
 }
 
 type EmailGroupMember struct {
 	bun.BaseModel
 
-	ID             string    `bun:",nullzero,pk" json:"id"`
-	Name           string    `json:"name"`
-	MemberOf       string    `json:"member_of"`
-	OrganisationID string    `json:"organisation_id"`
-	CreatedAt      time.Time `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	ID             string       `bun:",nullzero,pk" json:"id"`
+	Name           string       `json:"name"`
+	MemberOf       string       `json:"member_of"`
+	OrganisationID string       `json:"organisation_id"`
+	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime `json:"updated_at"`
+	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
 type EmailType string
@@ -487,31 +515,37 @@ const (
 type Email struct {
 	bun.BaseModel
 
-	ID             string    `bun:",nullzero,pk" json:"id"`
-	Name           string    `json:"name"`
-	Address        string    `json:"address"`
-	Type           EmailType `json:"type"`
-	OrganisationID string    `json:"organisation_id"`
-	CreatedAt      time.Time `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	ID             string       `bun:",nullzero,pk" json:"id"`
+	Name           string       `json:"name"`
+	Address        string       `json:"address"`
+	Type           EmailType    `json:"type"`
+	OrganisationID string       `json:"organisation_id"`
+	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime `json:"updated_at"`
+	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
 type EmailForwarding struct {
 	bun.BaseModel
 
-	ID             string    `bun:",nullzero,pk" json:"id"`
-	Origin         string    `json:"origin"`
-	Target         string    `json:"target"`
-	OrganisationID string    `json:"organisation_id"`
-	CreatedAt      time.Time `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	ID             string       `bun:",nullzero,pk" json:"id"`
+	Origin         string       `json:"origin"`
+	Target         string       `json:"target"`
+	OrganisationID string       `json:"organisation_id"`
+	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime `json:"updated_at"`
+	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
 type Domain struct {
 	bun.BaseModel
 
-	ID             string    `bun:",nullzero,pk" json:"id"`
-	Name           string    `json:"name"`
-	OrganisationID string    `json:"organisation_id"`
-	CreatedAt      time.Time `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	ID             string       `bun:",nullzero,pk" json:"id"`
+	Name           string       `json:"name"`
+	OrganisationID string       `json:"organisation_id"`
+	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime `json:"updated_at"`
+	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
 type Subject struct {
@@ -521,6 +555,7 @@ type Subject struct {
 	Name           string       `json:"name"`
 	OrganisationID string       `json:"organisation_id"`
 	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime `json:"updated_at"`
 	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
@@ -532,6 +567,7 @@ type SchoolYear struct {
 	Description    string       `bun:",nullzero" json:"description"`
 	OrganisationID string       `json:"organisation_id"`
 	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime `json:"updated_at"`
 	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
@@ -556,6 +592,7 @@ type UserStudentSchoolHistory struct {
 	SchoolYearID   string                         `json:"school_year_id"`
 	OrganisationID string                         `json:"organisation_id"`
 	CreatedAt      time.Time                      `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime                   `json:"updated_at"`
 	DeletedAt      bun.NullTime                   `bun:",soft_delete,nullzero"`
 }
 
@@ -569,6 +606,7 @@ type UserStudentGrades struct {
 	SchoolYearID   string       `json:"school_year_id"`
 	OrganisationID string       `json:"organisation_id"`
 	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime `json:"updated_at"`
 	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
 
@@ -592,16 +630,19 @@ type UserAttendance struct {
 	CreatedBy      string              `json:"created_by"`
 	OrganisationID string              `json:"organisation_id"`
 	CreatedAt      time.Time           `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime        `json:"updated_at"`
 	DeletedAt      bun.NullTime        `bun:",soft_delete,nullzero"`
 }
 
 type ChatMessageView struct {
 	bun.BaseModel
 
-	ID             string    `bun:",nullzero,pk" json:"id"`
-	UserID         string    `json:"user_id"`
-	ChatID         string    `json:"chat_id"`
-	ChatMessageID  string    `json:"chat_message_id"`
-	OrganisationID string    `json:"organisation_id"`
-	CreatedAt      time.Time `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	ID             string       `bun:",nullzero,pk" json:"id"`
+	UserID         string       `json:"user_id"`
+	ChatID         string       `json:"chat_id"`
+	ChatMessageID  string       `json:"chat_message_id"`
+	OrganisationID string       `json:"organisation_id"`
+	CreatedAt      time.Time    `bun:",nullzero,notnull,default:now()" json:"created_at"`
+	UpdatedAt      bun.NullTime `json:"updated_at"`
+	DeletedAt      bun.NullTime `bun:",soft_delete,nullzero"`
 }
