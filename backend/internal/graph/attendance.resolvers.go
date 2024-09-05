@@ -10,6 +10,8 @@ import (
 	"errors"
 	"time"
 
+	"github.com/uptrace/bun"
+
 	"github.com/dokedu/dokedu/backend/internal/dataloaders"
 	"github.com/dokedu/dokedu/backend/internal/db"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
@@ -35,6 +37,7 @@ func (r *mutationResolver) SetUserAttendanceState(ctx context.Context, userID st
 			OrganisationID: currentUser.OrganisationID,
 			Date:           date,
 			State:          state,
+			UpdatedAt:      bun.NullTime{Time: time.Now()},
 			CreatedBy:      currentUser.ID,
 		}
 		err = r.DB.NewInsert().
@@ -118,6 +121,7 @@ func (r *mutationResolver) UpdateDailyAttendance(ctx context.Context, date time.
 					State:          state,
 					CreatedBy:      currentUser.ID,
 					OrganisationID: currentUser.OrganisationID,
+					UpdatedAt:      bun.NullTime{Time: time.Now()},
 				})
 			}
 		}
@@ -194,6 +198,7 @@ func (r *queryResolver) UserAttendanceOverview(ctx context.Context, date time.Ti
 					State:          db.UserAttendanceStateUnknown,
 					CreatedBy:      currentUser.ID,
 					OrganisationID: currentUser.OrganisationID,
+					UpdatedAt:      bun.NullTime{Time: time.Now()},
 				})
 			}
 		}
@@ -214,8 +219,8 @@ func (r *queryResolver) UserAttendanceOverview(ctx context.Context, date time.Ti
 		Model(&userAttendances).
 		Where("date = ?", date).
 		Join("JOIN users ON users.id = user_attendance.user_id").
-		Order("users.first_name ASC").
 		Order("users.last_name ASC").
+		Order("users.first_name ASC").
 		Where("user_attendance.organisation_id = ?", currentUser.OrganisationID).
 		Scan(ctx)
 	if err != nil {
