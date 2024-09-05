@@ -627,8 +627,10 @@ type UserAttendance struct {
 	UserID         string              `json:"user_id"`
 	Date           time.Time           `json:"date"`
 	State          UserAttendanceState `json:"state"`
-	CreatedBy      string              `json:"created_by"`
 	OrganisationID string              `json:"organisation_id"`
+	Comment        string              `json:"comment"`
+	MinutesDelayed int                 `json:"minutes_delayed"`
+	CreatedBy      string              `json:"created_by"`
 	CreatedAt      time.Time           `bun:",nullzero,notnull,default:now()" json:"created_at"`
 	UpdatedAt      bun.NullTime        `json:"updated_at"`
 	DeletedAt      bun.NullTime        `bun:",soft_delete,nullzero"`

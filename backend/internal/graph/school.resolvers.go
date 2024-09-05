@@ -10,13 +10,12 @@ import (
 	"slices"
 	"time"
 
-	"github.com/uptrace/bun"
-	excelize "github.com/xuri/excelize/v2"
-
 	"github.com/dokedu/dokedu/backend/internal/db"
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
+	"github.com/uptrace/bun"
+	excelize "github.com/xuri/excelize/v2"
 )
 
 // CreateSubject is the resolver for the createSubject field.
