@@ -6,16 +6,19 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"slices"
+	"strconv"
 	"time"
+
+	"github.com/uptrace/bun"
+	excelize "github.com/xuri/excelize/v2"
 
 	"github.com/dokedu/dokedu/backend/internal/db"
 	"github.com/dokedu/dokedu/backend/internal/graph/model"
 	"github.com/dokedu/dokedu/backend/internal/helper"
 	"github.com/dokedu/dokedu/backend/internal/middleware"
-	"github.com/uptrace/bun"
-	excelize "github.com/xuri/excelize/v2"
 )
 
 // CreateSubject is the resolver for the createSubject field.
@@ -174,7 +177,7 @@ func (r *mutationResolver) ImportStudents(ctx context.Context, input model.Impor
 	}
 
 	// Validate headers
-	allowedHeaders := []string{"Vorname", "Nachname", "Geburtsdatum"}
+	allowedHeaders := []string{"Vorname", "Nachname", "Geburtsdatum", "Klasse"}
 	headers := rows[0]
 	for _, header := range headers {
 		if !slices.Contains(allowedHeaders, header) {
@@ -506,8 +509,21 @@ func (r *mutationResolver) createStudentFromRow(user *db.User, row []string, org
 		return nil, err
 	}
 
+	grade := 1
+	// parse row[3] as int (row[3] is a string)
+	if row[3] != "" {
+		grade, err = strconv.Atoi(row[3])
+		if err != nil {
+			return nil, err
+		}
+	}
+	// ensure grade is between 1 and 13
+	if grade < 1 || grade > 13 {
+		return nil, errors.New("grade must be between 1 and 13")
+	}
+
 	student.Birthday = bun.NullTime{Time: birthday}
-	student.Grade = 1
+	student.Grade = int32(grade)
 	student.OrganisationID = organisationID
 
 	return &student, nil
