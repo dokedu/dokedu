@@ -28,7 +28,7 @@ func (s *ReportGenerationService) AddToQueue(reportId string) error {
 	defer s.mu.Unlock()
 
 	s.queue.PushBack(reportId)
-	fmt.Println("Added to queue: ", reportId)
+	slog.Info("Added to queue", "reportId", reportId)
 	s.tickleLoop()
 	return nil
 }
@@ -60,7 +60,7 @@ func (s *ReportGenerationService) tryDequeue() {
 		request := s.dequeue()
 		go s.process(request)
 	default:
-		fmt.Println("Request limit reached")
+		slog.Info("Request limit reached")
 	}
 }
 
@@ -74,13 +74,13 @@ func (s *ReportGenerationService) dequeue() string {
 // Here, the report is processed and stuff is generated
 func (s *ReportGenerationService) process(request string) {
 	defer s.replenish()
-	fmt.Println("Processing request: ", request)
+	slog.Info("Processing request: ", "request", request)
 
 	// Fetch the report from the database
 	var report db.Report
 	err := s.cfg.DB.NewSelect().Model(&report).Where("id = ?", request).Scan(context.Background())
 	if err != nil {
-		fmt.Println("Error fetching report: ", err)
+		slog.Error("Error fetching report: ", "err", err)
 		return
 	}
 
@@ -90,6 +90,7 @@ func (s *ReportGenerationService) process(request string) {
 		if err != nil {
 			err := s.updateReportStatus(report.ID, db.ReportStatusError)
 			if err != nil {
+				slog.Error("Error updating report status: ", "err", err)
 				return
 			}
 			return
@@ -107,6 +108,7 @@ func (s *ReportGenerationService) cleanup(report db.Report) {
 	if report.Format == db.ReportFormatPdf {
 		err := os.Remove(fmt.Sprintf("tmp/reports/%s.html", report.ID))
 		if err != nil {
+			slog.Error("Error deleting report html file: ", "err", err)
 			fmt.Println("Error deleting report html file: ", err)
 		}
 	}

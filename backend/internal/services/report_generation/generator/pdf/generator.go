@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -44,18 +45,24 @@ func NewPDFReportsGenerator(cfg config.ReportGenerationConfig) *Generator {
 
 func (g *Generator) GeneratePDF(report db.Report) error {
 	var data any
+	var err error
 
 	switch report.Kind {
 	case db.ReportKindEntries:
-		data, _ = g.EntriesReportData(report)
+		data, err = g.EntriesReportData(report)
 	case db.ReportKindCompetences:
-		data, _ = g.CompetencesReportData(report)
+		data, err = g.CompetencesReportData(report)
 	case db.ReportKindLearnedCompetences:
-		data, _ = g.LearnedCompetencesReportData(report)
+		data, err = g.LearnedCompetencesReportData(report)
 	case db.ReportKindAllEntries:
-		data, _ = g.AllEntriesReportData(report)
+		data, err = g.AllEntriesReportData(report)
 	default:
 		return errors.New("unknown report kind")
+	}
+
+	if err != nil {
+		slog.Error("Error generating report: ", "err", err)
+		return err
 	}
 
 	return g.process(report, data)
