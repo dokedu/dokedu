@@ -374,7 +374,6 @@ type ReportTemplate struct {
 	OrganisationID string          `json:"organisation_id"`
 	CreatedAt      time.Time       `bun:",nullzero,notnull,default:now()" json:"created_at"`
 	UpdatedAt      bun.NullTime    `json:"updated_at"`
-	DeletedAt      bun.NullTime    `bun:",soft_delete,nullzero"`
 }
 
 type Share struct {
