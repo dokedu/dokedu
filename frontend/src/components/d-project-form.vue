@@ -1,18 +1,14 @@
 <template>
   <div class="flex h-screen w-full select-none flex-col text-sm @container">
     <div
-      class="flex h-[56px] min-h-0 w-full items-center justify-between border-b border-neutral-100 px-8 py-2 text-sm text-neutral-700"
-    >
+      class="flex h-[56px] min-h-0 w-full items-center justify-between border-b border-neutral-100 px-8 py-2 text-sm text-neutral-700">
       <div class="flex items-center gap-2">
         <router-link to="/record/projects/" class="select-none text-sm font-medium text-strong">
           {{ $t("project", 2) }}
         </router-link>
         <ChevronRight :size="16" />
-        <router-link
-          v-if="$route.name !== '/record/projects/new'"
-          :to="{ name: '/record/projects/[id]' }"
-          class="select-none text-sm font-medium text-strong"
-        >
+        <router-link v-if="$route.name !== '/record/projects/new'" :to="{ name: '/record/projects/[id]' }"
+          class="select-none text-sm font-medium text-strong">
           {{ $t("project", 1) }}
         </router-link>
         <div v-if="$route.name === '/record/projects/new'" class="select-none text-sm font-medium text-strong">
@@ -35,31 +31,19 @@
               </div>
             </div>
           </div>
-          <d-input
-            v-model="project.title"
-            name="name"
-            label="Name"
-            :placeholder="$t('name_of_project')"
-            :required="true"
-          />
+          <d-input v-model="project.title" name="name" label="Name" :placeholder="$t('name_of_project')"
+            :required="true" />
           <div class="grid grid-cols-2 gap-2">
-            <d-input v-model="startsAt" name="starts-at" type="datetime-local" />
-            <d-input v-model="endsAt" name="ends-at" type="datetime-local" />
+            <d-input v-model="startsAt" name="starts-at" type="date" />
+            <d-input v-model="endsAt" name="ends-at" type="date" />
           </div>
         </div>
 
         <div class="mt-2">
-          <textarea
-            ref="textarea"
-            v-model="body"
+          <textarea ref="textarea" v-model="body"
             class="block min-h-[6rem] w-full resize-none rounded-md border-0 py-2 text-neutral-900 shadow-sm ring-1 ring-inset ring-neutral-300 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-neutral-950 sm:text-sm sm:leading-6"
-            name="description"
-            id="description"
-            cols="30"
-            rows="3"
-            :placeholder="$t('project_description_placeholder')"
-            required
-          />
+            name="description" id="description" cols="30" rows="3" :placeholder="$t('project_description_placeholder')"
+            required />
         </div>
         <div class="mt-4 flex justify-between">
           <div class="flex gap-2">
@@ -76,10 +60,8 @@
             <d-button type="transparent" size="xs" @click="editCompetences = true">{{ $t("add") }}</d-button>
           </div>
         </header>
-        <div
-          v-if="project.competences && project.competences.length > 0"
-          class="flex flex-1 flex-col gap-1 overflow-scroll"
-        >
+        <div v-if="project.competences && project.competences.length > 0"
+          class="flex flex-1 flex-col gap-1 overflow-scroll">
           <d-competence v-for="competence in project.competences" :key="competence.id" :competence="competence">
             <div class="rounded-lg p-0.5 hover:bg-neutral-100" @click="toggleCompetence(competence)">
               <X :size="18" class="stroke-colors-default" />
@@ -156,14 +138,12 @@ export interface Props {
 const props = defineProps<Props>()
 
 const project = toRef(props, "project")
+
 const startsAt = computed({
-  get: () => {
-    // to local time
-    const date = new Date(project.value.startsAt)
-    return date.toISOString().slice(0, 16)
-  },
+  get: () => project.value.startsAt.slice(0, 16),
   set: (value) => (project.value.startsAt = value)
 })
+
 const endsAt = computed({
   get: () => project.value.endsAt.slice(0, 16),
   set: (value) => (project.value.endsAt = value)

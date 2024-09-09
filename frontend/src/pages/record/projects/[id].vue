@@ -1,6 +1,6 @@
 <template>
   <div v-if="data?.event" class="h-full w-full">
-    <d-project-form :project="data?.event as Event" :cancel="data?.event" @cancel="cancel" @save="save" />
+    <d-project-form :project="data.event" :cancel="data.event" @cancel="cancel" @save="save" />
   </div>
 </template>
 
