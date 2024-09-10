@@ -140,12 +140,12 @@ const props = defineProps<Props>()
 const project = toRef(props, "project")
 
 const startsAt = computed({
-  get: () => project.value.startsAt.slice(0, 16),
+  get: () => project.value.startsAt.slice(0, 10),
   set: (value) => (project.value.startsAt = value)
 })
 
 const endsAt = computed({
-  get: () => project.value.endsAt.slice(0, 16),
+  get: () => project.value.endsAt.slice(0, 10),
   set: (value) => (project.value.endsAt = value)
 })
 
