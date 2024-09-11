@@ -1,7 +1,7 @@
 <template>
   <div id="page" class="flex" v-if="width > 900">
     <PageSidebar />
-    <main class="flex w-[calc(100vw-230px)] print:w-full">
+    <main class="flex w-[calc(100vw-230px)] print:w-full print:overflow-auto">
       <router-view />
     </main>
   </div>

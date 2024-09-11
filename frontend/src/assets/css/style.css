@@ -71,10 +71,3 @@ body {
     transform: translateY(0);
   }
 }
-
-@media print {
-  #app,
-  body {
-    overflow: auto !important;
-  }
-}

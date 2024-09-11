@@ -13,9 +13,10 @@ body {
   position: relative;
   overscroll-behavior-y: none;
 }
+
 #app {
   background-color: white;
-  overflow: hidden;
+  /* overflow: hidden; */
   height: 100%;
   /* transition: all 0.2s ease-in-out; */
 }
