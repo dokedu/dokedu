@@ -62,11 +62,12 @@
 
 <script lang="ts" setup>
 import DCompetence from "@/components/d-competence/d-competence.vue"
-import { computed, reactive, Ref, ref } from "vue"
+import { computed, reactive, ref } from "vue"
 import { ChevronRight, PlusIcon } from "lucide-vue-next"
 import DCreateCompetence from "@/components/d-competence-search/d-create-competence.vue"
 import { useCompetenceSearchQuery } from "@/gql/queries/competences/competenceSearch"
 import { useCompetencePathQuery } from "@/gql/queries/competences/competencePath"
+import type { Competence } from "@/gql/schema"
 
 defineProps({
   selected: {
