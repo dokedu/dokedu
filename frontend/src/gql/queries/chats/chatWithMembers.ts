@@ -28,6 +28,6 @@ export const ChatWithMembersDocument = gql`
 }
     `;
 
-export function useChatWithMembersQuery(options: Omit<Urql.UseQueryArgs<never, ChatWithMembersQueryVariables>, 'query'>) {
-  return Urql.useQuery<ChatWithMembersQuery, ChatWithMembersQueryVariables>({ query: ChatWithMembersDocument, ...options });
+export function useChatWithMembersQuery(options?: Omit<Urql.UseQueryArgs<never, ChatWithMembersQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<ChatWithMembersQuery, ChatWithMembersQueryVariables | undefined>({ query: ChatWithMembersDocument, variables: undefined, ...options });
 };

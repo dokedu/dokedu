@@ -5,126 +5,126 @@
 scalar Time
 
 enum UserRole {
-    owner
-    admin
-    teacher
-    educator
-    student
-    parent
+  owner
+  admin
+  teacher
+  educator
+  student
+  parent
 }
 
 enum UserLanguage {
-    en
-    de
+  en
+  de
 }
 
 type User {
-    id: ID!
-    email: String
-    role: UserRole!
+  id: ID!
+  email: String
+  role: UserRole!
 
-    firstName: String!
-    lastName: String!
-    student: UserStudent
-    language: UserLanguage
+  firstName: String!
+  lastName: String!
+  student: UserStudent
+  language: UserLanguage
 
-    createdAt: Time!
-    deletedAt: Time
+  createdAt: Time!
+  deletedAt: Time
 
-    organisationId: ID!
+  organisationId: ID!
 
-    inviteAccepted: Boolean!
+  inviteAccepted: Boolean!
 
-    lastSeenAt: Time
+  lastSeenAt: Time
 }
 
 enum CompetenceType {
-    subject
-    group
-    competence
+  subject
+  group
+  competence
 }
 
 type Competence {
-    id: ID!
-    name: String!
-    type: CompetenceType!
-    grades: [Int!]!
-    color: String!
-    createdAt: Time!
-    parents: [Competence!]!
-    sortOrder: Int!
-    competences(search: String, sort: CompetenceSort): [Competence]!
-    userCompetences(userId: ID): [UserCompetence]!
-    tendency(userId: ID!): CompetenceTendency
+  id: ID!
+  name: String!
+  type: CompetenceType!
+  grades: [Int!]!
+  color: String!
+  createdAt: Time!
+  parents: [Competence!]!
+  sortOrder: Int!
+  competences(search: String, sort: CompetenceSort): [Competence]!
+  userCompetences(userId: ID): [UserCompetence]!
+  tendency(userId: ID!): CompetenceTendency
 }
 
 type CompetenceTendency {
-    countChildCompetences: Int!
-    countLearnedCompetences: Int!
-    tendency: Float! # -1.0 to 1.0
+  countChildCompetences: Int!
+  countLearnedCompetences: Int!
+  tendency: Float! # -1.0 to 1.0
 }
 
 type UserCompetence {
-    id: ID!
-    level: Int!
-    competence: Competence!
-    entry: Entry
-    user: User!
-    createdBy: User
-    createdAt: Time!
-    # TODO: deletedAt: Time
+  id: ID!
+  level: Int!
+  competence: Competence!
+  entry: Entry
+  user: User!
+  createdBy: User
+  createdAt: Time!
+  # TODO: deletedAt: Time
 }
 
 type UserCompetenceConnection {
-    edges: [UserCompetence]
-    pageInfo: PageInfo!
-    totalCount: Int!
+  edges: [UserCompetence]
+  pageInfo: PageInfo!
+  totalCount: Int!
 }
 
 type Tag {
-    id: ID!
-    name: String!
-    color: String!
-    createdAt: Time!
-    deletedAt: Time
+  id: ID!
+  name: String!
+  color: String!
+  createdAt: Time!
+  deletedAt: Time
 }
 
 input SignInInput {
-    email: String!
-    password: String!
+  email: String!
+  password: String!
 }
 
 type SignInPayload {
-    token: String!
-    enabled_apps: [String!]!
-    language: String!
-    setupComplete: Boolean!
-    user: User!
+  token: String!
+  enabled_apps: [String!]!
+  language: String!
+  setupComplete: Boolean!
+  user: User!
 }
 
 input SignUpInput {
-    firstName: String!
-    lastName: String!
-    email: String!
-    password: String!
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
 }
 
 type PageInfo {
-    hasNextPage: Boolean!
-    hasPreviousPage: Boolean!
-    currentPage: Int!
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  currentPage: Int!
 }
 
 type UserConnection {
-    edges: [User]
-    pageInfo: PageInfo!
-    totalCount: Int!
+  edges: [User]
+  pageInfo: PageInfo!
+  totalCount: Int!
 }
 
 type CompetenceConnection {
-    edges: [Competence]
-    pageInfo: PageInfo!
-    totalCount: Int!
+  edges: [Competence]
+  pageInfo: PageInfo!
+  totalCount: Int!
 }
 
 
@@ -132,82 +132,82 @@ type CompetenceConnection {
 
 
 type UserStudent {
-    id: ID!
-    leftAt: Time
-    grade: Int!
-    birthday: Time
-    nationality: String
-    comments: String
-    joinedAt: Time
-    createdAt: Time!
-    deletedAt: Time
-    entriesCount: Int!
-    competencesCount: Int!
-    eventsCount: Int!
-    emoji: String
-    user: User!
-    missedHours: Int!
-    missedHoursExcused: Int!
+  id: ID!
+  leftAt: Time
+  grade: Int!
+  birthday: Time
+  nationality: String
+  comments: String
+  joinedAt: Time
+  createdAt: Time!
+  deletedAt: Time
+  entriesCount: Int!
+  competencesCount: Int!
+  eventsCount: Int!
+  emoji: String
+  user: User!
+  missedHours: Int!
+  missedHoursExcused: Int!
 }
 
 type UserStudentConnection {
-    edges: [UserStudent]
-    pageInfo: PageInfo!
-    totalCount: Int!
+  edges: [UserStudent]
+  pageInfo: PageInfo!
+  totalCount: Int!
 }
 
 type TagConnection {
-    edges: [Tag]
-    pageInfo: PageInfo!
-    totalCount: Int!
+  edges: [Tag]
+  pageInfo: PageInfo!
+  totalCount: Int!
 }
 
 enum UserOrderBy {
-    firstNameAsc
-    firstNameDesc
-    lastNameAsc
-    lastNameDesc
+  firstNameAsc
+  firstNameDesc
+  lastNameAsc
+  lastNameDesc
 }
 
 # user filter input
 input UserFilterInput {
-    role: [UserRole]
-    orderBy: UserOrderBy
-    showDeleted: Boolean
+  role: [UserRole]
+  orderBy: UserOrderBy
+  showDeleted: Boolean
 }
 
 input CompetenceFilterInput {
-    type: [CompetenceType]
-    parents: [ID]
-    userId: ID
+  type: [CompetenceType]
+  parents: [ID]
+  userId: ID
 }
 
 
 input UserCompetenceFilterInput {
-    userID: ID
-    competenceID: ID
+  userID: ID
+  competenceID: ID
 }
 
 enum CompetenceSortField {
-    created_at
-    name
-    sort_order
+  created_at
+  name
+  sort_order
 }
 
 enum SortDirection {
-    asc
-    desc
+  asc
+  desc
 }
 
 input CompetenceSort {
-    field: CompetenceSortField!
-    order: SortDirection!
+  field: CompetenceSortField!
+  order: SortDirection!
 }
 
 type InviteDetailsPayload {
-    email: String!
-    firstName: String!
-    lastName: String!
+  email: String!
+  firstName: String!
+  lastName: String!
 }
 
 type Query
@@ -215,133 +215,154 @@ type Query
 type Mutation
 
 extend type Query {
-    users(limit: Int, offset: Int, filter: UserFilterInput, search: String): UserConnection!
-    user(id: ID!): User!
-    me: User!
+  users(limit: Int, offset: Int, filter: UserFilterInput, search: String): UserConnection!
+  user(id: ID!): User!
+  me: User!
 
-    competence(id: ID!): Competence!
-    competences(limit: Int, offset: Int, filter: CompetenceFilterInput, search: String, sort: CompetenceSort): CompetenceConnection!
+  competence(id: ID!): Competence!
+  competences(limit: Int, offset: Int, filter: CompetenceFilterInput, search: String, sort: CompetenceSort): CompetenceConnection!
 
-    tag(id: ID!): Tag!
-    tags(limit: Int, offset: Int, search: String): TagConnection!
+  tag(id: ID!): Tag!
+  tags(limit: Int, offset: Int, search: String): TagConnection!
 
-    userStudents(limit: Int, offset: Int): UserStudentConnection!
-    userStudent(id: ID!): UserStudent!
+  userStudents(limit: Int, offset: Int): UserStudentConnection!
+  userStudent(id: ID!): UserStudent!
 
-    inviteDetails(token: String!): InviteDetailsPayload!
+  inviteDetails(token: String!): InviteDetailsPayload!
 }
 
 input CreateUserInput {
-    firstName: String!
-    lastName: String!
-    email: String!
-    role: UserRole!
+  firstName: String!
+  lastName: String!
+  email: String!
+  role: UserRole!
 
-    birthday: Time
-    leftAt: Time
-    joinedAt: Time
+  birthday: Time
+  leftAt: Time
+  joinedAt: Time
 }
 
 input UpdateUserInput {
-    id: ID!
-    firstName: String!
-    lastName: String!
-    email: String
-    grade: Int
-    birthday: Time
-    leftAt: Time
-    joinedAt: Time
-    emoji: String
-    missedHours: Int
-    missedHoursExcused: Int
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String
+  grade: Int
+  birthday: Time
+  leftAt: Time
+  joinedAt: Time
+  emoji: String
+  missedHours: Int
+  missedHoursExcused: Int
 }
 
 input CreateStudentInput {
-    firstName: String!
-    lastName: String!
-    grade: Int!
-    birthday: Time
-    leftAt: Time
-    joinedAt: Time
-    emoji: String
+  firstName: String!
+  lastName: String!
+  grade: Int!
+  birthday: Time
+  leftAt: Time
+  joinedAt: Time
+  emoji: String
 }
 
 
 
 input CreateTagInput {
-    name: String!
-    color: String!
+  name: String!
+  color: String!
 }
 
 input ResetPasswordInput {
-    token: String
-    password: String!
+  token: String
+  password: String!
 }
 
 type ResetPasswordPayload {
-    success: Boolean!
-    unauthorized: Boolean!
-    invalidToken: Boolean!
-    tokenExpired: Boolean!
-    unableToReset: Boolean!
+  success: Boolean!
+  unauthorized: Boolean!
+  invalidToken: Boolean!
+  tokenExpired: Boolean!
+  unableToReset: Boolean!
 }
 
 input ForgotPasswordInput {
-    email: String!
+  email: String!
 }
 
 type ForgotPasswordPayload {
-    success: Boolean!
+  success: Boolean!
 }
 
 input UpdateCompetenceInput {
-    id: ID!
-    color: String
+  id: ID!
+  color: String
 }
 
 input SortCompetenceInput {
-    id: ID!
-    sortOrder: Int!
+  id: ID!
+  sortOrder: Int!
 }
 
 input UpdateCompetenceSortingInput {
-    competences: [SortCompetenceInput!]!
+  competences: [SortCompetenceInput!]!
 }
 
 input CreateCompetenceInput {
-    name: String!
-    parentId: ID!
+  name: String!
+  parentId: ID!
+}
+
+input SignInWithOtpInput {
+  email: String!
+}
+
+type SignInWithOtpPayload {
+  _success: Boolean! @deprecated(reason: "use __typename instead")
+}
+
+input VerifyOtpInput {
+  email: String!
+  token: String!
+}
+
+type VerifyOtpPayload {
+  token: String!
+  user: User!
 }
 
 extend type Mutation {
-    signIn(input: SignInInput!): SignInPayload!
-    resetPassword(input: ResetPasswordInput!): ResetPasswordPayload!
-    forgotPassword(input: ForgotPasswordInput!): ForgotPasswordPayload!
-    signOut: Boolean!
+  signIn(input: SignInInput!): SignInPayload!
+  resetPassword(input: ResetPasswordInput!): ResetPasswordPayload!
+  forgotPassword(input: ForgotPasswordInput!): ForgotPasswordPayload!
+  signOut: Boolean!
 
-    acceptInvite(token: String!, input: SignUpInput!): SignInPayload!
+  signInWithOtp(input: SignInWithOtpInput!): SignInWithOtpPayload!
+  verifyOtp(input: VerifyOtpInput!): VerifyOtpPayload!
 
-    createUser(input: CreateUserInput!): User!
-    updateUser(input: UpdateUserInput!): User!
-    archiveUser(id: ID!): User!
-    updateUserLanguage(language: UserLanguage!): User!
-    sendUserInvite(id: ID!): Boolean!
+  acceptInvite(token: String!, input: SignUpInput!): SignInPayload!
 
-    createStudent(input: CreateStudentInput!): User!
+  createUser(input: CreateUserInput!): User!
+  updateUser(input: UpdateUserInput!): User!
+  archiveUser(id: ID!): User!
+  updateUserLanguage(language: UserLanguage!): User!
+  sendUserInvite(id: ID!): Boolean!
 
-    createUserCompetence(input: CreateUserCompetenceInput!): UserCompetence!
-    archiveUserCompetence(id: ID!): UserCompetence!
+  createStudent(input: CreateStudentInput!): User!
 
-    createTag(input: CreateTagInput!): Tag!
-    archiveTag(id: ID!): Tag!
-    updateTag(id: ID!, input: CreateTagInput!): Tag!
+  createUserCompetence(input: CreateUserCompetenceInput!): UserCompetence!
+  archiveUserCompetence(id: ID!): UserCompetence!
 
-    updatePassword(oldPassword: String!, newPassword: String!): Boolean!
+  createTag(input: CreateTagInput!): Tag!
+  archiveTag(id: ID!): Tag!
+  updateTag(id: ID!, input: CreateTagInput!): Tag!
 
-    updateCompetence(input: UpdateCompetenceInput!): Competence!
+  updatePassword(oldPassword: String!, newPassword: String!): Boolean!
 
-    updateCompetenceSorting(input: UpdateCompetenceSortingInput!): [Competence]!
+  updateCompetence(input: UpdateCompetenceInput!): Competence!
 
-    createCompetence(input: CreateCompetenceInput!): Competence!
+  updateCompetenceSorting(input: UpdateCompetenceSortingInput!): [Competence]!
+
+  createCompetence(input: CreateCompetenceInput!): Competence!
 }
 

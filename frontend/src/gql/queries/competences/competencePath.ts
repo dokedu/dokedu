@@ -30,6 +30,6 @@ export const CompetencePathDocument = gql`
 }
     `;
 
-export function useCompetencePathQuery(options: Omit<Urql.UseQueryArgs<never, CompetencePathQueryVariables>, 'query'>) {
-  return Urql.useQuery<CompetencePathQuery, CompetencePathQueryVariables>({ query: CompetencePathDocument, ...options });
+export function useCompetencePathQuery(options?: Omit<Urql.UseQueryArgs<never, CompetencePathQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<CompetencePathQuery, CompetencePathQueryVariables | undefined>({ query: CompetencePathDocument, variables: undefined, ...options });
 };

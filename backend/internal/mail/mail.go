@@ -6,9 +6,9 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/dokedu/dokedu/backend/internal/db"
-
 	"github.com/labstack/gommon/log"
+
+	"github.com/dokedu/dokedu/backend/internal/db"
 )
 
 type Mailer struct {
@@ -45,6 +45,8 @@ func (m Mailer) Send(to []string, subject string, message string) error {
 			"Subject: " + subject + "\r\n" +
 			"\r\n" +
 			message + "\r\n")
+
+	fmt.Println(string(msg))
 
 	addr := fmt.Sprintf("%s:%d", m.cfg.Host, m.cfg.Port)
 	err := smtp.SendMail(addr, m.auth, "support@dokedu.org", to, msg)
@@ -92,6 +94,23 @@ func (m Mailer) SendInvite(to string, name string, organisationName string, lang
 		subject = "Willkommen bei Dokedu"
 	} else {
 		subject = "Welcome to Dokedu"
+	}
+
+	return m.Send([]string{to}, subject, template)
+}
+
+func (m Mailer) SendOTP(to string, name string, lang db.UserLanguage, token string) error {
+	template, err := OTPTemplate(name, token, lang)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	var subject string
+	if lang == db.UserLangDe {
+		subject = "Sicherheitscode für Dokedu"
+	} else {
+		subject = "Security code for Dokedu"
 	}
 
 	return m.Send([]string{to}, subject, template)

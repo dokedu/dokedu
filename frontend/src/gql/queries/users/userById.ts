@@ -31,6 +31,6 @@ export const UserByIdDocument = gql`
 }
     `;
 
-export function useUserByIdQuery(options: Omit<Urql.UseQueryArgs<never, UserByIdQueryVariables>, 'query'>) {
-  return Urql.useQuery<UserByIdQuery, UserByIdQueryVariables>({ query: UserByIdDocument, ...options });
+export function useUserByIdQuery(options?: Omit<Urql.UseQueryArgs<never, UserByIdQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<UserByIdQuery, UserByIdQueryVariables | undefined>({ query: UserByIdDocument, variables: undefined, ...options });
 };

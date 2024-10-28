@@ -23,6 +23,6 @@ export const TagLimitedDocument = gql`
 }
     `;
 
-export function useTagLimitedQuery(options: Omit<Urql.UseQueryArgs<never, TagLimitedQueryVariables>, 'query'>) {
-  return Urql.useQuery<TagLimitedQuery, TagLimitedQueryVariables>({ query: TagLimitedDocument, ...options });
+export function useTagLimitedQuery(options?: Omit<Urql.UseQueryArgs<never, TagLimitedQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<TagLimitedQuery, TagLimitedQueryVariables | undefined>({ query: TagLimitedDocument, variables: undefined, ...options });
 };

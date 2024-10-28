@@ -551,6 +551,14 @@ type SignInPayload struct {
 	User          *db.User `json:"user"`
 }
 
+type SignInWithOtpInput struct {
+	Email string `json:"email"`
+}
+
+type SignInWithOtpPayload struct {
+	Success bool `json:"_success"`
+}
+
 type SignUpInput struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
@@ -711,6 +719,16 @@ type UserStudentGradesConnection struct {
 	Edges      []*db.UserStudentGrades `json:"edges"`
 	TotalCount int                     `json:"totalCount"`
 	PageInfo   *PageInfo               `json:"pageInfo"`
+}
+
+type VerifyOtpInput struct {
+	Email string `json:"email"`
+	Token string `json:"token"`
+}
+
+type VerifyOtpPayload struct {
+	Token string   `json:"token"`
+	User  *db.User `json:"user"`
 }
 
 type CompetenceSortField string

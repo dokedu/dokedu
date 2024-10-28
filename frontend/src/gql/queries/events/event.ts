@@ -37,6 +37,6 @@ export const EventDocument = gql`
 }
     `;
 
-export function useEventQuery(options: Omit<Urql.UseQueryArgs<never, EventQueryVariables>, 'query'>) {
-  return Urql.useQuery<EventQuery, EventQueryVariables>({ query: EventDocument, ...options });
+export function useEventQuery(options?: Omit<Urql.UseQueryArgs<never, EventQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<EventQuery, EventQueryVariables | undefined>({ query: EventDocument, variables: undefined, ...options });
 };

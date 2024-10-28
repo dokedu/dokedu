@@ -63,6 +63,6 @@ export const EntryByIdDocument = gql`
 }
     ${FileFragementFragmentDoc}`;
 
-export function useEntryByIdQuery(options: Omit<Urql.UseQueryArgs<never, EntryByIdQueryVariables>, 'query'>) {
-  return Urql.useQuery<EntryByIdQuery, EntryByIdQueryVariables>({ query: EntryByIdDocument, ...options });
+export function useEntryByIdQuery(options?: Omit<Urql.UseQueryArgs<never, EntryByIdQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<EntryByIdQuery, EntryByIdQueryVariables | undefined>({ query: EntryByIdDocument, variables: undefined, ...options });
 };

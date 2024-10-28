@@ -24,6 +24,6 @@ export const FileDocument = gql`
 }
     `;
 
-export function useFileQuery(options: Omit<Urql.UseQueryArgs<never, FileQueryVariables>, 'query'>) {
-  return Urql.useQuery<FileQuery, FileQueryVariables>({ query: FileDocument, ...options });
+export function useFileQuery(options?: Omit<Urql.UseQueryArgs<never, FileQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<FileQuery, FileQueryVariables | undefined>({ query: FileDocument, variables: undefined, ...options });
 };

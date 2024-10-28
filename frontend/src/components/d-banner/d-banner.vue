@@ -1,9 +1,6 @@
 <template>
-  <div
-    class="rounded-xl p-2 flex gap-2 text-sm overflow-hidden border border-deafault"
-    :class="subtitle ? '' : 'items-center'"
-  >
-    <div class="size-7 min-w-7 justify-center items-center flex rounded-full" :class="`bg-${colors[type]}-100`">
+  <div class="rounded-xl p-2 flex gap-2 text-sm overflow-hidden border border-deafault">
+    <div class="size-7 min-w-7 flex rounded-full" :class="`bg-${colors[type]}-100`">
       <component :is="icon ? icon : icons[type]" class="size-4" :class="`text-${colors[type]}-700`"></component>
     </div>
     <div class="">

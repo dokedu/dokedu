@@ -30,6 +30,6 @@ export const GetTagWithLimitDocument = gql`
 }
     `;
 
-export function useGetTagWithLimitQuery(options: Omit<Urql.UseQueryArgs<never, GetTagWithLimitQueryVariables>, 'query'>) {
-  return Urql.useQuery<GetTagWithLimitQuery, GetTagWithLimitQueryVariables>({ query: GetTagWithLimitDocument, ...options });
+export function useGetTagWithLimitQuery(options?: Omit<Urql.UseQueryArgs<never, GetTagWithLimitQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<GetTagWithLimitQuery, GetTagWithLimitQueryVariables | undefined>({ query: GetTagWithLimitDocument, variables: undefined, ...options });
 };

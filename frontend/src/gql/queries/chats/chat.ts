@@ -32,6 +32,6 @@ export const ChatDocument = gql`
 }
     ${ChatMessageFragmentDoc}`;
 
-export function useChatQuery(options: Omit<Urql.UseQueryArgs<never, ChatQueryVariables>, 'query'>) {
-  return Urql.useQuery<ChatQuery, ChatQueryVariables>({ query: ChatDocument, ...options });
+export function useChatQuery(options?: Omit<Urql.UseQueryArgs<never, ChatQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<ChatQuery, ChatQueryVariables | undefined>({ query: ChatDocument, variables: undefined, ...options });
 };

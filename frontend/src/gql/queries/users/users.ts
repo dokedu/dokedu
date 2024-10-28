@@ -27,6 +27,6 @@ export const UsersDocument = gql`
 }
     `;
 
-export function useUsersQuery(options: Omit<Urql.UseQueryArgs<never, UsersQueryVariables>, 'query'>) {
-  return Urql.useQuery<UsersQuery, UsersQueryVariables>({ query: UsersDocument, ...options });
+export function useUsersQuery(options?: Omit<Urql.UseQueryArgs<never, UsersQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<UsersQuery, UsersQueryVariables | undefined>({ query: UsersDocument, variables: undefined, ...options });
 };

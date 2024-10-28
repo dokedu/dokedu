@@ -24,6 +24,6 @@ export const ExportEventsDocument = gql`
 }
     `;
 
-export function useExportEventsQuery(options: Omit<Urql.UseQueryArgs<never, ExportEventsQueryVariables>, 'query'>) {
-  return Urql.useQuery<ExportEventsQuery, ExportEventsQueryVariables>({ query: ExportEventsDocument, ...options });
+export function useExportEventsQuery(options?: Omit<Urql.UseQueryArgs<never, ExportEventsQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<ExportEventsQuery, ExportEventsQueryVariables | undefined>({ query: ExportEventsDocument, variables: undefined, ...options });
 };

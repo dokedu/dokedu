@@ -19,6 +19,6 @@ export const OrganisationDocument = gql`
 }
     `;
 
-export function useOrganisationQuery(options: Omit<Urql.UseQueryArgs<never, OrganisationQueryVariables>, 'query'>) {
-  return Urql.useQuery<OrganisationQuery, OrganisationQueryVariables>({ query: OrganisationDocument, ...options });
+export function useOrganisationQuery(options?: Omit<Urql.UseQueryArgs<never, OrganisationQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<OrganisationQuery, OrganisationQueryVariables | undefined>({ query: OrganisationDocument, variables: undefined, ...options });
 };

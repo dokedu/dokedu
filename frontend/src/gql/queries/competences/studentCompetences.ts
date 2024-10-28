@@ -32,6 +32,6 @@ export const StudentCompetencesDocument = gql`
 }
     `;
 
-export function useStudentCompetencesQuery(options: Omit<Urql.UseQueryArgs<never, StudentCompetencesQueryVariables>, 'query'>) {
-  return Urql.useQuery<StudentCompetencesQuery, StudentCompetencesQueryVariables>({ query: StudentCompetencesDocument, ...options });
+export function useStudentCompetencesQuery(options?: Omit<Urql.UseQueryArgs<never, StudentCompetencesQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<StudentCompetencesQuery, StudentCompetencesQueryVariables | undefined>({ query: StudentCompetencesDocument, variables: undefined, ...options });
 };

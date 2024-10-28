@@ -17,6 +17,6 @@ export const MeBucketShareDocument = gql`
 }
     `;
 
-export function useMeBucketShareQuery(options: Omit<Urql.UseQueryArgs<never, MeBucketShareQueryVariables>, 'query'>) {
-  return Urql.useQuery<MeBucketShareQuery, MeBucketShareQueryVariables>({ query: MeBucketShareDocument, ...options });
+export function useMeBucketShareQuery(options?: Omit<Urql.UseQueryArgs<never, MeBucketShareQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<MeBucketShareQuery, MeBucketShareQueryVariables | undefined>({ query: MeBucketShareDocument, variables: undefined, ...options });
 };

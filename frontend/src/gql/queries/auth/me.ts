@@ -18,6 +18,6 @@ export const MeDocument = gql`
 }
     ${UserFragmentDoc}`;
 
-export function useMeQuery(options: Omit<Urql.UseQueryArgs<never, MeQueryVariables>, 'query'>) {
-  return Urql.useQuery<MeQuery, MeQueryVariables>({ query: MeDocument, ...options });
+export function useMeQuery(options?: Omit<Urql.UseQueryArgs<never, MeQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<MeQuery, MeQueryVariables | undefined>({ query: MeDocument, variables: undefined, ...options });
 };

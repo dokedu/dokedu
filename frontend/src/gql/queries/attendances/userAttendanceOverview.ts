@@ -26,6 +26,6 @@ export const UserAttendanceOverviewDocument = gql`
 }
     `;
 
-export function useUserAttendanceOverviewQuery(options: Omit<Urql.UseQueryArgs<never, UserAttendanceOverviewQueryVariables>, 'query'>) {
-  return Urql.useQuery<UserAttendanceOverviewQuery, UserAttendanceOverviewQueryVariables>({ query: UserAttendanceOverviewDocument, ...options });
+export function useUserAttendanceOverviewQuery(options?: Omit<Urql.UseQueryArgs<never, UserAttendanceOverviewQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<UserAttendanceOverviewQuery, UserAttendanceOverviewQueryVariables | undefined>({ query: UserAttendanceOverviewDocument, variables: undefined, ...options });
 };

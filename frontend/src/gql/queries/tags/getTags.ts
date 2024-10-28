@@ -23,6 +23,6 @@ export const GetTagsDocument = gql`
 }
     `;
 
-export function useGetTagsQuery(options: Omit<Urql.UseQueryArgs<never, GetTagsQueryVariables>, 'query'>) {
-  return Urql.useQuery<GetTagsQuery, GetTagsQueryVariables>({ query: GetTagsDocument, ...options });
+export function useGetTagsQuery(options?: Omit<Urql.UseQueryArgs<never, GetTagsQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<GetTagsQuery, GetTagsQueryVariables | undefined>({ query: GetTagsDocument, variables: undefined, ...options });
 };

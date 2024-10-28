@@ -26,6 +26,6 @@ export const EmailAccountsDocument = gql`
 }
     `;
 
-export function useEmailAccountsQuery(options: Omit<Urql.UseQueryArgs<never, EmailAccountsQueryVariables>, 'query'>) {
-  return Urql.useQuery<EmailAccountsQuery, EmailAccountsQueryVariables>({ query: EmailAccountsDocument, ...options });
+export function useEmailAccountsQuery(options?: Omit<Urql.UseQueryArgs<never, EmailAccountsQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<EmailAccountsQuery, EmailAccountsQueryVariables | undefined>({ query: EmailAccountsDocument, variables: undefined, ...options });
 };

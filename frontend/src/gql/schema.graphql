@@ -724,6 +724,7 @@ type Mutation {
   sendUserInvite(id: ID!): Boolean!
   setUserAttendanceState(date: Time!, state: UserAttendanceState!, userId: ID!): UserAttendance!
   signIn(input: SignInInput!): SignInPayload!
+  signInWithOtp(input: SignInWithOtpInput!): SignInWithOtpPayload!
   signOut: Boolean!
   toggleEventCompetence(input: AddEventCompetenceInput!): Event!
   updateChat(input: UpdateChatInput!): Chat!
@@ -746,6 +747,7 @@ type Mutation {
   uploadFile(input: FileUploadInput!): File!
   uploadFileToEntry(entryId: ID!, file: Upload!): Entry!
   uploadFiles(input: FileUploadInput!): UploadFilesPayload!
+  verifyOtp(input: VerifyOtpInput!): VerifyOtpPayload!
 }
 
 input MyFilesFilterInput {
@@ -939,6 +941,14 @@ type SignInPayload {
   setupComplete: Boolean!
   token: String!
   user: User!
+}
+
+input SignInWithOtpInput {
+  email: String!
+}
+
+type SignInWithOtpPayload {
+  _success: Boolean! @deprecated(reason: "use __typename instead")
 }
 
 input SignUpInput {
@@ -1217,4 +1227,14 @@ type UserStudentGradesConnection {
   edges: [UserStudentGrades!]!
   pageInfo: PageInfo!
   totalCount: Int!
+}
+
+input VerifyOtpInput {
+  email: String!
+  token: String!
+}
+
+type VerifyOtpPayload {
+  token: String!
+  user: User!
 }

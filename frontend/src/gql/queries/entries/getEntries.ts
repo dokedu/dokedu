@@ -50,6 +50,6 @@ export const GetEntriesDocument = gql`
 }
     `;
 
-export function useGetEntriesQuery(options: Omit<Urql.UseQueryArgs<never, GetEntriesQueryVariables>, 'query'>) {
-  return Urql.useQuery<GetEntriesQuery, GetEntriesQueryVariables>({ query: GetEntriesDocument, ...options });
+export function useGetEntriesQuery(options?: Omit<Urql.UseQueryArgs<never, GetEntriesQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<GetEntriesQuery, GetEntriesQueryVariables | undefined>({ query: GetEntriesDocument, variables: undefined, ...options });
 };

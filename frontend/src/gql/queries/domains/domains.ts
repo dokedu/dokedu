@@ -25,6 +25,6 @@ export const DomainsDocument = gql`
 }
     `;
 
-export function useDomainsQuery(options: Omit<Urql.UseQueryArgs<never, DomainsQueryVariables>, 'query'>) {
-  return Urql.useQuery<DomainsQuery, DomainsQueryVariables>({ query: DomainsDocument, ...options });
+export function useDomainsQuery(options?: Omit<Urql.UseQueryArgs<never, DomainsQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<DomainsQuery, DomainsQueryVariables | undefined>({ query: DomainsDocument, variables: undefined, ...options });
 };

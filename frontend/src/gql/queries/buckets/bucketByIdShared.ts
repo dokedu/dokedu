@@ -20,6 +20,6 @@ export const BucketByIdSharedDocument = gql`
 }
     `;
 
-export function useBucketByIdSharedQuery(options: Omit<Urql.UseQueryArgs<never, BucketByIdSharedQueryVariables>, 'query'>) {
-  return Urql.useQuery<BucketByIdSharedQuery, BucketByIdSharedQueryVariables>({ query: BucketByIdSharedDocument, ...options });
+export function useBucketByIdSharedQuery(options?: Omit<Urql.UseQueryArgs<never, BucketByIdSharedQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<BucketByIdSharedQuery, BucketByIdSharedQueryVariables | undefined>({ query: BucketByIdSharedDocument, variables: undefined, ...options });
 };

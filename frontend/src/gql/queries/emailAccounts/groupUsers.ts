@@ -20,6 +20,6 @@ export const GroupUsersDocument = gql`
 }
     `;
 
-export function useGroupUsersQuery(options: Omit<Urql.UseQueryArgs<never, GroupUsersQueryVariables>, 'query'>) {
-  return Urql.useQuery<GroupUsersQuery, GroupUsersQueryVariables>({ query: GroupUsersDocument, ...options });
+export function useGroupUsersQuery(options?: Omit<Urql.UseQueryArgs<never, GroupUsersQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<GroupUsersQuery, GroupUsersQueryVariables | undefined>({ query: GroupUsersDocument, variables: undefined, ...options });
 };

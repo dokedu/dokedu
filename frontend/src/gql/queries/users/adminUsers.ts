@@ -35,6 +35,6 @@ export const AdminUsersDocument = gql`
 }
     `;
 
-export function useAdminUsersQuery(options: Omit<Urql.UseQueryArgs<never, AdminUsersQueryVariables>, 'query'>) {
-  return Urql.useQuery<AdminUsersQuery, AdminUsersQueryVariables>({ query: AdminUsersDocument, ...options });
+export function useAdminUsersQuery(options?: Omit<Urql.UseQueryArgs<never, AdminUsersQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<AdminUsersQuery, AdminUsersQueryVariables | undefined>({ query: AdminUsersDocument, variables: undefined, ...options });
 };

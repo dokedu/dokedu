@@ -40,6 +40,6 @@ export const AdminStudentsDocument = gql`
 }
     `;
 
-export function useAdminStudentsQuery(options: Omit<Urql.UseQueryArgs<never, AdminStudentsQueryVariables>, 'query'>) {
-  return Urql.useQuery<AdminStudentsQuery, AdminStudentsQueryVariables>({ query: AdminStudentsDocument, ...options });
+export function useAdminStudentsQuery(options?: Omit<Urql.UseQueryArgs<never, AdminStudentsQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<AdminStudentsQuery, AdminStudentsQueryVariables | undefined>({ query: AdminStudentsDocument, variables: undefined, ...options });
 };

@@ -20,6 +20,6 @@ export const BucketByIdDocument = gql`
 }
     `;
 
-export function useBucketByIdQuery(options: Omit<Urql.UseQueryArgs<never, BucketByIdQueryVariables>, 'query'>) {
-  return Urql.useQuery<BucketByIdQuery, BucketByIdQueryVariables>({ query: BucketByIdDocument, ...options });
+export function useBucketByIdQuery(options?: Omit<Urql.UseQueryArgs<never, BucketByIdQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<BucketByIdQuery, BucketByIdQueryVariables | undefined>({ query: BucketByIdDocument, variables: undefined, ...options });
 };

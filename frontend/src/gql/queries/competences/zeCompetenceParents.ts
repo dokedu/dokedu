@@ -28,6 +28,6 @@ export const ZeCompetenceParentsDocument = gql`
 }
     `;
 
-export function useZeCompetenceParentsQuery(options: Omit<Urql.UseQueryArgs<never, ZeCompetenceParentsQueryVariables>, 'query'>) {
-  return Urql.useQuery<ZeCompetenceParentsQuery, ZeCompetenceParentsQueryVariables>({ query: ZeCompetenceParentsDocument, ...options });
+export function useZeCompetenceParentsQuery(options?: Omit<Urql.UseQueryArgs<never, ZeCompetenceParentsQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<ZeCompetenceParentsQuery, ZeCompetenceParentsQueryVariables | undefined>({ query: ZeCompetenceParentsDocument, variables: undefined, ...options });
 };

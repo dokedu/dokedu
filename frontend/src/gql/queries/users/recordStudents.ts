@@ -39,6 +39,6 @@ export const RecordStudentsDocument = gql`
 }
     `;
 
-export function useRecordStudentsQuery(options: Omit<Urql.UseQueryArgs<never, RecordStudentsQueryVariables>, 'query'>) {
-  return Urql.useQuery<RecordStudentsQuery, RecordStudentsQueryVariables>({ query: RecordStudentsDocument, ...options });
+export function useRecordStudentsQuery(options?: Omit<Urql.UseQueryArgs<never, RecordStudentsQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<RecordStudentsQuery, RecordStudentsQueryVariables | undefined>({ query: RecordStudentsDocument, variables: undefined, ...options });
 };

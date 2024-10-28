@@ -21,6 +21,6 @@ export const ShareUsersDocument = gql`
 }
     `;
 
-export function useShareUsersQuery(options: Omit<Urql.UseQueryArgs<never, ShareUsersQueryVariables>, 'query'>) {
-  return Urql.useQuery<ShareUsersQuery, ShareUsersQueryVariables>({ query: ShareUsersDocument, ...options });
+export function useShareUsersQuery(options?: Omit<Urql.UseQueryArgs<never, ShareUsersQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<ShareUsersQuery, ShareUsersQueryVariables | undefined>({ query: ShareUsersDocument, variables: undefined, ...options });
 };

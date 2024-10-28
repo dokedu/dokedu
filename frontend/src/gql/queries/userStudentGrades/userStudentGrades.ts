@@ -44,6 +44,6 @@ export const UserStudentGradesDocument = gql`
 }
     `;
 
-export function useUserStudentGradesQuery(options: Omit<Urql.UseQueryArgs<never, UserStudentGradesQueryVariables>, 'query'>) {
-  return Urql.useQuery<UserStudentGradesQuery, UserStudentGradesQueryVariables>({ query: UserStudentGradesDocument, ...options });
+export function useUserStudentGradesQuery(options?: Omit<Urql.UseQueryArgs<never, UserStudentGradesQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<UserStudentGradesQuery, UserStudentGradesQueryVariables | undefined>({ query: UserStudentGradesDocument, variables: undefined, ...options });
 };

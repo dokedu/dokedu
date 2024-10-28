@@ -35,6 +35,6 @@ export const MGetEntriesDocument = gql`
 }
     `;
 
-export function useMGetEntriesQuery(options: Omit<Urql.UseQueryArgs<never, MGetEntriesQueryVariables>, 'query'>) {
-  return Urql.useQuery<MGetEntriesQuery, MGetEntriesQueryVariables>({ query: MGetEntriesDocument, ...options });
+export function useMGetEntriesQuery(options?: Omit<Urql.UseQueryArgs<never, MGetEntriesQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<MGetEntriesQuery, MGetEntriesQueryVariables | undefined>({ query: MGetEntriesDocument, variables: undefined, ...options });
 };

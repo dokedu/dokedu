@@ -39,6 +39,6 @@ export const EventWithSearchDocument = gql`
 }
     `;
 
-export function useEventWithSearchQuery(options: Omit<Urql.UseQueryArgs<never, EventWithSearchQueryVariables>, 'query'>) {
-  return Urql.useQuery<EventWithSearchQuery, EventWithSearchQueryVariables>({ query: EventWithSearchDocument, ...options });
+export function useEventWithSearchQuery(options?: Omit<Urql.UseQueryArgs<never, EventWithSearchQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<EventWithSearchQuery, EventWithSearchQueryVariables | undefined>({ query: EventWithSearchDocument, variables: undefined, ...options });
 };

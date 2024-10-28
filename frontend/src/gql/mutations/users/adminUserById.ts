@@ -24,6 +24,6 @@ export const AdminUserByIdDocument = gql`
 }
     `;
 
-export function useAdminUserByIdQuery(options: Omit<Urql.UseQueryArgs<never, AdminUserByIdQueryVariables>, 'query'>) {
-  return Urql.useQuery<AdminUserByIdQuery, AdminUserByIdQueryVariables>({ query: AdminUserByIdDocument, ...options });
+export function useAdminUserByIdQuery(options?: Omit<Urql.UseQueryArgs<never, AdminUserByIdQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<AdminUserByIdQuery, AdminUserByIdQueryVariables | undefined>({ query: AdminUserByIdDocument, variables: undefined, ...options });
 };

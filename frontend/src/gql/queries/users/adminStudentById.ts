@@ -32,6 +32,6 @@ export const AdminStudentByIdDocument = gql`
 }
     `;
 
-export function useAdminStudentByIdQuery(options: Omit<Urql.UseQueryArgs<never, AdminStudentByIdQueryVariables>, 'query'>) {
-  return Urql.useQuery<AdminStudentByIdQuery, AdminStudentByIdQueryVariables>({ query: AdminStudentByIdDocument, ...options });
+export function useAdminStudentByIdQuery(options?: Omit<Urql.UseQueryArgs<never, AdminStudentByIdQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<AdminStudentByIdQuery, AdminStudentByIdQueryVariables | undefined>({ query: AdminStudentByIdDocument, variables: undefined, ...options });
 };

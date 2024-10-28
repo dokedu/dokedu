@@ -60,3 +60,27 @@ func InviteMailTemplate(name string, link string, organisation string, language 
 
 	return out.String(), nil
 }
+
+func OTPTemplate(name string, token string, language db.UserLanguage) (string, error) {
+	t, err := template.ParseFS(templateFiles, "templates/"+string(language)+"/otp.gohtml")
+	if err != nil {
+		return "", err
+	}
+
+	data := struct {
+		Name    string
+		OTPCode string
+	}{
+		Name:    name,
+		OTPCode: token,
+	}
+
+	out := new(bytes.Buffer)
+	err = t.ExecuteTemplate(out, "otp.gohtml", data)
+
+	if err != nil {
+		return "", err
+	}
+
+	return out.String(), nil
+}

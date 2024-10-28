@@ -44,6 +44,6 @@ export const CompetenceSubjectsDocument = gql`
 }
     `;
 
-export function useCompetenceSubjectsQuery(options: Omit<Urql.UseQueryArgs<never, CompetenceSubjectsQueryVariables>, 'query'>) {
-  return Urql.useQuery<CompetenceSubjectsQuery, CompetenceSubjectsQueryVariables>({ query: CompetenceSubjectsDocument, ...options });
+export function useCompetenceSubjectsQuery(options?: Omit<Urql.UseQueryArgs<never, CompetenceSubjectsQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<CompetenceSubjectsQuery, CompetenceSubjectsQueryVariables | undefined>({ query: CompetenceSubjectsDocument, variables: undefined, ...options });
 };

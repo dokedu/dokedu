@@ -1,10 +1,10 @@
 <template>
   <div class="max-w-xs w-full select-none bg-white rounded-md shadow overflow-hidden border border-subtle">
-    <div class="p-6 bg-muted flex flex-col items-center gap-4 border-b border-default">
-      <img height="36" width="36" class="size-9" src="/dokedu-logo-icon-gradient.png" alt="dokedu logo" />
+    <div class="p-6 bg-muted flex items-start flex-col gap-4 border-b border-default">
+      <img height="71" width="401" class="h-8 w-fit" src="/wordmark.svg" alt="dokedu logo" />
       <div>
-        <div class="text-center text-strong text-xl mb-1 font-semibold leading-7">{{ title }}</div>
-        <div class="self-stretch text-center text-stone-500 text-sm font-normal leading-tight">
+        <div class="text-strong text-xl mb-1 font-semibold leading-7">{{ title }}</div>
+        <div class="self-stretch text-stone-500 text-sm font-normal leading-tight">
           {{ subtitle }}
         </div>
       </div>

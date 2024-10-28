@@ -6,6 +6,8 @@ import { urqlClient } from "@/main"
 import { computed } from "vue"
 import i18n from "@/i18n"
 import type { UserFragment } from "@/gql/fragments/user"
+import { SignInWithOtpDocument } from "@/gql/mutations/auth/signInWithOtp"
+import type { SignInWithOtpInput } from "@/gql/schema"
 
 export const user = useStorage<UserFragment | null>("user", null, undefined, {
   serializer: {
@@ -29,28 +31,17 @@ interface SignInInput {
   password: string
 }
 
-function signInMutation({ email, password }: SignInInput) {
-  return urqlClient.mutation(SignInDocument, { email, password })
+function signInMutation(input: SignInWithOtpInput) {
+  return urqlClient.mutation(SignInWithOtpDocument, input)
 }
 
-async function signIn({ email, password }: SignInInput): Promise<{ error?: Error | undefined }> {
-  const { data, error } = await signInMutation({
-    email: email,
-    password: password
-  })
+async function signIn(_token: string, _user: UserFragment): Promise<{ error?: Error | undefined }> {
 
-  if (error) {
-    return { error: new Error(error.graphQLErrors[0].message) }
-  }
 
-  if (!data?.signIn.token) {
-    return { error: new Error("No token returned") }
-  }
-
-  user.value = data.signIn.user
-  token.value = data.signIn.token
-  enabledApps.value = data.signIn.enabled_apps
-  language.value = data.signIn.language
+  token.value = _token
+  user.value = _user
+  enabledApps.value = ["admin", "record", "school"]
+  language.value = "de"
 
   // Set the i18n locale to the user's language
   i18n.global.locale.value = language.value as unknown as any

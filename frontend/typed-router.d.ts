@@ -48,6 +48,7 @@ declare module 'vue-router/auto/routes' {
     '/chat/[tab]': RouteRecordInfo<'/chat/[tab]', '/chat/:tab', { tab: ParamValue<true> }, { tab: ParamValue<false> }>,
     '/chat/[tab]/[id]/': RouteRecordInfo<'/chat/[tab]/[id]/', '/chat/:tab/:id', { tab: ParamValue<true>, id: ParamValue<true> }, { tab: ParamValue<false>, id: ParamValue<false> }>,
     '/chat/[tab]/[id]/edit': RouteRecordInfo<'/chat/[tab]/[id]/edit', '/chat/:tab/:id/edit', { tab: ParamValue<true>, id: ParamValue<true> }, { tab: ParamValue<false>, id: ParamValue<false> }>,
+    '/confirm': RouteRecordInfo<'/confirm', '/confirm', Record<never, never>, Record<never, never>>,
     '/drive/files/[id]': RouteRecordInfo<'/drive/files/[id]', '/drive/files/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/drive/my-drive/': RouteRecordInfo<'/drive/my-drive/', '/drive/my-drive', Record<never, never>, Record<never, never>>,
     '/drive/my-drive/folders/[id]': RouteRecordInfo<'/drive/my-drive/folders/[id]', '/drive/my-drive/folders/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,

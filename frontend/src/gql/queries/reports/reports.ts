@@ -43,6 +43,6 @@ export const ReportsDocument = gql`
 }
     `;
 
-export function useReportsQuery(options: Omit<Urql.UseQueryArgs<never, ReportsQueryVariables>, 'query'>) {
-  return Urql.useQuery<ReportsQuery, ReportsQueryVariables>({ query: ReportsDocument, ...options });
+export function useReportsQuery(options?: Omit<Urql.UseQueryArgs<never, ReportsQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<ReportsQuery, ReportsQueryVariables | undefined>({ query: ReportsDocument, variables: undefined, ...options });
 };

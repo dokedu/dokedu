@@ -32,6 +32,6 @@ export const StudentListDocument = gql`
 }
     `;
 
-export function useStudentListQuery(options: Omit<Urql.UseQueryArgs<never, StudentListQueryVariables>, 'query'>) {
-  return Urql.useQuery<StudentListQuery, StudentListQueryVariables>({ query: StudentListDocument, ...options });
+export function useStudentListQuery(options?: Omit<Urql.UseQueryArgs<never, StudentListQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<StudentListQuery, StudentListQueryVariables | undefined>({ query: StudentListDocument, variables: undefined, ...options });
 };

@@ -23,6 +23,6 @@ export const GetEntryFilterStudentsDocument = gql`
 }
     `;
 
-export function useGetEntryFilterStudentsQuery(options: Omit<Urql.UseQueryArgs<never, GetEntryFilterStudentsQueryVariables>, 'query'>) {
-  return Urql.useQuery<GetEntryFilterStudentsQuery, GetEntryFilterStudentsQueryVariables>({ query: GetEntryFilterStudentsDocument, ...options });
+export function useGetEntryFilterStudentsQuery(options?: Omit<Urql.UseQueryArgs<never, GetEntryFilterStudentsQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<GetEntryFilterStudentsQuery, GetEntryFilterStudentsQueryVariables | undefined>({ query: GetEntryFilterStudentsDocument, variables: undefined, ...options });
 };

@@ -24,6 +24,6 @@ export const BucketSharesDocument = gql`
 }
     `;
 
-export function useBucketSharesQuery(options: Omit<Urql.UseQueryArgs<never, BucketSharesQueryVariables>, 'query'>) {
-  return Urql.useQuery<BucketSharesQuery, BucketSharesQueryVariables>({ query: BucketSharesDocument, ...options });
+export function useBucketSharesQuery(options?: Omit<Urql.UseQueryArgs<never, BucketSharesQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<BucketSharesQuery, BucketSharesQueryVariables | undefined>({ query: BucketSharesDocument, variables: undefined, ...options });
 };

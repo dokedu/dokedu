@@ -25,6 +25,6 @@ export const SubjectsDataDocument = gql`
 }
     `;
 
-export function useSubjectsDataQuery(options: Omit<Urql.UseQueryArgs<never, SubjectsDataQueryVariables>, 'query'>) {
-  return Urql.useQuery<SubjectsDataQuery, SubjectsDataQueryVariables>({ query: SubjectsDataDocument, ...options });
+export function useSubjectsDataQuery(options?: Omit<Urql.UseQueryArgs<never, SubjectsDataQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<SubjectsDataQuery, SubjectsDataQueryVariables | undefined>({ query: SubjectsDataDocument, variables: undefined, ...options });
 };

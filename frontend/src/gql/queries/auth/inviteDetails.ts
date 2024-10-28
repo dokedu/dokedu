@@ -21,6 +21,6 @@ export const InviteDetailsDocument = gql`
 }
     `;
 
-export function useInviteDetailsQuery(options: Omit<Urql.UseQueryArgs<never, InviteDetailsQueryVariables>, 'query'>) {
-  return Urql.useQuery<InviteDetailsQuery, InviteDetailsQueryVariables>({ query: InviteDetailsDocument, ...options });
+export function useInviteDetailsQuery(options?: Omit<Urql.UseQueryArgs<never, InviteDetailsQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<InviteDetailsQuery, InviteDetailsQueryVariables | undefined>({ query: InviteDetailsDocument, variables: undefined, ...options });
 };

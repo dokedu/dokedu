@@ -24,6 +24,6 @@ export const ChatUsersDocument = gql`
 }
     `;
 
-export function useChatUsersQuery(options: Omit<Urql.UseQueryArgs<never, ChatUsersQueryVariables>, 'query'>) {
-  return Urql.useQuery<ChatUsersQuery, ChatUsersQueryVariables>({ query: ChatUsersDocument, ...options });
+export function useChatUsersQuery(options?: Omit<Urql.UseQueryArgs<never, ChatUsersQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<ChatUsersQuery, ChatUsersQueryVariables | undefined>({ query: ChatUsersDocument, variables: undefined, ...options });
 };

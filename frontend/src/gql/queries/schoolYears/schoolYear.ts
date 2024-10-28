@@ -21,6 +21,6 @@ export const SchoolYearDocument = gql`
 }
     `;
 
-export function useSchoolYearQuery(options: Omit<Urql.UseQueryArgs<never, SchoolYearQueryVariables>, 'query'>) {
-  return Urql.useQuery<SchoolYearQuery, SchoolYearQueryVariables>({ query: SchoolYearDocument, ...options });
+export function useSchoolYearQuery(options?: Omit<Urql.UseQueryArgs<never, SchoolYearQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<SchoolYearQuery, SchoolYearQueryVariables | undefined>({ query: SchoolYearDocument, variables: undefined, ...options });
 };

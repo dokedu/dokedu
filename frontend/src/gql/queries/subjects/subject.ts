@@ -20,6 +20,6 @@ export const SubjectDocument = gql`
 }
     `;
 
-export function useSubjectQuery(options: Omit<Urql.UseQueryArgs<never, SubjectQueryVariables>, 'query'>) {
-  return Urql.useQuery<SubjectQuery, SubjectQueryVariables>({ query: SubjectDocument, ...options });
+export function useSubjectQuery(options?: Omit<Urql.UseQueryArgs<never, SubjectQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<SubjectQuery, SubjectQueryVariables | undefined>({ query: SubjectDocument, variables: undefined, ...options });
 };

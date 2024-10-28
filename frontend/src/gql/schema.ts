@@ -787,6 +787,7 @@ export type Mutation = {
   sendUserInvite: Scalars['Boolean']['output'];
   setUserAttendanceState: UserAttendance;
   signIn: SignInPayload;
+  signInWithOtp: SignInWithOtpPayload;
   signOut: Scalars['Boolean']['output'];
   toggleEventCompetence: Event;
   updateChat: Chat;
@@ -809,6 +810,7 @@ export type Mutation = {
   uploadFile: File;
   uploadFileToEntry: Entry;
   uploadFiles: UploadFilesPayload;
+  verifyOtp: VerifyOtpPayload;
 };
 
 
@@ -1181,6 +1183,11 @@ export type MutationSignInArgs = {
 };
 
 
+export type MutationSignInWithOtpArgs = {
+  input: SignInWithOtpInput;
+};
+
+
 export type MutationToggleEventCompetenceArgs = {
   input: AddEventCompetenceInput;
 };
@@ -1287,6 +1294,11 @@ export type MutationUploadFileToEntryArgs = {
 
 export type MutationUploadFilesArgs = {
   input: FileUploadInput;
+};
+
+
+export type MutationVerifyOtpArgs = {
+  input: VerifyOtpInput;
 };
 
 export type MyFilesFilterInput = {
@@ -1700,6 +1712,16 @@ export type SignInPayload = {
   user: User;
 };
 
+export type SignInWithOtpInput = {
+  email: Scalars['String']['input'];
+};
+
+export type SignInWithOtpPayload = {
+  __typename?: 'SignInWithOtpPayload';
+  /** @deprecated use __typename instead */
+  _success: Scalars['Boolean']['output'];
+};
+
 export type SignUpInput = {
   email: Scalars['String']['input'];
   firstName: Scalars['String']['input'];
@@ -1989,6 +2011,17 @@ export type UserStudentGradesConnection = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type VerifyOtpInput = {
+  email: Scalars['String']['input'];
+  token: Scalars['String']['input'];
+};
+
+export type VerifyOtpPayload = {
+  __typename?: 'VerifyOtpPayload';
+  token: Scalars['String']['output'];
+  user: User;
+};
+
 export type WithTypename<T extends { __typename?: any }> = Partial<T> & { __typename: NonNullable<T['__typename']> };
 
 export type GraphCacheKeysConfig = {
@@ -2037,6 +2070,7 @@ export type GraphCacheKeysConfig = {
   SchoolYearConnection?: (data: WithTypename<SchoolYearConnection>) => null | string,
   ShareUser?: (data: WithTypename<ShareUser>) => null | string,
   SignInPayload?: (data: WithTypename<SignInPayload>) => null | string,
+  SignInWithOtpPayload?: (data: WithTypename<SignInWithOtpPayload>) => null | string,
   Subject?: (data: WithTypename<Subject>) => null | string,
   SubjectConnection?: (data: WithTypename<SubjectConnection>) => null | string,
   Tag?: (data: WithTypename<Tag>) => null | string,
@@ -2050,7 +2084,8 @@ export type GraphCacheKeysConfig = {
   UserStudent?: (data: WithTypename<UserStudent>) => null | string,
   UserStudentConnection?: (data: WithTypename<UserStudentConnection>) => null | string,
   UserStudentGrades?: (data: WithTypename<UserStudentGrades>) => null | string,
-  UserStudentGradesConnection?: (data: WithTypename<UserStudentGradesConnection>) => null | string
+  UserStudentGradesConnection?: (data: WithTypename<UserStudentGradesConnection>) => null | string,
+  VerifyOtpPayload?: (data: WithTypename<VerifyOtpPayload>) => null | string
 }
 
 export type GraphCacheResolvers = {
@@ -2388,6 +2423,9 @@ export type GraphCacheResolvers = {
     token?: GraphCacheResolver<WithTypename<SignInPayload>, Record<string, never>, Scalars['String'] | string>,
     user?: GraphCacheResolver<WithTypename<SignInPayload>, Record<string, never>, WithTypename<User> | string>
   },
+  SignInWithOtpPayload?: {
+    _success?: GraphCacheResolver<WithTypename<SignInWithOtpPayload>, Record<string, never>, Scalars['Boolean'] | string>
+  },
   Subject?: {
     id?: GraphCacheResolver<WithTypename<Subject>, Record<string, never>, Scalars['ID'] | string>,
     name?: GraphCacheResolver<WithTypename<Subject>, Record<string, never>, Scalars['String'] | string>
@@ -2486,6 +2524,10 @@ export type GraphCacheResolvers = {
     edges?: GraphCacheResolver<WithTypename<UserStudentGradesConnection>, Record<string, never>, Array<WithTypename<UserStudentGrades> | string>>,
     pageInfo?: GraphCacheResolver<WithTypename<UserStudentGradesConnection>, Record<string, never>, WithTypename<PageInfo> | string>,
     totalCount?: GraphCacheResolver<WithTypename<UserStudentGradesConnection>, Record<string, never>, Scalars['Int'] | string>
+  },
+  VerifyOtpPayload?: {
+    token?: GraphCacheResolver<WithTypename<VerifyOtpPayload>, Record<string, never>, Scalars['String'] | string>,
+    user?: GraphCacheResolver<WithTypename<VerifyOtpPayload>, Record<string, never>, WithTypename<User> | string>
   }
 };
 
@@ -2564,6 +2606,7 @@ export type GraphCacheOptimisticUpdaters = {
   sendUserInvite?: GraphCacheOptimisticMutationResolver<MutationSendUserInviteArgs, Scalars['Boolean']>,
   setUserAttendanceState?: GraphCacheOptimisticMutationResolver<MutationSetUserAttendanceStateArgs, WithTypename<UserAttendance>>,
   signIn?: GraphCacheOptimisticMutationResolver<MutationSignInArgs, WithTypename<SignInPayload>>,
+  signInWithOtp?: GraphCacheOptimisticMutationResolver<MutationSignInWithOtpArgs, WithTypename<SignInWithOtpPayload>>,
   signOut?: GraphCacheOptimisticMutationResolver<Record<string, never>, Scalars['Boolean']>,
   toggleEventCompetence?: GraphCacheOptimisticMutationResolver<MutationToggleEventCompetenceArgs, WithTypename<Event>>,
   updateChat?: GraphCacheOptimisticMutationResolver<MutationUpdateChatArgs, WithTypename<Chat>>,
@@ -2585,7 +2628,8 @@ export type GraphCacheOptimisticUpdaters = {
   updateUserStudentGrade?: GraphCacheOptimisticMutationResolver<MutationUpdateUserStudentGradeArgs, WithTypename<UserStudentGrades>>,
   uploadFile?: GraphCacheOptimisticMutationResolver<MutationUploadFileArgs, WithTypename<File>>,
   uploadFileToEntry?: GraphCacheOptimisticMutationResolver<MutationUploadFileToEntryArgs, WithTypename<Entry>>,
-  uploadFiles?: GraphCacheOptimisticMutationResolver<MutationUploadFilesArgs, WithTypename<UploadFilesPayload>>
+  uploadFiles?: GraphCacheOptimisticMutationResolver<MutationUploadFilesArgs, WithTypename<UploadFilesPayload>>,
+  verifyOtp?: GraphCacheOptimisticMutationResolver<MutationVerifyOtpArgs, WithTypename<VerifyOtpPayload>>
 };
 
 export type GraphCacheUpdaters = {
@@ -2708,6 +2752,7 @@ export type GraphCacheUpdaters = {
     sendUserInvite?: GraphCacheUpdateResolver<{ sendUserInvite: Scalars['Boolean'] }, MutationSendUserInviteArgs>,
     setUserAttendanceState?: GraphCacheUpdateResolver<{ setUserAttendanceState: WithTypename<UserAttendance> }, MutationSetUserAttendanceStateArgs>,
     signIn?: GraphCacheUpdateResolver<{ signIn: WithTypename<SignInPayload> }, MutationSignInArgs>,
+    signInWithOtp?: GraphCacheUpdateResolver<{ signInWithOtp: WithTypename<SignInWithOtpPayload> }, MutationSignInWithOtpArgs>,
     signOut?: GraphCacheUpdateResolver<{ signOut: Scalars['Boolean'] }, Record<string, never>>,
     toggleEventCompetence?: GraphCacheUpdateResolver<{ toggleEventCompetence: WithTypename<Event> }, MutationToggleEventCompetenceArgs>,
     updateChat?: GraphCacheUpdateResolver<{ updateChat: WithTypename<Chat> }, MutationUpdateChatArgs>,
@@ -2729,7 +2774,8 @@ export type GraphCacheUpdaters = {
     updateUserStudentGrade?: GraphCacheUpdateResolver<{ updateUserStudentGrade: WithTypename<UserStudentGrades> }, MutationUpdateUserStudentGradeArgs>,
     uploadFile?: GraphCacheUpdateResolver<{ uploadFile: WithTypename<File> }, MutationUploadFileArgs>,
     uploadFileToEntry?: GraphCacheUpdateResolver<{ uploadFileToEntry: WithTypename<Entry> }, MutationUploadFileToEntryArgs>,
-    uploadFiles?: GraphCacheUpdateResolver<{ uploadFiles: WithTypename<UploadFilesPayload> }, MutationUploadFilesArgs>
+    uploadFiles?: GraphCacheUpdateResolver<{ uploadFiles: WithTypename<UploadFilesPayload> }, MutationUploadFilesArgs>,
+    verifyOtp?: GraphCacheUpdateResolver<{ verifyOtp: WithTypename<VerifyOtpPayload> }, MutationVerifyOtpArgs>
   },
   Subscription?: {
     messageAdded?: GraphCacheUpdateResolver<{ messageAdded: WithTypename<ChatMessage> }, Record<string, never>>,
@@ -3025,6 +3071,9 @@ export type GraphCacheUpdaters = {
     token?: GraphCacheUpdateResolver<Maybe<WithTypename<SignInPayload>>, Record<string, never>>,
     user?: GraphCacheUpdateResolver<Maybe<WithTypename<SignInPayload>>, Record<string, never>>
   },
+  SignInWithOtpPayload?: {
+    _success?: GraphCacheUpdateResolver<Maybe<WithTypename<SignInWithOtpPayload>>, Record<string, never>>
+  },
   Subject?: {
     id?: GraphCacheUpdateResolver<Maybe<WithTypename<Subject>>, Record<string, never>>,
     name?: GraphCacheUpdateResolver<Maybe<WithTypename<Subject>>, Record<string, never>>
@@ -3123,6 +3172,10 @@ export type GraphCacheUpdaters = {
     edges?: GraphCacheUpdateResolver<Maybe<WithTypename<UserStudentGradesConnection>>, Record<string, never>>,
     pageInfo?: GraphCacheUpdateResolver<Maybe<WithTypename<UserStudentGradesConnection>>, Record<string, never>>,
     totalCount?: GraphCacheUpdateResolver<Maybe<WithTypename<UserStudentGradesConnection>>, Record<string, never>>
+  },
+  VerifyOtpPayload?: {
+    token?: GraphCacheUpdateResolver<Maybe<WithTypename<VerifyOtpPayload>>, Record<string, never>>,
+    user?: GraphCacheUpdateResolver<Maybe<WithTypename<VerifyOtpPayload>>, Record<string, never>>
   },
 };
 

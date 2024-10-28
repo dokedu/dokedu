@@ -1,0 +1,5 @@
+mutation signInWithOtp($email: String!) {
+  signInWithOtp(input: { email: $email }) {
+    __typename
+  }
+}

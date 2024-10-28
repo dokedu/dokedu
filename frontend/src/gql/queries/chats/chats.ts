@@ -26,6 +26,6 @@ export const ChatsDocument = gql`
 }
     `;
 
-export function useChatsQuery(options: Omit<Urql.UseQueryArgs<never, ChatsQueryVariables>, 'query'>) {
-  return Urql.useQuery<ChatsQuery, ChatsQueryVariables>({ query: ChatsDocument, ...options });
+export function useChatsQuery(options?: Omit<Urql.UseQueryArgs<never, ChatsQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<ChatsQuery, ChatsQueryVariables | undefined>({ query: ChatsDocument, variables: undefined, ...options });
 };

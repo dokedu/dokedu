@@ -408,6 +408,7 @@ type ComplexityRoot struct {
 		SendUserInvite                 func(childComplexity int, id string) int
 		SetUserAttendanceState         func(childComplexity int, userID string, date time.Time, state db.UserAttendanceState) int
 		SignIn                         func(childComplexity int, input model.SignInInput) int
+		SignInWithOtp                  func(childComplexity int, input model.SignInWithOtpInput) int
 		SignOut                        func(childComplexity int) int
 		ToggleEventCompetence          func(childComplexity int, input model.AddEventCompetenceInput) int
 		UpdateChat                     func(childComplexity int, input model.UpdateChatInput) int
@@ -430,6 +431,7 @@ type ComplexityRoot struct {
 		UploadFile                     func(childComplexity int, input model.FileUploadInput) int
 		UploadFileToEntry              func(childComplexity int, entryID string, file graphql.Upload) int
 		UploadFiles                    func(childComplexity int, input model.FileUploadInput) int
+		VerifyOtp                      func(childComplexity int, input model.VerifyOtpInput) int
 	}
 
 	Organisation struct {
@@ -551,6 +553,10 @@ type ComplexityRoot struct {
 		User          func(childComplexity int) int
 	}
 
+	SignInWithOtpPayload struct {
+		Success func(childComplexity int) int
+	}
+
 	Subject struct {
 		ID   func(childComplexity int) int
 		Name func(childComplexity int) int
@@ -667,6 +673,11 @@ type ComplexityRoot struct {
 		Edges      func(childComplexity int) int
 		PageInfo   func(childComplexity int) int
 		TotalCount func(childComplexity int) int
+	}
+
+	VerifyOtpPayload struct {
+		Token func(childComplexity int) int
+		User  func(childComplexity int) int
 	}
 }
 
@@ -826,6 +837,8 @@ type MutationResolver interface {
 	ResetPassword(ctx context.Context, input model.ResetPasswordInput) (*model.ResetPasswordPayload, error)
 	ForgotPassword(ctx context.Context, input model.ForgotPasswordInput) (*model.ForgotPasswordPayload, error)
 	SignOut(ctx context.Context) (bool, error)
+	SignInWithOtp(ctx context.Context, input model.SignInWithOtpInput) (*model.SignInWithOtpPayload, error)
+	VerifyOtp(ctx context.Context, input model.VerifyOtpInput) (*model.VerifyOtpPayload, error)
 	AcceptInvite(ctx context.Context, token string, input model.SignUpInput) (*model.SignInPayload, error)
 	CreateUser(ctx context.Context, input model.CreateUserInput) (*db.User, error)
 	UpdateUser(ctx context.Context, input model.UpdateUserInput) (*db.User, error)
@@ -2967,6 +2980,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.SignIn(childComplexity, args["input"].(model.SignInInput)), true
 
+	case "Mutation.signInWithOtp":
+		if e.complexity.Mutation.SignInWithOtp == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_signInWithOtp_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SignInWithOtp(childComplexity, args["input"].(model.SignInWithOtpInput)), true
+
 	case "Mutation.signOut":
 		if e.complexity.Mutation.SignOut == nil {
 			break
@@ -3225,6 +3250,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UploadFiles(childComplexity, args["input"].(model.FileUploadInput)), true
+
+	case "Mutation.verifyOtp":
+		if e.complexity.Mutation.VerifyOtp == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_verifyOtp_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.VerifyOtp(childComplexity, args["input"].(model.VerifyOtpInput)), true
 
 	case "Organisation.id":
 		if e.complexity.Organisation.ID == nil {
@@ -4008,6 +4045,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SignInPayload.User(childComplexity), true
 
+	case "SignInWithOtpPayload._success":
+		if e.complexity.SignInWithOtpPayload.Success == nil {
+			break
+		}
+
+		return e.complexity.SignInWithOtpPayload.Success(childComplexity), true
+
 	case "Subject.id":
 		if e.complexity.Subject.ID == nil {
 			break
@@ -4519,6 +4563,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UserStudentGradesConnection.TotalCount(childComplexity), true
 
+	case "VerifyOtpPayload.token":
+		if e.complexity.VerifyOtpPayload.Token == nil {
+			break
+		}
+
+		return e.complexity.VerifyOtpPayload.Token(childComplexity), true
+
+	case "VerifyOtpPayload.user":
+		if e.complexity.VerifyOtpPayload.User == nil {
+			break
+		}
+
+		return e.complexity.VerifyOtpPayload.User(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -4597,6 +4655,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputShareInput,
 		ec.unmarshalInputSharedDriveFilterInput,
 		ec.unmarshalInputSignInInput,
+		ec.unmarshalInputSignInWithOtpInput,
 		ec.unmarshalInputSignUpInput,
 		ec.unmarshalInputSortCompetenceInput,
 		ec.unmarshalInputUpdateChatInput,
@@ -4616,6 +4675,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputUserCompetenceFilterInput,
 		ec.unmarshalInputUserFileFilterInput,
 		ec.unmarshalInputUserFilterInput,
+		ec.unmarshalInputVerifyOtpInput,
 	)
 	first := true
 
@@ -5928,6 +5988,21 @@ func (ec *executionContext) field_Mutation_setUserAttendanceState_args(ctx conte
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_signInWithOtp_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.SignInWithOtpInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNSignInWithOtpInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐSignInWithOtpInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_signIn_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -6286,6 +6361,21 @@ func (ec *executionContext) field_Mutation_uploadFiles_args(ctx context.Context,
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNFileUploadInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐFileUploadInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_verifyOtp_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.VerifyOtpInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNVerifyOtpInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐVerifyOtpInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -20061,6 +20151,126 @@ func (ec *executionContext) fieldContext_Mutation_signOut(ctx context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_signInWithOtp(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_signInWithOtp(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SignInWithOtp(rctx, fc.Args["input"].(model.SignInWithOtpInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.SignInWithOtpPayload)
+	fc.Result = res
+	return ec.marshalNSignInWithOtpPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐSignInWithOtpPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_signInWithOtp(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "_success":
+				return ec.fieldContext_SignInWithOtpPayload__success(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SignInWithOtpPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_signInWithOtp_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_verifyOtp(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_verifyOtp(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().VerifyOtp(rctx, fc.Args["input"].(model.VerifyOtpInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.VerifyOtpPayload)
+	fc.Result = res
+	return ec.marshalNVerifyOtpPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐVerifyOtpPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_verifyOtp(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "token":
+				return ec.fieldContext_VerifyOtpPayload_token(ctx, field)
+			case "user":
+				return ec.fieldContext_VerifyOtpPayload_user(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type VerifyOtpPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_verifyOtp_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_acceptInvite(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_acceptInvite(ctx, field)
 	if err != nil {
@@ -26757,6 +26967,50 @@ func (ec *executionContext) fieldContext_SignInPayload_user(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _SignInWithOtpPayload__success(ctx context.Context, field graphql.CollectedField, obj *model.SignInWithOtpPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SignInWithOtpPayload__success(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Success, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SignInWithOtpPayload__success(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SignInWithOtpPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Subject_id(ctx context.Context, field graphql.CollectedField, obj *db.Subject) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Subject_id(ctx, field)
 	if err != nil {
@@ -30420,6 +30674,122 @@ func (ec *executionContext) fieldContext_UserStudentGradesConnection_pageInfo(ct
 				return ec.fieldContext_PageInfo_currentPage(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VerifyOtpPayload_token(ctx context.Context, field graphql.CollectedField, obj *model.VerifyOtpPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VerifyOtpPayload_token(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Token, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VerifyOtpPayload_token(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VerifyOtpPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VerifyOtpPayload_user(ctx context.Context, field graphql.CollectedField, obj *model.VerifyOtpPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VerifyOtpPayload_user(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.User, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*db.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋdbᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VerifyOtpPayload_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VerifyOtpPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "student":
+				return ec.fieldContext_User_student(ctx, field)
+			case "language":
+				return ec.fieldContext_User_language(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_User_deletedAt(ctx, field)
+			case "organisationId":
+				return ec.fieldContext_User_organisationId(ctx, field)
+			case "inviteAccepted":
+				return ec.fieldContext_User_inviteAccepted(ctx, field)
+			case "lastSeenAt":
+				return ec.fieldContext_User_lastSeenAt(ctx, field)
+			case "emailAccounts":
+				return ec.fieldContext_User_emailAccounts(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
 	}
 	return fc, nil
@@ -35038,6 +35408,35 @@ func (ec *executionContext) unmarshalInputSignInInput(ctx context.Context, obj i
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputSignInWithOtpInput(ctx context.Context, obj interface{}) (model.SignInWithOtpInput, error) {
+	var it model.SignInWithOtpInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"email"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Email = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputSignUpInput(ctx context.Context, obj interface{}) (model.SignUpInput, error) {
 	var it model.SignUpInput
 	asMap := map[string]interface{}{}
@@ -35997,6 +36396,44 @@ func (ec *executionContext) unmarshalInputUserFilterInput(ctx context.Context, o
 				return it, err
 			}
 			it.ShowDeleted = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputVerifyOtpInput(ctx context.Context, obj interface{}) (model.VerifyOtpInput, error) {
+	var it model.VerifyOtpInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"email", "token"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Email = data
+		case "token":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Token = data
 		}
 	}
 
@@ -39897,6 +40334,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "signInWithOtp":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_signInWithOtp(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "verifyOtp":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_verifyOtp(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "acceptInvite":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_acceptInvite(ctx, field)
@@ -41757,6 +42208,45 @@ func (ec *executionContext) _SignInPayload(ctx context.Context, sel ast.Selectio
 	return out
 }
 
+var signInWithOtpPayloadImplementors = []string{"SignInWithOtpPayload"}
+
+func (ec *executionContext) _SignInWithOtpPayload(ctx context.Context, sel ast.SelectionSet, obj *model.SignInWithOtpPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, signInWithOtpPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SignInWithOtpPayload")
+		case "_success":
+			out.Values[i] = ec._SignInWithOtpPayload__success(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var subjectImplementors = []string{"Subject"}
 
 func (ec *executionContext) _Subject(ctx context.Context, sel ast.SelectionSet, obj *db.Subject) graphql.Marshaler {
@@ -43361,6 +43851,50 @@ func (ec *executionContext) _UserStudentGradesConnection(ctx context.Context, se
 			}
 		case "pageInfo":
 			out.Values[i] = ec._UserStudentGradesConnection_pageInfo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var verifyOtpPayloadImplementors = []string{"VerifyOtpPayload"}
+
+func (ec *executionContext) _VerifyOtpPayload(ctx context.Context, sel ast.SelectionSet, obj *model.VerifyOtpPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, verifyOtpPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("VerifyOtpPayload")
+		case "token":
+			out.Values[i] = ec._VerifyOtpPayload_token(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "user":
+			out.Values[i] = ec._VerifyOtpPayload_user(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -45256,6 +45790,25 @@ func (ec *executionContext) marshalNSignInPayload2ᚖgithubᚗcomᚋdokeduᚋdok
 	return ec._SignInPayload(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNSignInWithOtpInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐSignInWithOtpInput(ctx context.Context, v interface{}) (model.SignInWithOtpInput, error) {
+	res, err := ec.unmarshalInputSignInWithOtpInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNSignInWithOtpPayload2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐSignInWithOtpPayload(ctx context.Context, sel ast.SelectionSet, v model.SignInWithOtpPayload) graphql.Marshaler {
+	return ec._SignInWithOtpPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSignInWithOtpPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐSignInWithOtpPayload(ctx context.Context, sel ast.SelectionSet, v *model.SignInWithOtpPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._SignInWithOtpPayload(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNSignUpInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐSignUpInput(ctx context.Context, v interface{}) (model.SignUpInput, error) {
 	res, err := ec.unmarshalInputSignUpInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -45986,6 +46539,25 @@ func (ec *executionContext) marshalNUserStudentGradesConnection2ᚖgithubᚗcom�
 		return graphql.Null
 	}
 	return ec._UserStudentGradesConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNVerifyOtpInput2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐVerifyOtpInput(ctx context.Context, v interface{}) (model.VerifyOtpInput, error) {
+	res, err := ec.unmarshalInputVerifyOtpInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNVerifyOtpPayload2githubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐVerifyOtpPayload(ctx context.Context, sel ast.SelectionSet, v model.VerifyOtpPayload) graphql.Marshaler {
+	return ec._VerifyOtpPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNVerifyOtpPayload2ᚖgithubᚗcomᚋdokeduᚋdokeduᚋbackendᚋinternalᚋgraphᚋmodelᚐVerifyOtpPayload(ctx context.Context, sel ast.SelectionSet, v *model.VerifyOtpPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._VerifyOtpPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

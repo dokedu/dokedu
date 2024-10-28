@@ -28,6 +28,6 @@ export const BucketsDocument = gql`
 }
     `;
 
-export function useBucketsQuery(options: Omit<Urql.UseQueryArgs<never, BucketsQueryVariables>, 'query'>) {
-  return Urql.useQuery<BucketsQuery, BucketsQueryVariables>({ query: BucketsDocument, ...options });
+export function useBucketsQuery(options?: Omit<Urql.UseQueryArgs<never, BucketsQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<BucketsQuery, BucketsQueryVariables | undefined>({ query: BucketsDocument, variables: undefined, ...options });
 };

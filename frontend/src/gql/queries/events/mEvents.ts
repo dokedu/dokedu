@@ -22,6 +22,6 @@ export const MEventsDocument = gql`
 }
     `;
 
-export function useMEventsQuery(options: Omit<Urql.UseQueryArgs<never, MEventsQueryVariables>, 'query'>) {
-  return Urql.useQuery<MEventsQuery, MEventsQueryVariables>({ query: MEventsDocument, ...options });
+export function useMEventsQuery(options?: Omit<Urql.UseQueryArgs<never, MEventsQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<MEventsQuery, MEventsQueryVariables | undefined>({ query: MEventsDocument, variables: undefined, ...options });
 };

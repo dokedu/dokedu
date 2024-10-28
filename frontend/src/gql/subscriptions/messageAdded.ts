@@ -31,6 +31,6 @@ export const MessageAddedDocument = gql`
 }
     `;
 
-export function useMessageAddedSubscription<R = MessageAddedSubscription>(options: Omit<Urql.UseSubscriptionArgs<never, MessageAddedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandlerArg<MessageAddedSubscription, R>) {
-  return Urql.useSubscription<MessageAddedSubscription, R, MessageAddedSubscriptionVariables>({ query: MessageAddedDocument, ...options }, handler);
+export function useMessageAddedSubscription<R = MessageAddedSubscription>(options?: Omit<Urql.UseSubscriptionArgs<never, MessageAddedSubscriptionVariables | undefined>, 'query'>, handler?: Urql.SubscriptionHandlerArg<MessageAddedSubscription, R>) {
+  return Urql.useSubscription<MessageAddedSubscription, R, MessageAddedSubscriptionVariables | undefined>({ query: MessageAddedDocument, variables: undefined, ...options }, handler);
 };

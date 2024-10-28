@@ -1,0 +1,8 @@
+mutation verifyOtp($input: VerifyOtpInput!) {
+  verifyOtp(input: $input) {
+    token
+    user {
+      ...user
+    }
+  }
+}

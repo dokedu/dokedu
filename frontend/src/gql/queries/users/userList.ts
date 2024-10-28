@@ -24,6 +24,6 @@ export const UserListDocument = gql`
 }
     `;
 
-export function useUserListQuery(options: Omit<Urql.UseQueryArgs<never, UserListQueryVariables>, 'query'>) {
-  return Urql.useQuery<UserListQuery, UserListQueryVariables>({ query: UserListDocument, ...options });
+export function useUserListQuery(options?: Omit<Urql.UseQueryArgs<never, UserListQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<UserListQuery, UserListQueryVariables | undefined>({ query: UserListDocument, variables: undefined, ...options });
 };

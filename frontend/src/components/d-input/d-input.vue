@@ -24,17 +24,17 @@
 type Props = {
   modelValue: string | number | Date | undefined
   label?: string
-  type: "text" | "email" | "password" | "number" | "date" | "time"
+  type?: "text" | "email" | "password" | "number" | "date" | "time"
   name: string
   max?: number
   min?: number
   message?: string
-  messageColor: "default" | "success" | "warning" | "error" | "info"
+  messageColor?: "default" | "success" | "warning" | "error" | "info"
   placeholder?: string
-  required: boolean
-  disabled: boolean
-  autocomplete: string
-  size: "sm" | "md" | "lg"
+  required?: boolean
+  disabled?: boolean
+  autocomplete?: string
+  size?: "sm" | "md" | "lg"
 }
 
 withDefaults(defineProps<Props>(), {

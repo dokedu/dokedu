@@ -37,6 +37,6 @@ export const CompetenceSearchDocument = gql`
 }
     `;
 
-export function useCompetenceSearchQuery(options: Omit<Urql.UseQueryArgs<never, CompetenceSearchQueryVariables>, 'query'>) {
-  return Urql.useQuery<CompetenceSearchQuery, CompetenceSearchQueryVariables>({ query: CompetenceSearchDocument, ...options });
+export function useCompetenceSearchQuery(options?: Omit<Urql.UseQueryArgs<never, CompetenceSearchQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<CompetenceSearchQuery, CompetenceSearchQueryVariables | undefined>({ query: CompetenceSearchDocument, variables: undefined, ...options });
 };

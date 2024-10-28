@@ -10,9 +10,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"math/rand"
 	"strings"
 	"time"
+
+	nanoid "github.com/matoous/go-nanoid/v2"
+	"github.com/meilisearch/meilisearch-go"
+	"github.com/uptrace/bun"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/dokedu/dokedu/backend/internal/dataloaders"
 	"github.com/dokedu/dokedu/backend/internal/db"
@@ -21,10 +27,6 @@ import (
 	"github.com/dokedu/dokedu/backend/internal/middleware"
 	meili "github.com/dokedu/dokedu/backend/internal/modules/meilisearch"
 	"github.com/dokedu/dokedu/backend/internal/msg"
-	nanoid "github.com/matoous/go-nanoid/v2"
-	meilisearch "github.com/meilisearch/meilisearch-go"
-	"github.com/uptrace/bun"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // Type is the resolver for the type field.
@@ -323,6 +325,95 @@ func (r *mutationResolver) SignOut(ctx context.Context) (bool, error) {
 	}
 
 	return true, nil
+}
+
+// SignInWithOtp is the resolver for the signInWithOtp field.
+func (r *mutationResolver) SignInWithOtp(ctx context.Context, input model.SignInWithOtpInput) (*model.SignInWithOtpPayload, error) {
+	var user db.User
+	err := r.DB.NewSelect().Model(&user).Where("email = ?", input.Email).Scan(ctx)
+	if errors.Is(err, sql.ErrNoRows) {
+		return &model.SignInWithOtpPayload{}, nil
+	}
+	if err != nil {
+		return nil, errors.New("unexpected error")
+	}
+
+	code := nanoid.MustGenerate("23456789ABCDEFGHJKLMNPQRSTUVWXYZ", 6)
+
+	// Write the code into the recovery_token
+	_, err = r.DB.NewUpdate().
+		Model(&user).
+		Set("recovery_token = ?", code).
+		Set("recovery_sent_at = ?", time.Now()).
+		Where("id = ?", user.ID).
+		Exec(ctx)
+	if err != nil {
+		return nil, errors.New("unexpected error")
+	}
+
+	go r.Mailer.SendOTP(user.Email.String, user.FirstName, user.Language, code)
+
+	return &model.SignInWithOtpPayload{}, nil
+}
+
+// VerifyOtp is the resolver for the verifyOtp field.
+func (r *mutationResolver) VerifyOtp(ctx context.Context, input model.VerifyOtpInput) (*model.VerifyOtpPayload, error) {
+
+	if input.Email == "" {
+		return nil, errors.New("email is required")
+	}
+	if input.Token == "" && len(input.Token) != 6 {
+		return nil, errors.New("token is required")
+	}
+
+	var user db.User
+	err := r.DB.NewSelect().
+		Model(&user).
+		Where("recovery_token = ?", input.Token).
+		Where("email = ?", input.Email).
+		Scan(ctx)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, errors.New("invalid token")
+	}
+	if err != nil {
+		slog.Error("failed to get user", "err", err)
+		return nil, errors.New("unexpected error")
+	}
+
+	// user.recoverySentAt must be newer than 10 minutes
+	if user.RecoverySentAt.IsZero() || time.Now().Sub(user.RecoverySentAt.Time) > 10*time.Minute {
+		return nil, errors.New("recovery token expired")
+	}
+
+	// Delete the recovery_token
+	_, err = r.DB.NewUpdate().
+		Model(&user).
+		Set("recovery_token = NULL").
+		Where("id = ?", user.ID).
+		Exec(ctx)
+	if err != nil {
+		slog.Error("failed to delete recovery token", "err", err)
+		return nil, errors.New("unexpected error")
+	}
+
+	// Generate the session
+	token := nanoid.Must(32)
+
+	// Save the token in the database
+	session := db.Session{
+		UserID: user.ID,
+		Token:  token,
+	}
+
+	_, err = r.DB.NewInsert().Model(&session).Exec(ctx)
+	if err != nil {
+		return nil, errors.New("unable to generate a token")
+	}
+
+	return &model.VerifyOtpPayload{
+		Token: token,
+		User:  &user,
+	}, nil
 }
 
 // AcceptInvite is the resolver for the acceptInvite field.

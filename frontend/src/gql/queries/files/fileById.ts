@@ -24,6 +24,6 @@ export const FileByIdDocument = gql`
 }
     `;
 
-export function useFileByIdQuery(options: Omit<Urql.UseQueryArgs<never, FileByIdQueryVariables>, 'query'>) {
-  return Urql.useQuery<FileByIdQuery, FileByIdQueryVariables>({ query: FileByIdDocument, ...options });
+export function useFileByIdQuery(options?: Omit<Urql.UseQueryArgs<never, FileByIdQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<FileByIdQuery, FileByIdQueryVariables | undefined>({ query: FileByIdDocument, variables: undefined, ...options });
 };

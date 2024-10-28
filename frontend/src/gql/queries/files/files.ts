@@ -32,6 +32,6 @@ export const FilesDocument = gql`
 }
     `;
 
-export function useFilesQuery(options: Omit<Urql.UseQueryArgs<never, FilesQueryVariables>, 'query'>) {
-  return Urql.useQuery<FilesQuery, FilesQueryVariables>({ query: FilesDocument, ...options });
+export function useFilesQuery(options?: Omit<Urql.UseQueryArgs<never, FilesQueryVariables | undefined>, 'query'>) {
+  return Urql.useQuery<FilesQuery, FilesQueryVariables | undefined>({ query: FilesDocument, variables: undefined, ...options });
 };
