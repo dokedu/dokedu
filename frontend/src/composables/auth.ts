@@ -6,8 +6,6 @@ import { urqlClient } from "@/main"
 import { computed } from "vue"
 import i18n from "@/i18n"
 import type { UserFragment } from "@/gql/fragments/user"
-import { SignInWithOtpDocument } from "@/gql/mutations/auth/signInWithOtp"
-import type { SignInWithOtpInput } from "@/gql/schema"
 
 export const user = useStorage<UserFragment | null>("user", null, undefined, {
   serializer: {
@@ -26,21 +24,10 @@ function signOutMutation() {
   return urqlClient.mutation(SignOutDocument, {})
 }
 
-interface SignInInput {
-  email: string
-  password: string
-}
-
-function signInMutation(input: SignInWithOtpInput) {
-  return urqlClient.mutation(SignInWithOtpDocument, input)
-}
-
 async function signIn(_token: string, _user: UserFragment): Promise<{ error?: Error | undefined }> {
-
-
   token.value = _token
   user.value = _user
-  enabledApps.value = ["admin", "record", "school"]
+  enabledApps.value = ["admin", "record", "school", "drive"]
   language.value = "de"
 
   // Set the i18n locale to the user's language
