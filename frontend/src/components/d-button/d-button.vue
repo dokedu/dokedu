@@ -1,5 +1,5 @@
 <template>
-  <component :is="componentType" tabindex="0" :class="buttonClasses">
+  <component :is="componentType" :to="props.to" tabindex="0" :class="buttonClasses">
     <component v-if="iconLeft" :is="iconLeft" :size="18" :class="iconLeftClasses" />
     <slot />
     <component v-if="iconRight" :is="iconRight" :size="18" />

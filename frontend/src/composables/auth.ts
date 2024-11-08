@@ -24,21 +24,7 @@ function signOutMutation() {
   return urqlClient.mutation(SignOutDocument, {})
 }
 
-async function signIn(_token: string, _user: UserFragment): Promise<{ error?: Error | undefined }> {
-  token.value = _token
-  user.value = _user
-  enabledApps.value = ["admin", "record", "school", "drive"]
-  language.value = "de"
-
-  // Set the i18n locale to the user's language
-  i18n.global.locale.value = language.value as unknown as any
-
-  await afterSignInHandleRedirect()
-
-  return {}
-}
-
-async function afterSignInHandleRedirect() {
+export async function afterSignInHandleRedirect() {
   if (enabledApps.value.includes("record")) {
     if (isMobile.value) {
       return await router.push({ name: "/m/record/entries/" })
@@ -69,5 +55,5 @@ async function signOut() {
 }
 
 export function useAuth() {
-  return { signOut, signIn }
+  return { signOut }
 }
