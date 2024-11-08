@@ -332,9 +332,11 @@ func (r *mutationResolver) SignInWithOtp(ctx context.Context, input model.SignIn
 	var user db.User
 	err := r.DB.NewSelect().Model(&user).Where("email = ?", input.Email).Scan(ctx)
 	if errors.Is(err, sql.ErrNoRows) {
+		slog.Error("no user found", "email", input.Email)
 		return &model.SignInWithOtpPayload{}, nil
 	}
 	if err != nil {
+		slog.Error("failed to get user", "err", err)
 		return nil, errors.New("unexpected error")
 	}
 
@@ -348,10 +350,16 @@ func (r *mutationResolver) SignInWithOtp(ctx context.Context, input model.SignIn
 		Where("id = ?", user.ID).
 		Exec(ctx)
 	if err != nil {
+		slog.Error("failed to update recovery token", "err", err)
 		return nil, errors.New("unexpected error")
 	}
 
-	go r.Mailer.SendOTP(user.Email.String, user.FirstName, user.Language, code)
+	go func() {
+		err := r.Mailer.SendOTP(user.Email.String, user.FirstName, user.Language, code)
+		if err != nil {
+			slog.Error("failed to send OTP", "err", err, "email", user.Email)
+		}
+	}()
 
 	return &model.SignInWithOtpPayload{}, nil
 }

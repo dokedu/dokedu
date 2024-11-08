@@ -107,11 +107,7 @@ func (m Mailer) SendOTP(to string, name string, lang db.UserLanguage, token stri
 	}
 
 	var subject string
-	if lang == db.UserLangDe {
-		subject = "Sicherheitscode für Dokedu"
-	} else {
-		subject = "Security code for Dokedu"
-	}
+	subject = "Sicherheitscode für Dokedu: " + token
 
 	return m.Send([]string{to}, subject, template)
 }
