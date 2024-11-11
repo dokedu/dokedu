@@ -330,7 +330,7 @@ func (r *mutationResolver) SignOut(ctx context.Context) (bool, error) {
 // SignInWithOtp is the resolver for the signInWithOtp field.
 func (r *mutationResolver) SignInWithOtp(ctx context.Context, input model.SignInWithOtpInput) (*model.SignInWithOtpPayload, error) {
 	var user db.User
-	err := r.DB.NewSelect().Model(&user).Where("email = ?", input.Email).Scan(ctx)
+	err := r.DB.NewSelect().Model(&user).Where("email = ?", strings.ToLower(input.Email)).Scan(ctx)
 	if errors.Is(err, sql.ErrNoRows) {
 		slog.Error("no user found", "email", input.Email)
 		return &model.SignInWithOtpPayload{}, nil
