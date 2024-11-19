@@ -53,8 +53,8 @@
         Alle Anwesend
       </button>
     </PageHeader>
-    <div class="w-full select-none min-h-0 overflow-scroll">
-      <div class="flex flex-col w-full divide-y divide-neutral-100 overflow-scroll flex-1 pb-4">
+    <div class="w-full select-none min-h-0 overflow-auto">
+      <div class="flex flex-col w-full divide-y divide-neutral-100 flex-1 pb-4">
         <div v-for="item in filteredData" :key="item.id" class="flex px-8 items-center justify-between py-2.5">
           <div class="text-sm">{{ item.user.firstName }} {{ item.user.lastName }}</div>
           <div class="flex bg-neutral-50 border border-neutral-200 shadow-sm p-0.5 rounded-lg gap-1">
