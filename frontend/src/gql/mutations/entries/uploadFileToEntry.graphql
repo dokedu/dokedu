@@ -1,5 +1,0 @@
-mutation uploadFileToEntry($entryId: ID!, $file: Upload!) {
-  uploadFileToEntry(entryId: $entryId, file: $file) {
-    id
-  }
-}

@@ -1,6 +1,0 @@
-mutation deleteChat($input: DeleteChatInput!) {
-  deleteChat(input: $input) {
-    id
-    deletedAt
-  }
-}

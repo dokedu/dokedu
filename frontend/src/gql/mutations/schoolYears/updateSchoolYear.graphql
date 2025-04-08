@@ -1,7 +1,0 @@
-mutation updateSchoolYear($id: ID!, $year: Int!) {
-  updateSchoolYear(input: { id: $id, year: $year }) {
-    id
-    year
-    description
-  }
-}

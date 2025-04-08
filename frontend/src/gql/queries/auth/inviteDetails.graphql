@@ -1,7 +1,0 @@
-query inviteDetails($token: String!) {
-  inviteDetails(token: $token) {
-    email
-    firstName
-    lastName
-  }
-}

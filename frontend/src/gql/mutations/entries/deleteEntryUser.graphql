@@ -1,5 +1,0 @@
-mutation deleteEntryUserInput($input: DeleteEntryUserInput!) {
-  deleteEntryUser(input: $input) {
-    id
-  }
-}

@@ -1,5 +1,0 @@
-mutation archiveEvent($id: ID!) {
-  archiveEvent(id: $id) {
-    id
-  }
-}

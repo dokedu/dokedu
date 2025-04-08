@@ -1,6 +1,0 @@
-mutation updateSubject($id: ID!, $name: String!) {
-  updateSubject(input: { id: $id, name: $name }) {
-    id
-    name
-  }
-}

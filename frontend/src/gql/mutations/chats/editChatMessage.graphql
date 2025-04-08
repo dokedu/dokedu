@@ -1,5 +1,0 @@
-mutation editChatMessage($input: EditChatMessageInput!) {
-  editChatMessage(input: $input) {
-    ...chatMessage
-  }
-}

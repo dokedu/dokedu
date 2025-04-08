@@ -1,9 +1,0 @@
-query users($search: String) {
-  users(filter: { role: [student], orderBy: lastNameAsc }, search: $search, limit: 1000) {
-    edges {
-      id
-      firstName
-      lastName
-    }
-  }
-}

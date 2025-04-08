@@ -1,9 +1,0 @@
-query shareUsers {
-  users(filter: { role: [owner, admin, teacher] }) {
-    edges {
-      id
-      firstName
-      lastName
-    }
-  }
-}

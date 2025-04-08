@@ -1,7 +1,0 @@
-mutation updateCompetence($input: UpdateCompetenceInput!) {
-  updateCompetence(input: $input) {
-    id
-    name
-    color
-  }
-}

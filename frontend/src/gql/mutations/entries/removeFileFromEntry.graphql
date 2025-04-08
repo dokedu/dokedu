@@ -1,5 +1,0 @@
-mutation removeFileFromEntry($entryId: ID!, $fileId: ID!) {
-  removeFileFromEntry(entryId: $entryId, fileId: $fileId) {
-    id
-  }
-}

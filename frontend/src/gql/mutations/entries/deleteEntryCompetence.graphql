@@ -1,5 +1,0 @@
-mutation deleteEntryCompetenceInput($input: DeleteEntryCompetenceInput!) {
-  deleteEntryCompetence(input: $input) {
-    id
-  }
-}

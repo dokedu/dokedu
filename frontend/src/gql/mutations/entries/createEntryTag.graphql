@@ -1,5 +1,0 @@
-mutation createEntryTag($input: CreateEntryTagInput!) {
-  createEntryTag(input: $input) {
-    id
-  }
-}

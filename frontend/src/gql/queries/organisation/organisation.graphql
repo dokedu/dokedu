@@ -1,7 +1,0 @@
-query organisation {
-  organisation {
-    id
-    name
-    legalName
-  }
-}

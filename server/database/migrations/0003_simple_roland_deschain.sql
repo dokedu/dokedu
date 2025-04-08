@@ -1,0 +1,1 @@
+ALTER TABLE "competences" ADD COLUMN "parents" jsonb;

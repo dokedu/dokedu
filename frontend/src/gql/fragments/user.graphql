@@ -1,8 +1,0 @@
-fragment user on User {
-  id
-  role
-  email
-  firstName
-  lastName
-  organisationId
-}

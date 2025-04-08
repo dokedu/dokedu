@@ -1,6 +1,0 @@
-mutation deleteDomain($input: DeleteDomainInput!) {
-  deleteDomain(input: $input) {
-    name
-    createdAt
-  }
-}

@@ -1,6 +1,0 @@
-mutation updateUserLanguage($language: UserLanguage!) {
-  updateUserLanguage(language: $language) {
-    id
-    language
-  }
-}

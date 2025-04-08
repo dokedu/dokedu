@@ -1,6 +1,0 @@
-query bucketById($id: ID!) {
-  bucket(id: $id) {
-    id
-    name
-  }
-}

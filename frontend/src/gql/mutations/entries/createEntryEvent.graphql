@@ -1,5 +1,0 @@
-mutation createEntryEvent($input: CreateEntryEventInput!) {
-  createEntryEvent(input: $input) {
-    id
-  }
-}

@@ -1,6 +1,0 @@
-mutation renameSharedDrive($input: RenameSharedDriveInput!) {
-  renameSharedDrive(input: $input) {
-    id
-    name
-  }
-}
