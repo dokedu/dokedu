@@ -24,7 +24,7 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    preset: "bun",
+    // preset: "bun",
     experimental: {
       // websocket: true,
       tasks: true
