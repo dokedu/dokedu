@@ -2,7 +2,7 @@
 service: dokedu
 
 # Name of the container image.
-image: dokedu/offline
+image: dokedu/dokedu
 
 # Deploy to these servers.
 servers:
@@ -20,7 +20,6 @@ servers:
 proxy:
   ssl: true
   hosts:
-    - beta.dokedu.org
     - app.dokedu.org
   # Proxy connects to your container on port 80 by default.
   app_port: 3000
