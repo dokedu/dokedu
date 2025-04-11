@@ -13,9 +13,9 @@ const links = [
     icon: UsersIcon
   },
   {
-    name: "Projekte",
+    name: "Veranstaltungen",
     to: "/projects",
-    icon: GridIcon
+    icon: CalendarDaysIcon
   },
   {
     name: "Kompetenzen",

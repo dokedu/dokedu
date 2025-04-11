@@ -25,13 +25,13 @@ function createEvent() {
 <template>
   <DPage>
     <DHeader>
-      <DHeaderTitle>Projekte</DHeaderTitle>
+      <DHeaderTitle>Veranstaltungen</DHeaderTitle>
       <DInputSearch v-model="search" />
       <DButton :icon-left="FilterIcon" variant="secondary" @click="toggleFilterModal">Filter</DButton>
 
       <template #right>
         <DButton :icon-left="SquareChartGanttIcon" to="/projects/export" variant="secondary">Export</DButton>
-        <DButton :icon-left="PlusIcon" to="/projects/new">Projekt erstellen</DButton>
+        <DButton :icon-left="PlusIcon" to="/projects/new">Veranstaltung erstellen</DButton>
       </template>
     </DHeader>
 
