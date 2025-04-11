@@ -109,7 +109,7 @@ async function deleteEvent() {
 
         <div class="mt-8 rounded-md bg-orange-100 p-4 text-sm text-orange-700">
           <div class="mb-2 font-bold text-orange-900">Kompetenzen</div>
-          <div>Derzeit werden die Projektkompetenzen nicht geladen, wir arbeiten daran, dass sie wieder angezeigt werden.</div>
+          <div>Derzeit werden die Kompetenzen nicht geladen, wir arbeiten daran, dass sie wieder angezeigt werden.</div>
         </div>
       </div>
     </DPageContent>

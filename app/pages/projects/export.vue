@@ -5,7 +5,7 @@
 <template>
   <DPage>
     <DHeader>
-      <DHeaderTitle>Exportiere Projekte</DHeaderTitle>
+      <DHeaderTitle>Exportieren</DHeaderTitle>
     </DHeader>
 
     <DPageContent>

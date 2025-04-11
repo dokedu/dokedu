@@ -37,7 +37,7 @@ function createEvent() {
 
     <DModal titel="Filter" v-if="showFilterModal" @close="showFilterModal = false" confirm-text="Schließen" @confirm="showFilterModal = false">
       <div class="p-4 text-sm text-neutral-500">
-        Diese Version von Dokedu unterstützt aktuell das Filtern von Projekten nicht. Wir arbeiten daran, dass diese Funktion bald verfügbar ist.
+        Diese Version von Dokedu unterstützt aktuell das Filtern von Veranstaltungen nicht. Wir arbeiten daran, dass diese Funktion bald verfügbar ist.
       </div>
     </DModal>
 

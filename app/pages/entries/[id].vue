@@ -238,7 +238,7 @@ async function saveEntry() {
             <div class="mb-4 flex flex-wrap items-center gap-1">
               <DButton variant="secondary" :icon-left="PlusIcon" @click="toggleUserModal"> Schüler</DButton>
               <DButton variant="secondary" :icon-left="PlusIcon" @click="toggleCompetenceModal"> Kompetenzen</DButton>
-              <DButton variant="secondary" :icon-left="PlusIcon" @click="toggleProjectModal"> Projekte</DButton>
+              <DButton variant="secondary" :icon-left="PlusIcon" @click="toggleProjectModal"> Veranstaltungen</DButton>
               <DButton variant="secondary" :icon-left="PlusIcon" @click="toggleTagModal"> Tags</DButton>
               <DButton variant="secondary" :icon-left="FilePlusIcon" @click="toggleFileModal"> Dateien</DButton>
             </div>
@@ -264,7 +264,7 @@ async function saveEntry() {
             </div>
 
             <div v-if="entry.entryEvents && entry.entryEvents.length > 0" class="mb-4">
-              <DLabel class="mb-1">Projekte</DLabel>
+              <DLabel class="mb-1">Veranstaltungen</DLabel>
               <div class="flex flex-wrap gap-2">
                 <DTag v-for="entryEvent in entry.entryEvents" :color="'gray'">
                   {{ entryEvent.event.title }}
@@ -305,7 +305,13 @@ async function saveEntry() {
               <DTagSearch :selected="selectedTags" @toggle="toggleTag" />
             </DModal>
 
-            <DModal titel="Projekte" v-if="showProjectModal" @close="showProjectModal = false" confirm-text="Schließen" @confirm="showProjectModal = false">
+            <DModal
+              titel="Veranstaltungen"
+              v-if="showProjectModal"
+              @close="showProjectModal = false"
+              confirm-text="Schließen"
+              @confirm="showProjectModal = false"
+            >
               <DEventSearch :selected="selectedEvents" @toggle="toggleEvent" />
             </DModal>
 
