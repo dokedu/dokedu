@@ -10,6 +10,7 @@ export default defineEventHandler(async (event) => {
     .select()
     .from(groups)
     .where(and(isNull(groups.deletedAt), eq(groups.organisationId, secure.organisationId)))
+    .orderBy(groups.name)
 
   return await query
 })
