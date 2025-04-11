@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { formatDate } from "@vueuse/core"
-import { Edit2Icon, XIcon } from "lucide-vue-next"
+import { ArrowRightIcon, Edit2Icon, Trash2Icon, XIcon } from "lucide-vue-next"
 
 const id = useRouteParams<string>("id")
 
@@ -80,7 +80,7 @@ async function deleteEvent() {
 
       <template #right>
         <div class="flex items-center gap-2">
-          <DButton :icon-left="XIcon" variant="danger-light" @click="deleteEvent">Archivieren</DButton>
+          <DButton :icon-left="Trash2Icon" variant="danger-light" @click="deleteEvent">Archivieren</DButton>
         </div>
       </template>
     </DHeader>
@@ -103,6 +103,7 @@ async function deleteEvent() {
 
         <div class="mb-2 flex items-center gap-2">
           <d-input v-model="startsAt" type="date" placeholder="Startdatum" />
+          <ArrowRightIcon class="h-5 w-5 text-gray-500" />
           <d-input v-model="endsAt" type="date" placeholder="Enddatum" />
         </div>
 
