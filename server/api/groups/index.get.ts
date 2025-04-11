@@ -1,5 +1,5 @@
-import { gt } from "drizzle-orm"
 import * as tables from "../../database/schema"
+import { gt, isNull } from "drizzle-orm"
 import { z } from "zod"
 
 const table = "groups"
@@ -14,13 +14,10 @@ export default defineEventHandler(async (event) => {
 
   const { updatedAt } = await getValidatedQuery(event, querySchema.parse)
 
-  const query = useDrizzle().select().from(tables[table]).$dynamic()
-
-  if (updatedAt) {
-    query.where(and(gt(tables[table].updatedAt, updatedAt), eq(tables[table].organisationId, secure.organisationId)))
-  } else {
-    query.where(eq(tables[table].organisationId, secure.organisationId))
-  }
+  const query = useDrizzle()
+    .select()
+    .from(tables[table])
+    .where(and(gt(tables[table].updatedAt, updatedAt), eq(tables[table].organisationId, secure.organisationId), isNull(tables[table].deletedAt)))
 
   return await query
 })
