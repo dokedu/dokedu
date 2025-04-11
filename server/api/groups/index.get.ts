@@ -1,4 +1,4 @@
-import * as tables from "../../database/schema"
+import { groups } from "../../database/schema"
 import { gt, isNull } from "drizzle-orm"
 import { z } from "zod"
 
@@ -16,8 +16,8 @@ export default defineEventHandler(async (event) => {
 
   const query = useDrizzle()
     .select()
-    .from(tables[table])
-    .where(and(gt(tables[table].updatedAt, updatedAt), eq(tables[table].organisationId, secure.organisationId), isNull(tables[table].deletedAt)))
+    .from(groups)
+    .where(and(isNull(groups.deletedAt), eq(groups.organisationId, secure.organisationId)))
 
   return await query
 })
