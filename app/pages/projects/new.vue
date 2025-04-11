@@ -24,9 +24,10 @@ async function create() {
 <template>
   <DPage>
     <DHeader>
+      <DButton :icon-left="XIcon" variant="secondary" to="/projects"></DButton>
       <template #right>
         <div>
-          <DButton :icon-left="XIcon" class="py-2" variant="secondary" to="/projects"></DButton>
+          <d-button @click="create">Erstellen</d-button>
         </div>
       </template>
     </DHeader>
@@ -51,10 +52,6 @@ async function create() {
           <d-input v-model="startsAt" type="date" placeholder="Startdatum" />
           <ArrowRightIcon class="h-5 w-5 text-gray-500" />
           <d-input v-model="endsAt" type="date" placeholder="Enddatum" />
-        </div>
-
-        <div>
-          <d-button @click="create">Erstellen</d-button>
         </div>
       </div>
     </DPageContent>

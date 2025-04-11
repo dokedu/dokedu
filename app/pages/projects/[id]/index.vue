@@ -76,7 +76,7 @@ async function deleteEvent() {
 <template>
   <DPage v-if="event">
     <DHeader>
-      <DButton :icon-left="XIcon" class="py-2" variant="secondary" to="/projects"></DButton>
+      <DButton :icon-left="XIcon" variant="secondary" to="/projects"></DButton>
 
       <template #right>
         <div class="flex items-center gap-2">
