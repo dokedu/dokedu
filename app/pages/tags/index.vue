@@ -33,10 +33,10 @@ function close() {
 async function update() {
   if (!name.value) return
   if (!color.value) return
-  await $fetch("/api/tags", {
+  await $fetch(`/api/tags/${id.value}`, {
     method: "PUT",
     body: {
-      id: modal.value,
+      id: id.value,
       name: name.value,
       color: color.value
     }
