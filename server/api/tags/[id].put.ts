@@ -1,5 +1,5 @@
-import { z } from "zod"
 import { tags } from "../../database/schema"
+import { z } from "zod"
 
 const bodySchema = z.object({
   id: z.string(),
@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
 
   const body = await readValidatedBody(event, bodySchema.parse)
 
-  const result = await useDrizzle()
+  await useDrizzle()
     .update(tags)
     .set({
       id: body.id,
