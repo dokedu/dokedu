@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { onKeyDown } from "@vueuse/core"
 
+interface Props {
+  refresh: () => Promise<void>
+}
+
+const { refresh } = defineProps<Props>()
+
 const firstName = ref("")
 const lastName = ref("")
 const studentGrade = ref("")
@@ -23,6 +29,7 @@ async function onFormSubmit() {
         role: "student"
       }
     })
+    await refresh()
     navigateTo("/settings/students")
   } catch (error) {
     console.error("Failed to create user:", error)

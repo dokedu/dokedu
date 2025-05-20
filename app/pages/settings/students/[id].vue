@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { onKeyDown } from "@vueuse/core"
 
+interface Props {
+  refresh: () => Promise<void>
+}
+
+const { refresh } = defineProps<Props>()
+
 const route = useRoute()
 
 const { data } = await useFetch(`/api/users/${route.params.id}`)
@@ -21,6 +27,7 @@ async function onFormSubmit() {
         studentBirthday: data.value?.studentBirthday
       }
     })
+    await refresh()
     navigateTo("/settings/students")
   } catch (error) {
     console.error("Failed to create user:", error)

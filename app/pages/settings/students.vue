@@ -93,5 +93,5 @@ async function deleteUser(id: string) {
     </DPageContent>
   </DPage>
 
-  <NuxtPage />
+  <NuxtPage :refresh="refresh" />
 </template>
