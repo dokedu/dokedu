@@ -1,18 +1,10 @@
 <script setup lang="ts">
-import { useQueryCache } from "@pinia/colada"
 import { onKeyDown } from "@vueuse/core"
-
-const queryCache = useQueryCache()
 
 const firstName = ref("")
 const lastName = ref("")
 const studentGrade = ref("")
 const studentBirthday = ref("")
-
-const roleOptions = [
-  { value: "admin", display: "Admin" },
-  { value: "teacher", display: "Lehrer" }
-]
 
 const container = useTemplateRef<HTMLElement>("container")
 
@@ -31,7 +23,6 @@ async function onFormSubmit() {
         role: "student"
       }
     })
-    queryCache.invalidateQueries({ key: ["settings", "students"] })
     navigateTo("/settings/students")
   } catch (error) {
     console.error("Failed to create user:", error)

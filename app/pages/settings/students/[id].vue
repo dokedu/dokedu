@@ -1,18 +1,9 @@
 <script setup lang="ts">
-import { useQueryCache } from "@pinia/colada"
 import { onKeyDown } from "@vueuse/core"
-
-const queryCache = useQueryCache()
 
 const route = useRoute()
 
 const { data } = await useFetch(`/api/users/${route.params.id}`)
-
-const roleOptions = [
-  { value: "owner", display: "Besitzer" },
-  { value: "admin", display: "Admin" },
-  { value: "teacher", display: "Lehrer" }
-]
 
 const container = useTemplateRef<HTMLElement>("container")
 
@@ -30,7 +21,6 @@ async function onFormSubmit() {
         studentBirthday: data.value?.studentBirthday
       }
     })
-    queryCache.invalidateQueries({ key: ["settings", "students"] })
     navigateTo("/settings/students")
   } catch (error) {
     console.error("Failed to create user:", error)
@@ -43,7 +33,6 @@ const showArchiveModal = ref(false)
 async function archive() {
   showArchiveModal.value = false
   await $fetch(`/api/users/${route.params.id}`, { method: "DELETE" })
-  queryCache.invalidateQueries({ key: ["settings", "students"] })
   await navigateTo("/settings/students")
 }
 

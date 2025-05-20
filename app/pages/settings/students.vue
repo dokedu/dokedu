@@ -2,7 +2,6 @@
 import { PlusIcon } from "lucide-vue-next"
 import type { DUser } from "~/types/models"
 import { formatDate } from "@vueuse/core"
-import { defineQuery, useQuery, useQueryCache } from "@pinia/colada"
 
 definePageMeta({
   layout: "settings"
@@ -13,29 +12,13 @@ const search = ref("")
 const sortBy = useSessionStorage<keyof DUser>("settings/students/sortBy", "firstName")
 const sortOrder = useSessionStorage<string>("settings/students/sortOrder", "asc")
 
-const queryCache = useQueryCache()
-
-const { data: users } = useQuery({
-  key: () => [
-    "settings",
-    "students",
-    {
-      role: "student",
-      sortBy: sortBy.value,
-      sort: sortOrder.value,
-      search: search.value
-    }
-  ],
-  query: () =>
-    $fetch("/api/users", {
-      params: {
-        role: "student",
-        sortBy: sortBy.value,
-        sort: sortOrder.value,
-        search: search.value
-      }
-    }),
-  placeholderData: (oldData) => oldData
+const { data: users, refresh } = await useFetch("/api/users", {
+  params: {
+    role: "student",
+    sortBy: sortBy.value,
+    sort: sortOrder.value,
+    search: search.value
+  }
 })
 
 function sort(key: keyof DUser) {
@@ -50,10 +33,9 @@ function sort(key: keyof DUser) {
 async function deleteUser(id: string) {
   try {
     await $fetch(`/api/users/${id}`, { method: "DELETE" })
-    queryCache.invalidateQueries({ key: ["settings", "students"] })
+    await refresh()
   } catch (error) {
     console.error("Failed to delete user:", error)
-    // Consider showing a toast notification here to inform the user
   }
 }
 </script>
