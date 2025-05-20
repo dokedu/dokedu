@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
   if (user.resetPasswordExpiresAt < new Date()) throw createError({ statusCode: 401, message: "Invalid request" })
 
   // Update the password
-  const hashedPassword = await Bun.password.hash(password)
+  const hashedPassword = await hashPassword(password)
 
   // Reset the password token and expiration date
   await useDrizzle().update(users).set({ password: hashedPassword, resetPasswordToken: null, resetPasswordExpiresAt: null }).where(eq(users.id, user.id))

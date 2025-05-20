@@ -1,4 +1,5 @@
 const { oklch, rgb, formatHex } = require("culori")
+import fs from "fs/promises"
 
 function oklchToHex(l, c, h) {
   const color = oklch(`oklch(${l} ${c} ${h})`)
@@ -6,8 +7,8 @@ function oklchToHex(l, c, h) {
 }
 
 async function extractColorTokens(number): any {
-  const dataFile = Bun.file(import.meta.dir + "/color.txt")
-  const cssString = await dataFile.text()
+  const dataFile = await fs.readFile(import.meta.dir + "/color.txt")
+  const cssString = dataFile.toString()
 
   const regex = new RegExp(`--color-([a-z]+)-${number}: oklch\\((\\d+\\.\\d+) (\\d+\\.\\d+) ([\\d\\.]+)\\);`, "g")
 

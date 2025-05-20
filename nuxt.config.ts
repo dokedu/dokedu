@@ -9,7 +9,7 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   css: ["@/app.css"],
 
-  modules: ["nuxt-auth-utils", "@nuxt/fonts", "@vueuse/nuxt", "@pinia/nuxt"],
+  modules: ["nuxt-auth-utils", "@nuxt/fonts", "@vueuse/nuxt"],
 
   fonts: { experimental: { processCSSVariables: true } },
 
@@ -24,7 +24,6 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    // preset: "bun",
     experimental: {
       // websocket: true,
       tasks: true

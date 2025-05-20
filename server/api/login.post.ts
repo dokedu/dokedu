@@ -1,5 +1,4 @@
 import { sessions, users } from "../database/schema"
-import * as bcrypt from "bcryptjs"
 import { eq } from "drizzle-orm"
 import { nanoid } from "nanoid"
 import { z } from "zod"
@@ -19,21 +18,8 @@ export default defineEventHandler(async (event) => {
 
   if (!user.password) throw createError({ statusCode: 401, message: "Bad credentials" })
 
-  // Check if using old hashed password
-  if (user.password.startsWith("$2a$")) {
-    console.log("using old hashed password")
-    const isMatch = await bcrypt.compare(password, user.password)
-    if (!isMatch) throw createError({ statusCode: 401, message: "Bad credentials" })
-
-    // Update to new hashed password
-    console.log("updating to new hashed password")
-    const newHash = await Bun.password.hash(password)
-    await useDrizzle().update(users).set({ password: newHash }).where(eq(users.id, user.id))
-  } else {
-    // Verify password
-    const isMatch = await Bun.password.verify(password, user.password)
-    if (!isMatch) throw createError({ statusCode: 401, message: "Bad credentials" })
-  }
+  const isMatch = await verifyPassword(user.password, password)
+  if (!isMatch) throw createError({ statusCode: 401, message: "Bad credentials" })
 
   // Create a user session
   const created = await useDrizzle()
