@@ -19,7 +19,8 @@ export default defineEventHandler(async (event) => {
       firstName: true,
       lastName: true,
       studentGrade: true,
-      studentBirthday: true
+      studentBirthday: true,
+      studentBirthplace: true
     },
     where: and(eq(users.id, id), eq(users.organisationId, secure.organisationId))
   })

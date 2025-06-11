@@ -11,7 +11,10 @@ export default defineNuxtConfig({
 
   modules: ["nuxt-auth-utils", "@nuxt/fonts", "@vueuse/nuxt"],
 
-  fonts: { experimental: { processCSSVariables: true } },
+  fonts: {
+    experimental: { disableLocalFallbacks: true },
+    providers: {}
+  },
 
   runtimeConfig: {
     s3AccessKeyId: "",
@@ -32,6 +35,9 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
+      htmlAttrs: {
+        lang: "de"
+      },
       title: "Dokedu"
     }
   }

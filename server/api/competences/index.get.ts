@@ -1,11 +1,12 @@
-import { desc, asc, ilike, isNull, arrayContains } from "drizzle-orm"
+import { isNull, arrayContains } from "drizzle-orm"
 import { competences } from "~~/server/database/schema"
-import { z } from "zod"
 import MiniSearch from "minisearch"
+import { z } from "zod"
 
 // const table = "competences"
 
 const querySchema = z.object({
+  everything: z.coerce.boolean().optional(),
   search: z.string().optional(),
   competenceId: z.string().optional()
 })
@@ -14,7 +15,14 @@ export default defineEventHandler(async (event) => {
   const { user, secure } = await requireUserSession(event)
   if (!secure) throw createError({ statusCode: 401, message: "Unauthorized" })
 
-  const { search, competenceId } = await getValidatedQuery(event, querySchema.parse)
+  const { search, competenceId, everything } = await getValidatedQuery(event, querySchema.parse)
+
+  if (everything) {
+    return useDrizzle()
+      .select()
+      .from(competences)
+      .where(and(eq(competences.organisationId, secure.organisationId), isNull(competences.deletedAt)))
+  }
 
   let parent = null
   if (competenceId) {

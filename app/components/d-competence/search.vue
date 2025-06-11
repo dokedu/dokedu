@@ -112,7 +112,7 @@ function levels(competence: DCompetence) {
           {{ levels(competence) }}
         </div>
       </div>
-      <div v-show="filtered.length === 0" class="px-4 py-2">
+      <div v-show="filtered?.length === 0" class="px-4 py-2">
         <div class="text-sm text-neutral-500">Keine Ergebnisse...</div>
       </div>
     </div>
