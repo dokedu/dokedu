@@ -1,4 +1,4 @@
-import { isNull, arrayContains } from "drizzle-orm"
+import { isNull, arrayContains, desc, asc } from "drizzle-orm"
 import { competences } from "~~/server/database/schema"
 import MiniSearch from "minisearch"
 import { z } from "zod"
@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
         eq(competences.organisationId, secure.organisationId)
       )
     )
-    // .orderBy(desc(competences.competenceType), asc(competences.name))
+    .orderBy(desc(competences.competenceType), asc(competences.name))
     .limit(2500)
 
   if (search) {
