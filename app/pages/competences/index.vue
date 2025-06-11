@@ -33,6 +33,7 @@ const showFilterModal = ref(false)
     </div>
 
     <DPageContent>
+      
       <RouterLink
         :to="`/competences/${competence.id}`"
         v-for="competence in competences"
@@ -41,7 +42,7 @@ const showFilterModal = ref(false)
       >
         <div class="line-clamp-1 text-sm text-neutral-700">
           <span v-if="competence.competenceType === 'competence'">{{ competence.name }}</span>
-          <DTag v-else class="w-fit" :color="competence.color">{{ competence.name }}</DTag>
+          <DTag v-else class="w-fit" :color="competence.color ? competence.color : 'gray'">{{ competence.name }}</DTag>
         </div>
         <div class="line-clamp-1 text-right text-sm text-neutral-700">
           <template v-if="competence.grades"> {{ competence.grades[0] }} - {{ competence.grades[competence.grades.length - 1] }} </template>

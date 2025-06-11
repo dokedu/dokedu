@@ -1,12 +1,13 @@
 <script setup lang="ts">
 const route = useRoute()
+const id = computed(() => route.params.id)
 
 const search = ref("")
 
 const { data: competences } = await useFetch("/api/competences", {
   params: {
     search: search,
-    competenceId: route.params.id
+    competenceId: id,
   }
 })
 </script>
@@ -32,9 +33,9 @@ const { data: competences } = await useFetch("/api/competences", {
         class="grid grid-cols-2 items-center justify-between gap-4 rounded px-2 py-2 hover:bg-neutral-100"
         :style="{ gridTemplateColumns: '1fr 110px' }"
       >
-        <div class="line-clamp-1 text-sm text-neutral-700">
-          <span v-if="competence.competenceType === 'competence'">{{ competence.name }}</span>
-          <DTag v-else class="w-fit" :color="`gray`">{{ competence.name }}</DTag>
+        <div class="line-clamp-1 text-sm text-neutral-700 cursor-default">
+          <span v-if="competence.competenceType === 'competence'" class="cursor-default">{{ competence.name }}</span>
+          <DTag v-else class="w-fit cursor-default" :color="`gray`">{{ competence.name }}</DTag>
         </div>
         <div class="line-clamp-1 text-right text-sm text-neutral-700">
           <template v-if="competence.grades"> {{ competence.grades[0] }} - {{ competence.grades[competence.grades.length - 1] }} </template>

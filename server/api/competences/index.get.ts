@@ -6,7 +6,7 @@ import { z } from "zod"
 // const table = "competences"
 
 const querySchema = z.object({
-  everything: z.coerce.boolean().optional(),
+  everything: z.coerce.boolean().optional().default(false),
   search: z.string().optional(),
   competenceId: z.string().optional()
 })
@@ -17,18 +17,22 @@ export default defineEventHandler(async (event) => {
 
   const { search, competenceId, everything } = await getValidatedQuery(event, querySchema.parse)
 
-  if (everything) {
-    return useDrizzle()
-      .select()
-      .from(competences)
-      .where(and(eq(competences.organisationId, secure.organisationId), isNull(competences.deletedAt)))
-  }
+  // if (everything) {
+  //   return useDrizzle()
+  //     .select()
+  //     .from(competences)
+  //     .where(and(eq(competences.organisationId, secure.organisationId), isNull(competences.deletedAt)))
+  // }
 
   let parent = null
   if (competenceId) {
     parent = await useDrizzle().query.competences.findFirst({
       where: and(eq(competences.id, competenceId), eq(competences.organisationId, secure.organisationId))
     })
+
+    if (!parent) {
+      return []
+    }
   }
 
   const result = await useDrizzle()
@@ -36,7 +40,8 @@ export default defineEventHandler(async (event) => {
     .from(competences)
     .where(
       and(
-        parent && parent.parents ? arrayContains(competences.parents, [...parent.parents, parent.id].filter(Boolean)) : isNull(competences.competenceId),
+        // parent && parent.parents ? arrayContains(competences.parents, [...parent.parents, parent.id].filter(Boolean)) : isNull(competences.competenceId),
+        competenceId ? eq(competences.competenceId, competenceId) : isNull(competences.competenceId),
         // ...(search ? [sql`to_tsvector('german', ${competences.name}) @@ websearch_to_tsquery('german', ${search})`] : []),
         isNull(competences.deletedAt),
         eq(competences.organisationId, secure.organisationId)
