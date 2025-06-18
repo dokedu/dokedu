@@ -34,7 +34,7 @@ const lastName = computed(() => report.value?.student.lastName)
 const birthdate = computed(() => (report.value?.student.studentBirthday ? formatDate(report.value?.student.studentBirthday) : ""))
 const birthplace = computed(() => report.value?.student.studentBirthplace)
 
-const status = ref(reportContent?.status ?? "draft")
+const status = ref(report.value?.status ?? "draft")
 
 const statusOptions = [
   { display: "Entwurf", color: "gray", value: "draft" },

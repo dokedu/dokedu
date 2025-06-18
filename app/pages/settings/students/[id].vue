@@ -24,7 +24,8 @@ async function onFormSubmit() {
         firstName: data.value?.firstName,
         lastName: data.value?.lastName,
         studentGrade: data.value?.studentGrade,
-        studentBirthday: data.value?.studentBirthday
+        studentBirthday: data.value?.studentBirthday,
+        studentBirthplace: data.value?.studentBirthplace
       }
     })
     await refresh()
@@ -69,6 +70,10 @@ function archiveModal() {
       <div class="mb-4">
         <d-label for="studentBirthday">Geburtstag</d-label>
         <d-input id="studentBirthday" class="w-full" v-model="data.studentBirthday" type="date" name="studentBirthday" />
+      </div>
+      <div class="mb-4">
+        <d-label for="studentBirthplace">Geburtsort</d-label>
+        <d-input id="studentBirthplace" class="w-full" v-model="data.studentBirthplace" type="text" name="studentBirthplace" />
       </div>
 
       <div class="flex items-center justify-between gap-2">

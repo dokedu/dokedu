@@ -33,9 +33,9 @@ function sort(key: keyof DUser) {
       <DHeaderTitle>Berichte</DHeaderTitle>
       <DInputSearch v-model="search" />
 
-      <template #right>
+      <!-- <template #right>
         <DButton :icon-left="DownloadIcon">Alle herunterladen</DButton>
-      </template>
+      </template> -->
     </DHeader>
 
     <div class="block min-h-0 px-4 pt-2.5">

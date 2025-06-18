@@ -23,8 +23,8 @@ export default defineEventHandler(async (event) => {
   await useDrizzle()
     .update(reports)
     .set({
+      ...(status !== undefined && { status }),
       content: {
-        status,
         schoolYear,
         introduction,
         competences

@@ -6,7 +6,8 @@ const userUpdateSchema = z.object({
   firstName: z.string().min(1, "First name must be at least 1 character long"),
   lastName: z.string().min(1, "Last name must be at least 1 character long"),
   studentBirthday: z.coerce.date().nullable().optional(),
-  studentGrade: z.coerce.number().min(1).max(13).nullable().optional()
+  studentGrade: z.coerce.number().min(1).max(13).nullable().optional(),
+  studentBirthplace: z.string().nullable().optional()
   // updatedAt: z.coerce.date()
 })
 
@@ -29,7 +30,8 @@ export default defineEventHandler(async (event) => {
         lastName: body.lastName,
         studentBirthday: body.studentBirthday,
         studentGrade: body.studentGrade ? `${body.studentGrade}` : null,
-        updatedAt: body.updatedAt
+        studentBirthplace: body.studentBirthplace,
+        updatedAt: new Date()
       })
       .where(and(eq(users.id, id), eq(users.organisationId, secure.organisationId)))
       .returning({
@@ -37,7 +39,8 @@ export default defineEventHandler(async (event) => {
         firstName: users.firstName,
         lastName: users.lastName,
         studentBirthday: users.studentBirthday,
-        studentGrade: users.studentGrade
+        studentGrade: users.studentGrade,
+        studentBirthplace: users.studentBirthplace
       })
 
     if (result.length === 0) {
