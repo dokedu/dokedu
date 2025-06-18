@@ -2,7 +2,7 @@
 import { ChevronDownIcon, ChevronUpIcon, CheckIcon } from "lucide-vue-next"
 
 interface Props {
-  options: { value: string | number | boolean | null; display: string }[]
+  options: { value: string | number | boolean | null; display: string; color?: string }[]
   placeholder?: string
 }
 
@@ -123,7 +123,11 @@ const popoverStyle = computed(() => {
         @click="select(option)"
         @keypress.enter="select(option)"
         tabindex="0"
-        class="flex cursor-default items-center justify-between rounded px-2.5 py-1.5 text-sm text-neutral-900 hover:bg-neutral-100 focus:bg-neutral-100 focus:outline-0"
+        class="flex cursor-default items-center justify-between rounded px-2.5 py-1.5 text-sm focus:outline-0"
+        :class="[
+          `bg-${option.color}-100 text-${option.color}-800 hover:bg-${option.color}-200 focus:bg-${option.color}-200`,
+          !option.color ? 'text-neutral-900 hover:bg-neutral-100 focus:bg-neutral-100' : ''
+        ]"
       >
         <div class="overflow-hidden text-nowrap overflow-ellipsis">{{ option.display }}</div>
         <CheckIcon v-if="model === option.value" class="ml-2 size-4" />

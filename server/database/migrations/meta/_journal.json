@@ -29,6 +29,20 @@
       "when": 1743665033875,
       "tag": "0003_simple_roland_deschain",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1750247949676,
+      "tag": "0004_dear_lucky_pierre",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1750254709672,
+      "tag": "0005_smiling_jackpot",
+      "breakpoints": true
     }
   ]
 }

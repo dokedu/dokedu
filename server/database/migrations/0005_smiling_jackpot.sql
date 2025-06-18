@@ -1,0 +1,1 @@
+ALTER TABLE "organisations" ADD COLUMN "logo_file_id" text;

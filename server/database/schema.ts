@@ -6,7 +6,6 @@ import { nanoid } from "nanoid"
 export type UserRole = "owner" | "admin" | "teacher" | "educator" | "student" | "parent"
 export type StudentSex = "male" | "female" | "other"
 export type CompetenceType = "subject" | "group" | "competence"
-export type ReportStatus = "pending" | "processing" | "done" | "error"
 export type UserAttendanceState = "unknown" | "present" | "absent" | "late" | "sick"
 
 // Helpers
@@ -26,6 +25,7 @@ const organisationId = {
 export const organisations = pgTable("organisations", {
   id: text().primaryKey().$defaultFn(nanoid),
   name: text().notNull(),
+  logoFileId: text(),
   stripeSubscriptionId: text(),
   stripeCustomerId: text().unique(),
   ...timestamps
@@ -196,26 +196,16 @@ export const entryEvents = pgTable(
   ]
 )
 
-export const reportTemplates = pgTable(
-  "report_templates",
-  {
-    id: text().primaryKey().$defaultFn(nanoid),
-    name: text().notNull(),
-    description: text().notNull(),
-    template: text().notNull(),
-    settings: jsonb(),
-    ...organisationId,
-    ...timestamps
-  },
-  (t) => [unique().on(t.name, t.organisationId)]
-)
+export type ReportStatus = "draft" | "in_progress" | "in_review" | "completed"
 
 export const reports = pgTable("reports", {
   id: text().primaryKey().$defaultFn(nanoid),
-  status: text().$type<ReportStatus>().notNull(),
-  options: jsonb(),
-  templateId: text().references(() => reportTemplates.id),
-  createdBy: text().references(() => users.id),
+  status: text().$type<ReportStatus>().notNull().default("draft"),
+  studentId: text()
+    .notNull()
+    .references(() => users.id),
+  content: jsonb(),
+  fileId: text(),
   ...organisationId,
   ...timestamps
 })
@@ -381,8 +371,8 @@ export const userAttendancesRelations = relations(userAttendances, ({ one, many 
 }))
 
 export const reportsRelations = relations(reports, ({ one, many }) => ({
-  createdBy: one(users, {
-    fields: [reports.createdBy],
+  student: one(users, {
+    fields: [reports.studentId],
     references: [users.id]
   })
 }))

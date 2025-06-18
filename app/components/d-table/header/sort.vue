@@ -19,13 +19,13 @@ function sort(key: T) {
 <template>
   <template v-if="sortBy === sortField">
     <template v-if="sortOrder === 'desc'">
-      <DButton variant="secondary" :icon-left="ArrowDownNarrowWideIcon" class="!p-1" @click="sort(sortField)"></DButton>
+      <DButton size="sm" variant="secondary" :icon-left="ArrowDownNarrowWideIcon" class="!p-1" @click="sort(sortField)"></DButton>
     </template>
     <template v-else>
-      <DButton variant="secondary" :icon-left="ArrowUpNarrowWideIcon" class="!p-1" @click="sort(sortField)"></DButton>
+      <DButton size="sm" variant="secondary" :icon-left="ArrowUpNarrowWideIcon" class="!p-1" @click="sort(sortField)"></DButton>
     </template>
   </template>
   <template v-else>
-    <DButton variant="transparent" :icon-left="ArrowUpDownIcon" class="!p-1" @click="sort(sortField)"></DButton>
+    <DButton size="sm" variant="transparent" :icon-left="ArrowUpDownIcon" class="!p-1" @click="sort(sortField)"></DButton>
   </template>
 </template>

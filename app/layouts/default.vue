@@ -1,5 +1,16 @@
 <script setup lang="ts">
-import { PenIcon, UsersIcon, GridIcon, BadgeCheckIcon, CalendarDaysIcon, ChartPieIcon, TagsIcon, LogOutIcon, Settings2Icon } from "lucide-vue-next"
+import {
+  PenIcon,
+  UsersIcon,
+  GridIcon,
+  BadgeCheckIcon,
+  CalendarDaysIcon,
+  ChartPieIcon,
+  TagsIcon,
+  LogOutIcon,
+  Settings2Icon,
+  UserCheckIcon
+} from "lucide-vue-next"
 
 const links = [
   {
@@ -25,7 +36,7 @@ const links = [
   {
     name: "Anwesenheit",
     to: "/attendances",
-    icon: CalendarDaysIcon
+    icon: UserCheckIcon
   },
   {
     name: "Berichte",

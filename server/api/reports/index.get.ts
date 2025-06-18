@@ -1,45 +1,48 @@
-import { desc, getTableColumns } from "drizzle-orm"
+import { desc, getTableColumns, isNull } from "drizzle-orm"
 import { reports, users } from "../../database/schema"
 import { z } from "zod"
-
-const querySchema = z.object({
-  // updatedAt: z.coerce.date().optional()
-})
 
 export default defineEventHandler(async (event) => {
   const { user, secure } = await requireUserSession(event)
   if (!secure) throw createError({ statusCode: 401, message: "Unauthorized" })
 
-  const {} = await getValidatedQuery(event, querySchema.parse)
+  const existing = await useDrizzle().select().from(reports).where(eq(reports.organisationId, secure.organisationId))
 
-  // const query = useDrizzle()
-  //   .select({
-  //     ...getTableColumns(reports),
-  //     createdBy: {
-  //       id: true,
-  //       firstName: true,
-  //       lastName: true
-  //     }
-  //   })
-  //   .from(reports)
-  //   .leftJoin(users, eq(reports.createdBy, users.id))
-  //   .where(and(eq(reports.organisationId, secure.organisationId)))
-  //   .orderBy(desc(reports.createdAt))
-  //   .limit(100)
+  const students = await useDrizzle()
+    .select()
+    .from(users)
+    .where(and(eq(users.role, "student"), isNull(users.deletedAt), eq(users.organisationId, secure.organisationId)))
 
-  const query = useDrizzle().query.reports.findMany({
+  // Check if for each student there is a existing report, if not, create it
+  for (const student of students) {
+    const existingReport = existing.find((report) => report.studentId === student.id)
+    if (!existingReport) {
+      await useDrizzle().insert(reports).values({
+        studentId: student.id,
+        organisationId: secure.organisationId
+      })
+    }
+  }
+
+  // Check if there are duplicates, if so, delete the duplicate
+  const duplicates = existing.filter((report, index, self) => self.findIndex((t) => t.studentId === report.studentId) !== index)
+  for (const duplicate of duplicates) {
+    await useDrizzle().delete(reports).where(eq(reports.id, duplicate.id))
+  }
+
+  const result = await useDrizzle().query.reports.findMany({
     with: {
-      createdBy: {
+      student: {
         columns: {
           id: true,
           firstName: true,
-          lastName: true
+          lastName: true,
+          studentGrade: true
         }
       }
     },
-    where: and(eq(reports.organisationId, secure.organisationId)),
-    orderBy: [desc(reports.createdAt)]
+    where: and(eq(reports.organisationId, secure.organisationId))
   })
 
-  return await query
+  return result
 })

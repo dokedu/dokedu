@@ -13,7 +13,9 @@ const model = defineModel()
 const inputClass = computed(() => {
   return [
     "rounded-md",
-    "bg-neutral-100",
+    // "bg-neutral-100",
+    "border",
+    "border-neutral-200",
     "text-neutral-900",
     "placeholder:text-neutral-500",
     "px-2",
