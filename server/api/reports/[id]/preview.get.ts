@@ -247,15 +247,37 @@ export default defineEventHandler(async (event) => {
   }
 
   typst.stdout.on("data", (data) => {
-    console.log(data.toString())
+    console.log("[Typst Output]:", data.toString())
   })
 
+  let stderrBuffer = ""
+  let hasError = false
+
   typst.stderr.on("data", (data) => {
-    throw createError({ statusCode: 500, message: data.toString() })
+    const output = data.toString()
+    stderrBuffer += output
+
+    // Check if it's a warning or an actual error
+    if (output.toLowerCase().includes("error:") && !output.toLowerCase().includes("warning:")) {
+      hasError = true
+    }
+
+    // Log all stderr output for debugging
+    console.warn("[Typst stderr]:", output)
   })
 
   // wait for the typst process to finish
-  await new Promise((resolve) => typst.on("close", resolve))
+  const exitCode = await new Promise<number>((resolve) => {
+    typst.on("close", (code) => resolve(code ?? 0))
+  })
+
+  // Only throw if there was an actual error (non-zero exit code or error in stderr)
+  if (exitCode !== 0 || hasError) {
+    throw createError({
+      statusCode: 500,
+      message: `Typst compilation failed with exit code ${exitCode}: ${stderrBuffer}`
+    })
+  }
 
   setHeader(event, "Content-Type", "application/pdf")
 
@@ -335,8 +357,8 @@ margin: (
 
 #align(center, text(size: 20pt, weight: "medium", heading(upper("Lernstandsbericht"))))
 
-// #show par: set block(above: 1em, below: 1em)
-#show par: set block(spacing: 1em)
+// Remove deprecated syntax - just use set par directly
+#set par(spacing: 1em)
 
 #grid(
   columns: (1fr, 1fr),
@@ -355,7 +377,7 @@ margin: (
 
 \
 
-// #show par: set block(above: 1.3em, below: 1.5em)
+// Remove deprecated show par: set block syntax
 #set par(spacing: 1.25em)
 #set text(size: 11pt)
 #set par(justify: true)
