@@ -233,7 +233,18 @@ export default defineEventHandler(async (event) => {
     })
   )
 
-  const typst = spawn("typst", ["compile", `${tmpDir}/template.typ`, `${tmpDir}/output.pdf`])
+  const fontPaths = [
+    "/usr/share/fonts", // System fonts
+    "/usr/local/share/fonts" // Local system fonts
+    // "/usr/share/fonts/truetype/inter" // Our custom Inter fonts
+  ].join(":")
+
+  let typst
+  if (process.dev) {
+    typst = spawn("typst", ["compile", `${tmpDir}/template.typ`, `${tmpDir}/output.pdf`])
+  } else {
+    typst = spawn("typst", ["compile", "--font-path", fontPaths, `${tmpDir}/template.typ`, `${tmpDir}/output.pdf`])
+  }
 
   typst.stdout.on("data", (data) => {
     console.log(data.toString())

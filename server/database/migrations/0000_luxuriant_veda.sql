@@ -5,6 +5,7 @@ CREATE TABLE "competences" (
 	"competence_type" text NOT NULL,
 	"grades" jsonb NOT NULL,
 	"color" text,
+	"parents" jsonb,
 	"sort_order" integer DEFAULT 0,
 	"created_by" text,
 	"organisation_id" text NOT NULL,
@@ -127,6 +128,7 @@ CREATE TABLE "groups" (
 CREATE TABLE "organisations" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
+	"logo_file_id" text,
 	"stripe_subscription_id" text,
 	"stripe_customer_id" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -135,25 +137,12 @@ CREATE TABLE "organisations" (
 	CONSTRAINT "organisations_stripeCustomerId_unique" UNIQUE("stripe_customer_id")
 );
 --> statement-breakpoint
-CREATE TABLE "report_templates" (
-	"id" text PRIMARY KEY NOT NULL,
-	"name" text NOT NULL,
-	"description" text NOT NULL,
-	"template" text NOT NULL,
-	"settings" jsonb,
-	"organisation_id" text NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"deleted_at" timestamp with time zone,
-	CONSTRAINT "report_templates_name_organisationId_unique" UNIQUE("name","organisation_id")
-);
---> statement-breakpoint
 CREATE TABLE "reports" (
 	"id" text PRIMARY KEY NOT NULL,
-	"status" text NOT NULL,
-	"options" jsonb,
-	"template_id" text,
-	"created_by" text,
+	"status" text DEFAULT 'draft' NOT NULL,
+	"student_id" text NOT NULL,
+	"content" jsonb,
+	"file_id" text,
 	"organisation_id" text NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -216,6 +205,8 @@ CREATE TABLE "users" (
 	"email" text,
 	"password" text,
 	"role" text DEFAULT 'student' NOT NULL,
+	"reset_password_token" text,
+	"reset_password_expires_at" timestamp with time zone,
 	"student_sex" text DEFAULT 'other',
 	"student_left_at" date,
 	"student_joined_at" date,
@@ -261,9 +252,7 @@ ALTER TABLE "group_users" ADD CONSTRAINT "group_users_group_id_groups_id_fk" FOR
 ALTER TABLE "group_users" ADD CONSTRAINT "group_users_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "group_users" ADD CONSTRAINT "group_users_organisation_id_organisations_id_fk" FOREIGN KEY ("organisation_id") REFERENCES "public"."organisations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "groups" ADD CONSTRAINT "groups_organisation_id_organisations_id_fk" FOREIGN KEY ("organisation_id") REFERENCES "public"."organisations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "report_templates" ADD CONSTRAINT "report_templates_organisation_id_organisations_id_fk" FOREIGN KEY ("organisation_id") REFERENCES "public"."organisations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "reports" ADD CONSTRAINT "reports_template_id_report_templates_id_fk" FOREIGN KEY ("template_id") REFERENCES "public"."report_templates"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "reports" ADD CONSTRAINT "reports_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "reports" ADD CONSTRAINT "reports_student_id_users_id_fk" FOREIGN KEY ("student_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reports" ADD CONSTRAINT "reports_organisation_id_organisations_id_fk" FOREIGN KEY ("organisation_id") REFERENCES "public"."organisations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "tags" ADD CONSTRAINT "tags_organisation_id_organisations_id_fk" FOREIGN KEY ("organisation_id") REFERENCES "public"."organisations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -275,4 +264,8 @@ ALTER TABLE "user_competences" ADD CONSTRAINT "user_competences_entry_id_entries
 ALTER TABLE "user_competences" ADD CONSTRAINT "user_competences_competence_id_competences_id_fk" FOREIGN KEY ("competence_id") REFERENCES "public"."competences"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_competences" ADD CONSTRAINT "user_competences_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_competences" ADD CONSTRAINT "user_competences_organisation_id_organisations_id_fk" FOREIGN KEY ("organisation_id") REFERENCES "public"."organisations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "users" ADD CONSTRAINT "users_organisation_id_organisations_id_fk" FOREIGN KEY ("organisation_id") REFERENCES "public"."organisations"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "users" ADD CONSTRAINT "users_organisation_id_organisations_id_fk" FOREIGN KEY ("organisation_id") REFERENCES "public"."organisations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "entry_events_event_id_entry_id_index" ON "entry_events" USING btree ("event_id","entry_id");--> statement-breakpoint
+CREATE INDEX "entry_tags_tag_id_entry_id_index" ON "entry_tags" USING btree ("tag_id","entry_id");--> statement-breakpoint
+CREATE INDEX "entry_users_user_id_entry_id_index" ON "entry_users" USING btree ("user_id","entry_id");--> statement-breakpoint
+CREATE INDEX "user_competences_user_id_entry_id_index" ON "user_competences" USING btree ("user_id","entry_id");
