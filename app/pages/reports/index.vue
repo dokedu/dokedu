@@ -1,23 +1,20 @@
 <script setup lang="ts">
-import { formatDate } from "@vueuse/core"
-import { FilterIcon, PlusIcon, ArrowDownNarrowWideIcon, ArrowUpNarrowWideIcon, ArrowUpDownIcon, DownloadCloudIcon, DownloadIcon } from "lucide-vue-next"
-import type { DUser } from "~/types/models"
+type ReportSortBy = "firstName" | "lastName" | "studentGrade"
 
 const search = ref("")
 
-const sortBy = useSessionStorage<keyof DUser>("students/sortBy", "firstName")
-const sortOrder = useSessionStorage<string>("students/sortOrder", "asc")
+const sortBy = useSessionStorage<ReportSortBy>("reports/sortBy", "firstName")
+const sortOrder = useSessionStorage<string>("reports/sortOrder", "asc")
 
 const { data: reports } = await useFetch("/api/reports", {
   params: {
-    // role: "student",
-    // sortBy: sortBy,
-    // sort: sortOrder,
-    // search: search
+    sortBy: sortBy,
+    sort: sortOrder,
+    search: search
   }
 })
 
-function sort(key: keyof DUser) {
+function sort(key: ReportSortBy) {
   if (sortBy.value === key) {
     sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc"
   } else {
