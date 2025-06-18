@@ -6,7 +6,8 @@ const { id } = useRoute().params as { id: string }
 const { data: report } = await useFetch(`/api/reports/${id}`)
 const { data: competences } = await useFetch(`/api/competences`)
 
-const selectedCompetences = ref<string[]>(report.value?.content?.competences ?? [])
+const reportContent = report.value?.content as any
+const selectedCompetences = ref<string[]>(reportContent?.competences ?? [])
 
 function toggleCompetence(competenceId: string) {
   if (selectedCompetences.value.includes(competenceId)) {
@@ -33,7 +34,7 @@ const lastName = computed(() => report.value?.student.lastName)
 const birthdate = computed(() => (report.value?.student.studentBirthday ? formatDate(report.value?.student.studentBirthday) : ""))
 const birthplace = computed(() => report.value?.student.studentBirthplace)
 
-const status = ref(report.value?.content?.status ?? "draft")
+const status = ref(reportContent?.status ?? "draft")
 
 const statusOptions = [
   { display: "Entwurf", color: "gray", value: "draft" },
@@ -42,9 +43,9 @@ const statusOptions = [
   { display: "Abgeschlossen", color: "green", value: "completed" }
 ]
 
-const schoolYear = ref(report.value?.content?.schoolYear ?? "")
+const schoolYear = ref(reportContent?.schoolYear ?? "")
 
-const header = ref(report.value?.content?.introduction ?? "")
+const header = ref(reportContent?.introduction ?? "")
 
 function formatDate(date: string) {
   return Intl.DateTimeFormat("de-DE", { dateStyle: "long" }).format(new Date(Date.parse(date)))
@@ -52,14 +53,14 @@ function formatDate(date: string) {
 
 let lastHash = ref(new Date().getTime().toString())
 
-watchDebounced(
-  [selectedCompetences, status, schoolYear, header],
-  async () => {
-    await save()
-    lastHash.value = new Date().getTime().toString()
-  },
-  { debounce: 1000, maxWait: 5_000, deep: true }
-)
+// watchDebounced(
+//   [selectedCompetences, status, schoolYear, header],
+//   async () => {
+//     await save()
+//     lastHash.value = new Date().getTime().toString()
+//   },
+//   { debounce: 1000, maxWait: 5_000, deep: true }
+// )
 
 async function save() {
   await $fetch(`/api/reports/${id}`, {
@@ -72,6 +73,17 @@ async function save() {
     }
   })
 }
+
+async function downloadReport() {
+  // Create a link to download the PDF
+  const link = document.createElement("a")
+  link.href = `/api/reports/${id}/preview?s=${lastHash.value}`
+  link.download = `bericht-${report.value?.student.firstName}-${report.value?.student.lastName}.pdf`
+  link.target = "_blank"
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
 </script>
 
 <template>
@@ -80,7 +92,7 @@ async function save() {
       <DHeaderTitle>Berichte</DHeaderTitle>
 
       <template #right>
-        <DButton :icon-left="DownloadIcon">Herunterladen</DButton>
+        <DButton :icon-left="DownloadIcon" @click="downloadReport">Herunterladen</DButton>
       </template>
     </DHeader>
 

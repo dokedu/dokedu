@@ -6,10 +6,19 @@ import { nanoid } from "nanoid"
 import { formatDate } from "date-fns"
 import { z } from "zod"
 import sharp from "sharp"
+import { competences, userCompetences } from "~~/server/database/schema"
+import { colors } from "~~/packages/report_generation/utils/color.json"
+import { and, eq, inArray, isNull, desc } from "drizzle-orm"
 
 const querySchema = z.object({
   updatedAt: z.coerce.date().optional()
 })
+
+// Helper function to get hex color from color name and shade
+function getHexColor(colorName: string, shade: keyof typeof colors): string {
+  const colorShade = colors[shade]
+  return colorShade[colorName as keyof typeof colorShade] || colorShade.blue
+}
 
 export default defineEventHandler(async (event) => {
   const { user, secure } = await requireUserSession(event)
@@ -29,6 +38,151 @@ export default defineEventHandler(async (event) => {
     where: and(eq(reports.id, id), eq(reports.organisationId, secure.organisationId))
   })
   if (!report) throw createError({ statusCode: 404, message: "Not found" })
+
+  // Fetch competences data if selected in report
+  let competencesData: any[] = []
+  const selectedCompetenceIds = (report.content as any)?.competences || []
+
+  if (selectedCompetenceIds.length > 0) {
+    // Fetch all selected competences AND their children (recursively)
+    // First, get all selected competences
+    const selectedCompetences = await useDrizzle()
+      .select()
+      .from(competences)
+      .where(and(inArray(competences.id, selectedCompetenceIds), eq(competences.organisationId, secure.organisationId), isNull(competences.deletedAt)))
+
+    // Now fetch ALL competences from the organization to build the full tree
+    const allCompetences = await useDrizzle()
+      .select()
+      .from(competences)
+      .where(and(eq(competences.organisationId, secure.organisationId), isNull(competences.deletedAt)))
+
+    // Build a set of all competence IDs we need (selected + all their descendants)
+    const neededCompetenceIds = new Set<string>()
+
+    // Helper function to recursively add children
+    const addChildrenRecursively = (parentId: string) => {
+      allCompetences
+        .filter((c) => c.competenceId === parentId)
+        .forEach((child) => {
+          neededCompetenceIds.add(child.id)
+          addChildrenRecursively(child.id)
+        })
+    }
+
+    // Add selected competences and all their children
+    selectedCompetenceIds.forEach((id: string) => {
+      neededCompetenceIds.add(id)
+      addChildrenRecursively(id)
+    })
+
+    // Filter to only needed competences
+    const relevantCompetences = allCompetences.filter((c) => neededCompetenceIds.has(c.id))
+
+    // Fetch user competence levels for ALL relevant competences
+    const userCompetenceLevels = await useDrizzle()
+      .select({
+        competenceId: userCompetences.competenceId,
+        level: userCompetences.level,
+        createdAt: userCompetences.createdAt
+      })
+      .from(userCompetences)
+      .where(and(eq(userCompetences.userId, report.studentId), isNull(userCompetences.deletedAt), eq(userCompetences.organisationId, secure.organisationId)))
+      .orderBy(desc(userCompetences.createdAt))
+
+    // Create a map of competenceId to latest level
+    const competenceLevels = new Map<string, number>()
+    const processedCompetences = new Set<string>()
+
+    userCompetenceLevels.forEach((uc) => {
+      if (!processedCompetences.has(uc.competenceId)) {
+        competenceLevels.set(uc.competenceId, uc.level)
+        processedCompetences.add(uc.competenceId)
+      }
+    })
+
+    // Helper function to build competence tree recursively
+    const buildCompetenceTree = (parentId: string | null): any[] => {
+      return relevantCompetences
+        .filter((c) => c.competenceId === parentId)
+        .map((competence) => {
+          if (competence.competenceType === "competence") {
+            // Leaf node - actual competence
+            return {
+              id: competence.id,
+              name: competence.name,
+              level: competenceLevels.get(competence.id) || 0,
+              type: "competence",
+              sortOrder: competence.sortOrder
+            }
+          } else {
+            // Group node - has children
+            return {
+              id: competence.id,
+              name: competence.name,
+              type: "group",
+              children: buildCompetenceTree(competence.id),
+              sortOrder: competence.sortOrder
+            }
+          }
+        })
+        .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0) || a.name.localeCompare(b.name))
+    }
+
+    // Find all subjects (either directly selected or parents of selected items)
+    const subjectIds = new Set<string>()
+    selectedCompetences.forEach((comp) => {
+      if (comp.competenceType === "subject") {
+        subjectIds.add(comp.id)
+      } else if (comp.parents && comp.parents.length > 0) {
+        // Find the subject parent (first in the parents array)
+        subjectIds.add(comp.parents[0])
+      }
+    })
+
+    // Get all subject competences
+    const subjectCompetences = relevantCompetences.filter((c) => c.competenceType === "subject" && subjectIds.has(c.id))
+
+    // Build the final structure starting from subjects
+    const subjects = subjectCompetences
+      .map((subject) => {
+        const children = buildCompetenceTree(subject.id)
+
+        // Flatten the structure for the template (collect all leaf competences)
+        const flattenCompetences = (items: any[]): any[] => {
+          const result: any[] = []
+          items.forEach((item) => {
+            if (item.type === "competence") {
+              result.push(item)
+            } else if (item.children) {
+              // Add group header
+              result.push({
+                name: item.name,
+                type: "group",
+                level: -1 // Special marker for groups
+              })
+              result.push(...flattenCompetences(item.children))
+            }
+          })
+          return result
+        }
+
+        const flatCompetences = flattenCompetences(children)
+
+        return {
+          id: subject.id,
+          name: subject.name,
+          color: getHexColor(subject.color || "blue", "100"),
+          color200: getHexColor(subject.color || "blue", "200"),
+          color900: getHexColor(subject.color || "blue", "900"),
+          competences: flatCompetences
+        }
+      })
+      .filter((subject) => subject.competences.length > 0) // Only include subjects with competences
+      .sort((a, b) => a.name.localeCompare(b.name))
+
+    competencesData = subjects
+  }
 
   // generate a typst document with a hello world template
   // create a tmp directory
@@ -57,7 +211,8 @@ export default defineEventHandler(async (event) => {
   }
 
   // write the template to the tmp directory
-  await writeFile(`${tmpDir}/template.typ`, TEMPLATE)
+  const templateContent = competencesData.length > 0 ? TEMPLATE + "\n\n" + TEMPLATE_COMPETENCES : TEMPLATE
+  await writeFile(`${tmpDir}/template.typ`, templateContent)
   // also write a data.json file with the respective data
   await writeFile(
     `${tmpDir}/data.json`,
@@ -73,7 +228,8 @@ export default defineEventHandler(async (event) => {
       student_class: report?.student.studentGrade,
       description: (report?.content as any)?.introduction ?? "N/A",
       school_name: school?.name ?? "N/A",
-      has_logo: !!school?.logoFileId
+      has_logo: !!school?.logoFileId,
+      competences: competencesData
     })
   )
 
@@ -126,6 +282,12 @@ const TEMPLATE = `#let data = json("data.json")
 #set text(font: "Inter", lang: "de")
 
 #set page(
+paper: "a4",
+margin: (
+  top: 1.5cm,
+  bottom: 1.5cm,
+  x: 1.5cm,
+),
   footer: context [
     #set text(size: 8pt)
     #grid(
@@ -136,7 +298,7 @@ const TEMPLATE = `#let data = json("data.json")
       ],
       [
    
-        #align(right, [Seite #counter(page).display("1/1", both: true)])
+        #align(right, [Seite #counter(page).display("1 von 1", both: true)])
       ],
     )
   ]
@@ -156,7 +318,7 @@ const TEMPLATE = `#let data = json("data.json")
 
 #align(center, text(size: 16pt, weight: "medium", data.school_name))
 
-// #align(center, text(size: 12pt, weight: "regular", "Ersatzschule in freier Trägerschaft"))
+#align(center, text(size: 12pt, weight: "regular", "Ersatzschule in freier Trägerschaft"))
 
 #show heading: set block(above: 1.3em, below: 0.9em)
 
@@ -187,7 +349,59 @@ const TEMPLATE = `#let data = json("data.json")
 #set text(size: 11pt)
 #set par(justify: true)
 
-#pagebreak()
 
-#data.description
+
+#if data.description != "N/A" and data.description != "" [
+  #pagebreak()
+
+  #data.description
+]
+
 `
+
+const TEMPLATE_COMPETENCES = `#pagebreak()
+#set text(size: 9pt)
+
+#let count = counter("count")
+#let n = 0
+
+#for subject in data.competences [
+  #count.step()
+  
+  #table(
+    columns: (1fr, auto),
+    inset: 6pt,
+    fill: (_, row) => if calc.even(row) { rgb(subject.color) } else { white },
+    stroke: rgb(subject.color200),
+    align: horizon,
+    text(size: 9pt + 2pt, fill: rgb(subject.color900), [*#subject.name*]), text(size: 9pt + 2pt, fill: rgb(subject.color900),[*Niveau*]),
+    ..subject.competences.map(row => (
+      text(fill: rgb(subject.color900),[#row.name]),
+      align(center, grid(columns: (auto, auto, auto), gutter: 2pt, inset: 0pt, align: bottom, 
+          if row.level >= 1 [
+            #rect(width: 4pt, height: 6pt, fill: rgb(subject.color900), radius: 1pt)
+          ] else [
+            #rect(width: 4pt, height: 6pt, fill: rgb(subject.color200), radius: 1pt)
+          ],
+          if row.level >= 2 [
+            #rect(width: 4pt, height: 10pt, fill: rgb(subject.color900), radius: 1pt)
+          ] else [
+            #rect(width: 4pt, height: 10pt, fill: rgb(subject.color200), radius: 1pt)
+          ],
+          if row.level >= 3 [
+            #rect(width: 4pt, height: 14pt, fill: rgb(subject.color900), radius: 1pt)
+          ] else [
+            #rect(width: 4pt, height: 14pt, fill: rgb(subject.color200), radius: 1pt)
+          ]
+        ))
+      ,
+      )
+    ).flatten(),
+  )
+
+  #context [
+      #if data.competences.len() > count.get().first() [
+        #pagebreak()
+    ]
+  ]
+]`
