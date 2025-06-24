@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { DUser, DTag } from "~/types/models"
 import { formatDate, useInfiniteScroll } from "@vueuse/core"
-import { PlusIcon } from "lucide-vue-next"
+import { DownloadIcon, PlusIcon } from "lucide-vue-next"
 import { nanoid } from "nanoid"
 
 // Reactive state
@@ -134,6 +134,28 @@ async function newEntry() {
 
   await useRouter().push(`/entries/${res.id}`)
 }
+
+const isExporting = ref(false)
+
+async function exportEntries() {
+  isExporting.value = true
+  const res = await $fetch("/api/entries/export", {
+    params: {
+      search: search.value,
+      studentId: filterByStudent.value,
+      teacherId: filterByTeacher.value,
+      tagId: filterByTag.value,
+      sortBy: sortBy.value,
+      sortOrder: sortOrder.value
+    }
+  })
+  if (!res) return alert("Einträge konnten nicht exportiert werden")
+
+  const blob = new Blob([res], { type: "application/pdf" })
+  const url = URL.createObjectURL(blob)
+  window.open(url, "_blank")
+  isExporting.value = false
+}
 </script>
 
 <template>
@@ -146,6 +168,10 @@ async function newEntry() {
       <DSelect v-model="filterByTag" :options="filterTagOptions" placeholder="Tags" class="hidden w-[160px] md:block" />
 
       <template #right>
+        <!-- Export -->
+        <DButton :icon-left="DownloadIcon" @click="exportEntries" variant="secondary" :loading="isExporting">Exportieren</DButton>
+
+        <!-- New entry -->
         <DButton :icon-left="PlusIcon" @click="newEntry">Eintrag erstellen</DButton>
       </template>
     </DHeader>

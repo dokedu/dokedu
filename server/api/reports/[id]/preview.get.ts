@@ -1,14 +1,12 @@
 import { organisations, reports } from "~~/server/database/schema"
-import { spawn } from "node:child_process"
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises"
 import { de } from "date-fns/locale"
-import { nanoid } from "nanoid"
 import { formatDate } from "date-fns"
 import { z } from "zod"
 import sharp from "sharp"
 import { competences, userCompetences } from "~~/server/database/schema"
 import { colors } from "~~/packages/report_generation/utils/color.json"
 import { and, eq, inArray, isNull, desc } from "drizzle-orm"
+import { typstRenderTemplate } from "~~/server/utils/typst"
 
 const querySchema = z.object({
   updatedAt: z.coerce.date().optional()
@@ -184,111 +182,49 @@ export default defineEventHandler(async (event) => {
     competencesData = subjects
   }
 
-  // generate a typst document with a hello world template
-  // create a tmp directory
-  const tmpDir = `/tmp/x-dokedu/reports/${report.id}-${nanoid()}`
-  await mkdir(tmpDir, { recursive: true })
-
-  // read from the current dir the logo.png and copy it to the tmp directory
-  // const logo = await readFile(new URL("logo.png", import.meta.url))
-  // await writeFile(`${tmpDir}/logo.png`, logo)
-
   // Fetch organization logo from storage if it exists
+  let processedLogo: Buffer | undefined
   if (school?.logoFileId) {
     const logoBuffer = await useStorage("files").getItemRaw(school.logoFileId)
     if (logoBuffer) {
       // Process the image with sharp to make it square and convert to PNG
-      const processedLogo = await sharp(logoBuffer)
+      processedLogo = await sharp(logoBuffer)
         .resize(512, 512, {
           fit: "cover",
           position: "center"
         })
         .png()
         .toBuffer()
-
-      await writeFile(`${tmpDir}/logo.png`, processedLogo)
     }
   }
 
-  // write the template to the tmp directory
+  // Prepare the template content
   const templateContent = competencesData.length > 0 ? TEMPLATE + "\n\n" + TEMPLATE_COMPETENCES : TEMPLATE
-  await writeFile(`${tmpDir}/template.typ`, templateContent)
-  // also write a data.json file with the respective data
-  await writeFile(
-    `${tmpDir}/data.json`,
-    JSON.stringify({
-      student_first_name: report?.student.firstName,
-      student_last_name: report?.student.lastName,
-      student_birthday: report?.student.studentBirthday,
-      student_birthplace: report?.student.studentBirthplace,
-      student_grade: report?.student.studentGrade,
-      student_birth_date: report?.student.studentBirthday ? formatDate(report.student.studentBirthday, "dd. MMMM yyyy", { locale: de }) : "N/A",
-      student_birth_place: report?.student.studentBirthplace ?? "N/A",
-      school_year: (report?.content as any)?.schoolYear ?? "N/A",
-      student_class: report?.student.studentGrade,
-      description: (report?.content as any)?.introduction ?? "N/A",
-      school_name: school?.name ?? "N/A",
-      has_logo: !!school?.logoFileId,
-      competences: competencesData
-    })
-  )
 
-  const fontPaths = [
-    "/usr/share/fonts", // System fonts
-    "/usr/local/share/fonts" // Local system fonts
-    // "/usr/share/fonts/truetype/inter" // Our custom Inter fonts
-  ].join(":")
-
-  let typst
-  if (process.dev) {
-    typst = spawn("typst", ["compile", `${tmpDir}/template.typ`, `${tmpDir}/output.pdf`])
-  } else {
-    typst = spawn("typst", ["compile", "--font-path", fontPaths, `${tmpDir}/template.typ`, `${tmpDir}/output.pdf`])
+  // Prepare the data
+  const templateData = {
+    student_first_name: report?.student.firstName,
+    student_last_name: report?.student.lastName,
+    student_birthday: report?.student.studentBirthday,
+    student_birthplace: report?.student.studentBirthplace,
+    student_grade: report?.student.studentGrade,
+    student_birth_date: report?.student.studentBirthday ? formatDate(report.student.studentBirthday, "dd. MMMM yyyy", { locale: de }) : "N/A",
+    student_birth_place: report?.student.studentBirthplace ?? "N/A",
+    school_year: (report?.content as any)?.schoolYear ?? "N/A",
+    student_class: report?.student.studentGrade,
+    description: (report?.content as any)?.introduction ?? "N/A",
+    school_name: school?.name ?? "N/A",
+    has_logo: !!school?.logoFileId,
+    competences: competencesData
   }
 
-  typst.stdout.on("data", (data) => {
-    console.log("[Typst Output]:", data.toString())
+  // Render the PDF using the utility function
+  const pdfBuffer = await typstRenderTemplate(templateContent, templateData, {
+    logo: processedLogo
   })
-
-  let stderrBuffer = ""
-  let hasError = false
-
-  typst.stderr.on("data", (data) => {
-    const output = data.toString()
-    stderrBuffer += output
-
-    // Check if it's a warning or an actual error
-    if (output.toLowerCase().includes("error:") && !output.toLowerCase().includes("warning:")) {
-      hasError = true
-    }
-
-    // Log all stderr output for debugging
-    console.warn("[Typst stderr]:", output)
-  })
-
-  // wait for the typst process to finish
-  const exitCode = await new Promise<number>((resolve) => {
-    typst.on("close", (code) => resolve(code ?? 0))
-  })
-
-  // Only throw if there was an actual error (non-zero exit code or error in stderr)
-  if (exitCode !== 0 || hasError) {
-    throw createError({
-      statusCode: 500,
-      message: `Typst compilation failed with exit code ${exitCode}: ${stderrBuffer}`
-    })
-  }
 
   setHeader(event, "Content-Type", "application/pdf")
-
-  let output: Buffer | null = null
-
-  output = await readFile(`${tmpDir}/output.pdf`)
-
-  // delete the tmp directory
-  await rm(tmpDir, { recursive: true })
-
-  return new Response(output)
+  return new Response(pdfBuffer)
 })
 
 const TEMPLATE = `#let data = json("data.json")
