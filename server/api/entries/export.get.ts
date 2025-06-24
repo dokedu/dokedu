@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
   const { secure } = await requireUserSession(event)
   if (!secure) throw createError({ statusCode: 401, message: "Unauthorized" })
 
-  const { search, limit, sortBy, sortOrder, tagId, studentId, teacherId, offset } = await getValidatedQuery(event, querySchema.parse)
+  const { search, limit: _ignore, sortBy, sortOrder, tagId, studentId, teacherId, offset } = await getValidatedQuery(event, querySchema.parse)
 
   const db = useDrizzle()
   const orderDirection = sortOrder === "asc" ? asc(entries[sortBy]) : desc(entries[sortBy])
@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
     .leftJoin(users, eq(entries.userId, users.id))
     .orderBy(orderDirection)
     .offset(offset)
-    .limit(limit + 1)
+    .limit(1000)
     .$dynamic()
 
   if (studentId) {
@@ -103,7 +103,7 @@ export default defineEventHandler(async (event) => {
     .where(and(isNull(entryUsers.deletedAt), inArray(entryUsers.entryId, entryIds), eq(entryUsers.organisationId, secure.organisationId)))
 
   // Construct final response
-  const output = result1.slice(0, limit).map((entry) => ({
+  const output = result1.slice(0, 1000).map((entry) => ({
     ...entry,
     tags: result2.filter((tag) => tag.entryId === entry.id).map(({ tagId, tagName, tagColor }) => ({ id: tagId, name: tagName, color: tagColor })),
     users: result3.filter((entryUser) => entryUser.entryId === entry.id).map(({ userId, firstName, lastName }) => ({ id: userId, firstName, lastName }))
