@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UsersIcon, ArrowLeft, SchoolIcon, UserIcon } from "lucide-vue-next"
+import { UsersIcon, ArrowLeft, SchoolIcon, UserIcon, DownloadIcon } from "lucide-vue-next"
 
 const links = [
   {
@@ -21,6 +21,11 @@ const links = [
     name: "Schüler",
     to: "/settings/students",
     icon: UsersIcon
+  },
+  {
+    name: "Datenexport",
+    to: "/settings/data-export",
+    icon: DownloadIcon
   }
   // {
   //   name: "Profil",
