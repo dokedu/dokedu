@@ -123,7 +123,7 @@ watch(isExporting, (newVal, oldVal) => {
         </div>
 
         <!-- Export Button -->
-        <div class="flex flex-col gap-2">
+        <div class="flex w-fit flex-col gap-2">
           <DButton :icon-left="DownloadIcon" :disabled="!canExport || isExporting" :loading="isExporting" @click="exportData" size="md">
             {{ isExporting ? "Exportiere Daten..." : "Alle Daten exportieren" }}
           </DButton>
