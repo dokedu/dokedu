@@ -105,15 +105,37 @@ watchDebounced(
   { debounce: 500, maxWait: 2000 }
 )
 
+const downloadingReport = ref(false)
+
 async function downloadReport() {
-  // Create a link to download the PDF
-  const link = document.createElement("a")
-  link.href = `/api/reports/${id}/preview?s=${lastHash.value}`
-  link.download = `bericht-${report.value?.student.firstName}-${report.value?.student.lastName}.pdf`
-  link.target = "_blank"
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
+  downloadingReport.value = true
+  try {
+    // Fetch the PDF asynchronously
+    const response = await fetch(`/api/reports/${id}/preview?s=${lastHash.value}`)
+
+    if (!response.ok) {
+      throw new Error(`Failed to download report: ${response.statusText}`)
+    }
+
+    // Convert response to blob
+    const blob = await response.blob()
+
+    // Create a blob URL and trigger download
+    const blobUrl = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = blobUrl
+    link.download = `bericht-${report.value?.student.firstName}-${report.value?.student.lastName}.pdf`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    // Clean up the blob URL
+    URL.revokeObjectURL(blobUrl)
+  } catch (e) {
+    console.error("Error downloading report:", e)
+  } finally {
+    downloadingReport.value = false
+  }
 }
 </script>
 
@@ -123,8 +145,8 @@ async function downloadReport() {
       <DHeaderTitle>Berichte</DHeaderTitle>
 
       <template #right>
-        <DButton type="submit" class="w-fit" @click="save" :loading="isSavingReport">Speichern</DButton>
-        <DButton :icon-left="DownloadIcon" @click="downloadReport">Herunterladen</DButton>
+        <DButton variant="secondary" :icon-left="DownloadIcon" @click="downloadReport" :loading="downloadingReport">Herunterladen</DButton>
+        <DButton class="w-fit" @click="save" :loading="isSavingReport">Speichern</DButton>
       </template>
     </DHeader>
 
