@@ -1,6 +1,5 @@
-import { isNull } from "drizzle-orm"
-import { z } from "zod"
 import { competences, entryUsers, userCompetences } from "~~/server/database/schema"
+import { z } from "zod"
 
 const routeParams = z.object({
   id: z.string(),
@@ -8,7 +7,7 @@ const routeParams = z.object({
 })
 
 const bodySchema = z.object({
-  level: z.coerce.number().min(0).max(3).default(1)
+  level: z.coerce.number().min(0).max(3).default(1).optional()
 })
 
 export default defineEventHandler(async (event) => {
@@ -16,7 +15,14 @@ export default defineEventHandler(async (event) => {
   if (!secure) throw createError({ statusCode: 401, message: "Unauthorized" })
 
   const { id, competenceId } = await getValidatedRouterParams(event, routeParams.parse)
-  const { level } = await readValidatedBody(event, bodySchema.parse)
+
+  // check if there is a body
+  let level = 1
+
+  const { data, error } = await readValidatedBody(event, bodySchema.safeParse)
+  if (data) {
+    level = data.level ?? 1
+  }
 
   // check if the competence is part of the organisation
   const competenceExists = await useDrizzle()
