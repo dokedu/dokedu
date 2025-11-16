@@ -35,19 +35,14 @@ RUN fc-cache -fv
 # install dependencies into temp directory
 # this will cache them and speed up future builds
 FROM fonts AS install
-RUN mkdir -p /temp/dev
-COPY package.json bun.lock /temp/dev/
-RUN cd /temp/dev && bun install --frozen-lockfile
-
-# install with --production (exclude devDependencies)
-RUN mkdir -p /temp/prod
-COPY package.json bun.lock /temp/prod/
-RUN cd /temp/prod && bun install --frozen-lockfile --production
+RUN mkdir -p /temp/app
+COPY package.json bun.lock /temp/app/
+RUN cd /temp/app && bun install
 
 # copy node_modules from temp directory
 # then copy all (non-ignored) project files into the image
 FROM fonts AS prerelease
-COPY --from=install /temp/dev/node_modules node_modules
+COPY --from=install /temp/app/node_modules node_modules
 COPY . .
 
 # [optional] tests & build
@@ -60,7 +55,7 @@ FROM base AS release
 COPY --from=system-deps /usr/local/bin/typst /usr/local/bin/typst
 # Copy fonts from fonts stage
 COPY --from=fonts /usr/share/fonts /usr/share/fonts
-COPY --from=install /temp/prod/node_modules node_modules
+COPY --from=install /temp/app/node_modules node_modules
 COPY --from=prerelease /usr/src/app/.output .output
 COPY --from=prerelease /usr/src/app/package.json .
 
