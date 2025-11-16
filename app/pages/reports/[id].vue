@@ -8,6 +8,11 @@ const { data: competences } = await useFetch(`/api/competences`)
 
 const reportContent = report.value?.content as any
 const selectedCompetences = ref<string[]>(reportContent?.competences ?? [])
+const enableDateFilter = ref<boolean>(reportContent?.enableDateFilter ?? false)
+const startDate = ref<string>(reportContent?.startDate ?? "")
+const endDate = ref<string>(reportContent?.endDate ?? "")
+const onlyLearnedCompetences = ref<boolean>(reportContent?.onlyLearnedCompetences ?? false)
+const showCoverPage = ref<boolean>(reportContent?.showCoverPage ?? true)
 
 function toggleCompetence(competenceId: string) {
   if (selectedCompetences.value.includes(competenceId)) {
@@ -62,17 +67,43 @@ let lastHash = ref(new Date().getTime().toString())
 //   { debounce: 1000, maxWait: 5_000, deep: true }
 // )
 
+const savingReport = ref(false)
+
+const isSavingReport = refDebounced(savingReport, 150)
+
 async function save() {
-  await $fetch(`/api/reports/${id}`, {
-    method: "PUT",
-    body: {
-      status: status.value,
-      schoolYear: schoolYear.value,
-      introduction: header.value,
-      competences: selectedCompetences.value
-    }
-  })
+  savingReport.value = true
+  try {
+    await $fetch(`/api/reports/${id}`, {
+      method: "PUT",
+      body: {
+        status: status.value,
+        schoolYear: schoolYear.value,
+        introduction: header.value,
+        competences: selectedCompetences.value,
+        enableDateFilter: enableDateFilter.value,
+        startDate: startDate.value,
+        endDate: endDate.value,
+        onlyLearnedCompetences: onlyLearnedCompetences.value,
+        showCoverPage: showCoverPage.value
+      }
+    })
+    // Update the hash to force iframe reload
+    lastHash.value = new Date().getTime().toString()
+  } catch (e) {
+    console.error(e)
+  }
+  savingReport.value = false
 }
+
+// Watch toggles and automatically save when they change
+watchDebounced(
+  [enableDateFilter, startDate, endDate, onlyLearnedCompetences, showCoverPage],
+  async () => {
+    await save()
+  },
+  { debounce: 500, maxWait: 2000 }
+)
 
 async function downloadReport() {
   // Create a link to download the PDF
@@ -92,6 +123,7 @@ async function downloadReport() {
       <DHeaderTitle>Berichte</DHeaderTitle>
 
       <template #right>
+        <DButton type="submit" class="w-fit" @click="save" :loading="isSavingReport">Speichern</DButton>
         <DButton :icon-left="DownloadIcon" @click="downloadReport">Herunterladen</DButton>
       </template>
     </DHeader>
@@ -99,10 +131,14 @@ async function downloadReport() {
     <DPageContent class="!p-0">
       <div class="flex h-full flex-col">
         <div class="grid h-full grid-cols-2 overflow-auto">
-          <form class="flex flex-1 flex-col gap-4 overflow-auto px-6 py-4" @submit.prevent="save">
+          <div class="flex flex-1 flex-col gap-4 overflow-auto px-6 py-4">
             <div>
               <DLabel class="mb-1">Status</DLabel>
               <DSelect v-model="status" :options="statusOptions" placeholder="Status" />
+            </div>
+
+            <div class="flex w-full flex-col gap-2">
+              <DToggle v-model="showCoverPage"> Deckblatt anzeigen </DToggle>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
@@ -155,6 +191,25 @@ async function downloadReport() {
                   Alle Kompetenzen {{ selectedCompetences.length === competences?.length ? "abwählen" : "auswählen" }}
                 </DButton>
               </div>
+              <div class="flex w-full flex-col gap-2">
+                <DToggle v-model="enableDateFilter"> Zeitraum für Kompetenzen einschränken </DToggle>
+
+                <div v-if="enableDateFilter" class="grid grid-cols-2 gap-4 rounded-md bg-neutral-50 p-3">
+                  <div>
+                    <DLabel class="mb-1">Startdatum</DLabel>
+                    <DInput type="date" v-model="startDate" placeholder="Startdatum" class="w-full" />
+                  </div>
+                  <div>
+                    <DLabel class="mb-1">Enddatum</DLabel>
+                    <DInput type="date" v-model="endDate" placeholder="Enddatum" class="w-full" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex w-full flex-col gap-2">
+                <DToggle v-model="onlyLearnedCompetences"> Nur gelernte Kompetenzen anzeigen </DToggle>
+              </div>
+
               <div class="rounded-md bg-neutral-100 p-2 text-sm text-neutral-500">
                 Wird eine Kompetenz ausgewählt, werden die entsprechenden Kompetenzen und Niveaus dafür mit ausgegeben.
               </div>
@@ -170,9 +225,7 @@ async function downloadReport() {
                 </div>
               </div>
             </div>
-
-            <DButton type="submit" class="w-fit">Speichern</DButton>
-          </form>
+          </div>
           <iframe :src="`/api/reports/${id}/preview?s=${lastHash}`" class="h-full w-full bg-black p-2" frameborder="0"></iframe>
         </div>
       </div>

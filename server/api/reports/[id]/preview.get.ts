@@ -5,7 +5,7 @@ import { z } from "zod"
 import sharp from "sharp"
 import { competences, userCompetences } from "~~/server/database/schema"
 import { colors } from "~~/packages/report_generation/utils/color.json"
-import { and, eq, inArray, isNull, desc } from "drizzle-orm"
+import { and, eq, inArray, isNull, desc, gte, lte } from "drizzle-orm"
 import { typstRenderTemplate } from "~~/server/utils/typst"
 
 const querySchema = z.object({
@@ -78,6 +78,25 @@ export default defineEventHandler(async (event) => {
     const relevantCompetences = allCompetences.filter((c) => neededCompetenceIds.has(c.id))
 
     // Fetch user competence levels for ALL relevant competences
+    // Build the where conditions
+    const whereConditions = [
+      eq(userCompetences.userId, report.studentId),
+      isNull(userCompetences.deletedAt),
+      eq(userCompetences.organisationId, secure.organisationId)
+    ]
+
+    // Apply optional date filtering if enabled
+    const reportContentTyped = report.content as any
+    if (reportContentTyped?.enableDateFilter && reportContentTyped?.startDate && reportContentTyped?.endDate) {
+      const filterStart = new Date(reportContentTyped.startDate)
+      const filterEnd = new Date(reportContentTyped.endDate)
+      // Make it end of day
+      filterEnd.setHours(23, 59, 59, 999)
+
+      whereConditions.push(gte(userCompetences.createdAt, filterStart))
+      whereConditions.push(lte(userCompetences.createdAt, filterEnd))
+    }
+
     const userCompetenceLevels = await useDrizzle()
       .select({
         competenceId: userCompetences.competenceId,
@@ -85,7 +104,7 @@ export default defineEventHandler(async (event) => {
         createdAt: userCompetences.createdAt
       })
       .from(userCompetences)
-      .where(and(eq(userCompetences.userId, report.studentId), isNull(userCompetences.deletedAt), eq(userCompetences.organisationId, secure.organisationId)))
+      .where(and(...whereConditions))
       .orderBy(desc(userCompetences.createdAt))
 
     // Create a map of competenceId to latest level
@@ -106,24 +125,38 @@ export default defineEventHandler(async (event) => {
         .map((competence) => {
           if (competence.competenceType === "competence") {
             // Leaf node - actual competence
+            const level = competenceLevels.get(competence.id) || 0
+
+            // Filter out unlearned competences if the option is enabled
+            if (reportContentTyped?.onlyLearnedCompetences && level === 0) {
+              return null
+            }
+
             return {
               id: competence.id,
               name: competence.name,
-              level: competenceLevels.get(competence.id) || 0,
+              level: level,
               type: "competence",
               sortOrder: competence.sortOrder
             }
           } else {
             // Group node - has children
+            const children = buildCompetenceTree(competence.id)
+            // If filtering unlearned competences, skip empty groups
+            if (reportContentTyped?.onlyLearnedCompetences && children.length === 0) {
+              return null
+            }
+
             return {
               id: competence.id,
               name: competence.name,
               type: "group",
-              children: buildCompetenceTree(competence.id),
+              children: children,
               sortOrder: competence.sortOrder
             }
           }
         })
+        .filter((item) => item !== null) // Remove filtered out items
         .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0) || a.name.localeCompare(b.name))
     }
 
@@ -202,6 +235,7 @@ export default defineEventHandler(async (event) => {
   const templateContent = competencesData.length > 0 ? TEMPLATE + "\n\n" + TEMPLATE_COMPETENCES : TEMPLATE
 
   // Prepare the data
+  const reportContentTyped2 = report?.content as any
   const templateData = {
     student_first_name: report?.student.firstName,
     student_last_name: report?.student.lastName,
@@ -215,6 +249,7 @@ export default defineEventHandler(async (event) => {
     description: (report?.content as any)?.introduction ?? "N/A",
     school_name: school?.name ?? "N/A",
     has_logo: !!school?.logoFileId,
+    show_cover_page: reportContentTyped2?.showCoverPage ?? true,
     competences: competencesData
   }
 
@@ -273,45 +308,49 @@ margin: (
   ]
 )
 
-#v(10%)
+#if data.show_cover_page [
+  #v(10%)
 
 
-#if data.has_logo {
-  align(center, image("logo.png", width: 25%))
-} else {
-  align(center, rect(width: 40%, height: 25%, fill: rgb(200, 200, 200)))
-}
+  // #if data.has_logo {
+  //   align(center, image("logo.png", width: 25%))
+  // } else {
+    #align(center, rect(width: 40%, height: 25%, fill: white))
+  // }
 
-// #show par: set block(above: 1em, below: 1em)
-#v(1em)
+  // #show par: set block(above: 1em, below: 1em)
+  #v(1em)
 
-#align(center, text(size: 16pt, weight: "medium", data.school_name))
+  #align(center, text(size: 16pt, weight: "medium", data.school_name))
 
-#align(center, text(size: 12pt, weight: "regular", "Ersatzschule in freier Trägerschaft"))
+  #align(center, text(size: 12pt, weight: "regular", "Ersatzschule in freier Trägerschaft"))
 
-#show heading: set block(above: 1.3em, below: 0.9em)
+  #show heading: set block(above: 1.3em, below: 0.9em)
 
-#align(center, text(size: 20pt, weight: "medium", heading(upper("Lernstandsbericht"))))
+  #align(center, text(size: 20pt, weight: "medium", heading(upper("Lernstandsbericht"))))
 
-// Remove deprecated syntax - just use set par directly
-#set par(spacing: 1em)
+  // Remove deprecated syntax - just use set par directly
+  #set par(spacing: 1em)
 
-#grid(
-  columns: (1fr, 1fr),
-  align: center,
-  [Schuljahr #school_year],
-  [Jahrgang #student_class],
-)
+  #grid(
+    columns: (1fr, 1fr),
+    align: center,
+    [Schuljahr #school_year],
+    [Jahrgang #student_class],
+  )
 
-\
+  \
 
-#align(center, text(size: 14pt, weight: "bold", full_name))
+  #align(center, text(size: 14pt, weight: "bold", full_name))
 
-#align(center, text(size: 10pt, weight: "regular", [
-    geboren am #birth_date in #birth_place
-]))
+  #align(center, text(size: 10pt, weight: "regular", [
+      geboren am #birth_date in #birth_place
+  ]))
 
-\
+  \
+
+  #pagebreak()
+]
 
 // Remove deprecated show par: set block syntax
 #set par(spacing: 1.25em)
@@ -325,10 +364,9 @@ margin: (
 
   #data.description
 ]
-
 `
 
-const TEMPLATE_COMPETENCES = `#pagebreak()
+const TEMPLATE_COMPETENCES = `
 #set text(size: 9pt)
 
 #let count = counter("count")
