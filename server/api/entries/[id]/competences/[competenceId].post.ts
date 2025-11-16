@@ -7,11 +7,9 @@ const routeParams = z.object({
   competenceId: z.string()
 })
 
-const bodySchema = z
-  .object({
-    level: z.coerce.number().min(0).max(3).default(1)
-  })
-  .default({})
+const bodySchema = z.object({
+  level: z.coerce.number().min(0).max(3).default(1)
+})
 
 export default defineEventHandler(async (event) => {
   const { user, secure } = await requireUserSession(event)
